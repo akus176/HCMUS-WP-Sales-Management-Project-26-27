@@ -39,6 +39,14 @@ The system MUST reject recipes containing missing ingredients, zero or negative 
 - **WHEN** authorized staff attempt to save a recipe ingredient with a quantity less than or equal to zero
 - **THEN** the recipe is not saved and a validation error identifies the invalid quantity
 
+#### Scenario: Reject a recipe with an incompatible unit
+- **WHEN** authorized staff attempt to save a recipe ingredient using a measurement unit incompatible with that ingredient's base unit
+- **THEN** the recipe is not saved and a validation error identifies the incompatible unit
+
+#### Scenario: Reject a recipe referencing a missing ingredient
+- **WHEN** authorized staff attempt to save a recipe line referencing an ingredient that does not exist or is inactive
+- **THEN** the recipe is not saved and a validation error identifies the missing ingredient
+
 ### Requirement: Menu availability
 The system SHALL prevent unavailable menu items, size variants, and add-ons from being added to new orders.
 

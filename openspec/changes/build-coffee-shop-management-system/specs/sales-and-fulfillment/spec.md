@@ -33,6 +33,10 @@ The system SHALL track whether each table is available or occupied and SHALL rel
 - **WHEN** a dine-in order is confirmed for an available table
 - **THEN** the table becomes occupied and cannot be assigned to another active order
 
+#### Scenario: Release a table
+- **WHEN** the active dine-in order for an occupied table is completed or cancelled
+- **THEN** the table becomes available for a new order assignment
+
 ### Requirement: Payments
 The system SHALL record cash, card, and e-wallet payments, including amount, method, status, and payment time, and MUST prevent a completed order from having an unpaid balance.
 
@@ -59,7 +63,7 @@ Authorized staff SHALL be able to cancel a confirmed order with a reason, and ca
 - **THEN** the order becomes cancelled, cannot continue fulfillment, and requests inventory restoration exactly once
 
 ### Requirement: Internal delivery fulfillment
-The system SHALL allow managers or authorized staff to assign a confirmed delivery order to an active delivery staff member and track ready, out-for-delivery, delivered, and failed-delivery outcomes.
+The system SHALL allow managers or authorized staff to assign a ready delivery order to an active delivery staff member and track assigned, out-for-delivery, delivered, and failed-delivery outcomes.
 
 #### Scenario: Assign a delivery order
 - **WHEN** an authorized user assigns a ready delivery order to active delivery staff
