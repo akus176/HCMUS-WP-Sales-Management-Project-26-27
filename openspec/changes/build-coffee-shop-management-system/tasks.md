@@ -1,10 +1,10 @@
 ## 1. Repository and Solution Foundation
 
-- [ ] 1.1 Create the .NET solution and Domain, Application, Contracts, PostgreSQL Infrastructure, WinUI, API, and test projects; verify `dotnet build` succeeds for the empty solution
-- [ ] 1.2 Configure project references so Domain has no infrastructure dependency and Application depends only on Domain abstractions; verify the dependency graph builds without circular references
-- [ ] 1.3 Add central package/version management for WinUI 3, EF Core, Npgsql, validation, JWT, and test libraries; verify package restore succeeds on a clean checkout
-- [ ] 1.4 Add repository formatting, analyzer, nullable-reference, and warning policies; verify the solution builds with the agreed warning threshold
-- [ ] 1.5 Add ignored environment templates for PostgreSQL, API, JWT, and AI settings without real secrets; verify secret and connection-string values are absent from tracked files
+- [x] 1.1 Create the .NET solution and Domain, Application, Contracts, PostgreSQL Infrastructure, WinUI, API, and test projects; verify `dotnet build` succeeds for the empty solution
+- [x] 1.2 Configure project references so Domain has no infrastructure dependency and Application depends only on Domain abstractions; verify the dependency graph builds without circular references
+- [x] 1.3 Add central package/version management for WinUI 3, EF Core, Npgsql, validation, JWT, and test libraries; verify package restore succeeds on a clean checkout
+- [x] 1.4 Add repository formatting, analyzer, nullable-reference, and warning policies; verify the solution builds with the agreed warning threshold
+- [x] 1.5 Add ignored environment templates for PostgreSQL, API, JWT, and AI settings without real secrets; verify secret and connection-string values are absent from tracked files
 - [ ] 1.6 Add a CI workflow that restores, builds, and runs tests; verify it succeeds on the initial scaffold
 
 ## 2. Shared Domain and Persistence Foundation

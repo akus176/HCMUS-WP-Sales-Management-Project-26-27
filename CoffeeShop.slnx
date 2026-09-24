@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CoffeeShop.Api/CoffeeShop.Api.csproj" />
+    <Project Path="src/CoffeeShop.Application/CoffeeShop.Application.csproj" />
+    <Project Path="src/CoffeeShop.Contracts/CoffeeShop.Contracts.csproj" />
+    <Project Path="src/CoffeeShop.Domain/CoffeeShop.Domain.csproj" />
+    <Project Path="src/CoffeeShop.Infrastructure.Postgres/CoffeeShop.Infrastructure.Postgres.csproj" />
+    <Project Path="src/CoffeeShop.WinUI/CoffeeShop.WinUI.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CoffeeShop.Api.Tests/CoffeeShop.Api.Tests.csproj" />
+    <Project Path="tests/CoffeeShop.Application.Tests/CoffeeShop.Application.Tests.csproj" />
+    <Project Path="tests/CoffeeShop.Domain.Tests/CoffeeShop.Domain.Tests.csproj" />
+    <Project Path="tests/CoffeeShop.Infrastructure.Tests/CoffeeShop.Infrastructure.Tests.csproj" />
+    <Project Path="tests/CoffeeShop.WinUI.Tests/CoffeeShop.WinUI.Tests.csproj" />
+  </Folder>
+</Solution>

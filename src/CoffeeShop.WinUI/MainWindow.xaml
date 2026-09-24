@@ -1,0 +1,22 @@
+<Window
+    x:Class="CoffeeShop.WinUI.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Coffee Shop">
+    <Grid Background="{StaticResource SketchBackgroundBrush}">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20" Padding="32">
+            <TextBlock Text="Coffee Shop" FontFamily="{StaticResource SketchHeadingFontFamily}"
+                       FontSize="40" Foreground="{StaticResource SketchForegroundBrush}" />
+            <Grid>
+                <Border Background="{StaticResource SketchBorderBrush}" CornerRadius="20,6,18,4"
+                        Translation="4,4,0" />
+                <Border Background="White" BorderBrush="{StaticResource SketchBorderBrush}"
+                        BorderThickness="2" CornerRadius="20,6,18,4" Padding="24">
+                    <TextBlock Text="The workspace is ready for the first business module."
+                               FontFamily="{StaticResource SketchBodyFontFamily}" FontSize="18"
+                               Foreground="{StaticResource SketchForegroundBrush}" TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Window>

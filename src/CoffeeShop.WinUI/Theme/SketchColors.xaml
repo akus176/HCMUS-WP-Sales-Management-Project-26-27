@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="SketchBackgroundColor">#FDFBF7</Color>
+    <Color x:Key="SketchForegroundColor">#2D2D2D</Color>
+    <Color x:Key="SketchMutedColor">#E5E0D8</Color>
+    <Color x:Key="SketchAccentColor">#FF4D4D</Color>
+    <Color x:Key="SketchSecondaryAccentColor">#2D5DA1</Color>
+    <Color x:Key="SketchPostItColor">#FFF9C4</Color>
+    <SolidColorBrush x:Key="SketchBackgroundBrush" Color="{StaticResource SketchBackgroundColor}" />
+    <SolidColorBrush x:Key="SketchForegroundBrush" Color="{StaticResource SketchForegroundColor}" />
+    <SolidColorBrush x:Key="SketchMutedBrush" Color="{StaticResource SketchMutedColor}" />
+    <SolidColorBrush x:Key="SketchBorderBrush" Color="{StaticResource SketchForegroundColor}" />
+    <SolidColorBrush x:Key="SketchAccentBrush" Color="{StaticResource SketchAccentColor}" />
+    <SolidColorBrush x:Key="SketchSecondaryAccentBrush" Color="{StaticResource SketchSecondaryAccentColor}" />
+    <SolidColorBrush x:Key="SketchPostItBrush" Color="{StaticResource SketchPostItColor}" />
+</ResourceDictionary>
