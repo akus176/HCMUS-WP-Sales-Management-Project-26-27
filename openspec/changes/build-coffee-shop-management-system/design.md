@@ -481,6 +481,33 @@ for errors (RFC 7807), consistent with decision #9 above (contracts never expose
 - **API versioning:** URL-segment (`/api/v1`) so `CoffeeShop.Contracts` can evolve without breaking the WinUI client mid-migration (decision #9 above).
 - **Rate limiting / abuse control:** out of scope per proposal.md non-goals (no public customer-facing surface).
 
+## UI Design System
+
+`CoffeeShop.WinUI` uses a single "Hand-Drawn" visual theme across both milestones (midterm direct-DB and final API-backed builds share the same client project and styling). The full authoring reference — including copy-pasteable XAML tokens, WinUI techniques for effects CSS-based design systems assume (offset shadows, wobbly radii, dashed dividers), and an agent-usable role prompt for consistently applying the style — lives in [`docs/sketch-theme.md`](../../../docs/sketch-theme.md) at the repo root. Summary for design/implementation planning:
+
+### Philosophy
+
+Organic, playful imperfection — sketches on paper, sticky notes, napkin diagrams — applied consistently to every screen (POS, table map, barista queue, inventory, customers, reports, AI assistant, login), not just customer-facing surfaces. The whole app is one coffee-shop-branded product; manager/report screens keep the same tokens but dial down rotation and decoration density so numbers stay quick to scan.
+
+### Tokens
+
+- **Colors**: Warm Paper `#FDFBF7` background, Soft Pencil Black `#2D2D2D` foreground/border (never pure black), Old Paper `#E5E0D8` muted, Red Correction Marker `#FF4D4D` accent (destructive/urgent), Blue Ballpoint `#2D5DA1` secondary accent (informational/in-progress), Post-it Yellow `#FFF9C4` for featured/highlighted cards only.
+- **Typography**: `Kalam` (headings), `Patrick Hand` (body) — embedded `.ttf` assets referenced via `ms-appx:///Assets/Fonts/...#FamilyName` (WinUI doesn't resolve web font names). A documented exception allows `Segoe UI Variable` on dense numeric report tables if handwritten digits reduce scan speed.
+- **Shape**: Uneven 4-value `CornerRadius` per element (WinUI has no elliptical 8-value `border-radius`); reserve hand-authored Path-geometry blobs for a few decorative spots (login backdrop) rather than every card.
+- **Shadow**: No native `box-shadow` — emulated with a second solid-color `Border`, offset via `Translation`, no blur. Buttons "press flat" (shadow collapses) on click; cards "lift" (gap shrinks) on hover.
+
+### Screen Application
+
+POS/order entry and the table map get full decoration density (tape/tack, rotation) since they're fast-tap staff surfaces; the barista kanban slides tickets between status columns; inventory low-stock rows get a left red accent bar rather than a full-row fill; reports and the AI assistant chat panel intentionally reduce rotation/decoration for manager readability; the login screen is the one place allowed a slow (~3s) idle decorative animation.
+
+### Responsiveness
+
+WinUI `AdaptiveTrigger` breakpoints (Compact `<641px`, Medium `641–1007px`, Expanded `≥1008px`, the primary POS-terminal target) scale menu-grid column count and decoration density, never removing the core wobble/shadow/handwritten-font language. Touch targets stay ≥48px at every breakpoint for touchscreen POS terminals.
+
+### Accessibility
+
+Focus visuals are reskinned (blue `FocusVisualPrimaryBrush`/`SecondaryBrush`), never removed, since cashier workflows are keyboard-driven. Contrast is kept readable despite the pencil/paper palette; functional icons use Fluent/Segoe Fluent Icons rather than custom hand-drawn glyphs, wrapped in a wobbly circle border to fit the aesthetic without sacrificing legibility.
+
 ## Risks / Trade-offs
 
 - **[Midterm direct database credentials exist on the client]** → Use a restricted PostgreSQL account, local-only networking, environment-based configuration, and remove all direct database access from the final client.
