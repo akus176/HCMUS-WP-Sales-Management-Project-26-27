@@ -1,7 +1,7 @@
 ---
 name: openspec-apply-change
-description: Implement tasks from an OpenSpec change. Use when the user wants to start implementing, continue implementation, or work through tasks.
-allowed-tools: Bash(openspec:*)
+description: Implement an OpenSpec change from its GitHub issue checklist. Use when the user wants to start or continue implementation.
+allowed-tools: Bash(openspec:*), Bash(gh:*), Bash(git:*)
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
@@ -10,7 +10,28 @@ metadata:
   generatedBy: "1.10.0"
 ---
 
-Implement tasks from an OpenSpec change.
+
+## Project override: GitHub issue ticket tracking
+
+This repository does **not** use `tasks.md`; it uses a GitHub issue ticket instead. This section takes precedence over every later reference to a tasks artifact, tasks file, `contextFiles.tasks`, or task checkboxes.
+
+- Track implementation work in exactly one GitHub issue per OpenSpec change. The issue title is `OpenSpec: <change-name>` and its body contains the exact marker `<!-- openspec-change: <change-name> -->`.
+- Resolve the repository from `git remote get-url origin`. Use `gh issue list --state all --search "OpenSpec: <change-name> in:title" --json number,title,body,state,url` and accept only an issue whose body contains the exact marker. Reuse and update it; never create a duplicate.
+- When the workflow reaches the schema's `tasks` artifact, run its OpenSpec instructions for planning guidance, but create or update the issue instead of writing the returned `resolvedOutputPath`. The issue body must contain `## Summary`, `## OpenSpec Artifacts`, `## Implementation Checklist`, and `## Acceptance Criteria`. Put implementation work under `## Implementation Checklist` as `- [ ]` items.
+- Treat that issue as satisfying the project's implementation-plan requirement. The stock schema may continue to report the `tasks` artifact as missing or blocked because no local file exists; do not create a placeholder file and do not let that expected state block propose, continue, fast-forward, apply, verify, or archive. Other missing artifacts still block normally.
+- For apply and verify, read proposal/spec/design from `artifactPaths` or `contextFiles`, then read the issue with `gh issue view <number> --json number,title,body,state,url`. The issue checklist is the canonical progress source.
+- After completing an item, edit only that item's checkbox in the issue body (`- [ ]` to `- [x]`) and read the issue back before claiming progress. Never mark partial or deferred work complete.
+- Every commit for the change must use `<type>(<scope>): <imperative summary> (#<issue-number>)`, using the linked issue's real number. Keep commits atomic and use an imperative summary. Examples:
+  - `feat(catalog): add menu item lifecycle rules (#12)`
+  - `test(domain): cover money validation (#2)`
+  - `infra(postgres): add initial migration (#8)`
+  - `docs(workflow): align ownership with five-member team (#11)`
+- After committing, verify the subject with `git log -1 --format=%s`; do not accept a missing, placeholder, or mismatched issue number.
+- After a successful archive, close the issue as completed if every checklist item is checked; otherwise leave it open and report the incomplete items.
+- After every issue create, edit, or close, read the exact issue back and verify the marker, body/state, and intended change before reporting success.
+- If `gh` is unavailable, authentication fails, no GitHub remote exists, or multiple marked tickets are found, stop and report the blocker. Never fall back to `tasks.md`.
+
+Implement checklist items from the GitHub issue linked to an OpenSpec change.
 
 **Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
 
@@ -34,7 +55,7 @@ Implement tasks from an OpenSpec change.
    Parse the JSON to understand:
    - `schemaName`: The workflow being used (e.g., "spec-driven")
    - `planningHome`, `changeRoot`, and `actionContext`: planning scope and edit constraints
-   - Which artifact contains the tasks (typically "tasks" for spec-driven, check status for others)
+   - Whether the schema exposes a `tasks` artifact; in this project it is represented by the marked GitHub issue instead of a file
 
 3. **Get apply instructions**
 
@@ -74,7 +95,7 @@ Implement tasks from an OpenSpec change.
 
    Read every file path listed under `contextFiles` from the apply instructions output.
    The files depend on the schema being used:
-   - **spec-driven**: proposal, specs, design, tasks
+   - **spec-driven**: proposal, specs, and design from `contextFiles`; load implementation work from the marked GitHub issue
    - Other schemas: follow the contextFiles from CLI output
 
    Do not copy `context` or `operationGuidance` verbatim into implementation
@@ -94,7 +115,7 @@ Implement tasks from an OpenSpec change.
    - Show which task is being worked on
    - Make the code changes required
    - Keep changes minimal and focused
-   - Mark task complete in the tasks file: `- [ ]` → `- [x]`
+   - Mark the matching checklist item complete in the GitHub issue body, then read the issue back to verify the update
    - Continue to next task
 
    **Pause if:**
@@ -169,11 +190,11 @@ What would you like to do?
 - If task is ambiguous, pause and ask before implementing
 - If implementation reveals issues, pause and suggest artifact updates
 - Keep code changes minimal and scoped to each task
-- Update task checkbox immediately after completing each task
+- Update the issue checkbox immediately after completing each checklist item and verify it by reading the issue back
 - Pause on errors, blockers, or unclear requirements - don't guess
 - When a task needs work beyond what the spec describes, surface the added scope and pause - never silently narrow, defer, or simplify away specified behavior
 - Only mark a task `- [x]` when its specified behavior is fully implemented, not when it is partially done or deferred
-- Use contextFiles from CLI output, don't assume specific file names
+- Use `contextFiles` for local artifacts and the marked GitHub issue for the implementation checklist
 - Do not use context or operation guidance as proof that a task is complete
 - Apply relevant project context; report conflicts with controlling workflow inputs
 - Consider every guidance entry; explain any inapplicable or conflicting advice

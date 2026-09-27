@@ -1,7 +1,7 @@
 ---
 name: openspec-propose
-description: Propose a new change with all artifacts generated in one step. Use when the user wants to quickly describe what they want to build and get a complete proposal with design, specs, and tasks ready for implementation.
-allowed-tools: Bash(openspec:*)
+description: Propose a new change with planning artifacts and a GitHub issue ticket ready for implementation.
+allowed-tools: Bash(openspec:*), Bash(gh:*), Bash(git:*)
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
@@ -9,6 +9,27 @@ metadata:
   version: "1.0"
   generatedBy: "1.10.0"
 ---
+
+
+## Project override: GitHub issue ticket tracking
+
+This repository does **not** use `tasks.md`; it uses a GitHub issue ticket instead. This section takes precedence over every later reference to a tasks artifact, tasks file, `contextFiles.tasks`, or task checkboxes.
+
+- Track implementation work in exactly one GitHub issue per OpenSpec change. The issue title is `OpenSpec: <change-name>` and its body contains the exact marker `<!-- openspec-change: <change-name> -->`.
+- Resolve the repository from `git remote get-url origin`. Use `gh issue list --state all --search "OpenSpec: <change-name> in:title" --json number,title,body,state,url` and accept only an issue whose body contains the exact marker. Reuse and update it; never create a duplicate.
+- When the workflow reaches the schema's `tasks` artifact, run its OpenSpec instructions for planning guidance, but create or update the issue instead of writing the returned `resolvedOutputPath`. The issue body must contain `## Summary`, `## OpenSpec Artifacts`, `## Implementation Checklist`, and `## Acceptance Criteria`. Put implementation work under `## Implementation Checklist` as `- [ ]` items.
+- Treat that issue as satisfying the project's implementation-plan requirement. The stock schema may continue to report the `tasks` artifact as missing or blocked because no local file exists; do not create a placeholder file and do not let that expected state block propose, continue, fast-forward, apply, verify, or archive. Other missing artifacts still block normally.
+- For apply and verify, read proposal/spec/design from `artifactPaths` or `contextFiles`, then read the issue with `gh issue view <number> --json number,title,body,state,url`. The issue checklist is the canonical progress source.
+- After completing an item, edit only that item's checkbox in the issue body (`- [ ]` to `- [x]`) and read the issue back before claiming progress. Never mark partial or deferred work complete.
+- Every commit for the change must use `<type>(<scope>): <imperative summary> (#<issue-number>)`, using the linked issue's real number. Keep commits atomic and use an imperative summary. Examples:
+  - `feat(catalog): add menu item lifecycle rules (#12)`
+  - `test(domain): cover money validation (#2)`
+  - `infra(postgres): add initial migration (#8)`
+  - `docs(workflow): align ownership with five-member team (#11)`
+- After committing, verify the subject with `git log -1 --format=%s`; do not accept a missing, placeholder, or mismatched issue number.
+- After a successful archive, close the issue as completed if every checklist item is checked; otherwise leave it open and report the incomplete items.
+- After every issue create, edit, or close, read the exact issue back and verify the marker, body/state, and intended change before reporting success.
+- If `gh` is unavailable, authentication fails, no GitHub remote exists, or multiple marked tickets are found, stop and report the blocker. Never fall back to `tasks.md`.
 
 Propose a new change - create the change and generate all artifacts in one step.
 
@@ -18,7 +39,7 @@ I'll create a change with the artifacts your schema defines. With the default sp
 - proposal.md (what & why)
 - `specs/<capability-path>/spec.md` (what the system must do - a delta, not the main spec)
 - design.md (how)
-- tasks.md (implementation steps)
+- GitHub issue ticket (implementation checklist; no local tasks file)
 
 `<capability-path>` is the spec directory relative to `specs/` (for example, `user-auth` or `identity/user-auth`). Preserve an existing capability's full path and follow the project's established organization for new capabilities.
 
@@ -105,7 +126,7 @@ When the user is ready to implement, they must start the apply workflow explicit
    b. **Continue until every artifact in the required set exists (not just `apply.requires`)**
       - After creating each artifact, re-run `openspec status --change "<name>" --json`
       - The required set is `applyRequires` plus every artifact reachable from those by following the `requires` edges in `status --json` - walk them transitively (spec-driven closes over proposal, specs, design, tasks). Leave artifacts outside that set alone
-      - `status` is file-existence only, so an `applyRequires` artifact reading `done` does NOT mean its dependencies exist - writing `tasks.md` early marks `tasks` done while `specs` was never written. Use each artifact's `requires` edges, not its `status`, to build the required set: a `done` artifact still lists what it depends on
+      - `status` is file-existence only, so an `applyRequires` artifact reading `done` does NOT mean its dependencies exist - creating the issue ticket does not mark the CLI `tasks` artifact done; still complete proposal/spec/design dependencies before treating planning as ready. Use each artifact's `requires` edges, not its `status`, to build the required set: a `done` artifact still lists what it depends on
       - An artifact already reading `status: "skipped"` is satisfied: the change declares `skip_specs` in `.openspec.yaml`, so its files must NOT exist. Never try to create one
       - Create every artifact in the required set that is missing, then re-check - creating one can unblock others
       - Skip one only when `status` already reports it `skipped`, or when its own `instruction` says it is conditional: run `openspec instructions <artifact-id> --change "<name>" --json` and skip only if its `instruction` field marks it optional (e.g. "create only if..."). Spec-driven's `design.md` qualifies; `specs` qualifies only via the `skipped` status above, never by your own judgment. Tell the user, and do not reconsider it
