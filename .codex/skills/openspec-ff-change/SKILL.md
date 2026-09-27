@@ -29,6 +29,7 @@ This repository does **not** use `tasks.md`; it uses a GitHub issue ticket inste
 - After committing, verify the subject with `git log -1 --format=%s`; do not accept a missing, placeholder, or mismatched issue number.
 - After a successful archive, close the issue as completed if every checklist item is checked; otherwise leave it open and report the incomplete items.
 - After every issue create, edit, or close, read the exact issue back and verify the marker, body/state, and intended change before reporting success.
+- Legacy migration: if no marked issue exists but `artifactPaths.tasks.existingOutputPaths` identifies an existing `tasks.md`, read it once, create the canonical marked issue with the same checkbox text and checked state, read the issue back, and then treat the issue as authoritative. Do not update or recreate the legacy file after migration.
 - If `gh` is unavailable, authentication fails, no GitHub remote exists, or multiple marked tickets are found, stop and report the blocker. Never fall back to `tasks.md`.
 
 Fast-forward through artifact creation - generate everything needed to start implementation in one go.
@@ -83,7 +84,8 @@ Fast-forward through artifact creation - generate everything needed to start imp
         - `resolvedOutputPath`: Resolved path or pattern to write the artifact
         - `dependencies`: Completed artifacts to read for context
       - Read any completed dependency files for context - always re-read them from disk, even if you saw them earlier in the conversation (the user may have edited them)
-      - If the `instruction` field delegates creation to a specific skill or command, invoke it to produce the artifact instead of writing the file yourself, then verify the artifact file exists at `resolvedOutputPath`
+      - If `<artifact-id>` is `tasks`, create or update the canonical marked GitHub issue from the returned guidance, verify it by reading it back, and record `tasks` in an `externallySatisfied` set. Do not write `resolvedOutputPath`.
+      - Else if the `instruction` field delegates creation to a specific skill or command, invoke it to produce the artifact instead of writing the file yourself, then verify the artifact file exists at `resolvedOutputPath`
       - Otherwise create the artifact file using `template` as the structure and write it to `resolvedOutputPath`. If `resolvedOutputPath` is a glob, follow `instruction` to choose the concrete file path
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
       - Show brief progress: "✓ Created <artifact-id>"
@@ -93,10 +95,10 @@ Fast-forward through artifact creation - generate everything needed to start imp
       - The required set is `applyRequires` plus every artifact reachable from those by following the `requires` edges in `status --json` - walk them transitively (spec-driven closes over proposal, specs, design, tasks). Leave artifacts outside that set alone
       - `status` is file-existence only, so an `applyRequires` artifact reading `done` does NOT mean its dependencies exist - creating the issue ticket does not mark the CLI `tasks` artifact done; still complete proposal/spec/design dependencies before treating planning as ready. Use each artifact's `requires` edges, not its `status`, to build the required set: a `done` artifact still lists what it depends on
       - An artifact already reading `status: "skipped"` is satisfied: the change declares `skip_specs` in `.openspec.yaml`, so its files must NOT exist. Never try to create one
-      - Create every artifact in the required set that is missing, then re-check - creating one can unblock others
+      - Create every missing non-`tasks` artifact in the required set, create/verify the issue for `tasks`, then re-check - creating one can unblock others
       - Skip one only when `status` already reports it `skipped`, or when its own `instruction` says it is conditional: run `openspec instructions <artifact-id> --change "<name>" --json` and skip only if its `instruction` field marks it optional (e.g. "create only if..."). Spec-driven's `design.md` qualifies; `specs` qualifies only via the `skipped` status above, never by your own judgment. Tell the user, and do not reconsider it
       - Dependencies are enablers, not gates: if a required artifact is still `blocked` only because you skipped a conditional dependency, write it anyway
-      - Stop when every artifact in the required set is `done`, `skipped`, or was deliberately skipped
+      - Stop when every artifact in the required set is `done`, `skipped`, deliberately skipped, or is `tasks` recorded in `externallySatisfied` by a verified marked issue
 
    c. **If an artifact requires user input** (unclear context):
       - Ask the user to clarify

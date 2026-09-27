@@ -29,6 +29,7 @@ This repository does **not** use `tasks.md`; it uses a GitHub issue ticket inste
 - After committing, verify the subject with `git log -1 --format=%s`; do not accept a missing, placeholder, or mismatched issue number.
 - After a successful archive, close the issue as completed if every checklist item is checked; otherwise leave it open and report the incomplete items.
 - After every issue create, edit, or close, read the exact issue back and verify the marker, body/state, and intended change before reporting success.
+- Legacy migration: if no marked issue exists but `artifactPaths.tasks.existingOutputPaths` identifies an existing `tasks.md`, read it once, create the canonical marked issue with the same checkbox text and checked state, read the issue back, and then treat the issue as authoritative. Do not update or recreate the legacy file after migration.
 - If `gh` is unavailable, authentication fails, no GitHub remote exists, or multiple marked tickets are found, stop and report the blocker. Never fall back to `tasks.md`.
 
 Continue working on a change by creating the next artifact.
@@ -70,7 +71,9 @@ Continue working on a change by creating the next artifact.
 
    ---
 
-   **If all planning artifacts are complete (`isPlanningComplete: true`, or legacy `isComplete: true`)**:
+   First compute effective planning completion: it is true when the CLI reports completion, **or** every non-`tasks` artifact is `done`/`skipped` and a unique valid marked issue satisfies `tasks`.
+
+   **If effective planning completion is true**:
    - Congratulate the user
    - Show final status including the schema used
    - Suggest: "Planning is complete! You can now implement this change. Once implementation and any tracked work are complete, archive it."
@@ -92,20 +95,19 @@ Continue working on a change by creating the next artifact.
      - `resolvedOutputPath`: Resolved path or pattern to write the artifact
      - `dependencies`: Completed artifacts to read for context (entries with `skipped: true` have no files - do not look for them)
      - `skipped`/`warning`: present when the change declares skip_specs and this artifact must NOT be created - pick another artifact
-   - **Create the artifact file**:
+   - **Create the artifact**:
      - Read any completed dependency files for context - always re-read them from disk, even if you saw them earlier in the conversation (the user may have edited them)
-     - If the `instruction` field delegates creation to a specific skill or command, invoke it to produce the artifact instead of writing the file yourself, then verify the artifact file exists at `resolvedOutputPath`
-     - Otherwise use `template` as the structure - fill in its sections
-     - Apply `context` and `rules` as constraints when writing - but do NOT copy them into the file
-     - Write to the `resolvedOutputPath` specified in instructions. If it is a glob pattern, choose the concrete file path using the schema instruction and the change's context
+     - If `<artifact-id>` is `tasks`, create or update the canonical marked issue, read it back, and treat `tasks` as externally satisfied. Do not write `resolvedOutputPath`.
+     - Else if the `instruction` field delegates creation to a specific skill or command, invoke it to produce the artifact instead of writing the file yourself, then verify the artifact file exists at `resolvedOutputPath`
+     - Otherwise use `template` as the structure, apply `context` and `rules`, and write to `resolvedOutputPath` (choosing a concrete path when it is a glob)
    - Show what was created and what's now unlocked
    - STOP after creating ONE artifact
 
    ---
 
    **If no artifacts are ready (all blocked)**:
-   - This shouldn't happen with a valid schema
-   - Show status and suggest checking for issues
+   - If every non-`tasks` artifact is `done`/`skipped` and the marked issue is valid, report effective planning completion and stop.
+   - Otherwise show the unresolved non-`tasks` blockers and suggest checking the schema or artifacts.
 
 4. **After creating an artifact, show progress**
    ```bash
@@ -132,7 +134,7 @@ If the `instruction` field directs you to use a specific skill or command to cre
 - Always read dependency artifacts before creating a new one - re-read from disk, not from conversation memory (files may have changed since you last saw them)
 - Never skip artifacts or create out of order
 - If context is unclear, ask the user before creating
-- Verify the artifact file exists after writing before marking progress
+- Verify local artifact files after writing; for `tasks`, verify the marked issue by reading it back
 - Use the schema's artifact sequence, don't assume specific artifact names
 - **IMPORTANT**: `context` and `rules` are constraints for YOU, not content for the file
   - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact

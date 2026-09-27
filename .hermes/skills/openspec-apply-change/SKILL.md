@@ -29,6 +29,7 @@ This repository does **not** use `tasks.md`; it uses a GitHub issue ticket inste
 - After committing, verify the subject with `git log -1 --format=%s`; do not accept a missing, placeholder, or mismatched issue number.
 - After a successful archive, close the issue as completed if every checklist item is checked; otherwise leave it open and report the incomplete items.
 - After every issue create, edit, or close, read the exact issue back and verify the marker, body/state, and intended change before reporting success.
+- Legacy migration: if no marked issue exists but `artifactPaths.tasks.existingOutputPaths` identifies an existing `tasks.md`, read it once, create the canonical marked issue with the same checkbox text and checked state, read the issue back, and then treat the issue as authoritative. Do not update or recreate the legacy file after migration.
 - If `gh` is unavailable, authentication fails, no GitHub remote exists, or multiple marked tickets are found, stop and report the blocker. Never fall back to `tasks.md`.
 
 Implement checklist items from the GitHub issue linked to an OpenSpec change.
@@ -72,7 +73,7 @@ Implement checklist items from the GitHub issue linked to an OpenSpec change.
    - Optional `operationGuidance`: current advisory guidance for apply
 
    **Handle states:**
-   - If `state: "blocked"` (missing artifacts): show message, suggest using `/openspec-continue-change` (if it is not installed, run `openspec status --change "<name>" --json` to see the next artifact and `openspec instructions <artifact-id> --change "<name>" --json` for how to create it)
+   - If `state: "blocked"`, inspect the missing artifact IDs. When `tasks` is the only missing or blocked artifact and a unique valid marked issue exists (or was just migrated), treat `tasks` as externally satisfied and proceed. If any other artifact is missing, show the blocker and suggest `/openspec-continue-change`.
    - If `state: "all_done"`: congratulate, suggest archive
    - Otherwise: proceed to implementation
 
@@ -85,7 +86,7 @@ Implement checklist items from the GitHub issue linked to an OpenSpec change.
    Keep both fields separate from CLI-returned state, missing artifacts, tasks,
    progress, `contextFiles`, and the built-in `instruction`. They are not
    evidence of task completion, do not replace the built-in instruction, and do
-   not permit bypassing a blocked state. If context conflicts with the built-in
+   not permit bypassing a blocked state except for the explicit tasks-only issue-backed state above. If context conflicts with the built-in
    instruction, an explicit user choice, or a CLI-controlled value, report the
    conflict and preserve the controlling value. If guidance is inapplicable or
    conflicts with those controlling inputs, do not follow it and explain why.

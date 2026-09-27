@@ -29,6 +29,7 @@ This repository does **not** use `tasks.md`; it uses a GitHub issue ticket inste
 - After committing, verify the subject with `git log -1 --format=%s`; do not accept a missing, placeholder, or mismatched issue number.
 - After a successful archive, close the issue as completed if every checklist item is checked; otherwise leave it open and report the incomplete items.
 - After every issue create, edit, or close, read the exact issue back and verify the marker, body/state, and intended change before reporting success.
+- Legacy migration: if no marked issue exists but `artifactPaths.tasks.existingOutputPaths` identifies an existing `tasks.md`, read it once, create the canonical marked issue with the same checkbox text and checked state, read the issue back, and then treat the issue as authoritative. Do not update or recreate the legacy file after migration.
 - If `gh` is unavailable, authentication fails, no GitHub remote exists, or multiple marked tickets are found, stop and report the blocker. Never fall back to `tasks.md`.
 
 Verify that an implementation matches the change artifacts and the linked GitHub issue checklist.

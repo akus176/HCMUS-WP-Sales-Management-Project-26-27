@@ -29,6 +29,7 @@ This repository does **not** use `tasks.md`; it uses a GitHub issue ticket inste
 - After committing, verify the subject with `git log -1 --format=%s`; do not accept a missing, placeholder, or mismatched issue number.
 - After a successful archive, close the issue as completed if every checklist item is checked; otherwise leave it open and report the incomplete items.
 - After every issue create, edit, or close, read the exact issue back and verify the marker, body/state, and intended change before reporting success.
+- Legacy migration: if no marked issue exists but `artifactPaths.tasks.existingOutputPaths` identifies an existing `tasks.md`, read it once, create the canonical marked issue with the same checkbox text and checked state, read the issue back, and then treat the issue as authoritative. Do not update or recreate the legacy file after migration.
 - If `gh` is unavailable, authentication fails, no GitHub remote exists, or multiple marked tickets are found, stop and report the blocker. Never fall back to `tasks.md`.
 
 Guide the user through their first complete OpenSpec workflow cycle. This is a teaching experience—you'll do real work in their codebase while explaining each step.
@@ -389,18 +390,26 @@ These should be small, clear, and in logical order.
 **DO:** Generate issue checklist items based on specs and design:
 
 ```
-Here are the implementation tasks:
+Here is the canonical issue body:
 
 ---
 
-## 1. [Category or file]
+<!-- openspec-change: <change-name> -->
+## Summary
+[Brief implementation summary]
 
+## OpenSpec Artifacts
+- `<changeRoot>/proposal.md`
+- `<changeRoot>/design.md`
+- `<changeRoot>/specs/...`
+
+## Implementation Checklist
 - [ ] 1.1 [Specific task] — verify: [test, command, observable behavior, or delivered artifact]
 - [ ] 1.2 [Specific task] — verify: [test, command, observable behavior, or delivered artifact]
-
-## 2. Integration Verification
-
 - [ ] 2.1 Verify [broader integration or system behavior] with [end-to-end test or observable result]
+
+## Acceptance Criteria
+- [Observable completion criterion]
 
 ---
 
@@ -537,7 +546,7 @@ No problem! Your change is saved at the `changeRoot` reported by `openspec statu
 
 To pick up where we left off later:
 - `/openspec-continue-change <name>` - Resume artifact creation (if installed; otherwise `openspec status --change "<name>" --json` shows the next artifact)
-- `/openspec-apply-change <name>` - Jump to implementation (if tasks exist)
+- `/openspec-apply-change <name>` - Jump to implementation when the marked issue checklist exists
 
 The work won't be lost. Come back whenever you're ready.
 ```
