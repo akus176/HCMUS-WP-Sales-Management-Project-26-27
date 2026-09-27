@@ -470,10 +470,12 @@ Archived changes become your project's decision history—you can always find th
 **DO:** Archive the change (`--yes` answers the confirmation prompts, which you cannot answer from a tool call), then close and verify its completed issue ticket:
 ```bash
 openspec archive "<name>" --yes
-# Resolve and read the unique marked issue using the project override.
-# Only when every checklist item is checked:
-gh issue close "<issue-number>" --repo "$OWNER_REPO" --reason completed
-# Always read back; an incomplete checklist must remain OPEN and be reported.
+# Resolve the unique marked issue using the project override.
+issue_body=$(gh issue view "<issue-number>" --repo "$OWNER_REPO" --json body --jq .body)
+if ! printf '%s\n' "$issue_body" | grep -qE '^[[:space:]]*- \[ \]'; then
+  gh issue close "<issue-number>" --repo "$OWNER_REPO" --reason completed
+fi
+# Always read back; an incomplete checklist remains OPEN and must be reported.
 gh issue view "<issue-number>" --repo "$OWNER_REPO" --json number,title,body,state,url
 ```
 
