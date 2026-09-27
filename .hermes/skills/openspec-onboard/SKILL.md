@@ -16,10 +16,10 @@ metadata:
 This repository does **not** use `tasks.md`; it uses a GitHub issue ticket instead. This section takes precedence over every later reference to a tasks artifact, tasks file, `contextFiles.tasks`, or task checkboxes.
 
 - Track implementation work in exactly one GitHub issue per OpenSpec change. The issue title is `OpenSpec: <change-name>` and its body contains the exact marker `<!-- openspec-change: <change-name> -->`.
-- Resolve the repository from `git remote get-url origin`. Use `gh issue list --state all --search "OpenSpec: <change-name> in:title" --json number,title,body,state,url` and accept only an issue whose body contains the exact marker. Reuse and update it; never create a duplicate.
+- Resolve `OWNER_REPO` from `git remote get-url origin` (strip the GitHub host prefix and trailing `.git`). Pass `--repo "$OWNER_REPO"` to every `gh issue` command, including create, list, view, edit, comment, and close. Find candidates with `gh issue list --repo "$OWNER_REPO" --state all --search "OpenSpec: <change-name> in:title" --json number,title,body,state,url`, then accept exactly one issue only when both its title equals `OpenSpec: <change-name>` and its body contains the exact marker. Reuse and update it; never create a duplicate.
 - When the workflow reaches the schema's `tasks` artifact, run its OpenSpec instructions for planning guidance, but create or update the issue instead of writing the returned `resolvedOutputPath`. The issue body must contain `## Summary`, `## OpenSpec Artifacts`, `## Implementation Checklist`, and `## Acceptance Criteria`. Put implementation work under `## Implementation Checklist` as `- [ ]` items.
 - Treat that issue as satisfying the project's implementation-plan requirement. The stock schema may continue to report the `tasks` artifact as missing or blocked because no local file exists; do not create a placeholder file and do not let that expected state block propose, continue, fast-forward, apply, verify, or archive. Other missing artifacts still block normally.
-- For apply and verify, read proposal/spec/design from `artifactPaths` or `contextFiles`, then read the issue with `gh issue view <number> --json number,title,body,state,url`. The issue checklist is the canonical progress source.
+- For apply and verify, read proposal/spec/design from `artifactPaths` or `contextFiles`, then read the issue with `gh issue view <number> --repo "$OWNER_REPO" --json number,title,body,state,url`. The issue checklist is the canonical progress source.
 - After completing an item, edit only that item's checkbox in the issue body (`- [ ]` to `- [x]`) and read the issue back before claiming progress. Never mark partial or deferred work complete.
 - Every commit for the change must use `<type>(<scope>): <imperative summary> (#<issue-number>)`, using the linked issue's real number. Keep commits atomic and use an imperative summary. Examples:
   - `feat(catalog): add menu item lifecycle rules (#12)`
@@ -458,10 +458,15 @@ When a change is complete, we archive it. The archive path is derived from `plan
 Archived changes become your project's decision history—you can always find them later to understand why something was built a certain way.
 ```
 
-**DO:** Archive the change (`--yes` answers the confirmation prompts, which you cannot answer from a tool call):
+**DO:** Archive the change (`--yes` answers the confirmation prompts, which you cannot answer from a tool call), then close and verify its completed issue ticket:
 ```bash
 openspec archive "<name>" --yes
+# Resolve the unique marked issue using the project override and confirm every checklist item is checked.
+gh issue close "<issue-number>" --repo "$OWNER_REPO" --reason completed
+gh issue view "<issue-number>" --repo "$OWNER_REPO" --json number,title,body,state,url
 ```
+
+Require the readback to show `state: CLOSED`, the exact title and marker, and a fully checked implementation checklist before reporting archive completion.
 
 **SHOW:**
 ```
