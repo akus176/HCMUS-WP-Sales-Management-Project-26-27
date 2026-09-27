@@ -90,8 +90,10 @@ Archive a completed change in the experimental workflow.
    - `planningHome`, `changeRoot`, `artifactPaths`, and `actionContext`: path and scope context
    - `artifacts`: List of artifacts with their status (`done`, `skipped`, or other)
 
-   **If any artifacts are neither `done` nor `skipped`** (skipped artifacts satisfy the requirement - the change declares skip_specs):
-   - Display warning listing incomplete artifacts
+   Compute incomplete artifacts after treating `tasks` as externally satisfied by the unique valid marked issue.
+
+   **If any non-`tasks` artifacts are neither `done` nor `skipped`** (skipped artifacts satisfy the requirement - the change declares skip_specs):
+   - Display warning listing those incomplete artifacts
    - Ask the user to confirm they want to proceed
    - Proceed if user confirms
 

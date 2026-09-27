@@ -74,7 +74,7 @@ Implement checklist items from the GitHub issue linked to an OpenSpec change.
 
    **Handle states:**
    - If `state: "blocked"`, inspect the missing artifact IDs. When `tasks` is the only missing or blocked artifact and a unique valid marked issue exists (or was just migrated), treat `tasks` as externally satisfied and proceed. If any other artifact is missing, show the blocker and suggest `/openspec-continue-change`.
-   - If `state: "all_done"`: congratulate, suggest archive
+   - If `state: "all_done"`, first resolve and validate the unique marked issue (performing legacy migration if needed). Only congratulate and suggest archive when that issue is valid; otherwise report the missing or malformed issue as a blocker.
    - Otherwise: proceed to implementation
 
    Treat `context` as a required prompt-level input. Read and consider it, and

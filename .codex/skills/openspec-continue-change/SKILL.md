@@ -71,7 +71,7 @@ Continue working on a change by creating the next artifact.
 
    ---
 
-   First compute effective planning completion: it is true when the CLI reports completion, **or** every non-`tasks` artifact is `done`/`skipped` and a unique valid marked issue satisfies `tasks`.
+   First resolve and validate the unique marked issue (performing legacy migration if needed). Effective planning completion is true only when that issue is valid **and** either the CLI reports completion or every non-`tasks` artifact is `done`/`skipped`.
 
    **If effective planning completion is true**:
    - Congratulate the user
