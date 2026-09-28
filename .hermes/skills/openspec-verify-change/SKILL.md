@@ -1,7 +1,7 @@
 ---
 name: openspec-verify-change
 description: Verify implementation matches change artifacts. Use when the user wants to validate that implementation is complete, correct, and coherent before archiving.
-allowed-tools: Bash(openspec:*)
+allowed-tools: Bash(openspec:*), Bash(gh:*), Bash(git:*)
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
@@ -10,7 +10,29 @@ metadata:
   generatedBy: "1.10.0"
 ---
 
-Verify that an implementation matches the change artifacts (specs, tasks, design).
+
+## Project override: GitHub issue ticket tracking
+
+This repository does **not** use `tasks.md`; it uses a GitHub issue ticket instead. This section takes precedence over every later reference to a tasks artifact, tasks file, `contextFiles.tasks`, or task checkboxes.
+
+- Track implementation work in exactly one GitHub issue per OpenSpec change. The issue title is `OpenSpec: <change-name>` and its body contains the exact marker `<!-- openspec-change: <change-name> -->`.
+- Resolve `OWNER_REPO` from `git remote get-url origin` (strip the GitHub host prefix and trailing `.git`). Pass `--repo "$OWNER_REPO"` to every `gh issue` command, including create, list, view, edit, comment, and close. Find candidates with `gh issue list --repo "$OWNER_REPO" --state all --search "OpenSpec: <change-name> in:title" --json number,title,body,state,url`, then accept exactly one issue only when both its title equals `OpenSpec: <change-name>` and its body contains the exact marker. Reuse and update it; never create a duplicate.
+- When the workflow reaches the schema's `tasks` artifact, run its OpenSpec instructions for planning guidance, but create or update the issue instead of writing the returned `resolvedOutputPath`. The issue body must contain `## Summary`, `## OpenSpec Artifacts`, `## Implementation Checklist`, and `## Acceptance Criteria`. Put implementation work under `## Implementation Checklist` as `- [ ]` items.
+- Treat that issue as satisfying the project's implementation-plan requirement. The stock schema may continue to report the `tasks` artifact as missing or blocked because no local file exists; do not create a placeholder file and do not let that expected state block propose, continue, fast-forward, apply, verify, or archive. Other missing artifacts still block normally.
+- For apply and verify, read proposal/spec/design from `artifactPaths` or `contextFiles`, then read the issue with `gh issue view <number> --repo "$OWNER_REPO" --json number,title,body,state,url`. The issue checklist is the canonical progress source.
+- After completing an item, edit only that item's checkbox in the issue body (`- [ ]` to `- [x]`) and read the issue back before claiming progress. Never mark partial or deferred work complete.
+- Every commit for the change must use `<type>(<scope>): <imperative summary> (#<issue-number>)`, using the linked issue's real number. Keep commits atomic and use an imperative summary. Examples:
+  - `feat(catalog): add menu item lifecycle rules (#12)`
+  - `test(domain): cover money validation (#2)`
+  - `infra(postgres): add initial migration (#8)`
+  - `docs(workflow): align ownership with five-member team (#11)`
+- After committing, verify the subject with `git log -1 --format=%s`; do not accept a missing, placeholder, or mismatched issue number.
+- After a successful archive, close the issue as completed if every checklist item is checked; otherwise leave it open and report the incomplete items.
+- After every issue create, edit, or close, read the exact issue back and verify the marker, body/state, and intended change before reporting success.
+- Legacy migration: if no marked issue exists but `artifactPaths.tasks.existingOutputPaths` identifies an existing `tasks.md`, read it once, create the canonical marked issue with the same checkbox text and checked state, read the issue back, and then treat the issue as authoritative. Do not update or recreate the legacy file after migration.
+- If `gh` is unavailable, authentication fails, no GitHub remote exists, or multiple marked tickets are found, stop and report the blocker. Never fall back to `tasks.md`.
+
+Verify that an implementation matches the change artifacts and the linked GitHub issue checklist.
 
 **Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
 
@@ -25,9 +47,9 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    - Auto-select if only one active change exists
    - If ambiguous, run `openspec list --json` to get available changes and ask the user to select one
 
-   When prompting, show changes that have implementation tasks (tasks artifact exists).
+   When prompting, show changes that have a marked GitHub issue ticket.
    Include the schema used for each change if available.
-   Mark changes with incomplete tasks as "(In Progress)".
+   Mark changes with unchecked issue items as "(In Progress)".
 
    Always announce: "Using change: <name>" and how to override (e.g., `/openspec-verify-change <other>`).
 
@@ -60,8 +82,8 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 5. **Verify Completeness**
 
    **Task Completion**:
-   - If `contextFiles.tasks` exists, read every file path in it
-   - Parse checkboxes: `- [ ]` (incomplete) vs `- [x]` (complete)
+   - Read the marked GitHub issue body
+   - Parse checklist items: `- [ ]` (incomplete) vs `- [x]` (complete)
    - Count complete vs total tasks
    - If incomplete tasks exist:
      - Add CRITICAL issue for each incomplete task
@@ -160,8 +182,8 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 
 **Graceful Degradation**
 
-- If only tasks.md exists: verify task completion only, skip spec/design checks
-- If tasks + specs exist: verify completeness and correctness, skip design
+- If only the GitHub issue ticket exists: verify checklist completion only, skip spec/design checks
+- If the issue ticket and specs exist: verify completeness and correctness, skip design
 - If full artifacts: verify all three dimensions
 - Always note which checks were skipped and why
 

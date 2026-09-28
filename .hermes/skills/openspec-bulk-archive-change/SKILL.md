@@ -1,7 +1,7 @@
 ---
 name: openspec-bulk-archive-change
 description: Archive multiple completed changes at once. Use when archiving several parallel changes.
-allowed-tools: Bash(openspec:*)
+allowed-tools: Bash(openspec:*), Bash(gh:*), Bash(git:*)
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
@@ -9,6 +9,28 @@ metadata:
   version: "1.0"
   generatedBy: "1.10.0"
 ---
+
+
+## Project override: GitHub issue ticket tracking
+
+This repository does **not** use `tasks.md`; it uses a GitHub issue ticket instead. This section takes precedence over every later reference to a tasks artifact, tasks file, `contextFiles.tasks`, or task checkboxes.
+
+- Track implementation work in exactly one GitHub issue per OpenSpec change. The issue title is `OpenSpec: <change-name>` and its body contains the exact marker `<!-- openspec-change: <change-name> -->`.
+- Resolve `OWNER_REPO` from `git remote get-url origin` (strip the GitHub host prefix and trailing `.git`). Pass `--repo "$OWNER_REPO"` to every `gh issue` command, including create, list, view, edit, comment, and close. Find candidates with `gh issue list --repo "$OWNER_REPO" --state all --search "OpenSpec: <change-name> in:title" --json number,title,body,state,url`, then accept exactly one issue only when both its title equals `OpenSpec: <change-name>` and its body contains the exact marker. Reuse and update it; never create a duplicate.
+- When the workflow reaches the schema's `tasks` artifact, run its OpenSpec instructions for planning guidance, but create or update the issue instead of writing the returned `resolvedOutputPath`. The issue body must contain `## Summary`, `## OpenSpec Artifacts`, `## Implementation Checklist`, and `## Acceptance Criteria`. Put implementation work under `## Implementation Checklist` as `- [ ]` items.
+- Treat that issue as satisfying the project's implementation-plan requirement. The stock schema may continue to report the `tasks` artifact as missing or blocked because no local file exists; do not create a placeholder file and do not let that expected state block propose, continue, fast-forward, apply, verify, or archive. Other missing artifacts still block normally.
+- For apply and verify, read proposal/spec/design from `artifactPaths` or `contextFiles`, then read the issue with `gh issue view <number> --repo "$OWNER_REPO" --json number,title,body,state,url`. The issue checklist is the canonical progress source.
+- After completing an item, edit only that item's checkbox in the issue body (`- [ ]` to `- [x]`) and read the issue back before claiming progress. Never mark partial or deferred work complete.
+- Every commit for the change must use `<type>(<scope>): <imperative summary> (#<issue-number>)`, using the linked issue's real number. Keep commits atomic and use an imperative summary. Examples:
+  - `feat(catalog): add menu item lifecycle rules (#12)`
+  - `test(domain): cover money validation (#2)`
+  - `infra(postgres): add initial migration (#8)`
+  - `docs(workflow): align ownership with five-member team (#11)`
+- After committing, verify the subject with `git log -1 --format=%s`; do not accept a missing, placeholder, or mismatched issue number.
+- After a successful archive, close the issue as completed if every checklist item is checked; otherwise leave it open and report the incomplete items.
+- After every issue create, edit, or close, read the exact issue back and verify the marker, body/state, and intended change before reporting success.
+- Legacy migration: if no marked issue exists but `artifactPaths.tasks.existingOutputPaths` identifies an existing `tasks.md`, read it once, create the canonical marked issue with the same checkbox text and checked state, read the issue back, and then treat the issue as authoritative. Do not update or recreate the legacy file after migration.
+- If `gh` is unavailable, authentication fails, no GitHub remote exists, or multiple marked tickets are found, stop and report the blocker. Never fall back to `tasks.md`.
 
 Archive multiple completed changes in a single operation.
 
@@ -70,9 +92,9 @@ This skill allows you to batch-archive changes, handling spec conflicts intellig
       - Parse `schemaName`, `artifacts`, `planningHome`, `changeRoot`, `artifactPaths`, and `actionContext`
       - Note which artifacts are `done` vs other states
 
-   b. **Task completion** - Read `artifactPaths.tasks.existingOutputPaths` from status JSON
+   b. **Issue checklist completion** - Resolve and read each change's marked GitHub issue
       - Count `- [ ]` (incomplete) vs `- [x]` (complete)
-      - If no tasks file exists, note as "No tasks"
+      - If no unique marked issue exists, mark the change blocked and report why
 
    c. **Delta specs** - Check `artifactPaths.specs.existingOutputPaths` from status JSON
       - List which capability specs exist
@@ -207,8 +229,10 @@ This skill allows you to batch-archive changes, handling spec conflicts intellig
       mv "<changeRoot>" "<planningHome.changesDir>/archive/<target-name>"
       ```
 
-   d. **Track outcome** for each change:
-      - Success: archived successfully
+   d. **Finalize the issue and track outcome** for each change:
+      - After a successful move, close the marked issue only when every checklist item is checked; otherwise leave it open.
+      - Read the issue back with `gh issue view <number> --repo "$OWNER_REPO" --json number,title,body,state,url` and verify its exact marker, title, checklist, and intended state.
+      - Success: archived successfully and issue state verified
       - Failed: error during archive or spec verification (record error)
       - Skipped: user chose not to archive (if applicable)
       - Sync skipped: for every delta in `excludedDeltas`, report `sync skipped` with the change, `<capability-path>`, and recorded reason. This is distinct from skipping the archive.

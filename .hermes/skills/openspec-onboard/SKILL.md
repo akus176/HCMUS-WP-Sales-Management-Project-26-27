@@ -1,7 +1,7 @@
 ---
 name: openspec-onboard
 description: Guided onboarding for OpenSpec - walk through a complete workflow cycle with narration and real codebase work.
-allowed-tools: Bash(openspec:*)
+allowed-tools: Bash(openspec:*), Bash(gh:*), Bash(git:*)
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
@@ -9,6 +9,28 @@ metadata:
   version: "1.0"
   generatedBy: "1.10.0"
 ---
+
+
+## Project override: GitHub issue ticket tracking
+
+This repository does **not** use `tasks.md`; it uses a GitHub issue ticket instead. This section takes precedence over every later reference to a tasks artifact, tasks file, `contextFiles.tasks`, or task checkboxes.
+
+- Track implementation work in exactly one GitHub issue per OpenSpec change. The issue title is `OpenSpec: <change-name>` and its body contains the exact marker `<!-- openspec-change: <change-name> -->`.
+- Resolve `OWNER_REPO` from `git remote get-url origin` (strip the GitHub host prefix and trailing `.git`). Pass `--repo "$OWNER_REPO"` to every `gh issue` command, including create, list, view, edit, comment, and close. Find candidates with `gh issue list --repo "$OWNER_REPO" --state all --search "OpenSpec: <change-name> in:title" --json number,title,body,state,url`, then accept exactly one issue only when both its title equals `OpenSpec: <change-name>` and its body contains the exact marker. Reuse and update it; never create a duplicate.
+- When the workflow reaches the schema's `tasks` artifact, run its OpenSpec instructions for planning guidance, but create or update the issue instead of writing the returned `resolvedOutputPath`. The issue body must contain `## Summary`, `## OpenSpec Artifacts`, `## Implementation Checklist`, and `## Acceptance Criteria`. Put implementation work under `## Implementation Checklist` as `- [ ]` items.
+- Treat that issue as satisfying the project's implementation-plan requirement. The stock schema may continue to report the `tasks` artifact as missing or blocked because no local file exists; do not create a placeholder file and do not let that expected state block propose, continue, fast-forward, apply, verify, or archive. Other missing artifacts still block normally.
+- For apply and verify, read proposal/spec/design from `artifactPaths` or `contextFiles`, then read the issue with `gh issue view <number> --repo "$OWNER_REPO" --json number,title,body,state,url`. The issue checklist is the canonical progress source.
+- After completing an item, edit only that item's checkbox in the issue body (`- [ ]` to `- [x]`) and read the issue back before claiming progress. Never mark partial or deferred work complete.
+- Every commit for the change must use `<type>(<scope>): <imperative summary> (#<issue-number>)`, using the linked issue's real number. Keep commits atomic and use an imperative summary. Examples:
+  - `feat(catalog): add menu item lifecycle rules (#12)`
+  - `test(domain): cover money validation (#2)`
+  - `infra(postgres): add initial migration (#8)`
+  - `docs(workflow): align ownership with five-member team (#11)`
+- After committing, verify the subject with `git log -1 --format=%s`; do not accept a missing, placeholder, or mismatched issue number.
+- After a successful archive, close the issue as completed if every checklist item is checked; otherwise leave it open and report the incomplete items.
+- After every issue create, edit, or close, read the exact issue back and verify the marker, body/state, and intended change before reporting success.
+- Legacy migration: if no marked issue exists but `artifactPaths.tasks.existingOutputPaths` identifies an existing `tasks.md`, read it once, create the canonical marked issue with the same checkbox text and checked state, read the issue back, and then treat the issue as authoritative. Do not update or recreate the legacy file after migration.
+- If `gh` is unavailable, authentication fails, no GitHub remote exists, or multiple marked tickets are found, stop and report the blocker. Never fall back to `tasks.md`.
 
 Guide the user through their first complete OpenSpec workflow cycle. This is a teaching experience—you'll do real work in their codebase while explaining each step.
 
@@ -47,8 +69,8 @@ I'll walk you through a complete change cycle—from idea to implementation—us
 1. Pick a small, real task in your codebase
 2. Explore the problem briefly
 3. Create a change (the container for our work)
-4. Build the artifacts: proposal → specs → design → tasks
-5. Implement the tasks
+4. Build proposal, specs, and design, then create the issue ticket
+5. Implement the issue checklist
 6. Archive the completed change
 
 **Time:** ~15-20 minutes
@@ -170,7 +192,7 @@ Now let's create a change to hold our work.
 ```
 ## Creating a Change
 
-A "change" in OpenSpec is a container for all the thinking and planning around a piece of work. It lives at the `changeRoot` reported by `openspec status --change "<name>" --json` and holds your artifacts—proposal, specs, design, tasks.
+A "change" in OpenSpec is a container for the proposal, specs, and design. Implementation work is tracked in the linked GitHub issue ticket.
 
 Let me create one for our task.
 ```
@@ -190,7 +212,7 @@ The folder structure:
 ├── proposal.md    ← Why we're doing this (empty, we'll fill it)
 ├── design.md      ← How we'll build it (empty)
 ├── specs/         ← Detailed requirements (empty)
-└── tasks.md       ← Implementation checklist (empty)
+└── (no tasks file)   ← Implementation checklist lives in the GitHub issue
 ```
 
 Now let's fill in the first artifact—the proposal.
@@ -354,32 +376,40 @@ Save to the `resolvedOutputPath` from `openspec instructions design --change "<n
 
 ---
 
-## Phase 8: Tasks
+## Phase 8: GitHub Issue Ticket
 
 **EXPLAIN:**
 ```
-## Tasks
+## GitHub Issue Ticket
 
-Finally, we break the work into implementation tasks—checkboxes that drive the apply phase.
+Finally, we break the work into checklist items in the change's marked GitHub issue.
 
 These should be small, clear, and in logical order.
 ```
 
-**DO:** Generate tasks based on specs and design:
+**DO:** Generate issue checklist items based on specs and design:
 
 ```
-Here are the implementation tasks:
+Here is the canonical issue body:
 
 ---
 
-## 1. [Category or file]
+<!-- openspec-change: <change-name> -->
+## Summary
+[Brief implementation summary]
 
+## OpenSpec Artifacts
+- `<changeRoot>/proposal.md`
+- `<changeRoot>/design.md`
+- `<changeRoot>/specs/...`
+
+## Implementation Checklist
 - [ ] 1.1 [Specific task] — verify: [test, command, observable behavior, or delivered artifact]
 - [ ] 1.2 [Specific task] — verify: [test, command, observable behavior, or delivered artifact]
-
-## 2. Integration Verification
-
 - [ ] 2.1 Verify [broader integration or system behavior] with [end-to-end test or observable result]
+
+## Acceptance Criteria
+- [Observable completion criterion]
 
 ---
 
@@ -388,7 +418,7 @@ Each checkbox becomes a unit of work in the apply phase. Ready to implement?
 
 **PAUSE** - Wait for user to confirm they're ready to implement.
 
-Save to the `resolvedOutputPath` from `openspec instructions tasks --change "<name>" --json`.
+Run `openspec instructions tasks --change "<name>" --json` for planning guidance, then create or update the marked GitHub issue; do not write `resolvedOutputPath`.
 
 ---
 
@@ -406,7 +436,7 @@ Now we implement each task, checking them off as we go. I'll announce each one a
 1. Announce: "Working on task N: [description]"
 2. Implement the change in the codebase
 3. Reference specs/design naturally: "The spec says X, so I'm doing Y"
-4. Mark complete in tasks.md: `- [ ]` → `- [x]`
+4. Mark the matching checkbox complete in the GitHub issue, then read it back
 5. Brief status: "✓ Task N complete"
 
 Keep narration light—don't over-explain every line of code.
@@ -437,10 +467,19 @@ When a change is complete, we archive it. The archive path is derived from `plan
 Archived changes become your project's decision history—you can always find them later to understand why something was built a certain way.
 ```
 
-**DO:** Archive the change (`--yes` answers the confirmation prompts, which you cannot answer from a tool call):
+**DO:** Archive the change (`--yes` answers the confirmation prompts, which you cannot answer from a tool call), then close and verify its completed issue ticket:
 ```bash
 openspec archive "<name>" --yes
+# Resolve the unique marked issue using the project override.
+issue_body=$(gh issue view "<issue-number>" --repo "$OWNER_REPO" --json body --jq .body)
+if ! printf '%s\n' "$issue_body" | grep -qE '^[[:space:]]*- \[ \]'; then
+  gh issue close "<issue-number>" --repo "$OWNER_REPO" --reason completed
+fi
+# Always read back; an incomplete checklist remains OPEN and must be reported.
+gh issue view "<issue-number>" --repo "$OWNER_REPO" --json number,title,body,state,url
 ```
+
+Require the readback to show the exact title and marker. Require `state: CLOSED` only for a fully checked checklist; otherwise require `state: OPEN` and report the remaining items before reporting archive completion.
 
 **SHOW:**
 ```
@@ -463,7 +502,7 @@ You just completed a full OpenSpec cycle:
 3. **Proposal** - Captured WHY
 4. **Specs** - Defined WHAT in detail
 5. **Design** - Decided HOW
-6. **Tasks** - Broke it into steps
+6. **Issue** - Broke implementation into a ticket checklist
 7. **Apply** - Implemented the work
 8. **Archive** - Preserved the record
 
@@ -511,7 +550,7 @@ No problem! Your change is saved at the `changeRoot` reported by `openspec statu
 
 To pick up where we left off later:
 - `/openspec-continue-change <name>` - Resume artifact creation (if installed; otherwise `openspec status --change "<name>" --json` shows the next artifact)
-- `/openspec-apply-change <name>` - Jump to implementation (if tasks exist)
+- `/openspec-apply-change <name>` - Jump to implementation when the marked issue checklist exists
 
 The work won't be lost. Come back whenever you're ready.
 ```
