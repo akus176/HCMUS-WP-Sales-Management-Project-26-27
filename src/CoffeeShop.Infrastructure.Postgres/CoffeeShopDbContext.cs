@@ -3,6 +3,7 @@ namespace CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Application.Common.Persistence;
 using CoffeeShop.Domain.Customers;
 using CoffeeShop.Domain.Identity;
+using CoffeeShop.Domain.Inventory;
 using Microsoft.EntityFrameworkCore;
 
 public class CoffeeShopDbContext : DbContext, IUnitOfWork
@@ -35,6 +36,17 @@ public class CoffeeShopDbContext : DbContext, IUnitOfWork
     public DbSet<LoyaltyTransaction> LoyaltyTransactions => Set<LoyaltyTransaction>();
 
     public DbSet<LoyaltySettings> LoyaltySettings => Set<LoyaltySettings>();
+
+    // Inventory
+    public DbSet<Ingredient> Ingredients => Set<Ingredient>();
+
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+
+    public DbSet<PurchaseReceipt> PurchaseReceipts => Set<PurchaseReceipt>();
+
+    public DbSet<PurchaseReceiptLine> PurchaseReceiptLines => Set<PurchaseReceiptLine>();
+
+    public DbSet<StockMovement> StockMovements => Set<StockMovement>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

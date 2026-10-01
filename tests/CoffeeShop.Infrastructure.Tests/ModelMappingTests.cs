@@ -357,4 +357,30 @@ public class ModelMappingTests
         Assert.Equal(14, quantityDelta.GetPrecision());
         Assert.Equal(3, quantityDelta.GetScale());
     }
+
+    [Fact]
+    public void InventoryRelationships_ShouldFormACompleteGraph()
+    {
+        var model = CreateModel();
+
+        // Receipt lines belong to a receipt and reference an ingredient.
+        var line = model.FindEntityType(typeof(PurchaseReceiptLine))!;
+        Assert.Contains(line.GetForeignKeys(), fk => fk.PrincipalEntityType.ClrType == typeof(PurchaseReceipt));
+        Assert.Contains(line.GetForeignKeys(), fk => fk.PrincipalEntityType.ClrType == typeof(Ingredient));
+
+        // Receipts reference their supplier.
+        var receipt = model.FindEntityType(typeof(PurchaseReceipt))!;
+        Assert.Contains(receipt.GetForeignKeys(), fk => fk.PrincipalEntityType.ClrType == typeof(Supplier));
+
+        // Movements reference their ingredient.
+        var movement = model.FindEntityType(typeof(StockMovement))!;
+        Assert.Contains(movement.GetForeignKeys(), fk => fk.PrincipalEntityType.ClrType == typeof(Ingredient));
+
+        // Every inventory entity is reachable from the model.
+        Assert.NotNull(model.FindEntityType(typeof(Ingredient)));
+        Assert.NotNull(model.FindEntityType(typeof(Supplier)));
+        Assert.NotNull(model.FindEntityType(typeof(PurchaseReceipt)));
+        Assert.NotNull(model.FindEntityType(typeof(PurchaseReceiptLine)));
+        Assert.NotNull(model.FindEntityType(typeof(StockMovement)));
+    }
 }
