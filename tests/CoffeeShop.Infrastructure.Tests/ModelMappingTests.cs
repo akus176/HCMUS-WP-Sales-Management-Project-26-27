@@ -43,6 +43,7 @@ public class ModelMappingTests
     [InlineData(typeof(Supplier), "suppliers", "inventory")]
     [InlineData(typeof(PurchaseReceipt), "purchase_receipts", "inventory")]
     [InlineData(typeof(PurchaseReceiptLine), "purchase_receipt_lines", "inventory")]
+    [InlineData(typeof(StockMovement), "stock_movements", "inventory")]
     public void Entities_ShouldMapToExpectedTableAndSchema(Type entityType, string expectedTable, string expectedSchema)
     {
         var model = CreateModel();
@@ -307,5 +308,53 @@ public class ModelMappingTests
         var unitCost = line.FindProperty(nameof(PurchaseReceiptLine.UnitCost))!;
         Assert.Equal(12, unitCost.GetPrecision());
         Assert.Equal(2, unitCost.GetScale());
+    }
+
+    [Fact]
+    public void CheckConstraints_ShouldBeConfiguredOnStockMovements()
+    {
+        var model = CreateModel();
+
+        var movement = model.FindEntityType(typeof(StockMovement))!;
+        var constraints = movement.GetCheckConstraints();
+        Assert.Contains(constraints, c => c.Name == "CK_stock_movements_type");
+        Assert.Contains(constraints, c => c.Name == "CK_stock_movements_quantity_delta");
+    }
+
+    [Fact]
+    public void StockMovementIndexes_ShouldBeConfiguredCorrectly()
+    {
+        var model = CreateModel();
+
+        var movement = model.FindEntityType(typeof(StockMovement))!;
+
+        var ingredientFk = movement.GetForeignKeys().First(fk => fk.PrincipalEntityType.ClrType == typeof(Ingredient));
+        Assert.Equal(DeleteBehavior.Restrict, ingredientFk.DeleteBehavior);
+
+        var historyIndex = movement.GetIndexes()
+            .FirstOrDefault(i => i.Properties.Any(p => p.Name == nameof(StockMovement.IngredientId)) &&
+                                 i.Properties.Any(p => p.Name == nameof(StockMovement.OccurredAt)));
+        Assert.NotNull(historyIndex);
+
+        var orderIndex = movement.GetIndexes()
+            .FirstOrDefault(i => i.Properties.Any(p => p.Name == nameof(StockMovement.OrderId)));
+        Assert.NotNull(orderIndex);
+        Assert.Equal("order_id IS NOT NULL", orderIndex.GetFilter());
+
+        var receiptIndex = movement.GetIndexes()
+            .FirstOrDefault(i => i.Properties.Any(p => p.Name == nameof(StockMovement.PurchaseReceiptId)));
+        Assert.NotNull(receiptIndex);
+        Assert.Equal("purchase_receipt_id IS NOT NULL", receiptIndex.GetFilter());
+    }
+
+    [Fact]
+    public void StockMovementPrecision_ShouldMatchOpenSpec()
+    {
+        var model = CreateModel();
+
+        var movement = model.FindEntityType(typeof(StockMovement))!;
+        var quantityDelta = movement.FindProperty(nameof(StockMovement.QuantityDelta))!;
+        Assert.Equal(14, quantityDelta.GetPrecision());
+        Assert.Equal(3, quantityDelta.GetScale());
     }
 }
