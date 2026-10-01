@@ -35,18 +35,18 @@ public sealed class IngredientConfiguration : IEntityTypeConfiguration<Ingredien
             .HasColumnName("base_unit");
 
         builder.Property(i => i.CurrentBalance)
-            .HasColumnType("numeric(14,3)")
+            .HasPrecision(14, 3)
             .IsRequired()
             .HasColumnName("current_balance");
 
         builder.Property(i => i.MinimumLevel)
-            .HasColumnType("numeric(14,3)")
+            .HasPrecision(14, 3)
             .IsRequired()
             .HasColumnName("minimum_level");
 
         builder.Property(i => i.UnitCost)
             .HasConversion<MoneyValueConverter>()
-            .HasColumnType("numeric(12,2)")
+            .HasPrecision(12, 2)
             .IsRequired()
             .HasColumnName("unit_cost");
 

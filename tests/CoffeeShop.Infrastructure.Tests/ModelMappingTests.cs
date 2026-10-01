@@ -40,6 +40,7 @@ public class ModelMappingTests
     [InlineData(typeof(LoyaltyTransaction), "loyalty_transactions", "customers")]
     [InlineData(typeof(LoyaltySettings), "loyalty_settings", "customers")]
     [InlineData(typeof(Ingredient), "ingredients", "inventory")]
+    [InlineData(typeof(Supplier), "suppliers", "inventory")]
     public void Entities_ShouldMapToExpectedTableAndSchema(Type entityType, string expectedTable, string expectedSchema)
     {
         var model = CreateModel();
@@ -231,5 +232,28 @@ public class ModelMappingTests
         var unitCost = ingredient.FindProperty(nameof(Ingredient.UnitCost))!;
         Assert.Equal(12, unitCost.GetPrecision());
         Assert.Equal(2, unitCost.GetScale());
+    }
+
+    [Fact]
+    public void SupplierUniqueIndex_ShouldBeConfiguredCorrectly()
+    {
+        var model = CreateModel();
+
+        var supplier = model.FindEntityType(typeof(Supplier))!;
+        var nameIndex = supplier.GetIndexes().FirstOrDefault(i => i.Properties.Any(p => p.Name == nameof(Supplier.Name)));
+        Assert.NotNull(nameIndex);
+        Assert.True(nameIndex.IsUnique);
+    }
+
+    [Fact]
+    public void SupplierColumnLengths_ShouldMatchOpenSpec()
+    {
+        var model = CreateModel();
+
+        var supplier = model.FindEntityType(typeof(Supplier))!;
+        Assert.Equal(120, supplier.FindProperty(nameof(Supplier.Name))!.GetMaxLength());
+        Assert.Equal(30, supplier.FindProperty(nameof(Supplier.Phone))!.GetMaxLength());
+        Assert.Equal(255, supplier.FindProperty(nameof(Supplier.Email))!.GetMaxLength());
+        Assert.Equal(255, supplier.FindProperty(nameof(Supplier.Address))!.GetMaxLength());
     }
 }
