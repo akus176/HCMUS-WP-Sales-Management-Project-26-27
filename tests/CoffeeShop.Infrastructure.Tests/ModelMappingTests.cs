@@ -2,6 +2,7 @@ namespace CoffeeShop.Infrastructure.Tests;
 
 using CoffeeShop.Domain.Customers;
 using CoffeeShop.Domain.Identity;
+using CoffeeShop.Domain.Inventory;
 using CoffeeShop.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -38,6 +39,7 @@ public class ModelMappingTests
     [InlineData(typeof(CustomerAddress), "customer_addresses", "customers")]
     [InlineData(typeof(LoyaltyTransaction), "loyalty_transactions", "customers")]
     [InlineData(typeof(LoyaltySettings), "loyalty_settings", "customers")]
+    [InlineData(typeof(Ingredient), "ingredients", "inventory")]
     public void Entities_ShouldMapToExpectedTableAndSchema(Type entityType, string expectedTable, string expectedSchema)
     {
         var model = CreateModel();
@@ -188,5 +190,46 @@ public class ModelMappingTests
         var loyaltyTx = model.FindEntityType(typeof(LoyaltyTransaction))!;
         var txCustomerFk = loyaltyTx.GetForeignKeys().First(fk => fk.PrincipalEntityType.ClrType == typeof(Customer));
         Assert.Equal(DeleteBehavior.Restrict, txCustomerFk.DeleteBehavior);
+    }
+
+    [Fact]
+    public void IngredientUniqueIndex_ShouldBeConfiguredCorrectly()
+    {
+        var model = CreateModel();
+
+        var ingredient = model.FindEntityType(typeof(Ingredient))!;
+        var nameIndex = ingredient.GetIndexes().FirstOrDefault(i => i.Properties.Any(p => p.Name == nameof(Ingredient.Name)));
+        Assert.NotNull(nameIndex);
+        Assert.True(nameIndex.IsUnique);
+    }
+
+    [Fact]
+    public void CheckConstraints_ShouldBeConfiguredOnIngredients()
+    {
+        var model = CreateModel();
+
+        var ingredient = model.FindEntityType(typeof(Ingredient))!;
+        var constraints = ingredient.GetCheckConstraints();
+        Assert.Contains(constraints, c => c.Name == "CK_ingredients_current_balance");
+        Assert.Contains(constraints, c => c.Name == "CK_ingredients_minimum_level");
+    }
+
+    [Fact]
+    public void IngredientPrecision_ShouldMatchOpenSpec()
+    {
+        var model = CreateModel();
+
+        var ingredient = model.FindEntityType(typeof(Ingredient))!;
+        var balance = ingredient.FindProperty(nameof(Ingredient.CurrentBalance))!;
+        Assert.Equal(14, balance.GetPrecision());
+        Assert.Equal(3, balance.GetScale());
+
+        var minimumLevel = ingredient.FindProperty(nameof(Ingredient.MinimumLevel))!;
+        Assert.Equal(14, minimumLevel.GetPrecision());
+        Assert.Equal(3, minimumLevel.GetScale());
+
+        var unitCost = ingredient.FindProperty(nameof(Ingredient.UnitCost))!;
+        Assert.Equal(12, unitCost.GetPrecision());
+        Assert.Equal(2, unitCost.GetScale());
     }
 }
