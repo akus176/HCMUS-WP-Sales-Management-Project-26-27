@@ -41,6 +41,8 @@ public class ModelMappingTests
     [InlineData(typeof(LoyaltySettings), "loyalty_settings", "customers")]
     [InlineData(typeof(Ingredient), "ingredients", "inventory")]
     [InlineData(typeof(Supplier), "suppliers", "inventory")]
+    [InlineData(typeof(PurchaseReceipt), "purchase_receipts", "inventory")]
+    [InlineData(typeof(PurchaseReceiptLine), "purchase_receipt_lines", "inventory")]
     public void Entities_ShouldMapToExpectedTableAndSchema(Type entityType, string expectedTable, string expectedSchema)
     {
         var model = CreateModel();
@@ -255,5 +257,55 @@ public class ModelMappingTests
         Assert.Equal(30, supplier.FindProperty(nameof(Supplier.Phone))!.GetMaxLength());
         Assert.Equal(255, supplier.FindProperty(nameof(Supplier.Email))!.GetMaxLength());
         Assert.Equal(255, supplier.FindProperty(nameof(Supplier.Address))!.GetMaxLength());
+    }
+
+    [Fact]
+    public void PurchaseReceiptStructure_ShouldBeConfiguredCorrectly()
+    {
+        var model = CreateModel();
+
+        var receipt = model.FindEntityType(typeof(PurchaseReceipt))!;
+        var receiptNumberIndex = receipt.GetIndexes().FirstOrDefault(i => i.Properties.Any(p => p.Name == nameof(PurchaseReceipt.ReceiptNumber)));
+        Assert.NotNull(receiptNumberIndex);
+        Assert.True(receiptNumberIndex.IsUnique);
+
+        var supplierFk = receipt.GetForeignKeys().First(fk => fk.PrincipalEntityType.ClrType == typeof(Supplier));
+        Assert.Equal(DeleteBehavior.Restrict, supplierFk.DeleteBehavior);
+
+        var line = model.FindEntityType(typeof(PurchaseReceiptLine))!;
+        var receiptFk = line.GetForeignKeys().First(fk => fk.PrincipalEntityType.ClrType == typeof(PurchaseReceipt));
+        Assert.Equal(DeleteBehavior.Cascade, receiptFk.DeleteBehavior);
+
+        var ingredientFk = line.GetForeignKeys().First(fk => fk.PrincipalEntityType.ClrType == typeof(Ingredient));
+        Assert.Equal(DeleteBehavior.Restrict, ingredientFk.DeleteBehavior);
+    }
+
+    [Fact]
+    public void CheckConstraints_ShouldBeConfiguredOnPurchaseReceipts()
+    {
+        var model = CreateModel();
+
+        var receipt = model.FindEntityType(typeof(PurchaseReceipt))!;
+        var receiptConstraints = receipt.GetCheckConstraints();
+        Assert.Contains(receiptConstraints, c => c.Name == "CK_purchase_receipts_status");
+
+        var line = model.FindEntityType(typeof(PurchaseReceiptLine))!;
+        var lineConstraints = line.GetCheckConstraints();
+        Assert.Contains(lineConstraints, c => c.Name == "CK_purchase_receipt_lines_quantity");
+    }
+
+    [Fact]
+    public void PurchaseReceiptPrecision_ShouldMatchOpenSpec()
+    {
+        var model = CreateModel();
+
+        var line = model.FindEntityType(typeof(PurchaseReceiptLine))!;
+        var quantity = line.FindProperty(nameof(PurchaseReceiptLine.Quantity))!;
+        Assert.Equal(14, quantity.GetPrecision());
+        Assert.Equal(3, quantity.GetScale());
+
+        var unitCost = line.FindProperty(nameof(PurchaseReceiptLine.UnitCost))!;
+        Assert.Equal(12, unitCost.GetPrecision());
+        Assert.Equal(2, unitCost.GetScale());
     }
 }
