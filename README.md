@@ -21,15 +21,15 @@ The API currently exposes only `/health` (and `/openapi/v1.json` in Development)
 
 ## Project boundaries
 
-| Project | Responsibility |
-| --- | --- |
-| `CoffeeShop.Domain` | Business entities and rules; no framework or persistence reference |
-| `CoffeeShop.Application` | Use cases and abstractions; references Domain only |
-| `CoffeeShop.Contracts` | API request/response contracts; independent of persistence |
-| `CoffeeShop.Infrastructure.Postgres` | EF Core/Npgsql persistence, later migrations |
-| `CoffeeShop.WinUI` | Desktop presentation; composes Application and PostgreSQL for midterm |
-| `CoffeeShop.Api` | Final HTTP composition root, later authentication and permissions |
-| `tests/*` | Unit, infrastructure, API, and future UI-facing tests |
+| Project                              | Responsibility                                                        |
+| ------------------------------------ | --------------------------------------------------------------------- |
+| `CoffeeShop.Domain`                  | Business entities and rules; no framework or persistence reference    |
+| `CoffeeShop.Application`             | Use cases and abstractions; references Domain only                    |
+| `CoffeeShop.Contracts`               | API request/response contracts; independent of persistence            |
+| `CoffeeShop.Infrastructure.Postgres` | EF Core/Npgsql persistence, later migrations                          |
+| `CoffeeShop.WinUI`                   | Desktop presentation; composes Application and PostgreSQL for midterm |
+| `CoffeeShop.Api`                     | Final HTTP composition root, later authentication and permissions     |
+| `tests/*`                            | Unit, infrastructure, API, and future UI-facing tests                 |
 
 Midterm runs application use cases inside WinUI against a restricted local PostgreSQL account. Final WinUI must drop its infrastructure reference and use typed HTTP clients; the API then owns authorization and persistence. Neither adapter nor those workflows are implemented yet.
 
@@ -41,4 +41,4 @@ Planned operational roles are Admin, Manager, Cashier, Barista, Inventory Staff,
 
 ## Team workflow
 
-The design calls for six module owners covering catalog, inventory, customers, sales, identity, and reporting/AI. Assign actual contributors and reviewers before parallel feature work. Cross-cutting contracts (money, errors, identity, audit, migrations, CI) require a reviewer outside the owning module. Commit small feature-scoped migrations, rebase before generating a new migration, and validate a rebuild from an empty database once migrations exist. Use concise, imperative commit subjects naming the module (for example, `inventory: add receipt model`).
+The design calls for five module owners covering catalog, inventory, customers, sales, identity, and reporting/AI. Assign actual contributors and reviewers before parallel feature work. Cross-cutting contracts (money, errors, identity, audit, migrations, CI) require a reviewer outside the owning module. Commit small feature-scoped migrations, rebase before generating a new migration, and validate a rebuild from an empty database once migrations exist. Use concise, imperative commit subjects naming the module (for example, `inventory: add receipt model`).
