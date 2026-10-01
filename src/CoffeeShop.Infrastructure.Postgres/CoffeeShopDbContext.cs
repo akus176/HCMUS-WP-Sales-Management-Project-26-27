@@ -1,10 +1,11 @@
 namespace CoffeeShop.Infrastructure.Postgres;
 
+using CoffeeShop.Application.Common.Persistence;
 using CoffeeShop.Domain.Customers;
 using CoffeeShop.Domain.Identity;
 using Microsoft.EntityFrameworkCore;
 
-public class CoffeeShopDbContext : DbContext
+public class CoffeeShopDbContext : DbContext, IUnitOfWork
 {
     public CoffeeShopDbContext(DbContextOptions<CoffeeShopDbContext> options)
         : base(options)
