@@ -1,8 +1,10 @@
 namespace CoffeeShop.Infrastructure.Postgres;
 
 using CoffeeShop.Application.Common.Persistence;
+using CoffeeShop.Domain.Catalog;
 using CoffeeShop.Domain.Customers;
 using CoffeeShop.Domain.Identity;
+using CoffeeShop.Domain.Inventory;
 using Microsoft.EntityFrameworkCore;
 
 public class CoffeeShopDbContext : DbContext, IUnitOfWork
@@ -11,6 +13,22 @@ public class CoffeeShopDbContext : DbContext, IUnitOfWork
         : base(options)
     {
     }
+
+    // Catalog
+    public DbSet<Category> Categories => Set<Category>();
+
+    public DbSet<MenuItem> MenuItems => Set<MenuItem>();
+
+    public DbSet<SizeVariant> SizeVariants => Set<SizeVariant>();
+
+    public DbSet<Addon> Addons => Set<Addon>();
+
+    public DbSet<MenuItemAddon> MenuItemAddons => Set<MenuItemAddon>();
+
+    public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
+
+    // Inventory recipe dependency
+    public DbSet<Ingredient> Ingredients => Set<Ingredient>();
 
     // Identity
     public DbSet<User> Users => Set<User>();
