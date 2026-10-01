@@ -37,4 +37,4 @@ None.
 - Requires PostgreSQL connectivity for the midterm architecture and HTTP API integration for the final architecture.
 - Introduces JWT authentication, refresh-token handling, role/permission policies, transactional inventory updates, and reporting endpoints.
 - Introduces local Docker configuration for PostgreSQL and the final API.
-- Establishes shared domain contracts that six contributors must follow across UI, database, API, testing, and AI integration work.
+- Establishes shared domain contracts that five contributors must follow across UI, database, API, testing, and AI integration work.

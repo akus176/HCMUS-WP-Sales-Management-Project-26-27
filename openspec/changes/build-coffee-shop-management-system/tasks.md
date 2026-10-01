@@ -5,16 +5,16 @@
 - [x] 1.3 Add central package/version management for WinUI 3, EF Core, Npgsql, validation, JWT, and test libraries; verify package restore succeeds on a clean checkout
 - [x] 1.4 Add repository formatting, analyzer, nullable-reference, and warning policies; verify the solution builds with the agreed warning threshold
 - [x] 1.5 Add ignored environment templates for PostgreSQL, API, JWT, and AI settings without real secrets; verify secret and connection-string values are absent from tracked files
-- [ ] 1.6 Add a CI workflow that restores, builds, and runs tests; verify it succeeds on the initial scaffold
+- [x] 1.6 Add a CI workflow that restores, builds, and runs tests; verify it succeeds on the initial scaffold
 
 ## 2. Shared Domain and Persistence Foundation
 
-- [ ] 2.1 Implement shared entity identifiers, money values, measured quantities, timestamps, and audit metadata; verify unit tests cover invalid money and quantity values
+- [x] 2.1 Implement shared entity identifiers, money values, measured quantities, timestamps, and audit metadata; verify unit tests cover invalid money and quantity values
 - [ ] 2.2 Define module-oriented domain entities and persistence mappings for catalog, sales, inventory, customers, and identity; verify EF Core can construct the model without mapping errors
 - [ ] 2.3 Configure PostgreSQL, Npgsql, the application database context, and design-time migration support; verify a migration can be generated from the solution
 - [ ] 2.4 Create the initial database migration with keys, foreign keys, indexes, precision, and check constraints; verify it applies successfully to an empty PostgreSQL database
-- [ ] 2.5 Add transaction, clock, current-user, and audit abstractions to the Application layer; verify unit tests can substitute deterministic implementations
-- [ ] 2.6 Add consistent application result and error contracts for validation, not-found, conflict, authentication, and authorization outcomes; verify mapping tests cover every error type
+- [x] 2.5 Add transaction, clock, current-user, and audit abstractions to the Application layer; verify unit tests can substitute deterministic implementations
+- [x] 2.6 Add consistent application result and error contracts for validation, not-found, conflict, authentication, and authorization outcomes; verify mapping tests cover every error type
 
 ## 3. Menu and Recipe Capability
 
@@ -124,7 +124,7 @@
 - [ ] 13.4 Add regression coverage for menu deactivation, historical snapshots, invalid quantities, insufficient stock, payment balance, and authorization boundaries; verify the complete automated suite passes
 - [ ] 13.5 Run secret scanning, dependency auditing, formatting, build, migration, unit, integration, and API collection checks in CI; verify a clean pipeline succeeds and intentional violations fail it
 - [ ] 13.6 Write README documentation for architecture, prerequisites, setup, Docker services, migrations, demo accounts, roles, tests, and both milestone modes; verify a new contributor can follow it from a clean checkout
-- [ ] 13.7 Document the six-person module ownership, review rules, migration-conflict procedure, and Git commit conventions; verify every module and cross-cutting responsibility has an owner and reviewer
+- [x] 13.7 Document the five-person module ownership, review rules, migration-conflict procedure, and Git commit conventions; verify every module and cross-cutting responsibility has an owner and reviewer
 - [ ] 13.8 Produce the final quality report listing tested functions, representative cases, pass/fail results, defects and fixes, boundary tests, API tests, and authorization tests; verify each claimed result links to reproducible evidence
 - [ ] 13.9 Execute the final end-to-end demonstration from a clean Docker environment covering login, RBAC, menu, inventory receipt, all order channels, payment, cancellation restoration, loyalty, reports, delivery, and AI; verify the complete acceptance checklist passes
 - [ ] 13.10 Prepare submission artifacts including repository link, read-only access token handling instructions, unlisted demo-video link, build instructions, and implemented/unimplemented feature summary; verify the submission archive contains no runtime secrets except the separately required access-token file
