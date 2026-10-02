@@ -5,6 +5,7 @@ using CoffeeShop.Domain.Catalog;
 using CoffeeShop.Domain.Customers;
 using CoffeeShop.Domain.Identity;
 using CoffeeShop.Domain.Inventory;
+using CoffeeShop.Domain.Sales;
 using Microsoft.EntityFrameworkCore;
 
 public class CoffeeShopDbContext : DbContext, IUnitOfWork
@@ -53,6 +54,25 @@ public class CoffeeShopDbContext : DbContext, IUnitOfWork
     public DbSet<LoyaltyTransaction> LoyaltyTransactions => Set<LoyaltyTransaction>();
 
     public DbSet<LoyaltySettings> LoyaltySettings => Set<LoyaltySettings>();
+
+    // Sales and fulfillment
+    public DbSet<DiningTable> DiningTables => Set<DiningTable>();
+
+    public DbSet<Order> Orders => Set<Order>();
+
+    public DbSet<OrderStatusHistory> OrderStatusHistories => Set<OrderStatusHistory>();
+
+    public DbSet<OrderLine> OrderLines => Set<OrderLine>();
+
+    public DbSet<OrderLineAddon> OrderLineAddons => Set<OrderLineAddon>();
+
+    public DbSet<Discount> Discounts => Set<Discount>();
+
+    public DbSet<Payment> Payments => Set<Payment>();
+
+    public DbSet<Delivery> Deliveries => Set<Delivery>();
+
+    public DbSet<Reservation> Reservations => Set<Reservation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
