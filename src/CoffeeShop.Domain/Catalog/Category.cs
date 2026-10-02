@@ -11,7 +11,7 @@ public class Category
     public Category(EntityId id, string name, UtcTimestamp createdAt, UtcTimestamp updatedAt, int displayOrder = 0, bool isActive = true)
     {
         ArgumentNullException.ThrowIfNull(id);
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ValidateName(name);
         ArgumentNullException.ThrowIfNull(createdAt);
         ArgumentNullException.ThrowIfNull(updatedAt);
 
@@ -34,4 +34,38 @@ public class Category
     public UtcTimestamp CreatedAt { get; protected set; } = null!;
 
     public UtcTimestamp UpdatedAt { get; protected set; } = null!;
+
+    public void Rename(string name, UtcTimestamp changedAt)
+    {
+        ValidateName(name);
+        ArgumentNullException.ThrowIfNull(changedAt);
+
+        Name = name.Trim();
+        UpdatedAt = changedAt;
+    }
+
+    public void Activate(UtcTimestamp changedAt) => SetActive(true, changedAt);
+
+    public void Deactivate(UtcTimestamp changedAt) => SetActive(false, changedAt);
+
+    private void SetActive(bool isActive, UtcTimestamp changedAt)
+    {
+        ArgumentNullException.ThrowIfNull(changedAt);
+        if (IsActive == isActive)
+        {
+            throw new InvalidOperationException(isActive ? "Category is already active." : "Category is already inactive.");
+        }
+
+        IsActive = isActive;
+        UpdatedAt = changedAt;
+    }
+
+    private static void ValidateName(string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        if (name.Trim().Length > 80)
+        {
+            throw new ArgumentException("Category name cannot exceed 80 characters.", nameof(name));
+        }
+    }
 }
