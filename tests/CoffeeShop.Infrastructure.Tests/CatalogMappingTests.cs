@@ -219,12 +219,44 @@ public class CatalogMappingTests
     }
 
     [Fact]
+    public void Deactivation_TracksOnlyStateAndTimestampChangesWithoutDeletingRelationships()
+    {
+        using var context = CreateContext();
+        var created = new UtcTimestamp(new DateTimeOffset(2026, 10, 2, 0, 0, 0, TimeSpan.Zero));
+        var changed = new UtcTimestamp(created.Value.AddHours(1));
+        var category = new Category(EntityId.New(), "Coffee", created, created);
+        var item = new MenuItem(EntityId.New(), category, "Latte", created, created);
+        var variant = new SizeVariant(EntityId.New(), item.Id, "Large", new Money(45000m));
+        var addon = new Addon(EntityId.New(), "Extra shot", new Money(10000m));
+        var compatibility = new MenuItemAddon(item.Id, addon.Id);
+        context.AttachRange(category, item, variant, addon, compatibility);
+
+        category.Deactivate(changed);
+        item.Deactivate(changed);
+        context.ChangeTracker.DetectChanges();
+
+        foreach (var entry in context.ChangeTracker.Entries().Where(entry => entry.Entity is Category or MenuItem))
+        {
+            Assert.Equal(EntityState.Modified, entry.State);
+            Assert.Equal(["IsActive", "UpdatedAt"], entry.Properties.Where(p => p.IsModified).Select(p => p.Metadata.Name));
+        }
+
+        Assert.Equal(EntityState.Unchanged, context.Entry(variant).State);
+        Assert.Equal(EntityState.Unchanged, context.Entry(addon).State);
+        Assert.Equal(EntityState.Unchanged, context.Entry(compatibility).State);
+        Assert.DoesNotContain(context.ChangeTracker.Entries(), entry => entry.State == EntityState.Deleted);
+        Assert.Equal(category.Id, item.CategoryId);
+        Assert.Equal(item.Id, variant.MenuItemId);
+        Assert.Equal(item.Id, compatibility.MenuItemId);
+    }
+
+    [Fact]
     public void CompleteCatalogGraph_CanBeTrackedWithoutShadowRelationships()
     {
         using var context = CreateContext();
         var now = new UtcTimestamp(DateTimeOffset.UtcNow);
         var category = new Category(EntityId.New(), "Coffee", now, now);
-        var item = new MenuItem(EntityId.New(), category.Id, "Latte", now, now);
+        var item = new MenuItem(EntityId.New(), category, "Latte", now, now);
         var variant = new SizeVariant(EntityId.New(), item.Id, "Large", new Money(45000m), isActive: false);
         var addon = new Addon(EntityId.New(), "Extra shot", new Money(10000m));
         var ingredient = new Ingredient(EntityId.New(), "Coffee beans", "g", now, now);

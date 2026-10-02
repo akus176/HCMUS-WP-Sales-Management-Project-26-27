@@ -18,7 +18,7 @@
 
 ## 3. Menu and Recipe Capability
 
-- [ ] 3.1 Implement category and menu-item domain models with activation and deactivation rules; verify unit tests preserve historical references after deactivation
+- [x] 3.1 Implement category and menu-item domain models with activation and deactivation rules; verify unit tests preserve historical references after deactivation
 - [ ] 3.2 Implement size variants with independent prices and availability; verify tests select the correct variant price and reject invalid prices
 - [ ] 3.3 Implement add-on definitions, compatibility, price, and availability; verify tests reject unavailable or incompatible add-ons
 - [ ] 3.4 Implement size-specific recipe models linked to active ingredients; verify tests reject missing ingredients and non-positive quantities

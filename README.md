@@ -33,6 +33,20 @@ The API currently exposes only `/health` (and `/openapi/v1.json` in Development)
 
 Midterm runs application use cases inside WinUI against a restricted local PostgreSQL account. Final WinUI must drop its infrastructure reference and use typed HTTP clients; the API then owns authorization and persistence. Neither adapter nor those workflows are implemented yet.
 
+### Catalog lifecycle (T3.1)
+
+Categories support creation, rename, activation, and deactivation. Menu items support creation,
+updates, activation, and deactivation. Names are trimmed and limited to the mapped 80/120
+characters. Menu-item creation and updates take a resolved active `Category`; activation
+requires the item's own active category. `IsAvailableForOrdering` checks both activation
+states and category membership. Deactivation retains IDs and links without cascading to variants.
+
+Domain methods validate before mutation and record the supplied change time. Repeated state
+transitions are rejected. `CoffeeShop.Application.Catalog.CatalogLifecycle` maps invalid input
+to shared validation results and invalid state to shared conflict results, without depending
+on EF Core. Repository loading, saving, search, and command/query orchestration belong to
+T3.5/T3.6; order snapshots and order-selection enforcement remain sales-module work.
+
 ## Local configuration
 
 Copy `.env.example` to an ignored `.env` and replace placeholders when PostgreSQL, JWT, and AI integration are introduced. ASP.NET Core does **not** load `.env` automatically: export the required values as environment variables (double underscores denote nested keys), or configure a local launch profile. Never commit local values. No database, migrations, Docker services, demo accounts, or secrets are present in this scaffold.
