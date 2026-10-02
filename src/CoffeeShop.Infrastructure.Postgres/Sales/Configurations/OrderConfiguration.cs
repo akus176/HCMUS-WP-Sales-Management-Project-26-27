@@ -36,9 +36,9 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         ConfigureMoney(builder.Property(order => order.LoyaltyDiscountAmount), "loyalty_discount_amount", defaultValue: true);
         builder.Property(order => order.CreatedBy).HasConversion<EntityIdValueConverter>().IsRequired().HasColumnName("created_by");
         ConfigureTimestamp(builder.Property(order => order.CreatedAt), "created_at", true);
-        ConfigureTimestamp(builder.Property(order => order.ConfirmedAt), "confirmed_at", false);
-        ConfigureTimestamp(builder.Property(order => order.CompletedAt), "completed_at", false);
-        ConfigureTimestamp(builder.Property(order => order.CancelledAt), "cancelled_at", false);
+        ConfigureNullableTimestamp(builder.Property(order => order.ConfirmedAt), "confirmed_at", false);
+        ConfigureNullableTimestamp(builder.Property(order => order.CompletedAt), "completed_at", false);
+        ConfigureNullableTimestamp(builder.Property(order => order.CancelledAt), "cancelled_at", false);
         builder.Property(order => order.CancelReason).HasColumnType("text").HasColumnName("cancel_reason");
         builder.Property(order => order.Version).IsRowVersion().HasColumnName("xmin");
 
@@ -70,7 +70,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         }
     }
 
-    private static void ConfigureTimestamp(PropertyBuilder<CoffeeShop.Domain.Common.UtcTimestamp?> property, string columnName, bool defaultValue)
+    private static void ConfigureNullableTimestamp(PropertyBuilder<CoffeeShop.Domain.Common.UtcTimestamp?> property, string columnName, bool defaultValue)
     {
         property.HasConversion<UtcTimestampValueConverter>().HasColumnType("timestamptz").HasColumnName(columnName);
         if (defaultValue)
