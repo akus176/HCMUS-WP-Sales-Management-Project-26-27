@@ -27,7 +27,7 @@ public sealed class OrderLineConfiguration : IEntityTypeConfiguration<OrderLine>
         builder.Property(line => line.Quantity).IsRequired().HasColumnName("quantity");
         builder.Property(line => line.LineTotal).HasConversion<MoneyValueConverter>().HasPrecision(12, 2).IsRequired().HasColumnName("line_total");
         builder.HasIndex(line => line.OrderId);
-        builder.HasOne<Order>().WithMany().HasForeignKey(line => line.OrderId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Order>().WithMany(order => order.Lines).HasForeignKey(line => line.OrderId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<MenuItem>().WithMany().HasForeignKey(line => line.MenuItemId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<SizeVariant>().WithMany().HasForeignKey(line => line.SizeVariantId).OnDelete(DeleteBehavior.Restrict);
     }
