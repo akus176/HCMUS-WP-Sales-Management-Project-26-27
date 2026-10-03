@@ -1,0 +1,225 @@
+namespace CoffeeShop.Domain.Tests.Inventory;
+
+using CoffeeShop.Domain.Common;
+using CoffeeShop.Domain.Inventory;
+
+public class IngredientTests
+{
+    private static readonly UtcTimestamp CreatedAt = new(new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero));
+
+    private static Ingredient CreateIngredient(
+        decimal availableQuantity = 10m,
+        decimal reorderThreshold = 2m,
+        bool isActive = true) =>
+        new(
+            EntityId.New(),
+            "Coffee beans",
+            "g",
+            CreatedAt,
+            CreatedAt,
+            availableQuantity,
+            reorderThreshold,
+            isActive);
+
+    [Fact]
+    public void Constructor_AcceptsValidValues()
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.Equal("coffee beans", ingredient.Name.ToLowerInvariant());
+        Assert.Equal("g", ingredient.BaseUnit);
+        Assert.Equal(10m, ingredient.AvailableQuantity);
+        Assert.Equal(2m, ingredient.ReorderThreshold);
+        Assert.True(ingredient.IsActive);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(-0.001)]
+    public void Constructor_RejectsNegativeBalance(decimal balance)
+    {
+        Assert.ThrowsAny<ArgumentException>(() => CreateIngredient(availableQuantity: balance));
+    }
+
+    [Fact]
+    public void Constructor_RejectsExcessPrecision()
+    {
+        Assert.ThrowsAny<ArgumentException>(() => CreateIngredient(availableQuantity: 1.0001m));
+    }
+
+    [Fact]
+    public void Constructor_RejectsValueAboveMaximum()
+    {
+        Assert.ThrowsAny<ArgumentException>(() => CreateIngredient(availableQuantity: MeasuredQuantity.MaximumValue + 1));
+    }
+
+    [Fact]
+    public void Receive_IncreasesBalance()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 10m);
+        var at = new UtcTimestamp(new DateTimeOffset(2026, 1, 2, 0, 0, 0, TimeSpan.Zero));
+
+        ingredient.Receive(5m, at);
+
+        Assert.Equal(15m, ingredient.AvailableQuantity);
+        Assert.Equal(at, ingredient.UpdatedAt);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Receive_RejectsNonPositiveAmount(decimal amount)
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.ThrowsAny<ArgumentException>(() => ingredient.Receive(amount, CreatedAt));
+    }
+
+    [Fact]
+    public void Receive_RejectsExcessPrecision()
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.ThrowsAny<ArgumentException>(() => ingredient.Receive(1.0001m, CreatedAt));
+    }
+
+    [Fact]
+    public void Receive_RejectsAmountAboveMaximum()
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.ThrowsAny<ArgumentException>(() => ingredient.Receive(MeasuredQuantity.MaximumValue + 1, CreatedAt));
+    }
+
+    [Fact]
+    public void Consume_DecreasesBalance()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 10m);
+        var at = new UtcTimestamp(new DateTimeOffset(2026, 1, 2, 0, 0, 0, TimeSpan.Zero));
+
+        ingredient.Consume(4m, at);
+
+        Assert.Equal(6m, ingredient.AvailableQuantity);
+        Assert.Equal(at, ingredient.UpdatedAt);
+    }
+
+    [Fact]
+    public void Consume_AllowsConsumingEntireBalance()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 10m);
+
+        ingredient.Consume(10m, CreatedAt);
+
+        Assert.Equal(0m, ingredient.AvailableQuantity);
+    }
+
+    [Fact]
+    public void Consume_RejectsAmountExceedingBalance()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 10m);
+
+        Assert.Throws<InvalidOperationException>(() => ingredient.Consume(10.001m, CreatedAt));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void Consume_RejectsNonPositiveAmount(decimal amount)
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.ThrowsAny<ArgumentException>(() => ingredient.Consume(amount, CreatedAt));
+    }
+
+    [Fact]
+    public void Adjust_IncreasesBalanceWithPositiveDelta()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 10m);
+
+        ingredient.Adjust(2.5m, CreatedAt);
+
+        Assert.Equal(12.5m, ingredient.AvailableQuantity);
+    }
+
+    [Fact]
+    public void Adjust_DecreasesBalanceWithNegativeDelta()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 10m);
+
+        ingredient.Adjust(-3m, CreatedAt);
+
+        Assert.Equal(7m, ingredient.AvailableQuantity);
+    }
+
+    [Fact]
+    public void Adjust_RejectsZeroDelta()
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.Throws<ArgumentException>(() => ingredient.Adjust(0m, CreatedAt));
+    }
+
+    [Fact]
+    public void Adjust_RejectsDeltaMakingBalanceNegative()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 10m);
+
+        Assert.ThrowsAny<ArgumentException>(() => ingredient.Adjust(-10.001m, CreatedAt));
+    }
+
+    [Fact]
+    public void Adjust_RejectsExcessPrecision()
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.ThrowsAny<ArgumentException>(() => ingredient.Adjust(0.0001m, CreatedAt));
+    }
+
+    [Fact]
+    public void SetReorderThreshold_UpdatesThreshold()
+    {
+        var ingredient = CreateIngredient(reorderThreshold: 2m);
+
+        ingredient.SetReorderThreshold(5m, CreatedAt);
+
+        Assert.Equal(5m, ingredient.ReorderThreshold);
+    }
+
+    [Fact]
+    public void SetReorderThreshold_RejectsNegativeValue()
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.ThrowsAny<ArgumentException>(() => ingredient.SetReorderThreshold(-1m, CreatedAt));
+    }
+
+    [Fact]
+    public void SetReorderThreshold_RejectsExcessPrecision()
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.ThrowsAny<ArgumentException>(() => ingredient.SetReorderThreshold(1.0001m, CreatedAt));
+    }
+
+    [Fact]
+    public void Deactivate_SetsIsActiveFalse()
+    {
+        var ingredient = CreateIngredient();
+
+        ingredient.Deactivate(CreatedAt);
+
+        Assert.False(ingredient.IsActive);
+        Assert.Equal(CreatedAt, ingredient.UpdatedAt);
+    }
+
+    [Fact]
+    public void Activate_SetsIsActiveTrue()
+    {
+        var ingredient = CreateIngredient(isActive: false);
+
+        ingredient.Activate(CreatedAt);
+
+        Assert.True(ingredient.IsActive);
+        Assert.Equal(CreatedAt, ingredient.UpdatedAt);
+    }
+}
