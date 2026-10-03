@@ -18,7 +18,7 @@ public sealed class OrderLineAddonConfiguration : IEntityTypeConfiguration<Order
         builder.Property(addon => addon.AddonNameSnapshot).HasMaxLength(80).IsRequired().HasColumnName("addon_name_snapshot");
         builder.Property(addon => addon.AddonPriceSnapshot).HasConversion<MoneyValueConverter>().HasPrecision(12, 2).IsRequired().HasColumnName("addon_price_snapshot");
         builder.HasIndex(addon => addon.OrderLineId);
-        builder.HasOne<OrderLine>().WithMany().HasForeignKey(addon => addon.OrderLineId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<OrderLine>().WithMany(line => line.Addons).HasForeignKey(addon => addon.OrderLineId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<Addon>().WithMany().HasForeignKey(addon => addon.AddonId).OnDelete(DeleteBehavior.Restrict);
     }
 }
