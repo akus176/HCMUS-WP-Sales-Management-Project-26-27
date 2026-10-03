@@ -28,7 +28,9 @@ public sealed class ReservationConfiguration : IEntityTypeConfiguration<Reservat
         builder.Property(reservation => reservation.CreatedBy).HasConversion<EntityIdValueConverter>().IsRequired().HasColumnName("created_by");
         builder.Property(reservation => reservation.CreatedAt).HasConversion<UtcTimestampValueConverter>().HasColumnType("timestamptz").IsRequired().HasDefaultValueSql("now()").HasColumnName("created_at");
         builder.Property(reservation => reservation.CancelledAt).HasConversion<UtcTimestampValueConverter>().HasColumnType("timestamptz").HasColumnName("cancelled_at");
-        builder.HasIndex(reservation => new { reservation.TableId, reservation.ReservedFor });
+        builder.HasIndex(reservation => new { reservation.TableId, reservation.ReservedFor })
+            .IsUnique()
+            .HasFilter("status NOT IN ('cancelled', 'completed')");
         builder.HasIndex(reservation => new { reservation.Status, reservation.ReservedFor });
         builder.HasOne<DiningTable>().WithMany().HasForeignKey(reservation => reservation.TableId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Customer>().WithMany().HasForeignKey(reservation => reservation.CustomerId).OnDelete(DeleteBehavior.Restrict);

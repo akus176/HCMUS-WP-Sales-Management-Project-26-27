@@ -70,6 +70,9 @@ public class SalesMappingTests
         Assert.Equal(40, line.FindProperty(nameof(OrderLine.SizeNameSnapshot))!.GetMaxLength());
         Assert.True(Assert.Single(delivery.GetIndexes(), index => index.Properties.Select(property => property.Name).SequenceEqual([nameof(Delivery.OrderId)])).IsUnique);
         Assert.Contains(reservation.GetIndexes(), index => index.Properties.Select(property => property.Name).SequenceEqual([nameof(Reservation.TableId), nameof(Reservation.ReservedFor)]));
+        var reservationSlotIndex = Assert.Single(reservation.GetIndexes(), index => index.Properties.Select(property => property.Name).SequenceEqual([nameof(Reservation.TableId), nameof(Reservation.ReservedFor)]));
+        Assert.True(reservationSlotIndex.IsUnique);
+        Assert.Equal("status NOT IN ('cancelled', 'completed')", reservationSlotIndex.GetFilter());
     }
 
     [Fact]
@@ -98,5 +101,18 @@ public class SalesMappingTests
         Assert.Contains(model.FindEntityType(typeof(Payment))!.GetCheckConstraints(), constraint => constraint.Name == "CK_payments_amount");
         Assert.Contains(model.FindEntityType(typeof(Delivery))!.GetCheckConstraints(), constraint => constraint.Name == "CK_deliveries_status");
         Assert.Contains(model.FindEntityType(typeof(Reservation))!.GetCheckConstraints(), constraint => constraint.Name == "CK_reservations_party_size");
+    }
+
+    [Fact]
+    public void Tables_UseOptimisticConcurrencyAndPartialActiveOrderUniqueness()
+    {
+        var table = CreateModel().FindEntityType(typeof(DiningTable))!;
+        var version = table.FindProperty(nameof(DiningTable.Version))!;
+        var activeOrderIndex = Assert.Single(table.GetIndexes(), index => index.Properties.Select(property => property.Name).SequenceEqual([nameof(DiningTable.ActiveOrderId)]));
+
+        Assert.True(version.IsConcurrencyToken);
+        Assert.Equal("xmin", version.GetColumnName());
+        Assert.True(activeOrderIndex.IsUnique);
+        Assert.Equal("active_order_id IS NOT NULL", activeOrderIndex.GetFilter());
     }
 }

@@ -30,4 +30,43 @@ public class DiningTable
     public bool IsOccupied { get; protected set; }
     public EntityId? ActiveOrderId { get; protected set; }
     public uint Version { get; protected set; }
+
+    public bool CanSeat(int partySize)
+    {
+        if (partySize <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(partySize));
+        }
+
+        return !IsOccupied && (Seats is null || partySize <= Seats.Value);
+    }
+
+    /// <summary>
+    /// Assigns one active dine-in order. The application must execute this mutation
+    /// in a transaction after locking this row; <see cref="Version"/> lets EF detect
+    /// a concurrent update that acquired the row first.
+    /// </summary>
+    public void Occupy(EntityId orderId, int partySize)
+    {
+        ArgumentNullException.ThrowIfNull(orderId);
+        if (!CanSeat(partySize))
+        {
+            throw new InvalidOperationException($"Table '{TableNumber}' is unavailable for this order.");
+        }
+
+        IsOccupied = true;
+        ActiveOrderId = orderId;
+    }
+
+    public void Release(EntityId orderId)
+    {
+        ArgumentNullException.ThrowIfNull(orderId);
+        if (!IsOccupied || ActiveOrderId != orderId)
+        {
+            throw new InvalidOperationException($"Table '{TableNumber}' is not occupied by this order.");
+        }
+
+        IsOccupied = false;
+        ActiveOrderId = null;
+    }
 }
