@@ -274,6 +274,28 @@ public class CatalogMappingTests
     }
 
     [Fact]
+    public void AddonUpdates_TrackOnlyNamePriceAndAvailabilityAndPreserveCompatibility()
+    {
+        using var context = CreateContext();
+        var addon = new Addon(EntityId.New(), "Extra shot", new Money(10000m));
+        var compatibility = new MenuItemAddon(EntityId.New(), addon.Id);
+        context.AttachRange(addon, compatibility);
+
+        addon.Update("Double shot", new Money(20000m));
+        addon.Deactivate();
+        context.ChangeTracker.DetectChanges();
+
+        var entry = context.Entry(addon);
+        Assert.Equal(EntityState.Modified, entry.State);
+        Assert.Equal(["IsActive", "Name", "Price"], entry.Properties.Where(property => property.IsModified).Select(property => property.Metadata.Name));
+        Assert.Equal(new Money(10000m), entry.Property(a => a.Price).OriginalValue);
+        Assert.Equal(new Money(20000m), entry.Property(a => a.Price).CurrentValue);
+        Assert.Equal(EntityState.Unchanged, context.Entry(compatibility).State);
+        Assert.Equal(addon.Id, compatibility.AddonId);
+        Assert.DoesNotContain(context.ChangeTracker.Entries(), tracked => tracked.State == EntityState.Deleted);
+    }
+
+    [Fact]
     public void CompleteCatalogGraph_CanBeTrackedWithoutShadowRelationships()
     {
         using var context = CreateContext();
