@@ -4,35 +4,24 @@ using CoffeeShop.Domain.Common;
 
 public class Ingredient
 {
-    public const decimal MaximumQuantity = MeasuredQuantity.MaximumValue;
+    protected Ingredient()
+    {
+    }
 
-    public Ingredient(
-        EntityId id,
-        string name,
-        string baseUnit,
-        decimal currentBalance,
-        decimal minimumLevel,
-        Money unitCost,
-        UtcTimestamp createdAt,
-        UtcTimestamp updatedAt,
-        bool isActive = true)
+    public Ingredient(EntityId id, string name, string baseUnit, UtcTimestamp createdAt, UtcTimestamp updatedAt, decimal availableQuantity = 0, decimal reorderThreshold = 0, bool isActive = true)
     {
         ArgumentNullException.ThrowIfNull(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        ArgumentException.ThrowIfNullOrWhiteSpace(baseUnit);
-        ArgumentNullException.ThrowIfNull(unitCost);
         ArgumentNullException.ThrowIfNull(createdAt);
         ArgumentNullException.ThrowIfNull(updatedAt);
-
-        ValidateQuantity(currentBalance, nameof(currentBalance));
-        ValidateQuantity(minimumLevel, nameof(minimumLevel));
+        var balance = new MeasuredQuantity(availableQuantity, baseUnit);
+        var threshold = new MeasuredQuantity(reorderThreshold, baseUnit);
 
         Id = id;
         Name = name.Trim();
-        BaseUnit = baseUnit.Trim().ToLowerInvariant();
-        CurrentBalance = currentBalance;
-        MinimumLevel = minimumLevel;
-        UnitCost = unitCost;
+        BaseUnit = balance.Unit;
+        AvailableQuantity = balance.Value;
+        ReorderThreshold = threshold.Value;
         IsActive = isActive;
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;
@@ -44,11 +33,9 @@ public class Ingredient
 
     public string BaseUnit { get; protected set; } = string.Empty;
 
-    public decimal CurrentBalance { get; protected set; }
+    public decimal AvailableQuantity { get; protected set; }
 
-    public decimal MinimumLevel { get; protected set; }
-
-    public Money UnitCost { get; protected set; } = null!;
+    public decimal ReorderThreshold { get; protected set; }
 
     public bool IsActive { get; protected set; } = true;
 
@@ -56,7 +43,7 @@ public class Ingredient
 
     public UtcTimestamp UpdatedAt { get; protected set; } = null!;
 
-    public bool IsLowStock => CurrentBalance <= MinimumLevel;
+    public bool IsLowStock => AvailableQuantity <= ReorderThreshold;
 
     private static void ValidateQuantity(decimal value, string paramName)
     {
@@ -70,9 +57,9 @@ public class Ingredient
             throw new ArgumentException("Ingredient quantity cannot have more than three decimal places.", paramName);
         }
 
-        if (value > MaximumQuantity)
+        if (value > MeasuredQuantity.MaximumValue)
         {
-            throw new ArgumentOutOfRangeException(paramName, value, $"Ingredient quantity cannot exceed the maximum of {MaximumQuantity}.");
+            throw new ArgumentOutOfRangeException(paramName, value, $"Ingredient quantity cannot exceed the maximum of {MeasuredQuantity.MaximumValue}.");
         }
     }
 }

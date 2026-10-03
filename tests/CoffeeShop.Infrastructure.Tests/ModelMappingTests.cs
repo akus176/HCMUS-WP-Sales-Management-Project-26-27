@@ -214,8 +214,8 @@ public class ModelMappingTests
 
         var ingredient = model.FindEntityType(typeof(Ingredient))!;
         var constraints = ingredient.GetCheckConstraints();
-        Assert.Contains(constraints, c => c.Name == "CK_ingredients_current_balance");
-        Assert.Contains(constraints, c => c.Name == "CK_ingredients_minimum_level");
+        Assert.Contains(constraints, c => c.Name == "CK_ingredients_available_quantity");
+        Assert.Contains(constraints, c => c.Name == "CK_ingredients_reorder_threshold");
     }
 
     [Fact]
@@ -224,17 +224,13 @@ public class ModelMappingTests
         var model = CreateModel();
 
         var ingredient = model.FindEntityType(typeof(Ingredient))!;
-        var balance = ingredient.FindProperty(nameof(Ingredient.CurrentBalance))!;
-        Assert.Equal(14, balance.GetPrecision());
-        Assert.Equal(3, balance.GetScale());
+        var availableQuantity = ingredient.FindProperty(nameof(Ingredient.AvailableQuantity))!;
+        Assert.Equal(14, availableQuantity.GetPrecision());
+        Assert.Equal(3, availableQuantity.GetScale());
 
-        var minimumLevel = ingredient.FindProperty(nameof(Ingredient.MinimumLevel))!;
-        Assert.Equal(14, minimumLevel.GetPrecision());
-        Assert.Equal(3, minimumLevel.GetScale());
-
-        var unitCost = ingredient.FindProperty(nameof(Ingredient.UnitCost))!;
-        Assert.Equal(12, unitCost.GetPrecision());
-        Assert.Equal(2, unitCost.GetScale());
+        var reorderThreshold = ingredient.FindProperty(nameof(Ingredient.ReorderThreshold))!;
+        Assert.Equal(14, reorderThreshold.GetPrecision());
+        Assert.Equal(3, reorderThreshold.GetScale());
     }
 
     [Fact]

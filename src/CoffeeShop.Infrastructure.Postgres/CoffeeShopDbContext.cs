@@ -1,9 +1,11 @@
 namespace CoffeeShop.Infrastructure.Postgres;
 
 using CoffeeShop.Application.Common.Persistence;
+using CoffeeShop.Domain.Catalog;
 using CoffeeShop.Domain.Customers;
 using CoffeeShop.Domain.Identity;
 using CoffeeShop.Domain.Inventory;
+using CoffeeShop.Domain.Sales;
 using Microsoft.EntityFrameworkCore;
 
 public class CoffeeShopDbContext : DbContext, IUnitOfWork
@@ -12,6 +14,19 @@ public class CoffeeShopDbContext : DbContext, IUnitOfWork
         : base(options)
     {
     }
+
+    // Catalog
+    public DbSet<Category> Categories => Set<Category>();
+
+    public DbSet<MenuItem> MenuItems => Set<MenuItem>();
+
+    public DbSet<SizeVariant> SizeVariants => Set<SizeVariant>();
+
+    public DbSet<Addon> Addons => Set<Addon>();
+
+    public DbSet<MenuItemAddon> MenuItemAddons => Set<MenuItemAddon>();
+
+    public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
 
     // Identity
     public DbSet<User> Users => Set<User>();
@@ -47,6 +62,25 @@ public class CoffeeShopDbContext : DbContext, IUnitOfWork
     public DbSet<PurchaseReceiptLine> PurchaseReceiptLines => Set<PurchaseReceiptLine>();
 
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
+
+    // Sales and fulfillment
+    public DbSet<DiningTable> DiningTables => Set<DiningTable>();
+
+    public DbSet<Order> Orders => Set<Order>();
+
+    public DbSet<OrderStatusHistory> OrderStatusHistories => Set<OrderStatusHistory>();
+
+    public DbSet<OrderLine> OrderLines => Set<OrderLine>();
+
+    public DbSet<OrderLineAddon> OrderLineAddons => Set<OrderLineAddon>();
+
+    public DbSet<Discount> Discounts => Set<Discount>();
+
+    public DbSet<Payment> Payments => Set<Payment>();
+
+    public DbSet<Delivery> Deliveries => Set<Delivery>();
+
+    public DbSet<Reservation> Reservations => Set<Reservation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
