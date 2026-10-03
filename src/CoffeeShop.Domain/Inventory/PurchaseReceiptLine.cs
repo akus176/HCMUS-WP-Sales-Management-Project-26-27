@@ -39,6 +39,12 @@ public class PurchaseReceiptLine
 
     public PurchaseReceipt PurchaseReceipt { get; protected set; } = null!;
 
+    /// <summary>
+    /// Aggregate-internal factory for adding a line to a draft receipt.
+    /// </summary>
+    internal static PurchaseReceiptLine Create(EntityId id, EntityId ingredientId, decimal quantity, Money unitCost) =>
+        new(id, ingredientId, quantity, unitCost);
+
     private static void ValidateQuantity(decimal value)
     {
         if (value <= 0)
