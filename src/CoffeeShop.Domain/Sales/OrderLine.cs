@@ -10,7 +10,7 @@ public class OrderLine
     {
     }
 
-    public OrderLine(EntityId id, MenuItem menuItem, SizeVariant sizeVariant, int quantity, IEnumerable<Addon>? addons = null)
+    public OrderLine(EntityId id, MenuItem menuItem, SizeVariant sizeVariant, int quantity, IEnumerable<Addon>? addons = null, IReadOnlyCollection<MenuItemAddon>? compatibility = null)
     {
         ArgumentNullException.ThrowIfNull(id);
         var snapshot = new CatalogPriceSnapshot(menuItem, sizeVariant);
@@ -26,9 +26,16 @@ public class OrderLine
         SizeNameSnapshot = snapshot.SizeName;
         UnitPriceSnapshot = snapshot.UnitPrice;
         Quantity = quantity;
+        var selectedAddonIds = new HashSet<EntityId>();
         foreach (var addon in addons ?? [])
         {
-            _addons.Add(new OrderLineAddon(EntityId.New(), addon));
+            var addonSnapshot = new CatalogAddonSnapshot(menuItem, addon, compatibility ?? []);
+            if (!selectedAddonIds.Add(addonSnapshot.AddonId))
+            {
+                throw new ArgumentException("Each add-on can be selected only once per drink.", nameof(addons));
+            }
+
+            _addons.Add(new OrderLineAddon(EntityId.New(), addonSnapshot));
         }
         LineTotal = new Money((UnitPriceSnapshot.Amount + _addons.Sum(addon => addon.AddonPriceSnapshot.Amount)) * quantity);
     }

@@ -21,9 +21,15 @@ Each sellable menu item SHALL have one or more size variants, and each variant S
 ### Requirement: Simple add-ons
 The system SHALL allow authorized staff to define optional add-ons with independent prices and availability, and SHALL allow compatible add-ons to be attached to an order line.
 
+Compatibility SHALL be defined per menu item and apply to all of its size variants. Each drink SHALL allow at most one of each add-on; duplicate add-on identifiers on an order line MUST be rejected. For a line containing multiple drinks, each selected add-on's unit price SHALL be charged once per drink.
+
 #### Scenario: Add an available topping
 - **WHEN** a cashier adds an available compatible add-on to a drink
 - **THEN** the add-on is recorded on the order line and its price is included in the line total
+
+#### Scenario: Reject a duplicate add-on selection
+- **WHEN** a cashier selects the same add-on more than once for a drink
+- **THEN** the selection is rejected without creating an order line
 
 ### Requirement: Size-specific recipes
 Each menu-item size variant SHALL support a recipe containing ingredient quantities and units required to produce one unit of that variant.

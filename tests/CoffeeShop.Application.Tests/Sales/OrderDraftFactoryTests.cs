@@ -20,7 +20,7 @@ public class OrderDraftFactoryTests
         var orderId = EntityId.New();
         var delivery = channel == "delivery" ? new Delivery(EntityId.New(), orderId, "Ada", "0900000000", "1 Main Street") : null;
         var request = new CreateOrderDraftRequest(orderId, "ORD-001", channel, EntityId.New(), Now,
-            [new OrderLineSelection(item, variant, 2, [addon])], TableId: channel == "dine_in" ? EntityId.New() : null, Delivery: delivery);
+            [new OrderLineSelection(item, variant, 2, [addon], [new MenuItemAddon(item.Id, addon.Id)])], TableId: channel == "dine_in" ? EntityId.New() : null, Delivery: delivery);
 
         var result = new OrderDraftFactory().Create(request);
 
@@ -46,7 +46,7 @@ public class OrderDraftFactoryTests
     {
         var (item, variant, addon) = CreateCatalog();
         var request = new CreateOrderDraftRequest(EntityId.New(), "ORD-002", channel, EntityId.New(), Now,
-            [new OrderLineSelection(item, variant, 1, [addon])]);
+            [new OrderLineSelection(item, variant, 1, [addon], [new MenuItemAddon(item.Id, addon.Id)])]);
 
         var result = new OrderDraftFactory().Create(request);
 
@@ -81,12 +81,58 @@ public class OrderDraftFactoryTests
         var (item, variant, addon) = CreateCatalog();
         var inactive = new Addon(addon.Id, addon.Name, addon.Price, isActive: false);
         var request = new CreateOrderDraftRequest(EntityId.New(), "ORD-003", "takeaway", EntityId.New(), Now,
-            [new OrderLineSelection(item, variant, 1, [inactive])]);
+            [new OrderLineSelection(item, variant, 1, [inactive], [new MenuItemAddon(item.Id, inactive.Id)])]);
 
         var result = new OrderDraftFactory().Create(request);
 
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.Validation, result.Error!.Type);
+    }
+
+    [Theory]
+    [InlineData("incompatible")]
+    [InlineData("foreign_item")]
+    [InlineData("duplicate")]
+    [InlineData("missing_compatibility")]
+    [InlineData("zero_quantity")]
+    [InlineData("negative_quantity")]
+    public void Create_InvalidAddonSelection_ReturnsValidationWithoutCreatingOrder(string reason)
+    {
+        var (item, variant, addon) = CreateCatalog();
+        MenuItemAddon[] links = reason == "incompatible" ? [] : [new(reason == "foreign_item" ? EntityId.New() : item.Id, addon.Id)];
+        var quantity = reason == "zero_quantity" ? 0 : reason == "negative_quantity" ? -1 : 1;
+        var selection = new OrderLineSelection(item, variant, quantity, reason == "duplicate" ? [addon, addon] : [addon],
+            reason == "missing_compatibility" ? null : links);
+        var request = new CreateOrderDraftRequest(EntityId.New(), "ORD-005", "takeaway", EntityId.New(), Now, [selection]);
+
+        var result = new OrderDraftFactory().Create(request);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Validation, result.Error!.Type);
+        Assert.Equal("orders.invalid", result.Error.Code);
+        Assert.Throws<InvalidOperationException>(() => result.Value);
+    }
+
+    [Fact]
+    public void Create_RechecksAddonAvailabilityAndCompatibilityAndPreservesExistingOrder()
+    {
+        var (item, variant, addon) = CreateCatalog();
+        var links = new List<MenuItemAddon> { new(item.Id, addon.Id) };
+        var request = new CreateOrderDraftRequest(EntityId.New(), "ORD-006", "takeaway", EntityId.New(), Now,
+            [new OrderLineSelection(item, variant, 2, [addon], links)]);
+        var factory = new OrderDraftFactory();
+        var order = factory.Create(request).Value;
+        addon.Update("Changed", new Money(20000m));
+        addon.Deactivate();
+
+        Assert.Equal(ErrorType.Validation, factory.Create(request).Error!.Type);
+        addon.Activate();
+        links.Clear();
+        Assert.Equal(ErrorType.Validation, factory.Create(request).Error!.Type);
+        Assert.Equal(new Money(110000m), order.Total);
+        var snapshot = Assert.Single(Assert.Single(order.Lines).Addons);
+        Assert.Equal("Extra shot", snapshot.AddonNameSnapshot);
+        Assert.Equal(new Money(10000m), snapshot.AddonPriceSnapshot);
     }
 
     private static (MenuItem Item, SizeVariant Variant, Addon Addon) CreateCatalog()

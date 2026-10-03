@@ -5,7 +5,7 @@ using CoffeeShop.Domain.Catalog;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Sales;
 
-public sealed record OrderLineSelection(MenuItem MenuItem, SizeVariant SizeVariant, int Quantity, IReadOnlyCollection<Addon> Addons);
+public sealed record OrderLineSelection(MenuItem MenuItem, SizeVariant SizeVariant, int Quantity, IReadOnlyCollection<Addon> Addons, IReadOnlyCollection<MenuItemAddon>? Compatibility = null);
 
 public sealed record CreateOrderDraftRequest(
     EntityId Id,
@@ -25,7 +25,7 @@ public sealed class OrderDraftFactory
         ArgumentNullException.ThrowIfNull(request);
         try
         {
-            var lines = request.Lines.Select(selection => new OrderLine(EntityId.New(), selection.MenuItem, selection.SizeVariant, selection.Quantity, selection.Addons));
+            var lines = request.Lines.Select(selection => new OrderLine(EntityId.New(), selection.MenuItem, selection.SizeVariant, selection.Quantity, selection.Addons, selection.Compatibility));
             return Result<Order>.Success(new Order(request.Id, request.OrderNumber, request.Channel, request.CreatedBy, request.CreatedAt, lines, request.CustomerId, request.TableId, request.Delivery));
         }
         catch (ArgumentException exception)

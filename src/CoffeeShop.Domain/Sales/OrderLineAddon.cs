@@ -9,19 +9,14 @@ public class OrderLineAddon
     {
     }
 
-    public OrderLineAddon(EntityId id, Addon addon)
+    public OrderLineAddon(EntityId id, CatalogAddonSnapshot addon)
     {
         ArgumentNullException.ThrowIfNull(id);
         ArgumentNullException.ThrowIfNull(addon);
-        if (!addon.IsActive)
-        {
-            throw new ArgumentException("The selected add-on must be active.", nameof(addon));
-        }
-
         Id = id;
-        AddonId = addon.Id;
+        AddonId = addon.AddonId;
         AddonNameSnapshot = addon.Name;
-        AddonPriceSnapshot = addon.Price;
+        AddonPriceSnapshot = addon.UnitPrice;
     }
 
     public EntityId Id { get; protected set; } = null!;
