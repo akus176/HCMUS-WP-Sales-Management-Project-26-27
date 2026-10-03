@@ -56,6 +56,26 @@ public class OrderDraftFactoryTests
     }
 
     [Fact]
+    public void Create_UsesSelectedSizeAndPreservesSnapshotAfterPriceAndAvailabilityChanges()
+    {
+        var (item, large, _) = CreateCatalog();
+        var small = new SizeVariant(EntityId.New(), item.Id, "Small", new Money(30000m));
+        var request = new CreateOrderDraftRequest(EntityId.New(), "ORD-004", "takeaway", EntityId.New(), Now,
+            [new OrderLineSelection(item, small, 1, []), new OrderLineSelection(item, large, 2, [])]);
+        var factory = new OrderDraftFactory();
+
+        var order = factory.Create(request).Value;
+        large.Update("Extra large", new Money(50000m));
+        large.Deactivate();
+
+        Assert.Equal([new Money(30000m), new Money(45000m)], order.Lines.Select(line => line.UnitPriceSnapshot));
+        Assert.Equal(["Small", "Large"], order.Lines.Select(line => line.SizeNameSnapshot));
+        Assert.Equal(new Money(120000m), order.Subtotal);
+        Assert.Equal(order.Subtotal, order.Total);
+        Assert.Equal(ErrorType.Validation, factory.Create(request).Error!.Type);
+    }
+
+    [Fact]
     public void Create_InactiveCatalogSelection_ReturnsSharedValidationError()
     {
         var (item, variant, addon) = CreateCatalog();

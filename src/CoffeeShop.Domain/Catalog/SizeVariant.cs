@@ -12,7 +12,7 @@ public class SizeVariant
     {
         ArgumentNullException.ThrowIfNull(id);
         ArgumentNullException.ThrowIfNull(menuItemId);
-        ArgumentException.ThrowIfNullOrWhiteSpace(sizeName);
+        ValidateSizeName(sizeName);
         ArgumentNullException.ThrowIfNull(price);
 
         Id = id;
@@ -31,4 +31,42 @@ public class SizeVariant
     public Money Price { get; protected set; } = null!;
 
     public bool IsActive { get; protected set; } = true;
+
+    public void Update(string sizeName, Money price)
+    {
+        ValidateSizeName(sizeName);
+        ArgumentNullException.ThrowIfNull(price);
+
+        SizeName = sizeName.Trim();
+        Price = price;
+    }
+
+    public void Activate() => SetActive(true);
+
+    public void Deactivate() => SetActive(false);
+
+    public bool IsAvailableForOrdering(MenuItem item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        return IsActive && item.IsActive && MenuItemId == item.Id;
+    }
+
+    private void SetActive(bool isActive)
+    {
+        if (IsActive == isActive)
+        {
+            throw new InvalidOperationException(isActive ? "Size variant is already active." : "Size variant is already inactive.");
+        }
+
+        IsActive = isActive;
+    }
+
+    private static void ValidateSizeName(string sizeName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sizeName);
+        if (sizeName.Trim().Length > 40)
+        {
+            throw new ArgumentException("Size name cannot exceed 40 characters.", nameof(sizeName));
+        }
+    }
 }

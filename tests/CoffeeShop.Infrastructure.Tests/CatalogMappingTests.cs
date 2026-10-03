@@ -251,6 +251,29 @@ public class CatalogMappingTests
     }
 
     [Fact]
+    public void VariantUpdates_TrackOnlyPriceNameAndAvailabilityAndPreserveRecipe()
+    {
+        using var context = CreateContext();
+        var variant = new SizeVariant(EntityId.New(), EntityId.New(), "Large", new Money(45000m));
+        var recipe = new RecipeIngredient(EntityId.New(), variant.Id, EntityId.New(), 18m, "g");
+        context.AttachRange(variant, recipe);
+
+        variant.Update("Extra large", new Money(50000m));
+        variant.Deactivate();
+        context.ChangeTracker.DetectChanges();
+
+        var entry = context.Entry(variant);
+        Assert.Equal(EntityState.Modified, entry.State);
+        Assert.Equal(["IsActive", "Price", "SizeName"], entry.Properties.Where(property => property.IsModified).Select(property => property.Metadata.Name));
+        Assert.Equal(new Money(45000m), entry.Property(v => v.Price).OriginalValue);
+        Assert.Equal(new Money(50000m), entry.Property(v => v.Price).CurrentValue);
+        Assert.False(entry.Property(v => v.IsActive).CurrentValue);
+        Assert.Equal(EntityState.Unchanged, context.Entry(recipe).State);
+        Assert.Equal(variant.Id, recipe.SizeVariantId);
+        Assert.DoesNotContain(context.ChangeTracker.Entries(), tracked => tracked.State == EntityState.Deleted);
+    }
+
+    [Fact]
     public void CompleteCatalogGraph_CanBeTrackedWithoutShadowRelationships()
     {
         using var context = CreateContext();
