@@ -5,6 +5,7 @@ using CoffeeShop.Domain.Common;
 public class Order
 {
     private readonly List<OrderLine> _lines = [];
+    private readonly List<OrderStatusHistory> _statusHistory = [];
     protected Order()
     {
     }
@@ -57,7 +58,7 @@ public class Order
     public EntityId Id { get; protected set; } = null!;
     public string OrderNumber { get; protected set; } = string.Empty;
     public string Channel { get; protected set; } = string.Empty;
-    public string Status { get; protected set; } = "draft";
+    public string Status { get; protected set; } = OrderStatus.Draft;
     public EntityId? CustomerId { get; protected set; }
     public EntityId? TableId { get; protected set; }
     public Money Subtotal { get; protected set; } = Money.Zero;
@@ -74,4 +75,45 @@ public class Order
     public string? CancelReason { get; protected set; }
     public uint Version { get; protected set; }
     public IReadOnlyCollection<OrderLine> Lines => _lines.AsReadOnly();
+    public IReadOnlyCollection<OrderStatusHistory> StatusHistory => _statusHistory.AsReadOnly();
+
+    public OrderStatusHistory TransitionTo(string targetStatus, EntityId actorId, UtcTimestamp changedAt, string? cancellationReason = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetStatus);
+        ArgumentNullException.ThrowIfNull(actorId);
+        ArgumentNullException.ThrowIfNull(changedAt);
+        if (!OrderStatus.IsKnown(targetStatus))
+        {
+            throw new ArgumentException($"Unknown order status '{targetStatus}'.", nameof(targetStatus));
+        }
+        if (!CanTransitionTo(targetStatus))
+        {
+            throw new InvalidOperationException($"Order cannot transition from '{Status}' to '{targetStatus}'.");
+        }
+        if (targetStatus == OrderStatus.Cancelled && string.IsNullOrWhiteSpace(cancellationReason))
+        {
+            throw new ArgumentException("A cancellation reason is required.", nameof(cancellationReason));
+        }
+
+        var history = new OrderStatusHistory(EntityId.New(), Id, Status, targetStatus, actorId, changedAt);
+        Status = targetStatus;
+        if (targetStatus == OrderStatus.Confirmed) ConfirmedAt = changedAt;
+        if (targetStatus == OrderStatus.Completed) CompletedAt = changedAt;
+        if (targetStatus == OrderStatus.Cancelled)
+        {
+            CancelledAt = changedAt;
+            CancelReason = cancellationReason!.Trim();
+        }
+        _statusHistory.Add(history);
+        return history;
+    }
+
+    private bool CanTransitionTo(string targetStatus) => Status switch
+    {
+        OrderStatus.Draft => targetStatus is OrderStatus.Confirmed or OrderStatus.Cancelled,
+        OrderStatus.Confirmed => targetStatus is OrderStatus.Preparing or OrderStatus.Cancelled,
+        OrderStatus.Preparing => targetStatus is OrderStatus.Ready or OrderStatus.Cancelled,
+        OrderStatus.Ready => targetStatus is OrderStatus.Completed or OrderStatus.Cancelled,
+        _ => false,
+    };
 }

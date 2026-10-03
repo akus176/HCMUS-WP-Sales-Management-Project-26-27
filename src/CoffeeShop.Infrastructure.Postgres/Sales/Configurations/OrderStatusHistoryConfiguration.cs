@@ -19,7 +19,7 @@ public sealed class OrderStatusHistoryConfiguration : IEntityTypeConfiguration<O
         builder.Property(history => history.ChangedBy).HasConversion<EntityIdValueConverter>().IsRequired().HasColumnName("changed_by");
         builder.Property(history => history.ChangedAt).HasConversion<UtcTimestampValueConverter>().HasColumnType("timestamptz").IsRequired().HasDefaultValueSql("now()").HasColumnName("changed_at");
         builder.HasIndex(history => new { history.OrderId, history.ChangedAt });
-        builder.HasOne<Order>().WithMany().HasForeignKey(history => history.OrderId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<Order>().WithMany(order => order.StatusHistory).HasForeignKey(history => history.OrderId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<User>().WithMany().HasForeignKey(history => history.ChangedBy).OnDelete(DeleteBehavior.Restrict);
     }
 }
