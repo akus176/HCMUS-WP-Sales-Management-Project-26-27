@@ -13,23 +13,18 @@ public class OrderLine
     public OrderLine(EntityId id, MenuItem menuItem, SizeVariant sizeVariant, int quantity, IEnumerable<Addon>? addons = null)
     {
         ArgumentNullException.ThrowIfNull(id);
-        ArgumentNullException.ThrowIfNull(menuItem);
-        ArgumentNullException.ThrowIfNull(sizeVariant);
-        if (!menuItem.IsActive || !sizeVariant.IsActive || sizeVariant.MenuItemId != menuItem.Id)
-        {
-            throw new ArgumentException("The selected menu item and size variant must be active and compatible.");
-        }
+        var snapshot = new CatalogPriceSnapshot(menuItem, sizeVariant);
         if (quantity <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(quantity));
         }
 
         Id = id;
-        MenuItemId = menuItem.Id;
-        SizeVariantId = sizeVariant.Id;
-        ItemNameSnapshot = menuItem.Name;
-        SizeNameSnapshot = sizeVariant.SizeName;
-        UnitPriceSnapshot = sizeVariant.Price;
+        MenuItemId = snapshot.MenuItemId;
+        SizeVariantId = snapshot.SizeVariantId;
+        ItemNameSnapshot = snapshot.ItemName;
+        SizeNameSnapshot = snapshot.SizeName;
+        UnitPriceSnapshot = snapshot.UnitPrice;
         Quantity = quantity;
         foreach (var addon in addons ?? [])
         {
