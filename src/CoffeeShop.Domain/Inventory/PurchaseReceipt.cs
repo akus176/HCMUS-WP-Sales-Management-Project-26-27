@@ -104,13 +104,33 @@ public class PurchaseReceipt
     }
 
     /// <summary>
-    /// Posts the receipt, transitioning it from draft to posted. The full
-    /// posting rules are covered in the posting step.
+    /// Posts the receipt, transitioning it from draft to posted.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Receipt state machine (authoritative):</b>
+    /// <list type="bullet">
+    /// <item><description><b>Draft → Posted</b> via <see cref="Post"/>: requires at least one line; stamps <see cref="PostedAt"/>.</description></item>
+    /// <item><description><b>Draft → Cancelled</b> via <see cref="Cancel"/>.</description></item>
+    /// <item><description><b>Posted</b> and <b>Cancelled</b> are terminal states — no further transitions exist.</description></item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// A posted receipt is an <b>immutable financial record</b>: it documents
+    /// what was actually received and at what cost. Corrections happen through
+    /// new receipts or stock adjustments, never by editing history. Cancelling
+    /// a posted receipt is therefore not allowed.
+    /// </para>
+    /// </remarks>
     public void Post(UtcTimestamp postedAt)
     {
         ArgumentNullException.ThrowIfNull(postedAt);
         EnsureDraft(nameof(Post));
+
+        if (_lines.Count == 0)
+        {
+            throw new InvalidOperationException("A receipt must contain at least one line before it can be posted.");
+        }
 
         Status = PurchaseReceiptStatus.Posted;
         PostedAt = postedAt;
@@ -119,6 +139,8 @@ public class PurchaseReceipt
 
     /// <summary>
     /// Cancels the receipt, transitioning it from draft to cancelled.
+    /// Posted receipts cannot be cancelled — they are immutable financial
+    /// records; see <see cref="Post"/>.
     /// </summary>
     public void Cancel(UtcTimestamp cancelledAt)
     {

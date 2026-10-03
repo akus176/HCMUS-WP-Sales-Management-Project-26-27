@@ -131,4 +131,98 @@ public class PurchaseReceiptTests
         Assert.Throws<InvalidOperationException>(() => receipt.RemoveLine(line.Id, Changed));
         Assert.Single(receipt.Lines);
     }
+
+    [Fact]
+    public void Post_TransitionsDraftToPostedAndStampsPostedAt()
+    {
+        var receipt = CreateDraftReceipt();
+        AddLine(receipt);
+
+        receipt.Post(Changed);
+
+        Assert.Equal(PurchaseReceiptStatus.Posted, receipt.Status);
+        Assert.Equal(Changed, receipt.PostedAt);
+        Assert.Equal(Changed, receipt.UpdatedAt);
+    }
+
+    [Fact]
+    public void Post_RejectsEmptyReceipt()
+    {
+        var receipt = CreateDraftReceipt();
+
+        Assert.Throws<InvalidOperationException>(() => receipt.Post(Changed));
+        Assert.Equal(PurchaseReceiptStatus.Draft, receipt.Status);
+        Assert.Null(receipt.PostedAt);
+    }
+
+    [Fact]
+    public void Post_RejectsAlreadyPostedReceipt()
+    {
+        var receipt = CreateDraftReceipt();
+        AddLine(receipt);
+        receipt.Post(Changed);
+
+        Assert.Throws<InvalidOperationException>(() => receipt.Post(Changed));
+        Assert.Equal(PurchaseReceiptStatus.Posted, receipt.Status);
+        Assert.Equal(Changed, receipt.PostedAt);
+    }
+
+    [Fact]
+    public void Post_RejectsCancelledReceipt()
+    {
+        var receipt = CreateDraftReceipt();
+        AddLine(receipt);
+        receipt.Cancel(Changed);
+
+        Assert.Throws<InvalidOperationException>(() => receipt.Post(Changed));
+        Assert.Equal(PurchaseReceiptStatus.Cancelled, receipt.Status);
+        Assert.Null(receipt.PostedAt);
+    }
+
+    [Fact]
+    public void Cancel_TransitionsDraftToCancelled()
+    {
+        var receipt = CreateDraftReceipt();
+        AddLine(receipt);
+
+        receipt.Cancel(Changed);
+
+        Assert.Equal(PurchaseReceiptStatus.Cancelled, receipt.Status);
+        Assert.Null(receipt.PostedAt);
+        Assert.Equal(Changed, receipt.UpdatedAt);
+    }
+
+    [Fact]
+    public void Cancel_RejectsPostedReceipt()
+    {
+        var receipt = CreateDraftReceipt();
+        AddLine(receipt);
+        receipt.Post(Changed);
+
+        Assert.Throws<InvalidOperationException>(() => receipt.Cancel(Changed));
+        Assert.Equal(PurchaseReceiptStatus.Posted, receipt.Status);
+    }
+
+    [Fact]
+    public void Cancel_RejectsAlreadyCancelledReceipt()
+    {
+        var receipt = CreateDraftReceipt();
+        receipt.Cancel(Changed);
+
+        Assert.Throws<InvalidOperationException>(() => receipt.Cancel(Changed));
+        Assert.Equal(PurchaseReceiptStatus.Cancelled, receipt.Status);
+    }
+
+    [Fact]
+    public void PostedReceipt_PreservesLineDataAsImmutableRecord()
+    {
+        var receipt = CreateDraftReceipt();
+        var line = AddLine(receipt, quantity: 7.5m, unitCost: 42m);
+        receipt.Post(Changed);
+
+        Assert.Single(receipt.Lines);
+        Assert.Equal(7.5m, line.Quantity);
+        Assert.Equal(new Money(42m), line.UnitCost);
+        Assert.Equal(PurchaseReceiptStatus.Posted, receipt.Status);
+    }
 }
