@@ -339,4 +339,83 @@ public class IngredientTests
 
         Assert.Null(ingredient.ConvertToBaseUnit(5m, "ml"));
     }
+
+    [Theory]
+    [InlineData(3, 2, true, StockStatus.Ok)]        // above threshold, active
+    [InlineData(2, 2, true, StockStatus.LowStock)]  // exactly at threshold, active
+    [InlineData(1, 2, true, StockStatus.LowStock)]  // below threshold, active
+    [InlineData(0, 2, true, StockStatus.LowStock)]  // empty balance, active
+    [InlineData(3, 2, false, StockStatus.LowStock)] // above threshold, deactivated
+    [InlineData(0, 0, false, StockStatus.LowStock)] // deactivated with zero threshold
+    public void Status_FollowsDocumentedBoundaryRule(
+        decimal availableQuantity,
+        decimal reorderThreshold,
+        bool isActive,
+        StockStatus expected)
+    {
+        var ingredient = CreateIngredient(
+            availableQuantity: availableQuantity,
+            reorderThreshold: reorderThreshold,
+            isActive: isActive);
+
+        Assert.Equal(expected, ingredient.Status);
+        Assert.Equal(expected == StockStatus.LowStock, ingredient.IsLowStock);
+    }
+
+    [Fact]
+    public void Status_AtThresholdCountsAsLowStock()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 5m, reorderThreshold: 5m);
+
+        Assert.Equal(StockStatus.LowStock, ingredient.Status);
+    }
+
+    [Fact]
+    public void Status_AboveThresholdIsOk()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 5.001m, reorderThreshold: 5m);
+
+        Assert.Equal(StockStatus.Ok, ingredient.Status);
+    }
+
+    [Fact]
+    public void Status_DeactivatedIngredientNeverReportsOk()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 100m, reorderThreshold: 2m, isActive: false);
+
+        Assert.Equal(StockStatus.LowStock, ingredient.Status);
+    }
+
+    [Fact]
+    public void Status_ReactivingIngredientRestoresEvaluation()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 100m, reorderThreshold: 2m, isActive: false);
+        Assert.Equal(StockStatus.LowStock, ingredient.Status);
+
+        ingredient.Activate(CreatedAt);
+
+        Assert.Equal(StockStatus.Ok, ingredient.Status);
+    }
+
+    [Fact]
+    public void Status_ReflectsBalanceChangesImmediately()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 10m, reorderThreshold: 2m);
+        Assert.Equal(StockStatus.Ok, ingredient.Status);
+
+        ingredient.Consume(8.5m, CreatedAt);
+
+        Assert.Equal(StockStatus.LowStock, ingredient.Status);
+    }
+
+    [Fact]
+    public void Status_ReflectsThresholdChangesImmediately()
+    {
+        var ingredient = CreateIngredient(availableQuantity: 10m, reorderThreshold: 2m);
+        Assert.Equal(StockStatus.Ok, ingredient.Status);
+
+        ingredient.SetReorderThreshold(10m, CreatedAt);
+
+        Assert.Equal(StockStatus.LowStock, ingredient.Status);
+    }
 }

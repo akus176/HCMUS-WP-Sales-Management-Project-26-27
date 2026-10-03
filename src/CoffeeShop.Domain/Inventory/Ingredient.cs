@@ -43,7 +43,33 @@ public class Ingredient
 
     public UtcTimestamp UpdatedAt { get; protected set; } = null!;
 
-    public bool IsLowStock => AvailableQuantity <= ReorderThreshold;
+    /// <summary>
+    /// The current stock status derived from the balance and threshold.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Low-stock boundary rule (authoritative):</b> an ingredient is
+    /// <see cref="StockStatus.LowStock"/> when its available quantity is
+    /// <b>less than or equal to</b> its reorder threshold — the threshold
+    /// itself counts as low stock, because reaching the reorder point is
+    /// exactly when a purchase should be triggered.
+    /// </para>
+    /// <para>
+    /// A <b>deactivated</b> ingredient never reports low stock regardless of
+    /// its balance: it is out of operation, so it must not appear on reorder
+    /// lists or dashboards. Reactivating it restores normal status evaluation.
+    /// </para>
+    /// </remarks>
+    public StockStatus Status =>
+        !IsActive || AvailableQuantity <= ReorderThreshold
+            ? StockStatus.LowStock
+            : StockStatus.Ok;
+
+    /// <summary>
+    /// Convenience flag equivalent to <see cref="Status"/> being
+    /// <see cref="StockStatus.LowStock"/>.
+    /// </summary>
+    public bool IsLowStock => Status == StockStatus.LowStock;
 
     /// <summary>
     /// Increases the available balance by a positive amount.
