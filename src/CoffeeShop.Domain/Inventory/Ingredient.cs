@@ -42,4 +42,24 @@ public class Ingredient
     public UtcTimestamp CreatedAt { get; protected set; } = null!;
 
     public UtcTimestamp UpdatedAt { get; protected set; } = null!;
+
+    public bool IsLowStock => AvailableQuantity <= ReorderThreshold;
+
+    private static void ValidateQuantity(decimal value, string paramName)
+    {
+        if (value < 0)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "Ingredient quantity cannot be negative.");
+        }
+
+        if (decimal.Round(value, 3) != value)
+        {
+            throw new ArgumentException("Ingredient quantity cannot have more than three decimal places.", paramName);
+        }
+
+        if (value > MeasuredQuantity.MaximumValue)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, $"Ingredient quantity cannot exceed the maximum of {MeasuredQuantity.MaximumValue}.");
+        }
+    }
 }

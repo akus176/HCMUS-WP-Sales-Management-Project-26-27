@@ -28,9 +28,6 @@ public class CoffeeShopDbContext : DbContext, IUnitOfWork
 
     public DbSet<RecipeIngredient> RecipeIngredients => Set<RecipeIngredient>();
 
-    // Inventory recipe dependency
-    public DbSet<Ingredient> Ingredients => Set<Ingredient>();
-
     // Identity
     public DbSet<User> Users => Set<User>();
 
@@ -54,6 +51,17 @@ public class CoffeeShopDbContext : DbContext, IUnitOfWork
     public DbSet<LoyaltyTransaction> LoyaltyTransactions => Set<LoyaltyTransaction>();
 
     public DbSet<LoyaltySettings> LoyaltySettings => Set<LoyaltySettings>();
+
+    // Inventory
+    public DbSet<Ingredient> Ingredients => Set<Ingredient>();
+
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
+
+    public DbSet<PurchaseReceipt> PurchaseReceipts => Set<PurchaseReceipt>();
+
+    public DbSet<PurchaseReceiptLine> PurchaseReceiptLines => Set<PurchaseReceiptLine>();
+
+    public DbSet<StockMovement> StockMovements => Set<StockMovement>();
 
     // Sales and fulfillment
     public DbSet<DiningTable> DiningTables => Set<DiningTable>();
