@@ -39,21 +39,27 @@ public class PurchaseReceiptLine
 
     public PurchaseReceipt PurchaseReceipt { get; protected set; } = null!;
 
-    private static void ValidateQuantity(decimal value)
+    /// <summary>
+    /// Aggregate-internal factory for adding a line to a draft receipt.
+    /// </summary>
+    internal static PurchaseReceiptLine Create(EntityId id, EntityId ingredientId, decimal quantity, Money unitCost) =>
+        new(id, ingredientId, quantity, unitCost);
+
+    private static void ValidateQuantity(decimal quantity)
     {
-        if (value <= 0)
+        if (quantity <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(value), value, "Receipt line quantity must be positive.");
+            throw new ArgumentOutOfRangeException(nameof(quantity), quantity, "Receipt line quantity must be positive.");
         }
 
-        if (decimal.Round(value, 3) != value)
+        if (decimal.Round(quantity, 3) != quantity)
         {
-            throw new ArgumentException("Receipt line quantity cannot have more than three decimal places.", nameof(value));
+            throw new ArgumentException("Receipt line quantity cannot have more than three decimal places.", nameof(quantity));
         }
 
-        if (value > MeasuredQuantity.MaximumValue)
+        if (quantity > MeasuredQuantity.MaximumValue)
         {
-            throw new ArgumentOutOfRangeException(nameof(value), value, $"Receipt line quantity cannot exceed the maximum of {MeasuredQuantity.MaximumValue}.");
+            throw new ArgumentOutOfRangeException(nameof(quantity), quantity, $"Receipt line quantity cannot exceed the maximum of {MeasuredQuantity.MaximumValue}.");
         }
     }
 }

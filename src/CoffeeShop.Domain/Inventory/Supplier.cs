@@ -45,4 +45,43 @@ public class Supplier
     public UtcTimestamp CreatedAt { get; protected set; } = null!;
 
     public UtcTimestamp UpdatedAt { get; protected set; } = null!;
+
+    /// <summary>
+    /// Updates the supplier's contact data. Deactivation history is preserved:
+    /// updating never reactivates a deactivated supplier.
+    /// </summary>
+    public void Update(string name, string phone, string? email, string? address, UtcTimestamp changedAt)
+    {
+        ArgumentNullException.ThrowIfNull(changedAt);
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(phone);
+
+        Name = name.Trim();
+        Phone = phone.Trim();
+        Email = email?.Trim().ToLowerInvariant();
+        Address = address?.Trim();
+        UpdatedAt = changedAt;
+    }
+
+    /// <summary>
+    /// Deactivates the supplier. Historical receipts keep their reference;
+    /// deactivation only prevents the supplier from being selected for new
+    /// receipts.
+    /// </summary>
+    public void Deactivate(UtcTimestamp changedAt)
+    {
+        ArgumentNullException.ThrowIfNull(changedAt);
+        IsActive = false;
+        UpdatedAt = changedAt;
+    }
+
+    /// <summary>
+    /// Reactivates a previously deactivated supplier.
+    /// </summary>
+    public void Activate(UtcTimestamp changedAt)
+    {
+        ArgumentNullException.ThrowIfNull(changedAt);
+        IsActive = true;
+        UpdatedAt = changedAt;
+    }
 }
