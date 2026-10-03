@@ -175,7 +175,11 @@ public class Ingredient
         {
             return new MeasuredQuantity(value, unit);
         }
-        catch (Exception exception) when (exception is ArgumentException or ArgumentOutOfRangeException)
+        catch (ArgumentOutOfRangeException exception)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, exception.Message);
+        }
+        catch (ArgumentException exception)
         {
             throw new ArgumentException(exception.Message, paramName, exception);
         }
