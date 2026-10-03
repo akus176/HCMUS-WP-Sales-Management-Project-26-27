@@ -129,6 +129,20 @@ public class Ingredient
         UpdatedAt = occurredAt;
     }
 
+    /// <summary>
+    /// Determines whether a quantity expressed in the given unit can be
+    /// applied to this ingredient. Compatible when the unit belongs to the
+    /// same family as the ingredient's base unit.
+    /// </summary>
+    public bool CanAcceptUnit(string unit) => IngredientUnit.AreCompatible(BaseUnit, unit);
+
+    /// <summary>
+    /// Converts a quantity from the given unit into the ingredient's base
+    /// unit, or null when the unit is incompatible or unknown.
+    /// </summary>
+    public decimal? ConvertToBaseUnit(decimal value, string unit) =>
+        IngredientUnit.Convert(value, unit, BaseUnit);
+
     private static void ValidatePositiveAmount(decimal amount)
     {
         if (amount <= 0)

@@ -222,4 +222,121 @@ public class IngredientTests
         Assert.True(ingredient.IsActive);
         Assert.Equal(CreatedAt, ingredient.UpdatedAt);
     }
+
+    [Theory]
+    [InlineData("g", "kg")]
+    [InlineData("kg", "g")]
+    [InlineData("ml", "l")]
+    [InlineData("l", "ml")]
+    [InlineData("g", "g")]
+    [InlineData("pcs", "pcs")]
+    public void IngredientUnit_AreCompatible_AcceptsSameFamilyUnits(string source, string target)
+    {
+        Assert.True(IngredientUnit.AreCompatible(source, target));
+    }
+
+    [Theory]
+    [InlineData("g", "ml")]
+    [InlineData("g", "l")]
+    [InlineData("kg", "pcs")]
+    [InlineData("ml", "pcs")]
+    [InlineData("g", "pcs")]
+    public void IngredientUnit_AreCompatible_RejectsCrossFamilyUnits(string source, string target)
+    {
+        Assert.False(IngredientUnit.AreCompatible(source, target));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("bushels")]
+    [InlineData("cups")]
+    public void IngredientUnit_AreCompatible_RejectsUnknownUnits(string unit)
+    {
+        Assert.False(IngredientUnit.AreCompatible(unit, "g"));
+        Assert.False(IngredientUnit.AreCompatible("g", unit));
+    }
+
+    [Theory]
+    [InlineData(1, "kg", "g", 1000)]
+    [InlineData(2.5, "kg", "g", 2500)]
+    [InlineData(1500, "g", "kg", 1.5)]
+    [InlineData(1, "l", "ml", 1000)]
+    [InlineData(500, "ml", "l", 0.5)]
+    [InlineData(3, "pcs", "pcs", 3)]
+    public void IngredientUnit_Convert_ConvertsWithinFamily(decimal value, string from, string to, decimal expected)
+    {
+        var result = IngredientUnit.Convert(value, from, to);
+
+        Assert.NotNull(result);
+        Assert.Equal(expected, result.Value);
+    }
+
+    [Fact]
+    public void IngredientUnit_Convert_ReturnsNullForCrossFamilyConversion()
+    {
+        Assert.Null(IngredientUnit.Convert(1, "g", "ml"));
+    }
+
+    [Fact]
+    public void IngredientUnit_Convert_ReturnsNullForUnknownUnit()
+    {
+        Assert.Null(IngredientUnit.Convert(1, "cups", "g"));
+    }
+
+    [Fact]
+    public void IngredientUnit_FamilyOf_ReturnsCanonicalUnit()
+    {
+        Assert.Equal("g", IngredientUnit.FamilyOf("kg"));
+        Assert.Equal("g", IngredientUnit.FamilyOf("G"));
+        Assert.Equal("ml", IngredientUnit.FamilyOf("l"));
+        Assert.Equal("pcs", IngredientUnit.FamilyOf("pcs"));
+        Assert.Null(IngredientUnit.FamilyOf("cups"));
+    }
+
+    [Fact]
+    public void IngredientUnit_IsKnown_AcceptsCaseInsensitiveUnits()
+    {
+        Assert.True(IngredientUnit.IsKnown("KG"));
+        Assert.True(IngredientUnit.IsKnown(" ml "));
+        Assert.False(IngredientUnit.IsKnown("cups"));
+        Assert.False(IngredientUnit.IsKnown(""));
+    }
+
+    [Fact]
+    public void CanAcceptUnit_AcceptsSameFamilyUnit()
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.True(ingredient.CanAcceptUnit("kg"));
+        Assert.True(ingredient.CanAcceptUnit("g"));
+    }
+
+    [Fact]
+    public void CanAcceptUnit_RejectsCrossFamilyUnit()
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.False(ingredient.CanAcceptUnit("ml"));
+        Assert.False(ingredient.CanAcceptUnit("pcs"));
+    }
+
+    [Fact]
+    public void ConvertToBaseUnit_ConvertsKilogramsToGrams()
+    {
+        var ingredient = CreateIngredient();
+
+        var result = ingredient.ConvertToBaseUnit(2m, "kg");
+
+        Assert.NotNull(result);
+        Assert.Equal(2000m, result.Value);
+    }
+
+    [Fact]
+    public void ConvertToBaseUnit_ReturnsNullForIncompatibleUnit()
+    {
+        var ingredient = CreateIngredient();
+
+        Assert.Null(ingredient.ConvertToBaseUnit(5m, "ml"));
+    }
 }
