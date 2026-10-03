@@ -14,8 +14,8 @@ public class Ingredient
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(createdAt);
         ArgumentNullException.ThrowIfNull(updatedAt);
-        var balance = new MeasuredQuantity(availableQuantity, baseUnit);
-        var threshold = new MeasuredQuantity(reorderThreshold, baseUnit);
+        var balance = ValidateQuantity(availableQuantity, baseUnit, nameof(availableQuantity));
+        var threshold = ValidateQuantity(reorderThreshold, baseUnit, nameof(reorderThreshold));
 
         Id = id;
         Name = name.Trim();
@@ -118,7 +118,7 @@ public class Ingredient
         }
 
         var newBalanceValue = AvailableQuantity + delta;
-        var newBalance = new MeasuredQuantity(newBalanceValue, BaseUnit);
+        var newBalance = ValidateQuantity(newBalanceValue, BaseUnit, nameof(delta));
         AvailableQuantity = newBalance.Value;
         UpdatedAt = occurredAt;
     }
@@ -168,6 +168,18 @@ public class Ingredient
     /// </summary>
     public decimal? ConvertToBaseUnit(decimal value, string unit) =>
         IngredientUnit.Convert(value, unit, BaseUnit);
+
+    private static MeasuredQuantity ValidateQuantity(decimal value, string unit, string paramName)
+    {
+        try
+        {
+            return new MeasuredQuantity(value, unit);
+        }
+        catch (Exception exception) when (exception is ArgumentException or ArgumentOutOfRangeException)
+        {
+            throw new ArgumentException(exception.Message, paramName, exception);
+        }
+    }
 
     private static void ValidatePositiveAmount(decimal amount)
     {
