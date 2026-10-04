@@ -160,6 +160,9 @@ public class ModelMappingTests
         Assert.Equal(120, customer.FindProperty(nameof(Customer.FullName))!.GetMaxLength());
         Assert.Equal(30, customer.FindProperty(nameof(Customer.Phone))!.GetMaxLength());
 
+        var customerAddress = model.FindEntityType(typeof(CustomerAddress))!;
+        Assert.Equal(40, customerAddress.FindProperty(nameof(CustomerAddress.Label))!.GetMaxLength());
+
         var loyaltySettings = model.FindEntityType(typeof(LoyaltySettings))!;
         var earnRate = loyaltySettings.FindProperty(nameof(LoyaltySettings.EarnPointsPerCurrencyUnit))!;
         Assert.Equal(8, earnRate.GetPrecision());

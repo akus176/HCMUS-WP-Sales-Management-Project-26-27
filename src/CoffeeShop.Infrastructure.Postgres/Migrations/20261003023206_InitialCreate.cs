@@ -223,7 +223,8 @@ public partial class InitialCreate : Migration
                 customer_id = table.Column<Guid>(type: "uuid", nullable: false),
                 label = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: true),
                 address_line = table.Column<string>(type: "text", nullable: false),
-                is_default = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false)
+                is_default = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true)
             },
             constraints: table =>
             {

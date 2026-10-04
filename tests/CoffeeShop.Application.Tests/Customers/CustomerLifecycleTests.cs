@@ -181,6 +181,115 @@ public class CustomerLifecycleTests
         Assert.Equal(Changed, customer.UpdatedAt);
     }
 
+    [Fact]
+    public void AddAddress_WithValidData_ReturnsSuccessAndAddsAddress()
+    {
+        var customer = CreateCustomer();
+        var addressId = EntityId.New();
+
+        var result = CustomerLifecycle.AddAddress(customer, addressId, "123 Main St", "Home", isDefault: true, Changed);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(addressId, result.Value.Id);
+        Assert.Equal("123 Main St", result.Value.AddressLine);
+        Assert.Equal("Home", result.Value.Label);
+        Assert.True(result.Value.IsDefault);
+        Assert.Equal(Changed, customer.UpdatedAt);
+    }
+
+    [Fact]
+    public void AddAddress_WithInvalidInput_ReturnsValidationError()
+    {
+        var customer = CreateCustomer();
+
+        var result = CustomerLifecycle.AddAddress(customer, EntityId.New(), "", "Home");
+
+        AssertValidation(result, "addressLine");
+    }
+
+    [Fact]
+    public void AddAddress_WithDuplicateId_ReturnsConflictError()
+    {
+        var customer = CreateCustomer();
+        var addressId = EntityId.New();
+        CustomerLifecycle.AddAddress(customer, addressId, "123 Main St");
+
+        var result = CustomerLifecycle.AddAddress(customer, addressId, "456 Other St");
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Conflict, result.Error!.Type);
+        Assert.Equal("customers.invalid_state", result.Error.Code);
+    }
+
+    [Fact]
+    public void UpdateAddress_WithValidData_ReturnsSuccess()
+    {
+        var customer = CreateCustomer();
+        var addressId = EntityId.New();
+        CustomerLifecycle.AddAddress(customer, addressId, "123 Main St");
+
+        var result = CustomerLifecycle.UpdateAddress(customer, addressId, "456 New St", "Work", isDefault: true, Changed);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal("456 New St", result.Value.AddressLine);
+        Assert.Equal("Work", result.Value.Label);
+        Assert.True(result.Value.IsDefault);
+    }
+
+    [Fact]
+    public void SelectDefaultAddress_ReturnsSuccessAndSetsDefault()
+    {
+        var customer = CreateCustomer();
+        var first = customer.AddAddress(EntityId.New(), "123 Main St", isDefault: true);
+        var second = customer.AddAddress(EntityId.New(), "456 Office Rd", isDefault: false);
+
+        var result = CustomerLifecycle.SelectDefaultAddress(customer, second.Id, Changed);
+
+        Assert.True(result.IsSuccess);
+        Assert.True(second.IsDefault);
+        Assert.False(first.IsDefault);
+    }
+
+    [Fact]
+    public void SelectDefaultAddress_DeactivatedAddress_ReturnsConflictError()
+    {
+        var customer = CreateCustomer();
+        var address = customer.AddAddress(EntityId.New(), "123 Main St");
+        customer.DeactivateAddress(address.Id);
+
+        var result = CustomerLifecycle.SelectDefaultAddress(customer, address.Id);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Conflict, result.Error!.Type);
+    }
+
+    [Fact]
+    public void DeactivateAddress_ReturnsSuccess()
+    {
+        var customer = CreateCustomer();
+        var address = customer.AddAddress(EntityId.New(), "123 Main St");
+
+        var result = CustomerLifecycle.DeactivateAddress(customer, address.Id, Changed);
+
+        Assert.True(result.IsSuccess);
+        Assert.False(address.IsActive);
+        Assert.Equal(Changed, customer.UpdatedAt);
+    }
+
+    [Fact]
+    public void ActivateAddress_ReturnsSuccess()
+    {
+        var customer = CreateCustomer();
+        var address = customer.AddAddress(EntityId.New(), "123 Main St");
+        customer.DeactivateAddress(address.Id);
+
+        var result = CustomerLifecycle.ActivateAddress(customer, address.Id, Changed);
+
+        Assert.True(result.IsSuccess);
+        Assert.True(address.IsActive);
+        Assert.Equal(Changed, customer.UpdatedAt);
+    }
+
     private static Customer CreateCustomer() =>
         new(EntityId.New(), "Alice Smith", "0901234567", Created, Created, "alice@example.com");
 
