@@ -34,9 +34,17 @@ public class Order
         {
             throw new ArgumentException("Delivery orders require delivery details.", nameof(delivery));
         }
+        if (channel != "delivery" && delivery is not null)
+        {
+            throw new ArgumentException("Only delivery orders can contain delivery details.", nameof(delivery));
+        }
         if (delivery is not null && delivery.OrderId != id)
         {
             throw new ArgumentException("Delivery details must belong to this order.", nameof(delivery));
+        }
+        if (delivery is not null && delivery.CustomerAddressId is not null && customerId is null)
+        {
+            throw new ArgumentException("Delivery orders referencing a customer address must have an attached customer.", nameof(delivery));
         }
 
         Id = id;
