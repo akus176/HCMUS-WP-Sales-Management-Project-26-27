@@ -104,6 +104,175 @@ public class Customer
         UpdatedAt = changedAt;
     }
 
+    /// <summary>
+    /// Adds a new delivery address to this customer.
+    /// Explicit default-address rules:
+    /// - If isDefault is true, this address becomes default and any previous default is unset.
+    /// - If isDefault is false and there is currently no active default address, this address becomes default.
+    /// - Address ownership belongs exclusively to this customer.
+    /// </summary>
+    public CustomerAddress AddAddress(
+        EntityId addressId,
+        string addressLine,
+        string? label = null,
+        bool isDefault = false,
+        UtcTimestamp? changedAt = null)
+    {
+        ArgumentNullException.ThrowIfNull(addressId);
+
+        if (_addresses.Any(a => a.Id == addressId))
+        {
+            throw new InvalidOperationException($"An address with ID '{addressId}' already exists for this customer.");
+        }
+
+        var shouldBeDefault = isDefault || !_addresses.Any(a => a.IsActive && a.IsDefault);
+
+        if (shouldBeDefault)
+        {
+            foreach (var existing in _addresses)
+            {
+                existing.SetDefault(false);
+            }
+        }
+
+        var address = new CustomerAddress(addressId, Id, addressLine, label, isDefault: shouldBeDefault, isActive: true);
+        _addresses.Add(address);
+
+        if (changedAt is not null)
+        {
+            UpdatedAt = changedAt;
+        }
+
+        return address;
+    }
+
+    /// <summary>
+    /// Updates an address belonging to this customer.
+    /// Throws InvalidOperationException if the address does not belong to this customer or if attempting to set a deactivated address as default.
+    /// </summary>
+    public CustomerAddress UpdateAddress(
+        EntityId addressId,
+        string addressLine,
+        string? label,
+        bool isDefault,
+        UtcTimestamp? changedAt = null)
+    {
+        ArgumentNullException.ThrowIfNull(addressId);
+
+        var address = _addresses.FirstOrDefault(a => a.Id == addressId)
+            ?? throw new InvalidOperationException($"Address '{addressId}' does not belong to customer '{Id}'.");
+
+        if (isDefault)
+        {
+            if (!address.IsActive)
+            {
+                throw new InvalidOperationException("Cannot set a deactivated address as default.");
+            }
+
+            foreach (var other in _addresses.Where(a => a.Id != addressId))
+            {
+                other.SetDefault(false);
+            }
+        }
+
+        address.Update(addressLine, label, isDefault);
+
+        if (changedAt is not null)
+        {
+            UpdatedAt = changedAt;
+        }
+
+        return address;
+    }
+
+    /// <summary>
+    /// Selects an active address as the default delivery address for this customer.
+    /// Clears any previous default address.
+    /// Throws InvalidOperationException if the address does not belong to this customer or is deactivated.
+    /// </summary>
+    public CustomerAddress SetDefaultAddress(EntityId addressId, UtcTimestamp? changedAt = null)
+    {
+        ArgumentNullException.ThrowIfNull(addressId);
+
+        var address = _addresses.FirstOrDefault(a => a.Id == addressId)
+            ?? throw new InvalidOperationException($"Address '{addressId}' does not belong to customer '{Id}'.");
+
+        if (!address.IsActive)
+        {
+            throw new InvalidOperationException("Cannot set a deactivated address as default.");
+        }
+
+        foreach (var other in _addresses.Where(a => a.Id != addressId))
+        {
+            other.SetDefault(false);
+        }
+
+        address.SetDefault(true);
+
+        if (changedAt is not null)
+        {
+            UpdatedAt = changedAt;
+        }
+
+        return address;
+    }
+
+    /// <summary>
+    /// Deactivates an address. Deactivating clears its default status.
+    /// Throws InvalidOperationException if the address does not belong to this customer.
+    /// </summary>
+    public CustomerAddress DeactivateAddress(EntityId addressId, UtcTimestamp? changedAt = null)
+    {
+        ArgumentNullException.ThrowIfNull(addressId);
+
+        var address = _addresses.FirstOrDefault(a => a.Id == addressId)
+            ?? throw new InvalidOperationException($"Address '{addressId}' does not belong to customer '{Id}'.");
+
+        address.Deactivate();
+
+        if (changedAt is not null)
+        {
+            UpdatedAt = changedAt;
+        }
+
+        return address;
+    }
+
+    /// <summary>
+    /// Reactivates an address. If no active address is currently default, this address becomes default.
+    /// Throws InvalidOperationException if the address does not belong to this customer.
+    /// </summary>
+    public CustomerAddress ActivateAddress(EntityId addressId, UtcTimestamp? changedAt = null)
+    {
+        ArgumentNullException.ThrowIfNull(addressId);
+
+        var address = _addresses.FirstOrDefault(a => a.Id == addressId)
+            ?? throw new InvalidOperationException($"Address '{addressId}' does not belong to customer '{Id}'.");
+
+        address.Activate();
+
+        if (!_addresses.Any(a => a.IsActive && a.IsDefault))
+        {
+            address.SetDefault(true);
+        }
+
+        if (changedAt is not null)
+        {
+            UpdatedAt = changedAt;
+        }
+
+        return address;
+    }
+
+    public CustomerAddress? GetDefaultAddress() =>
+        _addresses.FirstOrDefault(a => a.IsActive && a.IsDefault);
+
+    public CustomerAddress? GetAddress(EntityId addressId) =>
+        _addresses.FirstOrDefault(a => a.Id == addressId);
+
+    public IReadOnlyList<CustomerAddress> GetActiveAddresses() =>
+        _addresses.Where(a => a.IsActive).ToList().AsReadOnly();
+
     private static string ValidateAndNormalizeFullName(string fullName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fullName);

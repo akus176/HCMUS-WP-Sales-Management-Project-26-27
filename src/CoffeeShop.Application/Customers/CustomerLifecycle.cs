@@ -60,6 +60,57 @@ public static class CustomerLifecycle
         return Execute(() => customer.Activate(changedAt));
     }
 
+    public static Result<CustomerAddress> AddAddress(
+        Customer customer,
+        EntityId addressId,
+        string addressLine,
+        string? label = null,
+        bool isDefault = false,
+        UtcTimestamp? changedAt = null)
+    {
+        ArgumentNullException.ThrowIfNull(customer);
+        return Execute(() => customer.AddAddress(addressId, addressLine, label, isDefault, changedAt));
+    }
+
+    public static Result<CustomerAddress> UpdateAddress(
+        Customer customer,
+        EntityId addressId,
+        string addressLine,
+        string? label,
+        bool isDefault,
+        UtcTimestamp? changedAt = null)
+    {
+        ArgumentNullException.ThrowIfNull(customer);
+        return Execute(() => customer.UpdateAddress(addressId, addressLine, label, isDefault, changedAt));
+    }
+
+    public static Result<CustomerAddress> SelectDefaultAddress(
+        Customer customer,
+        EntityId addressId,
+        UtcTimestamp? changedAt = null)
+    {
+        ArgumentNullException.ThrowIfNull(customer);
+        return Execute(() => customer.SetDefaultAddress(addressId, changedAt));
+    }
+
+    public static Result<CustomerAddress> DeactivateAddress(
+        Customer customer,
+        EntityId addressId,
+        UtcTimestamp? changedAt = null)
+    {
+        ArgumentNullException.ThrowIfNull(customer);
+        return Execute(() => customer.DeactivateAddress(addressId, changedAt));
+    }
+
+    public static Result<CustomerAddress> ActivateAddress(
+        Customer customer,
+        EntityId addressId,
+        UtcTimestamp? changedAt = null)
+    {
+        ArgumentNullException.ThrowIfNull(customer);
+        return Execute(() => customer.ActivateAddress(addressId, changedAt));
+    }
+
     private static Result Execute(Action operation) => Execute(() =>
     {
         operation();

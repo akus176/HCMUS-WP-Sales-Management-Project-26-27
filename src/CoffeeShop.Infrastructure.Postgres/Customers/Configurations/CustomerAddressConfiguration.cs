@@ -36,6 +36,11 @@ public sealed class CustomerAddressConfiguration : IEntityTypeConfiguration<Cust
             .HasDefaultValue(false)
             .HasColumnName("is_default");
 
+        builder.Property(ca => ca.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true)
+            .HasColumnName("is_active");
+
         builder.HasIndex(ca => ca.CustomerId);
 
         builder.HasOne(ca => ca.Customer)
