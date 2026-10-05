@@ -15,6 +15,8 @@ public interface IInventoryRepository
 
     Task<IReadOnlyList<Supplier>> ListSuppliersAsync(CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<PurchaseReceipt>> ListReceiptsAsync(CancellationToken cancellationToken = default);
+
     void AddIngredient(Ingredient ingredient);
 
     void AddSupplier(Supplier supplier);

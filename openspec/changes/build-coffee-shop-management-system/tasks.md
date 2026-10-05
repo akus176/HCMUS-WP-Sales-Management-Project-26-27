@@ -10,26 +10,26 @@
 ## 2. Shared Domain and Persistence Foundation
 
 - [x] 2.1 Implement shared entity identifiers, money values, measured quantities, timestamps, and audit metadata; verify unit tests cover invalid money and quantity values
-- [ ] 2.2 Define module-oriented domain entities and persistence mappings for catalog, sales, inventory, customers, and identity; verify EF Core can construct the model without mapping errors
-- [ ] 2.3 Configure PostgreSQL, Npgsql, the application database context, and design-time migration support; verify a migration can be generated from the solution
-- [ ] 2.4 Create the initial database migration with keys, foreign keys, indexes, precision, and check constraints; verify it applies successfully to an empty PostgreSQL database
+- [x] 2.2 Define module-oriented domain entities and persistence mappings for catalog, sales, inventory, customers, and identity; verify EF Core can construct the model without mapping errors
+- [x] 2.3 Configure PostgreSQL, Npgsql, the application database context, and design-time migration support; verify a migration can be generated from the solution
+- [x] 2.4 Create the initial database migration with keys, foreign keys, indexes, precision, and check constraints; verify it applies successfully to an empty PostgreSQL database
 - [x] 2.5 Add transaction, clock, current-user, and audit abstractions to the Application layer; verify unit tests can substitute deterministic implementations
 - [x] 2.6 Add consistent application result and error contracts for validation, not-found, conflict, authentication, and authorization outcomes; verify mapping tests cover every error type
 
 ## 3. Menu and Recipe Capability
 
 - [x] 3.1 Implement category and menu-item domain models with activation and deactivation rules; verify unit tests preserve historical references after deactivation
-- [ ] 3.2 Implement size variants with independent prices and availability; verify tests select the correct variant price and reject invalid prices
-- [ ] 3.3 Implement add-on definitions, compatibility, price, and availability; verify tests reject unavailable or incompatible add-ons
-- [ ] 3.4 Implement size-specific recipe models linked to active ingredients; verify tests reject missing ingredients and non-positive quantities
-- [ ] 3.5 Implement menu and recipe application commands and queries for create, update, deactivate, search, and detail views; verify application tests cover successful and invalid operations
+- [x] 3.2 Implement size variants with independent prices and availability; verify tests select the correct variant price and reject invalid prices
+- [x] 3.3 Implement add-on definitions, compatibility, price, and availability; verify tests reject unavailable or incompatible add-ons
+- [x] 3.4 Implement size-specific recipe models linked to active ingredients; verify tests reject missing ingredients and non-positive quantities
+- [x] 3.5 Implement menu and recipe application commands and queries for create, update, deactivate, search, and detail views; verify application tests cover successful and invalid operations
 - [ ] 3.6 Implement PostgreSQL persistence for menu and recipe workflows; verify integration tests save and reload a complete item with sizes, add-ons, and recipes
 - [ ] 3.7 Build WinUI menu, variant, add-on, and recipe management screens; verify an operator can create, edit, deactivate, and search a complete drink definition
 
 ## 4. Inventory and Procurement Capability
 
-- [ ] 4.1 Implement ingredient models with base units, balances, reorder thresholds, and activation state; verify unit tests reject invalid thresholds and incompatible unit changes
-- [ ] 4.2 Implement supplier management while preserving historical receipt references; verify integration tests prevent deactivated suppliers from new receipt selection
+- [x] 4.1 Implement ingredient models with base units, balances, reorder thresholds, and activation state; verify unit tests reject invalid thresholds and incompatible unit changes
+- [x] 4.2 Implement supplier management while preserving historical receipt references; verify integration tests prevent deactivated suppliers from new receipt selection
 - [ ] 4.3 Implement draft and posted purchase receipts with ingredient quantities and costs; verify posting a receipt increases stock exactly once
 - [ ] 4.4 Implement positive and negative stock adjustments with mandatory reasons and actor identity; verify tests reject missing reasons and invalid resulting quantities
 - [ ] 4.5 Implement immutable stock-movement records for receipts, adjustments, order consumption, and restoration; verify every stock-changing integration test creates the expected movement
@@ -38,18 +38,18 @@
 
 ## 5. Customers and Loyalty Capability
 
-- [ ] 5.1 Implement optional customer profiles with contact data, activation state, and search; verify walk-in orders remain possible without a profile
-- [ ] 5.2 Implement reusable and order-specific delivery-address models; verify delivery validation accepts either source and rejects missing required fields
-- [ ] 5.3 Implement configurable loyalty earning, redemption, and maximum-redemption rules; verify unit tests cover balances, conversion, limits, and inactive customers
+- [x] 5.1 Implement optional customer profiles with contact data, activation state, and search; verify walk-in orders remain possible without a profile
+- [x] 5.2 Implement reusable and order-specific delivery-address models; verify delivery validation accepts either source and rejects missing required fields
+- [x] 5.3 Implement configurable loyalty earning, redemption, and maximum-redemption rules; verify unit tests cover balances, conversion, limits, and inactive customers
 - [ ] 5.4 Implement append-only loyalty transactions with order references and reversal support; verify repeated reversal requests do not alter the balance twice
 - [ ] 5.5 Implement customer and loyalty application commands and queries with PostgreSQL persistence; verify integration tests cover earning, redemption, cancellation reversal, and history
 - [ ] 5.6 Build WinUI customer profile, order attachment, address, balance, and loyalty-history screens; verify a completed eligible order changes the visible balance once
 
 ## 6. Sales, Payments, Tables, and Fulfillment
 
-- [ ] 6.1 Implement order aggregates, line snapshots, size/add-on selection, totals, and channel-specific validation; verify tests cover dine-in, takeaway, and delivery requirements
-- [ ] 6.2 Implement the order state machine and status history for draft, confirmed, preparing, ready, completed, and cancelled states; verify every allowed and rejected transition is unit tested
-- [ ] 6.3 Implement table management and concurrency-safe occupancy; verify two simultaneous assignments cannot occupy the same table
+- [x] 6.1 Implement order aggregates, line snapshots, size/add-on selection, totals, and channel-specific validation; verify tests cover dine-in, takeaway, and delivery requirements
+- [x] 6.2 Implement the order state machine and status history for draft, confirmed, preparing, ready, completed, and cancelled states; verify every allowed and rejected transition is unit tested
+- [x] 6.3 Implement table management and concurrency-safe occupancy; verify two simultaneous assignments cannot occupy the same table
 - [ ] 6.4 Implement cash, card, and e-wallet payment records and paid-balance calculation; verify an order cannot complete with an unpaid balance
 - [ ] 6.5 Implement fixed and percentage discount requests with manager approval and non-negative total validation; verify unapproved discounts do not affect payable totals
 - [ ] 6.6 Implement atomic order confirmation that validates recipes, checks stock, snapshots pricing, deducts all ingredients, and rolls back on shortage; verify PostgreSQL integration tests prove all-or-nothing behavior

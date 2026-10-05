@@ -11,39 +11,48 @@
                         OpenPaneLength="220"
                         SelectionChanged="OnNavSelectionChanged">
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="Ingredients" Tag="ingredients">
+                <NavigationViewItem Content="Ingredients"
+                        Tag="ingredients">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8F1;" />
+                        <FontIcon Glyph="&#xE8F1;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Suppliers" Tag="suppliers">
+                <NavigationViewItem Content="Suppliers"
+                        Tag="suppliers">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE77B;" />
+                        <FontIcon Glyph="&#xE77B;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Purchase Receipts" Tag="receipts">
+                <NavigationViewItem Content="Purchase Receipts"
+                        Tag="receipts">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8A5;" />
+                        <FontIcon Glyph="&#xE8A5;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Low Stock" Tag="lowstock">
+                <NavigationViewItem Content="Low Stock"
+                        Tag="lowstock">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7BA;" />
+                        <FontIcon Glyph="&#xE7BA;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Stock Adjustments" Tag="adjustments" IsEnabled="False">
+                <NavigationViewItem Content="Stock Adjustments"
+                        Tag="adjustments"
+                        IsEnabled="False">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8D7;" />
+                        <FontIcon Glyph="&#xE8D7;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Movement History" Tag="movements" IsEnabled="False">
+                <NavigationViewItem Content="Movement History"
+                        Tag="movements"
+                        IsEnabled="False">
                     <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE81C;" />
+                        <FontIcon Glyph="&#xE81C;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
-            <Frame x:Name="ContentFrame" Background="Transparent" />
+            <Frame x:Name="ContentFrame"
+                    Background="Transparent"/>
         </NavigationView>
     </Grid>
 </Window>
