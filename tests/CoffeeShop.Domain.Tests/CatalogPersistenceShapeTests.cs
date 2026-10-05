@@ -14,7 +14,10 @@ public class CatalogPersistenceShapeTests
     public void RecipeIngredient_RejectsNonPositiveExcessPrecisionAndOutOfRangeQuantities(string value)
     {
         var quantity = decimal.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
-        Assert.ThrowsAny<ArgumentException>(() => new RecipeIngredient(EntityId.New(), EntityId.New(), EntityId.New(), quantity, "g"));
+        var now = new UtcTimestamp(DateTimeOffset.UtcNow);
+        var variant = new SizeVariant(EntityId.New(), EntityId.New(), "Large", Money.Zero);
+        var ingredient = new Ingredient(EntityId.New(), "Coffee", "g", now, now);
+        Assert.ThrowsAny<ArgumentException>(() => new RecipeIngredient(EntityId.New(), variant, ingredient, quantity, "g"));
     }
 
     [Theory]
@@ -23,7 +26,10 @@ public class CatalogPersistenceShapeTests
     public void RecipeIngredient_AcceptsStorageBoundariesAndNormalizesUnit(string value)
     {
         var quantity = decimal.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
-        var recipe = new RecipeIngredient(EntityId.New(), EntityId.New(), EntityId.New(), quantity, " G ");
+        var now = new UtcTimestamp(DateTimeOffset.UtcNow);
+        var variant = new SizeVariant(EntityId.New(), EntityId.New(), "Large", Money.Zero);
+        var ingredient = new Ingredient(EntityId.New(), "Coffee", "g", now, now);
+        var recipe = new RecipeIngredient(EntityId.New(), variant, ingredient, quantity, " G ");
         Assert.Equal(quantity, recipe.Quantity);
         Assert.Equal("g", recipe.Unit);
     }
