@@ -2,6 +2,7 @@ namespace CoffeeShop.Domain.Tests.Catalog;
 
 using CoffeeShop.Domain.Catalog;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.Domain.Inventory;
 using CoffeeShop.Domain.Sales;
 
 public class SizeVariantTests
@@ -65,7 +66,8 @@ public class SizeVariantTests
     {
         var (_, item) = CreateItem();
         var variant = new SizeVariant(EntityId.New(), item.Id, "Large", new Money(45000m));
-        var recipe = new RecipeIngredient(EntityId.New(), variant.Id, EntityId.New(), 18m, "g");
+        var ingredient = new Ingredient(EntityId.New(), "Coffee", "g", Now, Now);
+        var recipe = new RecipeIngredient(EntityId.New(), variant, ingredient, 18m, "g");
 
         Assert.True(variant.IsAvailableForOrdering(item));
         Assert.Throws<InvalidOperationException>(() => variant.Activate());

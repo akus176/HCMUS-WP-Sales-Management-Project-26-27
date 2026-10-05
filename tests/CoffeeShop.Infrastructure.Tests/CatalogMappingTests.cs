@@ -255,7 +255,9 @@ public class CatalogMappingTests
     {
         using var context = CreateContext();
         var variant = new SizeVariant(EntityId.New(), EntityId.New(), "Large", new Money(45000m));
-        var recipe = new RecipeIngredient(EntityId.New(), variant.Id, EntityId.New(), 18m, "g");
+        var now = new UtcTimestamp(DateTimeOffset.UtcNow);
+        var ingredient = new Ingredient(EntityId.New(), "Coffee", "g", now, now);
+        var recipe = new RecipeIngredient(EntityId.New(), variant, ingredient, 18m, "g");
         context.AttachRange(variant, recipe);
 
         variant.Update("Extra large", new Money(50000m));
@@ -305,7 +307,7 @@ public class CatalogMappingTests
         var variant = new SizeVariant(EntityId.New(), item.Id, "Large", new Money(45000m), isActive: false);
         var addon = new Addon(EntityId.New(), "Extra shot", new Money(10000m));
         var ingredient = new Ingredient(EntityId.New(), "Coffee beans", "g", now, now);
-        var recipe = new RecipeIngredient(EntityId.New(), variant.Id, ingredient.Id, 18.5m, "g");
+        var recipe = new RecipeIngredient(EntityId.New(), variant, ingredient, 18.5m, "g");
         var compatibility = new MenuItemAddon(item.Id, addon.Id);
 
         context.AddRange(category, item, variant, addon, ingredient, recipe, compatibility);

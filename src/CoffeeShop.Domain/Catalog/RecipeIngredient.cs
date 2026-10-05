@@ -1,6 +1,7 @@
 namespace CoffeeShop.Domain.Catalog;
 
 using CoffeeShop.Domain.Common;
+using CoffeeShop.Domain.Inventory;
 
 public class RecipeIngredient
 {
@@ -8,11 +9,16 @@ public class RecipeIngredient
     {
     }
 
-    public RecipeIngredient(EntityId id, EntityId sizeVariantId, EntityId ingredientId, decimal quantity, string unit)
+    public RecipeIngredient(EntityId id, SizeVariant sizeVariant, Ingredient ingredient, decimal quantity, string unit)
     {
         ArgumentNullException.ThrowIfNull(id);
-        ArgumentNullException.ThrowIfNull(sizeVariantId);
-        ArgumentNullException.ThrowIfNull(ingredientId);
+        ArgumentNullException.ThrowIfNull(sizeVariant);
+        ArgumentNullException.ThrowIfNull(ingredient);
+        if (!ingredient.IsActive)
+        {
+            throw new ArgumentException("Recipe ingredient must be active.", nameof(ingredient));
+        }
+
         var measuredQuantity = new MeasuredQuantity(quantity, unit);
         // Recipe quantities use numeric(12,3), narrower than inventory quantities.
         if (quantity <= 0 || quantity > 999_999_999.999m)
@@ -20,9 +26,21 @@ public class RecipeIngredient
             throw new ArgumentOutOfRangeException(nameof(quantity), "Recipe quantity must be positive and fit numeric(12,3).");
         }
 
+        var baseQuantity = ingredient.ConvertToBaseUnit(measuredQuantity.Value, measuredQuantity.Unit);
+        if (baseQuantity is null)
+        {
+            throw new ArgumentException("Recipe unit must be compatible with the ingredient's base unit.", nameof(unit));
+        }
+
+        // Stock uses numeric(14,3); conversion must not overflow or require rounding.
+        if (baseQuantity > MeasuredQuantity.MaximumValue || decimal.Round(baseQuantity.Value, 3) != baseQuantity.Value)
+        {
+            throw new ArgumentException("Recipe quantity must convert exactly to a representable base-unit quantity.", nameof(quantity));
+        }
+
         Id = id;
-        SizeVariantId = sizeVariantId;
-        IngredientId = ingredientId;
+        SizeVariantId = sizeVariant.Id;
+        IngredientId = ingredient.Id;
         Quantity = measuredQuantity.Value;
         Unit = measuredQuantity.Unit;
     }
