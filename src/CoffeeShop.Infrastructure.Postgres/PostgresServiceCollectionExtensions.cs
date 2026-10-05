@@ -1,7 +1,9 @@
 namespace CoffeeShop.Infrastructure.Postgres;
 
 using CoffeeShop.Application.Common.Persistence;
+using CoffeeShop.Application.Inventory;
 using CoffeeShop.Infrastructure.Postgres.Common;
+using CoffeeShop.Infrastructure.Postgres.Inventory;
 using Microsoft.Extensions.DependencyInjection;
 
 public static class PostgresServiceCollectionExtensions
@@ -17,6 +19,7 @@ public static class PostgresServiceCollectionExtensions
         services.AddScoped<IUnitOfWork>(serviceProvider =>
             serviceProvider.GetRequiredService<CoffeeShopDbContext>());
         services.AddScoped<ITransactionManager, PostgresTransactionManager>();
+        services.AddScoped<IInventoryRepository, InventoryRepository>();
 
         return services;
     }
