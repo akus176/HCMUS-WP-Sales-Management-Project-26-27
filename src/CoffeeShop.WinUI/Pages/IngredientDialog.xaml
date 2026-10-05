@@ -1,0 +1,12 @@
+<ContentDialog
+    x:Class="CoffeeShop.WinUI.Pages.IngredientDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    PrimaryButtonClick="OnPrimaryClick">
+    <StackPanel Spacing="12" MinWidth="360">
+        <TextBox x:Name="NameBox" Header="Name" PlaceholderText="e.g. Coffee beans" />
+        <TextBox x:Name="UnitBox" Header="Base unit" PlaceholderText="g, kg, ml, l, pcs" />
+        <TextBox x:Name="BalanceBox" Header="Initial balance" PlaceholderText="0" />
+        <TextBox x:Name="ThresholdBox" Header="Reorder threshold" PlaceholderText="0" />
+    </StackPanel>
+</ContentDialog>

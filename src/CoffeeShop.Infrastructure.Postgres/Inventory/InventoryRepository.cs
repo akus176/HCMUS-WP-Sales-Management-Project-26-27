@@ -28,6 +28,9 @@ public sealed class InventoryRepository : IInventoryRepository
     public async Task<IReadOnlyList<Ingredient>> ListIngredientsAsync(CancellationToken cancellationToken = default) =>
         await context.Ingredients.ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<Supplier>> ListSuppliersAsync(CancellationToken cancellationToken = default) =>
+        await context.Suppliers.ToListAsync(cancellationToken);
+
     public void AddIngredient(Ingredient ingredient) => context.Ingredients.Add(ingredient);
 
     public void AddSupplier(Supplier supplier) => context.Suppliers.Add(supplier);

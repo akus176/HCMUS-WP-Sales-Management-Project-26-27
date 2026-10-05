@@ -16,6 +16,8 @@ public partial class App : Microsoft.UI.Xaml.Application
 
     public static ServiceProvider Services { get; private set; } = null!;
 
+    public Window? Window => _window;
+
     public App()
     {
         InitializeComponent();

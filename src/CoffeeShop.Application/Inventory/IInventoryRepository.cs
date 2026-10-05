@@ -13,6 +13,8 @@ public interface IInventoryRepository
 
     Task<IReadOnlyList<Ingredient>> ListIngredientsAsync(CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Supplier>> ListSuppliersAsync(CancellationToken cancellationToken = default);
+
     void AddIngredient(Ingredient ingredient);
 
     void AddSupplier(Supplier supplier);
