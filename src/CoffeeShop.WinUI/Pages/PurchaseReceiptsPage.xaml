@@ -1,0 +1,9 @@
+<Page
+    x:Class="CoffeeShop.WinUI.Pages.PurchaseReceiptsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="24">
+        <TextBlock Text="Purchase Receipts" FontFamily="{StaticResource SketchHeadingFontFamily}"
+                   FontSize="28" Foreground="{StaticResource SketchForegroundBrush}" />
+    </Grid>
+</Page>

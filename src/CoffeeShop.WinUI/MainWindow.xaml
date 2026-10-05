@@ -2,21 +2,48 @@
     x:Class="CoffeeShop.WinUI.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Coffee Shop">
+    Title="Coffee Shop — Inventory">
     <Grid Background="{StaticResource SketchBackgroundBrush}">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="20" Padding="32">
-            <TextBlock Text="Coffee Shop" FontFamily="{StaticResource SketchHeadingFontFamily}"
-                       FontSize="40" Foreground="{StaticResource SketchForegroundBrush}" />
-            <Grid>
-                <Border Background="{StaticResource SketchBorderBrush}" CornerRadius="20,6,18,4"
-                        Translation="4,4,0" />
-                <Border Background="White" BorderBrush="{StaticResource SketchBorderBrush}"
-                        BorderThickness="2" CornerRadius="20,6,18,4" Padding="24">
-                    <TextBlock Text="The workspace is ready for the first business module."
-                               FontFamily="{StaticResource SketchBodyFontFamily}" FontSize="18"
-                               Foreground="{StaticResource SketchForegroundBrush}" TextWrapping="Wrap" />
-                </Border>
-            </Grid>
-        </StackPanel>
+        <NavigationView x:Name="Nav"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        PaneDisplayMode="Left"
+                        OpenPaneLength="220"
+                        SelectionChanged="OnNavSelectionChanged">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Ingredients" Tag="ingredients">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8F1;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Suppliers" Tag="suppliers">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE77B;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Purchase Receipts" Tag="receipts">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8A5;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Low Stock" Tag="lowstock">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE7BA;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Stock Adjustments" Tag="adjustments" IsEnabled="False">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8D7;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Movement History" Tag="movements" IsEnabled="False">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE81C;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="ContentFrame" Background="Transparent" />
+        </NavigationView>
     </Grid>
 </Window>
