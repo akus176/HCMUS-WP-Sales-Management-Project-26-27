@@ -3,9 +3,17 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     PrimaryButtonClick="OnPrimaryClick">
-    <StackPanel Spacing="12" MinWidth="360">
-        <ComboBox x:Name="IngredientBox" Header="Ingredient" PlaceholderText="Select an ingredient" MinWidth="240" />
-        <TextBox x:Name="QuantityBox" Header="Quantity" PlaceholderText="e.g. 5" />
-        <TextBox x:Name="UnitCostBox" Header="Unit cost" PlaceholderText="e.g. 30.00" />
+    <StackPanel Spacing="12"
+            MinWidth="360">
+        <ComboBox x:Name="IngredientBox"
+                Header="Ingredient"
+                PlaceholderText="Select an ingredient"
+                MinWidth="240"/>
+        <TextBox x:Name="QuantityBox"
+                Header="Quantity"
+                PlaceholderText="e.g. 5"/>
+        <TextBox x:Name="UnitCostBox"
+                Header="Unit cost"
+                PlaceholderText="e.g. 30.00"/>
     </StackPanel>
 </ContentDialog>
