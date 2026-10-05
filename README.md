@@ -47,6 +47,13 @@ to shared validation results and invalid state to shared conflict results, witho
 on EF Core. Repository loading, saving, search, and command/query orchestration belong to
 T3.5/T3.6; order snapshots and order-selection enforcement remain sales-module work.
 
+### Loyalty rules (T5.3)
+
+Configurable earning and redemption calculations enforce active customers,
+order eligibility, available balances, and percentage caps. See
+[the loyalty calculation contract](docs/loyalty-rules.md) for rounding, settings
+validation, and integration with the later transaction/persistence workflows.
+
 ## Local PostgreSQL configuration and migrations
 
 Copy `.env.example` to an ignored `.env` and replace the PostgreSQL placeholders. `.env` is a reference only and is **not** loaded automatically, so set the connection string in the current PowerShell session before using Entity Framework Core:
