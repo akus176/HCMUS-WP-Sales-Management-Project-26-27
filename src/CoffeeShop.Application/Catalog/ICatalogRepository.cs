@@ -1,0 +1,34 @@
+namespace CoffeeShop.Application.Catalog;
+
+using CoffeeShop.Domain.Catalog;
+using CoffeeShop.Domain.Common;
+using CoffeeShop.Domain.Inventory;
+
+public interface ICatalogRepository
+{
+    Task<Category?> FindCategoryAsync(EntityId id, CancellationToken cancellationToken = default);
+
+    Task<MenuItem?> FindMenuItemAsync(EntityId id, CancellationToken cancellationToken = default);
+
+    Task<SizeVariant?> FindSizeVariantAsync(EntityId id, CancellationToken cancellationToken = default);
+
+    Task<Addon?> FindAddonAsync(EntityId id, CancellationToken cancellationToken = default);
+
+    Task<Ingredient?> FindIngredientAsync(EntityId id, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<SizeVariant>> ListSizeVariantsAsync(
+        EntityId menuItemId,
+        CancellationToken cancellationToken = default);
+
+    void AddCategory(Category category);
+
+    void AddMenuItem(MenuItem menuItem);
+
+    void AddSizeVariant(SizeVariant sizeVariant);
+
+    void AddAddon(Addon addon);
+
+    void ReplaceCompatibleAddons(EntityId menuItemId, IReadOnlyCollection<MenuItemAddon> compatibility);
+
+    void ReplaceRecipe(EntityId sizeVariantId, IReadOnlyCollection<RecipeIngredient> recipe);
+}
