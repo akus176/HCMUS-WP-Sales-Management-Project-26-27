@@ -11,13 +11,34 @@ public sealed class InitialMigrationTests
         "Host=localhost;Port=5432;Database=coffeeshop_test;Username=test;Password=test";
 
     [Fact]
-    public void InitialMigration_IsTheOnlyRegisteredMigration()
+    public void InitialMigration_IsTheFirstRegisteredMigration()
     {
         using var context = CreateContext();
 
-        var migration = Assert.Single(context.Database.GetMigrations());
+        var migration = context.Database.GetMigrations().First();
 
         Assert.EndsWith("_InitialCreate", migration, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Migrations_MatchTheCurrentModel()
+    {
+        using var context = CreateContext();
+
+        Assert.False(context.Database.HasPendingModelChanges());
+    }
+
+    [Fact]
+    public void ReservationMigration_OnlyReplacesTheActiveReservationIndex()
+    {
+        using var context = CreateContext();
+        var migrations = context.Database.GetMigrations().ToArray();
+        var script = context.GetService<IMigrator>().GenerateScript(migrations[0], migrations[1]);
+
+        Assert.EndsWith("_FilterActiveReservations", migrations[1], StringComparison.Ordinal);
+        Assert.Contains("DROP INDEX sales.\"IX_reservations_table_id_reserved_for\"", script, StringComparison.Ordinal);
+        Assert.Contains("WHERE status NOT IN ('cancelled', 'completed')", script, StringComparison.Ordinal);
+        Assert.DoesNotContain("ALTER TABLE", script, StringComparison.Ordinal);
     }
 
     [Fact]

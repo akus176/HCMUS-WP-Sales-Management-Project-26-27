@@ -312,17 +312,17 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("customer_id");
 
-                    b.Property<bool>("IsDefault")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_default");
-
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true)
                         .HasColumnName("is_active");
+
+                    b.Property<bool>("IsDefault")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_default");
 
                     b.Property<string>("Label")
                         .HasMaxLength(40)
@@ -1573,7 +1573,9 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
 
                     b.HasIndex("Status", "ReservedFor");
 
-                    b.HasIndex("TableId", "ReservedFor");
+                    b.HasIndex("TableId", "ReservedFor")
+                        .IsUnique()
+                        .HasFilter("status NOT IN ('cancelled', 'completed')");
 
                     b.ToTable("reservations", "sales", t =>
                         {
@@ -1840,7 +1842,7 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("CoffeeShop.Domain.Sales.Order", null)
-                        .WithMany()
+                        .WithMany("Lines")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1859,7 +1861,7 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("CoffeeShop.Domain.Sales.OrderLine", null)
-                        .WithMany()
+                        .WithMany("Addons")
                         .HasForeignKey("OrderLineId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1874,7 +1876,7 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                         .IsRequired();
 
                     b.HasOne("CoffeeShop.Domain.Sales.Order", null)
-                        .WithMany()
+                        .WithMany("StatusHistory")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1944,6 +1946,18 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
             modelBuilder.Entity("CoffeeShop.Domain.Inventory.PurchaseReceipt", b =>
                 {
                     b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("CoffeeShop.Domain.Sales.Order", b =>
+                {
+                    b.Navigation("Lines");
+
+                    b.Navigation("StatusHistory");
+                });
+
+            modelBuilder.Entity("CoffeeShop.Domain.Sales.OrderLine", b =>
+                {
+                    b.Navigation("Addons");
                 });
 #pragma warning restore 612, 618
         }
