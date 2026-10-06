@@ -10,6 +10,14 @@ public sealed record DeactivateSupplierCommand(EntityId SupplierId);
 
 public sealed record ActivateSupplierCommand(EntityId SupplierId);
 
+public sealed record CreateIngredientCommand(string Name, string BaseUnit, decimal AvailableQuantity = 0, decimal ReorderThreshold = 0);
+
+public sealed record SetReorderThresholdCommand(EntityId IngredientId, decimal ReorderThreshold);
+
+public sealed record DeactivateIngredientCommand(EntityId IngredientId);
+
+public sealed record ActivateIngredientCommand(EntityId IngredientId);
+
 public sealed record CreateDraftReceiptCommand(EntityId SupplierId, string ReceiptNumber);
 
 public sealed record AddReceiptLineCommand(EntityId ReceiptId, EntityId IngredientId, decimal Quantity, decimal UnitCost);
