@@ -66,6 +66,126 @@ public class Customer
     public IReadOnlyCollection<LoyaltyTransaction> LoyaltyTransactions => _loyaltyTransactions.AsReadOnly();
 
     /// <summary>
+    /// Records an already validated earning amount. The caller must load the ledger and
+    /// validate order eligibility and current settings before applying points.
+    /// </summary>
+    public LoyaltyTransaction EarnLoyaltyPoints(
+        EntityId transactionId, int points, UtcTimestamp changedAt,
+        EntityId? orderId = null, EntityId? createdBy = null) =>
+        RecordLoyaltyPoints(transactionId, points, LoyaltyTransactionType.Earn, changedAt, orderId, createdBy);
+
+    /// <summary>
+    /// Records an already validated redemption amount. The caller applies the order discount
+    /// and persists the balance and ledger in the same transaction.
+    /// </summary>
+    public LoyaltyTransaction RedeemLoyaltyPoints(
+        EntityId transactionId, int points, UtcTimestamp changedAt,
+        EntityId? orderId = null, EntityId? createdBy = null) =>
+        RecordLoyaltyPoints(transactionId, points, LoyaltyTransactionType.Redeem, changedAt, orderId, createdBy);
+
+    /// <summary>
+    /// Appends the exact opposite of an original entry from this customer's loaded ledger.
+    /// A retry returns the existing reversal, including after subsequent balance changes.
+    /// Historical corrections are allowed for inactive customers. An unsupported resulting
+    /// balance fails without changing the ledger, balance, or audit timestamp.
+    /// </summary>
+    public LoyaltyTransaction ReverseLoyaltyTransaction(
+        EntityId transactionId, EntityId originalTransactionId, UtcTimestamp changedAt, EntityId? createdBy = null)
+    {
+        ArgumentNullException.ThrowIfNull(transactionId);
+        ArgumentNullException.ThrowIfNull(originalTransactionId);
+        ArgumentNullException.ThrowIfNull(changedAt);
+
+        var original = _loyaltyTransactions.FirstOrDefault(t => t.Id == originalTransactionId)
+            ?? throw new KeyNotFoundException("The original loyalty transaction was not found for this customer.");
+        if (original.Type is not (LoyaltyTransactionType.Earn or LoyaltyTransactionType.Redeem))
+        {
+            throw new InvalidOperationException("A reversal cannot itself be reversed.");
+        }
+
+        var reusedId = _loyaltyTransactions.FirstOrDefault(t => t.Id == transactionId);
+        if (reusedId is not null && reusedId.ReversesTransactionId != originalTransactionId)
+        {
+            throw new InvalidOperationException("The transaction ID already belongs to another loyalty operation.");
+        }
+
+        var existing = _loyaltyTransactions.FirstOrDefault(t => t.ReversesTransactionId == originalTransactionId);
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var type = original.Type == LoyaltyTransactionType.Earn
+            ? LoyaltyTransactionType.ReverseEarn
+            : LoyaltyTransactionType.ReverseRedeem;
+        return AppendLoyaltyTransaction(transactionId, type, -original.Points, changedAt,
+            original.OrderId, original.Id, createdBy);
+    }
+
+    private LoyaltyTransaction RecordLoyaltyPoints(
+        EntityId transactionId, int points, string type, UtcTimestamp changedAt,
+        EntityId? orderId, EntityId? createdBy)
+    {
+        ArgumentNullException.ThrowIfNull(transactionId);
+        ArgumentNullException.ThrowIfNull(changedAt);
+        if (points <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(points), "Points must be positive.");
+        }
+
+        var delta = type == LoyaltyTransactionType.Earn ? points : -points;
+        var existing = _loyaltyTransactions.FirstOrDefault(t => t.Id == transactionId);
+        if (existing is not null)
+        {
+            return MatchLoyaltyRetry(existing, type, delta, orderId);
+        }
+
+        if (orderId is not null)
+        {
+            existing = _loyaltyTransactions.FirstOrDefault(t => t.OrderId == orderId && t.Type == type);
+            if (existing is not null)
+            {
+                return MatchLoyaltyRetry(existing, type, delta, orderId);
+            }
+        }
+
+        if (!IsActive)
+        {
+            throw new InvalidOperationException("Inactive customers cannot earn or redeem loyalty points.");
+        }
+
+        return AppendLoyaltyTransaction(transactionId, type, delta, changedAt, orderId, null, createdBy);
+    }
+
+    private static LoyaltyTransaction MatchLoyaltyRetry(LoyaltyTransaction existing, string type, int delta, EntityId? orderId)
+    {
+        if (existing.Type != type || existing.Points != delta || existing.OrderId != orderId)
+        {
+            throw new InvalidOperationException("The loyalty operation was already recorded with different values.");
+        }
+
+        return existing;
+    }
+
+    private LoyaltyTransaction AppendLoyaltyTransaction(
+        EntityId transactionId, string type, int delta, UtcTimestamp changedAt,
+        EntityId? orderId, EntityId? reversesTransactionId, EntityId? createdBy)
+    {
+        var balance = (long)LoyaltyPointsBalance + delta;
+        if (balance < 0 || balance > int.MaxValue)
+        {
+            throw new InvalidOperationException("The loyalty operation would exceed the supported balance range.");
+        }
+
+        var transaction = new LoyaltyTransaction(transactionId, Id, type, delta, (int)balance,
+            changedAt, orderId, reversesTransactionId, createdBy);
+        _loyaltyTransactions.Add(transaction);
+        LoyaltyPointsBalance = transaction.BalanceAfter;
+        UpdatedAt = changedAt;
+        return transaction;
+    }
+
+    /// <summary>
     /// Updates the customer's profile contact details. Preserves active status:
     /// updating does not automatically reactivate a deactivated customer.
     /// </summary>

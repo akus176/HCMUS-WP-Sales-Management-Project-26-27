@@ -49,3 +49,11 @@ The system MUST reverse loyalty points earned or redeemed when the associated tr
 #### Scenario: Cancel an order that redeemed points
 - **WHEN** an order is cancelled after loyalty points were redeemed against it
 - **THEN** the system restores the redeemed points to the customer's balance through a reversing loyalty transaction
+
+#### Scenario: Reject a reversal that would overdraw the balance
+- **WHEN** reversing earned points would make the customer's balance negative because those points have already been spent
+- **THEN** the system returns a conflict and leaves the balance and transaction history unchanged
+
+#### Scenario: Retry a completed reversal
+- **WHEN** a reversal is requested again for the same original transaction
+- **THEN** the system returns the existing reversal without appending another entry or changing the balance again
