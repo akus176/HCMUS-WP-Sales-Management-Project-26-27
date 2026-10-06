@@ -8,6 +8,7 @@ T3.6 / issue #45 implements `ICatalogRepository` and `ICatalogReadRepository` be
 - Searches filter and limit in PostgreSQL, use case-insensitive literal substring matching on names (and menu descriptions), and return deterministically ordered results. Category ordering uses display order, then name and identifier; menu ordering uses name and identifier.
 - Management reads include inactive definitions and existing recipes after deactivation. This is not the ordering-availability query. Read repositories return Application read models without tracking entities; menu searches batch-load variants and add-ons rather than querying once per item.
 - Recipe writes use current ingredient definitions and Domain validation for activity, quantities, units, and conversion precision. Database foreign keys, unique indexes, and quantity checks remain a second integrity boundary. Configuring recipes does not change stock.
+- Replacement locks and reads are asynchronous and honor the command cancellation token, including while waiting for a competing transaction. Recipe validation runs inside the replacement transaction: ingredient definitions are freshly loaded without tracking and locked in identifier order with `FOR SHARE` until commit, preventing concurrent definition changes between validation and save.
 
 ## Migration repair
 

@@ -34,86 +34,89 @@ public sealed class RecipeCommandHandler
                 [new ErrorDetail("lines", "Add at least one ingredient line.")]));
         }
 
-        var variant = await repository.FindSizeVariantAsync(command.SizeVariantId, cancellationToken);
-        if (variant is null)
+        return await transactionManager.ExecuteInTransactionAsync(async () =>
         {
-            return Result.Failure(Error.NotFound(
-                "catalog.variant_not_found",
-                "The selected size variant was not found."));
-        }
-
-        var errors = new List<ErrorDetail>();
-        var recipe = new List<RecipeIngredient>();
-        var ingredientIds = new HashSet<EntityId>();
-
-        var index = 0;
-        foreach (var input in command.Lines)
-        {
-            var target = $"lines[{index}]";
-            if (input is null)
+            var variant = await repository.FindSizeVariantAsync(command.SizeVariantId, cancellationToken);
+            if (variant is null)
             {
-                errors.Add(new ErrorDetail(target, "Recipe line cannot be null."));
-                index++;
-                continue;
+                return Result.Failure(Error.NotFound(
+                    "catalog.variant_not_found",
+                    "The selected size variant was not found."));
             }
 
-            if (!ingredientIds.Add(input.IngredientId))
-            {
-                errors.Add(new ErrorDetail(
-                    $"{target}.ingredientId",
-                    "An ingredient can appear only once in a size-specific recipe."));
-                index++;
-                continue;
-            }
+            var errors = new List<ErrorDetail>();
+            var recipe = new List<RecipeIngredient>();
+            var ingredientIds = new HashSet<EntityId>();
+            var ingredients = (await repository.ListIngredientsForRecipeUpdateAsync(
+                command.Lines.Where(line => line is not null).Select(line => line!.IngredientId).Distinct().ToArray(),
+                cancellationToken)).ToDictionary(ingredient => ingredient.Id);
 
-            var ingredient = await repository.FindIngredientAsync(input.IngredientId, cancellationToken);
-            if (ingredient is null)
+            var index = 0;
+            foreach (var input in command.Lines)
             {
-                errors.Add(new ErrorDetail(
-                    $"{target}.ingredientId",
-                    $"Ingredient '{input.IngredientId}' was not found."));
-                index++;
-                continue;
-            }
-
-            try
-            {
-                recipe.Add(new RecipeIngredient(
-                    EntityId.New(),
-                    variant,
-                    ingredient,
-                    input.Quantity,
-                    input.Unit));
-            }
-            catch (ArgumentException exception)
-            {
-                var field = exception.ParamName switch
+                var target = $"lines[{index}]";
+                if (input is null)
                 {
-                    "ingredient" => "ingredientId",
-                    "quantity" => "quantity",
-                    "unit" => "unit",
-                    _ => "line"
-                };
-                errors.Add(new ErrorDetail($"{target}.{field}", exception.Message));
+                    errors.Add(new ErrorDetail(target, "Recipe line cannot be null."));
+                    index++;
+                    continue;
+                }
+
+                if (!ingredientIds.Add(input.IngredientId))
+                {
+                    errors.Add(new ErrorDetail(
+                        $"{target}.ingredientId",
+                        "An ingredient can appear only once in a size-specific recipe."));
+                    index++;
+                    continue;
+                }
+
+                var ingredient = ingredients.GetValueOrDefault(input.IngredientId);
+                if (ingredient is null)
+                {
+                    errors.Add(new ErrorDetail(
+                        $"{target}.ingredientId",
+                        $"Ingredient '{input.IngredientId}' was not found."));
+                    index++;
+                    continue;
+                }
+
+                try
+                {
+                    recipe.Add(new RecipeIngredient(
+                        EntityId.New(),
+                        variant,
+                        ingredient,
+                        input.Quantity,
+                        input.Unit));
+                }
+                catch (ArgumentException exception)
+                {
+                    var field = exception.ParamName switch
+                    {
+                        "ingredient" => "ingredientId",
+                        "quantity" => "quantity",
+                        "unit" => "unit",
+                        _ => "line"
+                    };
+                    errors.Add(new ErrorDetail($"{target}.{field}", exception.Message));
+                }
+
+                index++;
             }
 
-            index++;
-        }
+            if (errors.Count > 0)
+            {
+                return Result.Failure(Error.Validation(
+                    "catalog.recipe_invalid",
+                    "The recipe contains one or more invalid ingredient lines.",
+                    errors));
+            }
 
-        if (errors.Count > 0)
-        {
-            return Result.Failure(Error.Validation(
-                "catalog.recipe_invalid",
-                "The recipe contains one or more invalid ingredient lines.",
-                errors));
-        }
-
-        await transactionManager.ExecuteInTransactionAsync(async () =>
-        {
-            repository.ReplaceRecipe(variant.Id, recipe);
+            await repository.ReplaceRecipeAsync(variant.Id, recipe, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
-        }, cancellationToken);
 
-        return Result.Success();
+            return Result.Success();
+        }, cancellationToken);
     }
 }

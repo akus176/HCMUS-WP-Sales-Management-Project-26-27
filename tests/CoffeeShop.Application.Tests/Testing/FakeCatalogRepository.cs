@@ -48,6 +48,12 @@ public sealed class FakeCatalogRepository : ICatalogRepository, ICatalogReadRepo
     public Task<Ingredient?> FindIngredientAsync(EntityId id, CancellationToken cancellationToken = default) =>
         Task.FromResult(Ingredients.GetValueOrDefault(id));
 
+    public Task<IReadOnlyList<Ingredient>> ListIngredientsForRecipeUpdateAsync(
+        IReadOnlyCollection<EntityId> ingredientIds,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<Ingredient>>(Ingredients.Values
+            .Where(ingredient => ingredientIds.Contains(ingredient.Id)).ToList());
+
     public Task<IReadOnlyList<SizeVariant>> ListSizeVariantsAsync(
         EntityId menuItemId,
         CancellationToken cancellationToken = default) =>
@@ -64,18 +70,24 @@ public sealed class FakeCatalogRepository : ICatalogRepository, ICatalogReadRepo
 
     public void AddAddon(Addon addon) => Addons.Add(addon.Id, addon);
 
-    public void ReplaceCompatibleAddons(
+    public Task ReplaceCompatibleAddonsAsync(
         EntityId menuItemId,
-        IReadOnlyCollection<MenuItemAddon> compatibility)
+        IReadOnlyCollection<MenuItemAddon> compatibility,
+        CancellationToken cancellationToken = default)
     {
         Compatibility.RemoveAll(link => link.MenuItemId == menuItemId);
         Compatibility.AddRange(compatibility);
+        return Task.CompletedTask;
     }
 
-    public void ReplaceRecipe(
+    public Task ReplaceRecipeAsync(
         EntityId sizeVariantId,
-        IReadOnlyCollection<RecipeIngredient> recipe) =>
+        IReadOnlyCollection<RecipeIngredient> recipe,
+        CancellationToken cancellationToken = default)
+    {
         Recipes[sizeVariantId] = recipe;
+        return Task.CompletedTask;
+    }
 
     public Task<IReadOnlyList<CategorySummary>> SearchCategoriesAsync(
         CategorySearchCriteria criteria,

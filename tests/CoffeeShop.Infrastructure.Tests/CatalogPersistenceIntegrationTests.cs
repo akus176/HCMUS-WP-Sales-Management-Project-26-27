@@ -267,6 +267,142 @@ public sealed class CatalogPersistenceIntegrationTests : IAsyncLifetime
     }
 
     [PostgresTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task CancelledReplacement_StopsWhileWaitingForParentLock(bool recipe)
+    {
+        var drink = await SeedDrinkAsync();
+        await using var blockerScope = services.CreateAsyncScope();
+        var blocker = blockerScope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        await using var transaction = await blocker.Database.BeginTransactionAsync();
+        if (recipe)
+        {
+            await blocker.Database.ExecuteSqlInterpolatedAsync($"SELECT 1 FROM catalog.size_variants WHERE id = {drink.Large.Value} FOR UPDATE");
+        }
+        else
+        {
+            await blocker.Database.ExecuteSqlInterpolatedAsync($"SELECT 1 FROM catalog.menu_items WHERE id = {drink.Item.Value} FOR UPDATE");
+        }
+
+        await using var requestScope = services.CreateAsyncScope();
+        var context = requestScope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        var name = $"catalog_cancel_{Guid.NewGuid():N}";
+        context.Database.SetConnectionString(new NpgsqlConnectionStringBuilder(context.Database.GetConnectionString())
+        {
+            ApplicationName = name
+        }.ConnectionString);
+        using var cancellation = new CancellationTokenSource();
+        var replacement = Task.Run(async () => recipe
+            ? await Recipes(requestScope.ServiceProvider).ReplaceRecipeAsync(new(drink.Large, [new(drink.Beans, 22m, "g")]), cancellation.Token)
+            : await Commands(requestScope.ServiceProvider).SetMenuItemAddonsAsync(new(drink.Item, []), cancellation.Token));
+        var cancelledBeforeRelease = false;
+        try
+        {
+            Assert.True(await WaitForLockOrCompletionAsync(name, replacement));
+            cancellation.Cancel();
+            cancelledBeforeRelease = await Task.WhenAny(replacement, Task.Delay(TimeSpan.FromSeconds(3))) == replacement;
+        }
+        finally
+        {
+            await transaction.RollbackAsync();
+        }
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => replacement);
+        Assert.True(cancelledBeforeRelease, "Cancellation must stop the request without releasing the blocking lock.");
+        await using var readScope = services.CreateAsyncScope();
+        Assert.Equal(2, (await Queries(readScope.ServiceProvider).GetRecipeAsync(drink.Large)).Value.Lines.Count);
+        Assert.Equal(2, (await Queries(readScope.ServiceProvider).GetMenuItemDetailAsync(drink.Item)).Value.CompatibleAddons.Count);
+    }
+
+    [PostgresTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(bool changeUnit)
+    {
+        var drink = await SeedDrinkAsync();
+        await using var requestScope = services.CreateAsyncScope();
+        var context = requestScope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        var name = $"catalog_ingredient_{Guid.NewGuid():N}";
+        context.Database.SetConnectionString(new NpgsqlConnectionStringBuilder(context.Database.GetConnectionString())
+        {
+            ApplicationName = name
+        }.ConnectionString);
+        // A scoped context may already track the old definition before this command.
+        await requestScope.ServiceProvider.GetRequiredService<ICatalogRepository>().FindIngredientAsync(drink.Beans);
+        await using var writerScope = services.CreateAsyncScope();
+        var writer = writerScope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        await using var transaction = await writer.Database.BeginTransactionAsync();
+        if (changeUnit)
+        {
+            await writer.Database.ExecuteSqlInterpolatedAsync($"UPDATE inventory.ingredients SET base_unit = 'ml' WHERE id = {drink.Beans.Value}");
+        }
+        else
+        {
+            await writer.Database.ExecuteSqlInterpolatedAsync($"UPDATE inventory.ingredients SET is_active = false WHERE id = {drink.Beans.Value}");
+        }
+
+        var replacement = Task.Run(() => Recipes(requestScope.ServiceProvider)
+            .ReplaceRecipeAsync(new(drink.Large, [new(drink.Beans, 22m, "g")])));
+        bool waitedForLock;
+        try
+        {
+            waitedForLock = await WaitForLockOrCompletionAsync(name, replacement);
+        }
+        finally
+        {
+            await transaction.CommitAsync();
+        }
+
+        var result = await replacement;
+        Assert.True(waitedForLock, "Recipe validation must wait for the ingredient update to commit.");
+        Assert.Equal(ErrorType.Validation, result.Error!.Type);
+        Assert.False(context.ChangeTracker.HasChanges());
+        await using var readScope = services.CreateAsyncScope();
+        var lines = (await Queries(readScope.ServiceProvider).GetRecipeAsync(drink.Large)).Value.Lines;
+        Assert.Equal(2, lines.Count);
+        Assert.Contains(lines, line => line.IngredientId == drink.Beans && line.Quantity == 24m);
+        Assert.Contains(lines, line => line.IngredientId == drink.Milk && line.Quantity == 0.25m);
+    }
+
+    [PostgresTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task IngredientDefinitionUpdate_WaitsUntilRecipeCommit(bool changeUnit)
+    {
+        var drink = await SeedDrinkAsync();
+        await using var recipeScope = services.CreateAsyncScope();
+        var recipeContext = recipeScope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        await using var transaction = await recipeContext.Database.BeginTransactionAsync();
+        Assert.True((await Recipes(recipeScope.ServiceProvider)
+            .ReplaceRecipeAsync(new(drink.Large, [new(drink.Beans, 22m, "g")]))).IsSuccess);
+
+        await using var writerScope = services.CreateAsyncScope();
+        var writer = writerScope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        var name = $"catalog_definition_{Guid.NewGuid():N}";
+        writer.Database.SetConnectionString(new NpgsqlConnectionStringBuilder(writer.Database.GetConnectionString())
+        {
+            ApplicationName = name
+        }.ConnectionString);
+        var update = changeUnit
+            ? writer.Database.ExecuteSqlInterpolatedAsync($"UPDATE inventory.ingredients SET base_unit = 'ml' WHERE id = {drink.Beans.Value}")
+            : writer.Database.ExecuteSqlInterpolatedAsync($"UPDATE inventory.ingredients SET is_active = false WHERE id = {drink.Beans.Value}");
+        bool waitedForLock;
+        try
+        {
+            waitedForLock = await WaitForLockOrCompletionAsync(name, update);
+        }
+        finally
+        {
+            await transaction.CommitAsync();
+        }
+
+        Assert.Equal(1, await update);
+        Assert.True(waitedForLock, "Ingredient definitions must remain locked through the recipe commit.");
+        await using var readScope = services.CreateAsyncScope();
+        Assert.Equal(22m, Assert.Single((await Queries(readScope.ServiceProvider).GetRecipeAsync(drink.Large)).Value.Lines).Quantity);
+    }
+
+    [PostgresTheory]
     [InlineData("missing")]
     [InlineData("inactive")]
     [InlineData("zero")]
@@ -322,7 +458,7 @@ public sealed class CatalogPersistenceIntegrationTests : IAsyncLifetime
             var transaction = scope.ServiceProvider.GetRequiredService<ITransactionManager>();
             await Assert.ThrowsAsync<InvalidOperationException>(() => transaction.ExecuteInTransactionAsync(async () =>
             {
-                repository.ReplaceRecipe(drink.Large, [new RecipeIngredient(EntityId.New(), variant, ingredient, 99m, "g")]);
+                await repository.ReplaceRecipeAsync(drink.Large, [new RecipeIngredient(EntityId.New(), variant, ingredient, 99m, "g")]);
                 await scope.ServiceProvider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
                 throw new InvalidOperationException("Injected failure after save.");
             }));

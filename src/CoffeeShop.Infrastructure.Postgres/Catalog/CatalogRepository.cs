@@ -30,6 +30,19 @@ public sealed class CatalogRepository : ICatalogRepository
     public Task<Ingredient?> FindIngredientAsync(EntityId id, CancellationToken cancellationToken = default) =>
         context.Ingredients.FirstOrDefaultAsync(ingredient => ingredient.Id == id, cancellationToken);
 
+    public async Task<IReadOnlyList<Ingredient>> ListIngredientsForRecipeUpdateAsync(
+        IReadOnlyCollection<EntityId> ingredientIds,
+        CancellationToken cancellationToken = default)
+    {
+        RequireTransaction();
+        var ids = ingredientIds.Select(id => id.Value).ToArray();
+        // Stable lock order avoids deadlocks; SHARE blocks definition updates through save.
+        // No tracking ensures validation does not reuse a stale scoped entity.
+        return await context.Ingredients.FromSqlInterpolated(
+            $"SELECT * FROM inventory.ingredients WHERE id = ANY({ids}) ORDER BY id FOR SHARE")
+            .AsNoTracking().ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<SizeVariant>> ListSizeVariantsAsync(
         EntityId menuItemId,
         CancellationToken cancellationToken = default) =>
@@ -45,12 +58,16 @@ public sealed class CatalogRepository : ICatalogRepository
 
     public void AddAddon(Addon addon) => context.Addons.Add(addon);
 
-    public void ReplaceCompatibleAddons(EntityId menuItemId, IReadOnlyCollection<MenuItemAddon> compatibility)
+    public async Task ReplaceCompatibleAddonsAsync(
+        EntityId menuItemId,
+        IReadOnlyCollection<MenuItemAddon> compatibility,
+        CancellationToken cancellationToken = default)
     {
         RequireTransaction();
         // Lock the parent before reading so even initially empty sets serialize.
-        context.Database.ExecuteSqlInterpolated($"SELECT 1 FROM catalog.menu_items WHERE id = {menuItemId.Value} FOR UPDATE");
-        var existing = context.MenuItemAddons.Where(link => link.MenuItemId == menuItemId).ToList();
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT 1 FROM catalog.menu_items WHERE id = {menuItemId.Value} FOR UPDATE", cancellationToken);
+        var existing = await context.MenuItemAddons.Where(link => link.MenuItemId == menuItemId).ToListAsync(cancellationToken);
         var requestedIds = compatibility.Select(link => link.AddonId).ToHashSet();
         var existingIds = existing.Select(link => link.AddonId).ToHashSet();
 
@@ -59,11 +76,15 @@ public sealed class CatalogRepository : ICatalogRepository
         context.MenuItemAddons.AddRange(compatibility.Where(link => !existingIds.Contains(link.AddonId)));
     }
 
-    public void ReplaceRecipe(EntityId sizeVariantId, IReadOnlyCollection<RecipeIngredient> recipe)
+    public async Task ReplaceRecipeAsync(
+        EntityId sizeVariantId,
+        IReadOnlyCollection<RecipeIngredient> recipe,
+        CancellationToken cancellationToken = default)
     {
         RequireTransaction();
-        context.Database.ExecuteSqlInterpolated($"SELECT 1 FROM catalog.size_variants WHERE id = {sizeVariantId.Value} FOR UPDATE");
-        var existing = context.RecipeIngredients.Where(line => line.SizeVariantId == sizeVariantId).ToList();
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT 1 FROM catalog.size_variants WHERE id = {sizeVariantId.Value} FOR UPDATE", cancellationToken);
+        var existing = await context.RecipeIngredients.Where(line => line.SizeVariantId == sizeVariantId).ToListAsync(cancellationToken);
         context.RecipeIngredients.RemoveRange(existing);
         context.RecipeIngredients.AddRange(recipe);
     }

@@ -29,20 +29,20 @@ public class PostgresAdapterTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void CatalogReplacement_WithoutTransaction_RejectsBeforeAccessingDatabase(bool recipe)
+    public async Task CatalogReplacement_WithoutTransaction_RejectsBeforeAccessingDatabase(bool recipe)
     {
         using var context = CreateContext();
         var repository = new CatalogRepository(context);
 
-        var exception = Assert.Throws<InvalidOperationException>(() =>
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
             if (recipe)
             {
-                repository.ReplaceRecipe(EntityId.New(), []);
+                await repository.ReplaceRecipeAsync(EntityId.New(), []);
             }
             else
             {
-                repository.ReplaceCompatibleAddons(EntityId.New(), []);
+                await repository.ReplaceCompatibleAddonsAsync(EntityId.New(), []);
             }
         });
 
