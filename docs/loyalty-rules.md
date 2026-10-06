@@ -41,3 +41,43 @@ reversal; T5.5 applies the rules with persistence and retry/concurrency guards.
 Those workflows must load current settings and customer/order state, revalidate
 at commit time, and apply the balance, order discount, and ledger changes in one
 transaction. Reversals must use the original transaction values, not new settings.
+
+## Ledger operations (T5.4)
+
+`Customer.EarnLoyaltyPoints`, `RedeemLoyaltyPoints`, and
+`ReverseLoyaltyTransaction` append immutable `LoyaltyTransaction` entries and
+update the cached balance and customer timestamp together. `LoyaltyLedger`
+exposes these operations through Application results. These are domain ledger
+operations on resolved objects; they do not load or save data or change orders.
+
+- Earning and redemption take positive, already validated point amounts.
+  Redemption stores a negative delta. A zero earning quote requires no ledger
+  call because zero-delta entries are forbidden.
+- Callers must load the customer's ledger, validate order attachment,
+  eligibility, and current settings with `LoyaltyRules`, and persist the ledger,
+  balance, and any order changes in one transaction. A customer constructed with
+  an existing balance represents persisted state, not a new earning event.
+- Matching retries use the transaction ID, or `(orderId, type)` when an order
+  is present. They return the existing entry without changing the balance or
+  timestamp. Reusing either identity with a different amount or operation
+  returns a conflict. New operations are rejected for inactive customers.
+- A reversal locates the original earning or redemption in this customer's
+  ledger, negates its points, copies its order reference, and links to its ID.
+  It never recalculates from settings or modifies the original entry.
+- Reversal retries return the existing reversal by original transaction ID,
+  even with a new request ID, no order reference, or later balance changes.
+  A request ID belonging to a different operation is rejected. Reversing a
+  reversal is rejected. Historical reversals are allowed for inactive customers.
+- If earned points have already been spent and reversing them would make the
+  balance negative, the reversal returns a conflict without changing any state.
+  Balances exceeding `int.MaxValue` are also rejected without mutation.
+- Invalid arguments return `loyalty.invalid_input`; state or balance conflicts
+  return `loyalty.invalid_state`; an original transaction missing from the
+  customer's ledger returns `loyalty.transaction_not_found`.
+
+T5.5 must load sufficient ledger history for these checks and serialize or
+concurrency-check customer balance updates. The existing order/type database
+index alone does not protect orderless reversals or concurrent operations on
+different orders. Persistence needs a unique original-reversal reference and
+enforcement against updating/deleting stored ledger entries. In-memory retry
+checks are not a substitute for these database guarantees.
