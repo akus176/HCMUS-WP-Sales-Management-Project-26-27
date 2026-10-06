@@ -24,6 +24,12 @@ public sealed class FakeInventoryRepository : IInventoryRepository
     public Task<IReadOnlyList<Ingredient>> ListIngredientsAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<Ingredient>>(Ingredients.Values.ToList().AsReadOnly());
 
+    public Task<IReadOnlyList<Supplier>> ListSuppliersAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<Supplier>>(Suppliers.Values.ToList().AsReadOnly());
+
+    public Task<IReadOnlyList<PurchaseReceipt>> ListReceiptsAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<PurchaseReceipt>>(Receipts.Values.ToList().AsReadOnly());
+
     public void AddIngredient(Ingredient ingredient) => Ingredients.Add(ingredient.Id, ingredient);
 
     public void AddSupplier(Supplier supplier) => Suppliers.Add(supplier.Id, supplier);

@@ -1,0 +1,172 @@
+<Page
+    x:Class="CoffeeShop.WinUI.Pages.PurchaseReceiptsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:pages="using:CoffeeShop.WinUI.Pages">
+
+    <Grid Padding="24"
+            RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0"
+                ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Purchase Receipts"
+                    FontFamily="{StaticResource SketchHeadingFontFamily}"
+                       FontSize="28"
+                    Foreground="{StaticResource SketchForegroundBrush}"/>
+            <Button Grid.Column="1"
+                    Content="New receipt"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="OnNewReceipt"/>
+        </Grid>
+
+        <InfoBar Grid.Row="1"
+                x:Name="Status"
+                IsOpen="False"
+                IsClosable="True"/>
+
+        <ScrollViewer Grid.Row="2"
+                MaxHeight="220">
+            <ListView x:Name="ReceiptsList"
+                    SelectionMode="Single"
+                    IsItemClickEnabled="True"
+                    ItemClick="OnReceiptSelected">
+                <ListView.Header>
+                    <Grid Padding="12,8"
+                            ColumnSpacing="12"
+                            Background="{ThemeResource LayerFillColorDefaultBrush}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="1.5*"/>
+                            <ColumnDefinition Width="1*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Receipt number"
+                                FontWeight="SemiBold"/>
+                        <TextBlock Grid.Column="1"
+                                Text="Supplier"
+                                FontWeight="SemiBold"/>
+                        <TextBlock Grid.Column="2"
+                                Text="Status"
+                                FontWeight="SemiBold"/>
+                        <TextBlock Grid.Column="3"
+                                Text="Lines"
+                                FontWeight="SemiBold"/>
+                    </Grid>
+                </ListView.Header>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="pages:ReceiptRow">
+                        <Grid Padding="12,8"
+                                ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="1.5*"/>
+                                <ColumnDefinition Width="1*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{x:Bind ReceiptNumber}"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                    Text="{x:Bind SupplierName}"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="2"
+                                    Text="{x:Bind StatusDisplay}"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="3"
+                                    Text="{x:Bind LineCount}"
+                                    VerticalAlignment="Center"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="3"
+                Spacing="12"
+                x:Name="DetailPanel"
+                Visibility="Collapsed">
+            <TextBlock x:Name="DetailTitle"
+                    FontSize="20"
+                    FontWeight="SemiBold"/>
+            <ScrollViewer MaxHeight="240">
+                <ListView x:Name="LinesList">
+                    <ListView.Header>
+                        <Grid Padding="12,8"
+                                ColumnSpacing="12"
+                                Background="{ThemeResource LayerFillColorDefaultBrush}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1*"/>
+                                <ColumnDefinition Width="1.5*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Ingredient"
+                                    FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="1"
+                                    Text="Quantity"
+                                    FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="2"
+                                    Text="Unit cost"
+                                    FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="3"
+                                    Text="Line total"
+                                    FontWeight="SemiBold"/>
+                            <TextBlock Grid.Column="4"
+                                    Text="Actions"
+                                    FontWeight="SemiBold"/>
+                        </Grid>
+                    </ListView.Header>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="pages:ReceiptLineRow">
+                            <Grid Padding="12,8"
+                                    ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="1.5*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{x:Bind IngredientName}"
+                                        VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1"
+                                        Text="{x:Bind QuantityDisplay}"
+                                        VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2"
+                                        Text="{x:Bind UnitCostDisplay}"
+                                        VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="3"
+                                        Text="{x:Bind LineTotalDisplay}"
+                                        VerticalAlignment="Center"/>
+                                <Button Grid.Column="4"
+                                        Content="Remove"
+                                        Click="OnRemoveLine"
+                                        Tag="{x:Bind}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </ScrollViewer>
+            <StackPanel Orientation="Horizontal"
+                    Spacing="8">
+                <Button Content="Add line"
+                        Click="OnAddLine"/>
+                <Button Content="Post receipt"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Click="OnPostReceipt"/>
+                <Button Content="Cancel receipt"
+                        Click="OnCancelReceipt"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Page>

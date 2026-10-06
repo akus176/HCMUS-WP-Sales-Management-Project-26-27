@@ -1,0 +1,16 @@
+<ContentDialog
+    x:Class="CoffeeShop.WinUI.Pages.NewReceiptDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    PrimaryButtonClick="OnPrimaryClick">
+    <StackPanel Spacing="12"
+            MinWidth="360">
+        <ComboBox x:Name="SupplierBox"
+                Header="Supplier"
+                PlaceholderText="Select a supplier"
+                MinWidth="240"/>
+        <TextBox x:Name="ReceiptNumberBox"
+                Header="Receipt number"
+                PlaceholderText="e.g. PR-2026-001"/>
+    </StackPanel>
+</ContentDialog>

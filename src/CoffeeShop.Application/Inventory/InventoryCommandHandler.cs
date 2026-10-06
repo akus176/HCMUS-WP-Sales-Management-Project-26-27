@@ -258,4 +258,96 @@ public sealed class InventoryCommandHandler
 
     private static Error ReceiptNotFound(EntityId id) =>
         Error.NotFound("inventory.receipt_not_found", $"Purchase receipt '{id}' was not found.");
+
+    private static Error IngredientNotFound(EntityId id) =>
+        Error.NotFound("inventory.ingredient_not_found", $"Ingredient '{id}' was not found.");
+
+    public async Task<Result<EntityId>> CreateIngredientAsync(
+        CreateIngredientCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        var created = IngredientLifecycle.CreateIngredient(
+            EntityId.New(),
+            command.Name,
+            command.BaseUnit,
+            clock.UtcNow,
+            command.AvailableQuantity,
+            command.ReorderThreshold);
+        if (created.IsFailure)
+        {
+            return Result<EntityId>.Failure(created.Error!);
+        }
+
+        repository.AddIngredient(created.Value);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result<EntityId>.Success(created.Value.Id);
+    }
+
+    public async Task<Result> SetReorderThresholdAsync(
+        SetReorderThresholdCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        var ingredient = await repository.FindIngredientAsync(command.IngredientId, cancellationToken);
+        if (ingredient is null)
+        {
+            return Result.Failure(IngredientNotFound(command.IngredientId));
+        }
+
+        var updated = IngredientLifecycle.SetReorderThreshold(ingredient, command.ReorderThreshold, clock.UtcNow);
+        if (updated.IsFailure)
+        {
+            return updated;
+        }
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+    }
+
+    public async Task<Result> DeactivateIngredientAsync(
+        DeactivateIngredientCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        var ingredient = await repository.FindIngredientAsync(command.IngredientId, cancellationToken);
+        if (ingredient is null)
+        {
+            return Result.Failure(IngredientNotFound(command.IngredientId));
+        }
+
+        var deactivated = IngredientLifecycle.DeactivateIngredient(ingredient, clock.UtcNow);
+        if (deactivated.IsFailure)
+        {
+            return deactivated;
+        }
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+    }
+
+    public async Task<Result> ActivateIngredientAsync(
+        ActivateIngredientCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        var ingredient = await repository.FindIngredientAsync(command.IngredientId, cancellationToken);
+        if (ingredient is null)
+        {
+            return Result.Failure(IngredientNotFound(command.IngredientId));
+        }
+
+        var activated = IngredientLifecycle.ActivateIngredient(ingredient, clock.UtcNow);
+        if (activated.IsFailure)
+        {
+            return activated;
+        }
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return Result.Success();
+    }
 }
