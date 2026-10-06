@@ -181,6 +181,92 @@ public sealed class CatalogPersistenceIntegrationTests : IAsyncLifetime
     }
 
     [PostgresTheory]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    [InlineData(true, true)]
+    public async Task ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(bool recipe, bool initiallyEmpty)
+    {
+        var drink = await SeedDrinkAsync();
+        EntityId otherAddon;
+        await using (var scope = services.CreateAsyncScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+            otherAddon = await context.MenuItemAddons.Where(link => link.MenuItemId == drink.Item && link.AddonId != drink.Addon)
+                .Select(link => link.AddonId).SingleAsync();
+            if (initiallyEmpty)
+            {
+                if (recipe)
+                {
+                    context.RecipeIngredients.RemoveRange(context.RecipeIngredients.Where(line => line.SizeVariantId == drink.Large));
+                }
+                else
+                {
+                    Assert.True((await Commands(scope.ServiceProvider).SetMenuItemAddonsAsync(new(drink.Item, []))).IsSuccess);
+                }
+
+                await context.SaveChangesAsync();
+            }
+        }
+
+        var firstSaved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseFirst = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var secondConnectionName = $"catalog_replace_{Guid.NewGuid():N}";
+        await using var firstScope = services.CreateAsyncScope();
+        await using var secondScope = services.CreateAsyncScope();
+        var secondContext = secondScope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        secondContext.Database.SetConnectionString(new NpgsqlConnectionStringBuilder(secondContext.Database.GetConnectionString())
+        {
+            ApplicationName = secondConnectionName
+        }.ConnectionString);
+
+        var first = firstScope.ServiceProvider.GetRequiredService<ITransactionManager>().ExecuteInTransactionAsync(async () =>
+        {
+            var result = recipe
+                ? await Recipes(firstScope.ServiceProvider).ReplaceRecipeAsync(new(drink.Large, [new(drink.Beans, 22m, "g")]))
+                : await Commands(firstScope.ServiceProvider).SetMenuItemAddonsAsync(new(drink.Item, [drink.Addon]));
+            Assert.True(result.IsSuccess);
+            firstSaved.SetResult();
+            await releaseFirst.Task.WaitAsync(TimeSpan.FromSeconds(15));
+        });
+
+        Task<Result>? second = null;
+        var waitedForLock = false;
+        try
+        {
+            await firstSaved.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            second = Task.Run(async () => recipe
+                ? await Recipes(secondScope.ServiceProvider).ReplaceRecipeAsync(new(drink.Large, [new(drink.Milk, 200m, "ml")]))
+                : await Commands(secondScope.ServiceProvider).SetMenuItemAddonsAsync(new(drink.Item, [otherAddon])));
+            waitedForLock = await WaitForLockOrCompletionAsync(secondConnectionName, second);
+        }
+        finally
+        {
+            releaseFirst.TrySetResult();
+            await first;
+            if (second is not null)
+            {
+                Assert.True((await second.WaitAsync(TimeSpan.FromSeconds(10))).IsSuccess);
+            }
+        }
+
+        await using var readScope = services.CreateAsyncScope();
+        if (recipe)
+        {
+            var line = Assert.Single((await Queries(readScope.ServiceProvider).GetRecipeAsync(drink.Large)).Value.Lines);
+            Assert.Equal(drink.Milk, line.IngredientId);
+            Assert.Equal(200m, line.Quantity);
+        }
+        else
+        {
+            var addon = Assert.Single((await Queries(readScope.ServiceProvider).GetMenuItemDetailAsync(drink.Item)).Value.CompatibleAddons);
+            Assert.Equal(otherAddon, addon.Id);
+        }
+
+        Assert.True(waitedForLock, "The second replacement must wait until the first transaction commits.");
+    }
+
+    [PostgresTheory]
     [InlineData("missing")]
     [InlineData("inactive")]
     [InlineData("zero")]
@@ -356,6 +442,27 @@ public sealed class CatalogPersistenceIntegrationTests : IAsyncLifetime
         await using var command = context.Database.GetDbConnection().CreateCommand();
         command.CommandText = "SELECT indexdef FROM pg_indexes WHERE schemaname = 'sales' AND indexname = 'IX_reservations_table_id_reserved_for'";
         return (string)(await command.ExecuteScalarAsync())!;
+    }
+
+    private async Task<bool> WaitForLockOrCompletionAsync(string applicationName, Task replacement)
+    {
+        await using var connection = new NpgsqlConnection(adminConnectionString);
+        await connection.OpenAsync();
+        await using var command = new NpgsqlCommand(
+            "SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE application_name = @name AND wait_event_type = 'Lock')", connection);
+        command.Parameters.AddWithValue("name", applicationName);
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        while (!replacement.IsCompleted)
+        {
+            if ((bool)(await command.ExecuteScalarAsync(timeout.Token))!)
+            {
+                return true;
+            }
+
+            await Task.Delay(25, timeout.Token);
+        }
+
+        return false;
     }
 
     private static CatalogCommandHandler Commands(IServiceProvider provider) => new(

@@ -1,7 +1,9 @@
 namespace CoffeeShop.Infrastructure.Tests;
 
 using CoffeeShop.Application.Common.Persistence;
+using CoffeeShop.Domain.Common;
 using CoffeeShop.Infrastructure.Postgres;
+using CoffeeShop.Infrastructure.Postgres.Catalog;
 using CoffeeShop.Infrastructure.Postgres.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +24,30 @@ public class PostgresAdapterTests
         using var context = CreateContext();
 
         Assert.IsAssignableFrom<IUnitOfWork>(context);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CatalogReplacement_WithoutTransaction_RejectsBeforeAccessingDatabase(bool recipe)
+    {
+        using var context = CreateContext();
+        var repository = new CatalogRepository(context);
+
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+        {
+            if (recipe)
+            {
+                repository.ReplaceRecipe(EntityId.New(), []);
+            }
+            else
+            {
+                repository.ReplaceCompatibleAddons(EntityId.New(), []);
+            }
+        });
+
+        Assert.Contains("require a transaction", exception.Message, StringComparison.Ordinal);
+        Assert.Empty(context.ChangeTracker.Entries());
     }
 
     [Fact]

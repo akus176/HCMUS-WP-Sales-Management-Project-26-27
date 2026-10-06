@@ -47,6 +47,9 @@ public sealed class CatalogRepository : ICatalogRepository
 
     public void ReplaceCompatibleAddons(EntityId menuItemId, IReadOnlyCollection<MenuItemAddon> compatibility)
     {
+        RequireTransaction();
+        // Lock the parent before reading so even initially empty sets serialize.
+        context.Database.ExecuteSqlInterpolated($"SELECT 1 FROM catalog.menu_items WHERE id = {menuItemId.Value} FOR UPDATE");
         var existing = context.MenuItemAddons.Where(link => link.MenuItemId == menuItemId).ToList();
         var requestedIds = compatibility.Select(link => link.AddonId).ToHashSet();
         var existingIds = existing.Select(link => link.AddonId).ToHashSet();
@@ -58,8 +61,18 @@ public sealed class CatalogRepository : ICatalogRepository
 
     public void ReplaceRecipe(EntityId sizeVariantId, IReadOnlyCollection<RecipeIngredient> recipe)
     {
+        RequireTransaction();
+        context.Database.ExecuteSqlInterpolated($"SELECT 1 FROM catalog.size_variants WHERE id = {sizeVariantId.Value} FOR UPDATE");
         var existing = context.RecipeIngredients.Where(line => line.SizeVariantId == sizeVariantId).ToList();
         context.RecipeIngredients.RemoveRange(existing);
         context.RecipeIngredients.AddRange(recipe);
+    }
+
+    private void RequireTransaction()
+    {
+        if (context.Database.CurrentTransaction is null)
+        {
+            throw new InvalidOperationException("Catalog replacements require a transaction spanning replacement and save.");
+        }
     }
 }
