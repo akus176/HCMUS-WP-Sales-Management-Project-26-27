@@ -1,7 +1,9 @@
 namespace CoffeeShop.Infrastructure.Tests;
 
+using CoffeeShop.Application.Catalog;
 using CoffeeShop.Application.Common.Persistence;
 using CoffeeShop.Infrastructure.Postgres;
+using CoffeeShop.Infrastructure.Postgres.Catalog;
 using CoffeeShop.Infrastructure.Postgres.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -50,6 +52,16 @@ public sealed class PostgresConfigurationTests
         Assert.Same(context, scope.ServiceProvider.GetRequiredService<IUnitOfWork>());
         Assert.IsType<PostgresTransactionManager>(
             scope.ServiceProvider.GetRequiredService<ITransactionManager>());
+        var catalog = scope.ServiceProvider.GetRequiredService<ICatalogRepository>();
+        var catalogReads = scope.ServiceProvider.GetRequiredService<ICatalogReadRepository>();
+        Assert.IsType<CatalogRepository>(catalog);
+        Assert.IsType<CatalogReadRepository>(catalogReads);
+        Assert.Same(catalog, scope.ServiceProvider.GetRequiredService<ICatalogRepository>());
+        Assert.Same(catalogReads, scope.ServiceProvider.GetRequiredService<ICatalogReadRepository>());
+
+        using var otherScope = serviceProvider.CreateScope();
+        Assert.NotSame(catalog, otherScope.ServiceProvider.GetRequiredService<ICatalogRepository>());
+        Assert.NotSame(catalogReads, otherScope.ServiceProvider.GetRequiredService<ICatalogReadRepository>());
     }
 
     [Fact]

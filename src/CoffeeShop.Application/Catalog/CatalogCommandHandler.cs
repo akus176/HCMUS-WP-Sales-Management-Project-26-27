@@ -410,7 +410,7 @@ public sealed class CatalogCommandHandler
 
         await transactionManager.ExecuteInTransactionAsync(async () =>
         {
-            repository.ReplaceCompatibleAddons(item.Id, links);
+            await repository.ReplaceCompatibleAddonsAsync(item.Id, links, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }, cancellationToken);
 

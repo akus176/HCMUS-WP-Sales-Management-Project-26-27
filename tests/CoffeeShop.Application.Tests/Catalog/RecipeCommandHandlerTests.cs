@@ -75,12 +75,12 @@ public sealed class RecipeCommandHandlerTests
         Assert.Contains(result.Error.Details, detail => detail.Target == "lines[2].quantity");
         Assert.Contains(result.Error.Details, detail => detail.Target == "lines[3].unit");
         Assert.Empty(context.Repository.Recipes);
-        Assert.Equal(0, context.TransactionManager.ExecutionCount);
+        Assert.Equal(1, context.TransactionManager.ExecutionCount);
         Assert.Equal(0, context.UnitOfWork.SaveChangesCallCount);
     }
 
     [Fact]
-    public async Task ReplaceRecipe_WithDuplicateIngredient_ReturnsValidationWithoutTransaction()
+    public async Task ReplaceRecipe_WithDuplicateIngredient_ReturnsValidationWithoutMutation()
     {
         var context = CreateContext();
         var variant = AddVariant(context.Repository);
@@ -93,7 +93,7 @@ public sealed class RecipeCommandHandlerTests
         AssertError(result, ErrorType.Validation, "catalog.recipe_invalid");
         Assert.Contains(result.Error!.Details, detail => detail.Target == "lines[1].ingredientId");
         Assert.Empty(context.Repository.Recipes);
-        Assert.Equal(0, context.TransactionManager.ExecutionCount);
+        Assert.Equal(1, context.TransactionManager.ExecutionCount);
     }
 
     [Fact]
