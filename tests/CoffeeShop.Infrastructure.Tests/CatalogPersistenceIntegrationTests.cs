@@ -3,11 +3,13 @@ namespace CoffeeShop.Infrastructure.Tests;
 using CoffeeShop.Application.Catalog;
 using CoffeeShop.Application.Common.Persistence;
 using CoffeeShop.Application.Common.Results;
+using CoffeeShop.Application.Common.Time;
 using CoffeeShop.Domain.Catalog;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Inventory;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Common;
+using CoffeeShop.WinUI.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -36,7 +38,9 @@ public sealed class CatalogPersistenceIntegrationTests : IAsyncLifetime
         await command.ExecuteNonQueryAsync();
 
         var builder = new NpgsqlConnectionStringBuilder(configured) { Database = databaseName, Pooling = false };
-        services = new ServiceCollection().AddCoffeeShopPostgres(builder.ConnectionString).BuildServiceProvider();
+        services = new ServiceCollection().AddCoffeeShopPostgres(builder.ConnectionString)
+            .AddSingleton<IClock, SystemClock>().AddScoped<CatalogCommandHandler>()
+            .AddScoped<RecipeCommandHandler>().AddScoped<CatalogQueryHandler>().BuildServiceProvider();
         await using var scope = services.CreateAsyncScope();
         await scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>().Database.MigrateAsync();
     }
@@ -55,6 +59,63 @@ public sealed class CatalogPersistenceIntegrationTests : IAsyncLifetime
             await using var command = new NpgsqlCommand($"DROP DATABASE IF EXISTS \"{databaseName}\" WITH (FORCE)", connection);
             await command.ExecuteNonQueryAsync();
         }
+    }
+
+    [PostgresFact]
+    public async Task WinUICatalogWorkspace_CompletesOperatorWorkflowWithFreshDatabaseScopes()
+    {
+        var model = new CatalogWorkspace(services.GetRequiredService<IServiceScopeFactory>());
+        await model.LoadAsync();
+        Assert.True(model.IsEmpty);
+        Assert.True(await model.SaveAsync(async (commands, _) => await commands.CreateCategoryAsync(new("Coffee")), "Category saved."));
+        var category = Assert.Single(model.Categories);
+        Assert.True(await model.SaveAsync(async (commands, _) => await commands.CreateMenuItemAsync(new(category.Id,
+            "Latte", "Milk coffee", [new("Small", 25.50m)])), "Drink saved."));
+        var item = Assert.Single(model.Items);
+        await model.SelectAsync(item.Id);
+        var small = Assert.Single(model.SelectedItem!.SizeVariants);
+        Assert.True(await model.SaveAsync(async (commands, _) => await commands.CreateSizeVariantAsync(new(item.Id, "Large", 35.75m)), "Size saved."));
+        Assert.True(await model.SaveAsync(async (commands, _) => await commands.CreateAddonAsync(new("Cream", 5m)), "Add-on saved."));
+        var addon = Assert.Single(model.Addons);
+        Assert.True(await model.SaveAsync((commands, _) => commands.SetMenuItemAddonsAsync(new(item.Id, [addon.Id])), "Compatibility saved."));
+
+        var beansId = EntityId.New();
+        using (var scope = services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+            var now = new SystemClock().UtcNow;
+            context.Ingredients.Add(new Ingredient(beansId, "Beans", "g", now, now));
+            context.Ingredients.Add(new Ingredient(EntityId.New(), "Inactive beans", "g", now, now, isActive: false));
+            await context.SaveChangesAsync();
+        }
+
+        await model.LoadAsync();
+        Assert.Equal(beansId, Assert.Single(model.Ingredients).Id);
+        Assert.True(await model.SaveAsync((_, recipes) => recipes.ReplaceRecipeAsync(new(small.Id, [new(beansId, 18m, "g")])), "Recipe saved."));
+        var large = model.SelectedItem!.SizeVariants.Single(variant => variant.SizeName == "Large");
+        Assert.True(await model.SaveAsync((_, recipes) => recipes.ReplaceRecipeAsync(new(large.Id, [new(beansId, 25m, "g")])), "Recipe saved."));
+        Assert.False(await model.SaveAsync((_, recipes) => recipes.ReplaceRecipeAsync(new(small.Id, [new(beansId, 0m, "g")])), "Recipe saved."));
+        Assert.Contains("quantity", model.Message);
+        await model.LoadAsync();
+        Assert.Equal(18m, Assert.Single(model.SelectedItem!.SizeVariants.Single(variant => variant.Id == small.Id).Recipe).Quantity);
+
+        Assert.True(await model.SaveAsync((commands, _) => commands.UpdateMenuItemAsync(new(item.Id, category.Id, "House latte", "Edited")), "Drink saved."));
+        Assert.True(await model.SaveAsync((commands, _) => commands.UpdateSizeVariantAsync(new(item.Id, small.Id, "Regular", 30m)), "Size saved."));
+        Assert.True(await model.SaveAsync((commands, _) => commands.UpdateAddonAsync(new(addon.Id, "Whipped cream", 6m)), "Add-on saved."));
+        model.Search = "  HOUSE  ";
+        await model.LoadAsync();
+        Assert.Equal("House latte", Assert.Single(model.Items).Name);
+        Assert.Equal(30m, model.SelectedItem.SizeVariants.Single(variant => variant.Id == small.Id).Price);
+        Assert.Equal(6m, Assert.Single(model.SelectedItem.CompatibleAddons).Price);
+        Assert.True(await model.SaveAsync((commands, _) => commands.DeactivateAddonAsync(new(addon.Id)), "Add-on deactivated."));
+        Assert.False(Assert.Single(model.Addons).IsActive);
+        Assert.True(await model.SaveAsync((commands, _) => commands.DeactivateMenuItemAsync(new(item.Id)), "Drink deactivated."));
+        Assert.True(model.IsEmpty);
+        model.IncludeInactive = true;
+        await model.LoadAsync();
+        Assert.False(Assert.Single(model.Items).IsActive);
+        Assert.Single(model.SelectedItem.SizeVariants.Single(variant => variant.Id == small.Id).Recipe);
+        Assert.False(model.IsError);
     }
 
     [PostgresFact]

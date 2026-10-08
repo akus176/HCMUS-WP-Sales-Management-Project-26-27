@@ -31,6 +31,8 @@ public sealed record AddonSummary(
     decimal Price,
     bool IsActive);
 
+public sealed record RecipeIngredientOption(EntityId Id, string Name, string BaseUnit);
+
 public sealed record MenuItemSummary(
     EntityId Id,
     EntityId CategoryId,

@@ -8,6 +8,31 @@ using CoffeeShop.Domain.Common;
 public sealed class CatalogQueryHandlerTests
 {
     [Fact]
+    public async Task EditorLookups_IncludeUnattachedInactiveAddonsAndOnlyActiveIngredients()
+    {
+        var repository = new FakeCatalogRepository();
+        var clock = new TestClock();
+        var active = new CoffeeShop.Domain.Inventory.Ingredient(EntityId.New(), "Beans", "g", clock.UtcNow, clock.UtcNow);
+        var inactive = new CoffeeShop.Domain.Inventory.Ingredient(EntityId.New(), "Old beans", "g", clock.UtcNow, clock.UtcNow, isActive: false);
+        repository.Ingredients.Add(active.Id, active);
+        repository.Ingredients.Add(inactive.Id, inactive);
+        var handler = new CatalogCommandHandler(repository, new FakeUnitOfWork(), new TestTransactionManager(), clock);
+        var addon = (await handler.CreateAddonAsync(new CreateAddonCommand("Cream", 5m))).Value;
+        await handler.DeactivateAddonAsync(new DeactivateAddonCommand(addon));
+        var queries = new CatalogQueryHandler(repository);
+
+        var addons = await queries.ListAddonsAsync();
+        var ingredients = await queries.ListActiveRecipeIngredientsAsync();
+
+        Assert.False(Assert.Single(addons.Value).IsActive);
+        Assert.Equal(addon, addons.Value[0].Id);
+        var option = Assert.Single(ingredients.Value);
+        Assert.Equal(active.Id, option.Id);
+        Assert.Equal("Beans", option.Name);
+        Assert.Equal("g", option.BaseUnit);
+    }
+
+    [Fact]
     public async Task SearchCategories_NormalizesCriteriaAndReturnsReadModels()
     {
         var repository = new FakeCatalogRepository();

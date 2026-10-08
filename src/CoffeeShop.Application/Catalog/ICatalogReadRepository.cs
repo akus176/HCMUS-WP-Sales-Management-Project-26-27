@@ -4,6 +4,10 @@ using CoffeeShop.Domain.Common;
 
 public interface ICatalogReadRepository
 {
+    Task<IReadOnlyList<AddonSummary>> ListAddonsAsync(CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<RecipeIngredientOption>> ListActiveRecipeIngredientsAsync(CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<CategorySummary>> SearchCategoriesAsync(
         CategorySearchCriteria criteria,
         CancellationToken cancellationToken = default);

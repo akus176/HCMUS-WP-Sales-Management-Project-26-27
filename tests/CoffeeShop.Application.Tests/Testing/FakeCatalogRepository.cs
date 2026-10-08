@@ -7,6 +7,14 @@ using CoffeeShop.Domain.Inventory;
 
 public sealed class FakeCatalogRepository : ICatalogRepository, ICatalogReadRepository
 {
+    public Task<IReadOnlyList<AddonSummary>> ListAddonsAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<AddonSummary>>(Addons.Values.Select(addon =>
+            new AddonSummary(addon.Id, addon.Name, addon.Price.Amount, addon.IsActive)).ToArray());
+
+    public Task<IReadOnlyList<RecipeIngredientOption>> ListActiveRecipeIngredientsAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<RecipeIngredientOption>>(Ingredients.Values.Where(ingredient => ingredient.IsActive)
+            .Select(ingredient => new RecipeIngredientOption(ingredient.Id, ingredient.Name, ingredient.BaseUnit)).ToArray());
+
     public Dictionary<EntityId, Category> Categories { get; } = [];
 
     public Dictionary<EntityId, MenuItem> MenuItems { get; } = [];
