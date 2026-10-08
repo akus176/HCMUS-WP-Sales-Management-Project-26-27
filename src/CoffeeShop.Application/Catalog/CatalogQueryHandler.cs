@@ -14,6 +14,12 @@ public sealed class CatalogQueryHandler
         this.repository = repository ?? throw new ArgumentNullException(nameof(repository));
     }
 
+    public async Task<Result<IReadOnlyList<AddonSummary>>> ListAddonsAsync(CancellationToken cancellationToken = default) =>
+        Result<IReadOnlyList<AddonSummary>>.Success(await repository.ListAddonsAsync(cancellationToken));
+
+    public async Task<Result<IReadOnlyList<RecipeIngredientOption>>> ListActiveRecipeIngredientsAsync(CancellationToken cancellationToken = default) =>
+        Result<IReadOnlyList<RecipeIngredientOption>>.Success(await repository.ListActiveRecipeIngredientsAsync(cancellationToken));
+
     public async Task<Result<IReadOnlyList<CategorySummary>>> SearchCategoriesAsync(
         CategorySearchCriteria? criteria = null,
         CancellationToken cancellationToken = default)

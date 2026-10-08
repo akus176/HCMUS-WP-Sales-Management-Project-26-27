@@ -5,10 +5,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\CoffeeShop.Application\CoffeeShop.Application.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\*.cs" Link="ViewModels\%(Filename)%(Extension)" />
+    <Compile Include="..\CoffeeShop.Application.Tests\Testing\FakeCatalogRepository.cs" Link="Testing\FakeCatalogRepository.cs" />
+    <Compile Include="..\CoffeeShop.Application.Tests\Testing\FakeUnitOfWork.cs" Link="Testing\FakeUnitOfWork.cs" />
+    <Compile Include="..\CoffeeShop.Application.Tests\Testing\TestClock.cs" Link="Testing\TestClock.cs" />
+    <Compile Include="..\CoffeeShop.Application.Tests\Testing\TestTransactionManager.cs" Link="Testing\TestTransactionManager.cs" />
   </ItemGroup>
 
   <ItemGroup>

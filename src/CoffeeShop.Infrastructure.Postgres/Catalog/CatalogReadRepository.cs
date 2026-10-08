@@ -14,6 +14,19 @@ public sealed class CatalogReadRepository : ICatalogReadRepository
         this.context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
+    public async Task<IReadOnlyList<AddonSummary>> ListAddonsAsync(CancellationToken cancellationToken = default)
+    {
+        var addons = await context.Addons.AsNoTracking().OrderBy(addon => addon.Name).ThenBy(addon => addon.Id)
+            .ToListAsync(cancellationToken);
+        return addons.Select(addon => new AddonSummary(addon.Id, addon.Name, addon.Price.Amount, addon.IsActive)).ToArray();
+    }
+
+    public async Task<IReadOnlyList<RecipeIngredientOption>> ListActiveRecipeIngredientsAsync(CancellationToken cancellationToken = default) =>
+        await context.Ingredients.AsNoTracking().Where(ingredient => ingredient.IsActive)
+            .OrderBy(ingredient => ingredient.Name).ThenBy(ingredient => ingredient.Id)
+            .Select(ingredient => new RecipeIngredientOption(ingredient.Id, ingredient.Name, ingredient.BaseUnit))
+            .ToListAsync(cancellationToken);
+
     public async Task<IReadOnlyList<CategorySummary>> SearchCategoriesAsync(
         CategorySearchCriteria criteria,
         CancellationToken cancellationToken = default)

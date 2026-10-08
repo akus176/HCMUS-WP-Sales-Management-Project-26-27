@@ -1,5 +1,8 @@
+using CoffeeShop.Application.Catalog;
+using CoffeeShop.Application.Common.Time;
 using CoffeeShop.Application.Inventory;
 using CoffeeShop.Infrastructure.Postgres;
+using CoffeeShop.Infrastructure.Postgres.Common;
 using CoffeeShop.Infrastructure.Postgres.Inventory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -37,6 +40,10 @@ public partial class App : Microsoft.UI.Xaml.Application
 
         var services = new ServiceCollection();
         services.AddCoffeeShopPostgres(connectionString);
+        services.AddSingleton<IClock, SystemClock>();
+        services.AddScoped<CatalogCommandHandler>();
+        services.AddScoped<CatalogQueryHandler>();
+        services.AddScoped<RecipeCommandHandler>();
         services.AddScoped<InventoryCommandHandler>();
         services.AddScoped<IInventoryRepository>(serviceProvider =>
             serviceProvider.GetRequiredService<InventoryRepository>());

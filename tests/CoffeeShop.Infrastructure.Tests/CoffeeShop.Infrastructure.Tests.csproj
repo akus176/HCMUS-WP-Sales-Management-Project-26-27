@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\CatalogWorkspace.cs" Link="ViewModels\CatalogWorkspace.cs" />
   </ItemGroup>
 
 </Project>
