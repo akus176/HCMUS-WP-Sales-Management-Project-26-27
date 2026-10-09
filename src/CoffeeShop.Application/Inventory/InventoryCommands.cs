@@ -26,4 +26,19 @@ public sealed record RemoveReceiptLineCommand(EntityId ReceiptId, EntityId LineI
 
 public sealed record CancelReceiptCommand(EntityId ReceiptId);
 
-public sealed record PostReceiptCommand(EntityId ReceiptId);
+public sealed record PostReceiptCommand(EntityId ReceiptId, EntityId ActorId);
+
+public sealed record RecordStockAdjustmentCommand(
+    EntityId IngredientId,
+    decimal QuantityDelta,
+    string Reason,
+    EntityId ActorId);
+
+public sealed record StockMovementLine(EntityId IngredientId, decimal Quantity);
+
+public sealed record RecordOrderConsumptionCommand(
+    EntityId OrderId,
+    IReadOnlyCollection<StockMovementLine> Lines,
+    EntityId ActorId);
+
+public sealed record RestoreOrderInventoryCommand(EntityId OrderId, string Reason, EntityId ActorId);

@@ -9,6 +9,11 @@ namespace CoffeeShop.WinUI.Pages;
 
 public sealed partial class PurchaseReceiptsPage : Page
 {
+    // The direct-database milestone has no authenticated session yet. This
+    // identifies the local operator until the identity workflow supplies the
+    // authenticated user to inventory commands.
+    private static readonly EntityId DirectClientActorId = new(new Guid("a63d667a-6b39-4b7f-80b4-f45efdbfd780"));
+
     private readonly InventoryCommandHandler handler;
     private readonly IInventoryRepository repository;
     private readonly Dictionary<EntityId, string> supplierNames = [];
@@ -164,7 +169,7 @@ public sealed partial class PurchaseReceiptsPage : Page
             return;
         }
 
-        var result = await handler.PostReceiptAsync(new PostReceiptCommand(selectedReceipt.Id));
+        var result = await handler.PostReceiptAsync(new PostReceiptCommand(selectedReceipt.Id, DirectClientActorId));
         if (result.IsSuccess)
         {
             ShowStatus(InfoBarSeverity.Success, "Receipt posted; ingredient balances updated.");
