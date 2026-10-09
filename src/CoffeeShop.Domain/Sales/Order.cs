@@ -116,6 +116,34 @@ public class Order
         return history;
     }
 
+    public void ApplyLoyaltyRedemption(int points, Money discount)
+    {
+        ArgumentNullException.ThrowIfNull(discount);
+        if (Status is not (OrderStatus.Draft or OrderStatus.Confirmed))
+        {
+            throw new InvalidOperationException("Loyalty redemption requires a draft or confirmed order.");
+        }
+
+        if (points <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(points), "Redeemed points must be positive.");
+        }
+
+        if (discount.Amount <= 0 || discount.Amount > Total.Amount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(discount), "Loyalty discount must be positive and cannot exceed the order total.");
+        }
+
+        if (LoyaltyPointsRedeemed != 0 || LoyaltyDiscountAmount.Amount != 0)
+        {
+            throw new InvalidOperationException("The order already has a loyalty redemption.");
+        }
+
+        LoyaltyPointsRedeemed = points;
+        LoyaltyDiscountAmount = discount;
+        Total = new Money(Total.Amount - discount.Amount);
+    }
+
     private bool CanTransitionTo(string targetStatus) => Status switch
     {
         OrderStatus.Draft => targetStatus is OrderStatus.Confirmed or OrderStatus.Cancelled,

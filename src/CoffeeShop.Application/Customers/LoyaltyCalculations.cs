@@ -32,6 +32,13 @@ public static class LoyaltyCalculations
     public static Result<Money> CalculateRedemptionDiscount(Customer customer, Order order, LoyaltySettings settings, int points) =>
         Execute(() => LoyaltyRules.CalculateRedemptionDiscount(customer, order, settings, points));
 
+    public static Result ApplyRedemption(Order order, int points, Money discount) => Execute(() =>
+    {
+        ArgumentNullException.ThrowIfNull(order);
+        order.ApplyLoyaltyRedemption(points, discount);
+        return order;
+    });
+
     private static Result<T> Execute<T>(Func<T> operation)
         where T : notnull
     {

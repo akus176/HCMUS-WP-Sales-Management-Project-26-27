@@ -74,6 +74,38 @@ public class OrderStateMachineTests
         Assert.Equal(Now, order.CancelledAt);
     }
 
+    [Fact]
+    public void ApplyLoyaltyRedemption_ReducesTotalAndRecordsSnapshot()
+    {
+        var order = CreateOrder();
+
+        order.ApplyLoyaltyRedemption(100, new Money(5000m));
+
+        Assert.Equal(100, order.LoyaltyPointsRedeemed);
+        Assert.Equal(new Money(5000m), order.LoyaltyDiscountAmount);
+        Assert.Equal(new Money(40000m), order.Total);
+    }
+
+    [Fact]
+    public void ApplyLoyaltyRedemption_RejectsDuplicateOrIneligibleChangesWithoutFurtherMutation()
+    {
+        var order = CreateOrder();
+        order.ApplyLoyaltyRedemption(100, new Money(5000m));
+
+        Assert.Throws<InvalidOperationException>(() => order.ApplyLoyaltyRedemption(50, new Money(2500m)));
+        Assert.Equal(new Money(40000m), order.Total);
+        Assert.Equal(100, order.LoyaltyPointsRedeemed);
+
+        var completed = CreateOrder();
+        var actor = EntityId.New();
+        completed.TransitionTo(OrderStatus.Confirmed, actor, Now);
+        completed.TransitionTo(OrderStatus.Preparing, actor, Now);
+        completed.TransitionTo(OrderStatus.Ready, actor, Now);
+        completed.TransitionTo(OrderStatus.Completed, actor, Now);
+        Assert.Throws<InvalidOperationException>(() => completed.ApplyLoyaltyRedemption(10, new Money(100m)));
+        Assert.Equal(new Money(45000m), completed.Total);
+    }
+
     private static Order CreateOrder()
     {
         var category = new Category(EntityId.New(), "Coffee", Now, Now);

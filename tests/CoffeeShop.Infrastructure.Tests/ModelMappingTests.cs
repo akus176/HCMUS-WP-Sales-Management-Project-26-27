@@ -3,6 +3,7 @@ namespace CoffeeShop.Infrastructure.Tests;
 using CoffeeShop.Domain.Customers;
 using CoffeeShop.Domain.Identity;
 using CoffeeShop.Domain.Inventory;
+using CoffeeShop.Domain.Sales;
 using CoffeeShop.Infrastructure.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -122,6 +123,17 @@ public class ModelMappingTests
         Assert.NotNull(idempotencyIndex);
         Assert.True(idempotencyIndex.IsUnique);
         Assert.Equal("order_id IS NOT NULL", idempotencyIndex.GetFilter());
+
+        var reversalIndex = loyaltyTx.GetIndexes()
+            .Single(i => i.Properties.Select(property => property.Name)
+                .SequenceEqual([nameof(LoyaltyTransaction.ReversesTransactionId)]));
+        Assert.True(reversalIndex.IsUnique);
+        Assert.Equal("reverses_transaction_id IS NOT NULL", reversalIndex.GetFilter());
+
+        var orderForeignKey = loyaltyTx.GetForeignKeys()
+            .Single(foreignKey => foreignKey.PrincipalEntityType.ClrType == typeof(Order));
+        Assert.Equal(nameof(LoyaltyTransaction.OrderId), Assert.Single(orderForeignKey.Properties).Name);
+        Assert.Equal(DeleteBehavior.Restrict, orderForeignKey.DeleteBehavior);
     }
 
     [Fact]

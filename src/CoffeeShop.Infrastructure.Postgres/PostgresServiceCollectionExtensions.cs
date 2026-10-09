@@ -2,9 +2,11 @@ namespace CoffeeShop.Infrastructure.Postgres;
 
 using CoffeeShop.Application.Catalog;
 using CoffeeShop.Application.Common.Persistence;
+using CoffeeShop.Application.Customers;
 using CoffeeShop.Application.Inventory;
 using CoffeeShop.Infrastructure.Postgres.Catalog;
 using CoffeeShop.Infrastructure.Postgres.Common;
+using CoffeeShop.Infrastructure.Postgres.Customers;
 using CoffeeShop.Infrastructure.Postgres.Inventory;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,6 +26,8 @@ public static class PostgresServiceCollectionExtensions
         services.AddScoped<IInventoryRepository, InventoryRepository>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<ICatalogReadRepository, CatalogReadRepository>();
+        services.AddScoped<ICustomerRepository, CustomerRepository>();
+        services.AddScoped<ICustomerReadRepository, CustomerReadRepository>();
 
         return services;
     }

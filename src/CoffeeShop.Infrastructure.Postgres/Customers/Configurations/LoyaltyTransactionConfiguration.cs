@@ -1,6 +1,7 @@
 namespace CoffeeShop.Infrastructure.Postgres.Customers.Configurations;
 
 using CoffeeShop.Domain.Customers;
+using CoffeeShop.Domain.Sales;
 using CoffeeShop.Infrastructure.Postgres.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -63,6 +64,10 @@ public sealed class LoyaltyTransactionConfiguration : IEntityTypeConfiguration<L
             .IsUnique()
             .HasFilter("order_id IS NOT NULL");
 
+        builder.HasIndex(lt => lt.ReversesTransactionId)
+            .IsUnique()
+            .HasFilter("reverses_transaction_id IS NOT NULL");
+
         builder.HasIndex(lt => new { lt.CustomerId, lt.CreatedAt });
 
         builder.HasOne(lt => lt.Customer)
@@ -73,6 +78,11 @@ public sealed class LoyaltyTransactionConfiguration : IEntityTypeConfiguration<L
         builder.HasOne(lt => lt.ReversesTransaction)
             .WithMany()
             .HasForeignKey(lt => lt.ReversesTransactionId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<Order>()
+            .WithMany()
+            .HasForeignKey(lt => lt.OrderId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
