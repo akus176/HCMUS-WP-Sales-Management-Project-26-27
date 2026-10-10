@@ -18,6 +18,8 @@ public class OrderStateMachineTests
         order.TransitionTo(OrderStatus.Confirmed, actor, times[0]);
         order.TransitionTo(OrderStatus.Preparing, actor, times[1]);
         order.TransitionTo(OrderStatus.Ready, actor, times[2]);
+        order.RecordPayment(
+            EntityId.New(), PaymentMethod.Cash, order.Total, PaymentStatus.Succeeded, times[2], actor);
         var completed = order.TransitionTo(OrderStatus.Completed, actor, times[3]);
 
         Assert.Equal(OrderStatus.Completed, order.Status);
@@ -51,6 +53,8 @@ public class OrderStateMachineTests
             }
             if (first == OrderStatus.Completed)
             {
+                order.RecordPayment(
+                    EntityId.New(), PaymentMethod.Cash, order.Total, PaymentStatus.Succeeded, Now, EntityId.New());
                 order.TransitionTo(OrderStatus.Completed, EntityId.New(), new UtcTimestamp(Now.Value.AddHours(3)));
             }
         }
@@ -101,6 +105,8 @@ public class OrderStateMachineTests
         completed.TransitionTo(OrderStatus.Confirmed, actor, Now);
         completed.TransitionTo(OrderStatus.Preparing, actor, Now);
         completed.TransitionTo(OrderStatus.Ready, actor, Now);
+        completed.RecordPayment(
+            EntityId.New(), PaymentMethod.Cash, completed.Total, PaymentStatus.Succeeded, Now, actor);
         completed.TransitionTo(OrderStatus.Completed, actor, Now);
         Assert.Throws<InvalidOperationException>(() => completed.ApplyLoyaltyRedemption(10, new Money(100m)));
         Assert.Equal(new Money(45000m), completed.Total);
