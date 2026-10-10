@@ -1505,6 +1505,8 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
 
                             t.HasCheckConstraint("CK_payments_method", "method IN ('cash', 'card', 'e_wallet')");
 
+                            t.HasCheckConstraint("CK_payments_required_reference", "method = 'cash' OR (reference IS NOT NULL AND btrim(reference) <> '')");
+
                             t.HasCheckConstraint("CK_payments_status", "status IN ('pending', 'succeeded', 'failed')");
                         });
                 });
@@ -1892,7 +1894,7 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
             modelBuilder.Entity("CoffeeShop.Domain.Sales.Payment", b =>
                 {
                     b.HasOne("CoffeeShop.Domain.Sales.Order", null)
-                        .WithMany()
+                        .WithMany("Payments")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1958,6 +1960,8 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
             modelBuilder.Entity("CoffeeShop.Domain.Sales.Order", b =>
                 {
                     b.Navigation("Lines");
+
+                    b.Navigation("Payments");
 
                     b.Navigation("StatusHistory");
                 });

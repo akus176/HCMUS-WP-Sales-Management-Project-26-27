@@ -6,6 +6,7 @@ public class Order
 {
     private readonly List<OrderLine> _lines = [];
     private readonly List<OrderStatusHistory> _statusHistory = [];
+    private readonly List<Payment> _payments = [];
     protected Order()
     {
     }
@@ -84,6 +85,9 @@ public class Order
     public uint Version { get; protected set; }
     public IReadOnlyCollection<OrderLine> Lines => _lines.AsReadOnly();
     public IReadOnlyCollection<OrderStatusHistory> StatusHistory => _statusHistory.AsReadOnly();
+    public IReadOnlyCollection<Payment> Payments => _payments.AsReadOnly();
+    public Money OutstandingBalance => new(decimal.Max(0m, Total.Amount - PaidAmount.Amount));
+    public bool IsFullyPaid => PaidAmount.Amount >= Total.Amount;
 
     public OrderStatusHistory TransitionTo(string targetStatus, EntityId actorId, UtcTimestamp changedAt, string? cancellationReason = null)
     {
@@ -103,6 +107,11 @@ public class Order
             throw new ArgumentException("A cancellation reason is required.", nameof(cancellationReason));
         }
 
+        if (targetStatus == OrderStatus.Completed && !IsFullyPaid)
+        {
+            throw new InvalidOperationException("An order cannot be completed while it has an unpaid balance.");
+        }
+
         var history = new OrderStatusHistory(EntityId.New(), Id, Status, targetStatus, actorId, changedAt);
         Status = targetStatus;
         if (targetStatus == OrderStatus.Confirmed) ConfirmedAt = changedAt;
@@ -114,6 +123,31 @@ public class Order
         }
         _statusHistory.Add(history);
         return history;
+    }
+
+    public Payment RecordPayment(
+        EntityId paymentId,
+        string method,
+        Money amount,
+        string status,
+        UtcTimestamp paidAt,
+        EntityId recordedBy,
+        string? reference = null)
+    {
+        if (Status is OrderStatus.Completed or OrderStatus.Cancelled)
+        {
+            throw new InvalidOperationException("Payments cannot be recorded for completed or cancelled orders.");
+        }
+
+        if (_payments.Any(payment => payment.Id == paymentId))
+        {
+            throw new InvalidOperationException("The payment identifier is already recorded for this order.");
+        }
+
+        var payment = new Payment(paymentId, Id, method, amount, status, paidAt, recordedBy, reference);
+        _payments.Add(payment);
+        RecalculatePaidAmount();
+        return payment;
     }
 
     public void ApplyLoyaltyRedemption(int points, Money discount)
@@ -142,6 +176,14 @@ public class Order
         LoyaltyPointsRedeemed = points;
         LoyaltyDiscountAmount = discount;
         Total = new Money(Total.Amount - discount.Amount);
+    }
+
+    private void RecalculatePaidAmount()
+    {
+        var amount = _payments
+            .Where(payment => payment.CountsTowardPaidBalance)
+            .Sum(payment => payment.Amount.Amount);
+        PaidAmount = new Money(amount);
     }
 
     private bool CanTransitionTo(string targetStatus) => Status switch
