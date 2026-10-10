@@ -284,6 +284,11 @@ public sealed class InventoryCommandHandler
             return Result.Failure(Error.Validation("inventory.adjustment_reason_required", "A stock adjustment requires a reason."));
         }
 
+        if (command.ActorId is null)
+        {
+            return Result.Failure(Error.Validation("inventory.adjustment_actor_required", "A stock adjustment requires an actor identity."));
+        }
+
         try
         {
             return await transactionManager.ExecuteInTransactionAsync(async () =>

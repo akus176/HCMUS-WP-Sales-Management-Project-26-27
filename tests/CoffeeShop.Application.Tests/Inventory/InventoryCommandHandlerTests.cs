@@ -237,21 +237,83 @@ public class InventoryCommandHandlerTests
     }
 
     [Fact]
-    public async Task RecordStockAdjustmentAsync_RecordsSignedImmutableMovement()
+    public async Task RecordStockAdjustmentAsync_WithPositiveQuantity_UpdatesBalanceAndAuditsActor()
     {
         var ingredient = CreateIngredient(10m);
         repository.AddIngredient(ingredient);
 
         var result = await handler.RecordStockAdjustmentAsync(
-            new RecordStockAdjustmentCommand(ingredient.Id, -3m, "Spoiled beans", ActorId));
+            new RecordStockAdjustmentCommand(ingredient.Id, 2.5m, "Count correction", ActorId));
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(12.5m, ingredient.AvailableQuantity);
+        var movement = Assert.Single(repository.StockMovements);
+        Assert.Equal(StockMovementType.Adjustment, movement.Type);
+        Assert.Equal(2.5m, movement.QuantityDelta);
+        Assert.Equal("Count correction", movement.Reason);
+        Assert.Equal(ActorId, movement.ActorId);
+        Assert.Equal(ingredient.Id, movement.IngredientId);
+    }
+
+    [Fact]
+    public async Task RecordStockAdjustmentAsync_WithNegativeQuantity_ReducesBalance()
+    {
+        var ingredient = CreateIngredient(10m);
+        repository.AddIngredient(ingredient);
+
+        var result = await handler.RecordStockAdjustmentAsync(
+            new RecordStockAdjustmentCommand(ingredient.Id, -3m, "Spoilage", ActorId));
 
         Assert.True(result.IsSuccess);
         Assert.Equal(7m, ingredient.AvailableQuantity);
-        var movement = Assert.Single(repository.StockMovements);
-        Assert.Equal(StockMovementType.Adjustment, movement.Type);
-        Assert.Equal(-3m, movement.QuantityDelta);
-        Assert.Equal("Spoiled beans", movement.Reason);
-        Assert.Equal(ActorId, movement.ActorId);
+        Assert.Equal(-3m, Assert.Single(repository.StockMovements).QuantityDelta);
+    }
+
+    [Fact]
+    public async Task RecordStockAdjustmentAsync_WithoutReason_RejectsWithoutChangingStock()
+    {
+        var ingredient = CreateIngredient(10m);
+        repository.AddIngredient(ingredient);
+
+        var result = await handler.RecordStockAdjustmentAsync(
+            new RecordStockAdjustmentCommand(ingredient.Id, 2m, "  ", ActorId));
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Validation, result.Error!.Type);
+        Assert.Equal("inventory.adjustment_reason_required", result.Error.Code);
+        Assert.Equal(10m, ingredient.AvailableQuantity);
+        Assert.Empty(repository.StockMovements);
+    }
+
+    [Fact]
+    public async Task RecordStockAdjustmentAsync_WithoutActor_RejectsWithoutChangingStock()
+    {
+        var ingredient = CreateIngredient(10m);
+        repository.AddIngredient(ingredient);
+
+        var result = await handler.RecordStockAdjustmentAsync(
+            new RecordStockAdjustmentCommand(ingredient.Id, 2m, "Count correction", null!));
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Validation, result.Error!.Type);
+        Assert.Equal("inventory.adjustment_actor_required", result.Error.Code);
+        Assert.Equal(10m, ingredient.AvailableQuantity);
+        Assert.Empty(repository.StockMovements);
+    }
+
+    [Fact]
+    public async Task RecordStockAdjustmentAsync_WithInvalidResultingQuantity_RejectsWithoutMovement()
+    {
+        var ingredient = CreateIngredient(2m);
+        repository.AddIngredient(ingredient);
+
+        var result = await handler.RecordStockAdjustmentAsync(
+            new RecordStockAdjustmentCommand(ingredient.Id, -3m, "Count correction", ActorId));
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(ErrorType.Validation, result.Error!.Type);
+        Assert.Equal(2m, ingredient.AvailableQuantity);
+        Assert.Empty(repository.StockMovements);
     }
 
     [Fact]
