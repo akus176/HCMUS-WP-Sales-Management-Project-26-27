@@ -34,9 +34,17 @@ public sealed class InventoryRepository : IInventoryRepository
     public async Task<IReadOnlyList<PurchaseReceipt>> ListReceiptsAsync(CancellationToken cancellationToken = default) =>
         await context.PurchaseReceipts.Include(r => r.Lines).ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<StockMovement>> ListMovementsForOrderAsync(EntityId orderId, CancellationToken cancellationToken = default) =>
+        await context.StockMovements
+            .Where(m => m.OrderId == orderId)
+            .OrderBy(m => m.OccurredAt)
+            .ToListAsync(cancellationToken);
+
     public void AddIngredient(Ingredient ingredient) => context.Ingredients.Add(ingredient);
 
     public void AddSupplier(Supplier supplier) => context.Suppliers.Add(supplier);
 
     public void AddReceipt(PurchaseReceipt receipt) => context.PurchaseReceipts.Add(receipt);
+
+    public void AddStockMovement(StockMovement movement) => context.StockMovements.Add(movement);
 }

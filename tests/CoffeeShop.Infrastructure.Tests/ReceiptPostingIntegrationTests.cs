@@ -70,13 +70,20 @@ public sealed class ReceiptPostingIntegrationTests : IAsyncLifetime
         var ingredientId = await SeedIngredientAsync(handler, availableQuantity: 10m);
         var receiptId = await SeedDraftReceiptAsync(handler, ingredientId, lines: [(5m, 30m), (3m, 28m)]);
 
-        var result = await handler.PostReceiptAsync(new PostReceiptCommand(receiptId));
+        var result = await handler.PostReceiptAsync(new PostReceiptCommand(receiptId, EntityId.New()));
 
         Assert.True(result.IsSuccess);
         var (receipt, ingredient) = await LoadReceiptAndIngredientAsync(ingredientId, receiptId);
         Assert.Equal(PurchaseReceiptStatus.Posted, receipt.Status);
         Assert.NotNull(receipt.PostedAt);
         Assert.Equal(18m, ingredient.AvailableQuantity);
+        var movements = await LoadMovementsAsync(receiptId);
+        Assert.Equal(2, movements.Count);
+        Assert.All(movements, movement =>
+        {
+            Assert.Equal(StockMovementType.Receipt, movement.Type);
+            Assert.Equal(receiptId, movement.PurchaseReceiptId);
+        });
     }
 
     [Fact]
@@ -88,10 +95,10 @@ public sealed class ReceiptPostingIntegrationTests : IAsyncLifetime
         var ingredientId = await SeedIngredientAsync(handler, availableQuantity: 10m);
         var receiptId = await SeedDraftReceiptAsync(handler, ingredientId, lines: [(5m, 30m)]);
 
-        var first = await handler.PostReceiptAsync(new PostReceiptCommand(receiptId));
+        var first = await handler.PostReceiptAsync(new PostReceiptCommand(receiptId, EntityId.New()));
         Assert.True(first.IsSuccess);
 
-        var second = await handler.PostReceiptAsync(new PostReceiptCommand(receiptId));
+        var second = await handler.PostReceiptAsync(new PostReceiptCommand(receiptId, EntityId.New()));
 
         Assert.True(second.IsFailure);
         Assert.Equal(ErrorType.Conflict, second.Error!.Type);
@@ -111,7 +118,7 @@ public sealed class ReceiptPostingIntegrationTests : IAsyncLifetime
         var addUnknown = await handler.AddReceiptLineAsync(new AddReceiptLineCommand(receiptId, EntityId.New(), 2m, 20m));
         Assert.True(addUnknown.IsSuccess);
 
-        var result = await handler.PostReceiptAsync(new PostReceiptCommand(receiptId));
+        var result = await handler.PostReceiptAsync(new PostReceiptCommand(receiptId, EntityId.New()));
 
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.NotFound, result.Error!.Type);
@@ -161,6 +168,15 @@ public sealed class ReceiptPostingIntegrationTests : IAsyncLifetime
         var receipt = (await repository.FindReceiptWithLinesAsync(receiptId))!;
         var ingredient = (await repository.FindIngredientAsync(ingredientId))!;
         return (receipt, ingredient);
+    }
+
+    private async Task<List<StockMovement>> LoadMovementsAsync(EntityId receiptId)
+    {
+        await using var scope = serviceProvider!.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        return await context.StockMovements
+            .Where(movement => movement.PurchaseReceiptId == receiptId)
+            .ToListAsync();
     }
 
     private static async Task<bool> TryProbeDatabaseAsync()

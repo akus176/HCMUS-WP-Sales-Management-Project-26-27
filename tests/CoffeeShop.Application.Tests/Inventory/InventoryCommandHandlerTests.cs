@@ -9,6 +9,7 @@ using CoffeeShop.Domain.Inventory;
 public class InventoryCommandHandlerTests
 {
     private static readonly DateTimeOffset BaseTime = new(2026, 10, 5, 0, 0, 0, TimeSpan.Zero);
+    private static readonly EntityId ActorId = EntityId.New();
 
     private readonly FakeInventoryRepository repository = new();
     private readonly FakeUnitOfWork unitOfWork = new();
@@ -163,11 +164,18 @@ public class InventoryCommandHandlerTests
         var receipt = await CreateDraftReceiptWithLinesAsync(ingredient);
         await handler.AddReceiptLineAsync(new AddReceiptLineCommand(receipt.Id, ingredient.Id, 3m, 28m));
 
-        var result = await handler.PostReceiptAsync(new PostReceiptCommand(receipt.Id));
+        var result = await handler.PostReceiptAsync(new PostReceiptCommand(receipt.Id, ActorId));
 
         Assert.True(result.IsSuccess);
         Assert.Equal(PurchaseReceiptStatus.Posted, receipt.Status);
         Assert.Equal(18m, ingredient.AvailableQuantity);
+        Assert.Equal(2, repository.StockMovements.Count);
+        Assert.All(repository.StockMovements, movement =>
+        {
+            Assert.Equal(StockMovementType.Receipt, movement.Type);
+            Assert.Equal(receipt.Id, movement.PurchaseReceiptId);
+            Assert.Equal(ActorId, movement.ActorId);
+        });
     }
 
     [Fact]
@@ -177,11 +185,11 @@ public class InventoryCommandHandlerTests
         repository.AddIngredient(ingredient);
         var receipt = await CreateDraftReceiptWithLinesAsync(ingredient);
 
-        var first = await handler.PostReceiptAsync(new PostReceiptCommand(receipt.Id));
+        var first = await handler.PostReceiptAsync(new PostReceiptCommand(receipt.Id, ActorId));
         Assert.True(first.IsSuccess);
         Assert.Equal(15m, ingredient.AvailableQuantity);
 
-        var second = await handler.PostReceiptAsync(new PostReceiptCommand(receipt.Id));
+        var second = await handler.PostReceiptAsync(new PostReceiptCommand(receipt.Id, ActorId));
 
         Assert.True(second.IsFailure);
         Assert.Equal(ErrorType.Conflict, second.Error!.Type);
@@ -196,7 +204,7 @@ public class InventoryCommandHandlerTests
         var receipt = await CreateDraftReceiptWithLinesAsync(ingredient);
         await handler.AddReceiptLineAsync(new AddReceiptLineCommand(receipt.Id, EntityId.New(), 3m, 28m));
 
-        var result = await handler.PostReceiptAsync(new PostReceiptCommand(receipt.Id));
+        var result = await handler.PostReceiptAsync(new PostReceiptCommand(receipt.Id, ActorId));
 
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.NotFound, result.Error!.Type);
@@ -208,7 +216,7 @@ public class InventoryCommandHandlerTests
     [Fact]
     public async Task PostReceiptAsync_WithUnknownReceipt_ReturnsNotFound()
     {
-        var result = await handler.PostReceiptAsync(new PostReceiptCommand(EntityId.New()));
+        var result = await handler.PostReceiptAsync(new PostReceiptCommand(EntityId.New(), ActorId));
 
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.NotFound, result.Error!.Type);
@@ -222,9 +230,60 @@ public class InventoryCommandHandlerTests
         repository.AddIngredient(ingredient);
         var receipt = await CreateDraftReceiptWithLinesAsync(ingredient);
 
-        await handler.PostReceiptAsync(new PostReceiptCommand(receipt.Id));
+        await handler.PostReceiptAsync(new PostReceiptCommand(receipt.Id, ActorId));
 
         Assert.Equal(1, transactionManager.ExecutionCount);
         Assert.Equal(1, transactionManager.CommittedCount);
+    }
+
+    [Fact]
+    public async Task RecordStockAdjustmentAsync_RecordsSignedImmutableMovement()
+    {
+        var ingredient = CreateIngredient(10m);
+        repository.AddIngredient(ingredient);
+
+        var result = await handler.RecordStockAdjustmentAsync(
+            new RecordStockAdjustmentCommand(ingredient.Id, -3m, "Spoiled beans", ActorId));
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(7m, ingredient.AvailableQuantity);
+        var movement = Assert.Single(repository.StockMovements);
+        Assert.Equal(StockMovementType.Adjustment, movement.Type);
+        Assert.Equal(-3m, movement.QuantityDelta);
+        Assert.Equal("Spoiled beans", movement.Reason);
+        Assert.Equal(ActorId, movement.ActorId);
+    }
+
+    [Fact]
+    public async Task RecordOrderConsumptionAndRestoration_CreateLinkedMovementsExactlyOnce()
+    {
+        var ingredient = CreateIngredient(10m);
+        repository.AddIngredient(ingredient);
+        var orderId = EntityId.New();
+
+        var consumed = await handler.RecordOrderConsumptionAsync(
+            new RecordOrderConsumptionCommand(orderId, [new StockMovementLine(ingredient.Id, 4m)], ActorId));
+        var restored = await handler.RestoreOrderInventoryAsync(
+            new RestoreOrderInventoryCommand(orderId, "Order cancelled", ActorId));
+        var repeatedRestore = await handler.RestoreOrderInventoryAsync(
+            new RestoreOrderInventoryCommand(orderId, "Order cancelled", ActorId));
+
+        Assert.True(consumed.IsSuccess);
+        Assert.True(restored.IsSuccess);
+        Assert.True(repeatedRestore.IsSuccess);
+        Assert.Equal(10m, ingredient.AvailableQuantity);
+        Assert.Collection(repository.StockMovements,
+            consumption =>
+            {
+                Assert.Equal(StockMovementType.OrderConsumption, consumption.Type);
+                Assert.Equal(-4m, consumption.QuantityDelta);
+                Assert.Equal(orderId, consumption.OrderId);
+            },
+            restoration =>
+            {
+                Assert.Equal(StockMovementType.Restoration, restoration.Type);
+                Assert.Equal(4m, restoration.QuantityDelta);
+                Assert.Equal(orderId, restoration.OrderId);
+            });
     }
 }

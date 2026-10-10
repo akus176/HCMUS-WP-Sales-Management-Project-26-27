@@ -17,9 +17,13 @@ public interface IInventoryRepository
 
     Task<IReadOnlyList<PurchaseReceipt>> ListReceiptsAsync(CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<StockMovement>> ListMovementsForOrderAsync(EntityId orderId, CancellationToken cancellationToken = default);
+
     void AddIngredient(Ingredient ingredient);
 
     void AddSupplier(Supplier supplier);
 
     void AddReceipt(PurchaseReceipt receipt);
+
+    void AddStockMovement(StockMovement movement);
 }

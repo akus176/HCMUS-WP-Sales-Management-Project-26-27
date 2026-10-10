@@ -4,6 +4,7 @@ using CoffeeShop.Application.Common.Persistence;
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Common.Time;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.Domain.Inventory;
 
 public sealed class InventoryCommandHandler
 {
@@ -246,6 +247,161 @@ public sealed class InventoryCommandHandler
             if (posted.IsFailure)
             {
                 return Result.Failure(posted.Error!);
+            }
+
+            foreach (var line in receipt.Lines)
+            {
+                repository.AddStockMovement(new StockMovement(
+                    EntityId.New(),
+                    line.IngredientId,
+                    StockMovementType.Receipt,
+                    line.Quantity,
+                    command.ActorId,
+                    $"Purchase receipt {receipt.ReceiptNumber}",
+                    clock.UtcNow,
+                    purchaseReceiptId: receipt.Id));
+            }
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            return Result.Success();
+        }, cancellationToken);
+    }
+
+    public async Task<Result> RecordStockAdjustmentAsync(
+        RecordStockAdjustmentCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        var ingredient = await repository.FindIngredientAsync(command.IngredientId, cancellationToken);
+        if (ingredient is null)
+        {
+            return Result.Failure(IngredientNotFound(command.IngredientId));
+        }
+
+        if (string.IsNullOrWhiteSpace(command.Reason))
+        {
+            return Result.Failure(Error.Validation("inventory.adjustment_reason_required", "A stock adjustment requires a reason."));
+        }
+
+        try
+        {
+            return await transactionManager.ExecuteInTransactionAsync(async () =>
+            {
+                ingredient.Adjust(command.QuantityDelta, clock.UtcNow);
+                repository.AddStockMovement(new StockMovement(
+                    EntityId.New(), ingredient.Id, StockMovementType.Adjustment, command.QuantityDelta,
+                    command.ActorId, command.Reason, clock.UtcNow));
+                await unitOfWork.SaveChangesAsync(cancellationToken);
+                return Result.Success();
+            }, cancellationToken);
+        }
+        catch (ArgumentException exception)
+        {
+            return Result.Failure(Error.Validation("inventory.invalid_adjustment", exception.Message));
+        }
+    }
+
+    public async Task<Result> RecordOrderConsumptionAsync(
+        RecordOrderConsumptionCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        if (command.Lines is null || command.Lines.Count == 0)
+        {
+            return Result.Failure(Error.Validation("inventory.consumption_lines_required", "Order consumption requires at least one ingredient line."));
+        }
+
+        var existing = await repository.ListMovementsForOrderAsync(command.OrderId, cancellationToken);
+        if (existing.Any(m => m.Type == StockMovementType.OrderConsumption))
+        {
+            return Result.Failure(Error.Conflict("inventory.order_already_consumed", $"Order '{command.OrderId}' already has inventory consumption records."));
+        }
+
+        var requested = command.Lines
+            .GroupBy(line => line.IngredientId)
+            .Select(group => new StockMovementLine(group.Key, group.Sum(line => line.Quantity)))
+            .ToArray();
+        var ingredients = new List<(StockMovementLine Line, Ingredient Ingredient)>();
+
+        foreach (var line in requested)
+        {
+            var ingredient = await repository.FindIngredientAsync(line.IngredientId, cancellationToken);
+            if (ingredient is null)
+            {
+                return Result.Failure(IngredientNotFound(line.IngredientId));
+            }
+
+            if (line.Quantity <= 0 || line.Quantity > ingredient.AvailableQuantity)
+            {
+                return Result.Failure(Error.BusinessRule(
+                    "inventory.insufficient_stock",
+                    $"Ingredient '{ingredient.Name}' does not have sufficient stock for this order."));
+            }
+
+            ingredients.Add((line, ingredient));
+        }
+
+        return await transactionManager.ExecuteInTransactionAsync(async () =>
+        {
+            foreach (var (line, ingredient) in ingredients)
+            {
+                ingredient.Consume(line.Quantity, clock.UtcNow);
+                repository.AddStockMovement(new StockMovement(
+                    EntityId.New(), ingredient.Id, StockMovementType.OrderConsumption, -line.Quantity,
+                    command.ActorId, $"Order {command.OrderId} consumption", clock.UtcNow, orderId: command.OrderId));
+            }
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            return Result.Success();
+        }, cancellationToken);
+    }
+
+    public async Task<Result> RestoreOrderInventoryAsync(
+        RestoreOrderInventoryCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+
+        if (string.IsNullOrWhiteSpace(command.Reason))
+        {
+            return Result.Failure(Error.Validation("inventory.restoration_reason_required", "Inventory restoration requires a reason."));
+        }
+
+        var movements = await repository.ListMovementsForOrderAsync(command.OrderId, cancellationToken);
+        if (movements.Any(m => m.Type == StockMovementType.Restoration))
+        {
+            return Result.Success();
+        }
+
+        var consumptions = movements.Where(m => m.Type == StockMovementType.OrderConsumption).ToArray();
+        if (consumptions.Length == 0)
+        {
+            return Result.Failure(Error.NotFound("inventory.order_consumption_not_found", $"Order '{command.OrderId}' has no inventory consumption to restore."));
+        }
+
+        var ingredients = new List<(StockMovement Consumption, Ingredient Ingredient)>();
+        foreach (var consumption in consumptions)
+        {
+            var ingredient = await repository.FindIngredientAsync(consumption.IngredientId, cancellationToken);
+            if (ingredient is null)
+            {
+                return Result.Failure(IngredientNotFound(consumption.IngredientId));
+            }
+
+            ingredients.Add((consumption, ingredient));
+        }
+
+        return await transactionManager.ExecuteInTransactionAsync(async () =>
+        {
+            foreach (var (consumption, ingredient) in ingredients)
+            {
+                var restoredQuantity = -consumption.QuantityDelta;
+                ingredient.Receive(restoredQuantity, clock.UtcNow);
+                repository.AddStockMovement(new StockMovement(
+                    EntityId.New(), ingredient.Id, StockMovementType.Restoration, restoredQuantity,
+                    command.ActorId, command.Reason, clock.UtcNow, orderId: command.OrderId));
             }
 
             await unitOfWork.SaveChangesAsync(cancellationToken);

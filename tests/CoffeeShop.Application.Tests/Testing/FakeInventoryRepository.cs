@@ -12,6 +12,8 @@ public sealed class FakeInventoryRepository : IInventoryRepository
 
     public Dictionary<EntityId, PurchaseReceipt> Receipts { get; } = [];
 
+    public List<StockMovement> StockMovements { get; } = [];
+
     public Task<Ingredient?> FindIngredientAsync(EntityId id, CancellationToken cancellationToken = default) =>
         Task.FromResult(Ingredients.GetValueOrDefault(id));
 
@@ -30,9 +32,14 @@ public sealed class FakeInventoryRepository : IInventoryRepository
     public Task<IReadOnlyList<PurchaseReceipt>> ListReceiptsAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<PurchaseReceipt>>(Receipts.Values.ToList().AsReadOnly());
 
+    public Task<IReadOnlyList<StockMovement>> ListMovementsForOrderAsync(EntityId orderId, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<StockMovement>>(StockMovements.Where(m => m.OrderId == orderId).ToList().AsReadOnly());
+
     public void AddIngredient(Ingredient ingredient) => Ingredients.Add(ingredient.Id, ingredient);
 
     public void AddSupplier(Supplier supplier) => Suppliers.Add(supplier.Id, supplier);
 
     public void AddReceipt(PurchaseReceipt receipt) => Receipts.Add(receipt.Id, receipt);
+
+    public void AddStockMovement(StockMovement movement) => StockMovements.Add(movement);
 }
