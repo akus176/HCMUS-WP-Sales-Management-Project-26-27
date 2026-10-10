@@ -99,8 +99,25 @@ public class SalesMappingTests
         Assert.Contains(model.FindEntityType(typeof(Order))!.GetCheckConstraints(), constraint => constraint.Name == "CK_orders_status");
         Assert.Contains(model.FindEntityType(typeof(OrderLine))!.GetCheckConstraints(), constraint => constraint.Name == "CK_order_lines_quantity");
         Assert.Contains(model.FindEntityType(typeof(Payment))!.GetCheckConstraints(), constraint => constraint.Name == "CK_payments_amount");
+        Assert.Contains(model.FindEntityType(typeof(Payment))!.GetCheckConstraints(), constraint => constraint.Name == "CK_payments_required_reference");
         Assert.Contains(model.FindEntityType(typeof(Delivery))!.GetCheckConstraints(), constraint => constraint.Name == "CK_deliveries_status");
         Assert.Contains(model.FindEntityType(typeof(Reservation))!.GetCheckConstraints(), constraint => constraint.Name == "CK_reservations_party_size");
+    }
+
+    [Fact]
+    public void Payments_UseOrderNavigationSharedMoneyPrecisionAndBoundedReference()
+    {
+        var payment = CreateModel().FindEntityType(typeof(Payment))!;
+        var amount = payment.FindProperty(nameof(Payment.Amount))!;
+        var orderRelationship = Assert.Single(
+            payment.GetForeignKeys(),
+            foreignKey => foreignKey.PrincipalEntityType.ClrType == typeof(Order));
+
+        Assert.Equal(12, amount.GetPrecision());
+        Assert.Equal(2, amount.GetScale());
+        Assert.Equal(100, payment.FindProperty(nameof(Payment.Reference))!.GetMaxLength());
+        Assert.Equal(nameof(Order.Payments), orderRelationship.PrincipalToDependent!.Name);
+        Assert.Equal(DeleteBehavior.Cascade, orderRelationship.DeleteBehavior);
     }
 
     [Fact]
