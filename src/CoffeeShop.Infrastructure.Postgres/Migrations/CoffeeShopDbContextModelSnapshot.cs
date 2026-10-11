@@ -1037,6 +1037,48 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoffeeShop.Domain.Sales.DeliveryStatusHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("actor_id");
+
+                    b.Property<DateTimeOffset>("ChangedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("changed_at");
+
+                    b.Property<Guid>("DeliveryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("delivery_id");
+
+                    b.Property<string>("FromStatus")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)")
+                        .HasColumnName("from_status");
+
+                    b.Property<string>("ToStatus")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)")
+                        .HasColumnName("to_status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorId");
+
+                    b.HasIndex("DeliveryId", "ChangedAt");
+
+                    b.ToTable("delivery_status_history", "sales", t =>
+                        {
+                            t.HasCheckConstraint("CK_delivery_status_history_status", "from_status IN ('unassigned', 'assigned', 'out_for_delivery', 'delivered', 'failed') AND to_status IN ('unassigned', 'assigned', 'out_for_delivery', 'delivered', 'failed')");
+                        });
+                });
+
             modelBuilder.Entity("CoffeeShop.Domain.Sales.DiningTable", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1796,6 +1838,21 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CoffeeShop.Domain.Sales.DeliveryStatusHistory", b =>
+                {
+                    b.HasOne("CoffeeShop.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("ActorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CoffeeShop.Domain.Sales.Delivery", null)
+                        .WithMany("StatusHistory")
+                        .HasForeignKey("DeliveryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CoffeeShop.Domain.Sales.DiningTable", b =>
                 {
                     b.HasOne("CoffeeShop.Domain.Sales.Order", null)
@@ -1955,6 +2012,11 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
             modelBuilder.Entity("CoffeeShop.Domain.Inventory.PurchaseReceipt", b =>
                 {
                     b.Navigation("Lines");
+                });
+
+            modelBuilder.Entity("CoffeeShop.Domain.Sales.Delivery", b =>
+                {
+                    b.Navigation("StatusHistory");
                 });
 
             modelBuilder.Entity("CoffeeShop.Domain.Sales.Order", b =>

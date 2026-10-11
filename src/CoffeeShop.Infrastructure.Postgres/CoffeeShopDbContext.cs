@@ -79,6 +79,7 @@ public class CoffeeShopDbContext : DbContext, IUnitOfWork
     public DbSet<Payment> Payments => Set<Payment>();
 
     public DbSet<Delivery> Deliveries => Set<Delivery>();
+    public DbSet<DeliveryStatusHistory> DeliveryStatusHistories => Set<DeliveryStatusHistory>();
 
     public DbSet<Reservation> Reservations => Set<Reservation>();
 

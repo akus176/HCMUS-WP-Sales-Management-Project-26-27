@@ -188,6 +188,32 @@ public class DeliveryTests
         Assert.Equal(addressId, delivery.CustomerAddressId);
     }
 
+    [Fact]
+    public void Fulfillment_RecordsActorAuditedTransitions()
+    {
+        var delivery = Delivery.CreateOrderSpecific(EntityId.New(), EntityId.New(), "Alice", "0901234567", "1 Main St");
+        var actor = EntityId.New();
+        var staff = EntityId.New();
+
+        delivery.Assign(staff, actor, Now);
+        delivery.StartDelivery(actor, Now);
+        delivery.Complete(actor, Now);
+
+        Assert.Equal(DeliveryStatus.Delivered, delivery.Status);
+        Assert.Equal(staff, delivery.AssignedStaffId);
+        Assert.Equal(3, delivery.StatusHistory.Count);
+        Assert.All(delivery.StatusHistory, history => Assert.Equal(actor, history.ActorId));
+    }
+
+    [Fact]
+    public void Fulfillment_RejectsInvalidOrRepeatedTransitions()
+    {
+        var delivery = Delivery.CreateOrderSpecific(EntityId.New(), EntityId.New(), "Alice", "0901234567", "1 Main St");
+        Assert.Throws<InvalidOperationException>(() => delivery.StartDelivery(EntityId.New(), Now));
+        delivery.Assign(EntityId.New(), EntityId.New(), Now);
+        Assert.Throws<InvalidOperationException>(() => delivery.Assign(EntityId.New(), EntityId.New(), Now));
+    }
+
     private static OrderLine CreateOrderLine()
     {
         var category = new Category(EntityId.New(), "Coffee", Now, Now);
