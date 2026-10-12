@@ -99,6 +99,7 @@ public sealed class PaymentCommandHandler
                     "payments.invalid_state", exception.Message));
             }
 
+            repository.AddPayment(payment);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return Result<PaymentOperationResult>.Success(ToResult(order, payment.Id, alreadyRecorded: false));
         }, cancellationToken);

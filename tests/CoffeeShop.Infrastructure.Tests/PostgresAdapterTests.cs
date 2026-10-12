@@ -5,6 +5,7 @@ using CoffeeShop.Domain.Common;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Catalog;
 using CoffeeShop.Infrastructure.Postgres.Common;
+using CoffeeShop.Infrastructure.Postgres.Sales;
 using Microsoft.EntityFrameworkCore;
 
 public class PostgresAdapterTests
@@ -47,6 +48,17 @@ public class PostgresAdapterTests
         });
 
         Assert.Contains("require a transaction", exception.Message, StringComparison.Ordinal);
+        Assert.Empty(context.ChangeTracker.Entries());
+    }
+
+    [Fact]
+    public async Task DiscountUpdates_RequireTransactionBeforeAccessingDatabase()
+    {
+        using var context = CreateContext();
+        var repository = new DiscountRepository(context);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            repository.LoadOrderForDiscountUpdateAsync(EntityId.New()));
         Assert.Empty(context.ChangeTracker.Entries());
     }
 

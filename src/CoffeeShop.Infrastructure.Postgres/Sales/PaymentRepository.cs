@@ -14,6 +14,8 @@ public sealed class PaymentRepository : IPaymentRepository
         this.context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
+    public void AddPayment(Payment payment) => context.Payments.Add(payment);
+
     public async Task<Order?> LoadOrderForPaymentUpdateAsync(
         EntityId orderId,
         CancellationToken cancellationToken = default)

@@ -1150,6 +1150,19 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("order_id");
 
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTimeOffset?>("RejectedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("rejected_at");
+
+                    b.Property<Guid?>("RejectedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("rejected_by");
+
                     b.Property<DateTimeOffset>("RequestedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamptz")
@@ -1183,6 +1196,8 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
 
                     b.HasIndex("ApprovedBy");
 
+                    b.HasIndex("RejectedBy");
+
                     b.HasIndex("RequestedBy");
 
                     b.HasIndex("OrderId", "Status");
@@ -1190,6 +1205,12 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                     b.ToTable("discounts", "sales", t =>
                         {
                             t.HasCheckConstraint("CK_discounts_computed_amount", "computed_amount IS NULL OR computed_amount >= 0");
+
+                            t.HasCheckConstraint("CK_discounts_decision", "(status = 'approved' AND approved_by IS NOT NULL AND approved_at IS NOT NULL AND approved_at >= requested_at AND computed_amount IS NOT NULL AND computed_amount > 0 AND rejected_by IS NULL AND rejected_at IS NULL) OR (status = 'pending' AND approved_by IS NULL AND approved_at IS NULL AND computed_amount IS NULL AND rejected_by IS NULL AND rejected_at IS NULL) OR (status = 'rejected' AND approved_by IS NULL AND approved_at IS NULL AND computed_amount IS NULL AND rejected_by IS NOT NULL AND rejected_at IS NOT NULL AND rejected_at >= requested_at)");
+
+                            t.HasCheckConstraint("CK_discounts_percentage", "type <> 'percentage' OR value <= 100");
+
+                            t.HasCheckConstraint("CK_discounts_reason", "length(btrim(reason)) > 0");
 
                             t.HasCheckConstraint("CK_discounts_status", "status IN ('pending', 'approved', 'rejected')");
 
@@ -1447,7 +1468,6 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
             modelBuilder.Entity("CoffeeShop.Domain.Sales.OrderStatusHistory", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
@@ -1869,10 +1889,15 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("CoffeeShop.Domain.Sales.Order", null)
-                        .WithMany()
+                        .WithMany("Discounts")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("CoffeeShop.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("RejectedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("CoffeeShop.Domain.Identity.User", null)
                         .WithMany()
@@ -2021,6 +2046,8 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
 
             modelBuilder.Entity("CoffeeShop.Domain.Sales.Order", b =>
                 {
+                    b.Navigation("Discounts");
+
                     b.Navigation("Lines");
 
                     b.Navigation("Payments");

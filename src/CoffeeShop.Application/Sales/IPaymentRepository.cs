@@ -5,6 +5,8 @@ using CoffeeShop.Domain.Sales;
 
 public interface IPaymentRepository
 {
+    void AddPayment(Payment payment);
+
     Task<Order?> LoadOrderForPaymentUpdateAsync(
         EntityId orderId,
         CancellationToken cancellationToken = default);
