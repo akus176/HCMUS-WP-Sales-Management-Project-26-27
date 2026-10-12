@@ -54,6 +54,13 @@ order eligibility, available balances, and percentage caps. See
 [the loyalty calculation contract](docs/loyalty-rules.md) for rounding, settings
 validation, and integration with the later transaction/persistence workflows.
 
+### Discounts (T6.5)
+
+Fixed and percentage requests remain pending until an actor with `discounts.approve`
+approves them. Reasons and decision actors/times are recorded, and approval rechecks
+the payable total in a transaction. See [discount rules](docs/discount-rules.md) for
+rounding, loyalty interaction, permissions, persistence, and migration behavior.
+
 ## Local PostgreSQL configuration and migrations
 
 Copy `.env.example` to an ignored `.env` and replace the PostgreSQL placeholders. `.env` is a reference only and is **not** loaded automatically, so set the connection string in the current PowerShell session before using Entity Framework Core:

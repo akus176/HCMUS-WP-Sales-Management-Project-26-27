@@ -7,6 +7,7 @@ public class Order
     private readonly List<OrderLine> _lines = [];
     private readonly List<OrderStatusHistory> _statusHistory = [];
     private readonly List<Payment> _payments = [];
+    private readonly List<Discount> _discounts = [];
     protected Order()
     {
     }
@@ -86,6 +87,7 @@ public class Order
     public IReadOnlyCollection<OrderLine> Lines => _lines.AsReadOnly();
     public IReadOnlyCollection<OrderStatusHistory> StatusHistory => _statusHistory.AsReadOnly();
     public IReadOnlyCollection<Payment> Payments => _payments.AsReadOnly();
+    public IReadOnlyCollection<Discount> Discounts => _discounts.AsReadOnly();
     public Money OutstandingBalance => new(decimal.Max(0m, Total.Amount - PaidAmount.Amount));
     public bool IsFullyPaid => PaidAmount.Amount >= Total.Amount;
 
@@ -176,6 +178,65 @@ public class Order
         LoyaltyPointsRedeemed = points;
         LoyaltyDiscountAmount = discount;
         Total = new Money(Total.Amount - discount.Amount);
+    }
+
+    public Discount RequestDiscount(EntityId discountId, string type, decimal value, string reason,
+        EntityId actorId, UtcTimestamp requestedAt)
+    {
+        EnsureDiscountsAllowed();
+        ArgumentNullException.ThrowIfNull(requestedAt);
+        if (_discounts.Any(discount => discount.Id == discountId))
+        {
+            throw new InvalidOperationException("The discount identifier is already recorded for this order.");
+        }
+
+        if (requestedAt.Value < CreatedAt.Value)
+        {
+            throw new ArgumentException("A discount request cannot predate the order.", nameof(requestedAt));
+        }
+
+        var discount = new Discount(discountId, Id, type, value, reason, actorId, requestedAt);
+        discount.CalculateAmount(Total);
+        _discounts.Add(discount);
+        return discount;
+    }
+
+    public Discount ApproveDiscount(EntityId discountId, EntityId actorId, UtcTimestamp approvedAt)
+    {
+        EnsureDiscountsAllowed();
+        var discount = FindDiscount(discountId);
+        discount.EnsurePending();
+        // Recalculate at approval: prior approvals and loyalty may have changed the payable total.
+        var amount = discount.CalculateAmount(Total);
+        var total = new Money(Total.Amount - amount.Amount);
+        var discountTotal = new Money(DiscountTotal.Amount + amount.Amount);
+        discount.Approve(amount, actorId, approvedAt);
+        DiscountTotal = discountTotal;
+        Total = total;
+        return discount;
+    }
+
+    public Discount RejectDiscount(EntityId discountId, EntityId actorId, UtcTimestamp rejectedAt)
+    {
+        EnsureDiscountsAllowed();
+        var discount = FindDiscount(discountId);
+        discount.Reject(actorId, rejectedAt);
+        return discount;
+    }
+
+    private Discount FindDiscount(EntityId discountId)
+    {
+        ArgumentNullException.ThrowIfNull(discountId);
+        return _discounts.SingleOrDefault(discount => discount.Id == discountId)
+            ?? throw new ArgumentException("The discount must belong to this order.", nameof(discountId));
+    }
+
+    private void EnsureDiscountsAllowed()
+    {
+        if (Status is OrderStatus.Completed or OrderStatus.Cancelled)
+        {
+            throw new InvalidOperationException("Discounts cannot be changed for completed or cancelled orders.");
+        }
     }
 
     private void RecalculatePaidAmount()

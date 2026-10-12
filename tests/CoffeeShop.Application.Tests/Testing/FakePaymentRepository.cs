@@ -12,6 +12,11 @@ public sealed class FakePaymentRepository : IPaymentRepository
 
     public int OrderLockCount { get; private set; }
 
+    public void AddPayment(Payment payment)
+    {
+        // The order owns the payment; the production adapter explicitly tracks it as new.
+    }
+
     public Task<Order?> LoadOrderForPaymentUpdateAsync(
         EntityId orderId,
         CancellationToken cancellationToken = default)

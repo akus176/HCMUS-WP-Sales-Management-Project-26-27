@@ -121,6 +121,21 @@ public class SalesMappingTests
     }
 
     [Fact]
+    public void Discounts_MapToOrderCollectionAndRequireReasonAndDecisionMetadata()
+    {
+        var discount = CreateModel().FindEntityType(typeof(Discount))!;
+        var orderRelationship = Assert.Single(discount.GetForeignKeys(),
+            foreignKey => foreignKey.PrincipalEntityType.ClrType == typeof(Order));
+
+        Assert.Equal(nameof(Order.Discounts), orderRelationship.PrincipalToDependent!.Name);
+        Assert.False(discount.FindProperty(nameof(Discount.Reason))!.IsNullable);
+        Assert.Equal("text", discount.FindProperty(nameof(Discount.Reason))!.GetColumnType());
+        Assert.Contains(discount.GetCheckConstraints(), constraint => constraint.Name == "CK_discounts_percentage");
+        Assert.Contains(discount.GetCheckConstraints(), constraint => constraint.Name == "CK_discounts_reason");
+        Assert.Contains(discount.GetCheckConstraints(), constraint => constraint.Name == "CK_discounts_decision");
+    }
+
+    [Fact]
     public void Tables_UseOptimisticConcurrencyAndPartialActiveOrderUniqueness()
     {
         var table = CreateModel().FindEntityType(typeof(DiningTable))!;

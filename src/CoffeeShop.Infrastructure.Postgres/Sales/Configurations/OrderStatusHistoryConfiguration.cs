@@ -12,7 +12,7 @@ public sealed class OrderStatusHistoryConfiguration : IEntityTypeConfiguration<O
     {
         builder.ToTable("order_status_history", "sales", table => table.HasCheckConstraint("CK_order_status_history_to_status", "to_status IN ('draft', 'confirmed', 'preparing', 'ready', 'completed', 'cancelled')"));
         builder.HasKey(history => history.Id);
-        builder.Property(history => history.Id).HasConversion<EntityIdValueConverter>().HasDefaultValueSql("gen_random_uuid()").HasColumnName("id");
+        builder.Property(history => history.Id).HasConversion<EntityIdValueConverter>().HasDefaultValueSql("gen_random_uuid()").ValueGeneratedNever().HasColumnName("id");
         builder.Property(history => history.OrderId).HasConversion<EntityIdValueConverter>().IsRequired().HasColumnName("order_id");
         builder.Property(history => history.FromStatus).HasMaxLength(15).HasColumnName("from_status");
         builder.Property(history => history.ToStatus).HasMaxLength(15).IsRequired().HasColumnName("to_status");
