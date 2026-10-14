@@ -17,7 +17,7 @@ dotnet test CoffeeShop.slnx
 dotnet run --project src/CoffeeShop.Api
 ```
 
-The API currently exposes only `/health` (and `/openapi/v1.json` in Development). Run the WinUI project from Visual Studio or use `dotnet run --project src/CoffeeShop.WinUI -r win-x64` on Windows. The UI is a themed shell with no database connection yet.
+The API currently exposes only `/health` (and `/openapi/v1.json` in Development). Run the WinUI project from Visual Studio or use `dotnet run --project src/CoffeeShop.WinUI -r win-x64` on Windows. The desktop client hosts catalog, inventory, and customer Application services against local PostgreSQL; set `ConnectionStrings__CoffeeShop` before launching it.
 
 ## Project boundaries
 
@@ -53,6 +53,13 @@ Configurable earning and redemption calculations enforce active customers,
 order eligibility, available balances, and percentage caps. See
 [the loyalty calculation contract](docs/loyalty-rules.md) for rounding, settings
 validation, and integration with the later transaction/persistence workflows.
+
+### Customer screens (T5.6)
+
+Customer profiles, saved addresses, balances, paginated loyalty history, and next-order
+customer/delivery selection are available under **Customers and Loyalty**. Walk-ins
+remain available without a profile. See [customer WinUI workflows](docs/customers-winui.md)
+for verification and the POS/order-completion integration contracts.
 
 ### Discounts (T6.5)
 
