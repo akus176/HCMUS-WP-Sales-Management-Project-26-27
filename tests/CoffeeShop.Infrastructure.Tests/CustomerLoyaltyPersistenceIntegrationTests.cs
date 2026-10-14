@@ -7,6 +7,7 @@ using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Identity;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Common;
+using CoffeeShop.WinUI.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
@@ -39,6 +40,7 @@ public sealed class CustomerLoyaltyPersistenceIntegrationTests : IAsyncLifetime
             .AddSingleton<ICurrentUser>(new FixedCurrentUser(actorId))
             .AddScoped<CustomerCommandHandler>()
             .AddScoped<CustomerQueryHandler>()
+            .AddScoped<CustomerOrderSelectionHandler>()
             .AddScoped<LoyaltyCommandHandler>()
             .BuildServiceProvider();
         await using var scope = services.CreateAsyncScope();
@@ -194,6 +196,48 @@ public sealed class CustomerLoyaltyPersistenceIntegrationTests : IAsyncLifetime
         Assert.Equal(80, (await context.Customers.AsNoTracking().SingleAsync(item => item.Id == customerId)).LoyaltyPointsBalance);
         Assert.Single(await context.LoyaltyTransactions.AsNoTracking()
             .Where(item => item.OrderId == redeemOrder && item.Type == "redeem").ToListAsync());
+    }
+
+    [PostgresFact]
+    public async Task WinUICustomerWorkspace_ManagesProfilesAndRefreshesEarnedBalanceExactlyOnce()
+    {
+        await ConfigureSettingsAsync();
+        var context = new CustomerOrderContext();
+        var workspace = new CustomerWorkspace(services.GetRequiredService<IServiceScopeFactory>(), context);
+        await workspace.LoadAsync();
+        Assert.True(workspace.IsEmpty);
+        Assert.True(await workspace.CreateAsync(new("UI Customer", "0904444444")));
+        var customerId = workspace.SelectedCustomer!.Id;
+        Assert.True(await workspace.AddAddressAsync(new(customerId, "10 UI Street", "Home", true)));
+        var address = Assert.Single(workspace.SelectedCustomer!.Addresses);
+        Assert.True(await workspace.SetOrderSelectionAsync(new(customerId, true, address.Id, "Recipient", "0904444444")));
+        Assert.Equal("10 UI Street", workspace.OrderSelection.AddressLine);
+        Assert.Equal(address.Id, workspace.OrderSelection.Delivery!.CustomerAddressId);
+
+        var orderId = await InsertOrderAsync(customerId, "completed", 100m, 100m);
+        Assert.False((await EarnAsync(orderId)).AlreadyApplied);
+        await workspace.RefreshAfterOrderCompletionAsync(customerId);
+        Assert.False(workspace.IsError, workspace.Message);
+        Assert.Equal(10, workspace.SelectedCustomer.LoyaltyPointsBalance);
+        Assert.Equal(orderId, Assert.Single(workspace.History.Items).OrderId);
+        Assert.Equal(orderId, Assert.Single(workspace.SelectedCustomer.RecentOrders).Id);
+
+        Assert.True((await EarnAsync(orderId)).AlreadyApplied);
+        await workspace.RefreshAfterOrderCompletionAsync(customerId);
+        Assert.Equal(10, workspace.SelectedCustomer.LoyaltyPointsBalance);
+        Assert.Single(workspace.History.Items);
+        Assert.True(await workspace.UpdateAddressAsync(new(customerId, address.Id, "11 UI Street", "Home", true)));
+        Assert.Equal("11 UI Street", workspace.OrderSelection.AddressLine);
+        Assert.True(await workspace.DeactivateAsync(customerId));
+        Assert.Null(context.Selection.CustomerId);
+        Assert.Empty(workspace.Customers);
+        Assert.Single(workspace.History.Items);
+        workspace.IncludeInactive = true;
+        await workspace.LoadAsync();
+        Assert.False(Assert.Single(workspace.Customers).IsActive);
+        Assert.Equal("11 UI Street", Assert.Single(workspace.SelectedCustomer.Addresses).AddressLine);
+        Assert.False(await workspace.SetOrderSelectionAsync(new(customerId)));
+        Assert.Equal(CoffeeShop.Application.Common.Results.ErrorType.Conflict, workspace.Error!.Type);
     }
 
     private async Task ConfigureSettingsAsync()

@@ -22,6 +22,7 @@ public sealed partial class MainWindow : Window
         ContentFrame.Navigate(tag switch
         {
             "catalog" => typeof(CatalogPage),
+            "customers" => typeof(CustomersPage),
             "ingredients" => typeof(IngredientsPage),
             "suppliers" => typeof(SuppliersPage),
             "receipts" => typeof(PurchaseReceiptsPage),

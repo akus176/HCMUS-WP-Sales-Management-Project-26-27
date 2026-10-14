@@ -1,9 +1,11 @@
 using CoffeeShop.Application.Catalog;
 using CoffeeShop.Application.Common.Time;
+using CoffeeShop.Application.Customers;
 using CoffeeShop.Application.Inventory;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Common;
 using CoffeeShop.Infrastructure.Postgres.Inventory;
+using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 
@@ -44,6 +46,11 @@ public partial class App : Microsoft.UI.Xaml.Application
         services.AddScoped<CatalogCommandHandler>();
         services.AddScoped<CatalogQueryHandler>();
         services.AddScoped<RecipeCommandHandler>();
+        services.AddScoped<CustomerCommandHandler>();
+        services.AddScoped<CustomerQueryHandler>();
+        services.AddScoped<CustomerOrderSelectionHandler>();
+        services.AddSingleton<CustomerOrderContext>();
+        services.AddSingleton<CustomerWorkspace>();
         services.AddScoped<InventoryCommandHandler>();
         services.AddScoped<IInventoryRepository>(serviceProvider =>
             serviceProvider.GetRequiredService<InventoryRepository>());

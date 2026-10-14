@@ -16,6 +16,8 @@
   <ItemGroup>
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\*.cs" Link="ViewModels\%(Filename)%(Extension)" />
     <Compile Include="..\CoffeeShop.Application.Tests\Testing\FakeCatalogRepository.cs" Link="Testing\FakeCatalogRepository.cs" />
+    <Compile Include="..\CoffeeShop.Application.Tests\Testing\FakeCustomerRepository.cs" Link="Testing\FakeCustomerRepository.cs" />
+    <Compile Include="..\CoffeeShop.Application.Tests\Testing\TestCurrentUser.cs" Link="Testing\TestCurrentUser.cs" />
     <Compile Include="..\CoffeeShop.Application.Tests\Testing\FakeUnitOfWork.cs" Link="Testing\FakeUnitOfWork.cs" />
     <Compile Include="..\CoffeeShop.Application.Tests\Testing\TestClock.cs" Link="Testing\TestClock.cs" />
     <Compile Include="..\CoffeeShop.Application.Tests\Testing\TestTransactionManager.cs" Link="Testing\TestTransactionManager.cs" />
