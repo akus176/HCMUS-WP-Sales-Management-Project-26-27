@@ -198,13 +198,37 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
         {
             await LoadDetailAsync(queries, History.Offset);
         }
+
+        if (!IsError && OrderSelection.CustomerId is not null)
+        {
+            var prepared = await scope.ServiceProvider.GetRequiredService<CustomerOrderSelectionHandler>()
+                .PrepareAsync(orderContext.Request);
+            if (prepared.IsSuccess)
+            {
+                orderContext.Set(orderContext.Request, prepared.Value);
+            }
+            else
+            {
+                orderContext.Clear();
+            }
+        }
     }
 
     private async Task LoadDetailAsync(CustomerQueryHandler queries, int offset)
     {
-        var detail = await queries.GetCustomerDetailAsync(selectedId!);
+        var customerId = selectedId!;
+        var detail = await queries.GetCustomerDetailAsync(customerId);
         if (!Accept(detail))
         {
+            if (detail.Error!.Type == ErrorType.NotFound)
+            {
+                selectedId = null;
+                if (OrderSelection.CustomerId == customerId)
+                {
+                    orderContext.Clear();
+                }
+            }
+
             SelectedCustomer = null;
             History = new([], 0, HistoryPageSize, 0);
             RequiresReload = true;
@@ -241,6 +265,10 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
         {
             History = result.Value;
             Message = "Loyalty history loaded.";
+        }
+        else
+        {
+            RequiresReload = true;
         }
     });
 

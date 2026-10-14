@@ -2,8 +2,8 @@
     x:Class="CoffeeShop.WinUI.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Coffee Shop — Catalog and Inventory">
-    <Grid Background="{StaticResource SketchBackgroundBrush}">
+    Title="Coffee Shop — Menu, Customers and Inventory">
+    <Grid Background="{StaticResource SketchBackgroundBrush}" RequestedTheme="Light">
         <NavigationView x:Name="Nav"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="False"
@@ -14,6 +14,11 @@
                 <NavigationViewItem Content="Menu and Recipes" Tag="catalog">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8F1;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Customers and Loyalty" Tag="customers">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE716;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Ingredients"

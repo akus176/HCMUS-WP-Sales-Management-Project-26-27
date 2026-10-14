@@ -6,7 +6,6 @@ using CoffeeShop.Application.Common.Time;
 using CoffeeShop.Application.Customers;
 using CoffeeShop.Application.Tests.Testing;
 using CoffeeShop.Domain.Common;
-using CoffeeShop.Domain.Customers;
 using CoffeeShop.Domain.Sales;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -118,6 +117,26 @@ public sealed class CustomerWorkspaceTests
         await setup.Model.LoadAsync();
         Assert.Equal("Alice", setup.Model.SelectedCustomer!.FullName);
         Assert.False(setup.Model.RequiresReload);
+    }
+
+    [Fact]
+    public async Task MissingSelectedProfile_CanRecoverOnReload()
+    {
+        using var setup = new Setup();
+        Assert.True(await setup.Model.CreateAsync(new("Alice", "0901234567")));
+        var id = setup.Model.SelectedCustomer!.Id;
+        Assert.True(await setup.Model.SetOrderSelectionAsync(new(id)));
+        setup.Store.Customers.Remove(id);
+
+        await setup.Model.LoadAsync();
+        Assert.Equal(ErrorType.NotFound, setup.Model.Error!.Type);
+        Assert.Null(setup.Model.SelectedCustomer);
+        Assert.Null(setup.Model.OrderSelection.CustomerId);
+        Assert.True(setup.Model.RequiresReload);
+        await setup.Model.LoadAsync();
+        Assert.False(setup.Model.RequiresReload);
+        Assert.True(setup.Model.IsEmpty);
+        Assert.True(await setup.Model.CreateAsync(new("Bob", "0907654321")));
     }
 
     [Fact]
