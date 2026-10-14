@@ -52,7 +52,7 @@
 - [x] 6.3 Implement table management and concurrency-safe occupancy; verify two simultaneous assignments cannot occupy the same table
 - [ ] 6.4 Implement cash, card, and e-wallet payment records and paid-balance calculation; verify an order cannot complete with an unpaid balance
 - [ ] 6.5 Implement fixed and percentage discount requests with manager approval and non-negative total validation; verify unapproved discounts do not affect payable totals
-- [ ] 6.6 Implement atomic order confirmation that validates recipes, checks stock, snapshots pricing, deducts all ingredients, and rolls back on shortage; verify PostgreSQL integration tests prove all-or-nothing behavior
+- [x] 6.6 Implement atomic order confirmation that validates recipes, checks stock, snapshots pricing, deducts all ingredients, and rolls back on shortage; verify PostgreSQL integration tests prove all-or-nothing behavior
 - [ ] 6.7 Implement idempotent cancellation that records a reason, stops fulfillment, restores consumed inventory, and reverses affected loyalty entries; verify repeated cancellation processing has no duplicate effects
 - [ ] 6.8 Implement delivery assignment and ready, out-for-delivery, delivered, and failed status transitions; verify only eligible active delivery staff can receive assignments
 - [ ] 6.9 Build WinUI POS screens for channel selection, product configuration, customer attachment, table/address details, totals, discounts, and confirmation; verify one order can be completed for each channel

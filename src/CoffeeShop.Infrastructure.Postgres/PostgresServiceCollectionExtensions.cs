@@ -33,6 +33,7 @@ public static class PostgresServiceCollectionExtensions
         services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IDeliveryRepository, DeliveryRepository>();
+        services.AddScoped<IOrderConfirmationRepository, OrderConfirmationRepository>();
 
         return services;
     }
