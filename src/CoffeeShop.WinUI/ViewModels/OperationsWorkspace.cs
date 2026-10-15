@@ -57,7 +57,7 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     {
         if (SelectedOrder is null) return;
         var result = await provider.GetRequiredService<PaymentCommandHandler>().RecordAsync(
-            new(EntityId.New(), SelectedOrder.Id, method, amount, reference: string.IsNullOrWhiteSpace(reference) ? null : reference));
+            new(EntityId.New(), SelectedOrder.Id, method, amount, Reference: string.IsNullOrWhiteSpace(reference) ? null : reference));
         if (Accept(result)) await RefreshAsync(provider, $"Payment recorded. Outstanding balance: {result.Value!.OutstandingBalance:0.00}.");
     });
 

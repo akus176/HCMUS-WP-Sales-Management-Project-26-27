@@ -37,7 +37,8 @@ public static class PostgresServiceCollectionExtensions
         services.AddScoped<IDeliveryRepository, DeliveryRepository>();
         services.AddScoped<IOrderConfirmationRepository, OrderConfirmationRepository>();
         services.AddScoped<IOrderCancellationRepository, OrderCancellationRepository>();
-        services.AddScoped<IFulfillmentOperationsRepository, FulfillmentOperationsRepository>();
+        services.AddScoped<FulfillmentOperationsRepository>();
+        services.AddScoped<IFulfillmentOperationsRepository>(serviceProvider => serviceProvider.GetRequiredService<FulfillmentOperationsRepository>());
         services.AddScoped<IOrderFulfillmentRepository>(serviceProvider => serviceProvider.GetRequiredService<FulfillmentOperationsRepository>());
         services.AddScoped<FulfillmentOperationsQueryHandler>();
         services.AddScoped<OrderFulfillmentCommandHandler>();
