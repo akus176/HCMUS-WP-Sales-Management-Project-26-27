@@ -14,8 +14,8 @@ public sealed class DeliveryStatusHistoryConfiguration : IEntityTypeConfiguratio
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).HasConversion<EntityIdValueConverter>().HasColumnName("id");
         builder.Property(x => x.DeliveryId).HasConversion<EntityIdValueConverter>().HasColumnName("delivery_id");
-        builder.Property(x => x.FromStatus).HasMaxLength(15).HasColumnName("from_status");
-        builder.Property(x => x.ToStatus).HasMaxLength(15).HasColumnName("to_status");
+        builder.Property(x => x.FromStatus).HasMaxLength(16).HasColumnName("from_status");
+        builder.Property(x => x.ToStatus).HasMaxLength(16).HasColumnName("to_status");
         builder.Property(x => x.ActorId).HasConversion<EntityIdValueConverter>().HasColumnName("actor_id");
         builder.Property(x => x.ChangedAt).HasConversion<UtcTimestampValueConverter>().HasColumnType("timestamptz").HasColumnName("changed_at");
         builder.HasIndex(x => new { x.DeliveryId, x.ChangedAt });

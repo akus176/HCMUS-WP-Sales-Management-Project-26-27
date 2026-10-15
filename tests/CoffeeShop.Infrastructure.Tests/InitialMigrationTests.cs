@@ -29,6 +29,23 @@ public sealed class InitialMigrationTests
     }
 
     [Fact]
+    public void DeliveryHistoryMigration_IsRegisteredAndSupportsEveryDeliveryStatus()
+    {
+        using var context = CreateContext();
+        Assert.Contains("20261010060000_AddDeliveryStatusHistory", context.Database.GetMigrations());
+        foreach (var (type, propertyName) in new[]
+        {
+            (typeof(Domain.Sales.Delivery), nameof(Domain.Sales.Delivery.Status)),
+            (typeof(Domain.Sales.DeliveryStatusHistory), nameof(Domain.Sales.DeliveryStatusHistory.FromStatus)),
+            (typeof(Domain.Sales.DeliveryStatusHistory), nameof(Domain.Sales.DeliveryStatusHistory.ToStatus))
+        })
+        {
+            var length = context.Model.FindEntityType(type)!.FindProperty(propertyName)!.GetMaxLength();
+            Assert.True(length >= Domain.Sales.DeliveryStatus.OutForDelivery.Length);
+        }
+    }
+
+    [Fact]
     public void ReservationMigration_OnlyReplacesTheActiveReservationIndex()
     {
         using var context = CreateContext();

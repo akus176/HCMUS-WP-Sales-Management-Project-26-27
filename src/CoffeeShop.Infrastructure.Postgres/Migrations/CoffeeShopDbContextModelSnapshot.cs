@@ -1036,8 +1036,8 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(15)
-                        .HasColumnType("character varying(15)")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
                         .HasDefaultValue("unassigned")
                         .HasColumnName("status");
 
@@ -1078,14 +1078,14 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
 
                     b.Property<string>("FromStatus")
                         .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("character varying(15)")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
                         .HasColumnName("from_status");
 
                     b.Property<string>("ToStatus")
                         .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("character varying(15)")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
                         .HasColumnName("to_status");
 
                     b.HasKey("Id");
