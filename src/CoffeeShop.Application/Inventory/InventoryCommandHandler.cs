@@ -369,46 +369,58 @@ public sealed class InventoryCommandHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        if (string.IsNullOrWhiteSpace(command.Reason))
+        if (string.IsNullOrWhiteSpace(command.Reason) || command.Reason.Trim().Length > 255)
         {
-            return Result.Failure(Error.Validation("inventory.restoration_reason_required", "Inventory restoration requires a reason."));
-        }
-
-        var movements = await repository.ListMovementsForOrderAsync(command.OrderId, cancellationToken);
-        if (movements.Any(m => m.Type == StockMovementType.Restoration))
-        {
-            return Result.Success();
-        }
-
-        var consumptions = movements.Where(m => m.Type == StockMovementType.OrderConsumption).ToArray();
-        if (consumptions.Length == 0)
-        {
-            return Result.Failure(Error.NotFound("inventory.order_consumption_not_found", $"Order '{command.OrderId}' has no inventory consumption to restore."));
-        }
-
-        var ingredients = new List<(StockMovement Consumption, Ingredient Ingredient)>();
-        foreach (var consumption in consumptions)
-        {
-            var ingredient = await repository.FindIngredientAsync(consumption.IngredientId, cancellationToken);
-            if (ingredient is null)
-            {
-                return Result.Failure(IngredientNotFound(consumption.IngredientId));
-            }
-
-            ingredients.Add((consumption, ingredient));
+            return Result.Failure(Error.Validation("inventory.restoration_reason_required", "Inventory restoration requires a reason of at most 255 characters."));
         }
 
         return await transactionManager.ExecuteInTransactionAsync(async () =>
         {
-            foreach (var (consumption, ingredient) in ingredients)
+            await repository.LockOrderForRestorationAsync(command.OrderId, cancellationToken);
+            if (await repository.HasOrderRestorationAsync(command.OrderId, cancellationToken))
             {
-                var restoredQuantity = -consumption.QuantityDelta;
-                ingredient.Receive(restoredQuantity, clock.UtcNow);
-                repository.AddStockMovement(new StockMovement(
-                    EntityId.New(), ingredient.Id, StockMovementType.Restoration, restoredQuantity,
-                    command.ActorId, command.Reason, clock.UtcNow, orderId: command.OrderId));
+                return Result.Success();
             }
 
+            var movements = await repository.ListMovementsForOrderAsync(command.OrderId, cancellationToken);
+            // The immutable consumption ledger is authoritative, even if recipes changed.
+            // Account for restoration movements made before the durable guard was introduced.
+            var quantities = movements.Where(movement => movement.Type is StockMovementType.OrderConsumption or StockMovementType.Restoration)
+                .GroupBy(movement => movement.IngredientId)
+                .Select(group => (IngredientId: group.Key, Quantity: -group.Sum(movement => movement.QuantityDelta)))
+                .ToArray();
+            if (quantities.Any(line => line.Quantity < 0))
+            {
+                return Result.Failure(Error.Conflict("inventory.invalid_restoration_history", "The order's restoration history exceeds its recorded consumption."));
+            }
+
+            var pending = quantities.Where(line => line.Quantity > 0).ToArray();
+            var ingredients = (await repository.LoadIngredientsForRestorationAsync(
+                pending.Select(line => line.IngredientId).ToArray(), cancellationToken)).ToDictionary(ingredient => ingredient.Id);
+            foreach (var line in pending)
+            {
+                if (!ingredients.TryGetValue(line.IngredientId, out var ingredient))
+                {
+                    return Result.Failure(IngredientNotFound(line.IngredientId));
+                }
+
+                if (line.Quantity + ingredient.AvailableQuantity > MeasuredQuantity.MaximumValue)
+                {
+                    return Result.Failure(Error.Conflict("inventory.restoration_balance_conflict", "Restoration would exceed the supported ingredient balance range."));
+                }
+            }
+
+            var restoredAt = clock.UtcNow;
+            foreach (var line in pending)
+            {
+                var ingredient = ingredients[line.IngredientId];
+                ingredient.Receive(line.Quantity, restoredAt);
+                repository.AddStockMovement(new StockMovement(
+                    EntityId.New(), ingredient.Id, StockMovementType.Restoration, line.Quantity,
+                    command.ActorId, command.Reason, restoredAt, orderId: command.OrderId));
+            }
+
+            repository.AddOrderRestoration(new OrderInventoryRestoration(command.OrderId, restoredAt, command.ActorId));
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }, cancellationToken);

@@ -63,6 +63,8 @@ public class CoffeeShopDbContext : DbContext, IUnitOfWork
 
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
 
+    public DbSet<OrderInventoryRestoration> OrderInventoryRestorations => Set<OrderInventoryRestoration>();
+
     // Sales and fulfillment
     public DbSet<DiningTable> DiningTables => Set<DiningTable>();
 

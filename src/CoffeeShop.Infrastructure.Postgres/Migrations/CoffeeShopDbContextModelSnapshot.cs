@@ -765,6 +765,27 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoffeeShop.Domain.Inventory.OrderInventoryRestoration", b =>
+                {
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("order_id");
+
+                    b.Property<DateTimeOffset>("RestoredAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("restored_at");
+
+                    b.Property<Guid>("RestoredBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("restored_by");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("RestoredBy");
+
+                    b.ToTable("order_inventory_restorations", "inventory");
+                });
+
             modelBuilder.Entity("CoffeeShop.Domain.Inventory.PurchaseReceipt", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1802,6 +1823,21 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CoffeeShop.Domain.Inventory.OrderInventoryRestoration", b =>
+                {
+                    b.HasOne("CoffeeShop.Domain.Sales.Order", null)
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CoffeeShop.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("RestoredBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CoffeeShop.Domain.Inventory.PurchaseReceipt", b =>
