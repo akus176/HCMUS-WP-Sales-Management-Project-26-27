@@ -1,6 +1,7 @@
 namespace CoffeeShop.Application.Tests.Testing;
 
 using CoffeeShop.Application.Common.Persistence;
+using CoffeeShop.Application.Common.Results;
 
 public sealed class TestTransactionManager : ITransactionManager
 {
@@ -51,7 +52,14 @@ public sealed class TestTransactionManager : ITransactionManager
         try
         {
             var result = await action();
-            CommittedCount++;
+            if (result is Result { IsFailure: true })
+            {
+                RollbackCount++;
+            }
+            else
+            {
+                CommittedCount++;
+            }
             return result;
         }
         catch

@@ -43,8 +43,14 @@ public sealed class CustomerRepository : ICustomerRepository
         RequireTransaction();
         await context.Database.ExecuteSqlInterpolatedAsync(
             $"SELECT 1 FROM customers.customers WHERE id = {customerId.Value} FOR UPDATE", cancellationToken);
-        return await context.Customers.Include(customer => customer.LoyaltyTransactions)
+        var customer = await context.Customers.Include(customer => customer.LoyaltyTransactions)
             .FirstOrDefaultAsync(customer => customer.Id == customerId, cancellationToken);
+        if (customer is not null)
+        {
+            await context.Entry(customer).ReloadAsync(cancellationToken);
+        }
+
+        return customer;
     }
 
     public async Task<LoyaltySettings?> LoadLoyaltySettingsForUpdateAsync(

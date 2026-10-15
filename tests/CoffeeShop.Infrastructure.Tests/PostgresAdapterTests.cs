@@ -5,6 +5,7 @@ using CoffeeShop.Domain.Common;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Catalog;
 using CoffeeShop.Infrastructure.Postgres.Common;
+using CoffeeShop.Infrastructure.Postgres.Inventory;
 using CoffeeShop.Infrastructure.Postgres.Sales;
 using Microsoft.EntityFrameworkCore;
 
@@ -59,6 +60,22 @@ public class PostgresAdapterTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             repository.LoadOrderForDiscountUpdateAsync(EntityId.New()));
+        Assert.Empty(context.ChangeTracker.Entries());
+    }
+
+    [Fact]
+    public async Task CancellationRestorationAndDelivery_RequireTransactionBeforeAccessingDatabase()
+    {
+        using var context = CreateContext();
+        var cancellation = new OrderCancellationRepository(context);
+        var inventory = new InventoryRepository(context);
+        var delivery = new DeliveryRepository(context);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => cancellation.LoadOrderForCancellationAsync(EntityId.New()));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => cancellation.LoadTableForCancellationAsync(EntityId.New()));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => inventory.LockOrderForRestorationAsync(EntityId.New()));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => inventory.LoadIngredientsForRestorationAsync([]));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => delivery.LoadOrderForUpdateAsync(EntityId.New()));
         Assert.Empty(context.ChangeTracker.Entries());
     }
 
