@@ -12,6 +12,9 @@ public sealed partial class MainWindow : Window
         Nav.SelectedItem = Nav.MenuItems[0];
     }
 
+    public void NavigateTo(string tag) => Nav.SelectedItem = Nav.MenuItems.OfType<NavigationViewItem>()
+        .Single(item => item.Tag is string itemTag && itemTag == tag);
+
     private void OnNavSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (args.SelectedItem is not NavigationViewItem item || item.Tag is not string tag)
@@ -21,6 +24,7 @@ public sealed partial class MainWindow : Window
 
         ContentFrame.Navigate(tag switch
         {
+            "pos" => typeof(PosPage),
             "catalog" => typeof(CatalogPage),
             "customers" => typeof(CustomersPage),
             "ingredients" => typeof(IngredientsPage),

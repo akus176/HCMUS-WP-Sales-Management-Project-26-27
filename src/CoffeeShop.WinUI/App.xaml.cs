@@ -1,7 +1,9 @@
 using CoffeeShop.Application.Catalog;
+using CoffeeShop.Application.Common.Security;
 using CoffeeShop.Application.Common.Time;
 using CoffeeShop.Application.Customers;
 using CoffeeShop.Application.Inventory;
+using CoffeeShop.Application.Sales;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Common;
 using CoffeeShop.Infrastructure.Postgres.Inventory;
@@ -51,6 +53,12 @@ public partial class App : Microsoft.UI.Xaml.Application
         services.AddScoped<CustomerOrderSelectionHandler>();
         services.AddSingleton<CustomerOrderContext>();
         services.AddSingleton<CustomerWorkspace>();
+        services.AddSingleton<PosOperatorSession>();
+        services.AddSingleton<ICurrentUser>(provider => provider.GetRequiredService<PosOperatorSession>());
+        services.AddScoped<PosOrderHandler>();
+        services.AddScoped<OrderConfirmationCommandHandler>();
+        services.AddScoped<DiscountCommandHandler>();
+        services.AddSingleton<PosWorkspace>();
         services.AddScoped<InventoryCommandHandler>();
         services.AddScoped<IInventoryRepository>(serviceProvider =>
             serviceProvider.GetRequiredService<InventoryRepository>());
