@@ -68,6 +68,14 @@ approves them. Reasons and decision actors/times are recorded, and approval rech
 the payable total in a transaction. See [discount rules](docs/discount-rules.md) for
 rounding, loyalty interaction, permissions, persistence, and migration behavior.
 
+### Cancellation (T6.7)
+
+Order cancellation restores consumed inventory, reverses affected loyalty entries,
+records the reason and actor, releases its dine-in table, and stops delivery updates
+in one transaction. Retries return a conflict without duplicate effects. See
+[cancellation rules](docs/cancellation-rules.md) for states, permissions, migrations,
+rollback behavior, and PostgreSQL verification.
+
 ## Local PostgreSQL configuration and migrations
 
 Copy `.env.example` to an ignored `.env` and replace the PostgreSQL placeholders. `.env` is a reference only and is **not** loaded automatically, so set the connection string in the current PowerShell session before using Entity Framework Core:
