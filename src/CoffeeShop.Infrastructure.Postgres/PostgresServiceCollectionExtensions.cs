@@ -4,11 +4,13 @@ using CoffeeShop.Application.Catalog;
 using CoffeeShop.Application.Common.Persistence;
 using CoffeeShop.Application.Customers;
 using CoffeeShop.Application.Inventory;
+using CoffeeShop.Application.Reporting;
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Infrastructure.Postgres.Catalog;
 using CoffeeShop.Infrastructure.Postgres.Common;
 using CoffeeShop.Infrastructure.Postgres.Customers;
 using CoffeeShop.Infrastructure.Postgres.Inventory;
+using CoffeeShop.Infrastructure.Postgres.Reporting;
 using CoffeeShop.Infrastructure.Postgres.Sales;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -35,6 +37,8 @@ public static class PostgresServiceCollectionExtensions
         services.AddScoped<IDeliveryRepository, DeliveryRepository>();
         services.AddScoped<IOrderConfirmationRepository, OrderConfirmationRepository>();
         services.AddScoped<IOrderCancellationRepository, OrderCancellationRepository>();
+        services.AddScoped<IRevenueReportRepository, RevenueReportRepository>();
+        services.AddScoped<RevenueReportQueryHandler>();
         services.AddScoped<InventoryCommandHandler>();
         services.AddScoped<LoyaltyCommandHandler>();
         services.AddScoped<OrderCancellationCommandHandler>();

@@ -44,5 +44,5 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      - name: Catalog, Customer, Order and POS PostgreSQL Integration Tests
-        run: dotnet test tests/CoffeeShop.Infrastructure.Tests --configuration Release --filter "FullyQualifiedName~CatalogPersistenceIntegrationTests|FullyQualifiedName~CustomerLoyaltyPersistenceIntegrationTests|FullyQualifiedName~OrderConfirmationIntegrationTests|FullyQualifiedName~OrderCancellationIntegrationTests|FullyQualifiedName~PosWorkspaceIntegrationTests"
+      - name: Catalog, Customer, Order, POS and Reporting PostgreSQL Integration Tests
+        run: dotnet test tests/CoffeeShop.Infrastructure.Tests --configuration Release --filter "FullyQualifiedName~CatalogPersistenceIntegrationTests|FullyQualifiedName~CustomerLoyaltyPersistenceIntegrationTests|FullyQualifiedName~OrderConfirmationIntegrationTests|FullyQualifiedName~OrderCancellationIntegrationTests|FullyQualifiedName~PosWorkspaceIntegrationTests|FullyQualifiedName~RevenueReportIntegrationTests"
