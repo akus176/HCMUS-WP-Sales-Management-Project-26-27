@@ -11,6 +11,9 @@
                         OpenPaneLength="220"
                         SelectionChanged="OnNavSelectionChanged">
             <NavigationView.MenuItems>
+                <NavigationViewItem Content="Point of Sale" Tag="pos">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE719;"/></NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Menu and Recipes" Tag="catalog">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8F1;"/>
