@@ -64,7 +64,7 @@
 - [ ] 7.2 Implement revenue and order-count queries with daily and payment-method breakdowns; verify seeded integration tests cover month and time-zone boundaries
 - [ ] 7.3 Implement best-seller queries by quantity and revenue while excluding cancelled orders; verify ranking tests use item and variant snapshots
 - [ ] 7.4 Implement dine-in, takeaway, and delivery channel summaries; verify totals reconcile with the same seeded orders used by revenue tests
-- [ ] 7.5 Implement current low-stock reporting from ingredient balances and thresholds; verify results match the inventory low-stock query
+- [x] 7.5 Implement current low-stock reporting from ingredient balances and thresholds; verify results match the inventory low-stock query
 - [ ] 7.6 Build WinUI report filters and views for revenue, best sellers, order channels, and low stock; verify each report renders a known seeded dataset correctly
 
 ## 8. Midterm Direct-Database Milestone
