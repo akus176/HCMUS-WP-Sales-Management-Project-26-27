@@ -7,13 +7,22 @@ namespace CoffeeShop.WinUI.ViewModels;
 // Midterm actor selection, not a login. The final API must replace this context.
 public sealed class PosOperatorSession : ICurrentUser
 {
+    private bool operationalWorkflow;
     public PosStaffOption? Operator { get; set; }
     public EntityId? Id => Operator?.Id;
     public string? Username => Operator?.FullName;
     public bool IsAuthenticated => Id is not null;
     public IReadOnlyCollection<string> Roles => [];
-    public IReadOnlyCollection<string> Permissions => IsAuthenticated ? ["discounts.request"] : [];
+    public IReadOnlyCollection<string> Permissions => IsAuthenticated
+        ? operationalWorkflow
+            ? ["discounts.request", "discounts.approve", "orders.cancel", "orders.fulfill"]
+            : ["discounts.request"]
+        : [];
     public bool HasPermission(string permission) => Permissions.Contains(permission);
     public bool IsInRole(string role) => false;
     public EntityId GetRequiredId() => Id ?? throw new UnauthorizedAccessException("Select a POS operator.");
+
+    // Direct-client milestone only: the operations screen enables staff workflow permissions
+    // until the API-backed identity flow replaces this context.
+    public void EnableOperationalWorkflow() => operationalWorkflow = true;
 }

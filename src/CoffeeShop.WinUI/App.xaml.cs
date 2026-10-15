@@ -58,7 +58,11 @@ public partial class App : Microsoft.UI.Xaml.Application
         services.AddScoped<PosOrderHandler>();
         services.AddScoped<OrderConfirmationCommandHandler>();
         services.AddScoped<DiscountCommandHandler>();
+        services.AddScoped<PaymentCommandHandler>();
+        services.AddScoped<DeliveryCommandHandler>();
+        services.AddScoped<OrderCancellationCommandHandler>();
         services.AddSingleton<PosWorkspace>();
+        services.AddSingleton<OperationsWorkspace>();
         services.AddScoped<InventoryCommandHandler>();
         services.AddScoped<IInventoryRepository>(serviceProvider =>
             serviceProvider.GetRequiredService<InventoryRepository>());

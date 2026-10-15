@@ -1,0 +1,23 @@
+<Page
+    x:Class="CoffeeShop.WinUI.Pages.OperationsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="{StaticResource SketchBackgroundBrush}">
+    <ScrollViewer><StackPanel Padding="24" Spacing="16">
+        <StackPanel Orientation="Horizontal" Spacing="12"><TextBlock Text="Fulfillment &amp; Operations" Style="{StaticResource TitleTextBlockStyle}"/><Button x:Name="ReloadButton" Content="Reload" Click="OnReload"/></StackPanel>
+        <InfoBar x:Name="Status" IsOpen="True" IsClosable="False"/>
+        <ProgressBar x:Name="LoadingBar" IsIndeterminate="True" Visibility="Collapsed"/>
+        <TextBlock x:Name="EmptyText" Text="No orders or tables are available." Visibility="Collapsed"/>
+        <Grid ColumnSpacing="16" RowSpacing="16"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Spacing="8"><TextBlock Text="Barista queue" Style="{StaticResource SubtitleTextBlockStyle}"/><TextBlock Text="Confirmed and preparing orders"/><ListView x:Name="QueueList" MinHeight="220" SelectionChanged="OnOrderChanged"><ListView.ItemTemplate><DataTemplate><StackPanel Padding="8"><TextBlock Text="{Binding OrderNumber}" FontWeight="SemiBold"/><TextBlock Text="{Binding Status}"/><TextBlock Text="{Binding Channel}"/></StackPanel></DataTemplate></ListView.ItemTemplate></ListView></StackPanel>
+            <StackPanel Grid.Column="1" Spacing="8"><TextBlock Text="Table overview" Style="{StaticResource SubtitleTextBlockStyle}"/><ListView x:Name="TablesList" MinHeight="220"><ListView.ItemTemplate><DataTemplate><StackPanel Padding="8"><TextBlock Text="{Binding TableNumber}" FontWeight="SemiBold"/><TextBlock Text="{Binding IsOccupied}"/><TextBlock Text="{Binding Seats}"/></StackPanel></DataTemplate></ListView.ItemTemplate></ListView></StackPanel>
+            <StackPanel Grid.Column="2" Spacing="8"><TextBlock Text="Order work" Style="{StaticResource SubtitleTextBlockStyle}"/><ComboBox x:Name="OrderBox" DisplayMemberPath="OrderNumber" SelectionChanged="OnOrderChanged"/><TextBlock x:Name="OrderDetails" TextWrapping="Wrap"/>
+                <StackPanel Orientation="Horizontal" Spacing="8"><Button x:Name="PrepareButton" Content="Start preparing" Click="OnPrepare"/><Button x:Name="ReadyButton" Content="Mark ready" Click="OnReady"/><Button x:Name="CompleteButton" Content="Complete" Click="OnComplete"/></StackPanel>
+                <TextBlock Text="Payment" FontWeight="SemiBold"/><StackPanel Orientation="Horizontal" Spacing="8"><ComboBox x:Name="PaymentMethodBox" SelectedIndex="0"><ComboBoxItem Tag="cash" Content="Cash"/><ComboBoxItem Tag="card" Content="Card"/><ComboBoxItem Tag="e_wallet" Content="E-wallet"/></ComboBox><TextBox x:Name="PaymentAmountBox" PlaceholderText="Amount" Width="100"/><TextBox x:Name="PaymentReferenceBox" PlaceholderText="Reference" Width="110"/><Button x:Name="PayButton" Content="Record" Click="OnPay"/></StackPanel>
+                <TextBlock Text="Cancellation" FontWeight="SemiBold"/><StackPanel Orientation="Horizontal" Spacing="8"><TextBox x:Name="CancelReasonBox" PlaceholderText="Reason" Width="180"/><Button x:Name="CancelButton" Content="Cancel order" Click="OnCancel"/></StackPanel>
+                <TextBlock Text="Manager approval" FontWeight="SemiBold"/><ListView x:Name="DiscountList" MaxHeight="90" SelectionMode="Single"><ListView.ItemTemplate><DataTemplate><TextBlock Text="{Binding}"/></DataTemplate></ListView.ItemTemplate></ListView><StackPanel Orientation="Horizontal" Spacing="8"><Button x:Name="ApproveButton" Content="Approve selected" Click="OnApprove"/><Button x:Name="RejectButton" Content="Reject selected" Click="OnReject"/></StackPanel>
+                <TextBlock Text="Delivery work" FontWeight="SemiBold"/><StackPanel Orientation="Horizontal" Spacing="8"><ComboBox x:Name="DeliveryStaffBox" DisplayMemberPath="FullName" Width="150"/><Button x:Name="AssignButton" Content="Assign" Click="OnAssign"/><Button x:Name="OutButton" Content="Out" Click="OnOut"/><Button x:Name="DeliveredButton" Content="Delivered" Click="OnDelivered"/></StackPanel><StackPanel Orientation="Horizontal" Spacing="8"><TextBox x:Name="FailureReasonBox" PlaceholderText="Failure reason" Width="180"/><Button x:Name="FailButton" Content="Mark failed" Click="OnFail"/></StackPanel>
+            </StackPanel>
+        </Grid>
+    </StackPanel></ScrollViewer>
+</Page>

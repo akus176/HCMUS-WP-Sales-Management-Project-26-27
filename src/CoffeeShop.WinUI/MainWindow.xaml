@@ -14,6 +14,9 @@
                 <NavigationViewItem Content="Point of Sale" Tag="pos">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE719;"/></NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Fulfillment &amp; Operations" Tag="operations">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE768;"/></NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Menu and Recipes" Tag="catalog">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8F1;"/>
