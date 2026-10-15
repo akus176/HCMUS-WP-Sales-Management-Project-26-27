@@ -19,6 +19,15 @@ public interface IInventoryRepository
 
     Task<IReadOnlyList<StockMovement>> ListMovementsForOrderAsync(EntityId orderId, CancellationToken cancellationToken = default);
 
+    Task LockOrderForRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default);
+
+    Task<bool> HasOrderRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<Ingredient>> LoadIngredientsForRestorationAsync(
+        IReadOnlyCollection<EntityId> ingredientIds, CancellationToken cancellationToken = default);
+
+    void AddOrderRestoration(OrderInventoryRestoration restoration);
+
     void AddIngredient(Ingredient ingredient);
 
     void AddSupplier(Supplier supplier);

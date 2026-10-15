@@ -347,5 +347,67 @@ public class InventoryCommandHandlerTests
                 Assert.Equal(4m, restoration.QuantityDelta);
                 Assert.Equal(orderId, restoration.OrderId);
             });
+        var guard = Assert.Single(repository.OrderRestorations.Values);
+        Assert.Equal(orderId, guard.OrderId);
+        Assert.Equal(ActorId, guard.RestoredBy);
+    }
+
+    [Fact]
+    public async Task Restoration_CompletesPartialLegacyHistoryWithoutRestoringAnIngredientTwice()
+    {
+        var first = CreateIngredient(10m);
+        var second = CreateIngredient(6m);
+        repository.AddIngredient(first);
+        repository.AddIngredient(second);
+        var orderId = EntityId.New();
+        repository.AddStockMovement(new(EntityId.New(), first.Id, StockMovementType.OrderConsumption, -4m,
+            ActorId, "Consumed", clock.UtcNow, orderId: orderId));
+        repository.AddStockMovement(new(EntityId.New(), second.Id, StockMovementType.OrderConsumption, -4m,
+            ActorId, "Consumed", clock.UtcNow, orderId: orderId));
+        repository.AddStockMovement(new(EntityId.New(), first.Id, StockMovementType.Restoration, 4m,
+            ActorId, "Previously restored", clock.UtcNow, orderId: orderId));
+
+        Assert.True((await handler.RestoreOrderInventoryAsync(new(orderId, "Cancelled", ActorId))).IsSuccess);
+        Assert.True((await handler.RestoreOrderInventoryAsync(new(orderId, "Cancelled", ActorId))).IsSuccess);
+
+        Assert.Equal(10m, first.AvailableQuantity);
+        Assert.Equal(10m, second.AvailableQuantity);
+        Assert.Equal(2, repository.StockMovements.Count(movement => movement.Type == StockMovementType.Restoration));
+        Assert.Single(repository.OrderRestorations);
+    }
+
+    [Fact]
+    public async Task Restoration_WithoutConsumption_RecordsGuardWithoutStockMovement()
+    {
+        var orderId = EntityId.New();
+        Assert.True((await handler.RestoreOrderInventoryAsync(new(orderId, "Cancelled draft", ActorId))).IsSuccess);
+        Assert.True((await handler.RestoreOrderInventoryAsync(new(orderId, "Cancelled draft", ActorId))).IsSuccess);
+        Assert.Empty(repository.StockMovements);
+        Assert.Single(repository.OrderRestorations);
+        Assert.Equal(1, unitOfWork.SaveChangesCallCount);
+    }
+
+    [Fact]
+    public async Task Restoration_BalanceOverflow_DoesNotMutateAnyIngredientOrRecordGuard()
+    {
+        var first = CreateIngredient(6m);
+        var second = CreateIngredient(MeasuredQuantity.MaximumValue);
+        repository.AddIngredient(first);
+        repository.AddIngredient(second);
+        var orderId = EntityId.New();
+        foreach (var ingredient in new[] { first, second })
+        {
+            repository.AddStockMovement(new(EntityId.New(), ingredient.Id, StockMovementType.OrderConsumption, -4m,
+                ActorId, "Consumed", clock.UtcNow, orderId: orderId));
+        }
+
+        var result = await handler.RestoreOrderInventoryAsync(new(orderId, "Cancelled", ActorId));
+
+        Assert.Equal(ErrorType.Conflict, result.Error!.Type);
+        Assert.Equal(6m, first.AvailableQuantity);
+        Assert.Equal(MeasuredQuantity.MaximumValue, second.AvailableQuantity);
+        Assert.Empty(repository.OrderRestorations);
+        Assert.Equal(2, repository.StockMovements.Count);
+        Assert.Equal(0, unitOfWork.SaveChangesCallCount);
     }
 }

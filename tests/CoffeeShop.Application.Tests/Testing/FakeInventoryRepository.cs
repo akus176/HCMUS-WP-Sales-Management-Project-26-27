@@ -14,6 +14,19 @@ public sealed class FakeInventoryRepository : IInventoryRepository
 
     public List<StockMovement> StockMovements { get; } = [];
 
+    public Dictionary<EntityId, OrderInventoryRestoration> OrderRestorations { get; } = [];
+
+    public Task LockOrderForRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    public Task<bool> HasOrderRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default) =>
+        Task.FromResult(OrderRestorations.ContainsKey(orderId));
+
+    public Task<IReadOnlyList<Ingredient>> LoadIngredientsForRestorationAsync(
+        IReadOnlyCollection<EntityId> ingredientIds, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<Ingredient>>(Ingredients.Values.Where(ingredient => ingredientIds.Contains(ingredient.Id)).ToArray());
+
+    public void AddOrderRestoration(OrderInventoryRestoration restoration) => OrderRestorations.Add(restoration.OrderId, restoration);
+
     public Task<Ingredient?> FindIngredientAsync(EntityId id, CancellationToken cancellationToken = default) =>
         Task.FromResult(Ingredients.GetValueOrDefault(id));
 

@@ -19,7 +19,7 @@ public sealed class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         builder.Property(delivery => delivery.ContactNumber).HasMaxLength(30).IsRequired().HasColumnName("contact_number");
         builder.Property(delivery => delivery.AddressLine).HasColumnType("text").IsRequired().HasColumnName("address_line");
         builder.Property(delivery => delivery.CustomerAddressId).HasConversion<EntityIdValueConverter>().HasColumnName("customer_address_id");
-        builder.Property(delivery => delivery.Status).HasMaxLength(15).IsRequired().HasDefaultValue("unassigned").HasColumnName("status");
+        builder.Property(delivery => delivery.Status).HasMaxLength(16).IsRequired().HasDefaultValue("unassigned").HasColumnName("status");
         builder.Property(delivery => delivery.AssignedStaffId).HasConversion<EntityIdValueConverter>().HasColumnName("assigned_staff_id");
         builder.Property(delivery => delivery.AssignedAt).HasConversion<UtcTimestampValueConverter>().HasColumnType("timestamptz").HasColumnName("assigned_at");
         builder.Property(delivery => delivery.OutForDeliveryAt).HasConversion<UtcTimestampValueConverter>().HasColumnType("timestamptz").HasColumnName("out_for_delivery_at");

@@ -34,6 +34,10 @@ public static class PostgresServiceCollectionExtensions
         services.AddScoped<IDiscountRepository, DiscountRepository>();
         services.AddScoped<IDeliveryRepository, DeliveryRepository>();
         services.AddScoped<IOrderConfirmationRepository, OrderConfirmationRepository>();
+        services.AddScoped<IOrderCancellationRepository, OrderCancellationRepository>();
+        services.AddScoped<InventoryCommandHandler>();
+        services.AddScoped<LoyaltyCommandHandler>();
+        services.AddScoped<OrderCancellationCommandHandler>();
 
         return services;
     }

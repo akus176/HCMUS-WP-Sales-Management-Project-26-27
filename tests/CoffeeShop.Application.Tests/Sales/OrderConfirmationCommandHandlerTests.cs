@@ -238,7 +238,7 @@ public sealed class OrderConfirmationCommandHandlerTests
         Assert.True(result.IsFailure);
         Assert.Equal(ErrorType.NotFound, result.Error!.Type);
         Assert.Equal("orders.order_not_found", result.Error.Code);
-        Assert.Equal(0, setup.Transactions.RollbackCount);
+        Assert.Equal(1, setup.Transactions.RollbackCount);
     }
 
     [Fact]

@@ -1,9 +1,12 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace CoffeeShop.Infrastructure.Postgres.Migrations;
 
+[DbContext(typeof(CoffeeShopDbContext))]
+[Migration("20261010060000_AddDeliveryStatusHistory")]
 public partial class AddDeliveryStatusHistory : Migration
 {
     protected override void Up(MigrationBuilder migrationBuilder)

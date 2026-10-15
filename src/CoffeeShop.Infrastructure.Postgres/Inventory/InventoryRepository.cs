@@ -47,4 +47,41 @@ public sealed class InventoryRepository : IInventoryRepository
     public void AddReceipt(PurchaseReceipt receipt) => context.PurchaseReceipts.Add(receipt);
 
     public void AddStockMovement(StockMovement movement) => context.StockMovements.Add(movement);
+
+    public async Task LockOrderForRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default)
+    {
+        RequireTransaction();
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT 1 FROM sales.orders WHERE id = {orderId.Value} FOR UPDATE", cancellationToken);
+    }
+
+    public Task<bool> HasOrderRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default) =>
+        context.OrderInventoryRestorations.AnyAsync(restoration => restoration.OrderId == orderId, cancellationToken);
+
+    public async Task<IReadOnlyList<Ingredient>> LoadIngredientsForRestorationAsync(
+        IReadOnlyCollection<EntityId> ingredientIds, CancellationToken cancellationToken = default)
+    {
+        RequireTransaction();
+        var ids = ingredientIds.Select(id => id.Value).OrderBy(id => id).ToArray();
+        var ingredients = await context.Ingredients.FromSqlInterpolated(
+            $"SELECT * FROM inventory.ingredients WHERE id = ANY({ids}) ORDER BY id FOR UPDATE")
+            .ToListAsync(cancellationToken);
+        // Refresh entities a long-lived scope may have read before acquiring the locks.
+        foreach (var ingredient in ingredients)
+        {
+            await context.Entry(ingredient).ReloadAsync(cancellationToken);
+        }
+
+        return ingredients;
+    }
+
+    public void AddOrderRestoration(OrderInventoryRestoration restoration) => context.OrderInventoryRestorations.Add(restoration);
+
+    private void RequireTransaction()
+    {
+        if (context.Database.CurrentTransaction is null)
+        {
+            throw new InvalidOperationException("Order inventory restoration requires an explicit database transaction.");
+        }
+    }
 }

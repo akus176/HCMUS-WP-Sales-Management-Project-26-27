@@ -238,7 +238,11 @@ public sealed class DiscountPersistenceIntegrationTests : IAsyncLifetime
         await using var scope = services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
         var migrator = context.GetService<IMigrator>();
-        var previous = context.Database.GetMigrations().SkipLast(1).Last();
+        var migrations = context.Database.GetMigrations().ToArray();
+        var discountMigrationIndex = Array.FindIndex(migrations,
+            migration => migration.EndsWith("_AddDiscountApprovalRules", StringComparison.Ordinal));
+        Assert.True(discountMigrationIndex > 0);
+        var previous = migrations[discountMigrationIndex - 1];
         await migrator.MigrateAsync(previous);
         var orderId = await InsertOrderAsync();
         var legacyId = EntityId.New();
