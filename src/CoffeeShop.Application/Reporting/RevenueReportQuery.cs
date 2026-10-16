@@ -61,30 +61,14 @@ public sealed class RevenueReportQueryHandler
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(query);
-        if (query.BusinessTimeZone is null)
+        var periodResult = ReportPeriodValidation.Create(
+            query.FirstDate, query.LastDateInclusive, query.BusinessTimeZone);
+        if (periodResult.IsFailure)
         {
-            return Result<RevenueReport>.Failure(Validation(
-                "reports.time_zone_required", "A business time zone is required.", "businessTimeZone"));
+            return Result<RevenueReport>.Failure(periodResult.Error!);
         }
 
-        if (query.LastDateInclusive < query.FirstDate)
-        {
-            return Result<RevenueReport>.Failure(Validation(
-                "reports.invalid_date_range", "The final report date cannot precede the first date.", "lastDateInclusive"));
-        }
-
-        RevenuePeriod period;
-        try
-        {
-            period = RevenuePeriod.FromLocalDates(
-                query.FirstDate, query.LastDateInclusive, query.BusinessTimeZone);
-        }
-        catch (ArgumentException exception)
-        {
-            return Result<RevenueReport>.Failure(Validation(
-                "reports.invalid_date_boundary", exception.Message, "firstDate,lastDateInclusive"));
-        }
-
+        var period = periodResult.Value;
         var candidates = await repository.LoadCandidatesAsync(period, cancellationToken);
         var payments = candidates
             .SelectMany(candidate => RevenueRecognitionRule.Recognize(
@@ -129,7 +113,4 @@ public sealed class RevenueReportQueryHandler
         PaymentMethod.EWallet => 2,
         _ => 3,
     };
-
-    private static Error Validation(string code, string description, string target) =>
-        Error.Validation(code, description, [new ErrorDetail(target, description)]);
 }

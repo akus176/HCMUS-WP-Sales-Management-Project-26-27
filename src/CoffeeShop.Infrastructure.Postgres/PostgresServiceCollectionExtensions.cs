@@ -44,6 +44,7 @@ public static class PostgresServiceCollectionExtensions
         services.AddScoped<OrderFulfillmentCommandHandler>();
         services.AddScoped<IRevenueReportRepository, RevenueReportRepository>();
         services.AddScoped<RevenueReportQueryHandler>();
+        services.AddScoped<OrderChannelReportQueryHandler>();
         services.AddScoped<InventoryCommandHandler>();
         services.AddScoped<LoyaltyCommandHandler>();
         services.AddScoped<OrderCancellationCommandHandler>();
