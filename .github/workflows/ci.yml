@@ -45,4 +45,4 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Catalog, Customer, Order, POS and Reporting PostgreSQL Integration Tests
-        run: dotnet test tests/CoffeeShop.Infrastructure.Tests --configuration Release --filter "FullyQualifiedName~CatalogPersistenceIntegrationTests|FullyQualifiedName~CustomerLoyaltyPersistenceIntegrationTests|FullyQualifiedName~OrderConfirmationIntegrationTests|FullyQualifiedName~OrderCancellationIntegrationTests|FullyQualifiedName~PosWorkspaceIntegrationTests|FullyQualifiedName~RevenueReportIntegrationTests"
+        run: dotnet test tests/CoffeeShop.Infrastructure.Tests --configuration Release --filter "FullyQualifiedName~CatalogPersistenceIntegrationTests|FullyQualifiedName~CustomerLoyaltyPersistenceIntegrationTests|FullyQualifiedName~OrderConfirmationIntegrationTests|FullyQualifiedName~OrderCancellationIntegrationTests|FullyQualifiedName~PosWorkspaceIntegrationTests|FullyQualifiedName~RevenueReportIntegrationTests|FullyQualifiedName~OrderChannelReportIntegrationTests"
