@@ -14,6 +14,19 @@ using CoffeeShop.Domain.Sales;
 /// </summary>
 public static class RevenueRecognitionRule
 {
+    /// <summary>Whether a completed, fully paid order remains eligible for sales reporting, including free orders.</summary>
+    public static bool IsEligible(Order order, bool inventoryWasRestored = false)
+    {
+        ArgumentNullException.ThrowIfNull(order);
+        return order.Status == OrderStatus.Completed
+            && order.CompletedAt is not null
+            && order.CancelledAt is null
+            && !inventoryWasRestored
+            && order.Payments.Where(payment => payment.Status == PaymentStatus.Succeeded
+                && payment.PaidAt.Value <= order.CompletedAt.Value)
+                .Sum(payment => payment.Amount.Amount) >= order.Total.Amount;
+    }
+
     /// <summary>
     /// Returns the recognized portions of successful payments whose payment instants fall in
     /// <paramref name="period"/>. All revenue queries must use this method rather than restating the rule.
@@ -26,27 +39,18 @@ public static class RevenueRecognitionRule
         ArgumentNullException.ThrowIfNull(order);
         ArgumentNullException.ThrowIfNull(period);
 
-        if (order.Status != OrderStatus.Completed
-            || order.CompletedAt is null
-            || order.CancelledAt is not null
-            || inventoryWasRestored
-            || order.Total.Amount == 0)
+        if (!IsEligible(order, inventoryWasRestored) || order.Total.Amount == 0)
         {
             return [];
         }
 
-        var completionInstant = order.CompletedAt.Value;
+        var completionInstant = order.CompletedAt!.Value;
         var successfulPayments = order.Payments
             .Where(payment => payment.Status == PaymentStatus.Succeeded
                 && payment.PaidAt.Value <= completionInstant)
             .OrderBy(payment => payment.PaidAt.Value)
             .ThenBy(payment => payment.Id.Value)
             .ToArray();
-
-        if (successfulPayments.Sum(payment => payment.Amount.Amount) < order.Total.Amount)
-        {
-            return [];
-        }
 
         var remainingPayable = order.Total.Amount;
         var recognized = new List<RecognizedRevenuePayment>();
