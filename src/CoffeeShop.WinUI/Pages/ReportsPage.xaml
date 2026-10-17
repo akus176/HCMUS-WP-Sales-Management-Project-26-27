@@ -45,7 +45,7 @@
 
         <Grid Grid.Row="2" ColumnSpacing="12">
             <InfoBar x:Name="Status" IsOpen="False" IsClosable="True" HorizontalAlignment="Stretch"/>
-            <ProgressRing x:Name="Loading" Grid.Column="1" Width="24" Height="24" IsActive="False" Visibility="Collapsed"/>
+            <ProgressRing x:Name="LoadingIndicator" Grid.Column="1" Width="24" Height="24" IsActive="False" Visibility="Collapsed"/>
         </Grid>
 
         <ScrollViewer Grid.Row="3">

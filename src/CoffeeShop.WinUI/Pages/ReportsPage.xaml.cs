@@ -114,8 +114,8 @@ public sealed partial class ReportsPage : Page
 
     private void SetLoading(bool loading)
     {
-        Loading.IsActive = loading;
-        Loading.Visibility = loading ? Visibility.Visible : Visibility.Collapsed;
+        LoadingIndicator.IsActive = loading;
+        LoadingIndicator.Visibility = loading ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ShowStatus(InfoBarSeverity severity, string message)
