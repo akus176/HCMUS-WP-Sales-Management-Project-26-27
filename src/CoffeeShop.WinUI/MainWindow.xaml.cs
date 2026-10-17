@@ -32,6 +32,7 @@ public sealed partial class MainWindow : Window
             "suppliers" => typeof(SuppliersPage),
             "receipts" => typeof(PurchaseReceiptsPage),
             "lowstock" => typeof(LowStockPage),
+            "reports" => typeof(ReportsPage),
             _ => typeof(IngredientsPage),
         });
     }

@@ -1,0 +1,115 @@
+<Page
+    x:Class="CoffeeShop.WinUI.Pages.ReportsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:viewModels="using:CoffeeShop.WinUI.ViewModels">
+
+    <Grid Padding="24" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Reports" FontFamily="{StaticResource SketchHeadingFontFamily}" FontSize="28" Foreground="{StaticResource SketchForegroundBrush}"/>
+            <TextBlock x:Name="PeriodLabel" Foreground="{StaticResource SketchMutedBrush}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnSpacing="12" RowSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <DatePicker x:Name="FirstDate" Header="From"/>
+            <DatePicker x:Name="LastDate" Grid.Column="1" Header="To"/>
+            <ComboBox x:Name="PaymentFilter" Grid.Column="2" Header="Payment" Width="160" SelectionChanged="OnPaymentFilterChanged">
+                <ComboBoxItem Content="All payment methods" Tag="" IsSelected="True"/>
+                <ComboBoxItem Content="Cash" Tag="cash"/>
+                <ComboBoxItem Content="Card" Tag="card"/>
+                <ComboBoxItem Content="E-wallet" Tag="e_wallet"/>
+            </ComboBox>
+            <ComboBox x:Name="ChannelFilter" Grid.Column="3" Header="Channel" Width="145" SelectionChanged="OnChannelFilterChanged">
+                <ComboBoxItem Content="All channels" Tag="" IsSelected="True"/>
+                <ComboBoxItem Content="Dine-in" Tag="dine_in"/>
+                <ComboBoxItem Content="Takeaway" Tag="takeaway"/>
+                <ComboBoxItem Content="Delivery" Tag="delivery"/>
+            </ComboBox>
+            <Button Grid.Column="5" Content="Refresh reports" VerticalAlignment="Bottom" Click="OnRefresh"/>
+        </Grid>
+
+        <Grid Grid.Row="2" ColumnSpacing="12">
+            <InfoBar x:Name="Status" IsOpen="False" IsClosable="True" HorizontalAlignment="Stretch"/>
+            <ProgressRing x:Name="LoadingIndicator" Grid.Column="1" Width="24" Height="24" IsActive="False" Visibility="Collapsed"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="3">
+            <Grid ColumnSpacing="16" RowSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border Padding="16" BorderBrush="{StaticResource SketchBorderBrush}" BorderThickness="1" CornerRadius="8,10,7,9">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Revenue" FontSize="20" FontFamily="{StaticResource SketchHeadingFontFamily}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="24">
+                            <StackPanel><TextBlock Text="Paid revenue"/><TextBlock x:Name="RevenueTotal" FontSize="24" FontWeight="SemiBold"/></StackPanel>
+                            <StackPanel><TextBlock Text="Recognized orders"/><TextBlock x:Name="RevenueOrderCount" FontSize="24" FontWeight="SemiBold"/></StackPanel>
+                        </StackPanel>
+                        <TextBlock Text="Daily revenue" FontWeight="SemiBold"/>
+                        <ListView x:Name="RevenueDaysList" MaxHeight="140">
+                            <ListView.ItemTemplate><DataTemplate x:DataType="viewModels:RevenueDayRow"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{x:Bind DateDisplay}"/><TextBlock Grid.Column="1" Text="{x:Bind RevenueDisplay}"/><TextBlock Grid.Column="2" Text="{x:Bind OrderCount}"/></Grid></DataTemplate></ListView.ItemTemplate>
+                        </ListView>
+                        <TextBlock Text="By payment method" FontWeight="SemiBold"/>
+                        <ListView x:Name="RevenuePaymentsList" MaxHeight="180">
+                            <ListView.ItemTemplate><DataTemplate x:DataType="viewModels:RevenuePaymentRow"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{x:Bind PaymentMethod}"/><TextBlock Grid.Column="1" Text="{x:Bind RevenueDisplay}"/><TextBlock Grid.Column="2" Text="{x:Bind OrderCount}"/></Grid></DataTemplate></ListView.ItemTemplate>
+                        </ListView>
+                        <TextBlock x:Name="RevenueEmpty" Text="No paid revenue matched this period and payment filter." Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Padding="16" BorderBrush="{StaticResource SketchBorderBrush}" BorderThickness="1" CornerRadius="10,8,9,7">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Best sellers" FontSize="20" FontFamily="{StaticResource SketchHeadingFontFamily}"/>
+                        <TextBlock Text="Ranked by quantity; cancelled orders are excluded." Foreground="{StaticResource SketchMutedBrush}"/>
+                        <ListView x:Name="BestSellersList" MaxHeight="240">
+                            <ListView.ItemTemplate><DataTemplate x:DataType="viewModels:BestSellerViewRow"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{x:Bind Rank}"/><TextBlock Grid.Column="1" Text="{x:Bind NameDisplay}"/><TextBlock Grid.Column="2" Text="{x:Bind Quantity}"/><TextBlock Grid.Column="3" Text="{x:Bind RevenueDisplay}"/></Grid></DataTemplate></ListView.ItemTemplate>
+                        </ListView>
+                        <TextBlock x:Name="BestSellersEmpty" Text="No best sellers matched this reporting period." Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Padding="16" BorderBrush="{StaticResource SketchBorderBrush}" BorderThickness="1" CornerRadius="7,9,8,10">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Order channels" FontSize="20" FontFamily="{StaticResource SketchHeadingFontFamily}"/>
+                        <ListView x:Name="ChannelsList" MaxHeight="180">
+                            <ListView.ItemTemplate><DataTemplate x:DataType="viewModels:OrderChannelViewRow"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{x:Bind ChannelDisplay}"/><TextBlock Grid.Column="1" Text="{x:Bind RevenueDisplay}"/><TextBlock Grid.Column="2" Text="{x:Bind OrderCount}"/></Grid></DataTemplate></ListView.ItemTemplate>
+                        </ListView>
+                        <TextBlock x:Name="ChannelsEmpty" Text="No channel data matched this period and channel filter." Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="1" Grid.Column="1" Padding="16" BorderBrush="{StaticResource SketchBorderBrush}" BorderThickness="1" CornerRadius="9,7,10,8">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Low stock" FontSize="20" FontFamily="{StaticResource SketchHeadingFontFamily}"/>
+                        <TextBlock Text="Active ingredients at or below their reorder threshold." Foreground="{StaticResource SketchMutedBrush}"/>
+                        <ListView x:Name="LowStockList" MaxHeight="180">
+                            <ListView.ItemTemplate><DataTemplate x:DataType="viewModels:LowStockViewRow"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{x:Bind Name}"/><TextBlock Grid.Column="1" Text="{x:Bind BalanceDisplay}"/><TextBlock Grid.Column="2" Text="{x:Bind ThresholdDisplay}"/></Grid></DataTemplate></ListView.ItemTemplate>
+                        </ListView>
+                        <TextBlock x:Name="LowStockEmpty" Text="No active ingredients are at or below their reorder threshold." Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Page>
