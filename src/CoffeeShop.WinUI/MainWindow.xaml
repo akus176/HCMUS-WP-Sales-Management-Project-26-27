@@ -51,6 +51,12 @@
                         <FontIcon Glyph="&#xE7BA;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="Reports"
+                        Tag="reports">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9D2;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem Content="Stock Adjustments"
                         Tag="adjustments"
                         IsEnabled="False">
