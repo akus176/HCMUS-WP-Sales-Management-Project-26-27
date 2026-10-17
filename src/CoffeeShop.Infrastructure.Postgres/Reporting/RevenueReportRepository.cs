@@ -20,12 +20,13 @@ public sealed class RevenueReportRepository(CoffeeShopDbContext context) : IReve
                 FROM sales.orders AS orders
                 WHERE orders.status = 'completed'
                   AND orders.completed_at IS NOT NULL
-                  AND EXISTS (
+                  AND ((orders.completed_at >= {period.StartUtc}
+                        AND orders.completed_at < {period.EndUtcExclusive}) OR EXISTS (
                       SELECT 1
                       FROM sales.payments AS payments
                       WHERE payments.order_id = orders.id
                         AND payments.status = 'succeeded'
-                        AND payments.paid_at < {period.EndUtcExclusive})")
+                        AND payments.paid_at < {period.EndUtcExclusive}))")
             .ToListAsync(cancellationToken))
             .Select(value => new EntityId(value))
             .ToArray();
@@ -36,6 +37,8 @@ public sealed class RevenueReportRepository(CoffeeShopDbContext context) : IReve
             .AsNoTracking()
             .Where(order => candidateOrderIds.Contains(order.Id))
             .Include(order => order.Payments)
+            .Include(order => order.Lines)
+            .AsSplitQuery()
             .ToListAsync(cancellationToken);
 
         var restoredOrderIds = (await context.OrderInventoryRestorations

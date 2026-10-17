@@ -1,5 +1,6 @@
 namespace CoffeeShop.Infrastructure.Tests;
 
+using CoffeeShop.Domain.Catalog;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Identity;
 using CoffeeShop.Domain.Sales;
@@ -26,6 +27,10 @@ public sealed class ReportingDatabaseFixture : IAsyncLifetime
 
     public ServiceProvider Services { get; private set; } = null!;
 
+    public EntityId LatteId { get; } = EntityId.New();
+    public EntityId SmallId { get; } = EntityId.New();
+    public EntityId LargeId { get; } = EntityId.New();
+
     public async Task InitializeAsync()
     {
         var configured = Environment.GetEnvironmentVariable(CatalogPersistenceIntegrationTests.ConnectionVariable);
@@ -50,6 +55,12 @@ public sealed class ReportingDatabaseFixture : IAsyncLifetime
             actorId, "revenue_actor", "revenue@example.com", "not-a-real-password-hash",
             "Revenue Actor", null, now, now));
         context.DiningTables.Add(new DiningTable(tableId, "REPORT-1", 2));
+        var category = new Category(EntityId.New(), "Coffee", now, now);
+        context.Categories.Add(category);
+        context.MenuItems.Add(new MenuItem(LatteId, category, "Current renamed latte", now, now, isActive: false));
+        context.SizeVariants.AddRange(
+            new SizeVariant(SmallId, LatteId, "Current small", new Money(999m), isActive: false),
+            new SizeVariant(LargeId, LatteId, "Current large", new Money(999m), isActive: false));
         await context.SaveChangesAsync();
         await SeedKnownOrdersAsync(context);
     }
@@ -161,6 +172,34 @@ public sealed class ReportingDatabaseFixture : IAsyncLifetime
         {
             context.Deliveries.Add(new Delivery(EntityId.New(), id, "Report Recipient", "0901234567", "123 Coffee Street"));
             await context.SaveChangesAsync();
+        }
+
+        // Historical snapshots deliberately differ from the inactive current catalog. Null catalog
+        // references also remain reportable, as permitted by the sales schema.
+        var isLatte = orderNumber is "REV-SPLIT" or "REV-DISCOUNT" or "REV-NEXT-MONTH";
+        Guid? itemId = isLatte ? LatteId.Value : null;
+        Guid? variantId = isLatte ? (orderNumber == "REV-DISCOUNT" ? LargeId.Value : SmallId.Value) : null;
+        var itemName = isLatte ? "Latte" : orderNumber switch
+        {
+            "REV-MONTH-END" => "Espresso",
+            "REV-COMPLIMENTARY" => "Complimentary",
+            _ => "Excluded",
+        };
+        var sizeName = orderNumber == "REV-DISCOUNT" ? "Large" : "Small";
+        var quantity = orderNumber == "REV-SPLIT" ? 2 : orderNumber == "REV-MONTH-END" ? 3 : 1;
+        var lineTotal = orderNumber == "REV-DISCOUNT" ? 60m : subtotal ?? total;
+        await context.Database.ExecuteSqlInterpolatedAsync($@"
+            INSERT INTO sales.order_lines
+                (id, order_id, menu_item_id, size_variant_id, item_name_snapshot, size_name_snapshot,
+                 unit_price_snapshot, quantity, line_total)
+            VALUES ({Guid.NewGuid()}, {id.Value}, {itemId}, {variantId}, {itemName}, {sizeName},
+                    {lineTotal / quantity}, {quantity}, {lineTotal})");
+        if (orderNumber == "REV-DISCOUNT")
+        {
+            await context.Database.ExecuteSqlInterpolatedAsync($@"
+                INSERT INTO sales.order_lines
+                    (id, order_id, item_name_snapshot, size_name_snapshot, unit_price_snapshot, quantity, line_total)
+                VALUES ({Guid.NewGuid()}, {id.Value}, 'Tea', 'Small', 20, 2, 40)");
         }
 
         return id;

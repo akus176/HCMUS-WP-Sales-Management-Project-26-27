@@ -39,7 +39,8 @@ public sealed record RevenueOrderCandidate(Order Order, bool InventoryWasRestore
 public interface IRevenueReportRepository
 {
     /// <summary>
-    /// Loads candidate orders with their complete payment history. Payments before the requested period
+    /// Loads candidate orders with their line snapshots and complete payment history, including orders
+    /// completed in the period even when all payments precede it. Payments before the requested period
     /// are required because the authoritative rule allocates the discounted payable cap chronologically.
     /// </summary>
     Task<IReadOnlyList<RevenueOrderCandidate>> LoadCandidatesAsync(
