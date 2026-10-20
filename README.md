@@ -17,7 +17,17 @@ dotnet test CoffeeShop.slnx
 dotnet run --project src/CoffeeShop.Api
 ```
 
-The API currently exposes only `/health` (and `/openapi/v1.json` in Development). Run the WinUI project from Visual Studio or use `dotnet run --project src/CoffeeShop.WinUI -r win-x64` on Windows. The desktop client hosts catalog, inventory, and customer Application services against local PostgreSQL; set `ConnectionStrings__CoffeeShop` before launching it.
+The API currently exposes only `/health` (and `/openapi/v1.json` in Development). Run the WinUI project from Visual Studio or use `dotnet run --project src/CoffeeShop.WinUI -r win-x64` on Windows. The desktop client hosts Application services and PostgreSQL infrastructure in-process. Configure its database connection with the `ConnectionStrings__CoffeeShop` environment variable or a user-local `%LOCALAPPDATA%\CoffeeShop\appsettings.json` file containing:
+
+```json
+{
+  "ConnectionStrings": {
+    "CoffeeShop": "Host=localhost;Port=5432;Database=coffeeshop;Username=coffeeshop;Password=<local-password>"
+  }
+}
+```
+
+The environment variable takes precedence. Keep this user-local file out of source control.
 
 ## Project boundaries
 
@@ -85,7 +95,7 @@ $env:ConnectionStrings__CoffeeShop = "Host=localhost;Port=5432;Database=coffeesh
 dotnet tool restore
 ```
 
-Never commit local credentials. The design-time factory and future runtime composition roots use the same `ConnectionStrings__CoffeeShop` setting.
+Never commit local credentials. The design-time factory uses `ConnectionStrings__CoffeeShop`; the WinUI client accepts that environment variable or its user-local configuration file.
 
 Create a migration only after rebasing on the latest `main` and confirming that all current entity mappings are present:
 
