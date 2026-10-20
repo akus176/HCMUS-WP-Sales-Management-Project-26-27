@@ -18,22 +18,23 @@ public partial class App : Microsoft.UI.Xaml.Application
     public App()
     {
         InitializeComponent();
-        Services = BuildServices();
     }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         _window = new MainWindow();
         _window.Activate();
+        _ = ((MainWindow)_window).ConnectToDatabaseAsync();
     }
 
-    private static ServiceProvider BuildServices()
+    internal static void ConfigureServices(string connectionString)
     {
-        var connectionString = Environment.GetEnvironmentVariable(CoffeeShopPostgresOptions.ConnectionStringEnvironmentVariable)
-            ?? "Host=localhost;Port=5432;Database=coffeeshop;Username=postgres;Password=postgres";
-
-        return new ServiceCollection()
+        var services = new ServiceCollection()
             .AddCoffeeShopDirectClient(connectionString)
             .BuildServiceProvider();
+
+        var previousServices = Services;
+        Services = services;
+        previousServices?.Dispose();
     }
 }
