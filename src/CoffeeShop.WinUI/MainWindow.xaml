@@ -4,7 +4,33 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Coffee Shop — Menu, Customers and Inventory">
     <Grid Background="{StaticResource SketchBackgroundBrush}" RequestedTheme="Light">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Border x:Name="DatabaseStatusBar"
+                Grid.Row="0"
+                Padding="16,10"
+                Background="{StaticResource SketchMutedBrush}">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="DatabaseStatusText"
+                           VerticalAlignment="Center"
+                           Text="Checking database connection..."
+                           TextWrapping="Wrap" />
+                <Button x:Name="RetryDatabaseButton"
+                        Grid.Column="1"
+                        Content="Retry"
+                        Click="OnRetryDatabaseClick"
+                        Visibility="Collapsed" />
+            </Grid>
+        </Border>
         <NavigationView x:Name="Nav"
+                        Grid.Row="1"
+                        IsEnabled="False"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="False"
                         PaneDisplayMode="Left"
