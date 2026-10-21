@@ -1,5 +1,7 @@
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Inventory;
+using CoffeeShop.Domain.Inventory;
+using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -11,6 +13,7 @@ public sealed partial class IngredientsPage : Page
     private readonly InventoryCommandHandler handler;
     private readonly IInventoryRepository repository;
     private List<IngredientRow> allRows = [];
+    private bool isBusy;
 
     public IngredientsPage()
     {
@@ -20,19 +23,17 @@ public sealed partial class IngredientsPage : Page
         _ = LoadAsync();
     }
 
-    private async Task LoadAsync()
+    private Task LoadAsync(string? successMessage = null) => RunAsync("load ingredients", async () =>
     {
-        try
-        {
-            var ingredients = await repository.ListIngredientsAsync();
-            allRows = ingredients.Select(i => new IngredientRow(i)).ToList();
-            ApplyFilter();
-        }
-        catch (Exception exception)
-        {
-            ShowStatus(InfoBarSeverity.Error, $"Could not load ingredients: {exception.Message}");
-        }
-    }
+        var ingredients = await repository.ListIngredientsAsync();
+        allRows = ingredients.Select(i => new IngredientRow(i)).ToList();
+        ApplyFilter();
+        Status.Apply(successMessage is not null
+            ? WorkflowFeedback.Success(successMessage)
+            : allRows.Count == 0
+                ? WorkflowFeedback.Empty("No ingredients are available.", "Create an ingredient to begin tracking stock.")
+                : WorkflowFeedback.Ready("Ingredients loaded. Search, edit, or change availability."));
+    });
 
     private void ApplyFilter()
     {
@@ -41,9 +42,12 @@ public sealed partial class IngredientsPage : Page
             ? allRows
             : allRows.Where(row => row.Name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
         IngredientsList.ItemsSource = filtered;
+        EmptyMessage.Visibility = !isBusy && filtered.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void OnSearchTextChanged(object sender, TextChangedEventArgs args) => ApplyFilter();
+
+    private async void OnReload(object sender, RoutedEventArgs args) => await LoadAsync();
 
     private async void OnAddIngredient(object sender, RoutedEventArgs args)
     {
@@ -53,17 +57,19 @@ public sealed partial class IngredientsPage : Page
             return;
         }
 
-        var result = await handler.CreateIngredientAsync(new CreateIngredientCommand(
-            dialog.IngredientName, dialog.BaseUnit, dialog.AvailableQuantity, dialog.ReorderThreshold));
-        if (result.IsSuccess)
+        await RunAsync("create the ingredient", async () =>
         {
-            ShowStatus(InfoBarSeverity.Success, "Ingredient created.");
-            await LoadAsync();
-        }
-        else
-        {
-            ShowStatus(InfoBarSeverity.Error, result.Error!.Description);
-        }
+            var result = await handler.CreateIngredientAsync(new CreateIngredientCommand(
+                dialog.IngredientName, dialog.BaseUnit, dialog.AvailableQuantity, dialog.ReorderThreshold));
+            if (result.IsSuccess)
+            {
+                await LoadCoreAsync("Ingredient created.");
+            }
+            else
+            {
+                Status.Apply(WorkflowFeedback.FromError(result.Error!));
+            }
+        });
     }
 
     private async void OnEditIngredient(object sender, RoutedEventArgs args)
@@ -73,11 +79,16 @@ public sealed partial class IngredientsPage : Page
             return;
         }
 
-        var ingredient = await repository.FindIngredientAsync(row.Id);
+        Ingredient? ingredient = null;
+        await RunAsync("open the ingredient", async () =>
+        {
+            ingredient = await repository.FindIngredientAsync(row.Id);
+            Status.Apply(ingredient is null
+                ? WorkflowFeedback.FromError(Error.NotFound("inventory.ingredient_not_found", "The ingredient no longer exists."))
+                : WorkflowFeedback.Ready("Ingredient loaded for editing."));
+        });
         if (ingredient is null)
         {
-            ShowStatus(InfoBarSeverity.Error, "The ingredient no longer exists.");
-            await LoadAsync();
             return;
         }
 
@@ -87,16 +98,18 @@ public sealed partial class IngredientsPage : Page
             return;
         }
 
-        var threshold = await handler.SetReorderThresholdAsync(new SetReorderThresholdCommand(ingredient.Id, dialog.ReorderThreshold));
-        if (threshold.IsSuccess)
+        await RunAsync("update the ingredient", async () =>
         {
-            ShowStatus(InfoBarSeverity.Success, "Ingredient updated.");
-            await LoadAsync();
-        }
-        else
-        {
-            ShowStatus(InfoBarSeverity.Error, threshold.Error!.Description);
-        }
+            var threshold = await handler.SetReorderThresholdAsync(new SetReorderThresholdCommand(ingredient.Id, dialog.ReorderThreshold));
+            if (threshold.IsSuccess)
+            {
+                await LoadCoreAsync("Ingredient updated.");
+            }
+            else
+            {
+                Status.Apply(WorkflowFeedback.FromError(threshold.Error!));
+            }
+        });
     }
 
     private async void OnToggleActive(object sender, RoutedEventArgs args)
@@ -106,19 +119,20 @@ public sealed partial class IngredientsPage : Page
             return;
         }
 
-        Result result = row.IsActive
-            ? await handler.DeactivateIngredientAsync(new DeactivateIngredientCommand(row.Id))
-            : await handler.ActivateIngredientAsync(new ActivateIngredientCommand(row.Id));
-
-        if (result.IsSuccess)
+        await RunAsync("change ingredient availability", async () =>
         {
-            ShowStatus(InfoBarSeverity.Success, row.IsActive ? "Ingredient deactivated." : "Ingredient activated.");
-            await LoadAsync();
-        }
-        else
-        {
-            ShowStatus(InfoBarSeverity.Error, result.Error!.Description);
-        }
+            Result result = row.IsActive
+                ? await handler.DeactivateIngredientAsync(new DeactivateIngredientCommand(row.Id))
+                : await handler.ActivateIngredientAsync(new ActivateIngredientCommand(row.Id));
+            if (result.IsSuccess)
+            {
+                await LoadCoreAsync(row.IsActive ? "Ingredient deactivated." : "Ingredient activated.");
+            }
+            else
+            {
+                Status.Apply(WorkflowFeedback.FromError(result.Error!));
+            }
+        });
     }
 
     private static async Task<ContentDialogResult> ShowDialogAsync(ContentDialog dialog)
@@ -127,10 +141,46 @@ public sealed partial class IngredientsPage : Page
         return await dialog.ShowAsync();
     }
 
-    private void ShowStatus(InfoBarSeverity severity, string message)
+    private async Task LoadCoreAsync(string successMessage)
     {
-        Status.Severity = severity;
-        Status.Message = message;
-        Status.IsOpen = true;
+        var ingredients = await repository.ListIngredientsAsync();
+        allRows = ingredients.Select(ingredient => new IngredientRow(ingredient)).ToList();
+        ApplyFilter();
+        Status.Apply(WorkflowFeedback.Success(successMessage));
+    }
+
+    private async Task RunAsync(string operation, Func<Task> action)
+    {
+        if (isBusy)
+        {
+            return;
+        }
+
+        SetBusy(true);
+        Status.Apply(WorkflowFeedback.Loading($"Trying to {operation}..."));
+        try
+        {
+            await action();
+        }
+        catch (Exception)
+        {
+            Status.Apply(WorkflowFeedback.DatabaseFailure(operation,
+                "Check the local database connection, then select Reload before retrying."));
+        }
+        finally
+        {
+            SetBusy(false);
+            ApplyFilter();
+        }
+    }
+
+    private void SetBusy(bool busy)
+    {
+        isBusy = busy;
+        LoadingIndicator.IsActive = busy;
+        LoadingIndicator.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
+        ReloadButton.IsEnabled = !busy;
+        AddButton.IsEnabled = !busy;
+        SearchBox.IsEnabled = !busy;
     }
 }

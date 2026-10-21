@@ -130,6 +130,7 @@ public sealed class CatalogWorkspaceTests
         var model = new CatalogWorkspace(services.GetRequiredService<IServiceScopeFactory>());
         await model.LoadAsync();
         Assert.True(model.IsError);
+        Assert.Equal(WorkflowFeedbackKind.DatabaseError, model.Feedback.Kind);
         Assert.False(model.IsEmpty);
         Assert.False(model.IsBusy);
         Assert.Contains("reload", model.Message);
@@ -150,6 +151,7 @@ public sealed class CatalogWorkspaceTests
         Assert.True(await model.SaveAsync(async (commands, _) => await commands.CreateAddonAsync(new("Cream", 5m)), "Add-on saved."));
         Assert.Single(repository.Addons);
         Assert.True(model.IsError);
+        Assert.Equal(WorkflowFeedbackKind.DatabaseError, model.Feedback.Kind);
         Assert.Contains("Add-on saved. Refresh failed", model.Message);
         Assert.Contains("do not submit again", model.Message);
     }
@@ -166,6 +168,12 @@ public sealed class CatalogWorkspaceTests
         var error = new Error("test.error", "Correct the input or reload.", type, [new("name", "Name is required.")]);
         Assert.False(await model.SaveAsync((_, _) => Task.FromResult(Result.Failure(error)), "Saved."));
         Assert.True(model.IsError);
+        Assert.Equal(type switch
+        {
+            ErrorType.Validation => WorkflowFeedbackKind.Validation,
+            ErrorType.Conflict => WorkflowFeedbackKind.Conflict,
+            _ => WorkflowFeedbackKind.Error,
+        }, model.Feedback.Kind);
         Assert.Contains(type.ToString(), model.Message);
         Assert.Contains("name: Name is required.", model.Message);
         Assert.False(model.IsBusy);

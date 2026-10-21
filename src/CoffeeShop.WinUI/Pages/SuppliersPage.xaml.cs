@@ -1,5 +1,7 @@
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Inventory;
+using CoffeeShop.Domain.Inventory;
+using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -11,6 +13,7 @@ public sealed partial class SuppliersPage : Page
     private readonly InventoryCommandHandler handler;
     private readonly IInventoryRepository repository;
     private List<SupplierRow> allRows = [];
+    private bool isBusy;
 
     public SuppliersPage()
     {
@@ -20,19 +23,15 @@ public sealed partial class SuppliersPage : Page
         _ = LoadAsync();
     }
 
-    private async Task LoadAsync()
+    private Task LoadAsync() => RunAsync("load suppliers", async () =>
     {
-        try
-        {
-            var suppliers = await repository.ListSuppliersAsync();
-            allRows = suppliers.Select(s => new SupplierRow(s)).ToList();
-            SuppliersList.ItemsSource = allRows;
-        }
-        catch (Exception exception)
-        {
-            ShowStatus(InfoBarSeverity.Error, $"Could not load suppliers: {exception.Message}");
-        }
-    }
+        await LoadCoreAsync();
+        Status.Apply(allRows.Count == 0
+            ? WorkflowFeedback.Empty("No suppliers are available.", "Create a supplier before starting a purchase receipt.")
+            : WorkflowFeedback.Ready("Suppliers loaded. Select one to edit or change availability."));
+    });
+
+    private async void OnReload(object sender, RoutedEventArgs args) => await LoadAsync();
 
     private async void OnAddSupplier(object sender, RoutedEventArgs args)
     {
@@ -42,17 +41,20 @@ public sealed partial class SuppliersPage : Page
             return;
         }
 
-        var result = await handler.CreateSupplierAsync(new CreateSupplierCommand(
-            dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
-        if (result.IsSuccess)
+        await RunAsync("create the supplier", async () =>
         {
-            ShowStatus(InfoBarSeverity.Success, "Supplier created.");
-            await LoadAsync();
-        }
-        else
-        {
-            ShowStatus(InfoBarSeverity.Error, result.Error!.Description);
-        }
+            var result = await handler.CreateSupplierAsync(new CreateSupplierCommand(
+                dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
+            if (result.IsSuccess)
+            {
+                await LoadCoreAsync();
+                Status.Apply(WorkflowFeedback.Success("Supplier created."));
+            }
+            else
+            {
+                Status.Apply(WorkflowFeedback.FromError(result.Error!));
+            }
+        });
     }
 
     private async void OnEditSupplier(object sender, RoutedEventArgs args)
@@ -62,11 +64,16 @@ public sealed partial class SuppliersPage : Page
             return;
         }
 
-        var supplier = await repository.FindSupplierAsync(row.Id);
+        Supplier? supplier = null;
+        await RunAsync("open the supplier", async () =>
+        {
+            supplier = await repository.FindSupplierAsync(row.Id);
+            Status.Apply(supplier is null
+                ? WorkflowFeedback.FromError(Error.NotFound("inventory.supplier_not_found", "The supplier no longer exists."))
+                : WorkflowFeedback.Ready("Supplier loaded for editing."));
+        });
         if (supplier is null)
         {
-            ShowStatus(InfoBarSeverity.Error, "The supplier no longer exists.");
-            await LoadAsync();
             return;
         }
 
@@ -76,17 +83,20 @@ public sealed partial class SuppliersPage : Page
             return;
         }
 
-        var result = await handler.UpdateSupplierAsync(new UpdateSupplierCommand(
-            supplier.Id, dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
-        if (result.IsSuccess)
+        await RunAsync("update the supplier", async () =>
         {
-            ShowStatus(InfoBarSeverity.Success, "Supplier updated.");
-            await LoadAsync();
-        }
-        else
-        {
-            ShowStatus(InfoBarSeverity.Error, result.Error!.Description);
-        }
+            var result = await handler.UpdateSupplierAsync(new UpdateSupplierCommand(
+                supplier.Id, dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
+            if (result.IsSuccess)
+            {
+                await LoadCoreAsync();
+                Status.Apply(WorkflowFeedback.Success("Supplier updated."));
+            }
+            else
+            {
+                Status.Apply(WorkflowFeedback.FromError(result.Error!));
+            }
+        });
     }
 
     private async void OnToggleActive(object sender, RoutedEventArgs args)
@@ -96,19 +106,21 @@ public sealed partial class SuppliersPage : Page
             return;
         }
 
-        Result result = row.IsActive
-            ? await handler.DeactivateSupplierAsync(new DeactivateSupplierCommand(row.Id))
-            : await handler.ActivateSupplierAsync(new ActivateSupplierCommand(row.Id));
-
-        if (result.IsSuccess)
+        await RunAsync("change supplier availability", async () =>
         {
-            ShowStatus(InfoBarSeverity.Success, row.IsActive ? "Supplier deactivated." : "Supplier activated.");
-            await LoadAsync();
-        }
-        else
-        {
-            ShowStatus(InfoBarSeverity.Error, result.Error!.Description);
-        }
+            Result result = row.IsActive
+                ? await handler.DeactivateSupplierAsync(new DeactivateSupplierCommand(row.Id))
+                : await handler.ActivateSupplierAsync(new ActivateSupplierCommand(row.Id));
+            if (result.IsSuccess)
+            {
+                await LoadCoreAsync();
+                Status.Apply(WorkflowFeedback.Success(row.IsActive ? "Supplier deactivated." : "Supplier activated."));
+            }
+            else
+            {
+                Status.Apply(WorkflowFeedback.FromError(result.Error!));
+            }
+        });
     }
 
     private static async Task<ContentDialogResult> ShowDialogAsync(ContentDialog dialog)
@@ -117,10 +129,44 @@ public sealed partial class SuppliersPage : Page
         return await dialog.ShowAsync();
     }
 
-    private void ShowStatus(InfoBarSeverity severity, string message)
+    private async Task LoadCoreAsync()
     {
-        Status.Severity = severity;
-        Status.Message = message;
-        Status.IsOpen = true;
+        var suppliers = await repository.ListSuppliersAsync();
+        allRows = suppliers.Select(supplier => new SupplierRow(supplier)).ToList();
+        SuppliersList.ItemsSource = allRows;
+        EmptyMessage.Visibility = allRows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private async Task RunAsync(string operation, Func<Task> action)
+    {
+        if (isBusy)
+        {
+            return;
+        }
+
+        SetBusy(true);
+        Status.Apply(WorkflowFeedback.Loading($"Trying to {operation}..."));
+        try
+        {
+            await action();
+        }
+        catch (Exception)
+        {
+            Status.Apply(WorkflowFeedback.DatabaseFailure(operation,
+                "Check the local database connection, then select Reload before retrying."));
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
+
+    private void SetBusy(bool busy)
+    {
+        isBusy = busy;
+        LoadingIndicator.IsActive = busy;
+        LoadingIndicator.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
+        ReloadButton.IsEnabled = !busy;
+        AddButton.IsEnabled = !busy;
     }
 }

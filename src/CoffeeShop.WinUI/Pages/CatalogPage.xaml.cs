@@ -45,8 +45,7 @@ public sealed partial class CatalogPage : Page
         LoadingBar.Visibility = model.IsBusy ? Visibility.Visible : Visibility.Collapsed;
         WorkspaceTabs.IsEnabled = !model.IsBusy;
         ReloadButton.IsEnabled = !model.IsBusy;
-        Status.Severity = model.IsError ? InfoBarSeverity.Error : InfoBarSeverity.Informational;
-        Status.Message = model.Message;
+        Status.Apply(model.Feedback);
         EmptyMessage.Visibility = model.IsEmpty ? Visibility.Visible : Visibility.Collapsed;
         // Do not reassign ItemsSource during a selection load: it would clear selection.
         if (!ReferenceEquals(DrinksList.ItemsSource, model.Items))

@@ -212,8 +212,7 @@ public sealed partial class PosPage : Page
     {
         rendering = true;
         LoadingBar.Visibility = model.IsBusy ? Visibility.Visible : Visibility.Collapsed;
-        Status.Severity = model.Error is null ? InfoBarSeverity.Informational : InfoBarSeverity.Error;
-        Status.Message = model.Message;
+        Status.Apply(model.Feedback);
         ReloadButton.IsEnabled = !model.IsBusy;
         EntryPanel.IsEnabled = model.CanEdit;
         OperatorBox.IsEnabled = !model.IsBusy;

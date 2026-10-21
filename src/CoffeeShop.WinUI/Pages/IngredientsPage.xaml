@@ -18,6 +18,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock Text="Ingredients"
                     FontFamily="{StaticResource SketchHeadingFontFamily}"
@@ -29,18 +30,28 @@
                      Width="240"
                     TextChanged="OnSearchTextChanged"/>
             <Button Grid.Column="2"
+                    x:Name="ReloadButton"
+                    Content="Reload"
+                    Click="OnReload"/>
+            <Button Grid.Column="3"
                     x:Name="AddButton"
                     Content="New ingredient"
                     Style="{StaticResource AccentButtonStyle}"
                     Click="OnAddIngredient"/>
         </Grid>
 
-        <InfoBar Grid.Row="1"
-                x:Name="Status"
-                IsOpen="False"
-                IsClosable="True"/>
+        <Grid Grid.Row="1" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <InfoBar x:Name="Status" IsOpen="False" IsClosable="True"/>
+            <ProgressRing x:Name="LoadingIndicator" Grid.Column="1" Width="24" Height="24"
+                          AutomationProperties.Name="Loading ingredients" Visibility="Collapsed"/>
+        </Grid>
 
-        <ScrollViewer Grid.Row="2">
+        <Grid Grid.Row="2">
+            <ScrollViewer>
             <ListView x:Name="IngredientsList"
                     SelectionMode="Single">
                 <ListView.Header>
@@ -114,6 +125,10 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-        </ScrollViewer>
+            </ScrollViewer>
+            <TextBlock x:Name="EmptyMessage"
+                       Text="No ingredients match. Clear the search or create the first ingredient."
+                       TextWrapping="Wrap" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
     </Grid>
 </Page>

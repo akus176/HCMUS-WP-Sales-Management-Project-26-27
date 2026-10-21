@@ -12,7 +12,8 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public bool IsBusy { get; private set; }
-    public bool IsError { get; private set; }
+    public Error? Error { get; private set; }
+    public bool IsError => Error is not null;
     public string Message { get; private set; } = "Load the catalog to begin.";
     public string Search { get; set; } = "";
     public bool IncludeInactive { get; set; }
@@ -22,6 +23,7 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
     public IReadOnlyList<RecipeIngredientOption> Ingredients { get; private set; } = [];
     public MenuItemDetail? SelectedItem { get; private set; }
     public bool IsEmpty => !IsBusy && !IsError && Items.Count == 0;
+    public WorkflowFeedback Feedback => WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
 
     public Task LoadAsync() => RunAsync(async () =>
     {
@@ -71,8 +73,8 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
                 catch (Exception)
                 {
                     // The write succeeded: do not invite a duplicate create on refresh failure.
-                    IsError = true;
                     Message = $"{successMessage} Refresh failed. Use Reload before continuing; do not submit again.";
+                    Error = Error.Unexpected("catalog.database_error", Message);
                 }
             }
         });
@@ -81,7 +83,7 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
 
     public void ShowValidation(string message)
     {
-        IsError = true;
+        Error = Error.Validation("catalog.ui_validation", message, [new("input", message)]);
         Message = message;
         Notify();
     }
@@ -119,7 +121,7 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
         }
 
         var error = result.Error!;
-        IsError = true;
+        Error = error;
         Message = $"{error.Type}: {error.Description}";
         if (error.Details.Count > 0)
         {
@@ -137,7 +139,7 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
         }
 
         IsBusy = true;
-        IsError = false;
+        Error = null;
         Message = "Working...";
         Notify();
         try
@@ -146,8 +148,8 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
         }
         catch (Exception)
         {
-            IsError = true;
             Message = "The operation could not complete. Check the local database connection, then reload and verify the saved state before retrying.";
+            Error = Error.Unexpected("catalog.database_error", Message);
         }
         finally
         {

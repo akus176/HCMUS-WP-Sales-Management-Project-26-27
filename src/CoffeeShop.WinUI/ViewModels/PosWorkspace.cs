@@ -37,6 +37,7 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
     public bool CanEdit => !IsBusy && !RequiresReload && Order is null;
     public bool CanConfirm => !IsBusy && !RequiresReload && Order?.Status == OrderStatus.Draft;
     public bool IsEmpty => !IsBusy && Error is null && Menu.Count == 0;
+    public WorkflowFeedback Feedback => WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
 
     public Task LoadAsync() => RunAsync(async provider =>
     {

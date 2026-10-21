@@ -1,4 +1,5 @@
 using CoffeeShop.Application.Inventory;
+using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -30,6 +31,7 @@ public sealed record LowStockRow
 public sealed partial class LowStockPage : Page
 {
     private readonly IInventoryRepository repository;
+    private bool isBusy;
 
     public LowStockPage()
     {
@@ -40,25 +42,44 @@ public sealed partial class LowStockPage : Page
 
     private async Task LoadAsync()
     {
+        if (isBusy)
+        {
+            return;
+        }
+
+        SetBusy(true);
+        Status.Apply(WorkflowFeedback.Loading("Checking current ingredient balances..."));
         try
         {
             var ingredients = await repository.ListIngredientsAsync();
             var lowStock = LowStockQuery.Find(ingredients);
             LowStockList.ItemsSource = lowStock.Select(i => new LowStockRow(i)).ToList();
-            ShowStatus(InfoBarSeverity.Informational, $"{lowStock.Count} ingredient(s) at or below the reorder threshold.");
+            EmptyMessage.Visibility = lowStock.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            Status.Apply(lowStock.Count == 0
+                ? WorkflowFeedback.Empty(
+                    "No active ingredients are at or below their reorder threshold.",
+                    "No action is needed; refresh after stock balances change.")
+                : WorkflowFeedback.Ready($"{lowStock.Count} ingredient(s) need replenishment."));
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            ShowStatus(InfoBarSeverity.Error, $"Could not load low stock: {exception.Message}");
+            Status.Apply(WorkflowFeedback.DatabaseFailure(
+                "load the low-stock report",
+                "Check the local database connection, then select Refresh."));
+        }
+        finally
+        {
+            SetBusy(false);
         }
     }
 
     private async void OnRefresh(object sender, RoutedEventArgs args) => await LoadAsync();
 
-    private void ShowStatus(InfoBarSeverity severity, string message)
+    private void SetBusy(bool busy)
     {
-        Status.Severity = severity;
-        Status.Message = message;
-        Status.IsOpen = true;
+        isBusy = busy;
+        LoadingIndicator.IsActive = busy;
+        LoadingIndicator.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
+        RefreshButton.IsEnabled = !busy;
     }
 }

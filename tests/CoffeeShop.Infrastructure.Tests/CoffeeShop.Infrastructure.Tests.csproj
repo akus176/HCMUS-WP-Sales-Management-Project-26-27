@@ -19,6 +19,7 @@
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\CustomerOrderContext.cs" Link="ViewModels\CustomerOrderContext.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\PosWorkspace.cs" Link="ViewModels\PosWorkspace.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\PosOperatorSession.cs" Link="ViewModels\PosOperatorSession.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\WorkflowFeedback.cs" Link="ViewModels\WorkflowFeedback.cs" />
   </ItemGroup>
 
 </Project>

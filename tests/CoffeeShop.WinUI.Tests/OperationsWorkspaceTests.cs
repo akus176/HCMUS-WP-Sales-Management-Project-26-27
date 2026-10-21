@@ -1,6 +1,8 @@
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Sales;
+using CoffeeShop.WinUI.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CoffeeShop.WinUI.Tests;
 
@@ -44,6 +46,19 @@ public sealed class OperationsWorkspaceTests
         Assert.True(assigned.CanStartDelivery);
         Assert.True(outForDelivery.CanFinishDelivery);
         Assert.False(Order(OrderStatus.Preparing, channel: "delivery", deliveryStatus: DeliveryStatus.Unassigned).CanAssignDelivery);
+    }
+
+    [Fact]
+    public async Task DatabaseFailure_IsSafeAndLeavesFulfillmentReloadable()
+    {
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var model = new OperationsWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new());
+
+        await model.LoadAsync();
+
+        Assert.Equal(WorkflowFeedbackKind.DatabaseError, model.Feedback.Kind);
+        Assert.Contains("reload", model.Feedback.DisplayMessage, StringComparison.OrdinalIgnoreCase);
+        Assert.False(model.IsBusy);
     }
 
     private static OperationalOrder Order(string status, decimal total = 20m, decimal paid = 0m,

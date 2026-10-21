@@ -92,9 +92,7 @@ public sealed partial class CustomersPage : Page
             WorkspaceContent.IsEnabled = !model.IsBusy;
             ReloadButton.IsEnabled = !model.IsBusy;
             NewCustomerButton.IsEnabled = !model.RequiresReload;
-            Status.Severity = model.IsError ? InfoBarSeverity.Error : InfoBarSeverity.Informational;
-            Status.Title = model.Error?.Type.ToString() ?? "Customer notebook";
-            Status.Message = StatusMessage();
+            Status.Apply(model.Feedback);
             EmptyMessage.Visibility = model.IsEmpty ? Visibility.Visible : Visibility.Collapsed;
             var customer = model.SelectedCustomer;
             if (!ReferenceEquals(CustomersList.ItemsSource, model.Customers))
