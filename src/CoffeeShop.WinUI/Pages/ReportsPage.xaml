@@ -40,7 +40,7 @@
                 <ComboBoxItem Content="Takeaway" Tag="takeaway"/>
                 <ComboBoxItem Content="Delivery" Tag="delivery"/>
             </ComboBox>
-            <Button Grid.Column="5" Content="Refresh reports" VerticalAlignment="Bottom" Click="OnRefresh"/>
+            <Button x:Name="RefreshButton" Grid.Column="5" Content="Refresh reports" VerticalAlignment="Bottom" Click="OnRefresh"/>
         </Grid>
 
         <Grid Grid.Row="2" ColumnSpacing="12">
@@ -74,7 +74,7 @@
                         <ListView x:Name="RevenuePaymentsList" MaxHeight="180">
                             <ListView.ItemTemplate><DataTemplate x:DataType="viewModels:RevenuePaymentRow"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{x:Bind PaymentMethod}"/><TextBlock Grid.Column="1" Text="{x:Bind RevenueDisplay}"/><TextBlock Grid.Column="2" Text="{x:Bind OrderCount}"/></Grid></DataTemplate></ListView.ItemTemplate>
                         </ListView>
-                        <TextBlock x:Name="RevenueEmpty" Text="No paid revenue matched this period and payment filter." Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
+                        <TextBlock x:Name="RevenueEmpty" Text="No paid revenue matched. Change the period or payment filter, or complete a paid order." TextWrapping="Wrap" Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
                     </StackPanel>
                 </Border>
 
@@ -85,7 +85,7 @@
                         <ListView x:Name="BestSellersList" MaxHeight="240">
                             <ListView.ItemTemplate><DataTemplate x:DataType="viewModels:BestSellerViewRow"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{x:Bind Rank}"/><TextBlock Grid.Column="1" Text="{x:Bind NameDisplay}"/><TextBlock Grid.Column="2" Text="{x:Bind Quantity}"/><TextBlock Grid.Column="3" Text="{x:Bind RevenueDisplay}"/></Grid></DataTemplate></ListView.ItemTemplate>
                         </ListView>
-                        <TextBlock x:Name="BestSellersEmpty" Text="No best sellers matched this reporting period." Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
+                        <TextBlock x:Name="BestSellersEmpty" Text="No best sellers matched. Change the reporting period or complete an order." TextWrapping="Wrap" Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
                     </StackPanel>
                 </Border>
 
@@ -95,7 +95,7 @@
                         <ListView x:Name="ChannelsList" MaxHeight="180">
                             <ListView.ItemTemplate><DataTemplate x:DataType="viewModels:OrderChannelViewRow"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{x:Bind ChannelDisplay}"/><TextBlock Grid.Column="1" Text="{x:Bind RevenueDisplay}"/><TextBlock Grid.Column="2" Text="{x:Bind OrderCount}"/></Grid></DataTemplate></ListView.ItemTemplate>
                         </ListView>
-                        <TextBlock x:Name="ChannelsEmpty" Text="No channel data matched this period and channel filter." Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
+                        <TextBlock x:Name="ChannelsEmpty" Text="No channel data matched. Change the period or channel filter, or complete an order." TextWrapping="Wrap" Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
                     </StackPanel>
                 </Border>
 
@@ -106,7 +106,7 @@
                         <ListView x:Name="LowStockList" MaxHeight="180">
                             <ListView.ItemTemplate><DataTemplate x:DataType="viewModels:LowStockViewRow"><Grid ColumnSpacing="12"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock Text="{x:Bind Name}"/><TextBlock Grid.Column="1" Text="{x:Bind BalanceDisplay}"/><TextBlock Grid.Column="2" Text="{x:Bind ThresholdDisplay}"/></Grid></DataTemplate></ListView.ItemTemplate>
                         </ListView>
-                        <TextBlock x:Name="LowStockEmpty" Text="No active ingredients are at or below their reorder threshold." Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
+                        <TextBlock x:Name="LowStockEmpty" Text="No active ingredients are at or below their reorder threshold. No action is needed; refresh after balances change." TextWrapping="Wrap" Visibility="Collapsed" Foreground="{StaticResource SketchMutedBrush}"/>
                     </StackPanel>
                 </Border>
             </Grid>
