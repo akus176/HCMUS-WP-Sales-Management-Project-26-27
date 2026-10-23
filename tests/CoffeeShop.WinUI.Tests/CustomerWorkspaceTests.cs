@@ -64,6 +64,7 @@ public sealed class CustomerWorkspaceTests
         Assert.True(await model.SetOrderSelectionAsync(new(id)));
         Assert.False(await model.CreateAsync(new("Another", "0901234567")));
         Assert.Equal(ErrorType.Conflict, model.Error!.Type);
+        Assert.Equal(WorkflowFeedbackKind.Conflict, model.Feedback.Kind);
         Assert.False(await model.SetOrderSelectionAsync(new(id, true, EntityId.New(), "Alice", "0901234567")));
         Assert.Equal(ErrorType.Conflict, model.Error!.Type);
         Assert.Equal(id, model.OrderSelection.CustomerId);
@@ -90,6 +91,7 @@ public sealed class CustomerWorkspaceTests
         setup.Reads.Fail = true;
         await setup.Model.LoadAsync();
         Assert.True(setup.Model.IsError);
+        Assert.Equal(WorkflowFeedbackKind.DatabaseError, setup.Model.Feedback.Kind);
         Assert.True(setup.Model.RequiresReload);
         Assert.False(setup.Model.IsBusy);
         Assert.DoesNotContain("private database details", setup.Model.Message);

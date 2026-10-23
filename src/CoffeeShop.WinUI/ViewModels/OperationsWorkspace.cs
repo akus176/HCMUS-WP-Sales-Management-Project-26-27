@@ -20,6 +20,7 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public string Message { get; private set; } = "Load operational work to see the current queue, tables and fulfillment controls.";
     public bool IsEmpty => !IsBusy && Error is null && Orders.Count == 0 && Tables.Count == 0;
     public bool HasOperator => session.IsAuthenticated;
+    public WorkflowFeedback Feedback => WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
 
     public void EnableOperationalWorkflow() => session.EnableOperationalWorkflow();
 

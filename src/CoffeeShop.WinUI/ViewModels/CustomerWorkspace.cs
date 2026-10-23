@@ -27,6 +27,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
     public CustomerOrderSelection OrderSelection => orderContext.Selection;
     public CustomerOrderSelectionRequest OrderRequest => orderContext.Request;
     public bool IsEmpty => !IsBusy && !IsError && Customers.Count == 0;
+    public WorkflowFeedback Feedback => WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
     public bool CanEdit => !IsBusy && !RequiresReload && SelectedCustomer is { IsActive: true };
     public bool CanPrevious => !IsBusy && !RequiresReload && History.Offset > 0;
     public bool CanNext => !IsBusy && !RequiresReload && History.Offset + History.Items.Count < History.TotalCount;

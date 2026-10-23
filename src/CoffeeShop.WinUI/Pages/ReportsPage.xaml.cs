@@ -34,11 +34,12 @@ public sealed partial class ReportsPage : Page
     {
         if (!ReportPresentation.TryCreatePeriod(FirstDate.Date, LastDate.Date, out var first, out var last, out var validationMessage))
         {
-            ShowStatus(InfoBarSeverity.Warning, validationMessage!);
+            Status.Apply(WorkflowFeedback.Validation("reporting period", validationMessage!));
             return;
         }
 
         SetLoading(true);
+        Status.Apply(WorkflowFeedback.Loading("Loading reports for the selected period..."));
         try
         {
             var timeZone = TimeZoneInfo.Local;
@@ -51,7 +52,9 @@ public sealed partial class ReportsPage : Page
             if (!revenue.Result.IsSuccess || !bestSellers.Result.IsSuccess || !channels.Result.IsSuccess)
             {
                 var error = revenue.Result.Error ?? bestSellers.Result.Error ?? channels.Result.Error;
-                ShowStatus(InfoBarSeverity.Error, error?.Description ?? "Could not load the selected reports.");
+                Status.Apply(error is null
+                    ? WorkflowFeedback.DatabaseFailure("load the selected reports", "Check the local database connection, then select Refresh reports.")
+                    : WorkflowFeedback.FromError(error));
                 return;
             }
 
@@ -68,11 +71,13 @@ public sealed partial class ReportsPage : Page
             LowStockEmpty.Visibility = lowStock.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             ApplyPaymentFilter();
             ApplyChannelFilter();
-            ShowStatus(InfoBarSeverity.Success, "Reports refreshed from the selected reporting period.");
+            Status.Apply(WorkflowFeedback.Success("Reports refreshed from the selected reporting period."));
         }
         catch (Exception)
         {
-            ShowStatus(InfoBarSeverity.Error, "Could not load reports from the database. Check the connection and try again.");
+            Status.Apply(WorkflowFeedback.DatabaseFailure(
+                "load reports from the database",
+                "Check the local database connection, then select Refresh reports."));
         }
         finally
         {
@@ -116,12 +121,10 @@ public sealed partial class ReportsPage : Page
     {
         LoadingIndicator.IsActive = loading;
         LoadingIndicator.Visibility = loading ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    private void ShowStatus(InfoBarSeverity severity, string message)
-    {
-        Status.Severity = severity;
-        Status.Message = message;
-        Status.IsOpen = true;
+        RefreshButton.IsEnabled = !loading;
+        FirstDate.IsEnabled = !loading;
+        LastDate.IsEnabled = !loading;
+        PaymentFilter.IsEnabled = !loading;
+        ChannelFilter.IsEnabled = !loading;
     }
 }

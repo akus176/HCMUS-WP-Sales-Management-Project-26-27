@@ -47,6 +47,7 @@ public sealed class PosWorkspaceTests
         var id = model.TicketId;
         await model.LoadAsync();
         Assert.Equal("pos.database_error", model.Error!.Code);
+        Assert.Equal(WorkflowFeedbackKind.DatabaseError, model.Feedback.Kind);
         Assert.True(model.RequiresReload);
         Assert.False(model.IsBusy);
         Assert.False(model.CanEdit);

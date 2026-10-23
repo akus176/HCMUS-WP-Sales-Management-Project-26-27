@@ -18,23 +18,32 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <TextBlock Text="Purchase Receipts"
                     FontFamily="{StaticResource SketchHeadingFontFamily}"
                        FontSize="28"
                     Foreground="{StaticResource SketchForegroundBrush}"/>
-            <Button Grid.Column="1"
+            <Button Grid.Column="1" x:Name="ReloadButton" Content="Reload" Click="OnReload"/>
+            <Button Grid.Column="2"
+                    x:Name="NewReceiptButton"
                     Content="New receipt"
                     Style="{StaticResource AccentButtonStyle}"
                     Click="OnNewReceipt"/>
         </Grid>
 
-        <InfoBar Grid.Row="1"
-                x:Name="Status"
-                IsOpen="False"
-                IsClosable="True"/>
+        <Grid Grid.Row="1" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <InfoBar x:Name="Status" IsOpen="False" IsClosable="True"/>
+            <ProgressRing x:Name="LoadingIndicator" Grid.Column="1" Width="24" Height="24"
+                          AutomationProperties.Name="Loading purchase receipts" Visibility="Collapsed"/>
+        </Grid>
 
-        <ScrollViewer Grid.Row="2"
+        <Grid Grid.Row="2">
+        <ScrollViewer
                 MaxHeight="220">
             <ListView x:Name="ReceiptsList"
                     SelectionMode="Single"
@@ -89,6 +98,9 @@
                 </ListView.ItemTemplate>
             </ListView>
         </ScrollViewer>
+        <TextBlock x:Name="EmptyMessage" Text="No purchase receipts yet. Create a draft receipt to record incoming stock."
+                   TextWrapping="Wrap" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
 
         <StackPanel Grid.Row="3"
                 Spacing="12"
