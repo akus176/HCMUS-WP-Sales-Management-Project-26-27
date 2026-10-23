@@ -22,7 +22,7 @@ The API currently exposes only `/health` (and `/openapi/v1.json` in Development)
 ```json
 {
   "ConnectionStrings": {
-    "CoffeeShop": "Host=localhost;Port=5432;Database=coffeeshop;Username=coffeeshop;Password=<local-password>"
+    "CoffeeShop": "Host=127.0.0.1;Port=5432;Database=coffeeshop;Username=coffeeshop_midterm;Password=<local-password>"
   }
 }
 ```
@@ -41,7 +41,7 @@ The environment variable takes precedence. Keep this user-local file out of sour
 | `CoffeeShop.Api`                     | Final HTTP composition root, later authentication and permissions     |
 | `tests/*`                            | Unit, infrastructure, API, and future UI-facing tests                 |
 
-Midterm runs application use cases inside WinUI against a restricted local PostgreSQL account. Final WinUI must drop its infrastructure reference and use typed HTTP clients; the API then owns authorization and persistence. The PostgreSQL adapter is configured; those application workflows are not implemented yet.
+Midterm runs application use cases inside WinUI against a restricted local PostgreSQL account. Follow [restricted midterm PostgreSQL setup](docs/midterm-postgres-role.md) to provision `coffeeshop_midterm`, separate migration credentials, and restrict networking to the local machine. Final WinUI must drop its infrastructure reference and use typed HTTP clients; the API then owns authorization and persistence. The PostgreSQL adapter is configured; those application workflows are not implemented yet.
 
 ### Catalog lifecycle (T3.1)
 
