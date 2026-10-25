@@ -116,9 +116,14 @@ dotnet ef database update `
 
 To verify a full rebuild, point the connection string at a newly created empty database, run `dotnet ef database update`, and confirm that a second run reports no pending migrations. Recreate the verification database through PostgreSQL tooling rather than editing tables by hand.
 
+For the midterm demonstration, apply migrations and then run the repeatable dataset in
+[`scripts/postgres/midterm-seed.sql`](scripts/postgres/midterm-seed.sql). The dataset contents,
+run command, and PostgreSQL integration validation are documented in
+[`docs/midterm-seed-data.md`](docs/midterm-seed-data.md).
+
 JWT and AI placeholders follow the same environment-variable convention (double underscores denote nested keys). No demo accounts or secrets are committed.
 
-Planned operational roles are Admin, Manager, Cashier, Barista, Inventory Staff, and Delivery Staff; role policies are not yet enforced. Docker Compose, migration/seed commands, and the two end-to-end demonstration paths belong to later tasks in `tasks.md`.
+Planned operational roles are Admin, Manager, Cashier, Barista, Inventory Staff, and Delivery Staff; role policies are not yet enforced. Docker Compose automation and the full end-to-end demonstration paths belong to later tasks in `openspec/changes/build-coffee-shop-management-system/tasks.md`.
 
 ## Team workflow
 
