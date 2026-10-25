@@ -15,6 +15,7 @@
   <ItemGroup>
     <Using Include="Xunit" />
     <None Include="..\..\scripts\postgres\midterm-role.sql" Link="midterm-role.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\scripts\postgres\midterm-seed.sql" Link="midterm-seed.sql" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\CatalogWorkspace.cs" Link="ViewModels\CatalogWorkspace.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\CustomerWorkspace.cs" Link="ViewModels\CustomerWorkspace.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\CustomerOrderContext.cs" Link="ViewModels\CustomerOrderContext.cs" />
