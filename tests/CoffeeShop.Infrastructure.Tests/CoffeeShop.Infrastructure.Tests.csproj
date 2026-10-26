@@ -22,6 +22,8 @@
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\PosWorkspace.cs" Link="ViewModels\PosWorkspace.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\PosOperatorSession.cs" Link="ViewModels\PosOperatorSession.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\WorkflowFeedback.cs" Link="ViewModels\WorkflowFeedback.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\OperationsWorkspace.cs" Link="ViewModels\OperationsWorkspace.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\WinUIServiceCollectionExtensions.cs" Link="WinUIServiceCollectionExtensions.cs" />
   </ItemGroup>
 
 </Project>

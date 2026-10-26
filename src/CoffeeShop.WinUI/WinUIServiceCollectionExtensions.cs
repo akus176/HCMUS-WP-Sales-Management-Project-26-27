@@ -6,7 +6,6 @@ using CoffeeShop.Application.Inventory;
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Common;
-using CoffeeShop.Infrastructure.Postgres.Inventory;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -41,8 +40,6 @@ internal static class WinUIServiceCollectionExtensions
         services.AddSingleton<PosWorkspace>();
         services.AddSingleton<OperationsWorkspace>();
         services.AddScoped<InventoryCommandHandler>();
-        services.AddScoped<IInventoryRepository>(serviceProvider =>
-            serviceProvider.GetRequiredService<InventoryRepository>());
 
         return services;
     }
