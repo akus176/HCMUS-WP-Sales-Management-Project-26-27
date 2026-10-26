@@ -9,6 +9,7 @@ DO $$
 DECLARE
     stamp timestamptz := '2026-10-01 08:00:00+00';
     actor uuid := pg_temp.midterm_id('staff-manager');
+    courier uuid := pg_temp.midterm_id('staff-delivery');
 BEGIN
     -- Remove only this dataset, in dependency order. The fixed actor and names are
     -- deliberately namespaced so normal application records are not touched.
@@ -28,10 +29,19 @@ BEGIN
     DELETE FROM customers.customers WHERE phone LIKE '+8409008%';
     DELETE FROM customers.loyalty_settings WHERE id = pg_temp.midterm_id('loyalty-settings');
     DELETE FROM inventory.ingredients WHERE name LIKE 'Midterm %';
-    DELETE FROM identity.users WHERE id = actor;
+    DELETE FROM identity.user_roles WHERE user_id IN (actor, courier);
+    DELETE FROM identity.users WHERE id IN (actor, courier);
 
     INSERT INTO identity.users (id, username, email, password_hash, full_name, phone, is_active, created_at, updated_at)
     VALUES (actor, 'midterm_manager', 'midterm-manager@example.test', 'demo-only-not-for-authentication', 'Midterm Demo Manager', '+84900000000', true, stamp, stamp);
+
+    INSERT INTO identity.users (id, username, email, password_hash, full_name, phone, is_active, created_at, updated_at)
+    VALUES (courier, 'midterm_delivery', 'midterm-delivery@example.test', 'demo-only-not-for-authentication', 'Midterm Demo Courier', '+84900000001', true, stamp, stamp);
+    INSERT INTO identity.roles (id, code, name)
+    VALUES (pg_temp.midterm_id('role-delivery'), 'DeliveryStaff', 'Delivery Staff')
+    ON CONFLICT (code) DO NOTHING;
+    INSERT INTO identity.user_roles (user_id, role_id, assigned_at, assigned_by)
+    SELECT courier, id, stamp, actor FROM identity.roles WHERE code = 'DeliveryStaff';
 
     INSERT INTO catalog.categories (id, name, display_order, is_active, created_at, updated_at)
     SELECT pg_temp.midterm_id('category-' || n), 'Midterm ' || name, n, true, stamp, stamp
@@ -178,7 +188,7 @@ BEGIN
            COALESCE(a.address_line,'88 Demo Avenue, Ho Chi Minh City'), a.id,
            CASE WHEN n = 18 THEN 'failed' WHEN n IN (6,21) THEN 'assigned' WHEN n IN (9,15) THEN 'out_for_delivery'
                 WHEN n IN (12,24) THEN 'delivered' ELSE 'unassigned' END,
-           CASE WHEN n IN (6,9,12,15,18,21,24) THEN actor ELSE NULL END,
+           CASE WHEN n IN (6,9,12,15,18,21,24) THEN courier ELSE NULL END,
            CASE WHEN n IN (6,9,12,15,18,21,24) THEN o.created_at + interval '15 minutes' ELSE NULL END,
            CASE WHEN n IN (9,12,15,18,24) THEN o.created_at + interval '30 minutes' ELSE NULL END,
            CASE WHEN n IN (12,24) THEN o.created_at + interval '1 hour' ELSE NULL END,
