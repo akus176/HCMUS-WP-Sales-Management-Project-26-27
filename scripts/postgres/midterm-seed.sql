@@ -82,7 +82,7 @@ BEGIN
       (pg_temp.midterm_id('ingredient-6'),'Midterm Peach puree','ml',1800,300,true,stamp,stamp),
       (pg_temp.midterm_id('ingredient-7'),'Midterm Chocolate sauce','ml',1200,250,true,stamp,stamp),
       (pg_temp.midterm_id('ingredient-8'),'Midterm Vanilla syrup','ml',14,150,true,stamp,stamp),
-      (pg_temp.midterm_id('ingredient-9'),'Midterm Pastry','piece',80,20,true,stamp,stamp);
+      (pg_temp.midterm_id('ingredient-9'),'Midterm Pastry','pcs',80,20,true,stamp,stamp);
 
     INSERT INTO catalog.recipe_ingredients (id, size_variant_id, ingredient_id, quantity, unit)
     SELECT pg_temp.midterm_id('recipe-' || p.n || '-' || s.size_key), pg_temp.midterm_id('size-' || p.n || '-' || s.size_key),
@@ -91,7 +91,7 @@ BEGIN
       (1,1,18.0,'g'),(2,1,18.0,'g'),(3,1,18.0,'g'),(4,1,18.0,'g'),(5,1,18.0,'g'),
       (6,1,18.0,'g'),(7,1,18.0,'g'),(8,1,22.0,'g'),(9,1,22.0,'g'),(10,4,4.0,'g'),
       (11,5,5.0,'g'),(12,5,6.0,'g'),(13,6,80.0,'ml'),(14,7,35.0,'ml'),(15,6,100.0,'ml'),
-      (16,9,1.0,'piece'),(17,9,1.0,'piece'),(18,9,1.0,'piece'),(19,1,18.0,'g'),(20,1,18.0,'g')
+      (16,9,1.0,'pcs'),(17,9,1.0,'pcs'),(18,9,1.0,'pcs'),(19,1,18.0,'g'),(20,1,18.0,'g')
     ) AS p(n,ingredient,qty,unit)
     CROSS JOIN (VALUES ('regular',1.0),('large',1.35)) AS s(size_key,multiplier);
 
