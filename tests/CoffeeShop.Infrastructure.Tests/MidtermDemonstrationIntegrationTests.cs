@@ -89,7 +89,20 @@ public sealed class MidtermDemonstrationIntegrationTests(ITestOutputHelper outpu
         Success(await inventory.PostReceiptAsync(new(receipt, actor)));
         Assert.False((await inventory.PostReceiptAsync(new(receipt, actor))).IsSuccess);
         Assert.Equal(100m, await BalanceAsync(ingredient));
-        Success(await inventory.RecordStockAdjustmentAsync(new(ingredient, -5m, "Demo spillage", actor)));
+        var audit = services.GetRequiredService<InventoryAuditWorkspace>();
+        await audit.SelectAsync(ingredient);
+        Assert.Null(audit.Error);
+        await audit.AdjustAsync(-5m, "");
+        Assert.NotNull(audit.Error);
+        Assert.Equal(100m, await BalanceAsync(ingredient));
+        await audit.AdjustAsync(-5m, "Demo spillage");
+        Assert.Null(audit.Error);
+        await audit.AdjustAsync(5m, "Demo recount increase");
+        Assert.Null(audit.Error);
+        await audit.AdjustAsync(-5m, "Demo recount correction");
+        Assert.Null(audit.Error);
+        Assert.Equal(95m, audit.SelectedIngredient!.AvailableQuantity);
+        Assert.Equal(4, audit.Movements.Count);
         Assert.Equal(95m, await BalanceAsync(ingredient));
         output.WriteLine("PASS DEMO-02: supplier created/updated; receipt posted once (+100g); adjustment -5g; balance 95g.");
 
@@ -233,10 +246,74 @@ public sealed class MidtermDemonstrationIntegrationTests(ITestOutputHelper outpu
         Assert.Equal(3L, best.Items.Where(row => row.MenuItemId == itemId).Sum(row => row.Quantity));
         Assert.NotEmpty(LowStockReport.Build(ingredients));
         Assert.Equal(65m, await BalanceAsync(ingredient));
+        await audit.LoadAsync();
+        Assert.Null(audit.Error);
+        Assert.Equal(65m, audit.SelectedIngredient!.AvailableQuantity);
+        Assert.Equal(9, audit.Movements.Count);
+        Assert.Contains(audit.Movements, movement => movement.Type == StockMovementType.Restoration && movement.OrderId == pos.TicketId);
         Success(await catalog.DeactivateMenuItemAsync(new(itemId)));
         await pos.LoadAsync();
         Assert.DoesNotContain(pos.Menu, item => item.Id == itemId);
         output.WriteLine("PASS DEMO-08: revenue delta 130; channels reconcile; best seller quantity 3; cancellation excluded; low stock present; stock 65g; deactivated drink excluded from POS.");
+    }
+
+    [PostgresFact]
+    public async Task FailedLoyaltyEarning_RollsBackCompletionAndTableRelease_ThenRecoversOnce()
+    {
+        var pos = services.GetRequiredService<PosWorkspace>();
+        await pos.LoadAsync();
+        Assert.Null(pos.Error);
+        pos.Session.Operator = pos.Options.Staff.First();
+        using var scope = services.CreateScope();
+        var customer = Success(await scope.ServiceProvider.GetRequiredService<CustomerCommandHandler>()
+            .CreateCustomerAsync(new("Completion rollback customer", "0901999104")));
+        pos.Channel = "dine_in";
+        pos.TableId = pos.Options.Tables.First().Id;
+        pos.Customer = new(customer);
+        var item = pos.Menu.Single(menu => menu.Name == "Midterm Almond Croissant");
+        pos.AddLine(item, item.SizeVariants.Single(size => size.SizeName == "Regular"), 1, []);
+        await pos.SaveDraftAsync();
+        Assert.Null(pos.Error);
+        await pos.ConfirmAsync();
+        Assert.Null(pos.Error);
+        var operations = services.GetRequiredService<OperationsWorkspace>();
+        operations.EnableOperationalWorkflow();
+        await operations.LoadAsync();
+        Assert.Null(operations.Error);
+        operations.Select(operations.Orders.Single(order => order.Id == pos.TicketId));
+        await operations.StartPreparingAsync();
+        Assert.Null(operations.Error);
+        await operations.MarkReadyAsync();
+        Assert.Null(operations.Error);
+        await operations.RecordPaymentAsync(PaymentMethod.Cash, pos.Order!.Total, "");
+        Assert.Null(operations.Error);
+        var owner = new NpgsqlConnectionStringBuilder(adminConnection!) { Database = databaseName };
+        await ExecuteAsync(owner.ConnectionString, "DELETE FROM customers.loyalty_settings");
+
+        await operations.CompleteAsync();
+
+        Assert.Equal("loyalty.settings_not_found", operations.Error?.Code);
+        await operations.LoadAsync();
+        Assert.Equal(OrderStatus.Ready, operations.SelectedOrder!.Status);
+        Assert.True(operations.Tables.Single(table => table.Id == pos.TableId).IsOccupied);
+        using (var verify = services.CreateScope())
+        {
+            var db = verify.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+            Assert.Equal(0, await db.LoyaltyTransactions.CountAsync(entry => entry.OrderId == pos.TicketId));
+            Assert.Equal(0, await db.OrderStatusHistories.CountAsync(entry => entry.OrderId == pos.TicketId && entry.ToStatus == OrderStatus.Completed));
+        }
+        Success(await scope.ServiceProvider.GetRequiredService<LoyaltyCommandHandler>().UpdateSettingsAsync(new(1m, 1m, 50m)));
+        await operations.CompleteAsync();
+        Assert.Null(operations.Error);
+        Assert.False(operations.Tables.Single(table => table.Id == pos.TableId).IsOccupied);
+        await operations.CompleteAsync();
+        Assert.NotNull(operations.Error);
+        using (var verify = services.CreateScope())
+        {
+            var db = verify.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+            Assert.Equal(1, await db.LoyaltyTransactions.CountAsync(entry => entry.OrderId == pos.TicketId));
+        }
+        output.WriteLine("PASS DEMO-09: missing loyalty settings rolled back completion/history/table release; configuration restored; retry completed and earned once.");
     }
 
     private async Task<decimal> BalanceAsync(EntityId ingredient)

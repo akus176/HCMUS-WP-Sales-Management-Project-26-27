@@ -39,6 +39,7 @@ internal static class WinUIServiceCollectionExtensions
         services.AddScoped<OrderCancellationCommandHandler>();
         services.AddSingleton<PosWorkspace>();
         services.AddSingleton<OperationsWorkspace>();
+        services.AddSingleton<InventoryAuditWorkspace>();
         services.AddScoped<InventoryCommandHandler>();
 
         return services;

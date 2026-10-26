@@ -21,6 +21,8 @@ public sealed class DirectClientCompositionTests
 
         Assert.IsType<InventoryRepository>(provider.GetRequiredService<IInventoryRepository>());
         Assert.NotNull(provider.GetRequiredService<InventoryCommandHandler>());
+        Assert.NotNull(provider.GetRequiredService<IStockMovementReader>());
+        Assert.NotNull(provider.GetRequiredService<InventoryAuditWorkspace>());
         Assert.NotNull(provider.GetRequiredService<RevenueReportQueryHandler>());
         Assert.NotNull(provider.GetRequiredService<BestSellerReportQueryHandler>());
         Assert.NotNull(provider.GetRequiredService<OrderChannelReportQueryHandler>());

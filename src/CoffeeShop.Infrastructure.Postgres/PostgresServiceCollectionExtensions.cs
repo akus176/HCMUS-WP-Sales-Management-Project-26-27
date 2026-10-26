@@ -28,6 +28,7 @@ public static class PostgresServiceCollectionExtensions
             serviceProvider.GetRequiredService<CoffeeShopDbContext>());
         services.AddScoped<ITransactionManager, PostgresTransactionManager>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
+        services.AddScoped<IStockMovementReader, InventoryRepository>();
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<ICatalogReadRepository, CatalogReadRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();

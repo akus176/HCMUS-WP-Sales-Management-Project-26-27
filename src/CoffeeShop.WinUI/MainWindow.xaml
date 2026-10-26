@@ -84,15 +84,13 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Stock Adjustments"
-                        Tag="adjustments"
-                        IsEnabled="False">
+                        Tag="adjustments">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE8D7;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem Content="Movement History"
-                        Tag="movements"
-                        IsEnabled="False">
+                        Tag="movements">
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE81C;"/>
                     </NavigationViewItem.Icon>
