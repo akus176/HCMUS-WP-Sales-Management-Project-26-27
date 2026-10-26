@@ -159,6 +159,16 @@ public sealed partial class PosPage : Page
         if (await dialog.ShowAsync() == ContentDialogResult.Primary) await model.ConfirmAsync();
     }
 
+    private async void OnRedeemLoyalty(object sender, RoutedEventArgs args)
+    {
+        if (!int.TryParse(LoyaltyPointsBox.Text, out var points) || points <= 0)
+        {
+            model.ShowValidation("Enter a positive whole number of loyalty points.");
+            return;
+        }
+        await model.RedeemLoyaltyAsync(points);
+    }
+
     private async void OnNewTicket(object sender, RoutedEventArgs args)
     {
         var dialog = new ContentDialog

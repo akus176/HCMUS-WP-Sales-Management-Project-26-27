@@ -106,6 +106,8 @@
                             <TextBlock x:Name="TicketIdText" IsTextSelectionEnabled="True" TextWrapping="Wrap"/>
                             <TextBlock x:Name="TicketText" Text="Your saved snapshots and exact total will appear here." TextWrapping="Wrap" FontSize="20" IsTextSelectionEnabled="True"/>
                             <UserControl x:Name="DiscountPanel" IsEnabled="False"><StackPanel Spacing="12">
+                                <TextBox x:Name="LoyaltyPointsBox" Header="Loyalty points to redeem (attached customer)"/>
+                                <Button Content="Redeem loyalty points" Click="OnRedeemLoyalty"/>
                                 <TextBlock Text="Request a discount (manager approval required)" TextWrapping="Wrap" FontSize="22"/>
                                 <ComboBox x:Name="DiscountTypeBox" Header="Discount type" SelectedIndex="0">
                                     <ComboBoxItem Content="Fixed amount" Tag="fixed"/>

@@ -26,7 +26,11 @@ public sealed partial class OperationsPage : Page
     }
     private async void OnPrepare(object sender, RoutedEventArgs args) => await model.StartPreparingAsync();
     private async void OnReady(object sender, RoutedEventArgs args) => await model.MarkReadyAsync();
-    private async void OnComplete(object sender, RoutedEventArgs args) => await model.CompleteAsync();
+    private async void OnComplete(object sender, RoutedEventArgs args)
+    {
+        await model.CompleteAsync();
+        if (model.Error is null) await App.Services.GetRequiredService<CustomerWorkspace>().LoadAsync();
+    }
     private async void OnPay(object sender, RoutedEventArgs args) { if (decimal.TryParse(PaymentAmountBox.Text, NumberStyles.Number, CultureInfo.CurrentCulture, out var amount) && PaymentMethodBox.SelectedItem is ComboBoxItem method) await model.RecordPaymentAsync((string)method.Tag, amount, PaymentReferenceBox.Text); else model.ShowValidation("Enter a positive payment amount."); }
     private async void OnCancel(object sender, RoutedEventArgs args) => await model.CancelAsync(CancelReasonBox.Text);
     private async void OnApprove(object sender, RoutedEventArgs args) { if (DiscountList.SelectedItem is EntityId id) await model.DecideDiscountAsync(id, true); }
