@@ -1,6 +1,6 @@
 # Coffee Shop
 
-WinUI 3 desktop client and ASP.NET Core API for a coffee-shop management system. The current repository is a **foundation scaffold**, not a functioning POS. The behavior and milestone plan are in `openspec/changes/build-coffee-shop-management-system/`; the client theme is in `docs/sketch-theme.md`.
+WinUI 3 desktop client and ASP.NET Core API for a coffee-shop management system. The midterm client supports direct PostgreSQL workflows for catalog, customers, inventory, orders, fulfillment, and reports. The final API architecture remains in progress. The behavior and milestone plan are in `openspec/changes/build-coffee-shop-management-system/`; the client theme is in `docs/sketch-theme.md`.
 
 ## Prerequisites
 
@@ -41,7 +41,7 @@ The environment variable takes precedence. Keep this user-local file out of sour
 | `CoffeeShop.Api`                     | Final HTTP composition root, later authentication and permissions     |
 | `tests/*`                            | Unit, infrastructure, API, and future UI-facing tests                 |
 
-Midterm runs application use cases inside WinUI against a restricted local PostgreSQL account. Follow [restricted midterm PostgreSQL setup](docs/midterm-postgres-role.md) to provision `coffeeshop_midterm`, separate migration credentials, and restrict networking to the local machine. Final WinUI must drop its infrastructure reference and use typed HTTP clients; the API then owns authorization and persistence. The PostgreSQL adapter is configured; those application workflows are not implemented yet.
+Midterm runs application use cases inside WinUI against a restricted local PostgreSQL account. Follow [restricted midterm PostgreSQL setup](docs/midterm-postgres-role.md) to provision `coffeeshop_midterm`, separate migration credentials, and restrict networking to the local machine. Final WinUI must drop its infrastructure reference and use typed HTTP clients; the API then owns authorization and persistence.
 
 ### Catalog lifecycle (T3.1)
 
@@ -123,7 +123,22 @@ run command, and PostgreSQL integration validation are documented in
 
 JWT and AI placeholders follow the same environment-variable convention (double underscores denote nested keys). No demo accounts or secrets are committed.
 
-Planned operational roles are Admin, Manager, Cashier, Barista, Inventory Staff, and Delivery Staff; role policies are not yet enforced. Docker Compose automation and the full end-to-end demonstration paths belong to later tasks in `openspec/changes/build-coffee-shop-management-system/tasks.md`.
+Planned operational roles are Admin, Manager, Cashier, Barista, Inventory Staff, and Delivery Staff; final API role policies are not yet enforced. Docker Compose automation remains future work. The canonical implementation checklist is [issue #26](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/26).
+
+## Midterm demonstration
+
+Follow the [executed demonstration checklist](docs/midterm-demonstration.md) for inputs,
+actual results, native client evidence, and reproduction instructions for #103.
+With `COFFEESHOP_TEST_POSTGRES` set to an isolated PostgreSQL administrator connection, run:
+
+```powershell
+./scripts/verify-midterm.ps1
+```
+
+The script creates temporary databases and restricted runtime logins, executes the actual
+client composition/workspaces, and removes its test databases and logins. Missing database
+configuration or skipped checks fail verification. Raw TRX evidence is written to
+`artifacts/midterm/`; CI also retains PostgreSQL test results.
 
 ## Team workflow
 

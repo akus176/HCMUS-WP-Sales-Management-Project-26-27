@@ -1,0 +1,151 @@
+﻿App=CoffeeShop.WinUI (pid 25684)
+Window: "Coffee Shop — Menu, Customers and Inventory", App: CoffeeShop.WinUI.
+
+0 window Coffee Shop — Menu, Customers and Inventory
+	1 pane
+		2 text Connected to PostgreSQL (ConnectionStrings__CoffeeShop). The WinUI client is running in direct database mode.
+		3 custom Nav
+			4 button Close Navigation
+			5 window PaneRoot
+				6 pane MenuItemsScrollViewer, Secondary Actions: Scroll
+					7 group MenuItemsHost
+						8 list item Point of Sale, Secondary Actions: Select
+						9 list item Fulfillment & Operations, Secondary Actions: Select
+						10 list item Menu and Recipes, Secondary Actions: Select
+						11 list item Customers and Loyalty, Secondary Actions: Select
+						12 list item Ingredients, Secondary Actions: Select
+						13 list item Suppliers, Secondary Actions: Select
+						14 list item Purchase Receipts, Secondary Actions: Select
+						15 list item Low Stock, Secondary Actions: Select
+						16 list item Reports, Secondary Actions: Select
+						17 list item Stock Adjustments, Secondary Actions: Select
+						18 list item Movement History, Secondary Actions: Select
+				19 pane FooterItemsScrollViewer, Secondary Actions: Scroll
+					20 group FooterMenuItemsHost
+			21 text Reports
+			22 text Reporting period: 01 Oct 2026 – 26 Oct 2026
+			23 group From
+				24 button From ‎October‎ ‎1‎, ‎2026 date picker
+			25 group To
+				26 button To ‎October‎ ‎26‎, ‎2026 date picker
+			27 combo box Payment
+			28 combo box Channel
+			29 button Refresh reports
+			30 status bar Status
+				31 text Success icon
+				32 text Done
+				33 text Reports refreshed from the selected reporting period.
+				34 button Close
+			35 pane, Secondary Actions: Scroll
+				36 text Revenue
+				37 text Paid revenue
+				38 text 2260.10
+				39 text Recognized orders
+				40 text 19
+				41 text Daily revenue
+				42 list RevenueDaysList, Secondary Actions: Scroll
+					43 list item RevenueDayRow { Date = 10/1/2026, Revenue = 715.00, OrderCount = 6, DateDisplay = 01 Oct, RevenueDisplay = 715.00 }, Text: 01 Oct 715.00 6, Secondary Actions: Select
+						44 text 01 Oct
+						45 text 715.00
+						46 text 6
+					47 list item RevenueDayRow { Date = 10/2/2026, Revenue = 1545.10, OrderCount = 13, DateDisplay = 02 Oct, RevenueDisplay = 1545.10 }, Text: 02 Oct 1545.10 13, Secondary Actions: Select
+						48 text 02 Oct
+						49 text 1545.10
+						50 text 13
+				51 text By payment method
+				52 list RevenuePaymentsList, Secondary Actions: Scroll
+					53 list item RevenuePaymentRow { PaymentMethod = cash, Revenue = 741.60, OrderCount = 6, RevenueDisplay = 741.60 }, Text: cash 741.60 6, Secondary Actions: Select
+						54 text cash
+						55 text 741.60
+						56 text 6
+					57 list item RevenuePaymentRow { PaymentMethod = card, Revenue = 1059.50, OrderCount = 6, RevenueDisplay = 1059.50 }, Text: card 1059.50 6, Secondary Actions: Select
+						58 text card
+						59 text 1059.50
+						60 text 6
+					61 list item RevenuePaymentRow { PaymentMethod = e_wallet, Revenue = 459.00, OrderCount = 7, RevenueDisplay = 459.00 }, Text: e_wallet 459.00 7, Secondary Actions: Select
+						62 text e_wallet
+						63 text 459.00
+						64 text 7
+				65 text Best sellers
+				66 text Ranked by quantity; cancelled orders are excluded.
+				67 list BestSellersList, Secondary Actions: Scroll
+					68 list item BestSellerViewRow { Rank = 1, ItemName = Midterm Americano, SizeName = , Quantity = 5, Revenue = 260, NameDisplay = Midterm Americano, RevenueDisplay = 260.00 }, Text: 1 Midterm Americano 5 260.00, Secondary Actions: Select
+						69 text 1
+						70 text Midterm Americano
+						71 text 5
+						72 text 260.00
+					73 list item BestSellerViewRow { Rank = 2, ItemName = Midterm Cappuccino, SizeName = , Quantity = 4, Revenue = 208, NameDisplay = Midterm Cappuccino, RevenueDisplay = 208.00 }, Text: 2 Midterm Cappuccino 4 208.00, Secondary Actions: Select
+						74 text 2
+						75 text Midterm Cappuccino
+						76 text 4
+						77 text 208.00
+					78 list item BestSellerViewRow { Rank = 3, ItemName = Midterm Cold Brew, SizeName = , Quantity = 3, Revenue = 210, NameDisplay = Midterm Cold Brew, RevenueDisplay = 210.00 }, Text: 3 Midterm Cold Brew 210.00, Secondary Actions: Select
+						79 text 3
+						80 text Midterm Cold Brew
+						81 text 3
+						82 text 210.00
+					83 list item BestSellerViewRow { Rank = 4, ItemName = Midterm Honey Oat Latte, SizeName = , Quantity = 3, Revenue = 202.5, NameDisplay = Midterm Honey Oat Latte, RevenueDisplay = 202.50 }, Text: 4 Midterm Honey Oat Latte 3 202.50, Secondary Actions: Select
+						84 text 4
+						85 text Midterm Honey Oat Latte
+						86 text 3
+						87 text 202.50
+					88 list item BestSellerViewRow { Rank = 5, ItemName = Midterm Cafe Latte, SizeName = , Quantity = 3, Revenue = 201, NameDisplay = Midterm Cafe Latte, RevenueDisplay = 201.00 }, Text: 5 Midterm Cafe Latte 3 201.00, Secondary Actions: Select
+						89 text 5
+						90 text Midterm Cafe Latte
+						91 text 3
+						92 text 201.00
+					93 list item BestSellerViewRow { Rank = 6, ItemName = Midterm Almond Croissant, SizeName = , Quantity = 3, Revenue = 174, NameDisplay = Midterm Almond Croissant, RevenueDisplay = 174.00 }, Text: 6 Midterm Almond Croissant 3 174.00, Secondary Actions: Select
+						94 text 6
+						95 text Midterm Almond Croissant
+						96 text 3
+						97 text 174.00
+					98 list item BestSellerViewRow { Rank = 7, ItemName = Midterm Peach Green Tea, SizeName = , Quantity = 3, Revenue = 165, NameDisplay = Midterm Peach Green Tea, RevenueDisplay = 165.00 }, Text: 7 Midterm Peach Green Tea 3 165.00, Secondary Actions: Select
+						99 text 7
+						100 text Midterm Peach Green Tea
+						101 text 3
+						102 text 165.00
+					103 list item BestSellerViewRow { Rank = 8, ItemName = Midterm Strawberry Frappe, SizeName = , Quantity = 2, Revenue = 144, NameDisplay = Midterm Strawberry Frappe, RevenueDisplay = 144.00 }, Text: 8 Midterm Strawberry Frappe 2 144.00, Secondary Actions: Select
+						104 text 8
+						105 text Midterm Strawberry Frappe
+						106 text 2
+						107 text 144.00
+					108 list item BestSellerViewRow { Rank = 9, ItemName = Midterm Pumpkin Spice Latte, SizeName = , Quantity = 2, Revenue = 136, NameDisplay = Midterm Pumpkin Spice Latte, RevenueDisplay = 136.00 }, Text: 9 Midterm Pumpkin Spice Latte 2 136.00, Secondary Actions: Select
+						109 text 9
+						110 text Midterm Pumpkin Spice Latte
+						111 text 2
+						112 text 136.00
+					113 list item BestSellerViewRow { Rank = 10, ItemName = Midterm Matcha Latte, SizeName = , Quantity = 2, Revenue = 129.6, NameDisplay = Midterm Matcha Latte, RevenueDisplay = 129.60 }, Text: 10 Midterm Matcha Latte 2 129.60, Secondary Actions: Select
+						114 text 10
+						115 text Midterm Matcha Latte
+						116 text 2
+						117 text 129.60
+				118 text Order channels
+				119 list ChannelsList, Secondary Actions: Scroll
+					120 list item OrderChannelViewRow { Channel = dine_in, Revenue = 741.60, OrderCount = 6, ChannelDisplay = Dine-in, RevenueDisplay = 741.60 }, Text: Dine-in 741.60 6, Secondary Actions: Select
+						121 text Dine-in
+						122 text 741.60
+						123 text 6
+					124 list item OrderChannelViewRow { Channel = takeaway, Revenue = 1059.50, OrderCount = 6, ChannelDisplay = Takeaway, RevenueDisplay = 1059.50 }, Text: Takeaway 1059.50 6, Secondary Actions: Select
+						125 text Takeaway
+						126 text 1059.50
+						127 text 6
+					128 list item OrderChannelViewRow { Channel = delivery, Revenue = 459.00, OrderCount = 7, ChannelDisplay = Delivery, RevenueDisplay = 459.00 }, Text: Delivery 459.00 7, Secondary Actions: Select
+						129 text Delivery
+						130 text 459.00
+						131 text 7
+				132 text Low stock
+				133 text Active ingredients at or below their reorder threshold.
+				134 list LowStockList, Secondary Actions: Scroll
+					135 list item LowStockViewRow { Name = Midterm Arabica beans, BaseUnit = g, AvailableQuantity = 500.000, ReorderThreshold = 500.000, BalanceDisplay = 500 g, ThresholdDisplay = 500 g }, Text: Midterm Arabica beans 500 g, Secondary Actions: Select
+						136 text Midterm Arabica beans
+						137 text 500 g
+						138 text 500 g
+					139 list item LowStockViewRow { Name = Midterm Vanilla syrup, BaseUnit = ml, AvailableQuantity = 4.000, ReorderThreshold = 150.000, BalanceDisplay = 4 ml, ThresholdDisplay = 150 ml }, Text: Midterm Vanilla syrup 4 ml 150 ml, Secondary Actions: Select
+						140 text Midterm Vanilla syrup
+						141 text 4 ml
+						142 text 150 ml
+				143 scroll bar Vertical
+					144 button Vertical Small Decrease
+					145 button Vertical Large Decrease
+					146 button Vertical Large Increase
+					147 button Vertical Small Increase

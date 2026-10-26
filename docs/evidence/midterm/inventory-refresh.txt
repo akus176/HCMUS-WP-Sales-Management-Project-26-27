@@ -1,0 +1,6 @@
+﻿Native inventory refresh regression — 2026-10-26
+An owner-side fixture update in the disposable desktop database simulates a balance committed by another session. This is a refresh check, not an application stock-adjustment demonstration.
+Before: 					38 list item IngredientRow { Id = 8cb4932c-3487-d0c6-5cff-af0c0a5db6f2, Name = Midterm Arabica beans, BaseUnit = g, BalanceDisplay = 500 g, ThresholdDisplay = 500 g, StatusDisplay = Low stock, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Arabica beans g 500 g Low stock, Secondary Actions: Select
+Fixture: available_quantity changed from 500 to 499 in a separate connection; Reload clicked on the existing Ingredients page.
+After: 					102 list item IngredientRow { Id = 8cb4932c-3487-d0c6-5cff-af0c0a5db6f2, Name = Midterm Arabica beans, BaseUnit = g, BalanceDisplay = 499 g, ThresholdDisplay = 500 g, StatusDisplay = Low stock, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Arabica beans g 499 g 500 g Low stock, Secondary Actions: Select
+PASS: existing page reloaded 499g instead of retaining a tracked 500g snapshot. Fixture restored to 500g after observation.
