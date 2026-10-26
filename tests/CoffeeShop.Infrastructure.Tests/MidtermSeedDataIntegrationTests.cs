@@ -84,8 +84,16 @@ public sealed class MidtermSeedDataIntegrationTests : IAsyncLifetime
         Assert.Equal(20, await CountAsync(context, "SELECT count(*) FROM catalog.menu_items WHERE name LIKE 'Midterm %'"));
         Assert.Equal(40, await CountAsync(context, "SELECT count(*) FROM catalog.size_variants sv JOIN catalog.menu_items mi ON mi.id = sv.menu_item_id WHERE mi.name LIKE 'Midterm %'"));
         Assert.Equal(40, await CountAsync(context, "SELECT count(*) FROM catalog.recipe_ingredients ri JOIN catalog.size_variants sv ON sv.id = ri.size_variant_id JOIN catalog.menu_items mi ON mi.id = sv.menu_item_id WHERE mi.name LIKE 'Midterm %'"));
+        var ingredients = await context.Ingredients.AsNoTracking().ToDictionaryAsync(ingredient => ingredient.Id);
+        foreach (var recipe in await context.RecipeIngredients.AsNoTracking().ToArrayAsync())
+        {
+            Assert.True(recipe.Quantity > 0);
+            Assert.NotNull(ingredients[recipe.IngredientId].ConvertToBaseUnit(recipe.Quantity, recipe.Unit));
+        }
         Assert.Equal(12, await CountAsync(context, "SELECT count(*) FROM customers.customers WHERE phone LIKE '+8409008%'"));
         Assert.Equal(24, await CountAsync(context, "SELECT count(*) FROM sales.orders WHERE order_number LIKE 'MIDTERM-%'"));
+        Assert.Equal(1, await CountAsync(context, "SELECT count(*) FROM identity.users u JOIN identity.user_roles ur ON ur.user_id = u.id JOIN identity.roles r ON r.id = ur.role_id WHERE u.username = 'midterm_delivery' AND u.is_active AND r.code = 'DeliveryStaff'"));
+        Assert.Equal(0, await CountAsync(context, "SELECT count(*) FROM sales.deliveries d JOIN sales.orders o ON o.id = d.order_id WHERE o.order_number LIKE 'MIDTERM-%' AND d.assigned_staff_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM identity.user_roles ur JOIN identity.roles r ON r.id = ur.role_id WHERE ur.user_id = d.assigned_staff_id AND r.code = 'DeliveryStaff')"));
         Assert.Equal(3, await CountAsync(context, "SELECT count(DISTINCT channel) FROM sales.orders WHERE order_number LIKE 'MIDTERM-%'"));
         Assert.Equal(8, await CountAsync(context, "SELECT count(*) FROM sales.tables WHERE table_number LIKE 'MIDTERM-%'"));
         Assert.Equal(3, await CountAsync(context, "SELECT count(*) FROM inventory.suppliers WHERE name LIKE 'Midterm %'"));

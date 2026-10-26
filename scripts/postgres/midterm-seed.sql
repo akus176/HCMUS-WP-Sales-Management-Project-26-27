@@ -9,6 +9,7 @@ DO $$
 DECLARE
     stamp timestamptz := '2026-10-01 08:00:00+00';
     actor uuid := pg_temp.midterm_id('staff-manager');
+    courier uuid := pg_temp.midterm_id('staff-delivery');
 BEGIN
     -- Remove only this dataset, in dependency order. The fixed actor and names are
     -- deliberately namespaced so normal application records are not touched.
@@ -28,10 +29,19 @@ BEGIN
     DELETE FROM customers.customers WHERE phone LIKE '+8409008%';
     DELETE FROM customers.loyalty_settings WHERE id = pg_temp.midterm_id('loyalty-settings');
     DELETE FROM inventory.ingredients WHERE name LIKE 'Midterm %';
-    DELETE FROM identity.users WHERE id = actor;
+    DELETE FROM identity.user_roles WHERE user_id IN (actor, courier);
+    DELETE FROM identity.users WHERE id IN (actor, courier);
 
     INSERT INTO identity.users (id, username, email, password_hash, full_name, phone, is_active, created_at, updated_at)
     VALUES (actor, 'midterm_manager', 'midterm-manager@example.test', 'demo-only-not-for-authentication', 'Midterm Demo Manager', '+84900000000', true, stamp, stamp);
+
+    INSERT INTO identity.users (id, username, email, password_hash, full_name, phone, is_active, created_at, updated_at)
+    VALUES (courier, 'midterm_delivery', 'midterm-delivery@example.test', 'demo-only-not-for-authentication', 'Midterm Demo Courier', '+84900000001', true, stamp, stamp);
+    INSERT INTO identity.roles (id, code, name)
+    VALUES (pg_temp.midterm_id('role-delivery'), 'DeliveryStaff', 'Delivery Staff')
+    ON CONFLICT (code) DO NOTHING;
+    INSERT INTO identity.user_roles (user_id, role_id, assigned_at, assigned_by)
+    SELECT courier, id, stamp, actor FROM identity.roles WHERE code = 'DeliveryStaff';
 
     INSERT INTO catalog.categories (id, name, display_order, is_active, created_at, updated_at)
     SELECT pg_temp.midterm_id('category-' || n), 'Midterm ' || name, n, true, stamp, stamp
@@ -72,7 +82,7 @@ BEGIN
       (pg_temp.midterm_id('ingredient-6'),'Midterm Peach puree','ml',1800,300,true,stamp,stamp),
       (pg_temp.midterm_id('ingredient-7'),'Midterm Chocolate sauce','ml',1200,250,true,stamp,stamp),
       (pg_temp.midterm_id('ingredient-8'),'Midterm Vanilla syrup','ml',14,150,true,stamp,stamp),
-      (pg_temp.midterm_id('ingredient-9'),'Midterm Pastry','piece',80,20,true,stamp,stamp);
+      (pg_temp.midterm_id('ingredient-9'),'Midterm Pastry','pcs',80,20,true,stamp,stamp);
 
     INSERT INTO catalog.recipe_ingredients (id, size_variant_id, ingredient_id, quantity, unit)
     SELECT pg_temp.midterm_id('recipe-' || p.n || '-' || s.size_key), pg_temp.midterm_id('size-' || p.n || '-' || s.size_key),
@@ -81,7 +91,7 @@ BEGIN
       (1,1,18.0,'g'),(2,1,18.0,'g'),(3,1,18.0,'g'),(4,1,18.0,'g'),(5,1,18.0,'g'),
       (6,1,18.0,'g'),(7,1,18.0,'g'),(8,1,22.0,'g'),(9,1,22.0,'g'),(10,4,4.0,'g'),
       (11,5,5.0,'g'),(12,5,6.0,'g'),(13,6,80.0,'ml'),(14,7,35.0,'ml'),(15,6,100.0,'ml'),
-      (16,9,1.0,'piece'),(17,9,1.0,'piece'),(18,9,1.0,'piece'),(19,1,18.0,'g'),(20,1,18.0,'g')
+      (16,9,1.0,'pcs'),(17,9,1.0,'pcs'),(18,9,1.0,'pcs'),(19,1,18.0,'g'),(20,1,18.0,'g')
     ) AS p(n,ingredient,qty,unit)
     CROSS JOIN (VALUES ('regular',1.0),('large',1.35)) AS s(size_key,multiplier);
 
@@ -178,7 +188,7 @@ BEGIN
            COALESCE(a.address_line,'88 Demo Avenue, Ho Chi Minh City'), a.id,
            CASE WHEN n = 18 THEN 'failed' WHEN n IN (6,21) THEN 'assigned' WHEN n IN (9,15) THEN 'out_for_delivery'
                 WHEN n IN (12,24) THEN 'delivered' ELSE 'unassigned' END,
-           CASE WHEN n IN (6,9,12,15,18,21,24) THEN actor ELSE NULL END,
+           CASE WHEN n IN (6,9,12,15,18,21,24) THEN courier ELSE NULL END,
            CASE WHEN n IN (6,9,12,15,18,21,24) THEN o.created_at + interval '15 minutes' ELSE NULL END,
            CASE WHEN n IN (9,12,15,18,24) THEN o.created_at + interval '30 minutes' ELSE NULL END,
            CASE WHEN n IN (12,24) THEN o.created_at + interval '1 hour' ELSE NULL END,

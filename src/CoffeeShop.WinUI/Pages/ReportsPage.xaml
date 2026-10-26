@@ -17,31 +17,23 @@
             <TextBlock x:Name="PeriodLabel" Foreground="{StaticResource SketchMutedBrush}"/>
         </StackPanel>
 
-        <Grid Grid.Row="1" ColumnSpacing="12" RowSpacing="8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <DatePicker x:Name="FirstDate" Header="From"/>
-            <DatePicker x:Name="LastDate" Grid.Column="1" Header="To"/>
-            <ComboBox x:Name="PaymentFilter" Grid.Column="2" Header="Payment" Width="160" SelectionChanged="OnPaymentFilterChanged">
+        <VariableSizedWrapGrid Grid.Row="1" Orientation="Horizontal" ItemWidth="310" ItemHeight="80" MaximumRowsOrColumns="3">
+            <DatePicker x:Name="FirstDate" Header="From" Margin="0,0,12,8"/>
+            <DatePicker x:Name="LastDate" Header="To" Margin="0,0,12,8"/>
+            <ComboBox x:Name="PaymentFilter" Header="Payment" Width="220" Margin="0,0,12,8" SelectionChanged="OnPaymentFilterChanged">
                 <ComboBoxItem Content="All payment methods" Tag="" IsSelected="True"/>
                 <ComboBoxItem Content="Cash" Tag="cash"/>
                 <ComboBoxItem Content="Card" Tag="card"/>
                 <ComboBoxItem Content="E-wallet" Tag="e_wallet"/>
             </ComboBox>
-            <ComboBox x:Name="ChannelFilter" Grid.Column="3" Header="Channel" Width="145" SelectionChanged="OnChannelFilterChanged">
+            <ComboBox x:Name="ChannelFilter" Header="Channel" Width="200" Margin="0,0,12,8" SelectionChanged="OnChannelFilterChanged">
                 <ComboBoxItem Content="All channels" Tag="" IsSelected="True"/>
                 <ComboBoxItem Content="Dine-in" Tag="dine_in"/>
                 <ComboBoxItem Content="Takeaway" Tag="takeaway"/>
                 <ComboBoxItem Content="Delivery" Tag="delivery"/>
             </ComboBox>
-            <Button x:Name="RefreshButton" Grid.Column="5" Content="Refresh reports" VerticalAlignment="Bottom" Click="OnRefresh"/>
-        </Grid>
+            <Button x:Name="RefreshButton" Content="Refresh reports" Margin="0,0,12,8" VerticalAlignment="Bottom" Click="OnRefresh"/>
+        </VariableSizedWrapGrid>
 
         <Grid Grid.Row="2" ColumnSpacing="12">
             <InfoBar x:Name="Status" IsOpen="False" IsClosable="True" HorizontalAlignment="Stretch"/>

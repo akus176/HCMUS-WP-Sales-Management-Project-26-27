@@ -1,0 +1,22 @@
+<Page
+    x:Class="CoffeeShop.WinUI.Pages.InventoryAuditPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Padding="24" Spacing="16">
+            <TextBlock Text="Stock adjustments and movement history" FontSize="32" FontFamily="{StaticResource SketchHeadingFontFamily}" TextWrapping="Wrap"/>
+            <ProgressBar x:Name="LoadingBar" IsIndeterminate="True" Visibility="Collapsed"/>
+            <InfoBar x:Name="Status" IsOpen="True" IsClosable="False"/>
+            <Button x:Name="ReloadButton" Content="Reload balance and history" Click="OnReload"/>
+            <ComboBox x:Name="IngredientBox" Header="Ingredient" DisplayMemberPath="Name" SelectionChanged="OnIngredientChanged"/>
+            <TextBlock x:Name="BalanceText" FontSize="22" TextWrapping="Wrap"/>
+            <ComboBox x:Name="OperatorBox" Header="Operator" DisplayMemberPath="FullName" SelectionChanged="OnOperatorChanged"/>
+            <TextBox x:Name="DeltaBox" Header="Quantity change in the ingredient's base unit (positive or negative)"/>
+            <TextBox x:Name="ReasonBox" Header="Reason (required)" MaxLength="255" TextWrapping="Wrap"/>
+            <Button x:Name="AdjustButton" Content="Record stock adjustment" Click="OnAdjust"/>
+            <TextBlock Text="Latest 100 movements for the selected ingredient" FontSize="24" TextWrapping="Wrap"/>
+            <TextBlock x:Name="EmptyText" Text="No movements recorded for this ingredient." Visibility="Collapsed"/>
+            <ItemsControl x:Name="HistoryList"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

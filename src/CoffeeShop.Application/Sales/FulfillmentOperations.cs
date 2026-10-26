@@ -4,6 +4,7 @@ using CoffeeShop.Application.Common.Persistence;
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Common.Security;
 using CoffeeShop.Application.Common.Time;
+using CoffeeShop.Application.Customers;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Sales;
 
@@ -60,7 +61,8 @@ public sealed class OrderFulfillmentCommandHandler(
     IUnitOfWork unitOfWork,
     ITransactionManager transactionManager,
     IClock clock,
-    ICurrentUser currentUser)
+    ICurrentUser currentUser,
+    LoyaltyCommandHandler loyalty)
 {
     public async Task<Result> TransitionAsync(TransitionOrderCommand command, CancellationToken cancellationToken = default)
     {
@@ -84,6 +86,11 @@ public sealed class OrderFulfillmentCommandHandler(
                     table.Release(order.Id);
                 }
                 await unitOfWork.SaveChangesAsync(cancellationToken);
+                if (command.TargetStatus == OrderStatus.Completed && order.CustomerId is not null)
+                {
+                    var earned = await loyalty.EarnForCompletedOrderAsync(new(order.Id), cancellationToken);
+                    if (earned.IsFailure) return Result.Failure(earned.Error!);
+                }
                 return Result.Success();
             }
             catch (InvalidOperationException exception) { return Result.Failure(Error.Conflict("orders.invalid_transition", exception.Message)); }

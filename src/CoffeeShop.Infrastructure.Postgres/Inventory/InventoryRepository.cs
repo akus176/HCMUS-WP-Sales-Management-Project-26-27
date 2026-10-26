@@ -5,7 +5,7 @@ using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Inventory;
 using Microsoft.EntityFrameworkCore;
 
-public sealed class InventoryRepository : IInventoryRepository
+public sealed class InventoryRepository : IInventoryRepository, IStockMovementReader
 {
     private readonly CoffeeShopDbContext context;
 
@@ -47,6 +47,11 @@ public sealed class InventoryRepository : IInventoryRepository
     public void AddReceipt(PurchaseReceipt receipt) => context.PurchaseReceipts.Add(receipt);
 
     public void AddStockMovement(StockMovement movement) => context.StockMovements.Add(movement);
+
+    public async Task<IReadOnlyList<StockMovement>> ListRecentAsync(EntityId ingredientId, CancellationToken cancellationToken = default) =>
+        await context.StockMovements.AsNoTracking().Where(movement => movement.IngredientId == ingredientId)
+            .OrderByDescending(movement => movement.OccurredAt).ThenBy(movement => movement.Id)
+            .Take(100).ToArrayAsync(cancellationToken);
 
     public async Task LockOrderForRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default)
     {

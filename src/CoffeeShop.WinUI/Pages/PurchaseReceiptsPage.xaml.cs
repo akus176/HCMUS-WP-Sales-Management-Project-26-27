@@ -1,5 +1,6 @@
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Inventory;
+using CoffeeShop.Application.Sales;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Inventory;
 using CoffeeShop.WinUI.ViewModels;
@@ -11,13 +12,8 @@ namespace CoffeeShop.WinUI.Pages;
 
 public sealed partial class PurchaseReceiptsPage : Page
 {
-    // The direct-database milestone has no authenticated session yet. This
-    // identifies the local operator until the identity workflow supplies the
-    // authenticated user to inventory commands.
-    private static readonly EntityId DirectClientActorId = new(new Guid("a63d667a-6b39-4b7f-80b4-f45efdbfd780"));
-
-    private readonly InventoryCommandHandler handler;
-    private readonly IInventoryRepository repository;
+    private InventoryCommandHandler handler = null!;
+    private IInventoryRepository repository = null!;
     private readonly Dictionary<EntityId, string> supplierNames = [];
     private readonly Dictionary<EntityId, string> activeSupplierNames = [];
     private readonly Dictionary<EntityId, string> ingredientNames = [];
@@ -28,8 +24,6 @@ public sealed partial class PurchaseReceiptsPage : Page
     public PurchaseReceiptsPage()
     {
         InitializeComponent();
-        handler = App.Services.GetRequiredService<InventoryCommandHandler>();
-        repository = App.Services.GetRequiredService<IInventoryRepository>();
         _ = LoadAsync();
     }
 
@@ -171,7 +165,15 @@ public sealed partial class PurchaseReceiptsPage : Page
 
         await RunAsync("post the receipt", async () =>
         {
-            var result = await handler.PostReceiptAsync(new PostReceiptCommand(selectedReceipt.Id, DirectClientActorId));
+            var actor = App.Services.GetRequiredService<PosOperatorSession>().Id;
+            using var operatorScope = App.Services.CreateScope();
+            var options = await operatorScope.ServiceProvider.GetRequiredService<PosOrderHandler>().GetOptionsAsync();
+            if (actor is null || options.Staff.All(staff => staff.Id != actor))
+            {
+                Status.Apply(WorkflowFeedback.Validation("operator", "Select an active operator in Point of Sale or Stock Adjustments before posting a receipt."));
+                return;
+            }
+            var result = await handler.PostReceiptAsync(new PostReceiptCommand(selectedReceipt.Id, actor));
             if (result.IsSuccess)
             {
                 await LoadCoreAsync();
@@ -281,6 +283,9 @@ public sealed partial class PurchaseReceiptsPage : Page
         Status.Apply(WorkflowFeedback.Loading($"Trying to {operation}..."));
         try
         {
+            using var scope = App.Services.CreateScope();
+            handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
+            repository = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
             await action();
         }
         catch (Exception)

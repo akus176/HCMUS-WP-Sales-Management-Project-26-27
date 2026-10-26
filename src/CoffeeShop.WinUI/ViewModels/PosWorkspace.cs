@@ -161,6 +161,22 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
         Message = $"Opened {Order.OrderNumber}: {Order.Status}. Saved ticket details are read-only.";
     });
 
+    public Task RedeemLoyaltyAsync(int points) => RunAsync(async provider =>
+    {
+        if (RequiresReload || Order?.Status != OrderStatus.Draft) return;
+        var result = await provider.GetRequiredService<LoyaltyCommandHandler>()
+            .RedeemForOrderAsync(new(Order.Id, points));
+        if (!Accept(result)) return;
+        RequiresReload = true;
+        var detail = await provider.GetRequiredService<PosOrderHandler>().GetOrderAsync(Order.Id);
+        if (Accept(detail))
+        {
+            Order = detail.Value;
+            RequiresReload = false;
+            Message = $"Redeemed {points} points. Review the reduced payable total before confirmation.";
+        }
+    });
+
     public void NewTicket()
     {
         if (IsBusy || RequiresReload) return;

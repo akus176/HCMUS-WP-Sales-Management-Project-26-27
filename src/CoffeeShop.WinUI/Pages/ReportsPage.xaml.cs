@@ -9,21 +9,12 @@ namespace CoffeeShop.WinUI.Pages;
 
 public sealed partial class ReportsPage : Page
 {
-    private readonly RevenueReportQueryHandler revenueHandler;
-    private readonly BestSellerReportQueryHandler bestSellerHandler;
-    private readonly OrderChannelReportQueryHandler channelHandler;
-    private readonly IInventoryRepository inventoryRepository;
     private RevenueReport? revenueReport;
     private OrderChannelReport? channelReport;
 
     public ReportsPage()
     {
         InitializeComponent();
-        revenueHandler = App.Services.GetRequiredService<RevenueReportQueryHandler>();
-        bestSellerHandler = App.Services.GetRequiredService<BestSellerReportQueryHandler>();
-        channelHandler = App.Services.GetRequiredService<OrderChannelReportQueryHandler>();
-        inventoryRepository = App.Services.GetRequiredService<IInventoryRepository>();
-
         var today = DateTimeOffset.Now;
         FirstDate.Date = new DateTimeOffset(today.Year, today.Month, 1, 0, 0, 0, today.Offset);
         LastDate.Date = today;
@@ -42,32 +33,37 @@ public sealed partial class ReportsPage : Page
         Status.Apply(WorkflowFeedback.Loading("Loading reports for the selected period..."));
         try
         {
+            using var scope = App.Services.CreateScope();
+            var revenueHandler = scope.ServiceProvider.GetRequiredService<RevenueReportQueryHandler>();
+            var bestSellerHandler = scope.ServiceProvider.GetRequiredService<BestSellerReportQueryHandler>();
+            var channelHandler = scope.ServiceProvider.GetRequiredService<OrderChannelReportQueryHandler>();
+            var inventoryRepository = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
             var timeZone = TimeZoneInfo.Local;
-            var revenue = revenueHandler.GetRevenueAsync(new(first, last, timeZone));
-            var bestSellers = bestSellerHandler.GetBestSellersAsync(new(first, last, timeZone));
-            var channels = channelHandler.GetChannelsAsync(new(first, last, timeZone));
-            var ingredients = inventoryRepository.ListIngredientsAsync();
-            await Task.WhenAll(revenue, bestSellers, channels, ingredients);
+            // These queries share the scope's DbContext, which allows one operation at a time.
+            var revenue = await revenueHandler.GetRevenueAsync(new(first, last, timeZone));
+            var bestSellers = await bestSellerHandler.GetBestSellersAsync(new(first, last, timeZone));
+            var channels = await channelHandler.GetChannelsAsync(new(first, last, timeZone));
+            var ingredients = await inventoryRepository.ListIngredientsAsync();
 
-            if (!revenue.Result.IsSuccess || !bestSellers.Result.IsSuccess || !channels.Result.IsSuccess)
+            if (!revenue.IsSuccess || !bestSellers.IsSuccess || !channels.IsSuccess)
             {
-                var error = revenue.Result.Error ?? bestSellers.Result.Error ?? channels.Result.Error;
+                var error = revenue.Error ?? bestSellers.Error ?? channels.Error;
                 Status.Apply(error is null
                     ? WorkflowFeedback.DatabaseFailure("load the selected reports", "Check the local database connection, then select Refresh reports.")
                     : WorkflowFeedback.FromError(error));
                 return;
             }
 
-            revenueReport = revenue.Result.Value;
-            channelReport = channels.Result.Value;
+            revenueReport = revenue.Value;
+            channelReport = channels.Value;
             PeriodLabel.Text = ReportPresentation.PeriodLabel(first, last);
             RevenueTotal.Text = revenueReport.Revenue.ToString("0.00");
             RevenueOrderCount.Text = revenueReport.OrderCount.ToString();
             RevenueDaysList.ItemsSource = ReportPresentation.RevenueDays(revenueReport);
-            BestSellersList.ItemsSource = ReportPresentation.BestSellers(bestSellers.Result.Value);
-            var lowStock = ReportPresentation.LowStock(LowStockReport.Build(ingredients.Result));
+            BestSellersList.ItemsSource = ReportPresentation.BestSellers(bestSellers.Value);
+            var lowStock = ReportPresentation.LowStock(LowStockReport.Build(ingredients));
             LowStockList.ItemsSource = lowStock;
-            BestSellersEmpty.Visibility = bestSellers.Result.Value.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            BestSellersEmpty.Visibility = bestSellers.Value.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             LowStockEmpty.Visibility = lowStock.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             ApplyPaymentFilter();
             ApplyChannelFilter();

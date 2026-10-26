@@ -1,0 +1,660 @@
+﻿Native WinUI smoke: 2026-10-26; .NET 10.0.401; PostgreSQL 18; restricted runtime login.
+
+PAGE: Ingredients
+App=CoffeeShop.WinUI (pid 27980)
+Window: "Coffee Shop — Menu, Customers and Inventory", App: CoffeeShop.WinUI.
+
+0 window Coffee Shop — Menu, Customers and Inventory
+	1 pane
+		2 text Connected to PostgreSQL (ConnectionStrings__CoffeeShop). The WinUI client is running in direct database mode.
+		3 custom Nav
+			4 button Close Navigation
+			5 window PaneRoot
+				6 pane MenuItemsScrollViewer, Secondary Actions: Scroll
+					7 group MenuItemsHost
+						8 list item Point of Sale, Secondary Actions: Select
+						9 list item Fulfillment & Operations, Secondary Actions: Select
+						10 list item Menu and Recipes, Secondary Actions: Select
+						11 list item Customers and Loyalty, Secondary Actions: Select
+						12 list item Ingredients, Secondary Actions: Select
+						13 list item Suppliers, Secondary Actions: Select
+						14 list item Purchase Receipts, Secondary Actions: Select
+						15 list item Low Stock, Secondary Actions: Select
+						16 list item Reports, Secondary Actions: Select
+						17 list item Stock Adjustments, Secondary Actions: Select
+						18 list item Movement History, Secondary Actions: Select
+				19 pane FooterItemsScrollViewer, Secondary Actions: Scroll
+					20 group FooterMenuItemsHost
+			21 text Ingredients
+			22 edit Search by name, Secondary Actions: SetValue
+			23 button Reload
+			24 button New ingredient
+			25 status bar Status
+				26 text Informational icon
+				27 text Ready
+				28 text Ingredients loaded. Search, edit, or change availability.
+				29 button Close
+			30 pane, Secondary Actions: Scroll
+				31 list IngredientsList, Secondary Actions: Scroll
+					32 text Name
+					33 text Unit
+					34 text Balance
+					35 text Reorder threshold
+					36 text Status
+					37 text Actions
+					38 list item IngredientRow { Id = 8cb4932c-3487-d0c6-5cff-af0c0a5db6f2, Name = Midterm Arabica beans, BaseUnit = g, BalanceDisplay = 500 g, ThresholdDisplay = 500 g, StatusDisplay = Low stock, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Arabica beans g 500 g Low stock, Secondary Actions: Select
+						39 text Midterm Arabica beans
+						40 text g
+						41 text 500 g
+						42 text 500 g
+						43 text Low stock
+						44 button Edit
+						45 button Deactivate
+					46 list item IngredientRow { Id = 750018a1-ad48-8f4c-598b-a5f35dbe77b5, Name = Midterm Whole milk, BaseUnit = ml, BalanceDisplay = 3000 ml, ThresholdDisplay = 1000 ml, StatusDisplay = OK, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Whole milk ml 3000 ml 1000 ml OK, Secondary Actions: Select
+						47 text Midterm Whole milk
+						48 text ml
+						49 text 3000 ml
+						50 text 1000 ml
+						51 text OK
+						52 button Edit
+						53 button Deactivate
+					54 list item IngredientRow { Id = 65a82cf8-4361-3cdb-ec53-c81711e01eb4, Name = Midterm Oat milk, BaseUnit = ml, BalanceDisplay = 3500 ml, ThresholdDisplay = 500 ml, StatusDisplay = OK, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Oat milk ml 3500 ml 500 ml OK, Secondary Actions: Select
+						55 text Midterm Oat milk
+						56 text ml
+						57 text 3500 ml
+						58 text 500 ml
+						59 text OK
+						60 button Edit
+						61 button Deactivate
+					62 list item IngredientRow { Id = d80f8754-c5b2-a034-c79b-8016abc69765, Name = Midterm Matcha powder, BaseUnit = g, BalanceDisplay = 450 g, ThresholdDisplay = 100 g, StatusDisplay = OK, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Matcha powder g 450 g 100 g OK, Secondary Actions: Select
+						63 text Midterm Matcha powder
+						64 text g
+						65 text 450 g
+						66 text 100 g
+						67 text OK
+						68 button Edit
+						69 button Deactivate
+					70 list item IngredientRow { Id = d9d0c3d2-77c4-b960-1112-247f21efbfcc, Name = Midterm Black tea, BaseUnit = g, BalanceDisplay = 700 g, ThresholdDisplay = 150 g, StatusDisplay = OK, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Black tea g 700 g 150 g OK, Secondary Actions: Select
+						71 text Midterm Black tea
+						72 text g
+						73 text 700 g
+						74 text 150 g
+						75 text OK
+						76 button Edit
+						77 button Deactivate
+					78 list item IngredientRow { Id = b91b7ce8-fc3f-d666-c504-3fac4a4bd947, Name = Midterm Peach puree, BaseUnit = ml, BalanceDisplay = 1800 ml, ThresholdDisplay = 300 ml, StatusDisplay = OK, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Peach puree ml 1800 ml 300 ml OK, Secondary Actions: Select
+						79 text Midterm Peach puree
+						80 text ml
+						81 text 1800 ml
+						82 text 300 ml
+						83 text OK
+						84 button Edit
+						85 button Deactivate
+					86 list item IngredientRow { Id = 99f6c1c6-9a99-1197-7fb2-cb21553c96c9, Name = Midterm Chocolate sauce, BaseUnit = ml, BalanceDisplay = 1200 ml, ThresholdDisplay = 250 ml, StatusDisplay = OK, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Chocolate sauce ml 1200 ml 250 ml OK, Secondary Actions: Select
+						87 text Midterm Chocolate sauce
+						88 text ml
+						89 text 1200 ml
+						90 text 250 ml
+						91 text OK
+						92 button Edit
+						93 button Deactivate
+					94 list item IngredientRow { Id = e47805e3-eb0b-9ad9-f0b0-81c7eb779afe, Name = Midterm Pastry, BaseUnit = pcs, BalanceDisplay = 80 pcs, ThresholdDisplay = 20 pcs, StatusDisplay = OK, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Pastry pcs 80 pcs 20 pcs OK, Secondary Actions: Select
+						95 text Midterm Pastry
+						96 text pcs
+						97 text 80 pcs
+						98 text 20 pcs
+						99 text OK
+						100 button Edit
+						101 button Deactivate
+					102 list item IngredientRow { Id = 603ae6b7-1f5d-5827-0beb-049b1ee7934b, Name = Midterm Vanilla syrup, BaseUnit = ml, BalanceDisplay = 4 ml, ThresholdDisplay = 150 ml, StatusDisplay = Low stock, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Vanilla syrup ml 4 ml 150 ml Low stock, Secondary Actions: Select
+						103 text Midterm Vanilla syrup
+						104 text ml
+						105 text 4 ml
+						106 text 150 ml
+						107 text Low stock
+						108 button Edit
+						109 button Deactivate
+				110 scroll bar Vertical
+					111 button Vertical Small Decrease
+					112 button Vertical Large Decrease
+					113 button Vertical Large Increase
+					114 button Vertical Small Increase
+
+PAGE: Suppliers
+App=CoffeeShop.WinUI (pid 27980)
+Window: "Coffee Shop — Menu, Customers and Inventory", App: CoffeeShop.WinUI.
+
+0 window Coffee Shop — Menu, Customers and Inventory
+	1 pane
+		2 text Connected to PostgreSQL (ConnectionStrings__CoffeeShop). The WinUI client is running in direct database mode.
+		3 custom Nav
+			4 button Close Navigation
+			5 window PaneRoot
+				6 pane MenuItemsScrollViewer, Secondary Actions: Scroll
+					7 group MenuItemsHost
+						8 list item Point of Sale, Secondary Actions: Select
+						9 list item Fulfillment & Operations, Secondary Actions: Select
+						10 list item Menu and Recipes, Secondary Actions: Select
+						11 list item Customers and Loyalty, Secondary Actions: Select
+						12 list item Ingredients, Secondary Actions: Select
+						13 list item Suppliers, Secondary Actions: Select
+						14 list item Purchase Receipts, Secondary Actions: Select
+						15 list item Low Stock, Secondary Actions: Select
+						16 list item Reports, Secondary Actions: Select
+						17 list item Stock Adjustments, Secondary Actions: Select
+						18 list item Movement History, Secondary Actions: Select
+				19 pane FooterItemsScrollViewer, Secondary Actions: Scroll
+					20 group FooterMenuItemsHost
+			21 text Suppliers
+			22 button Reload
+			23 button New supplier
+			24 status bar Status
+				25 text Informational icon
+				26 text Ready
+				27 text Suppliers loaded. Select one to edit or change availability.
+				28 button Close
+			29 pane, Secondary Actions: Scroll
+				30 list SuppliersList, Secondary Actions: Scroll
+					31 text Name
+					32 text Phone
+					33 text Email
+					34 text Status
+					35 text Actions
+					36 list item SupplierRow { Id = 549b819e-e6ca-1e93-cb7f-3054e02f5a9a, Name = Midterm Highland Roasters, Phone = 0281234567, Email = beans@example.test, StatusDisplay = Active, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Highland Roasters 0281234567 beans@example.test Active, Secondary Actions: Select
+						37 text Midterm Highland Roasters
+						38 text 0281234567
+						39 text beans@example.test
+						40 text Active
+						41 button Edit
+						42 button Deactivate
+					43 list item SupplierRow { Id = 71babac2-f848-5ccf-31e0-a76a5e10314e, Name = Midterm Fresh Dairy, Phone = 0281234568, Email = dairy@example.test, StatusDisplay = Active, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Fresh Dairy 0281234568 dairy@example.test Active, Secondary Actions: Select
+						44 text Midterm Fresh Dairy
+						45 text 0281234568
+						46 text dairy@example.test
+						47 text Active
+						48 button Edit
+						49 button Deactivate
+					50 list item SupplierRow { Id = d6a4fb66-f5b6-d876-9012-c00df7cbf0f8, Name = Midterm Tea and Pantry, Phone = 0281234569, Email = tea@example.test, StatusDisplay = Active, ToggleActiveLabel = Deactivate, IsActive = True }, Text: Midterm Tea and Pantry 0281234569 tea@example.test Active, Secondary Actions: Select
+						51 text Midterm Tea and Pantry
+						52 text 0281234569
+						53 text tea@example.test
+						54 text Active
+						55 button Edit
+						56 button Deactivate
+				57 scroll bar Vertical
+
+PAGE: Purchase Receipts
+App=CoffeeShop.WinUI (pid 27980)
+Window: "Coffee Shop — Menu, Customers and Inventory", App: CoffeeShop.WinUI.
+
+0 window Coffee Shop — Menu, Customers and Inventory
+	1 pane
+		2 text Connected to PostgreSQL (ConnectionStrings__CoffeeShop). The WinUI client is running in direct database mode.
+		3 custom Nav
+			4 button Close Navigation
+			5 window PaneRoot
+				6 pane MenuItemsScrollViewer, Secondary Actions: Scroll
+					7 group MenuItemsHost
+						8 list item Point of Sale, Secondary Actions: Select
+						9 list item Fulfillment & Operations, Secondary Actions: Select
+						10 list item Menu and Recipes, Secondary Actions: Select
+						11 list item Customers and Loyalty, Secondary Actions: Select
+						12 list item Ingredients, Secondary Actions: Select
+						13 list item Suppliers, Secondary Actions: Select
+						14 list item Purchase Receipts, Secondary Actions: Select
+						15 list item Low Stock, Secondary Actions: Select
+						16 list item Reports, Secondary Actions: Select
+						17 list item Stock Adjustments, Secondary Actions: Select
+						18 list item Movement History, Secondary Actions: Select
+				19 pane FooterItemsScrollViewer, Secondary Actions: Scroll
+					20 group FooterMenuItemsHost
+			21 text Purchase Receipts
+			22 button Reload
+			23 button New receipt
+			24 status bar Status
+				25 text Informational icon
+				26 text Ready
+				27 text Purchase receipts loaded. Select a draft to manage its lines.
+				28 button Close
+			29 pane, Secondary Actions: Scroll
+				30 list ReceiptsList, Secondary Actions: Scroll
+					31 text Receipt number
+					32 text Supplier
+					33 text Status
+					34 text Lines
+					35 list item ReceiptRow { Id = 5d917dfb-dbde-4380-8063-b85bfbe2acbf, ReceiptNumber = MIDTERM-RECEIPT-002, SupplierName = Midterm Fresh Dairy, StatusDisplay = Posted, LineCount = 1, Status = Posted }, Text: MIDTERM-RECEIPT-002 Midterm Fresh Dairy Posted 1, Secondary Actions: Select
+						36 text MIDTERM-RECEIPT-002
+						37 text Midterm Fresh Dairy
+						38 text Posted
+						39 text 1
+					40 list item ReceiptRow { Id = 81e26e4f-4304-2798-c075-8c6bc4cfbba0, ReceiptNumber = MIDTERM-RECEIPT-001, SupplierName = Midterm Highland Roasters, StatusDisplay = Posted, LineCount = 1, Status = Posted }, Text: MIDTERM-RECEIPT-001 Midterm Highland Roasters Posted 1, Secondary Actions: Select
+						41 text MIDTERM-RECEIPT-001
+						42 text Midterm Highland Roasters
+						43 text Posted
+						44 text 1
+				45 scroll bar Vertical
+
+PAGE: Low Stock
+App=CoffeeShop.WinUI (pid 27980)
+Window: "Coffee Shop — Menu, Customers and Inventory", App: CoffeeShop.WinUI.
+
+0 window Coffee Shop — Menu, Customers and Inventory
+	1 pane
+		2 text Connected to PostgreSQL (ConnectionStrings__CoffeeShop). The WinUI client is running in direct database mode.
+		3 custom Nav
+			4 button Close Navigation
+			5 window PaneRoot
+				6 pane MenuItemsScrollViewer, Secondary Actions: Scroll
+					7 group MenuItemsHost
+						8 list item Point of Sale, Secondary Actions: Select
+						9 list item Fulfillment & Operations, Secondary Actions: Select
+						10 list item Menu and Recipes, Secondary Actions: Select
+						11 list item Customers and Loyalty, Secondary Actions: Select
+						12 list item Ingredients, Secondary Actions: Select
+						13 list item Suppliers, Secondary Actions: Select
+						14 list item Purchase Receipts, Secondary Actions: Select
+						15 list item Low Stock, Secondary Actions: Select
+						16 list item Reports, Secondary Actions: Select
+						17 list item Stock Adjustments, Secondary Actions: Select
+						18 list item Movement History, Secondary Actions: Select
+				19 pane FooterItemsScrollViewer, Secondary Actions: Scroll
+					20 group FooterMenuItemsHost
+			21 text Low Stock
+			22 button Refresh
+			23 status bar Status
+				24 text Informational icon
+				25 text Ready
+				26 text 2 ingredient(s) need replenishment.
+				27 button Close
+			28 pane, Secondary Actions: Scroll
+				29 list LowStockList, Secondary Actions: Scroll
+					30 text Ingredient
+					31 text Unit
+					32 text Balance
+					33 text Reorder threshold
+					34 list item LowStockRow { Name = Midterm Arabica beans, BaseUnit = g, BalanceDisplay = 500 g, ThresholdDisplay = 500 g }, Text: Midterm Arabica beans g 500 g, Secondary Actions: Select
+						35 text Midterm Arabica beans
+						36 text g
+						37 text 500 g
+						38 text 500 g
+					39 list item LowStockRow { Name = Midterm Vanilla syrup, BaseUnit = ml, BalanceDisplay = 4 ml, ThresholdDisplay = 150 ml }, Text: Midterm Vanilla syrup ml 4 ml 150 ml, Secondary Actions: Select
+						40 text Midterm Vanilla syrup
+						41 text ml
+						42 text 4 ml
+						43 text 150 ml
+				44 scroll bar Vertical
+
+PAGE: Menu and Recipes
+App=CoffeeShop.WinUI (pid 27980)
+Window: "Coffee Shop — Menu, Customers and Inventory", App: CoffeeShop.WinUI.
+
+0 window Coffee Shop — Menu, Customers and Inventory
+	1 pane
+		2 text Connected to PostgreSQL (ConnectionStrings__CoffeeShop). The WinUI client is running in direct database mode.
+		3 custom Nav
+			4 button Close Navigation
+			5 window PaneRoot
+				6 pane MenuItemsScrollViewer, Secondary Actions: Scroll
+					7 group MenuItemsHost
+						8 list item Point of Sale, Secondary Actions: Select
+						9 list item Fulfillment & Operations, Secondary Actions: Select
+						10 list item Menu and Recipes, Secondary Actions: Select
+						11 list item Customers and Loyalty, Secondary Actions: Select
+						12 list item Ingredients, Secondary Actions: Select
+						13 list item Suppliers, Secondary Actions: Select
+						14 list item Purchase Receipts, Secondary Actions: Select
+						15 list item Low Stock, Secondary Actions: Select
+						16 list item Reports, Secondary Actions: Select
+						17 list item Stock Adjustments, Secondary Actions: Select
+						18 list item Movement History, Secondary Actions: Select
+				19 pane FooterItemsScrollViewer, Secondary Actions: Scroll
+					20 group FooterMenuItemsHost
+			21 text The menu notebook
+			22 text Drinks, sizes, toppings, and a recipe for every cup.
+			23 status bar Status
+				24 text Informational icon
+				25 text Ready
+				26 text Catalog loaded. Select a drink or create a new one.
+			27 button Reload catalog
+			28 tab WorkspaceTabs, Secondary Actions: Scroll
+				29 tab item Drinks and recipes, Secondary Actions: Select
+				30 tab item Categories, Secondary Actions: Select
+				31 tab item Add-ons, Secondary Actions: Select
+
+PAGE: Customers and Loyalty
+App=CoffeeShop.WinUI (pid 27980)
+Window: "Coffee Shop — Menu, Customers and Inventory", App: CoffeeShop.WinUI.
+
+0 window Coffee Shop — Menu, Customers and Inventory
+	1 pane
+		2 text Connected to PostgreSQL (ConnectionStrings__CoffeeShop). The WinUI client is running in direct database mode.
+		3 custom Nav
+			4 button Close Navigation
+			5 window PaneRoot
+				6 pane MenuItemsScrollViewer, Secondary Actions: Scroll
+					7 group MenuItemsHost
+						8 list item Point of Sale, Secondary Actions: Select
+						9 list item Fulfillment & Operations, Secondary Actions: Select
+						10 list item Menu and Recipes, Secondary Actions: Select
+						11 list item Customers and Loyalty, Secondary Actions: Select
+						12 list item Ingredients, Secondary Actions: Select
+						13 list item Suppliers, Secondary Actions: Select
+						14 list item Purchase Receipts, Secondary Actions: Select
+						15 list item Low Stock, Secondary Actions: Select
+						16 list item Reports, Secondary Actions: Select
+						17 list item Stock Adjustments, Secondary Actions: Select
+						18 list item Movement History, Secondary Actions: Select
+				19 pane FooterItemsScrollViewer, Secondary Actions: Scroll
+					20 group FooterMenuItemsHost
+			21 text The customer notebook
+			22 text Familiar faces, delivery details, and a little loyalty with every cup.
+			23 status bar Status
+				24 text Informational icon
+				25 text Ready
+				26 text Customers loaded. Select a profile or create a new one.
+			27 button Reload customers
+			28 pane WorkspaceContent, Secondary Actions: Scroll
+				29 edit Find a customer, Secondary Actions: SetValue
+					30 text Find a customer
+				31 check box Include inactive profiles, Secondary Actions: Toggle
+				32 button Search
+				33 button New customer
+				34 list Customer search results, Secondary Actions: Scroll
+					35 list item An Nguyen, +84090080001, active, Text: An Nguyen +84090080001 customer1@example.test, Secondary Actions: Select
+						36 text An Nguyen
+						37 text +84090080001
+						38 text customer1@example.test
+						39 check box Active profile, Secondary Actions: Toggle
+					40 list item Binh Tran, +84090080002, active, Text: Binh Tran +84090080002 customer2@example.test, Secondary Actions: Select
+						41 text Binh Tran
+						42 text +84090080002
+						43 text customer2@example.test
+						44 check box Active profile, Secondary Actions: Toggle
+					45 list item Chi Le, +84090080003, active, Text: Chi Le +84090080003 customer3@example.test, Secondary Actions: Select
+						46 text Chi Le
+						47 text +84090080003
+						48 text customer3@example.test
+						49 check box Active profile, Secondary Actions: Toggle
+					50 list item Duc Pham, +84090080004, active, Text: Duc Pham +84090080004 customer4@example.test, Secondary Actions: Select
+						51 text Duc Pham
+						52 text +84090080004
+						53 text customer4@example.test
+						54 check box Active profile, Secondary Actions: Toggle
+					55 list item Em Hoang, +84090080005, active, Text: Em Hoang +84090080005 customer5@example.test, Secondary Actions: Select
+						56 text Em Hoang
+						57 text +84090080005
+						58 text customer5@example.test
+						59 check box Active profile, Secondary Actions: Toggle
+					60 list item Giang Vo, +84090080006, active, Text: Giang Vo +84090080006 customer6@example.test, Secondary Actions: Select
+						61 text Giang Vo
+						62 text +84090080006
+						63 text customer6@example.test
+						64 check box Active profile, Secondary Actions: Toggle
+					65 list item Hanh Do, +84090080007, active, Text: Hanh Do +84090080007 customer7@example.test, Secondary Actions: Select
+						66 text Hanh Do
+						67 text +84090080007
+						68 text customer7@example.test
+						69 check box Active profile, Secondary Actions: Toggle
+					70 list item Khanh Bui, +84090080008, active, Text: Khanh Bui +84090080008 customer8@example.test, Secondary Actions: Select
+						71 text Khanh Bui
+						72 text +84090080008
+						73 text customer8@example.test
+						74 check box Active profile, Secondary Actions: Toggle
+					75 list item Lan Phan, +84090080009, active, Text: Lan Phan +84090080009 customer9@example.test, Secondary Actions: Select
+						76 text Lan Phan
+						77 text +84090080009
+						78 text customer9@example.test
+						79 check box Active profile, Secondary Actions: Toggle
+					80 list item Minh Dang, +84090080010, active, Text: Minh Dang +84090080010 customer10@example.test, Secondary Actions: Select
+						81 text Minh Dang
+						82 text +84090080010
+						83 text customer10@example.test
+						84 check box Active profile, Secondary Actions: Toggle
+					85 list item Nga Huynh, +84090080011, active, Text: Nga Huynh +84090080011 customer11@example.test, Secondary Actions: Select
+						86 text Nga Huynh
+						87 text +84090080011
+						88 text customer11@example.test
+						89 check box Active profile, Secondary Actions: Toggle
+					90 list item Oanh Truong, +84090080012, active, Text: Oanh Truong +84090080012 customer12@example.test, Secondary Actions: Select
+						91 text Oanh Truong
+						92 text +84090080012
+						93 text customer12@example.test
+						94 check box Active profile, Secondary Actions: Toggle
+				95 text Select a customer to open their notebook.
+				96 text ContactDetails
+				97 text BalanceText
+				98 list Saved delivery addresses, Secondary Actions: Scroll
+				99 text Loyalty history
+				100 list Loyalty transaction history, Secondary Actions: Scroll
+				101 text HistoryPageText
+				102 button Previous
+				103 button Next
+				104 text Recent orders
+				105 list Recent customer orders, Secondary Actions: Scroll
+				106 text Customer for the next order
+				107 text Walk-in — no profile required.
+				108 button Continue as walk-in
+				109 check box Select an active profile above to attach it, Secondary Actions: Toggle
+				110 check box Delivery order, Secondary Actions: Toggle
+				111 button Use these details for next order
+				112 text This selection is kept while you browse. A customer profile is optional; delivery contact details are required for deliveries.
+				113 scroll bar Vertical
+
+PAGE: Fulfillment & Operations
+App=CoffeeShop.WinUI (pid 27980)
+Window: "Coffee Shop — Menu, Customers and Inventory", App: CoffeeShop.WinUI.
+
+0 window Coffee Shop — Menu, Customers and Inventory
+	1 pane
+		2 text Connected to PostgreSQL (ConnectionStrings__CoffeeShop). The WinUI client is running in direct database mode.
+		3 custom Nav
+			4 button Close Navigation
+			5 window PaneRoot
+				6 pane MenuItemsScrollViewer, Secondary Actions: Scroll
+					7 group MenuItemsHost
+						8 list item Point of Sale, Secondary Actions: Select
+						9 list item Fulfillment & Operations, Secondary Actions: Select
+						10 list item Menu and Recipes, Secondary Actions: Select
+						11 list item Customers and Loyalty, Secondary Actions: Select
+						12 list item Ingredients, Secondary Actions: Select
+						13 list item Suppliers, Secondary Actions: Select
+						14 list item Purchase Receipts, Secondary Actions: Select
+						15 list item Low Stock, Secondary Actions: Select
+						16 list item Reports, Secondary Actions: Select
+						17 list item Stock Adjustments, Secondary Actions: Select
+						18 list item Movement History, Secondary Actions: Select
+				19 pane FooterItemsScrollViewer, Secondary Actions: Scroll
+					20 group FooterMenuItemsHost
+			21 pane, Secondary Actions: Scroll
+				22 text Fulfillment & Operations
+				23 button Reload
+				24 status bar Status
+					25 text Informational icon
+					26 text Ready
+					27 text Choose an order. Controls are enabled only for its current lifecycle state.
+				28 text Barista queue
+				29 text Confirmed and preparing orders
+				30 list QueueList, Secondary Actions: Scroll
+					31 list item OperationalOrder { Id = 31ea82bc-b985-300f-ec51-aef86edd831c, OrderNumber = MIDTERM-021, Channel = delivery, Status = preparing, Total = 45.00, PaidAmount = 45.00, TableNumber = , DeliveryStatus = assigned, AssignedStaffId = d14ad418-29e0-407e-bf75-18d2f37161b7, PendingDiscountIds = CoffeeShop.Domain.Common.EntityId[], OutstandingBalance = 0, CanStartPreparing = False, CanMarkReady = True, CanComplete = False, CanRecordPayment = True, CanCancel = True, CanAssignDelivery = False, CanStartDelivery = True, CanFinishDelivery = False }, Text: MIDTERM-021 preparing delivery, Secondary Actions: Select
+						32 text MIDTERM-021
+						33 text preparing
+						34 text delivery
+				35 text Table overview
+				36 list TablesList, Secondary Actions: Scroll
+					37 list item OperationalTable { Id = bb1ec747-2931-6e1f-488b-84df45d59adb, TableNumber = MIDTERM-01, Seats = 2, IsOccupied = False, ActiveOrderId = }, Text: MIDTERM-01 False 2, Secondary Actions: Select
+						38 text MIDTERM-01
+						39 text False
+						40 text 2
+					41 list item OperationalTable { Id = b9c5bdb0-7cc3-f785-5c29-d501c42cee56, TableNumber = MIDTERM-02, Seats = 4, IsOccupied = False, ActiveOrderId = }, Text: MIDTERM-02 False 4, Secondary Actions: Select
+						42 text MIDTERM-02
+						43 text False
+						44 text 4
+					45 list item OperationalTable { Id = 9e2a4f60-c698-1573-a732-8fca9ba01465, TableNumber = MIDTERM-03, Seats = 2, IsOccupied = False, ActiveOrderId = }, Text: MIDTERM-03 False 2, Secondary Actions: Select
+						46 text MIDTERM-03
+						47 text False
+						48 text 2
+					49 list item OperationalTable { Id = f01d1af6-ef70-e970-bb49-2e0b457d0638, TableNumber = MIDTERM-04, Seats = 4, IsOccupied = False, ActiveOrderId = }, Text: MIDTERM-04 False 4, Secondary Actions: Select
+						50 text MIDTERM-04
+						51 text False
+						52 text 4
+					53 list item OperationalTable { Id = e686c100-71c5-e10c-d3fd-fea60600128e, TableNumber = MIDTERM-05, Seats = 2, IsOccupied = False, ActiveOrderId = }, Text: MIDTERM-05 False 2, Secondary Actions: Select
+						54 text MIDTERM-05
+						55 text False
+						56 text 2
+					57 list item OperationalTable { Id = d401d664-ef98-a656-8c9c-5a0be0cf0442, TableNumber = MIDTERM-06, Seats = 4, IsOccupied = False, ActiveOrderId = }, Text: MIDTERM-06 False 4, Secondary Actions: Select
+						58 text MIDTERM-06
+						59 text False
+						60 text 4
+					61 list item OperationalTable { Id = 5c931985-3aa9-2fce-9706-de86766af407, TableNumber = MIDTERM-07, Seats = 2, IsOccupied = False, ActiveOrderId = }, Text: MIDTERM-07 False 2, Secondary Actions: Select
+						62 text MIDTERM-07
+						63 text False
+						64 text 2
+					65 list item OperationalTable { Id = 4b8a2eb1-f0bf-3cbd-12ba-e6ce55d7a542, TableNumber = MIDTERM-08, Seats = 4, IsOccupied = False, ActiveOrderId = }, Text: MIDTERM-08 False 4, Secondary Actions: Select
+						66 text MIDTERM-08
+						67 text False
+						68 text 4
+				69 text Order work
+				70 combo box OrderBox
+				71 text completed / dine_in Total 90.00 · paid 90.00 · outstanding 0.00 Table MIDTERM-01 · delivery —
+				72 button Start preparing
+				73 button Mark ready
+				74 button Complete
+				75 text Payment
+				76 combo box PaymentMethodBox
+				77 edit Amount, Secondary Actions: SetValue
+				78 edit Reference, Secondary Actions: SetValue
+				79 button Record
+				80 text Cancellation
+				81 edit Reason, Secondary Actions: SetValue
+				82 button Cancel order
+				83 text Manager approval
+				84 list DiscountList, Secondary Actions: Scroll
+				85 button Approve selected
+				86 button Reject selected
+				87 text Delivery work
+				88 combo box DeliveryStaffBox
+				89 button Assign
+				90 button Out
+				91 button Delivered
+				92 edit Failure reason, Secondary Actions: SetValue
+				93 button Mark failed
+				94 scroll bar Vertical
+
+PAGE: Movement History
+App=CoffeeShop.WinUI (pid 27980)
+Window: "Coffee Shop — Menu, Customers and Inventory", App: CoffeeShop.WinUI.
+
+0 window Coffee Shop — Menu, Customers and Inventory
+	1 pane
+		2 text Connected to PostgreSQL (ConnectionStrings__CoffeeShop). The WinUI client is running in direct database mode.
+		3 custom Nav
+			4 button Close Navigation
+			5 window PaneRoot
+				6 pane MenuItemsScrollViewer, Secondary Actions: Scroll
+					7 group MenuItemsHost
+						8 list item Point of Sale, Secondary Actions: Select
+						9 list item Fulfillment & Operations, Secondary Actions: Select
+						10 list item Menu and Recipes, Secondary Actions: Select
+						11 list item Customers and Loyalty, Secondary Actions: Select
+						12 list item Ingredients, Secondary Actions: Select
+						13 list item Suppliers, Secondary Actions: Select
+						14 list item Purchase Receipts, Secondary Actions: Select
+						15 list item Low Stock, Secondary Actions: Select
+						16 list item Reports, Secondary Actions: Select
+						17 list item Stock Adjustments, Secondary Actions: Select
+						18 list item Movement History, Secondary Actions: Select
+				19 pane FooterItemsScrollViewer, Secondary Actions: Scroll
+					20 group FooterMenuItemsHost
+			21 pane, Secondary Actions: Scroll
+				22 text Stock adjustments and movement history
+				23 status bar Status
+					24 text Informational icon
+					25 text Ready
+					26 text Balances and latest 100 movements loaded. Select an operator before recording an adjustment.
+				27 button Reload balance and history
+				28 combo box Ingredient
+				29 text Balance: 500 g; reorder threshold: 500.
+				30 combo box Operator
+				31 edit Quantity change in the ingredient's base unit (positive or negative), Secondary Actions: SetValue
+					32 text Quantity change in the ingredient's base unit (positive or negative)
+				33 edit Reason (required), Secondary Actions: SetValue
+					34 text Reason (required)
+				35 button Record stock adjustment
+				36 text Latest 100 movements for the selected ingredient
+				37 text 2026-10-01 08:00:00Z | Receipt | +2000 | Opening demo purchase receipt Actor: eef7e3cb-cfc1-971a-57ed-66dd71e63dfa | Order: | Receipt: 81e26e4f-4304-2798-c075-8c6bc4cfbba0
+				38 scroll bar Vertical
+
+PAGE: Point of Sale
+App=CoffeeShop.WinUI (pid 27980)
+Window: "Coffee Shop — Menu, Customers and Inventory", App: CoffeeShop.WinUI.
+
+0 window Coffee Shop — Menu, Customers and Inventory
+	1 pane
+		2 text Connected to PostgreSQL (ConnectionStrings__CoffeeShop). The WinUI client is running in direct database mode.
+		3 custom Nav
+			4 button Close Navigation
+			5 window PaneRoot
+				6 pane MenuItemsScrollViewer, Secondary Actions: Scroll
+					7 group MenuItemsHost
+						8 list item Point of Sale, Secondary Actions: Select
+						9 list item Fulfillment & Operations, Secondary Actions: Select
+						10 list item Menu and Recipes, Secondary Actions: Select
+						11 list item Customers and Loyalty, Secondary Actions: Select
+						12 list item Ingredients, Secondary Actions: Select
+						13 list item Suppliers, Secondary Actions: Select
+						14 list item Purchase Receipts, Secondary Actions: Select
+						15 list item Low Stock, Secondary Actions: Select
+						16 list item Reports, Secondary Actions: Select
+						17 list item Stock Adjustments, Secondary Actions: Select
+						18 list item Movement History, Secondary Actions: Select
+				19 pane FooterItemsScrollViewer, Secondary Actions: Scroll
+					20 group FooterMenuItemsHost
+			21 text A fresh ticket
+			22 text Pick a cup. Review the ticket. Send it to the bar.
+			23 status bar Status
+				24 text Informational icon
+				25 text Ready
+				26 text Choose a drink, size and optional toppings. Save the draft to review exact snapshots and totals. Showing up to 200 matches; narrow the search for more.
+			27 button Reload menu and ticket
+			28 pane, Secondary Actions: Scroll
+				29 combo box Operator (midterm actor selection, not a login)
+				30 combo box Order channel
+				31 text Customer: Walk-in
+				32 button Choose customer / saved delivery address
+				33 button Use selection from Customers
+				34 button Continue as walk-in
+				35 edit Find a drink, Secondary Actions: SetValue
+					36 text Find a drink
+				37 button Search menu
+				38 combo box Drink
+				39 combo box Size
+				40 text Choose a drink and size.
+				41 edit Quantity (whole drinks) 1, Secondary Actions: SetValue
+					42 text Quantity (whole drinks)
+				43 text Optional toppings: one of each per drink
+				44 list Compatible add-ons, Secondary Actions: Scroll
+				45 text AddonPricesText
+				46 button Add drink to ticket
+				47 list Unsaved ticket lines, Secondary Actions: Scroll
+				48 button Remove selected line
+				49 button Save draft and review exact totals
+				50 text The order ticket
+				51 text Order ID: 28fab368-55dc-47c1-9d73-a582b94618c9
+				52 text Save the draft to see persisted names, sizes, topping prices and exact totals here.
+				53 edit Loyalty points to redeem (attached customer), Secondary Actions: SetValue
+					54 text Loyalty points to redeem (attached customer)
+				55 button Redeem loyalty points
+				56 text Request a discount (manager approval required)
+				57 combo box Discount type
+				58 edit Value, Secondary Actions: SetValue
+					59 text Value
+				60 edit Reason, Secondary Actions: SetValue
+					61 text Reason
+				62 button Request discount
+				63 text Pending requests do not reduce the total. Reload after manager approval and review the new total.
+				64 button Confirm reviewed order
+				65 button Start a new ticket
+				66 edit Reopen saved ticket by order ID, Secondary Actions: SetValue
+					67 text Reopen saved ticket by order ID
+				68 button Open saved ticket
+				69 scroll bar Vertical
