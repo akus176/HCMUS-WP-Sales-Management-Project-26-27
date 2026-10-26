@@ -44,5 +44,11 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      - name: Catalog, Customer, Order, POS, Reporting and Midterm Role PostgreSQL Integration Tests
-        run: dotnet test tests/CoffeeShop.Infrastructure.Tests --configuration Release --filter "FullyQualifiedName~CatalogPersistenceIntegrationTests|FullyQualifiedName~CustomerLoyaltyPersistenceIntegrationTests|FullyQualifiedName~OrderConfirmationIntegrationTests|FullyQualifiedName~OrderCancellationIntegrationTests|FullyQualifiedName~PosWorkspaceIntegrationTests|FullyQualifiedName~RevenueReportIntegrationTests|FullyQualifiedName~OrderChannelReportIntegrationTests|FullyQualifiedName~BestSellerReportIntegrationTests|FullyQualifiedName~MidtermRoleIntegrationTests"
+      - name: Infrastructure and complete midterm demonstration tests
+        run: dotnet test tests/CoffeeShop.Infrastructure.Tests --configuration Release --logger "trx;LogFileName=postgres.trx" --results-directory TestResults
+      - name: Preserve PostgreSQL test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postgres-test-results
+          path: TestResults/*.trx

@@ -3,6 +3,8 @@
 **/obj/
 *.user
 *.suo
+**/TestResults/
+artifacts/midterm/
 .env
 .env.*
 !.env.example

@@ -5,7 +5,6 @@ using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Customers;
 using CoffeeShop.Application.Inventory;
 using CoffeeShop.Application.Reporting;
-using CoffeeShop.Application.Sales;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Inventory;
 using CoffeeShop.Domain.Sales;
@@ -104,7 +103,7 @@ public sealed class MidtermDemonstrationIntegrationTests(ITestOutputHelper outpu
         Assert.Equal(95m, audit.SelectedIngredient!.AvailableQuantity);
         Assert.Equal(4, audit.Movements.Count);
         Assert.Equal(95m, await BalanceAsync(ingredient));
-        output.WriteLine("PASS DEMO-02: supplier created/updated; receipt posted once (+100g); adjustment -5g; balance 95g.");
+        output.WriteLine("PASS DEMO-02: supplier created/updated; receipt posted once (+100g); blank adjustment rejected; -5/+5/-5g adjustments; balance 95g; four movements.");
 
         var catalog = provider.GetRequiredService<CatalogCommandHandler>();
         var category = Success(await catalog.CreateCategoryAsync(new("Demo acceptance coffee")));
@@ -254,7 +253,7 @@ public sealed class MidtermDemonstrationIntegrationTests(ITestOutputHelper outpu
         Success(await catalog.DeactivateMenuItemAsync(new(itemId)));
         await pos.LoadAsync();
         Assert.DoesNotContain(pos.Menu, item => item.Id == itemId);
-        output.WriteLine("PASS DEMO-08: revenue delta 130; channels reconcile; best seller quantity 3; cancellation excluded; low stock present; stock 65g; deactivated drink excluded from POS.");
+        output.WriteLine("PASS DEMO-08: revenue delta 130; channels reconcile; best seller quantity 3; cancellation excluded; low stock present; stock 65g; nine immutable movements; deactivated drink excluded from POS.");
     }
 
     [PostgresFact]
