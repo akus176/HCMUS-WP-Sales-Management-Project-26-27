@@ -12,8 +12,8 @@ namespace CoffeeShop.WinUI.Pages;
 
 public sealed partial class PurchaseReceiptsPage : Page
 {
-    private readonly InventoryCommandHandler handler;
-    private readonly IInventoryRepository repository;
+    private InventoryCommandHandler handler = null!;
+    private IInventoryRepository repository = null!;
     private readonly Dictionary<EntityId, string> supplierNames = [];
     private readonly Dictionary<EntityId, string> activeSupplierNames = [];
     private readonly Dictionary<EntityId, string> ingredientNames = [];
@@ -24,8 +24,6 @@ public sealed partial class PurchaseReceiptsPage : Page
     public PurchaseReceiptsPage()
     {
         InitializeComponent();
-        handler = App.Services.GetRequiredService<InventoryCommandHandler>();
-        repository = App.Services.GetRequiredService<IInventoryRepository>();
         _ = LoadAsync();
     }
 
@@ -168,7 +166,8 @@ public sealed partial class PurchaseReceiptsPage : Page
         await RunAsync("post the receipt", async () =>
         {
             var actor = App.Services.GetRequiredService<PosOperatorSession>().Id;
-            var options = await App.Services.GetRequiredService<PosOrderHandler>().GetOptionsAsync();
+            using var operatorScope = App.Services.CreateScope();
+            var options = await operatorScope.ServiceProvider.GetRequiredService<PosOrderHandler>().GetOptionsAsync();
             if (actor is null || options.Staff.All(staff => staff.Id != actor))
             {
                 Status.Apply(WorkflowFeedback.Validation("operator", "Select an active operator in Point of Sale or Stock Adjustments before posting a receipt."));
@@ -284,6 +283,9 @@ public sealed partial class PurchaseReceiptsPage : Page
         Status.Apply(WorkflowFeedback.Loading($"Trying to {operation}..."));
         try
         {
+            using var scope = App.Services.CreateScope();
+            handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
+            repository = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
             await action();
         }
         catch (Exception)

@@ -10,16 +10,14 @@ namespace CoffeeShop.WinUI.Pages;
 
 public sealed partial class IngredientsPage : Page
 {
-    private readonly InventoryCommandHandler handler;
-    private readonly IInventoryRepository repository;
+    private InventoryCommandHandler handler = null!;
+    private IInventoryRepository repository = null!;
     private List<IngredientRow> allRows = [];
     private bool isBusy;
 
     public IngredientsPage()
     {
         InitializeComponent();
-        handler = App.Services.GetRequiredService<InventoryCommandHandler>();
-        repository = App.Services.GetRequiredService<IInventoryRepository>();
         _ = LoadAsync();
     }
 
@@ -160,6 +158,9 @@ public sealed partial class IngredientsPage : Page
         Status.Apply(WorkflowFeedback.Loading($"Trying to {operation}..."));
         try
         {
+            using var scope = App.Services.CreateScope();
+            handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
+            repository = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
             await action();
         }
         catch (Exception)

@@ -30,13 +30,11 @@ public sealed record LowStockRow
 
 public sealed partial class LowStockPage : Page
 {
-    private readonly IInventoryRepository repository;
     private bool isBusy;
 
     public LowStockPage()
     {
         InitializeComponent();
-        repository = App.Services.GetRequiredService<IInventoryRepository>();
         _ = LoadAsync();
     }
 
@@ -51,6 +49,8 @@ public sealed partial class LowStockPage : Page
         Status.Apply(WorkflowFeedback.Loading("Checking current ingredient balances..."));
         try
         {
+            using var scope = App.Services.CreateScope();
+            var repository = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
             var ingredients = await repository.ListIngredientsAsync();
             var lowStock = LowStockQuery.Find(ingredients);
             LowStockList.ItemsSource = lowStock.Select(i => new LowStockRow(i)).ToList();
