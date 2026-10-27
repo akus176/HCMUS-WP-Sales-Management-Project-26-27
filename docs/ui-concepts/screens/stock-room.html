@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=1440">
 <title>Stock room · Corner Cafe concept</title>
 <link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/refinements.css">
 </head>
 <body class="screen">
 <script src="../assets/icons.js"></script>
 <div class="window">
   <div class="titlebar">
     <div class="win-brand"><span class="logo-dot"><svg class="ico"><use href="#i-counter"/></svg></span><b>Corner Cafe</b></div>
-    <div class="win-title">Service Console</div>
+    <div class="win-title">Service console</div>
     <div class="win-right">
       <span class="conn"><i></i> Local · connected</span>
       <span class="win-clock">10:42</span>
@@ -27,23 +28,24 @@
           <div class="brand-sub">service console</div>
         </div>
       </div>
-      <nav class="nav-groups">
+      <nav class="nav-groups" aria-label="Workspaces">
         <div class="nav-group">
           <div class="nav-group-label">Service</div>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span><span class="key">1</span></a>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
+          <a class="nav-item" href="#"><span class="numeral">I</span><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span></a>
+          <a class="nav-item" href="#"><span class="numeral">II</span><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
         </div>
         <div class="nav-group">
           <div class="nav-group-label">Manage</div>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span><span class="key">3</span></a>
-          <a class="nav-item active" aria-current="page" href="#"><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span><span class="key">4</span></a>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span><span class="key">5</span></a>
+          <a class="nav-item" href="#"><span class="numeral">III</span><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span></a>
+          <a class="nav-item active" aria-current="page" href="#"><span class="numeral">IV</span><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span></a>
+          <a class="nav-item" href="#"><span class="numeral">V</span><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span></a>
         </div>
         <div class="nav-group">
           <div class="nav-group-label">Insights</div>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span><span class="key">6</span></a>
+          <a class="nav-item" href="#"><span class="numeral">VI</span><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span></a>
         </div>
       </nav>
+      <img class="sidebar-ornament" src="../assets/ornaments/coffee.svg" alt="" aria-hidden="true">
       <div class="side-foot">
         <div class="shift-card">
           <div class="shift-top"><span>Shift 01</span><span>Open</span></div>
@@ -71,10 +73,11 @@
       <main class="page">
         <div class="page-head">
           <div class="title-wrap">
-            <div class="eyebrow">Manage <span class="sep">/</span> Inventory <span class="sep">/</span> Last movement 6 min ago</div>
+            <div class="eyebrow"><span class="live-dot"></span> Manage <span class="sep">/</span> Inventory <span class="sep">/</span> Last movement 6 min ago</div>
             <h1 class="page-title">Stock room</h1>
-            <div class="page-sub">12 ingredients · 3 below reorder point · one delivery expected today.</div>
+            <div class="page-sub">Twelve ingredients, three below reorder point, and one delivery still expected today.</div>
           </div>
+          <img class="page-ornament" src="../assets/ornaments/stock-room.svg" alt="" aria-hidden="true">
           <div class="page-actions">
             <button class="btn"><svg class="ico"><use href="#i-plus"/></svg> New ingredient</button>
             <button class="btn btn-primary"><svg class="ico"><use href="#i-bag"/></svg> Receive delivery</button>
@@ -83,7 +86,7 @@
 
         <div class="tabs">
           <div class="tab active"><span>Balances</span> <span class="count">12</span></div>
-          <div class="tab"><span>Low stock</span> <span class="count" style="color:var(--red);">3</span></div>
+          <div class="tab"><span>Low stock</span> <span class="count">3</span></div>
           <div class="tab"><span>Receipts</span> <span class="count">8</span></div>
           <div class="tab"><span>Suppliers</span> <span class="count">4</span></div>
           <div class="tab"><span>Adjustments</span> <span class="count">24</span></div>
@@ -166,16 +169,17 @@
                 <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
               </div>
             </div>
+            <div class="stock-ornament" aria-hidden="true"><img src="../assets/ornaments/stock-room.svg" alt=""></div>
             <div class="stock-footer">
               <span>Showing 8 of 12 ingredients</span>
-              <span class="right"><span class="mono">last sync 10:40</span><button class="icon-btn" style="width:24px;height:24px;box-shadow:none;" aria-label="Refresh"><svg class="ico" style="width:12px;height:12px;"><use href="#i-refresh"/></svg></button></span>
+              <span class="right"><span>Last sync 10:40</span><button class="icon-btn" style="width:24px;height:24px;" aria-label="Refresh"><svg class="ico" style="width:12px;height:12px;"><use href="#i-refresh"/></svg></button></span>
             </div>
           </section>
 
-          <aside class="drawer">
+          <aside class="drawer" aria-label="Adjust Arabica beans">
             <div class="drawer-head">
               <div>
-                <div class="drawer-kicker">ADJUST STOCK · IMMUTABLE MOVEMENT</div>
+                <div class="drawer-kicker">Adjust stock · immutable movement</div>
                 <div class="drawer-title">Arabica beans</div>
               </div>
               <button class="drawer-close" aria-label="Close"><svg class="ico"><use href="#i-x"/></svg></button>
@@ -193,13 +197,13 @@
               <div class="balance-preview"><span>New balance</span><b>380 g</b><span class="pill pill-stamp pill-red">Below reorder</span></div>
               <div class="field">
                 <label class="field-label" for="reason">Reason (required)</label>
-                <textarea class="textarea" id="reason">Grinder calibration waste — morning dial-in.</textarea>
+                <textarea class="textarea" id="reason" rows="2">Grinder calibration waste — morning dial-in.</textarea>
               </div>
               <button class="btn btn-primary btn-block"><svg class="ico"><use href="#i-check"/></svg> Record −120 g adjustment</button>
               <div class="drawer-note">Written against Mai Tran · Shift 01. The movement cannot be edited or deleted; correct it with a new adjustment.</div>
             </div>
             <div class="drawer-hist">
-              <div class="drawer-hist-head"><svg class="ico" style="width:12px;height:12px;"><use href="#i-clock"/></svg> Recent movements <span class="right">Open full history</span></div>
+              <div class="drawer-hist-head"><svg class="ico"><use href="#i-clock"/></svg> Recent movements <span class="right">Open full history</span></div>
               <div class="hist-row"><span class="delta neg">−120 g</span><span class="why">Grinder calibration waste</span><span class="when">10:36</span></div>
               <div class="hist-row"><span class="delta pos">+2,000 g</span><span class="why">Receipt #R-221 · Vietnam Beans</span><span class="when">08:10</span></div>
               <div class="hist-row"><span class="delta neg">−35 g</span><span class="why">Dial-in sample</span><span class="when">yest.</span></div>

@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=1440">
 <title>Customers · Corner Cafe concept</title>
 <link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/refinements.css">
 </head>
 <body class="screen">
 <script src="../assets/icons.js"></script>
 <div class="window">
   <div class="titlebar">
     <div class="win-brand"><span class="logo-dot"><svg class="ico"><use href="#i-counter"/></svg></span><b>Corner Cafe</b></div>
-    <div class="win-title">Service Console</div>
+    <div class="win-title">Service console</div>
     <div class="win-right">
       <span class="conn"><i></i> Local · connected</span>
       <span class="win-clock">10:42</span>
@@ -27,23 +28,24 @@
           <div class="brand-sub">service console</div>
         </div>
       </div>
-      <nav class="nav-groups">
+      <nav class="nav-groups" aria-label="Workspaces">
         <div class="nav-group">
           <div class="nav-group-label">Service</div>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span><span class="key">1</span></a>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
+          <a class="nav-item" href="#"><span class="numeral">I</span><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span></a>
+          <a class="nav-item" href="#"><span class="numeral">II</span><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
         </div>
         <div class="nav-group">
           <div class="nav-group-label">Manage</div>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span><span class="key">3</span></a>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span><span class="key">4</span></a>
-          <a class="nav-item active" aria-current="page" href="#"><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span><span class="key">5</span></a>
+          <a class="nav-item" href="#"><span class="numeral">III</span><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span></a>
+          <a class="nav-item" href="#"><span class="numeral">IV</span><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span></a>
+          <a class="nav-item active" aria-current="page" href="#"><span class="numeral">V</span><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span></a>
         </div>
         <div class="nav-group">
           <div class="nav-group-label">Insights</div>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span><span class="key">6</span></a>
+          <a class="nav-item" href="#"><span class="numeral">VI</span><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span></a>
         </div>
       </nav>
+      <img class="sidebar-ornament" src="../assets/ornaments/coffee.svg" alt="" aria-hidden="true">
       <div class="side-foot">
         <div class="shift-card">
           <div class="shift-top"><span>Shift 01</span><span>Open</span></div>
@@ -75,13 +77,14 @@
             <h1 class="page-title">Customers</h1>
             <div class="page-sub">Familiar faces, saved addresses, loyalty, and the next order in one place.</div>
           </div>
+          <img class="page-ornament" src="../assets/ornaments/customers.svg" alt="" aria-hidden="true">
           <div class="page-actions">
             <button class="btn btn-primary"><svg class="ico"><use href="#i-plus"/></svg> New customer</button>
           </div>
         </div>
 
         <div class="customer-cols">
-          <section class="customer-list">
+          <section class="customer-list" aria-label="Customer directory">
             <div class="customer-list-head">
               <div class="input-search"><svg class="ico"><use href="#i-search"/></svg><input aria-label="Find a customer" placeholder="Find a name, phone, or email…"></div>
               <div class="chip-row"><button class="chip active">All <span class="count">12</span></button><button class="chip">Active</button><button class="chip">Points <span class="count">5</span></button></div>
@@ -93,27 +96,27 @@
                 <div class="customer-row-pts"><b>85</b><span>points</span></div>
               </div>
               <div class="customer-row-item">
-                <div class="avatar avatar-small" style="background:var(--yellow-soft);color:var(--ink);">MT</div>
+                <div class="avatar avatar-small" style="background:var(--ground-2);">MT</div>
                 <div class="customer-row-copy"><div class="customer-row-name">Minh Tran</div><div class="customer-row-meta">091 884 2010 · last order 3d</div></div>
                 <div class="customer-row-pts"><b>150</b><span>points</span></div>
               </div>
               <div class="customer-row-item">
-                <div class="avatar avatar-small" style="background:var(--paper-3);color:var(--ink-2);">BL</div>
+                <div class="avatar avatar-small">BL</div>
                 <div class="customer-row-copy"><div class="customer-row-name">Bao Le</div><div class="customer-row-meta">098 221 7731 · last order 4d</div></div>
                 <div class="customer-row-pts"><b>20</b><span>points</span></div>
               </div>
               <div class="customer-row-item">
-                <div class="avatar avatar-small" style="background:var(--red-soft);color:var(--red);">AN</div>
+                <div class="avatar avatar-small" style="background:var(--ground-2);">AN</div>
                 <div class="customer-row-copy"><div class="customer-row-name">An Nguyen</div><div class="customer-row-meta">090 442 1188 · last order 6d</div></div>
                 <div class="customer-row-pts"><b>40</b><span>points</span></div>
               </div>
               <div class="customer-row-item">
-                <div class="avatar avatar-small" style="background:var(--yellow-soft);color:var(--ink);">TP</div>
+                <div class="avatar avatar-small">TP</div>
                 <div class="customer-row-copy"><div class="customer-row-name">Thao Pham</div><div class="customer-row-meta">093 771 0042 · last order 8d</div></div>
                 <div class="customer-row-pts"><b>0</b><span>points</span></div>
               </div>
               <div class="customer-row-item">
-                <div class="avatar avatar-small" style="background:var(--paper-3);color:var(--ink-2);">KV</div>
+                <div class="avatar avatar-small" style="background:var(--ground-2);">KV</div>
                 <div class="customer-row-copy"><div class="customer-row-name">Khanh Vu</div><div class="customer-row-meta">097 140 6652 · last order 12d</div></div>
                 <div class="customer-row-pts"><b>10</b><span>points</span></div>
               </div>
@@ -121,7 +124,7 @@
             <div class="customer-list-foot"><span>Showing 6 of 12</span><span>5 with points</span></div>
           </section>
 
-          <section class="profile">
+          <section class="profile" aria-label="Linh Nguyen profile">
             <div class="profile-card">
               <div class="profile-top">
                 <div class="avatar avatar-big">LN</div>
@@ -146,22 +149,20 @@
                 <div class="block-head"><h3>Saved addresses</h3><span class="right">+ Add</span></div>
                 <div class="address-grid">
                   <div class="address-card">
-                    <div class="address-top"><svg class="ico" style="width:13px;height:13px;"><use href="#i-home"/></svg><b>Home</b><span class="pill pill-stamp pill-blue">Default</span></div>
+                    <div class="address-top"><svg class="ico"><use href="#i-home"/></svg><b>Home</b><span class="pill pill-stamp pill-blue">Default</span></div>
                     <p>24 Nguyen Thi Minh Khai, District 1, Ho Chi Minh City<br>Buzzer 1204 · leave with guard if away</p>
                   </div>
                   <div class="address-card">
-                    <div class="address-top"><svg class="ico" style="width:13px;height:13px;"><use href="#i-note"/></svg><b>Studio</b><span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> Active</span></div>
+                    <div class="address-top"><svg class="ico"><use href="#i-note"/></svg><b>Studio</b><span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> Active</span></div>
                     <p>7 Ly Tu Trong, District 1, Ho Chi Minh City<br>Reception desk · weekdays only</p>
                   </div>
                 </div>
-                <div style="margin-top:auto;padding-top:5px;color:var(--ink-3);font-size:10.5px;">Delivery uses the default address unless the order says otherwise.</div>
+                <div class="block-note">Delivery uses the default address unless the order says otherwise.</div>
               </div>
 
               <div class="card-block ledger-block">
                 <div class="block-head"><h3>Loyalty ledger</h3><span class="right">View all</span></div>
-                <div style="display:flex;align-items:center;gap:7px;padding:5px 7px;background:var(--yellow-soft);border:1px dashed rgba(36,31,26,.28);border-radius:6px 2px 7px 3px;margin-bottom:5px;">
-                  <span style="font-size:10.5px;color:var(--ink-2);">Earns 1 pt per $1</span><span class="pill pill-ink" style="margin-left:auto;">85 available</span>
-                </div>
+                <div class="ledger-note">Earns 1 pt per $1<span class="pill pill-ink">85 available</span></div>
                 <div class="ledger-row"><div class="ledger-type">Earned on order A-092<span>24 Oct · 10:18 · Dine-in</span></div><span class="ledger-delta">+45</span><span class="ledger-balance">85</span></div>
                 <div class="ledger-row"><div class="ledger-type">Redeemed at counter<span>22 Oct · 15:42 · Order A-078</span></div><span class="ledger-delta neg">−10</span><span class="ledger-balance">40</span></div>
                 <div class="ledger-row"><div class="ledger-type">Earned on order A-078<span>22 Oct · 15:40 · Delivery</span></div><span class="ledger-delta">+40</span><span class="ledger-balance">50</span></div>
@@ -172,7 +173,7 @@
             </div>
           </section>
 
-          <aside class="customer-side">
+          <aside class="customer-side" aria-label="Next order and history">
             <div class="next-order-card">
               <div class="next-kicker">Next order</div>
               <div class="next-title">Use Linh for the next ticket</div>

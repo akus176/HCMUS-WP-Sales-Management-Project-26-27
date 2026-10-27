@@ -6,6 +6,25 @@ Provides staff with a cohesive, task-oriented desktop console that presents exis
 
 ## ADDED Requirements
 
+### Requirement: Exact concept-art fidelity
+The production UI SHALL match the updated concept art exactly at the 1440 by 900 reference content viewport. The authoritative visual specification is `docs/ui-concepts/screens/*.html`, `docs/ui-concepts/assets/app.css`, `docs/ui-concepts/assets/refinements.css`, and their bundled fonts, photos, icons, ornaments, and patterns; the regenerated screen PNGs and Menu editor PNG provide review evidence. Matching only the general hierarchy or palette SHALL NOT satisfy this requirement.
+
+#### Scenario: A workspace is reviewed for visual acceptance
+- **WHEN** Counter, Service board, Menu, Stock room, Customers, Reports, or the Menu editor is presented for completion
+- **THEN** a matched-state production screenshot at 1440 by 900 is compared directly with the corresponding concept
+- **AND** layout, alignment, spacing, density, typography, colors, imagery and crops, icon treatment, borders, patterns, decoration, and selection/warning states match exactly
+- **AND** any visible difference is corrected before the corresponding implementation task is marked complete
+
+#### Scenario: Native behavior or accessibility conflicts with a concept detail
+- **WHEN** a reference detail conflicts with supported application behavior, native rendering constraints, or the specified accessibility requirements
+- **THEN** the exact conflict is documented and a targeted concept/spec revision is approved before the screen is accepted
+- **AND** no silent approximation, unrelated restyling, or inert control is used to bypass the fidelity requirement
+
+#### Scenario: Concept art changes after implementation was verified
+- **WHEN** the approved concept art changes
+- **THEN** the affected completed checklist items are reopened and revalidated against the updated concept commit
+- **AND** previous behavioral test results alone do not establish visual completion
+
 ### Requirement: Task-oriented application shell
 The system SHALL present the staff client as one Corner Cafe service console with primary navigation for Counter, Service board, Menu, Stock room, Customers, and Reports.
 
@@ -39,6 +58,12 @@ The Service board SHALL present active fulfillment work by operational state and
 - **WHEN** active orders are loaded
 - **THEN** confirmed, preparing, and ready work is visually distinguishable
 - **AND** selecting an order reveals its details and valid fulfillment, payment, discount, cancellation, table, or delivery actions
+
+#### Scenario: Staff scans order notes by status
+- **WHEN** the Service board displays populated confirmed, preparing, and ready columns
+- **THEN** order cards reproduce the concept's pale yellow, peach, and sage sticky-note surfaces respectively, including tape, folded corners, subtle paper shadows, and aligned baselines
+- **AND** the selected note retains its outline and left accent without obscuring order details, timing, or actions
+- **AND** decorative layers do not intercept input or add accessibility announcements
 
 #### Scenario: No active work exists
 - **WHEN** no active orders are available
@@ -140,3 +165,4 @@ The migrated console SHALL display an actionable control only when the client pr
 - **WHEN** a concept includes federated search, notifications, persisted menu pictures, report export, or authenticated shift management that the client does not support
 - **THEN** the migrated production workspace omits the corresponding action
 - **AND** no inert or simulated control is presented to staff
+- **AND** the omission is documented and approved in the concept/spec before exact visual acceptance is claimed

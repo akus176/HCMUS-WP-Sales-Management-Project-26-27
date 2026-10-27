@@ -6,13 +6,14 @@ See `proposal.md` for motivation and `specs/staff-service-console/spec.md` for o
 
 The current WinUI client already implements the required midterm workflows through separate pages and presentation workspaces. `MainWindow` uses a standard `NavigationView` with eleven entries, while individual pages mix layout, event wiring, and workflow feedback. Shared resources currently cover only a small subset of the visual language. The approved concepts under `docs/ui-concepts` define a six-workspace shell and detailed 1440 by 900 reference layouts using browser-specific CSS effects.
 
-The migration must coexist with uncommitted concept assets, preserve the direct-PostgreSQL composition path, avoid changes to domain or persistence behavior, and retain the existing Compact, Medium, and Expanded breakpoint contract.
+The updated concept assets committed with this change are the authoritative visual specification. The migration must preserve the direct-PostgreSQL composition path, avoid changes to domain or persistence behavior, and retain the existing Compact, Medium, and Expanded breakpoint contract.
 
 ## Goals / Non-Goals
 
 **Goals:**
 
 - Translate the concept system into reusable WinUI resources and compositions instead of duplicating styles per page.
+- Match the concept art exactly at 1440 by 900, including typography, palette, imagery, patterns, decorative details, alignment, density, selection, and warning states.
 - Preserve the current application-service and domain boundaries while reorganizing the presentation layer.
 - Provide one navigable shell and six cohesive workspaces with reliable state and feedback behavior.
 - Keep each workspace independently testable and migrate it behind stable navigation tags.
@@ -24,7 +25,7 @@ The migration must coexist with uncommitted concept assets, preserve the direct-
 - Adding API-backed authentication or replacing the direct database adapter.
 - Implementing concept-only federated search, notifications, persisted pictures, export, or shift management.
 - Reproducing HTML structure, CSS, or browser SVG symbols directly in production XAML.
-- Achieving pixel identity at the expense of native behavior or accessibility.
+- Hard-coding sample customers, dates, amounts, or counts solely to imitate a screenshot.
 
 ## Decisions
 
@@ -45,7 +46,11 @@ Shared resources will be separated by responsibility:
 - reusable surface styles for paper panels, selected cards, warning rows, ticket sheets, and offset shadows;
 - workspace-specific resources only when a pattern is not shared elsewhere.
 
-Concept colors become the authoritative palette. Kalam and Patrick Hand remain embedded application fonts, with a native UI or monospace font allowed for dense numeric data. Offset shadow layers and uneven four-value corner radii reproduce the intended paper aesthetic using supported XAML primitives. Functional icons use accessible WinUI icon elements with explicit automation names; SVG symbol markup from the concept remains documentation-only.
+The authoritative resources are `docs/ui-concepts/assets/app.css`, `assets/refinements.css`, the fonts, photos, ornaments, and patterns they reference, and the six screen HTML files. Regenerated screen PNGs and `menu-picture-editor.png` provide matched review captures. `docs/luxury-theme.md` supplies supporting guidance; the screen-specific treatment takes precedence where it is more specific.
+
+Use EB Garamond for display headings, prices, and display numerals, and Instrument Sans for controls, labels, and reading text, with the exact weights, sizes, tracking, and line heights shown in the concepts. Replace the obsolete Kalam / Patrick Hand presentation resources. Preserve the cream (#f3eee4), taupe (#e4dbcc), charcoal (#262321), and brass (#b69355) palette and the explicit small-text accent colors. Do not introduce a native or monospace typography substitution that changes the reference appearance.
+
+Reproduce square geometry, fine and double rules, inset photo frames, café illustrations, lattice/hatch patterns, and spacing using native XAML templates or packaged assets. Service board order cards use pale yellow Confirmed, peach Preparing, and sage Ready paper surfaces, translucent tape, folded corners, subtle paper shadows, and aligned card baselines. Retain the selected-note outline and left accent. This shadow treatment is specific to the sticky notes; other surfaces retain their concept styling. Decorative layers must not intercept input or appear in the accessibility tree. Functional icons must match the concept shapes and stroke treatment while exposing meaningful automation names.
 
 Alternative considered: copy visual properties into each page. Rejected because token drift would make six workspace migrations inconsistent and expensive to maintain.
 
@@ -75,9 +80,11 @@ Alternative considered: move payment recording into Counter as part of this visu
 
 ### 6. Use explicit visual states at the established breakpoints
 
-Each workspace defines Compact, Medium, and Expanded visual states using the existing width boundaries. Expanded layouts follow the concepts closely. Medium layouts reduce simultaneous columns and move secondary detail into a selectable pane. Compact layouts stack regions or use an in-workspace list/detail transition while preserving the current task and entered data.
+Each workspace defines Compact, Medium, and Expanded visual states using the existing width boundaries. At 1440 by 900, Expanded layouts must match the concepts exactly. At other widths, retain the same visual tokens, components, content hierarchy, and decorative language while reflowing regions. Medium layouts reduce simultaneous columns and move secondary detail into a selectable pane. Compact layouts stack regions or use an in-workspace list/detail transition while preserving the current task and entered data.
 
 Scrolling is assigned to bounded content regions rather than the entire desktop shell. Primary actions remain visible or are placed in a predictable sticky/footer region. Layout transitions change presentation only and do not recreate workspace state.
+
+Native keyboard behavior and accessibility remain required. If a reference detail conflicts with the specified touch targets, supported behavior, or native rendering constraints, record the exact conflict and obtain approval for a targeted concept/spec revision before claiming completion. Do not silently replace the reference with an approximate native default.
 
 Alternative considered: scale the 1440 by 900 design uniformly. Rejected because scaled controls would harm readability and touch targets while still producing poor narrow-window behavior.
 
@@ -89,11 +96,11 @@ Workspace state survives layout transitions and normal navigation where the curr
 
 Alternative considered: use only global InfoBars. Rejected because global messages lose action context and can obscure simultaneous workspace state.
 
-### 8. Treat concepts as reference states, not additional product promises
+### 8. Treat the updated concepts as the exact visual contract
 
-The checked-in HTML and PNG concepts define visual hierarchy, density, copy tone, and representative populated states. Production controls appear only when backed by existing behavior. Sample numbers, people, dates, queue counts, and statuses are not hard-coded into the client.
+The six checked-in screen HTML files, shared styles, bundled assets, and regenerated PNGs define the exact appearance of the shell and workspaces. Layout, component dimensions, visual copy, typography, image crop, icon treatment, patterns, tape/folds, borders, and selection states must match. A merely similar palette or hierarchy is insufficient. Browser-specific implementation details may be translated into WinUI techniques only when their visible result is preserved.
 
-Concept-only features remain absent until a separate change defines their data contracts and behavior. Layouts reserve no mandatory empty chrome for omitted features; neighboring regions expand naturally.
+Sample numbers, people, dates, queue counts, and statuses come from live application state. Use equivalent seeded data for visual verification instead of hard-coding sample data. The existing supported-affordance and payment-boundary requirements still apply. Any difference they require from the visible concept, including omission of an unsupported control or a different action label, must be documented and approved in the concept/spec before that screen can be accepted. An unsupported capability must not be simulated to satisfy visual comparison.
 
 Alternative considered: render disabled placeholders for fidelity. Rejected because disabled or inert controls imply unavailable permissions or temporary failure rather than an intentionally unimplemented capability.
 
@@ -101,19 +108,19 @@ Alternative considered: render disabled placeholders for fidelity. Rejected beca
 
 Existing workspace tests remain the behavioral safety net. New tests cover six-tag navigation mapping, default navigation after connection, legacy inventory alias routing during migration, presentation-state transitions, breakpoint state selection where testable, and accessible naming for critical icon-only actions.
 
-Manual smoke verification uses the seeded midterm database and exercises one representative workflow in every workspace at Compact and Expanded widths. Visual comparison checks hierarchy and component use against `docs/ui-concepts`, while acceptance is based on the spec rather than hard-coded screenshot pixels.
+Manual smoke verification uses the seeded midterm database and exercises one representative workflow in every workspace at Compact and Expanded widths. Capture each workspace and the Menu editor at a 1440 by 900 content viewport with equivalent data, selected items, and UI state; record the concept commit used. Compare each capture directly with its concept using side-by-side views or overlays. Check shell and column geometry, alignment and spacing, fonts and line breaks, palette, photos and crops, icons, patterns, ornaments, borders, paper/tape/fold/shadow treatments, and selected/warning states. Resolve all visible differences before checking off the corresponding implementation task. Behavioral tests alone do not satisfy this visual gate.
 
-Alternative considered: screenshot-only verification. Rejected because it is brittle for fonts and rendering and cannot prove workflow parity or accessibility.
+Alternative considered: hierarchy-only visual review or screenshot-only testing. Rejected because hierarchy-only review permits visible drift, while screenshots alone cannot prove workflow parity or accessibility. Both exact visual verification and behavioral checks are required.
 
 ## Risks / Trade-offs
 
 - **[Large XAML pages become difficult to maintain]** -> Split each workspace into named section views and keep shared styles in resource dictionaries.
-- **[Restyling NavigationView cannot reproduce every concept detail]** -> Prioritize hierarchy, spacing, palette, and interaction semantics; introduce a custom template only for isolated visual gaps.
+- **[Default NavigationView styling differs from the concepts]** -> Use custom templates and shared resources to reproduce the reference appearance while retaining navigation semantics; unresolved differences block visual acceptance.
 - **[Inventory consolidation loses page-local state]** -> Add a Stock room context and parity tests before retiring each standalone page.
 - **[Code-behind refactoring changes behavior during a visual migration]** -> Characterize current commands first and move state incrementally behind existing workspace tests.
-- **[Handwritten typography reduces numeric scan speed]** -> Use the approved native or monospace exception for dense totals, tables, timestamps, and identifiers.
+- **[Font substitution changes alignment and number widths]** -> Package the exact EB Garamond and Instrument Sans font files and preserve the concept's tabular numeral settings in dense data regions.
 - **[Concept density fails at smaller widths]** -> Design each workspace's three visual states before marking its expanded layout complete.
-- **[Uncommitted concept files change during implementation]** -> Treat the concept snapshot present when implementation begins as the reference and report material later changes rather than silently chasing them.
+- **[Concept updates invalidate previous verification]** -> Record the reference commit, reset affected completion claims, and repeat matched-state screenshot review against the latest approved concepts before rechecking tasks.
 
 ## Migration Plan
 
@@ -124,6 +131,6 @@ Alternative considered: screenshot-only verification. Rejected because it is bri
 5. Migrate Service board using existing operations commands and introduce the shared order-detail presentation.
 6. Migrate Counter after its menu, ticket, customer context, discount, loyalty, and confirmation states have characterization coverage.
 7. Migrate Reports using reusable dashboard panels and native presentation of the existing result sets.
-8. Run automated tests and seeded manual smoke checks at Compact and Expanded widths, then remove obsolete page registrations, local duplicate styles, and temporary aliases.
+8. Run automated tests, seeded manual smoke checks at Compact and Expanded widths, and exact matched-state screenshot comparisons for all six workspaces and the Menu editor at 1440 by 900, then remove obsolete page registrations, local duplicate styles, and temporary aliases.
 
 Rollback is page-oriented: until a workspace passes parity checks, its stable shell destination can point back to the existing page. No database rollback is required because this change introduces no schema or persisted-data migration.

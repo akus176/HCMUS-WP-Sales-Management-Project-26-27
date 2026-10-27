@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=1440">
 <title>Reports · Corner Cafe concept</title>
 <link rel="stylesheet" href="../assets/app.css">
+<link rel="stylesheet" href="../assets/refinements.css">
 </head>
 <body class="screen">
 <script src="../assets/icons.js"></script>
 <div class="window">
   <div class="titlebar">
     <div class="win-brand"><span class="logo-dot"><svg class="ico"><use href="#i-counter"/></svg></span><b>Corner Cafe</b></div>
-    <div class="win-title">Service Console</div>
+    <div class="win-title">Service console</div>
     <div class="win-right">
       <span class="conn"><i></i> Local · connected</span>
       <span class="win-clock">10:42</span>
@@ -27,23 +28,24 @@
           <div class="brand-sub">service console</div>
         </div>
       </div>
-      <nav class="nav-groups">
+      <nav class="nav-groups" aria-label="Workspaces">
         <div class="nav-group">
           <div class="nav-group-label">Service</div>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span><span class="key">1</span></a>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
+          <a class="nav-item" href="#"><span class="numeral">I</span><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span></a>
+          <a class="nav-item" href="#"><span class="numeral">II</span><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
         </div>
         <div class="nav-group">
           <div class="nav-group-label">Manage</div>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span><span class="key">3</span></a>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span><span class="key">4</span></a>
-          <a class="nav-item" href="#"><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span><span class="key">5</span></a>
+          <a class="nav-item" href="#"><span class="numeral">III</span><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span></a>
+          <a class="nav-item" href="#"><span class="numeral">IV</span><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span></a>
+          <a class="nav-item" href="#"><span class="numeral">V</span><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span></a>
         </div>
         <div class="nav-group">
           <div class="nav-group-label">Insights</div>
-          <a class="nav-item active" aria-current="page" href="#"><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span><span class="key">6</span></a>
+          <a class="nav-item active" aria-current="page" href="#"><span class="numeral">VI</span><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span></a>
         </div>
       </nav>
+      <img class="sidebar-ornament" src="../assets/ornaments/coffee.svg" alt="" aria-hidden="true">
       <div class="side-foot">
         <div class="shift-card">
           <div class="shift-top"><span>Shift 01</span><span>Open</span></div>
@@ -75,9 +77,10 @@
             <h1 class="page-title">Reports</h1>
             <div class="page-sub">A short read on the week: what sold, how they paid, and what needs fixing before close.</div>
           </div>
+          <img class="page-ornament" src="../assets/ornaments/reports.svg" alt="" aria-hidden="true">
           <div class="page-actions">
-            <button class="chip" style="height:37px;"><svg class="ico"><use href="#i-calendar"/></svg> 19 — 25 Oct <svg class="ico"><use href="#i-chevron"/></svg></button>
-            <button class="btn"><svg class="ico"><use href="#i-download"/></svg> Export</button>
+            <button class="btn"><svg class="ico"><use href="#i-calendar"/></svg> 19 — 25 Oct <svg class="ico"><use href="#i-chevron"/></svg></button>
+            <button class="btn btn-primary"><svg class="ico"><use href="#i-download"/></svg> Export</button>
           </div>
         </div>
 
@@ -97,13 +100,13 @@
           <div class="report-kpi">
             <div class="k-label">Average ticket</div>
             <div class="k-value">$14.52</div>
-            <div class="k-sub text-red">▼ $0.82 softer than prior week</div>
+            <div class="k-sub">▼ $0.82 softer than prior week</div>
             <div class="k-mark"><svg class="ico"><use href="#i-tag"/></svg></div>
           </div>
           <div class="report-kpi alert">
             <div class="k-label">Low stock</div>
             <div class="k-value">3 items</div>
-            <div class="k-sub text-red">2 urgent · fix before close</div>
+            <div class="k-sub">2 urgent · fix before close</div>
             <div class="k-mark"><svg class="ico"><use href="#i-warning"/></svg></div>
           </div>
         </div>
@@ -115,7 +118,7 @@
                 <h3>Revenue by day</h3>
                 <p>Paid tickets, net of refunds and cancelled orders.</p>
               </div>
-              <span class="right pill">19 — 25 Oct</span>
+              <span class="right">19 — 25 Oct</span>
             </div>
             <div class="revenue-chart">
               <div class="daycol">
@@ -211,19 +214,24 @@
               </div>
               <span class="right">This week</span>
             </div>
-            <div class="report-bottom-left" style="flex:1;">
+            <div class="report-bottom-left">
               <div class="donut-wrap">
-                <div class="donut"></div>
+                <svg viewBox="0 0 108 108" aria-hidden="true">
+                  <circle cx="54" cy="54" r="45" stroke="#d5cab8"></circle>
+                  <circle cx="54" cy="54" r="45" stroke="#b69355" stroke-dasharray="132.6 150.1" stroke-dashoffset="0"></circle>
+                  <circle cx="54" cy="54" r="45" stroke="#262321" stroke-dasharray="92.7 190" stroke-dashoffset="-132.6"></circle>
+                  <circle cx="54" cy="54" r="45" stroke="#5f5750" stroke-dasharray="57.4 225.3" stroke-dashoffset="-225.3"></circle>
+                </svg>
                 <div class="donut-label"><b>86</b><span>paid tickets</span></div>
               </div>
               <div class="pay-legend">
-                <div class="legend-row"><i style="background:var(--blue);"></i> Cash <span class="amount">$585.50</span><span class="pct">46.9%</span></div>
-                <div class="legend-row"><i style="background:var(--yellow);"></i> Card <span class="amount">$409.50</span><span class="pct">32.8%</span></div>
-                <div class="legend-row"><i style="background:var(--paper-3);"></i> E-wallet <span class="amount">$253.50</span><span class="pct">20.3%</span></div>
-                <div class="chart-foot" style="margin-top:2px;">
+                <div class="legend-row"><i style="background:var(--accent);"></i> Cash <span class="amount">$585.50</span><span class="pct">46.9%</span></div>
+                <div class="legend-row"><i style="background:var(--ink);"></i> Card <span class="amount">$409.50</span><span class="pct">32.8%</span></div>
+                <div class="legend-row"><i style="background:var(--ink-2);"></i> E-wallet <span class="amount">$253.50</span><span class="pct">20.3%</span></div>
+                <div class="chart-foot">
                   <span class="pill pill-blue">Card</span>
                   <span>fastest growing method</span>
-                  <b style="margin-left:auto;font-family:var(--mono);font-size:9.5px;">+18%</b>
+                  <b>+18%</b>
                 </div>
               </div>
             </div>
@@ -244,19 +252,19 @@
             </div>
             <div class="low-stock-report">
               <div class="low-report-row">
-                <svg class="ico" style="width:13px;height:13px;"><use href="#i-warning"/></svg>
+                <svg class="ico"><use href="#i-warning"/></svg>
                 <b>Arabica beans</b>
                 <span class="need">500 g left · order 2 kg</span>
                 <span class="amt">TODAY</span>
               </div>
               <div class="low-report-row">
-                <svg class="ico" style="width:13px;height:13px;"><use href="#i-warning"/></svg>
+                <svg class="ico"><use href="#i-warning"/></svg>
                 <b>Matcha powder</b>
                 <span class="need">180 g left · order 1 kg</span>
                 <span class="amt">TODAY</span>
               </div>
               <div class="low-report-row">
-                <svg class="ico" style="width:13px;height:13px;"><use href="#i-warning"/></svg>
+                <svg class="ico"><use href="#i-warning"/></svg>
                 <b>Cocoa powder</b>
                 <span class="need">180 g left · order 500 g</span>
                 <span class="amt">THIS WEEK</span>
