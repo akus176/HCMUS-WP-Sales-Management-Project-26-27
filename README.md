@@ -127,8 +127,8 @@ Planned operational roles are Admin, Manager, Cashier, Barista, Inventory Staff,
 
 ## Midterm demonstration
 
-Follow the [executed demonstration checklist](docs/midterm-demonstration.md) for inputs,
-actual results, native client evidence, and reproduction instructions for #103.
+Follow the [executed demonstration checklist](docs/midterm-demonstration.md) and [midterm test-case report](docs/midterm-test-cases.md) for inputs,
+actual results, native client evidence, defect resolutions, and reproduction instructions for #103 and #104.
 With `COFFEESHOP_TEST_POSTGRES` set to an isolated PostgreSQL administrator connection, run:
 
 ```powershell

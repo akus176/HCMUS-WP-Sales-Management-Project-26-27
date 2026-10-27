@@ -90,5 +90,4 @@ refreshes observe stock changes committed by POS and audit workflows.
 Completion and loyalty remain in the same database transaction;
 the rollback check proves a loyalty failure cannot partially complete the order or release its table.
 
-Final API authentication/authorization and the full valid/invalid/boundary test-case report remain
-separate work. The latter is [T8.6 / #104](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/104).
+Final API authentication/authorization remains separate work; the full valid/invalid/boundary test-case record across all core modules is documented in the [midterm test-case report](midterm-test-cases.md) for [T8.6 / #104](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/104).
