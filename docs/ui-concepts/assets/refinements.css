@@ -30,6 +30,11 @@
   color: var(--ink-2);
 }
 
+/* Reserve the same caption-button region as the native window title bar. */
+.titlebar { padding-right: 0; }
+.win-controls { width: 138px; height: 40px; gap: 0; }
+.win-controls span { width: 46px; height: 40px; display: grid; place-items: center; }
+
 .sidebar-ornament {
   flex-shrink: 1;
 }
