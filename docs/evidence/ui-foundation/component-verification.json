@@ -1,0 +1,50 @@
+{
+  "surface": "Component gallery",
+  "resourcesResolved": 784,
+  "primaryTargets": [
+    {
+      "name": "PRIMARY ACTION",
+      "width": 101.5999984741211,
+      "height": 48
+    },
+    {
+      "name": "SECONDARY ACTION",
+      "width": 115.19999694824219,
+      "height": 48
+    },
+    {
+      "name": "Add item",
+      "width": 48,
+      "height": 48
+    },
+    {
+      "name": "Find a drink",
+      "width": 442.3999938964844,
+      "height": 48
+    },
+    {
+      "name": "Drinks and recipes tab",
+      "width": 94.4000015258789,
+      "height": 48
+    },
+    {
+      "name": "START",
+      "width": 58.400001525878906,
+      "height": 48
+    },
+    {
+      "name": "FINISH",
+      "width": 59.20000076293945,
+      "height": 48
+    },
+    {
+      "name": "SERVE",
+      "width": 60,
+      "height": 48
+    }
+  ],
+  "allTargetsAtLeast48": true,
+  "keyboardFocus": "Keyboard",
+  "width": 1152,
+  "height": 720
+}

@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="ConsoleGroundBrush" Color="#F3EEE4" />
+    <SolidColorBrush x:Key="ConsolePanelBrush" Color="#E4DBCC" />
+    <SolidColorBrush x:Key="ConsoleInkBrush" Color="#262321" />
+    <SolidColorBrush x:Key="ConsoleMutedInkBrush" Color="#5F5750" />
+    <SolidColorBrush x:Key="ConsoleFieldBrush" Color="#262321" />
+    <SolidColorBrush x:Key="ConsoleFieldDeepBrush" Color="#302C29" />
+    <SolidColorBrush x:Key="ConsoleFieldLineBrush" Color="#46403A" />
+    <SolidColorBrush x:Key="ConsoleOnFieldBrush" Color="#F3EEE4" />
+    <SolidColorBrush x:Key="ConsoleOnFieldMutedBrush" Color="#C6BDB0" />
+    <SolidColorBrush x:Key="ConsoleAccentBrush" Color="#B69355" />
+    <SolidColorBrush x:Key="ConsoleAccentTextBrush" Color="#76591F" />
+    <SolidColorBrush x:Key="ConsoleAccentLightBrush" Color="#D2B071" />
+    <SolidColorBrush x:Key="ConsoleRuleBrush" Color="#D5CAB8" />
+    <SolidColorBrush x:Key="ConsolePanelLineBrush" Color="#C6B89F" />
+    <SolidColorBrush x:Key="ConsoleConfirmedBrush" Color="#F3E8BF" />
+    <SolidColorBrush x:Key="ConsolePreparingBrush" Color="#EDDDCA" />
+    <SolidColorBrush x:Key="ConsoleReadyBrush" Color="#E1E7D7" />
+    <SolidColorBrush x:Key="ConsoleConfirmedEdgeBrush" Color="#D6C795" />
+    <SolidColorBrush x:Key="ConsolePreparingEdgeBrush" Color="#D1BAA0" />
+    <SolidColorBrush x:Key="ConsoleReadyEdgeBrush" Color="#BDC8AD" />
+    <SolidColorBrush x:Key="ConsoleTapeBrush" Color="#CCD7C4A8" />
+    <SolidColorBrush x:Key="ConsoleConfirmedTapeBrush" Color="#CCDFD2AE" />
+    <SolidColorBrush x:Key="ConsolePreparingTapeBrush" Color="#CCD7C4A8" />
+    <SolidColorBrush x:Key="ConsoleReadyTapeBrush" Color="#CCCCD4BC" />
+    <SolidColorBrush x:Key="ConsoleShadowBrush" Color="#20262321" />
+</ResourceDictionary>

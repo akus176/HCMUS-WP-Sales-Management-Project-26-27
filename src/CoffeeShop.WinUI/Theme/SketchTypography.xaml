@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <FontFamily x:Key="SketchHeadingFontFamily">ms-appx:///Assets/Fonts/Kalam-Bold.ttf#Kalam</FontFamily>
-    <FontFamily x:Key="SketchBodyFontFamily">ms-appx:///Assets/Fonts/PatrickHand-Regular.ttf#Patrick Hand</FontFamily>
+    <!-- Compatibility aliases until each existing workspace has migrated. -->
+    <FontFamily x:Key="SketchHeadingFontFamily">ms-appx:///Assets/Fonts/EBGaramond-Regular.ttf#EB Garamond</FontFamily>
+    <FontFamily x:Key="SketchBodyFontFamily">ms-appx:///Assets/Fonts/InstrumentSans-Regular.ttf#Instrument Sans</FontFamily>
 </ResourceDictionary>
