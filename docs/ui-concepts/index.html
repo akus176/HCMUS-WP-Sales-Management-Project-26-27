@@ -2,84 +2,89 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=1440">
-<title>Paper Service · UI concept deck</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Service, Considered. · UI concept deck</title>
 <link rel="stylesheet" href="assets/deck.css">
 </head>
 <body class="deck">
 <script src="assets/icons.js"></script>
 
-<nav class="deck-nav">
-  <div class="deck-brand"><span class="dot"><svg class="ico"><use href="#i-counter"/></svg></span> Paper Service <span class="sub">concept deck</span></div>
+<nav class="deck-nav" aria-label="Concept deck">
+  <a class="deck-brand" href="#cover"><span class="mark"><svg class="ico"><use href="#i-counter"/></svg></span> Service, Considered.</a>
   <div class="deck-links">
-    <a href="#diagnosis">Diagnosis</a>
-    <a href="#counter">Screens</a>
-    <a href="#system">Language</a>
-    <a href="#plan">Plan</a>
+    <a class="deck-link" href="#diagnosis"><span>01</span> Diagnosis</a>
+    <a class="deck-link" href="#counter"><span>02</span> Screens</a>
+    <a class="deck-link" href="#system"><span>08</span> Language</a>
+    <a class="deck-link" href="#plan"><span>09</span> Plan</a>
   </div>
   <div class="deck-nav-right">
-    <span class="deck-status"><i></i> concept v1 · 26 Oct 2026</span>
+    <span class="deck-status"><i></i> concept v2 · 27 Oct 2026</span>
     <a class="deck-cta" href="#approval">Review &amp; approve →</a>
   </div>
 </nav>
 
 <!-- 00 · COVER -->
-<section class="slide cover" id="cover">
+<section class="slide cover" id="cover" data-marker="Vol. I · Service, considered">
   <div class="cover-top">
     <span>Corner Cafe · service console redesign</span>
     <div class="right"><span>WinUI 3 · 1440 × 900</span><span>6 artboards</span><span>no production edits</span></div>
   </div>
 
-  <div class="cover-body">
+  <div class="cover-main">
     <div class="cover-copy">
-      <div class="cover-kicker"><i></i> Concept art · for approval</div>
-      <h1>Paper<br><span>Service</span></h1>
-      <p class="cover-lede">A calmer counter, a faster <b>service board</b>, and one notebook for the whole shop.</p>
-      <div class="cover-meta">
-        <div class="meta"><span>Screens</span><b>6 artboards</b></div>
-        <div class="meta"><span>Navigation</span><b>11 → 6</b></div>
-        <div class="meta"><span>Production UI</span><b>Untouched</b></div>
+      <div class="cover-kicker">Concept art · for approval</div>
+      <h1>Service,<br><em>Considered.</em></h1>
+      <p class="cover-lede">A calmer counter, a faster <em>service board</em>, and one notebook for the whole shop.</p>
+      <div class="cover-facts">
+        <div class="cover-fact"><span>Screens</span><b>6 artboards</b></div>
+        <div class="cover-fact"><span>Navigation</span><b>11 → 6</b></div>
+        <div class="cover-fact"><span>Production UI</span><b>Untouched</b></div>
       </div>
-      <div class="cover-stamp">For approval<br>not built yet</div>
+      <span class="cover-mark">For approval · not built yet</span>
     </div>
 
-    <div class="hero-collage">
-      <figure class="hero-shot main"><img src="counter.png" alt="Counter concept artboard"></figure>
-      <figure class="hero-shot back"><img src="service-board.png" alt="Service board concept artboard"></figure>
-      <div class="hero-note">The till reads like a receipt.<small>Ticket, loyalty, pay — in that order.</small></div>
-    </div>
+    <figure class="cover-image plate">
+      <img src="assets/photos/cafe-room.jpg" width="1200" height="800" alt="The Corner Cafe room in warm afternoon light">
+      <figcaption><span>The room, before the software.</span><span>Plate 01</span></figcaption>
+    </figure>
   </div>
 
-  <div class="cover-index">
-    <a class="index-chip" href="#counter"><span class="n">01</span> Counter</a>
-    <a class="index-chip" href="#service-board"><span class="n">02</span> Service board</a>
-    <a class="index-chip" href="#menu"><span class="n">03</span> Menu</a>
-    <a class="index-chip" href="#stock-room"><span class="n">04</span> Stock room</a>
-    <a class="index-chip" href="#customers"><span class="n">05</span> Customers</a>
-    <a class="index-chip" href="#reports"><span class="n">06</span> Reports</a>
+  <div class="cover-index-wrap">
+    <div class="cover-index">
+      <div class="cover-index-label">Contents</div>
+      <div class="cover-index-links">
+        <a class="index-chip" href="#counter"><span class="n">01</span> Counter</a>
+        <a class="index-chip" href="#service-board"><span class="n">02</span> Service board</a>
+        <a class="index-chip" href="#menu"><span class="n">03</span> Menu</a>
+        <a class="index-chip" href="#stock-room"><span class="n">04</span> Stock room</a>
+        <a class="index-chip" href="#customers"><span class="n">05</span> Customers</a>
+        <a class="index-chip" href="#reports"><span class="n">06</span> Reports</a>
+      </div>
+    </div>
+    <div class="slide-no">00 / 10</div>
   </div>
-  <div class="slide-no">00 / 10</div>
 </section>
 
 <!-- 01 · DIAGNOSIS -->
-<section class="slide" id="diagnosis">
-  <div class="section-head">
-    <div>
-      <div class="section-kicker"><span class="n">01</span> / The diagnosis</div>
-      <h2 class="section-title">The data is there.<br>The surface fights back.</h2>
+<section class="slide" id="diagnosis" data-marker="I · Diagnosis">
+  <div class="section-head" data-folio="01">
+    <div class="section-no">01</div>
+    <div class="section-copy">
+      <div class="section-kicker">The diagnosis</div>
+      <h2 class="section-title">The data is there.<br>The surface <em>fights back.</em></h2>
       <p class="section-sub">The current WinUI client works, but every screen asks the cashier to translate. This concept removes that translation before changing a single line of XAML.</p>
     </div>
     <div class="section-side">
-      <span class="pill pill-stamp pill-red">Current build evidence</span>
+      <span class="side-tag">Current build evidence</span>
       <a class="plain-link" href="../evidence/midterm/reports.png">Open evidence screenshot →</a>
     </div>
   </div>
 
   <div class="diag-grid">
     <figure class="evidence">
-      <div class="evidence-bar"><i></i><i></i><i></i><span>CoffeeShop.WinUI · current reports</span></div>
-      <img src="../evidence/midterm/reports.png" alt="Current WinUI reports screen">
-      <figcaption><b>Reports today.</b> Three date/payment fields and a raw status banner take the top third. Results start below the fold; the nav asks the user to know the schema.</figcaption>
+      <div class="evidence-meta"><span>Evidence · current reports</span><b>CoffeeShop.WinUI</b></div>
+      <div class="evidence-frame plate"><img src="../evidence/midterm/reports.png" width="1920" height="1157" alt="Current WinUI reports screen"></div>
+      <figcaption><b>Reports today.</b> Three date and payment fields plus a raw status banner take the top third. Results start below the fold, and the navigation asks the user to know the schema.</figcaption>
     </figure>
 
     <div class="problems">
@@ -110,28 +115,37 @@
     </div>
     <div class="principle">
       <span class="label">Principle 02</span>
-      <h3>Paper where it helps.</h3>
-      <p>Tickets, ledgers, sticky notes. Familiar café artifacts, not decoration for its own sake.</p>
+      <h3>Paper, where it helps.</h3>
+      <p>Tickets, ledgers, and notes are familiar café artifacts. They earn their place through use, not decoration.</p>
     </div>
     <div class="principle">
       <span class="label">Principle 03</span>
       <h3>Loud only when it matters.</h3>
-      <p>Yellow focuses. Blue acts. Red is late, low, or destructive. Nothing else shouts.</p>
+      <p>Gold marks. Charcoal acts. Red is late, low, or destructive. Nothing else raises its voice.</p>
     </div>
   </div>
 
   <div class="ia-strip">
-    <div>
-      <div class="ia-label">Before <b>11 destinations</b></div>
-      <div class="ia-tags">
-        <span class="ia-tag old">Point of Sale</span><span class="ia-tag old">Fulfillment</span><span class="ia-tag old">Menu &amp; Recipes</span><span class="ia-tag old">Customers</span><span class="ia-tag old">Ingredients</span><span class="ia-tag old">Suppliers</span><span class="ia-tag old">Receipts</span><span class="ia-tag old">Low Stock</span><span class="ia-tag old">Reports</span><span class="ia-tag old">Adjustments</span><span class="ia-tag old">Movements</span>
+    <div class="ia-inner">
+      <div class="ia-block before">
+        <div class="ia-label">Before <b>11 destinations</b></div>
+        <div class="ia-tags">
+          <span class="ia-tag">Point of Sale</span><span class="ia-tag">Fulfillment</span>
+          <span class="ia-tag">Menu &amp; Recipes</span><span class="ia-tag">Customers</span>
+          <span class="ia-tag">Ingredients</span><span class="ia-tag">Suppliers</span>
+          <span class="ia-tag">Receipts</span><span class="ia-tag">Low Stock</span>
+          <span class="ia-tag">Reports</span><span class="ia-tag">Adjustments</span>
+          <span class="ia-tag">Movements</span>
+        </div>
       </div>
-    </div>
-    <div class="ia-arrow">→</div>
-    <div>
-      <div class="ia-label">After <b>6 destinations</b></div>
-      <div class="ia-tags">
-        <span class="ia-tag new">Counter</span><span class="ia-tag new">Service board</span><span class="ia-tag new">Menu</span><span class="ia-tag new">Stock room</span><span class="ia-tag new">Customers</span><span class="ia-tag new">Reports</span>
+      <div class="ia-arrow" aria-hidden="true">→</div>
+      <div class="ia-block after">
+        <div class="ia-label">After <b>6 destinations</b></div>
+        <div class="ia-tags">
+          <span class="ia-tag new">Counter</span><span class="ia-tag new">Service board</span>
+          <span class="ia-tag new">Menu</span><span class="ia-tag new">Stock room</span>
+          <span class="ia-tag new">Customers</span><span class="ia-tag new">Reports</span>
+        </div>
       </div>
     </div>
   </div>
@@ -139,247 +153,327 @@
 </section>
 
 <!-- 02 · COUNTER -->
-<section class="slide" id="counter">
-  <div class="section-head">
-    <div>
-      <div class="section-kicker"><span class="n">02</span> / Counter</div>
-      <h2 class="section-title">Sell in three taps.</h2>
+<section class="slide screen-slide" id="counter" data-marker="II · Counter">
+  <div class="section-head" data-folio="02">
+    <div class="section-no">02</div>
+    <div class="section-copy">
+      <div class="section-kicker">Counter</div>
+      <h2 class="section-title">Sell in <em>three taps.</em></h2>
       <p class="section-sub">The menu becomes the interface. The ticket becomes a receipt. Size, milk, and toppings stay one beat away instead of blocking the first decision.</p>
     </div>
     <div class="section-side">
-      <span class="pill pill-blue">Daily driver · POS</span>
+      <span class="side-tag">Daily driver · POS</span>
       <a class="plain-link" href="screens/counter.html" target="_blank">Open full-size artboard →</a>
     </div>
   </div>
-  <div class="screen-layout">
-    <figure class="art-frame"><img src="counter.png" alt="Counter artboard"><figcaption><span>Counter · sell</span><span>1440 × 900</span></figcaption></figure>
+
+  <div class="screen-layout layout-split">
+    <figure class="shot">
+      <div class="shot-frame plate"><img src="counter.png" width="1440" height="900" alt="Counter artboard with drink tiles and a receipt-style ticket"></div>
+      <figcaption><span>Counter · sell</span><span>1440 × 900</span></figcaption>
+    </figure>
     <aside class="notes">
-      <div class="note"><b>Drink tiles, not a form.</b><p>The grid is the menu. Tap once to add; size and toppings open as a second beat, so the first decision stays fast.</p></div>
-      <div class="note"><b>The ticket is a receipt.</b><p>Quantity, modifiers, loyalty, total, and payment read top-to-bottom in the same order the cashier says them out loud.</p></div>
-      <div class="note"><b>Context stays in the rail.</b><p>Shift, open tickets, table, and customer are always visible. No modal detour, no lost state.</p></div>
-      <div class="rationale"><span>Why it works</span><p>The menu is the interface; the form is the exception.</p></div>
+      <div class="note"><h3>Drink tiles, not a form.</h3><p>The grid is the menu. Tap once to add; size and toppings open as a second beat, so the first decision stays fast.</p></div>
+      <div class="note"><h3>The ticket is a receipt.</h3><p>Quantity, modifiers, loyalty, total, and payment read top-to-bottom in the same order the cashier says them out loud.</p></div>
+      <div class="note"><h3>Context stays in the rail.</h3><p>Shift, open tickets, table, and customer are always visible. No modal detour, no lost state.</p></div>
+      <div class="rationale"><span class="label">Why it works</span><p>The menu is the interface; the form is the exception.</p></div>
     </aside>
   </div>
   <div class="slide-no">02 / 10</div>
 </section>
 
 <!-- 03 · SERVICE BOARD -->
-<section class="slide" id="service-board">
-  <div class="section-head">
-    <div>
-      <div class="section-kicker"><span class="n">03</span> / Service board</div>
-      <h2 class="section-title">A board, not a list.</h2>
-      <p class="section-sub">Confirmed, preparing, ready — left to right. The late ticket is the only red thing in the room, and the side ticket carries the detail without covering the board.</p>
+<section class="slide screen-slide" id="service-board" data-marker="III · Service board">
+  <div class="section-head" data-folio="03">
+    <div class="section-no">03</div>
+    <div class="section-copy">
+      <div class="section-kicker">Service board</div>
+      <h2 class="section-title">A board, <em>not a list.</em></h2>
+      <p class="section-sub">Confirmed, preparing, ready — left to right. Taped paper notes use yellow, peach, and sage to separate the queues, while the side ticket carries the detail without covering the board.</p>
     </div>
     <div class="section-side">
-      <span class="pill pill-stamp pill-yellow">Live floor · 3 open</span>
+      <span class="side-tag">Live floor · 3 open</span>
       <a class="plain-link" href="screens/service-board.html" target="_blank">Open full-size artboard →</a>
     </div>
   </div>
-  <div class="screen-layout">
-    <figure class="art-frame"><div class="art-live"><iframe src="screens/service-board.html" title="Service board artboard" tabindex="-1"></iframe></div><figcaption><span>Service board · operate</span><span>1440 × 900 · live</span></figcaption></figure>
+
+  <div class="screen-layout layout-reverse">
     <aside class="notes">
-      <div class="note"><b>The work starts immediately.</b><p>The summary cards are gone. Counts stay in the column headings and the one-sentence status line, while tickets gain the full vertical workspace.</p></div>
-      <div class="note"><b>Columns are the status machine.</b><p>Confirmed → preparing → ready. “Start”, “Finish”, and “Serve” are the only actions in each card, so the next state is never ambiguous.</p></div>
-      <div class="note"><b>The side ticket does the detail.</b><p>Discount requests, payment, and mark-ready live next to the board, not in a modal. Tables stay a small secondary panel.</p></div>
-      <div class="rationale"><span>Why it works</span><p>Service is spatial. The screen should feel like the counter, not a database grid.</p></div>
+      <div class="note"><h3>The work starts immediately.</h3><p>The summary cards are gone. Counts stay in the column headings and the one-sentence status line, while tickets gain the full vertical workspace.</p></div>
+      <div class="note"><h3>Columns are the status machine.</h3><p>Confirmed → preparing → ready. “Start”, “Finish”, and “Serve” are the only actions in each card, so the next state is never ambiguous.</p></div>
+      <div class="note"><h3>The side ticket does the detail.</h3><p>Discount requests, payment, and mark-ready live next to the board, not in a modal. Tables stay a small secondary panel.</p></div>
+      <div class="rationale"><span class="label">Why it works</span><p>Service is spatial. The screen should feel like the counter, not a database grid.</p></div>
     </aside>
+    <figure class="shot">
+      <div class="shot-frame plate"><img src="service-board.png" width="1440" height="900" alt="Service board artboard with taped sticky-note cards in confirmed, preparing, and ready columns"></div>
+      <figcaption><span>Service board · operate</span><span>1440 × 900</span></figcaption>
+    </figure>
   </div>
   <div class="slide-no">03 / 10</div>
 </section>
 
 <!-- 04 · MENU -->
-<section class="slide" id="menu">
-  <div class="section-head">
-    <div>
-      <div class="section-kicker"><span class="n">04</span> / Menu</div>
-      <h2 class="section-title">One notebook for every drink.</h2>
+<section class="slide screen-slide" id="menu" data-marker="IV · Menu">
+  <div class="section-head" data-folio="04">
+    <div class="section-no">04</div>
+    <div class="section-copy">
+      <div class="section-kicker">Menu</div>
+      <h2 class="section-title">One notebook for <em>every drink.</em></h2>
       <p class="section-sub">Categories on the left, products in the middle, one detail sheet on the right. Each drink can use a picture or keep a simple icon fallback.</p>
     </div>
     <div class="section-side">
-      <span class="pill">Catalog · 20 drinks</span>
+      <span class="side-tag">Catalog · 20 drinks</span>
       <a class="plain-link" href="screens/menu.html?edit=1" target="_blank">Open picture editor →</a>
     </div>
   </div>
-  <div class="screen-layout">
-    <figure class="art-frame"><img src="menu-picture-editor.png" alt="Drink editor with picture and icon choices"><figcaption><span>Menu · picture editor</span><span>1280 × 720</span></figcaption></figure>
+
+  <div class="screen-layout layout-split">
+    <figure class="shot">
+      <div class="shot-frame plate"><img src="menu-picture-editor.png" width="1440" height="900" alt="Drink editor with picture and icon choices"></div>
+      <figcaption><span>Menu · picture editor</span><span>1440 × 900</span></figcaption>
+    </figure>
     <aside class="notes">
-      <div class="note"><b>Picture or icon, by choice.</b><p>Picture is the clear default for a richer menu, while Icon remains one click away for drinks without photography.</p></div>
-      <div class="note"><b>Preview before save.</b><p>The selected picture, filename, file types, 5 MB limit, and square crop are visible before the user commits the change.</p></div>
-      <div class="note"><b>Replace and remove are explicit.</b><p>Choosing a new picture does not hide the fallback. Remove switches the drink back to its icon instead of leaving a broken image.</p></div>
-      <div class="rationale"><span>Why it works</span><p>Photography adds appetite; the icon fallback keeps incomplete catalogs usable.</p></div>
+      <div class="note"><h3>Picture or icon, by choice.</h3><p>Picture is the clear default for a richer menu, while Icon remains one click away for drinks without photography.</p></div>
+      <div class="note"><h3>Preview before save.</h3><p>The selected picture, filename, file types, 5 MB limit, and square crop are visible before the user commits the change.</p></div>
+      <div class="note"><h3>Replace and remove are explicit.</h3><p>Choosing a new picture does not hide the fallback. Remove switches the drink back to its icon instead of leaving a broken image.</p></div>
+      <div class="rationale"><span class="label">Why it works</span><p>Photography adds appetite; the icon fallback keeps incomplete catalogs usable.</p></div>
     </aside>
   </div>
   <div class="slide-no">04 / 10</div>
 </section>
 
 <!-- 05 · STOCK ROOM -->
-<section class="slide" id="stock-room">
-  <div class="section-head">
-    <div>
-      <div class="section-kicker"><span class="n">05</span> / Stock room</div>
-      <h2 class="section-title">Adjustments are events.</h2>
+<section class="slide screen-slide" id="stock-room" data-marker="V · Stock room">
+  <div class="section-head" data-folio="05">
+    <div class="section-no">05</div>
+    <div class="section-copy">
+      <div class="section-kicker">Stock room</div>
+      <h2 class="section-title">Adjustments are <em>events.</em></h2>
       <p class="section-sub">Balances, reorder points, and movements belong together. The adjustment drawer previews the new balance before anything is written.</p>
     </div>
     <div class="section-side">
-      <span class="pill pill-stamp pill-red">3 below reorder</span>
+      <span class="side-tag">3 below reorder</span>
       <a class="plain-link" href="screens/stock-room.html" target="_blank">Open full-size artboard →</a>
     </div>
   </div>
-  <div class="screen-layout">
-    <figure class="art-frame"><img src="stock-room.png" alt="Stock room artboard"><figcaption><span>Stock room · balances</span><span>1440 × 900</span></figcaption></figure>
+
+  <div class="screen-layout layout-reverse">
     <aside class="notes">
-      <div class="note"><b>Balances first.</b><p>Eight rows fit at 1440×900. Low rows bleed red from the edge, so the eye catches the exception before reading the numbers.</p></div>
-      <div class="note"><b>Preview the consequence.</b><p>“500 g → 380 g” appears before recording, with a warning that the new balance is still below reorder. No surprise after commit.</p></div>
-      <div class="note"><b>History is part of the action.</b><p>Recent movements sit under the form. The movement is immutable; corrections are new entries, not edits to the past.</p></div>
-      <div class="rationale"><span>Why it works</span><p>An adjustment is an event with a reason and an author, not a field edit.</p></div>
+      <div class="note"><h3>Balances first.</h3><p>Eight rows fit at 1440×900. Low rows carry a red rule from the edge, so the eye catches the exception before reading the numbers.</p></div>
+      <div class="note"><h3>Preview the consequence.</h3><p>“500 g → 380 g” appears before recording, with a warning that the new balance is still below reorder. No surprise after commit.</p></div>
+      <div class="note"><h3>History is part of the action.</h3><p>Recent movements sit under the form. The movement is immutable; corrections are new entries, not edits to the past.</p></div>
+      <div class="rationale"><span class="label">Why it works</span><p>An adjustment is an event with a reason and an author, not a field edit.</p></div>
     </aside>
+    <figure class="shot">
+      <div class="shot-frame plate"><img src="stock-room.png" width="1440" height="900" alt="Stock room artboard with balances and an adjustment drawer"></div>
+      <figcaption><span>Stock room · balances</span><span>1440 × 900</span></figcaption>
+    </figure>
   </div>
   <div class="slide-no">05 / 10</div>
 </section>
 
 <!-- 06 · CUSTOMERS -->
-<section class="slide" id="customers">
-  <div class="section-head">
-    <div>
-      <div class="section-kicker"><span class="n">06</span> / Customers</div>
-      <h2 class="section-title">A notebook, not a database.</h2>
+<section class="slide screen-slide" id="customers" data-marker="VI · Customers">
+  <div class="section-head" data-folio="06">
+    <div class="section-no">06</div>
+    <div class="section-copy">
+      <div class="section-kicker">Customers</div>
+      <h2 class="section-title">A notebook, <em>not a database.</em></h2>
       <p class="section-sub">Find a customer, read the profile, and set them for the next ticket without leaving the screen. Loyalty is explainable; addresses feed delivery.</p>
     </div>
     <div class="section-side">
-      <span class="pill">12 profiles · 5 with points</span>
+      <span class="side-tag">12 profiles · 5 with points</span>
       <a class="plain-link" href="screens/customers.html" target="_blank">Open full-size artboard →</a>
     </div>
   </div>
-  <div class="screen-layout">
-    <figure class="art-frame"><img src="customers.png" alt="Customers artboard"><figcaption><span>Customers · profile</span><span>1440 × 900</span></figcaption></figure>
+
+  <div class="screen-layout layout-split">
+    <figure class="shot">
+      <div class="shot-frame plate"><img src="customers.png" width="1440" height="900" alt="Customers artboard with list, profile, and next order"></div>
+      <figcaption><span>Customers · profile</span><span>1440 × 900</span></figcaption>
+    </figure>
     <aside class="notes">
-      <div class="note"><b>Three columns, one story.</b><p>List, profile, and next order. The selected customer is the same person in all three places; no detail page round-trip.</p></div>
-      <div class="note"><b>Ledger with a running balance.</b><p>Earn and redeem rows show the delta and the balance after it. “85 points” becomes an answer, not a number to trust.</p></div>
-      <div class="note"><b>Addresses feed delivery.</b><p>Home and Studio sit beside the next-order card. Choosing a customer at the counter also chooses their default address.</p></div>
-      <div class="rationale"><span>Why it works</span><p>Customer data is only useful when it changes the next order.</p></div>
+      <div class="note"><h3>Three columns, one story.</h3><p>List, profile, and next order. The selected customer is the same person in all three places; no detail page round-trip.</p></div>
+      <div class="note"><h3>Ledger with a running balance.</h3><p>Earn and redeem rows show the delta and the balance after it. “85 points” becomes an answer, not a number to trust.</p></div>
+      <div class="note"><h3>Addresses feed delivery.</h3><p>Home and Studio sit beside the next-order card. Choosing a customer at the counter also chooses their default address.</p></div>
+      <div class="rationale"><span class="label">Why it works</span><p>Customer data is only useful when it changes the next order.</p></div>
     </aside>
   </div>
   <div class="slide-no">06 / 10</div>
 </section>
 
 <!-- 07 · REPORTS -->
-<section class="slide" id="reports">
-  <div class="section-head">
-    <div>
-      <div class="section-kicker"><span class="n">07</span> / Reports</div>
-      <h2 class="section-title">A short read, not a spreadsheet.</h2>
+<section class="slide screen-slide" id="reports" data-marker="VII · Reports">
+  <div class="section-head" data-folio="07">
+    <div class="section-no">07</div>
+    <div class="section-copy">
+      <div class="section-kicker">Reports</div>
+      <h2 class="section-title">A short read, <em>not a spreadsheet.</em></h2>
       <p class="section-sub">The week is already chosen. Revenue, best sellers, payment mix, and the low-stock to-do list sit above the fold; export is secondary.</p>
     </div>
     <div class="section-side">
-      <span class="pill pill-stamp pill-yellow">Last completed week</span>
+      <span class="side-tag">Last completed week</span>
       <a class="plain-link" href="screens/reports.html" target="_blank">Open full-size artboard →</a>
     </div>
   </div>
-  <div class="screen-layout">
-    <figure class="art-frame"><img src="reports.png" alt="Reports artboard"><figcaption><span>Reports · read the week</span><span>1440 × 900</span></figcaption></figure>
-    <aside class="notes">
-      <div class="note"><b>One loud number.</b><p>Net revenue is the only yellow card. Paid tickets, average ticket, and low stock support it instead of competing.</p></div>
-      <div class="note"><b>Chart first, filters second.</b><p>Seven days of revenue, best sellers, payment split, and peak-hour stats are visible without touching a date picker.</p></div>
-      <div class="note"><b>End with an action.</b><p>Low stock turns the report into a to-do list. “Open stock room” is one link away, not a separate destination hunt.</p></div>
-      <div class="rationale"><span>Why it works</span><p>A report should end with a decision, not a scrollbar.</p></div>
-    </aside>
+
+  <div class="screen-layout layout-feature">
+    <figure class="shot">
+      <div class="shot-frame plate"><img src="reports.png" width="1440" height="900" alt="Reports artboard with weekly revenue, best sellers, and payment mix"></div>
+      <figcaption><span>Reports · read the week</span><span>1440 × 900</span></figcaption>
+    </figure>
+    <div class="notes-row">
+      <div class="note"><h3>One loud number.</h3><p>Net revenue is the only charcoal field. Paid tickets, average ticket, and low stock support it instead of competing.</p></div>
+      <div class="note"><h3>Chart first, filters second.</h3><p>Seven days of revenue, best sellers, payment split, and peak-hour stats are visible without touching a date picker.</p></div>
+      <div class="note"><h3>End with an action.</h3><p>Low stock turns the report into a to-do list. “Open stock room” is one link away, not a separate destination hunt.</p></div>
+      <div class="rationale"><span class="label">Why it works</span><p>A report should end with a decision, not a scrollbar.</p></div>
+    </div>
   </div>
   <div class="slide-no">07 / 10</div>
 </section>
 
 <!-- 08 · DESIGN LANGUAGE -->
-<section class="slide" id="system">
-  <div class="section-head">
-    <div>
-      <div class="section-kicker"><span class="n">08</span> / Design language</div>
-      <h2 class="section-title">Paper Service, in six rules.</h2>
-      <p class="section-sub">Warm paper, dark ink, one loud accent per screen. The hand-drawn language is already in the product; this makes it a system rather than a texture.</p>
+<section class="slide" id="system" data-marker="VIII · Design language">
+  <div class="section-head" data-folio="08">
+    <div class="section-no">08</div>
+    <div class="section-copy">
+      <div class="section-kicker">Design language</div>
+      <h2 class="section-title">Service, in <em>six rules.</em></h2>
+      <p class="section-sub">Alabaster ground, charcoal ink, one fine gold line. The language is architectural: a spine, a grid, and quiet controls that leave the work in front.</p>
     </div>
     <div class="section-side">
-      <span class="pill pill-blue">Tokens · type · surfaces</span>
+      <span class="side-tag">Tokens · type · pattern</span>
     </div>
   </div>
 
+  <div class="system-intro">
+    <p class="system-statement">A room reads before a menu does. The interface should carry the same <em>calm.</em></p>
+    <p class="system-note">The luxury system is not ornament. It is restraint: a twelve-column grid, a gold spine, square corners, and photographs given room to breathe. Gold stays in rules, labels, and small details; charcoal carries action.</p>
+  </div>
+
   <div class="system-grid">
-    <div class="token-card">
+    <div class="sys-block">
       <h3>Palette</h3>
-      <p>Warm paper, ink, and three jobs for colour.</p>
+      <p>Warm alabaster, pale taupe, and charcoal, with gold kept to fine marks.</p>
       <div class="swatches">
-        <div class="swatch" style="background:#fbf7ee;"><em>#FBF7EE</em><b>paper</b></div>
-        <div class="swatch" style="background:#241f1a;color:#fff8e9;"><em>#241F1A</em><b>ink</b></div>
-        <div class="swatch" style="background:#ffe077;"><em>#FFE077</em><b>focus</b></div>
-        <div class="swatch" style="background:#2d5da1;color:#fffaf0;"><em>#2D5DA1</em><b>primary</b></div>
-        <div class="swatch" style="background:#bc3b32;color:#fff7ec;"><em>#BC3B32</em><b>alert</b></div>
-        <div class="swatch" style="background:#2f6b4f;color:#fff8e9;"><em>#2F6B4F</em><b>stamp</b></div>
+        <div class="swatch" style="background:#f3eee4;"><b>Alabaster</b><em>#F3EEE4</em></div>
+        <div class="swatch" style="background:#e4dbcc;"><b>Taupe</b><em>#E4DBCC</em></div>
+        <div class="swatch" style="background:#262321;color:#f3eee4;"><b>Charcoal</b><em>#262321</em></div>
+        <div class="swatch" style="background:#b69355;color:#262321;"><b>Gold</b><em>#B69355</em></div>
+        <div class="swatch" style="background:#d2b071;color:#262321;"><b>Gold light</b><em>#D2B071</em></div>
+        <div class="swatch" style="background:#5f5750;color:#f3eee4;"><b>Ink 2</b><em>#5F5750</em></div>
       </div>
     </div>
 
-    <div class="token-card">
+    <div class="sys-block">
       <h3>Type</h3>
-      <p>Three voices, three jobs.</p>
-      <div class="type-row"><div class="sample type-h1">Aa</div><div class="meta"><b>Kalam Bold</b> · page titles, cards, big numbers. The hand.</div></div>
-      <div class="type-row"><div class="sample type-body">Aa</div><div class="meta"><b>Patrick Hand</b> · body, labels, controls. The voice.</div></div>
-      <div class="type-row"><div class="sample type-mono">$23.50</div><div class="meta"><b>Cascadia Mono</b> · prices, counts, IDs, timestamps. The till.</div></div>
+      <p>Three voices, three jobs. The serif speaks; the sans works.</p>
+      <div class="type-row"><div class="type-sample">Aa</div><div class="type-meta"><b>EB Garamond</b>Display, headings, prices, large values, roman numerals.</div></div>
+      <div class="type-row"><div class="type-sample sans">Aa</div><div class="type-meta"><b>Instrument Sans</b>Body, labels, navigation, controls, metadata.</div></div>
+      <div class="type-row"><div class="type-sample italic">Aa</div><div class="type-meta"><b>EB Garamond Italic</b>Quotations, asides, and one emphasized word.</div></div>
     </div>
 
-    <div class="token-card">
+    <div class="sys-block">
       <h3>Surfaces</h3>
-      <p>Paper is a material, not a background colour.</p>
-      <div class="surface-sample"><b>Tickets &amp; notes</b><p>1.4 px ink border · uneven 5–16 px radii · 3 px offset shadow · tape and stitch details. No blur, no glass.</p></div>
+      <p>Borders and tonal fields, not floating cards.</p>
       <div class="rule-list">
-        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Offset, not blur.</b> Shadows are cut paper, not elevation.</span></div>
-        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>One texture.</b> Dot grid on the canvas; clean paper inside panels.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Square corners.</b> A hairline rule or a change of ground does the separating.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>One gold spine.</b> It runs the page and stops before the charcoal close.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Material, rules, and restrained depth.</b> Soft shadows belong only to the Service board’s taped paper notes.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Photographs keep their colour.</b> No duotone, no overlay wash.</span></div>
       </div>
     </div>
 
-    <div class="token-card">
+    <div class="sys-block">
       <h3>Colour rules</h3>
       <p>If everything is loud, nothing is.</p>
       <div class="rule-list">
-        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Yellow</b> focuses: active nav, best day, selected card, sticky note.</span></div>
-        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Blue</b> acts: primary buttons, links, informational state.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Gold</b> marks: active navigation, selection, the best day, fine rules.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Charcoal</b> acts: primary buttons, ink fields, the approval close.</span></div>
         <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Red</b> only for late, low, cancelled, or destructive.</span></div>
-        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Green stamps completion.</b> Paid, done, OK, active. Stamp ink only; no green fills or buttons.</span></div>
-        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Statuses are stamps.</b> 1.7 px ink outline, mono caps, no fill. A check means complete.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Taupe</b> supports: evidence frames, secondary fields, quiet sections.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Completion is a quiet gold check.</b> Paid, done, OK, active — no green fills.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pattern-band">
+    <div class="pattern-band-copy">
+      <span class="section-kicker">Pattern &amp; ornament</span>
+      <h3>Eight marks, one grammar.</h3>
+      <p>Every pattern is a measured line: drafting grid, ledger, field grain, hatch, dentil, ruler, cross, and the folio diamond. Screen ornaments and lattice bands repeat this language; the Service board adds taped paper notes with folded corners and soft shadows.</p>
+      <div class="pattern-band-note">
+        <span>In use</span>
+        <p>Page ground 72 px · plate mats 24 px · field grain 14 px · every rule 1 px. The pattern changes scale, never colour.</p>
+      </div>
+    </div>
+    <div class="pattern-samples" aria-label="Pattern samples">
+      <div class="pattern-sample pattern-sample-grid"><span>Drafting grid</span><em>72 px</em></div>
+      <div class="pattern-sample pattern-sample-ledger"><span>Ledger rule</span><em>32 px</em></div>
+      <div class="pattern-sample pattern-sample-dots"><span>Field grain</span><em>28 px</em></div>
+      <div class="pattern-sample pattern-sample-hatch"><span>Hatch</span><em>8 px</em></div>
+      <div class="pattern-sample pattern-sample-dentil"><span>Dentil</span><em>8 px</em></div>
+      <div class="pattern-sample pattern-sample-ruler"><span>Ruler</span><em>32 px</em></div>
+      <div class="pattern-sample pattern-sample-cross"><span>Cross</span><em>48 px</em></div>
+      <div class="pattern-sample pattern-sample-diamond"><span>Folio diamond</span><em>rule</em></div>
+    </div>
+    <div class="ornament-specimens" aria-label="Ornament specimens">
+      <div class="ornament-specimen">
+        <span class="ornament-visual ornament-rule"></span>
+        <b>Measure rule</b>
+        <em>ticks · diamond</em>
+      </div>
+      <div class="ornament-specimen">
+        <span class="ornament-visual ornament-dentil"></span>
+        <b>Dentil frieze</b>
+        <em>rule · teeth · rule</em>
+      </div>
+      <div class="ornament-specimen">
+        <span class="ornament-visual ornament-double"></span>
+        <b>Double rule</b>
+        <em>gold · hairline</em>
+      </div>
+      <div class="ornament-specimen">
+        <span class="ornament-visual ornament-bracket"></span>
+        <b>Corner bracket</b>
+        <em>plate · frame</em>
       </div>
     </div>
   </div>
 
   <div class="component-strip">
     <span class="strip-label">Components<br>at a glance</span>
-    <button class="btn btn-primary"><svg class="ico"><use href="#i-check"/></svg> Primary</button>
-    <button class="btn btn-yellow">Focus</button>
-    <button class="chip active">Selected</button>
-    <button class="chip">Filter</button>
-    <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> Paid</span>
-    <span class="pill pill-stamp pill-red">Low</span>
-    <span class="pill pill-stamp pill-blue">Informational</span>
-    <div class="divider-v"></div>
+    <button class="btn btn-primary" type="button"><svg class="ico"><use href="#i-check"/></svg> Primary</button>
+    <button class="btn" type="button">Secondary</button>
+    <button class="chip active" type="button">Selected</button>
+    <button class="chip" type="button">Filter</button>
+    <span class="pill pill-stamp pill-gold"><svg class="ico"><use href="#i-check"/></svg> Paid</span>
+    <span class="pill pill-stamp" style="border-color:var(--accent);color:var(--accent-text);">Low</span>
+    <span class="pill pill-stamp">Informational</span>
     <input class="input" value="Search tickets…" aria-label="Component sample">
-    <span class="switch on"></span>
+    <span class="switch on" aria-hidden="true"></span>
   </div>
 
   <div class="system-extra">
-    <div class="token-card">
+    <div class="sys-block">
       <h3>Layout</h3>
-      <p>One rail, one top bar, one page canvas.</p>
+      <p>One rail, one top bar, one title line, one page canvas.</p>
       <div class="layout-anatomy">
-        <div class="mini-rail"><span>226</span><b>rail</b></div>
+        <div class="mini-rail"><span>216</span><b>rail</b></div>
         <div class="mini-workspace">
-          <div class="mini-topbar"><span>60</span> top bar</div>
-          <div class="mini-canvas"><span>page padding 26 · gap 8–14</span></div>
+          <div class="mini-topbar"><span>52</span> top bar · <span>40</span> title</div>
+          <div class="mini-canvas"><span>page padding 32 · gap 16</span></div>
         </div>
       </div>
     </div>
-    <div class="token-card">
+    <div class="sys-block">
       <h3>Motion &amp; focus</h3>
       <p>Fast enough to feel immediate; quiet enough to disappear.</p>
       <div class="rule-list">
-        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>120 ms</b> · background and border transitions only.</span></div>
-        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>2 px</b> · press translate; the offset shadow collapses.</span></div>
-        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>2 px blue ring</b> · keyboard focus is never removed.</span></div>
-        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>No bounce, no parallax, no page transitions.</b></span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>150 ms</b> · colour and border transitions only.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>1 px</b> · press movement; no shadow to collapse.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>2 px solid outline</b> · focus is never removed.</span></div>
+        <div class="rule-row"><svg class="ico"><use href="#i-check"/></svg><span><b>One closing reveal</b> · only after scroll, never on load.</span></div>
       </div>
     </div>
   </div>
@@ -387,15 +481,16 @@
 </section>
 
 <!-- 09 · ROLLOUT -->
-<section class="slide" id="plan">
-  <div class="section-head">
-    <div>
-      <div class="section-kicker"><span class="n">09</span> / Rollout</div>
-      <h2 class="section-title">Build the shell once. Then earn the screens.</h2>
+<section class="slide" id="plan" data-marker="IX · Rollout">
+  <div class="section-head" data-folio="09">
+    <div class="section-no">09</div>
+    <div class="section-copy">
+      <div class="section-kicker">Rollout</div>
+      <h2 class="section-title">Build the shell once. Then <em>earn the screens.</em></h2>
       <p class="section-sub">A UI refactor against the existing services and direct PostgreSQL data access. No schema migration, no new backend, no big-bang cutover.</p>
     </div>
     <div class="section-side">
-      <span class="pill">Estimated 11–15 working days</span>
+      <span class="side-tag">Estimated 11–15 working days</span>
       <a class="plain-link" href="#approval">Skip to the decision →</a>
     </div>
   </div>
@@ -405,7 +500,7 @@
       <div class="phase">
         <span class="num">0</span>
         <div><b>Foundation</b><p>Tokens, bundled fonts, control templates, sidebar, window chrome, empty and error states. One shell, six rooms.</p></div>
-        <div class="time">2–3 days<span>branch: ui/paper-service</span></div>
+        <div class="time">2–3 days<span>branch: ui/service-considered</span></div>
       </div>
       <div class="phase">
         <span class="num">1</span>
@@ -419,19 +514,19 @@
       </div>
       <div class="phase">
         <span class="num">3</span>
-        <div><b>Reports + hardening</b><p>Charts, low-stock actions, 1280×800, DPI 150/200%, keyboard paths, empty/error states, and a final pass against this deck.</p></div>
+        <div><b>Reports + hardening</b><p>Charts, low-stock actions, 1280×800, DPI 150/200%, keyboard paths, empty and error states, and a final pass against this deck.</p></div>
         <div class="time">2–3 days<span>second review gate</span></div>
       </div>
     </div>
 
-    <aside class="constraints">
+    <aside class="constraints plate plate-dark">
       <h3>Guardrails</h3>
       <p>What I will not trade away for speed.</p>
-      <div class="constraint"><svg class="ico"><use href="#i-check"/></svg><span><b>XAML-native surfaces.</b> Borders, radii, and tape are vectors. No screenshot textures, no image backgrounds.</span></div>
-      <div class="constraint"><svg class="ico"><use href="#i-check"/></svg><span><b>Fonts travel with the app.</b> Kalam and Patrick Hand bundled; fall back to Segoe Print, never Segoe UI for display.</span></div>
+      <div class="constraint"><svg class="ico"><use href="#i-check"/></svg><span><b>XAML-native surfaces.</b> Rules, frames, and the gold spine are vectors. No screenshot textures, no image backgrounds.</span></div>
+      <div class="constraint"><svg class="ico"><use href="#i-check"/></svg><span><b>Fonts travel with the app.</b> EB Garamond and Instrument Sans bundled; fall back to Georgia and Helvetica Neue, never a default UI serif.</span></div>
       <div class="constraint"><svg class="ico"><use href="#i-check"/></svg><span><b>Charts stay simple.</b> Path/Canvas first. No new chart dependency until the simple version proves insufficient.</span></div>
       <div class="constraint"><svg class="ico"><use href="#i-check"/></svg><span><b>Data access stays put.</b> Existing services and PostgreSQL connections remain; this is a UI refactor.</span></div>
-      <div class="constraint"><svg class="ico"><use href="#i-check"/></svg><span><b>DPI is part of done.</b> Hand-drawn strokes must stay crisp at 100%, 150%, and 200%.</span></div>
+      <div class="constraint"><svg class="ico"><use href="#i-check"/></svg><span><b>DPI is part of done.</b> Hairlines and gold rules must stay crisp at 100%, 150%, and 200%.</span></div>
     </aside>
   </div>
 
@@ -455,11 +550,12 @@
 </section>
 
 <!-- 10 · APPROVAL -->
-<section class="slide approval-slide" id="approval">
-  <div class="approval-body">
+<section class="slide approval-slide" id="approval" data-marker="X · The decision">
+  <div class="approval-inner">
+    <div class="approval-frame" aria-hidden="true"></div>
     <div class="approval-copy">
-      <div class="section-kicker"><span class="n">10</span> / The decision</div>
-      <h2>Approve the direction?</h2>
+      <div class="section-kicker">The decision</div>
+      <h2>Approve the <em>direction?</em></h2>
       <p>Nothing in <b>src/CoffeeShop.WinUI</b> has been touched. Pick the path you want and I’ll implement against these artboards — screen by screen, with a review gate before the rest.</p>
 
       <div class="approval-options">
@@ -476,36 +572,18 @@
           <div><b>Request revisions</b><p>Mark up the artboards or tell me what feels wrong. I revise the concepts; production UI stays untouched.</p></div>
         </div>
       </div>
-
-      <div class="review-head">Three questions for the review</div>
-      <div class="review-prompts">
-        <div class="prompt"><span>01 · Shell</span><p>Does the paper rail feel distinct enough from the canvas, or should it be quieter still?</p></div>
-        <div class="prompt"><span>02 · Counter</span><p>Is the ticket wide enough for the modifiers this shop actually uses?</p></div>
-        <div class="prompt"><span>03 · Default</span><p>Should Service board be the first screen when a shift opens, not Counter?</p></div>
-      </div>
-
-      <div class="approval-gallery">
-        <a class="gallery-item" href="screens/counter.html" target="_blank"><div class="gallery-thumb"><img src="counter.png" alt="Counter"></div><span><b>01</b> Counter</span></a>
-        <a class="gallery-item" href="screens/service-board.html" target="_blank"><div class="gallery-thumb"><img src="service-board.png" alt="Service board"></div><span><b>02</b> Board</span></a>
-        <a class="gallery-item" href="screens/menu.html" target="_blank"><div class="gallery-thumb"><img src="menu.png" alt="Menu"></div><span><b>03</b> Menu</span></a>
-        <a class="gallery-item" href="screens/stock-room.html" target="_blank"><div class="gallery-thumb"><img src="stock-room.png" alt="Stock room"></div><span><b>04</b> Stock</span></a>
-        <a class="gallery-item" href="screens/customers.html" target="_blank"><div class="gallery-thumb"><img src="customers.png" alt="Customers"></div><span><b>05</b> Customers</span></a>
-        <a class="gallery-item" href="screens/reports.html" target="_blank"><div class="gallery-thumb"><img src="reports.png" alt="Reports"></div><span><b>06</b> Reports</span></a>
-      </div>
-
-      <div class="approval-foot">
-        <span class="mono">docs/ui-concepts/screens/</span>
-        <span>·</span>
-        <span>6 artboards + this deck</span>
-        <span class="right"><span class="pill pill-stamp pill-ink">No XAML changed</span></span>
-      </div>
     </div>
 
-    <aside class="decision-card">
-      <div class="stamp">Awaiting<br>your call</div>
+    <figure class="approval-image plate plate-dark">
+      <img src="assets/photos/cafe-room.jpg" width="1200" height="800" alt="A detail of the cafe room from the opening photograph">
+      <figcaption><b>A detail from the room.</b>Plate 12 · the same light, after</figcaption>
+    </figure>
+
+    <aside class="approval-side">
       <h3>What approval unlocks</h3>
+      <p>The work begins here, in this order.</p>
       <div class="decision-list">
-        <div class="decision-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Branch</b> · ui/paper-service</span></div>
+        <div class="decision-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Branch</b> · ui/service-considered</span></div>
         <div class="decision-row"><svg class="ico"><use href="#i-check"/></svg><span><b>First build</b> · shell + Counter + board</span></div>
         <div class="decision-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Review gate</b> · after first two screens</span></div>
         <div class="decision-row"><svg class="ico"><use href="#i-check"/></svg><span><b>Rollback</b> · production UI untouched</span></div>
@@ -518,12 +596,98 @@
       </div>
       <div class="signature">
         <span>Prepared by</span>
-        <b>OpenCode · 26 Oct 2026</b>
+        <b>OpenCode · 27 Oct 2026</b>
       </div>
     </aside>
   </div>
-  <div class="slide-no">10 / 10</div>
+
+  <div class="review-prompts">
+    <div class="prompt"><span>01 · Shell</span><p>Does the alabaster rail feel distinct enough from the canvas, or should it be quieter still?</p></div>
+    <div class="prompt"><span>02 · Counter</span><p>Is the ticket wide enough for the modifiers this shop actually uses?</p></div>
+    <div class="prompt"><span>03 · Default</span><p>Should Service board be the first screen when a shift opens, not Counter?</p></div>
+  </div>
+
+  <div class="approval-gallery">
+    <a class="gallery-item" href="screens/counter.html" target="_blank"><div class="gallery-thumb"><img src="counter.png" width="1440" height="900" alt="Counter"></div><span><b>01</b> Counter</span></a>
+    <a class="gallery-item" href="screens/service-board.html" target="_blank"><div class="gallery-thumb"><img src="service-board.png" width="1440" height="900" alt="Service board"></div><span><b>02</b> Board</span></a>
+    <a class="gallery-item" href="screens/menu.html" target="_blank"><div class="gallery-thumb"><img src="menu.png" width="1440" height="900" alt="Menu"></div><span><b>03</b> Menu</span></a>
+    <a class="gallery-item" href="screens/stock-room.html" target="_blank"><div class="gallery-thumb"><img src="stock-room.png" width="1440" height="900" alt="Stock room"></div><span><b>04</b> Stock</span></a>
+    <a class="gallery-item" href="screens/customers.html" target="_blank"><div class="gallery-thumb"><img src="customers.png" width="1440" height="900" alt="Customers"></div><span><b>05</b> Customers</span></a>
+    <a class="gallery-item" href="screens/reports.html" target="_blank"><div class="gallery-thumb"><img src="reports.png" width="1440" height="900" alt="Reports"></div><span><b>06</b> Reports</span></a>
+  </div>
+
+  <footer class="approval-footer">
+    <span class="brand">Corner Cafe</span>
+    <span>docs/ui-concepts/screens/</span>
+    <span>6 artboards + this deck</span>
+    <span class="right"><span>No XAML changed</span><span>27 Oct 2026</span><span>10 / 10</span></span>
+  </footer>
 </section>
 
+<script>
+  (function () {
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var approval = document.getElementById('approval');
+    var armed = false;
+    var played = false;
+
+    if (!approval || reduceMotion.matches || window.innerWidth <= 720) return;
+
+    function startPlay() {
+      if (!armed || played) return;
+      played = true;
+      approval.classList.remove('reveal-armed');
+      approval.classList.add('reveal-play');
+      approval.addEventListener('animationend', function (event) {
+        if (event.target !== approval) return;
+        approval.classList.remove('reveal-play');
+      }, { once: true });
+    }
+
+    function arm() {
+      if (armed || played) return;
+      var rect = approval.getBoundingClientRect();
+      if (rect.top < window.innerHeight) return;
+      armed = true;
+      approval.classList.add('reveal-armed');
+      window.removeEventListener('scroll', arm);
+      requestAnimationFrame(function () {
+        if (approval.getBoundingClientRect().top < window.innerHeight) startPlay();
+      });
+    }
+
+    function play(entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) startPlay();
+      });
+    }
+
+    window.addEventListener('scroll', arm, { passive: true });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(play, { threshold: 0 }).observe(approval);
+    }
+  })();
+
+  (function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll('.deck-link'));
+    var sections = links.map(function (link) {
+      return document.querySelector(link.getAttribute('href'));
+    });
+
+    function setActive() {
+      var y = window.scrollY + 140;
+      var current = -1;
+      sections.forEach(function (section, index) {
+        if (section && section.offsetTop <= y) current = index;
+      });
+      links.forEach(function (link, index) {
+        link.classList.toggle('active', index === current);
+      });
+    }
+
+    window.addEventListener('scroll', setActive, { passive: true });
+    setActive();
+  })();
+</script>
 </body>
 </html>

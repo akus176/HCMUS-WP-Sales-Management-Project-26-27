@@ -1,0 +1,711 @@
+/* Decorative layer for the six fixed 1440 × 900 concept artboards.
+   All ornament is passive; controls and reading surfaces stay unobstructed. */
+:root {
+  --pattern-lattice: url("patterns/lattice.svg");
+  --pattern-rule: url("patterns/rule.svg");
+}
+
+.sidebar {
+  background-image: var(--pattern-rule);
+  background-size: 100% 7px;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+}
+
+.logo {
+  outline: 1px solid var(--rule);
+  outline-offset: 3px;
+}
+
+.nav-item {
+  padding-right: 6px;
+}
+
+.nav-item.active {
+  background: var(--ground-2);
+  border-bottom-color: var(--accent);
+}
+
+.sidebar-ornament {
+  width: 164px;
+  height: 146px;
+  object-fit: contain;
+  align-self: center;
+  margin: auto 0;
+  padding: 12px 0;
+  opacity: .75;
+  pointer-events: none;
+}
+
+.side-foot {
+  margin-top: 0;
+}
+
+.shift-card {
+  border-top: 3px double var(--accent);
+}
+
+.page-head {
+  position: relative;
+  align-items: center;
+  gap: 20px;
+  border-bottom: 3px double var(--accent);
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.title-wrap {
+  flex: 1;
+}
+
+.page-title {
+  line-height: 1.02;
+}
+
+.page-ornament {
+  flex: none;
+  width: 116px;
+  height: 78px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.page-actions {
+  align-self: flex-end;
+  margin-left: 0;
+  padding-bottom: 2px;
+}
+
+.page-sub {
+  max-width: 58em;
+}
+
+.page-head::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  right: 0;
+  bottom: -4px;
+  background: var(--accent);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.ticket, .selected-ticket, .next-order-card, .report-kpi.loud {
+  position: relative;
+  background-image: var(--pattern-lattice);
+  background-size: 24px 24px;
+  background-repeat: repeat-x;
+  background-position: left top;
+}
+
+.ticket-head, .st-head {
+  padding-top: 8px;
+}
+
+.ticket-head {
+  padding-top: 4px;
+}
+
+.ticket .order-type, .ticket .customer-row {
+  padding-block: 7px;
+}
+
+.ticket, .selected-ticket, .next-order-card {
+  border: 1px solid var(--field-line);
+  border-top: 3px double var(--accent);
+}
+
+.ticket-title {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.ticket-change {
+  float: none;
+  margin: 0 0 0 auto;
+  order: 1;
+}
+
+.ticket-line {
+  align-items: center;
+  padding-block: 4px;
+}
+
+.qty {
+  justify-content: space-between;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.total-row b, .ticket-line-price, .st-item .price,
+.qty-cell, .last-cell, .ledger-delta, .ledger-balance,
+.order-line .amount, .legend-row .amount, .best-figures {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.dish {
+  padding-top: 6px;
+}
+
+.dish .art {
+  position: relative;
+}
+
+.dish .art::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(243, 238, 228, .45);
+  pointer-events: none;
+}
+
+.dish.selected .art::after {
+  border-color: var(--accent-light);
+}
+
+.dish-foot {
+  min-height: 30px;
+  margin-top: auto;
+  border-bottom: 3px double var(--rule);
+}
+
+.dish-add {
+  width: 22px;
+  height: 22px;
+}
+
+.popular {
+  z-index: 1;
+}
+
+.board {
+  border-bottom: 1px solid var(--accent);
+}
+
+.kcol {
+  min-width: 0;
+}
+
+.kcol-head {
+  align-items: center;
+  min-height: 49px;
+}
+
+.kcol-count {
+  margin-left: auto;
+  min-width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--rule);
+}
+
+.kcol-head .ico {
+  margin-left: 2px;
+}
+
+.kcol-cards {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.kcol-cards::after {
+  content: "";
+  min-height: 26px;
+  height: 26px;
+  margin-top: auto;
+  margin-bottom: 14px;
+  background: var(--pattern-lattice);
+  border-block: 1px solid var(--rule);
+  pointer-events: none;
+}
+
+.kcard {
+  flex: none;
+  min-height: 125px;
+  padding: 14px 0 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.kcard-items {
+  min-height: 28px;
+}
+
+.kcard-foot {
+  margin-top: auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.kcard.late {
+  margin-left: 0;
+  padding-left: 10px;
+  background: var(--ground-2);
+}
+
+.kcard-action {
+  white-space: nowrap;
+}
+
+.kcol:last-child .kcol-count {
+  background: var(--field);
+  color: var(--on-field);
+  border-color: var(--field);
+}
+
+/* Pinned order notes: fixed baselines keep the board easy to scan. */
+.board-notes .kcol {
+  --note-paper: #f3e8bf;
+  --note-edge: #d6c795;
+  --note-tape: #dfd2ae;
+}
+
+.board-notes .kcol:nth-child(2) {
+  --note-paper: #edddca;
+  --note-edge: #d1baa0;
+  --note-tape: #d7c4a8;
+}
+
+.board-notes .kcol:nth-child(3) {
+  --note-paper: #e1e7d7;
+  --note-edge: #bdc8ad;
+  --note-tape: #ccd4bc;
+}
+
+.board-notes .kcol-cards {
+  gap: 16px;
+  padding: 18px 6px 0;
+}
+
+.board-notes .kcard {
+  isolation: isolate;
+  min-height: 150px;
+  margin: 0;
+  padding: 20px 12px 12px;
+  border: 1px solid var(--note-edge);
+  background: var(--note-paper);
+  box-shadow: 0 2px 2px rgba(38, 35, 33, .06),
+              1px 5px 8px -5px rgba(38, 35, 33, .25);
+}
+
+.board-notes .kcard::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: calc(50% - 25px);
+  width: 50px;
+  height: 16px;
+  background: var(--note-tape);
+  border-inline: 1px dashed rgba(118, 89, 31, .2);
+  opacity: .8;
+  transform: rotate(-4deg);
+  pointer-events: none;
+}
+
+.board-notes .kcard:nth-child(even)::before {
+  transform: rotate(4deg);
+}
+
+.board-notes .kcard::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 0;
+  height: 0;
+  border-top: 13px solid var(--note-edge);
+  border-right: 13px solid var(--ground);
+  pointer-events: none;
+}
+
+.board-notes .kcard.selected {
+  outline: 1px solid var(--accent-text);
+  outline-offset: 2px;
+  box-shadow: inset 3px 0 var(--accent),
+              1px 5px 8px -5px rgba(38, 35, 33, .25);
+}
+
+.board-notes .kcard-top {
+  align-items: center;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--note-edge);
+}
+
+.board-notes .kcard-title {
+  margin-top: 8px;
+}
+
+.board-notes .kcard-items {
+  min-height: 27px;
+  margin-bottom: 8px;
+}
+
+.board-notes .kcard-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 8px;
+  padding-top: 7px;
+  border-top: 1px solid var(--note-edge);
+}
+
+.board-notes .kcard-foot > span:first-child {
+  grid-column: 1 / -1;
+}
+
+.board-notes .kcard-time {
+  margin-left: 0;
+}
+
+.board-notes .kcard-action {
+  margin-right: 5px;
+  justify-self: end;
+}
+
+.board-notes .kcol-cards::after {
+  flex: none;
+  margin-bottom: 14px;
+}
+
+.table-tile {
+  outline: 1px solid var(--rule);
+  outline-offset: -4px;
+}
+
+.menu-cols {
+  grid-template-columns: 155px minmax(0, 1fr) 330px;
+}
+
+.category-rail, .detail-card, .drawer, .customer-side,
+.customer-list, .report-panel, .profile-lower > * {
+  min-width: 0;
+}
+
+.rail-ornament {
+  display: block;
+  width: 100%;
+  height: 116px;
+  margin: auto 0;
+  object-fit: contain;
+  opacity: .75;
+  pointer-events: none;
+}
+
+.rail-health {
+  margin-top: 0;
+  border-top: 3px double var(--accent);
+  padding-top: 14px;
+  background-image: var(--pattern-rule);
+  background-size: 100% 7px;
+  background-repeat: no-repeat;
+}
+
+.product-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 10px 16px;
+}
+
+.product {
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 11px;
+  padding-top: 10px;
+}
+
+.product-art {
+  width: 92px;
+  height: 92px;
+  padding: 3px;
+  border: 1px solid var(--rule);
+}
+
+.product.selected {
+  border-top: 3px double var(--accent);
+  padding-top: 8px;
+}
+
+.product.selected .product-art {
+  padding: 3px;
+}
+
+.product-copy {
+  padding-top: 3px;
+}
+
+.product-name {
+  min-height: 37px;
+  font-size: 19px;
+}
+
+.product-price b {
+  font-size: 17px;
+}
+
+.product-dot {
+  top: 4px;
+  bottom: auto;
+}
+
+.product-flag {
+  bottom: 3px;
+}
+
+.detail-top {
+  align-items: center;
+}
+
+.detail-art {
+  width: 92px;
+  height: 106px;
+}
+
+.detail-tags {
+  gap: 5px;
+}
+
+.recipe-box {
+  padding: 8px 10px;
+  border-left: 2px solid var(--accent);
+  background: var(--ground-2);
+}
+
+.menu-perf-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.menu-perf-row > div + div {
+  border-left: 1px solid var(--rule);
+  padding-left: 10px;
+}
+
+.stock-row {
+  grid-template-columns: minmax(0, 1.5fr) 70px 70px 76px minmax(0, 1.1fr) 22px;
+  padding-inline: 8px 10px;
+  border-left: 2px solid transparent;
+}
+
+.stock-row.data {
+  min-height: 49px;
+}
+
+.stock-row.head {
+  background: var(--ground-2);
+  padding: 6px 10px 6px 8px;
+}
+
+.stock-row.low {
+  margin-left: 0;
+  padding-left: 8px;
+  background-image: var(--pattern-rule);
+  background-size: 5px 100%;
+  background-repeat: no-repeat;
+}
+
+.stock-ornament {
+  height: 76px;
+  flex: none;
+  margin: 8px 0;
+  border-block: 1px solid var(--rule);
+  background: var(--pattern-lattice);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.stock-ornament img {
+  height: 100%;
+  width: 180px;
+  background: var(--ground);
+  padding-inline: 16px;
+}
+
+.balance-block {
+  padding: 8px 10px;
+  background: var(--ground-2);
+  border: 1px solid var(--panel-line);
+  margin-top: 0;
+}
+
+.stock-table {
+  flex: none;
+}
+
+.stock-footer {
+  margin-top: auto;
+}
+
+.drawer-hist {
+  padding-top: 3px;
+}
+
+.balance-value {
+  padding-left: 0;
+}
+
+.customer-row-item {
+  min-height: 62px;
+  padding-right: 8px;
+}
+
+.customer-row-item.active {
+  margin-left: 0;
+  padding-left: 8px;
+}
+
+.avatar-big {
+  outline: 1px solid var(--accent);
+  outline-offset: -5px;
+}
+
+.profile-stats {
+  background: var(--ground-2);
+  border-bottom: 1px solid var(--rule);
+}
+
+.pstat, .pstat:last-child {
+  padding: 10px;
+}
+
+.profile-lower {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.address-card {
+  padding: 10px 9px;
+  margin-top: 8px;
+  border: 1px solid var(--rule);
+  background: var(--ground);
+}
+
+.address-top {
+  align-items: center;
+}
+
+.address-top .pill {
+  margin-left: auto;
+}
+
+.address-block::after {
+  content: "";
+  height: 85px;
+  margin-top: auto;
+  background: url("ornaments/stock-room.svg") center / 130px 85px no-repeat;
+  opacity: .6;
+  pointer-events: none;
+}
+
+.block-note {
+  margin-top: 14px;
+}
+
+.ledger-row {
+  min-height: 48px;
+}
+
+.ledger-block::after {
+  content: "";
+  height: 25px;
+  margin-top: auto;
+  border-block: 1px solid var(--rule);
+  background: var(--pattern-lattice);
+  pointer-events: none;
+}
+
+.next-order-card {
+  padding-top: 27px;
+}
+
+.order-line {
+  grid-template-columns: 37px minmax(0, 1fr) 65px 39px;
+  min-height: 43px;
+}
+
+.order-line > .pill {
+  justify-content: center;
+}
+
+.order-line .amount {
+  text-align: right;
+}
+
+.report-kpi, .report-kpi:last-child {
+  padding: 14px 18px;
+}
+
+.report-kpi.loud {
+  margin-right: 0;
+  padding: 14px 18px;
+  background-position: right bottom -12px;
+}
+
+.report-kpi.loud .k-sub .up {
+  color: var(--accent-light);
+}
+
+.report-grid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.rp-head {
+  min-height: 51px;
+  align-items: center;
+}
+
+.revenue-chart {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='42'%3E%3Cpath d='M0 41.5h12' stroke='%23d5cab8' stroke-width='.5'/%3E%3C/svg%3E");
+}
+
+.bar {
+  max-width: 30px;
+  border: 1px solid var(--ink);
+  border-top: 3px solid var(--accent);
+}
+
+.daycol.best .bar {
+  background-image: var(--pattern-rule);
+  border-color: var(--accent-text);
+}
+
+.best-fill {
+  height: 3px;
+  background: var(--accent);
+}
+
+.donut-wrap {
+  outline: 1px solid var(--rule);
+  outline-offset: 5px;
+  border-radius: 50%;
+}
+
+.rstat, .rstat:last-child {
+  padding: 8px 10px;
+}
+
+.low-stock-report {
+  border-bottom: 1px solid var(--rule);
+}
+
+.low-report-row {
+  min-height: 41px;
+}
+
+.drink-editor {
+  border: 1px solid var(--accent);
+  outline: 1px solid var(--panel-line);
+  outline-offset: -6px;
+}
+
+.drink-editor-head {
+  border-bottom: 3px double var(--accent);
+  background-image: var(--pattern-lattice);
+  background-size: 100px 100%;
+  background-position: right top;
+  background-repeat: no-repeat;
+}

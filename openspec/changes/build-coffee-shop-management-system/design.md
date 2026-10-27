@@ -523,7 +523,9 @@ for errors (RFC 7807), consistent with decision #9 above (contracts never expose
 
 ## UI Design System
 
-`CoffeeShop.WinUI` uses a single "Hand-Drawn" visual theme across both milestones (midterm direct-DB and final API-backed builds share the same client project and styling). The full authoring reference — including copy-pasteable XAML tokens, WinUI techniques for effects CSS-based design systems assume (offset shadows, wobbly radii, dashed dividers), and an agent-usable role prompt for consistently applying the style — lives in [`docs/sketch-theme.md`](../../../docs/sketch-theme.md) at the repo root. Summary for design/implementation planning:
+The original "Hand-Drawn" theme described below is historical. The current visual contract is defined by [`migrate-winui-service-console`](../migrate-winui-service-console/design.md), the exact screen artboards in [`docs/ui-concepts`](../../../docs/ui-concepts/index.html), and the supporting [`docs/luxury-theme.md`](../../../docs/luxury-theme.md). The migration replaces the legacy palette, handwritten fonts, and shape rules with the luxury concept system, including its specific Service board sticky-note treatment. Midterm direct-DB and final API-backed builds share the same client project and styling.
+
+The following legacy design notes describe the pre-migration implementation and MUST NOT override the current migration's exact concept-art fidelity requirement.
 
 ### Philosophy
 

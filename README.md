@@ -1,6 +1,6 @@
 # Coffee Shop
 
-WinUI 3 desktop client and ASP.NET Core API for a coffee-shop management system. The midterm client supports direct PostgreSQL workflows for catalog, customers, inventory, orders, fulfillment, and reports. The final API architecture remains in progress. The behavior and milestone plan are in `openspec/changes/build-coffee-shop-management-system/`; the client theme is in `docs/sketch-theme.md`.
+WinUI 3 desktop client and ASP.NET Core API for a coffee-shop management system. The midterm client supports direct PostgreSQL workflows for catalog, customers, inventory, orders, fulfillment, and reports. The final API architecture remains in progress. The behavior and milestone plan are in `openspec/changes/build-coffee-shop-management-system/`; the client theme is in `docs/luxury-theme.md`.
 
 ## Prerequisites
 
