@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Stock room · Corner Cafe concept</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body class="screen">
+<script src="../assets/icons.js"></script>
+<div class="window">
+  <div class="titlebar">
+    <div class="win-brand"><span class="logo-dot"><svg class="ico"><use href="#i-counter"/></svg></span><b>Corner Cafe</b></div>
+    <div class="win-title">Service Console</div>
+    <div class="win-right">
+      <span class="conn"><i></i> Local · connected</span>
+      <span class="win-clock">10:42</span>
+      <div class="win-controls"><span>—</span><span>□</span><span>×</span></div>
+    </div>
+  </div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="side-brand">
+        <div class="logo"><svg class="ico"><use href="#i-counter"/></svg></div>
+        <div class="brand-copy">
+          <div class="brand-name">Corner Cafe</div>
+          <div class="brand-sub">service console</div>
+        </div>
+      </div>
+      <nav class="nav-groups">
+        <div class="nav-group">
+          <div class="nav-group-label">Service</div>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span><span class="key">1</span></a>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">Manage</div>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span><span class="key">3</span></a>
+          <a class="nav-item active" aria-current="page" href="#"><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span><span class="key">4</span></a>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span><span class="key">5</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">Insights</div>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span><span class="key">6</span></a>
+        </div>
+      </nav>
+      <div class="side-foot">
+        <div class="shift-card">
+          <div class="shift-top"><span>Shift 01</span><span>Open</span></div>
+          <div class="shift-name">Mai Tran</div>
+          <div class="shift-meta">Cashier · 07:00 — 15:00</div>
+          <div class="shift-end"><span>3 open tickets</span><svg class="ico"><use href="#i-arrow"/></svg></div>
+        </div>
+        <div class="side-fine"><i></i> WinUI · direct PostgreSQL</div>
+      </div>
+    </aside>
+    <div class="workspace">
+      <div class="topbar">
+        <div class="searchbar">
+          <svg class="ico"><use href="#i-search"/></svg>
+          <input aria-label="Search" placeholder="Search drinks, tickets, customers…">
+          <kbd>Ctrl K</kbd>
+        </div>
+        <div class="top-meta">
+          <span class="top-ticket"><b>3</b> open tickets</span>
+          <span class="top-date">Mon 26 Oct</span>
+          <button class="icon-btn" aria-label="Notifications"><svg class="ico"><use href="#i-bell"/></svg><span class="dot"></span></button>
+          <div class="avatar">MT</div>
+        </div>
+      </div>
+      <main class="page">
+        <div class="page-head">
+          <div class="title-wrap">
+            <div class="eyebrow">Manage <span class="sep">/</span> Inventory <span class="sep">/</span> Last movement 6 min ago</div>
+            <h1 class="page-title">Stock room</h1>
+            <div class="page-sub">12 ingredients · 3 below reorder point · one delivery expected today.</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn"><svg class="ico"><use href="#i-plus"/></svg> New ingredient</button>
+            <button class="btn btn-primary"><svg class="ico"><use href="#i-bag"/></svg> Receive delivery</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active"><span>Balances</span> <span class="count">12</span></div>
+          <div class="tab"><span>Low stock</span> <span class="count" style="color:var(--red);">3</span></div>
+          <div class="tab"><span>Receipts</span> <span class="count">8</span></div>
+          <div class="tab"><span>Suppliers</span> <span class="count">4</span></div>
+          <div class="tab"><span>Adjustments</span> <span class="count">24</span></div>
+          <div class="tab"><span>Movements</span> <span class="count">100</span></div>
+          <div class="right"><span class="pill pill-stamp pill-blue">Synced 10:40</span></div>
+        </div>
+
+        <div class="stock-cols">
+          <section class="stock-main">
+            <div class="stock-toolbar">
+              <div class="input-search"><svg class="ico"><use href="#i-search"/></svg><input aria-label="Filter ingredients" placeholder="Filter ingredients…"></div>
+              <button class="chip"><svg class="ico"><use href="#i-filter"/></svg> All units</button>
+              <button class="chip chip-red"><svg class="ico"><use href="#i-warning"/></svg> Low stock only</button>
+              <div class="right"><span class="pill">8 of 12</span><button class="icon-btn" aria-label="Export"><svg class="ico"><use href="#i-download"/></svg></button></div>
+            </div>
+            <div class="stock-table">
+              <div class="stock-row head"><span>Ingredient</span><span>On hand</span><span>Reorder at</span><span>Status</span><span>Last movement</span><span></span></div>
+              <div class="stock-row data low">
+                <div class="ing-name"><b>Arabica beans</b><span>Beans · kg / g</span></div>
+                <div class="qty-cell"><b>500</b><small>g</small></div>
+                <div class="qty-cell"><b>500</b><small>g</small></div>
+                <span class="pill pill-stamp pill-red">Low</span>
+                <div class="last-cell">−120 g · waste<span class="mono">10:36 · Mai T.</span></div>
+                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+              </div>
+              <div class="stock-row data low">
+                <div class="ing-name"><b>Matcha powder</b><span>Tea · ceremonial</span></div>
+                <div class="qty-cell"><b>180</b><small>g</small></div>
+                <div class="qty-cell"><b>200</b><small>g</small></div>
+                <span class="pill pill-stamp pill-red">Low</span>
+                <div class="last-cell">−40 g · waste<span class="mono">08:45 · Mai T.</span></div>
+                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+              </div>
+              <div class="stock-row data">
+                <div class="ing-name"><b>Whole milk</b><span>Dairy · 1 L bottles</span></div>
+                <div class="qty-cell"><b>8.0</b><small>L</small></div>
+                <div class="qty-cell"><b>3.0</b><small>L</small></div>
+                <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> OK</span>
+                <div class="last-cell">−2 L · service<span class="mono">10:21 · Mai T.</span></div>
+                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+              </div>
+              <div class="stock-row data">
+                <div class="ing-name"><b>Oat milk</b><span>Dairy · 1 L cartons</span></div>
+                <div class="qty-cell"><b>2.4</b><small>L</small></div>
+                <div class="qty-cell"><b>2.0</b><small>L</small></div>
+                <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> OK</span>
+                <div class="last-cell">+6 L · receipt<span class="mono">09:12 · Bao L.</span></div>
+                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+              </div>
+              <div class="stock-row data">
+                <div class="ing-name"><b>Vanilla syrup</b><span>Syrup · 750 ml bottle</span></div>
+                <div class="qty-cell"><b>750</b><small>ml</small></div>
+                <div class="qty-cell"><b>250</b><small>ml</small></div>
+                <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> OK</span>
+                <div class="last-cell">+750 ml · receipt<span class="mono">yesterday · Mai T.</span></div>
+                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+              </div>
+              <div class="stock-row data">
+                <div class="ing-name"><b>Paper cups · 12 oz</b><span>Packaging · sleeves</span></div>
+                <div class="qty-cell"><b>380</b><small>pcs</small></div>
+                <div class="qty-cell"><b>200</b><small>pcs</small></div>
+                <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> OK</span>
+                <div class="last-cell">−50 pcs · service<span class="mono">10:40 · Mai T.</span></div>
+                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+              </div>
+              <div class="stock-row data">
+                <div class="ing-name"><b>Croissant dough</b><span>Bakery · frozen</span></div>
+                <div class="qty-cell"><b>12</b><small>pcs</small></div>
+                <div class="qty-cell"><b>10</b><small>pcs</small></div>
+                <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> OK</span>
+                <div class="last-cell">+12 pcs · receipt<span class="mono">07:55 · Bao L.</span></div>
+                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+              </div>
+              <div class="stock-row data low">
+                <div class="ing-name"><b>Cocoa powder</b><span>Dry goods · tub</span></div>
+                <div class="qty-cell"><b>180</b><small>g</small></div>
+                <div class="qty-cell"><b>250</b><small>g</small></div>
+                <span class="pill pill-stamp pill-red">Low</span>
+                <div class="last-cell">−80 g · waste<span class="mono">09:20 · Mai T.</span></div>
+                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+              </div>
+            </div>
+            <div class="stock-footer">
+              <span>Showing 8 of 12 ingredients</span>
+              <span class="right"><span class="mono">last sync 10:40</span><button class="icon-btn" style="width:24px;height:24px;box-shadow:none;" aria-label="Refresh"><svg class="ico" style="width:12px;height:12px;"><use href="#i-refresh"/></svg></button></span>
+            </div>
+          </section>
+
+          <aside class="drawer">
+            <div class="drawer-head">
+              <div>
+                <div class="drawer-kicker">ADJUST STOCK · IMMUTABLE MOVEMENT</div>
+                <div class="drawer-title">Arabica beans</div>
+              </div>
+              <button class="drawer-close" aria-label="Close"><svg class="ico"><use href="#i-x"/></svg></button>
+            </div>
+            <div class="drawer-tags"><span class="pill pill-stamp pill-red">Low</span><span class="pill">Beans</span><span class="pill pill-stamp pill-blue">Counted 08:10</span></div>
+            <div class="balance-block">
+              <div class="balance-label">On hand</div>
+              <div class="balance-value">500 <small>g</small></div>
+              <div class="balance-meta">Reorder at 500 g · last movement 10:36</div>
+            </div>
+            <div class="drawer-form">
+              <label class="field-label" for="delta">Change quantity</label>
+              <div class="amount-box"><span class="sign">−</span><input id="delta" value="120" aria-label="Quantity change"><span class="unit">g</span></div>
+              <div class="quick-row"><span class="chip">−5</span><span class="chip">−10</span><span class="chip">+5</span><span class="chip">+10</span><span class="chip">+250</span></div>
+              <div class="balance-preview"><span>New balance</span><b>380 g</b><span class="pill pill-stamp pill-red">Below reorder</span></div>
+              <div class="field">
+                <label class="field-label" for="reason">Reason (required)</label>
+                <textarea class="textarea" id="reason">Grinder calibration waste — morning dial-in.</textarea>
+              </div>
+              <button class="btn btn-primary btn-block"><svg class="ico"><use href="#i-check"/></svg> Record −120 g adjustment</button>
+              <div class="drawer-note">Written against Mai Tran · Shift 01. The movement cannot be edited or deleted; correct it with a new adjustment.</div>
+            </div>
+            <div class="drawer-hist">
+              <div class="drawer-hist-head"><svg class="ico" style="width:12px;height:12px;"><use href="#i-clock"/></svg> Recent movements <span class="right">Open full history</span></div>
+              <div class="hist-row"><span class="delta neg">−120 g</span><span class="why">Grinder calibration waste</span><span class="when">10:36</span></div>
+              <div class="hist-row"><span class="delta pos">+2,000 g</span><span class="why">Receipt #R-221 · Vietnam Beans</span><span class="when">08:10</span></div>
+              <div class="hist-row"><span class="delta neg">−35 g</span><span class="why">Dial-in sample</span><span class="when">yest.</span></div>
+              <div class="hist-row"><span class="delta pos">+1,000 g</span><span class="why">Receipt #R-218 · Vietnam Beans</span><span class="when">24 Oct</span></div>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+</body>
+</html>

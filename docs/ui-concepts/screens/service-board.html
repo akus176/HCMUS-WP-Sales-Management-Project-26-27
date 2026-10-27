@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Service board · Corner Cafe concept</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body class="screen">
+<script src="../assets/icons.js"></script>
+<div class="window">
+  <div class="titlebar">
+    <div class="win-brand"><span class="logo-dot"><svg class="ico"><use href="#i-counter"/></svg></span><b>Corner Cafe</b></div>
+    <div class="win-title">Service Console</div>
+    <div class="win-right">
+      <span class="conn"><i></i> Local · connected</span>
+      <span class="win-clock">10:42</span>
+      <div class="win-controls"><span>—</span><span>□</span><span>×</span></div>
+    </div>
+  </div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="side-brand">
+        <div class="logo"><svg class="ico"><use href="#i-counter"/></svg></div>
+        <div class="brand-copy">
+          <div class="brand-name">Corner Cafe</div>
+          <div class="brand-sub">service console</div>
+        </div>
+      </div>
+      <nav class="nav-groups">
+        <div class="nav-group">
+          <div class="nav-group-label">Service</div>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span><span class="key">1</span></a>
+          <a class="nav-item active" aria-current="page" href="#"><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">Manage</div>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span><span class="key">3</span></a>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span><span class="key">4</span></a>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span><span class="key">5</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">Insights</div>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span><span class="key">6</span></a>
+        </div>
+      </nav>
+      <div class="side-foot">
+        <div class="shift-card">
+          <div class="shift-top"><span>Shift 01</span><span>Open</span></div>
+          <div class="shift-name">Mai Tran</div>
+          <div class="shift-meta">Cashier · 07:00 — 15:00</div>
+          <div class="shift-end"><span>3 open tickets</span><svg class="ico"><use href="#i-arrow"/></svg></div>
+        </div>
+        <div class="side-fine"><i></i> WinUI · direct PostgreSQL</div>
+      </div>
+    </aside>
+    <div class="workspace">
+      <div class="topbar">
+        <div class="searchbar">
+          <svg class="ico"><use href="#i-search"/></svg>
+          <input aria-label="Search" placeholder="Search drinks, tickets, customers…">
+          <kbd>Ctrl K</kbd>
+        </div>
+        <div class="top-meta">
+          <span class="top-ticket"><b>3</b> open tickets</span>
+          <span class="top-date">Mon 26 Oct</span>
+          <button class="icon-btn" aria-label="Notifications"><svg class="ico"><use href="#i-bell"/></svg><span class="dot"></span></button>
+          <div class="avatar">MT</div>
+        </div>
+      </div>
+      <main class="page">
+        <div class="page-head">
+          <div class="title-wrap">
+            <div class="eyebrow"><span class="live-dot"></span> Service <span class="sep">/</span> Live floor <span class="sep">/</span> 10:42</div>
+            <h1 class="page-title">Service board</h1>
+            <div class="page-sub">Three preparing, three ready, and one ticket needs a nudge.</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn"><svg class="ico"><use href="#i-filter"/></svg> All channels</button>
+            <button class="icon-btn" aria-label="Refresh"><svg class="ico"><use href="#i-refresh"/></svg></button>
+            <button class="btn btn-primary"><svg class="ico"><use href="#i-counter"/></svg> Open counter</button>
+          </div>
+        </div>
+
+        <div class="board-layout">
+          <section class="board">
+            <div class="kcol">
+              <div class="kcol-head"><span class="status-dot blue"></span><span class="kcol-name">Confirmed</span><span class="kcol-count">3</span><svg class="ico"><use href="#i-dots"/></svg></div>
+              <div class="kcol-cards">
+                <article class="kcard">
+                  <div class="kcard-top"><b>A-106</b><span class="kcard-channel"><svg class="ico"><use href="#i-table"/></svg> T-02</span></div>
+                  <div class="kcard-title">Table 02 · 2 guests</div>
+                  <div class="kcard-items">Cappuccino · Cold Brew · Butter Croissant</div>
+                  <div class="kcard-foot"><span>Linh N.</span><span class="kcard-time"><svg class="ico"><use href="#i-clock"/></svg> 2 min</span><span class="kcard-action">Start <svg class="ico"><use href="#i-arrow"/></svg></span></div>
+                </article>
+                <article class="kcard">
+                  <div class="kcard-top"><b>A-107</b><span class="kcard-channel"><svg class="ico"><use href="#i-bag"/></svg> Takeaway</span></div>
+                  <div class="kcard-title">Walk-in · 1 item</div>
+                  <div class="kcard-items">Iced Americano · L · oat milk</div>
+                  <div class="kcard-foot"><span>Counter</span><span class="kcard-time"><svg class="ico"><use href="#i-clock"/></svg> 4 min</span><span class="kcard-action">Start <svg class="ico"><use href="#i-arrow"/></svg></span></div>
+                </article>
+                <article class="kcard">
+                  <div class="kcard-top"><b>A-108</b><span class="kcard-channel"><svg class="ico"><use href="#i-bike"/></svg> Delivery</span></div>
+                  <div class="kcard-title">Minh Tran · 2 items</div>
+                  <div class="kcard-items">Matcha Latte · Almond Croissant</div>
+                  <div class="kcard-foot"><span>District 1</span><span class="kcard-time"><svg class="ico"><use href="#i-clock"/></svg> 1 min</span><span class="kcard-action">Start <svg class="ico"><use href="#i-arrow"/></svg></span></div>
+                </article>
+              </div>
+            </div>
+
+            <div class="kcol">
+              <div class="kcol-head"><span class="status-dot yellow"></span><span class="kcol-name">Preparing</span><span class="kcol-count">3</span><svg class="ico"><use href="#i-dots"/></svg></div>
+              <div class="kcol-cards">
+                <article class="kcard late">
+                  <div class="kcard-top"><b>A-102</b><span class="kcard-channel"><svg class="ico"><use href="#i-table"/></svg> T-05</span></div>
+                  <div class="kcard-title">Linh Nguyen · 3 items</div>
+                  <div class="kcard-items">Cappuccino · Cold Brew · Butter Croissant</div>
+                  <div class="kcard-foot"><span>Selected</span><span class="kcard-time"><svg class="ico"><use href="#i-clock"/></svg> 6:21</span><span class="kcard-action">Finish <svg class="ico"><use href="#i-arrow"/></svg></span></div>
+                </article>
+                <article class="kcard">
+                  <div class="kcard-top"><b>A-105</b><span class="kcard-channel"><svg class="ico"><use href="#i-bag"/></svg> Takeaway</span></div>
+                  <div class="kcard-title">Walk-in · 4 items</div>
+                  <div class="kcard-items">2× Flat White · 2× Banana Bread</div>
+                  <div class="kcard-foot"><span>Counter</span><span class="kcard-time"><svg class="ico"><use href="#i-clock"/></svg> 4:08</span><span class="kcard-action">Finish <svg class="ico"><use href="#i-arrow"/></svg></span></div>
+                </article>
+                <article class="kcard">
+                  <div class="kcard-top"><b>A-103</b><span class="kcard-channel"><svg class="ico"><use href="#i-bike"/></svg> Delivery</span></div>
+                  <div class="kcard-title">Bao Le · 1 item</div>
+                  <div class="kcard-items">Espresso Tonic · L</div>
+                  <div class="kcard-foot"><span>District 3</span><span class="kcard-time"><svg class="ico"><use href="#i-clock"/></svg> 2:34</span><span class="kcard-action">Finish <svg class="ico"><use href="#i-arrow"/></svg></span></div>
+                </article>
+              </div>
+            </div>
+
+            <div class="kcol">
+              <div class="kcol-head"><span class="status-dot ink"></span><span class="kcol-name">Ready</span><span class="kcol-count">3</span><svg class="ico"><use href="#i-dots"/></svg></div>
+              <div class="kcol-cards">
+                <article class="kcard ready">
+                  <div class="kcard-top"><b>A-099</b><span class="kcard-channel"><svg class="ico"><use href="#i-table"/></svg> T-01</span></div>
+                  <div class="kcard-title">Table 01 · 2 guests</div>
+                  <div class="kcard-items">2× Chai Latte · 1× Butter Croissant</div>
+                  <div class="kcard-foot"><span>Ready 2 min</span><span class="kcard-time"><svg class="ico"><use href="#i-check"/></svg> ready</span><span class="kcard-action">Serve <svg class="ico"><use href="#i-arrow"/></svg></span></div>
+                </article>
+                <article class="kcard ready">
+                  <div class="kcard-top"><b>A-104</b><span class="kcard-channel"><svg class="ico"><use href="#i-bag"/></svg> Takeaway</span></div>
+                  <div class="kcard-title">Walk-in · 1 item</div>
+                  <div class="kcard-items">Peach Iced Tea · M</div>
+                  <div class="kcard-foot"><span>Ready 5 min</span><span class="kcard-time"><svg class="ico"><use href="#i-warning"/></svg> nudge</span><span class="kcard-action">Serve <svg class="ico"><use href="#i-arrow"/></svg></span></div>
+                </article>
+                <article class="kcard ready">
+                  <div class="kcard-top"><b>A-109</b><span class="kcard-channel"><svg class="ico"><use href="#i-bike"/></svg> Delivery</span></div>
+                  <div class="kcard-title">Bao Le · 1 item</div>
+                  <div class="kcard-items">Matcha Latte · M · oat milk</div>
+                  <div class="kcard-foot"><span>District 3</span><span class="kcard-time"><svg class="ico"><use href="#i-check"/></svg> ready</span><span class="kcard-action">Hand off <svg class="ico"><use href="#i-arrow"/></svg></span></div>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <aside class="board-rail">
+            <section class="selected-ticket">
+              <div class="st-head">
+                <div>
+                  <div class="st-kicker">SELECTED · TICKET A-102</div>
+                  <div class="st-title">Table 05 <small>· 2 guests</small></div>
+                </div>
+                <div class="avatar avatar-small" style="margin-left:auto;">LN</div>
+              </div>
+              <div class="st-status">
+                <span class="pill pill-stamp pill-yellow">Preparing</span>
+                <span class="pill">Dine-in</span>
+                <span class="pill pill-stamp pill-red">6:21</span>
+              </div>
+              <div class="st-customer"><svg class="ico ico-sm"><use href="#i-customers"/></svg> <b>Linh Nguyen</b> · 85 pts <span class="spacer"></span><span class="pill pill-stamp pill-blue">Gold cup</span></div>
+              <div class="st-items">
+                <div class="st-item"><span class="q">1×</span><div>Cappuccino <div class="mod">M · oat milk · extra shot</div></div><span class="price">$6.50</span></div>
+                <div class="st-item"><span class="q">1×</span><div>Cold Brew <div class="mod">L · no ice</div></div><span class="price">$6.00</span></div>
+                <div class="st-item"><span class="q">1×</span><div>Butter Croissant <div class="mod">warmed</div></div><span class="price">$4.00</span></div>
+              </div>
+              <div class="st-total"><span>Total</span><b>$15.50</b></div>
+              <div class="st-pay"><svg class="ico"><use href="#i-warning"/></svg> Unpaid <b>at pickup</b></div>
+              <div class="discount-request">
+                <div class="dr-head"><svg class="ico"><use href="#i-tag"/></svg> Discount request · 10% <b>−$1.55</b></div>
+                <div class="dr-actions"><button>Approve</button><button>Reject</button></div>
+              </div>
+              <div class="st-actions">
+                <button class="btn btn-primary">Mark ready <svg class="ico"><use href="#i-arrow"/></svg></button>
+                <button class="btn">Payment</button>
+              </div>
+              <div class="st-cancel">Cancel order</div>
+            </section>
+
+            <section class="table-panel">
+              <div class="table-head"><span class="panel-title">Tables</span><span class="pill">Dine-in · 5 / 10</span><span class="pill pill-stamp pill-yellow">2 waiting</span></div>
+              <div class="tables">
+                <div class="table-tile occupied">01<small>2 seats</small></div>
+                <div class="table-tile occupied">02<small>4 seats</small></div>
+                <div class="table-tile free">03<small>2 seats</small></div>
+                <div class="table-tile occupied">04<small>4 seats</small></div>
+                <div class="table-tile occupied">05<small>2 seats</small></div>
+                <div class="table-tile free">06<small>4 seats</small></div>
+                <div class="table-tile occupied">07<small>2 seats</small></div>
+                <div class="table-tile free">08<small>4 seats</small></div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+</body>
+</html>

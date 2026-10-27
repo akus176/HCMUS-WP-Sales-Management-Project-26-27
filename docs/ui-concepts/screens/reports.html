@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Reports · Corner Cafe concept</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body class="screen">
+<script src="../assets/icons.js"></script>
+<div class="window">
+  <div class="titlebar">
+    <div class="win-brand"><span class="logo-dot"><svg class="ico"><use href="#i-counter"/></svg></span><b>Corner Cafe</b></div>
+    <div class="win-title">Service Console</div>
+    <div class="win-right">
+      <span class="conn"><i></i> Local · connected</span>
+      <span class="win-clock">10:42</span>
+      <div class="win-controls"><span>—</span><span>□</span><span>×</span></div>
+    </div>
+  </div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="side-brand">
+        <div class="logo"><svg class="ico"><use href="#i-counter"/></svg></div>
+        <div class="brand-copy">
+          <div class="brand-name">Corner Cafe</div>
+          <div class="brand-sub">service console</div>
+        </div>
+      </div>
+      <nav class="nav-groups">
+        <div class="nav-group">
+          <div class="nav-group-label">Service</div>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span><span class="key">1</span></a>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">Manage</div>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span><span class="key">3</span></a>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span><span class="key">4</span></a>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span><span class="key">5</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">Insights</div>
+          <a class="nav-item active" aria-current="page" href="#"><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span><span class="key">6</span></a>
+        </div>
+      </nav>
+      <div class="side-foot">
+        <div class="shift-card">
+          <div class="shift-top"><span>Shift 01</span><span>Open</span></div>
+          <div class="shift-name">Mai Tran</div>
+          <div class="shift-meta">Cashier · 07:00 — 15:00</div>
+          <div class="shift-end"><span>3 open tickets</span><svg class="ico"><use href="#i-arrow"/></svg></div>
+        </div>
+        <div class="side-fine"><i></i> WinUI · direct PostgreSQL</div>
+      </div>
+    </aside>
+    <div class="workspace">
+      <div class="topbar">
+        <div class="searchbar">
+          <svg class="ico"><use href="#i-search"/></svg>
+          <input aria-label="Search" placeholder="Search drinks, tickets, customers…">
+          <kbd>Ctrl K</kbd>
+        </div>
+        <div class="top-meta">
+          <span class="top-ticket"><b>3</b> open tickets</span>
+          <span class="top-date">Mon 26 Oct</span>
+          <button class="icon-btn" aria-label="Notifications"><svg class="ico"><use href="#i-bell"/></svg><span class="dot"></span></button>
+          <div class="avatar">MT</div>
+        </div>
+      </div>
+      <main class="page">
+        <div class="page-head">
+          <div class="title-wrap">
+            <div class="eyebrow">Insights <span class="sep">/</span> Last completed week <span class="sep">/</span> 19 — 25 Oct</div>
+            <h1 class="page-title">Reports</h1>
+            <div class="page-sub">A short read on the week: what sold, how they paid, and what needs fixing before close.</div>
+          </div>
+          <div class="page-actions">
+            <button class="chip" style="height:37px;"><svg class="ico"><use href="#i-calendar"/></svg> 19 — 25 Oct <svg class="ico"><use href="#i-chevron"/></svg></button>
+            <button class="btn"><svg class="ico"><use href="#i-download"/></svg> Export</button>
+          </div>
+        </div>
+
+        <div class="report-kpis">
+          <div class="report-kpi loud">
+            <div class="k-label">Net revenue</div>
+            <div class="k-value">$1,248.50</div>
+            <div class="k-sub"><span class="up">▲ 12.4%</span> vs 12 — 18 Oct</div>
+            <div class="k-mark"><svg class="ico"><use href="#i-cash"/></svg></div>
+          </div>
+          <div class="report-kpi">
+            <div class="k-label">Paid tickets</div>
+            <div class="k-value">86</div>
+            <div class="k-sub"><span class="up">▲ 9 tickets</span> vs prior week</div>
+            <div class="k-mark"><svg class="ico"><use href="#i-receipt"/></svg></div>
+          </div>
+          <div class="report-kpi">
+            <div class="k-label">Average ticket</div>
+            <div class="k-value">$14.52</div>
+            <div class="k-sub text-red">▼ $0.82 softer than prior week</div>
+            <div class="k-mark"><svg class="ico"><use href="#i-tag"/></svg></div>
+          </div>
+          <div class="report-kpi alert">
+            <div class="k-label">Low stock</div>
+            <div class="k-value">3 items</div>
+            <div class="k-sub text-red">2 urgent · fix before close</div>
+            <div class="k-mark"><svg class="ico"><use href="#i-warning"/></svg></div>
+          </div>
+        </div>
+
+        <div class="report-grid">
+          <section class="report-panel">
+            <div class="rp-head">
+              <div>
+                <h3>Revenue by day</h3>
+                <p>Paid tickets, net of refunds and cancelled orders.</p>
+              </div>
+              <span class="right pill">19 — 25 Oct</span>
+            </div>
+            <div class="revenue-chart">
+              <div class="daycol">
+                <span class="bar-val">$142</span>
+                <div class="bar" style="height:50%;"></div>
+                <span class="bar-day">Mon 19</span>
+              </div>
+              <div class="daycol">
+                <span class="bar-val">$169</span>
+                <div class="bar" style="height:59%;"></div>
+                <span class="bar-day">Tue 20</span>
+              </div>
+              <div class="daycol">
+                <span class="bar-val">$131</span>
+                <div class="bar" style="height:46%;"></div>
+                <span class="bar-day">Wed 21</span>
+              </div>
+              <div class="daycol">
+                <span class="bar-val">$196</span>
+                <div class="bar" style="height:69%;"></div>
+                <span class="bar-day">Thu 22</span>
+              </div>
+              <div class="daycol best">
+                <span class="bar-val">$225</span>
+                <div class="bar" style="height:79%;"></div>
+                <span class="bar-day">Fri 23</span>
+              </div>
+              <div class="daycol">
+                <span class="bar-val">$211</span>
+                <div class="bar" style="height:74%;"></div>
+                <span class="bar-day">Sat 24</span>
+              </div>
+              <div class="daycol">
+                <span class="bar-val">$176</span>
+                <div class="bar" style="height:62%;"></div>
+                <span class="bar-day">Sun 25</span>
+              </div>
+            </div>
+            <div class="revenue-total">
+              <span class="pill pill-stamp pill-yellow">Best day</span>
+              <b>Fri 23 Oct · $224.50</b>
+              <span class="right">7 days · 86 tickets</span>
+            </div>
+          </section>
+
+          <section class="report-panel">
+            <div class="rp-head">
+              <div>
+                <h3>Best sellers</h3>
+                <p>By units sold, this week.</p>
+              </div>
+              <span class="right">View menu</span>
+            </div>
+            <div class="best-list">
+              <div class="best-row">
+                <span class="best-rank">01</span>
+                <div class="best-copy"><div class="best-name">Cappuccino</div><div class="best-track"><div class="best-fill" style="width:100%;"></div></div></div>
+                <div class="best-figures">42<span>$168.00</span></div>
+              </div>
+              <div class="best-row">
+                <span class="best-rank">02</span>
+                <div class="best-copy"><div class="best-name">Cà phê sữa đá</div><div class="best-track"><div class="best-fill" style="width:90%;"></div></div></div>
+                <div class="best-figures">38<span>$152.00</span></div>
+              </div>
+              <div class="best-row">
+                <span class="best-rank">03</span>
+                <div class="best-copy"><div class="best-name">Matcha latte</div><div class="best-track"><div class="best-fill" style="width:74%;"></div></div></div>
+                <div class="best-figures">31<span>$151.90</span></div>
+              </div>
+              <div class="best-row">
+                <span class="best-rank">04</span>
+                <div class="best-copy"><div class="best-name">Butter croissant</div><div class="best-track"><div class="best-fill" style="width:64%;"></div></div></div>
+                <div class="best-figures">27<span>$94.50</span></div>
+              </div>
+              <div class="best-row">
+                <span class="best-rank">05</span>
+                <div class="best-copy"><div class="best-name">Iced americano</div><div class="best-track"><div class="best-fill" style="width:52%;"></div></div></div>
+                <div class="best-figures">22<span>$77.00</span></div>
+              </div>
+              <div class="best-row">
+                <span class="best-rank">06</span>
+                <div class="best-copy"><div class="best-name">Caramel latte</div><div class="best-track"><div class="best-fill" style="width:45%;"></div></div></div>
+                <div class="best-figures">19<span>$83.60</span></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="report-panel">
+            <div class="rp-head">
+              <div>
+                <h3>How they paid</h3>
+                <p>86 paid tickets · net $1,248.50.</p>
+              </div>
+              <span class="right">This week</span>
+            </div>
+            <div class="report-bottom-left" style="flex:1;">
+              <div class="donut-wrap">
+                <div class="donut"></div>
+                <div class="donut-label"><b>86</b><span>paid tickets</span></div>
+              </div>
+              <div class="pay-legend">
+                <div class="legend-row"><i style="background:var(--blue);"></i> Cash <span class="amount">$585.50</span><span class="pct">46.9%</span></div>
+                <div class="legend-row"><i style="background:var(--yellow);"></i> Card <span class="amount">$409.50</span><span class="pct">32.8%</span></div>
+                <div class="legend-row"><i style="background:var(--paper-3);"></i> E-wallet <span class="amount">$253.50</span><span class="pct">20.3%</span></div>
+                <div class="chart-foot" style="margin-top:2px;">
+                  <span class="pill pill-blue">Card</span>
+                  <span>fastest growing method</span>
+                  <b style="margin-left:auto;font-family:var(--mono);font-size:9.5px;">+18%</b>
+                </div>
+              </div>
+            </div>
+            <div class="rstat-row">
+              <div class="rstat"><span>Peak hour</span><b>08:00 — 09:00</b><em>21 tickets</em></div>
+              <div class="rstat"><span>Dine-in share</span><b>58%</b><em>50 of 86 tickets</em></div>
+              <div class="rstat"><span>Items per ticket</span><b>2.4</b><em>206 items sold</em></div>
+            </div>
+          </section>
+
+          <section class="report-panel">
+            <div class="rp-head">
+              <div>
+                <h3>Fix before close</h3>
+                <p>3 below reorder point · 2 urgent.</p>
+              </div>
+              <span class="right">Stock room</span>
+            </div>
+            <div class="low-stock-report">
+              <div class="low-report-row">
+                <svg class="ico" style="width:13px;height:13px;"><use href="#i-warning"/></svg>
+                <b>Arabica beans</b>
+                <span class="need">500 g left · order 2 kg</span>
+                <span class="amt">TODAY</span>
+              </div>
+              <div class="low-report-row">
+                <svg class="ico" style="width:13px;height:13px;"><use href="#i-warning"/></svg>
+                <b>Matcha powder</b>
+                <span class="need">180 g left · order 1 kg</span>
+                <span class="amt">TODAY</span>
+              </div>
+              <div class="low-report-row">
+                <svg class="ico" style="width:13px;height:13px;"><use href="#i-warning"/></svg>
+                <b>Cocoa powder</b>
+                <span class="need">180 g left · order 500 g</span>
+                <span class="amt">THIS WEEK</span>
+              </div>
+            </div>
+            <div class="rp-link"><svg class="ico"><use href="#i-arrow"/></svg> Open stock room and receive delivery</div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+</body>
+</html>
