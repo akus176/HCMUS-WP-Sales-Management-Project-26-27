@@ -31,44 +31,27 @@
       <nav class="nav-groups" aria-label="Workspaces">
         <div class="nav-group">
           <div class="nav-group-label">Service</div>
-          <a class="nav-item active" aria-current="page" href="#"><span class="numeral">I</span><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span></a>
-          <a class="nav-item" href="#"><span class="numeral">II</span><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
+          <a class="nav-item active" aria-current="page" href="counter.html"><span class="numeral">I</span><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span></a>
+          <a class="nav-item" href="service-board.html"><span class="numeral">II</span><svg class="ico"><use href="#i-board"/></svg><span>Service board</span></a>
         </div>
         <div class="nav-group">
           <div class="nav-group-label">Manage</div>
-          <a class="nav-item" href="#"><span class="numeral">III</span><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span></a>
-          <a class="nav-item" href="#"><span class="numeral">IV</span><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span></a>
-          <a class="nav-item" href="#"><span class="numeral">V</span><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span></a>
+          <a class="nav-item" href="menu.html"><span class="numeral">III</span><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span></a>
+          <a class="nav-item" href="stock-room.html"><span class="numeral">IV</span><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span></a>
+          <a class="nav-item" href="customers.html"><span class="numeral">V</span><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span></a>
         </div>
         <div class="nav-group">
           <div class="nav-group-label">Insights</div>
-          <a class="nav-item" href="#"><span class="numeral">VI</span><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span></a>
+          <a class="nav-item" href="reports.html"><span class="numeral">VI</span><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span></a>
         </div>
       </nav>
       <img class="sidebar-ornament" src="../assets/ornaments/coffee.svg" alt="" aria-hidden="true">
-      <div class="side-foot">
-        <div class="shift-card">
-          <div class="shift-top"><span>Shift 01</span><span>Open</span></div>
-          <div class="shift-name">Mai Tran</div>
-          <div class="shift-meta">Cashier · 07:00 — 15:00</div>
-          <div class="shift-end"><span>3 open tickets</span><svg class="ico"><use href="#i-arrow"/></svg></div>
-        </div>
-        <div class="side-fine"><i></i> WinUI · direct PostgreSQL</div>
-      </div>
+      <div class="side-foot"><div class="side-fine"><i></i> WinUI · direct PostgreSQL</div></div>
     </aside>
     <div class="workspace">
       <div class="topbar">
-        <div class="searchbar">
-          <svg class="ico"><use href="#i-search"/></svg>
-          <input aria-label="Search" placeholder="Search drinks, tickets, customers…">
-          <kbd>Ctrl K</kbd>
-        </div>
-        <div class="top-meta">
-          <span class="top-ticket"><b>3</b> open tickets</span>
-          <span class="top-date">Mon 26 Oct</span>
-          <button class="icon-btn" aria-label="Notifications"><svg class="ico"><use href="#i-bell"/></svg><span class="dot"></span></button>
-          <div class="avatar">MT</div>
-        </div>
+        <div class="workspace-breadcrumb">Service <span class="sep">/</span> Counter</div>
+        <div class="top-meta"><span class="top-date">Mon 26 Oct</span></div>
       </div>
       <main class="page">
         <div class="page-head">
@@ -79,7 +62,6 @@
           </div>
           <img class="page-ornament" src="../assets/ornaments/counter.svg" alt="" aria-hidden="true">
           <div class="page-actions">
-            <button class="btn"><svg class="ico"><use href="#i-chevron"/></svg> Mai Tran · Cashier</button>
             <button class="btn btn-primary"><svg class="ico"><use href="#i-plus"/></svg> New ticket</button>
           </div>
         </div>

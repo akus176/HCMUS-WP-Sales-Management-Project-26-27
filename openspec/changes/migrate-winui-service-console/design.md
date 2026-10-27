@@ -8,6 +8,10 @@ The current WinUI client already implements the required midterm workflows throu
 
 The updated concept assets committed with this change are the authoritative visual specification. The migration must preserve the direct-PostgreSQL composition path, avoid changes to domain or persistence behavior, and retain the existing Compact, Medium, and Expanded breakpoint contract.
 
+### Approved foundation and shell target revision
+
+During part 1 implementation, the user approved revising the artboards to use 48-pixel primary controls and navigation rows and omit unsupported shell controls. The revised HTML/PNG artboards are the implementation target. Global search, notifications, open-ticket chrome, operator avatars, and shift-management chrome are omitted; a workspace breadcrumb and the current date remain. Native caption buttons retain their operating-system behavior. The Stock room shell temporarily offers a section selector for the six existing inventory routes so consolidation does not remove workflows before the section views are migrated. Individual workspace interiors are migrated in later parts; part 1 visual review covers the common shell and shared component gallery.
+
 ## Goals / Non-Goals
 
 **Goals:**
