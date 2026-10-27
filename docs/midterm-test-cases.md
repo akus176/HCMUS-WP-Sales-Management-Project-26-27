@@ -146,4 +146,57 @@ Covers ingredients, unit definitions, suppliers, purchase receipts, stock adjust
 | `TC-INV-14` | Zero stock condition | Boundary | Ingredient balance: `0.00g`, Threshold: `10.00g` | Query low-stock ingredients | Ingredient flagged as critical out-of-stock | Displayed with zero balance warning | **PASS** | `LowStockReportIntegrationTests.cs` |
 | `TC-INV-15` | External update isolation | Valid | Inventory screen loaded; order confirmed in background | Refresh inventory page | Fresh service scope queries DB; updated stock balance reflected immediately | Updated balance observed without app restart | **PASS** | `OperationsWorkspaceTests.cs`, `inventory-refresh.txt` |
 
+---
+
+## 8. Orders & State machine test cases
+
+Covers dine-in table assignment, takeaway, delivery draft workflows, status transitions, inventory reservation/consumption, unpaid completion guards, and cancellation restoration (T6.1–T6.3, T6.6, T6.7).
+
+| Test ID | Feature | Type | Precondition | Input | Expected Result | Actual Result | Status | Evidence Link |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `TC-ORD-01` | Dine-in order draft creation | Valid | Active table 1 is available | Create dine-in order for Table 1 with 1 Large Latte (`45.00`) | Draft created with channel `DineIn`, Table 1 assigned | Draft persisted in `Draft` status | **PASS** | `OrderDraftFactoryTests.cs`, DEMO-05-dine_in |
+| `TC-ORD-02` | Table double occupancy prevention | Invalid | Table 1 already occupied by active order | Attempt to confirm second order on Table 1 | Rejected: Table 1 is currently occupied | Rejected with conflict error | **PASS** | `TableOccupancyTests.cs` |
+| `TC-ORD-03` | Atomic confirmation inventory consumption | Valid | 100g coffee beans in stock; Recipe requires 10g | Confirm draft order with Large Latte | Order status -> `Confirmed`; exactly 10g beans decremented; stock -> 90g | Stock decremented by 10g; status `Confirmed` | **PASS** | `OrderConfirmationIntegrationTests.cs`, DEMO-05-dine_in |
+| `TC-ORD-04` | Insufficient stock confirmation failure | Boundary | 5g coffee beans in stock; Recipe requires 10g | Attempt to confirm draft order | Rejected: insufficient inventory; order remains in `Draft`; stock remains 5g | Rejected with out-of-stock; no stock changed | **PASS** | `OrderConfirmationCommandHandlerTests.cs` |
+| `TC-ORD-05` | Kitchen preparation state flow | Valid | Order is in `Confirmed` state | Move order: `Confirmed` -> `Preparing` -> `Ready` | Status transitions successfully; audit timestamps recorded | Status reaches `Ready` | **PASS** | `OrderStateMachineTests.cs`, DEMO-05-dine_in |
+| `TC-ORD-06` | Unpaid order completion rejection | Invalid | Order is `Ready` with payable balance `40.00`; no payments | Attempt to mark order as `Completed` | Rejected: order cannot be completed while balance is unpaid | Rejected with unpaid balance error | **PASS** | `OrderStateMachineTests.cs`, DEMO-05-dine_in |
+| `TC-ORD-07` | Completed order idempotence | Invalid | Order paid and completed | Attempt to re-complete or modify the completed order | Rejected: completed orders are immutable and cannot transition | Rejected with invalid state transition error | **PASS** | `OrderStateMachineTests.cs`, DEMO-05-dine_in |
+| `TC-ORD-08` | Dine-in completion releases table | Valid | Order completed for Table 1 | Verify Table 1 status post-completion | Table 1 automatically released to `Available` | Table released and available for new seating | **PASS** | `TableOccupancyTests.cs`, DEMO-05-dine_in |
+| `TC-ORD-09` | Order cancellation with restoration | Valid | Order confirmed with 10g beans consumed, Table 1 occupied | Cancel order with reason: `"Customer emergency departure"` | Status -> `Cancelled`; 10g beans restored to stock; Table 1 released; loyalty entries reversed | 10g restored; table freed; cancellation recorded | **PASS** | `OrderCancellationIntegrationTests.cs`, DEMO-07 |
+| `TC-ORD-10` | Cancellation idempotence | Boundary | Order already `Cancelled` | Repeat cancellation command on same order | Rejected: order already cancelled; no duplicate inventory restoration | Rejected without duplicate stock addition | **PASS** | `OrderCancellationCommandHandlerTests.cs`, DEMO-07 |
+| `TC-ORD-11` | Blank cancellation reason | Invalid | Order in `Confirmed` state | Attempt cancellation with empty reason `""` | Rejected: cancellation reason is required | Validation error returned | **PASS** | `OrderCancellationCommandHandlerTests.cs` |
+
+---
+
+## 9. Discounts & Approvals test cases
+
+Covers discount requests, supervisor approval permissions, total recalculations, and rejected discount policies (T6.5).
+
+| Test ID | Feature | Type | Precondition | Input | Expected Result | Actual Result | Status | Evidence Link |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `TC-DISC-01` | Fixed discount request | Valid | Order total `45.00` | Request fixed discount of `5.00`, Reason: `"Opening promo"` | Discount status set to `Pending`; order total remains `45.00` until approval | Discount recorded as `Pending`; total `45.00` | **PASS** | `DiscountTests.cs`, DEMO-05-dine_in |
+| `TC-DISC-02` | Supervisor discount approval | Valid | Discount `5.00` is pending; Supervisor has `discounts.approve` permission | Approve discount with supervisor actor credentials | Discount status -> `Approved`; order payable total recalculated to `40.00` | Total updated to `40.00` | **PASS** | `DiscountCommandHandlerTests.cs`, DEMO-05-dine_in |
+| `TC-DISC-03` | Percentage discount calculation | Valid | Order total `100.00` | Request 15% discount | Calculated discount value is `15.00`; payable total becomes `85.00` upon approval | Discount applied as 15.00 | **PASS** | `DiscountCommandHandlerTests.cs` |
+| `TC-DISC-04` | Discount exceeding order total | Boundary | Order total `30.00` | Request fixed discount of `35.00` | Rejected: discount cannot exceed order subtotal | Rejected with validation error | **PASS** | `DiscountTests.cs` |
+| `TC-DISC-05` | Unauthorized approval rejection | Invalid | Cashier lacks `discounts.approve` permission | Cashier attempts to approve pending discount | Rejected: actor does not possess required approval permission | Rejected with forbidden/permission error | **PASS** | `DiscountPersistenceIntegrationTests.cs` |
+| `TC-DISC-06` | Discount rejection | Valid | Discount is `Pending` | Supervisor rejects discount request with reason | Discount status -> `Rejected`; order payable total remains unchanged | Status `Rejected`; original total preserved | **PASS** | `DiscountCommandHandlerTests.cs` |
+
+---
+
+## 10. Payments & Fulfillment test cases
+
+Covers cash payments (with change), credit/debit card, e-wallet, split payments, delivery courier assignments, and delivery lifecycle (T6.4, T6.8).
+
+| Test ID | Feature | Type | Precondition | Input | Expected Result | Actual Result | Status | Evidence Link |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `TC-PAY-01` | Exact cash payment | Valid | Order payable balance `40.00` | Tender `40.00` Cash | Payment recorded; change `0.00`; remaining balance `0.00`; order ready for completion | Payment captured; remaining 0.00 | **PASS** | `PaymentCommandHandlerTests.cs`, DEMO-05-dine_in |
+| `TC-PAY-02` | Cash payment with change | Boundary | Order payable balance `45.00` | Tender `50.00` Cash | Payment recorded; calculated change is `5.00`; remaining balance `0.00` | Change calculated as 5.00; balance 0.00 | **PASS** | `PaymentTests.cs` |
+| `TC-PAY-03` | Electronic payment exact amount | Valid | Takeaway order balance `45.00` | Process Card payment for `45.00` | Payment captured; transaction ID stored; remaining balance `0.00` | Card payment recorded; balance 0.00 | **PASS** | `PaymentCommandHandlerTests.cs`, DEMO-05-takeaway |
+| `TC-PAY-04` | E-Wallet delivery payment | Valid | Delivery order balance `45.00` | Process E-Wallet payment for `45.00` | Payment captured; payment method marked `e_wallet` | E-Wallet payment recorded | **PASS** | `PaymentPersistenceIntegrationTests.cs`, DEMO-05-delivery |
+| `TC-PAY-05` | Partial payment tracking | Valid | Order balance `100.00` | Tender `40.00` Cash | Payment accepted; remaining balance `60.00`; order cannot yet complete | Remaining balance 60.00 | **PASS** | `PaymentCommandHandlerTests.cs` |
+| `TC-FUL-01` | Delivery staff assignment | Valid | Delivery order is `Ready`; active courier exists | Assign courier with role `DeliveryStaff` | Courier assigned; delivery record updated | Active courier linked to delivery | **PASS** | `DeliveryCommandHandlerTests.cs`, DEMO-05-delivery |
+| `TC-FUL-02` | Ineligible courier assignment | Invalid | Staff member has role `Barista` (not `DeliveryStaff`) | Attempt to assign staff member to delivery | Rejected: assigned staff must have delivery eligibility | Rejected with role validation error | **PASS** | `DeliveryTests.cs` |
+| `TC-FUL-03` | Delivery dispatch and completion | Valid | Courier assigned to ready order | Dispatch delivery -> mark as `Delivered` | Delivery reaches `Delivered`; order reaches `Completed` | Order completed; delivery timestamps recorded | **PASS** | `DeliveryCommandHandlerTests.cs`, DEMO-05-delivery |
+
+
 
