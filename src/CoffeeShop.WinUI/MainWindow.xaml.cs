@@ -154,35 +154,49 @@ public sealed partial class MainWindow : Window
     }
     private void ShowRoute(ServiceConsoleRoute route)
     {
-        var key = route.StockSection ?? route.Destination.Tag;
-        if (currentRoute != key)
+        if (route.Destination.Workspace == ServiceConsoleWorkspace.StockRoom)
         {
-            if (!pages.TryGetValue(key, out var page)) pages.Add(key, page = CreatePage(route));
-            ContentFrame.Content = page;
-            currentRoute = key;
+            const string stockKey = "stock-room";
+            if (!pages.TryGetValue(stockKey, out var stockPage))
+            {
+                pages.Add(stockKey, stockPage = new StockRoomPage());
+            }
+            if (currentRoute != stockKey)
+            {
+                ContentFrame.Content = stockPage;
+                currentRoute = stockKey;
+            }
+            if (stockPage is StockRoomPage page)
+            {
+                page.SelectSection(route.StockSection ?? "ingredients");
+            }
         }
+        else
+        {
+            var key = route.Destination.Tag;
+            if (currentRoute != key)
+            {
+                if (!pages.TryGetValue(key, out var page)) pages.Add(key, page = CreatePage(route));
+                ContentFrame.Content = page;
+                currentRoute = key;
+            }
+        }
+
         BreadcrumbGroup.Text = route.Destination.Group.ToUpperInvariant();
         BreadcrumbText.Text = route.Destination.Label.ToUpperInvariant();
         StockSectionButton.Visibility = route.StockSection is null ? Visibility.Collapsed : Visibility.Visible;
         if (route.StockSection is { } section) StockSectionButton.Content = ServiceConsoleNavigation.StockSections[section].ToUpperInvariant() + " ▾";
         if (layout != ServiceConsoleLayoutMode.Expanded) Nav.IsPaneOpen = false;
     }
-    private static Page CreatePage(ServiceConsoleRoute route) => route.StockSection switch
+    private static Page CreatePage(ServiceConsoleRoute route) => route.Destination.Workspace switch
     {
-        "ingredients" => new IngredientsPage(),
-        "lowstock" => new LowStockPage(),
-        "receipts" => new PurchaseReceiptsPage(),
-        "suppliers" => new SuppliersPage(),
-        "adjustments" or "movements" => new InventoryAuditPage(),
-        _ => route.Destination.Workspace switch
-        {
-            ServiceConsoleWorkspace.Counter => new PosPage(),
-            ServiceConsoleWorkspace.ServiceBoard => new OperationsPage(),
-            ServiceConsoleWorkspace.Menu => new CatalogPage(),
-            ServiceConsoleWorkspace.Customers => new CustomersPage(),
-            ServiceConsoleWorkspace.Reports => new ReportsPage(),
-            _ => throw new ArgumentOutOfRangeException(nameof(route)),
-        },
+        ServiceConsoleWorkspace.Counter => new PosPage(),
+        ServiceConsoleWorkspace.ServiceBoard => new OperationsPage(),
+        ServiceConsoleWorkspace.Menu => new CatalogPage(),
+        ServiceConsoleWorkspace.StockRoom => new StockRoomPage(),
+        ServiceConsoleWorkspace.Customers => new CustomersPage(),
+        ServiceConsoleWorkspace.Reports => new ReportsPage(),
+        _ => throw new ArgumentOutOfRangeException(nameof(route)),
     };
     private void OnShellSizeChanged(object sender, SizeChangedEventArgs e)
     {

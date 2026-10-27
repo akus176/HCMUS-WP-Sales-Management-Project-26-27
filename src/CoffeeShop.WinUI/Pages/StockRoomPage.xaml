@@ -1,0 +1,88 @@
+<Page
+    x:Class="CoffeeShop.WinUI.Pages.StockRoomPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CoffeeShop.WinUI.Controls"
+    mc:Ignorable="d"
+    Background="{StaticResource ConsoleGroundBrush}">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid x:Name="RootGrid" Padding="32,24" RowSpacing="20">
+            <Grid.RowDefinitions>
+                <!-- 0: Page Header -->
+                <RowDefinition Height="Auto" />
+                <!-- 1: Section Tabs -->
+                <RowDefinition Height="Auto" />
+                <!-- 2: Workflow Feedback / Status Banner -->
+                <RowDefinition Height="Auto" />
+                <!-- 3: Main Workspace -->
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Page Header -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="4">
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <Ellipse Width="6" Height="6" Fill="{StaticResource ConsoleAccentBrush}" />
+                        <TextBlock x:Name="EyebrowText" Text="MANAGE / INVENTORY / STOCK ROOM" Style="{StaticResource ConsoleLabelStyle}" CharacterSpacing="140" />
+                    </StackPanel>
+                    <TextBlock Text="Stock room" Style="{StaticResource ConsolePageTitleStyle}" Margin="0,4,0,4" />
+                    <TextBlock x:Name="SubtitleText" Text="Consolidated inventory, balances, replenishment, and movements." Style="{StaticResource ConsoleBodyStyle}" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                </StackPanel>
+                <Image Grid.Column="1" Source="ms-appx:///Assets/Ornaments/stock-room.svg" Width="100" Height="70" Margin="16,0" Opacity="0.8" AutomationProperties.AccessibilityView="Raw" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <Button x:Name="NewIngredientButton" Content="+ NEW INGREDIENT" Style="{StaticResource ConsoleButtonStyle}" Click="OnNewIngredientClick" AutomationProperties.Name="Create new ingredient" />
+                    <Button x:Name="ReceiveDeliveryButton" Content="RECEIVE DELIVERY" Style="{StaticResource ConsolePrimaryButtonStyle}" Click="OnReceiveDeliveryClick" AutomationProperties.Name="Receive delivery and create receipt" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Section Tabs Bar -->
+            <Border Grid.Row="1" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel x:Name="TabsPanel" Orientation="Horizontal" Spacing="8">
+                        <Button x:Name="TabBalances" Content="BALANCES" Style="{StaticResource ConsoleTabStyle}" Click="OnTabClick" Tag="ingredients" AutomationProperties.Name="Balances section" />
+                        <Button x:Name="TabLowStock" Content="LOW STOCK" Style="{StaticResource ConsoleTabStyle}" Click="OnTabClick" Tag="lowstock" AutomationProperties.Name="Low stock section" />
+                        <Button x:Name="TabReceipts" Content="RECEIPTS" Style="{StaticResource ConsoleTabStyle}" Click="OnTabClick" Tag="receipts" AutomationProperties.Name="Receipts section" />
+                        <Button x:Name="TabSuppliers" Content="SUPPLIERS" Style="{StaticResource ConsoleTabStyle}" Click="OnTabClick" Tag="suppliers" AutomationProperties.Name="Suppliers section" />
+                        <Button x:Name="TabAdjustments" Content="ADJUSTMENTS" Style="{StaticResource ConsoleTabStyle}" Click="OnTabClick" Tag="adjustments" AutomationProperties.Name="Adjustments section" />
+                        <Button x:Name="TabMovements" Content="MOVEMENTS" Style="{StaticResource ConsoleTabStyle}" Click="OnTabClick" Tag="movements" AutomationProperties.Name="Movements audit section" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Border BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="1" Padding="8,3">
+                            <TextBlock x:Name="SyncPillText" Text="SYNCED 10:40" Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                        </Border>
+                        <Button x:Name="RefreshButton" Content="↻" Style="{StaticResource ConsoleIconButtonStyle}" Click="OnRefreshClick" AutomationProperties.Name="Refresh stock room data" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Feedback / Status -->
+            <Border x:Name="StatusBanner" Grid.Row="2" Style="{StaticResource ConsolePaperPanelStyle}" Visibility="Collapsed">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="StatusMessageText" Style="{StaticResource ConsoleBodyStyle}" VerticalAlignment="Center" />
+                    <Button x:Name="StatusDismissButton" Grid.Column="1" Content="✕" Style="{StaticResource ConsoleIconButtonStyle}" Width="32" Height="32" Click="OnDismissStatus" AutomationProperties.Name="Dismiss status message" />
+                </Grid>
+            </Border>
+
+            <!-- Section Host (populated by subsequent commits) -->
+            <Grid x:Name="SectionsHost" Grid.Row="3">
+                <TextBlock Text="Stock room workspace loading…" Style="{StaticResource ConsoleBodyStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+        </Grid>
+    </ScrollViewer>
+</Page>
