@@ -31,6 +31,8 @@ The environment variable takes precedence. Keep this user-local file out of sour
 
 ## Project boundaries
 
+The first stage of the service-console UI migration is documented in [the native foundation and shell guide](docs/ui-foundation.md), including the component gallery, supported routes, and verification commands.
+
 | Project                              | Responsibility                                                        |
 | ------------------------------------ | --------------------------------------------------------------------- |
 | `CoffeeShop.Domain`                  | Business entities and rules; no framework or persistence reference    |

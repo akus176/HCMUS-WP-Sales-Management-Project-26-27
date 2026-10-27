@@ -1,0 +1,21 @@
+<UserControl x:Class="CoffeeShop.WinUI.Controls.ConceptNote"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Padding="3,9,3,4">
+        <Border x:Name="ShadowHost" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
+        <Border x:Name="Paper" Background="{StaticResource ConsoleConfirmedBrush}"
+                BorderBrush="{StaticResource ConsoleConfirmedEdgeBrush}" BorderThickness="1" Padding="12,20,12,12">
+            <ContentPresenter x:Name="NotePresenter" HorizontalContentAlignment="Stretch" />
+        </Border>
+        <Border x:Name="SelectedEdge" BorderBrush="{StaticResource ConsoleAccentTextBrush}" BorderThickness="1" Margin="-2" Visibility="Collapsed" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
+        <Border x:Name="Tape" Width="50" Height="16" VerticalAlignment="Top" Margin="0,-8,0,0"
+                Background="{StaticResource ConsoleConfirmedTapeBrush}" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw"
+                RenderTransformOrigin=".5,.5">
+            <Border.RenderTransform><RotateTransform x:Name="TapeRotation" Angle="-4" /></Border.RenderTransform>
+        </Border>
+        <Polygon x:Name="Fold" Points="0,0 13,0 0,13" Fill="{StaticResource ConsoleConfirmedEdgeBrush}"
+                 Width="13" Height="13" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                 IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
+        <Polygon Points="13,0 13,13 0,13" Fill="{StaticResource ConsoleGroundBrush}" Width="13" Height="13" HorizontalAlignment="Right" VerticalAlignment="Bottom" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
+    </Grid>
+</UserControl>

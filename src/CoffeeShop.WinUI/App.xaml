@@ -6,6 +6,11 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="ms-appx:///Theme/ServiceConsoleColors.xaml" />
+                <ResourceDictionary Source="ms-appx:///Theme/ServiceConsoleTypography.xaml" />
+                <ResourceDictionary Source="ms-appx:///Theme/ServiceConsoleGeometry.xaml" />
+                <ResourceDictionary Source="ms-appx:///Theme/ServiceConsoleControls.xaml" />
+                <ResourceDictionary Source="ms-appx:///Theme/ServiceConsoleSurfaces.xaml" />
                 <ResourceDictionary Source="ms-appx:///Theme/SketchColors.xaml" />
                 <ResourceDictionary Source="ms-appx:///Theme/SketchTypography.xaml" />
                 <ResourceDictionary Source="ms-appx:///Theme/SketchShapes.xaml" />

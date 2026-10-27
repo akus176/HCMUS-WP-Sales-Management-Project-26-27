@@ -1,6 +1,6 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <CornerRadius x:Key="SketchCornerRadiusWobbly">18,6,20,4</CornerRadius>
-    <CornerRadius x:Key="SketchCornerRadiusWobblyMd">26,10,22,8</CornerRadius>
-    <CornerRadius x:Key="SketchCornerRadiusPill">999</CornerRadius>
+    <CornerRadius x:Key="SketchCornerRadiusWobbly">0</CornerRadius>
+    <CornerRadius x:Key="SketchCornerRadiusWobblyMd">0</CornerRadius>
+    <CornerRadius x:Key="SketchCornerRadiusPill">0</CornerRadius>
 </ResourceDictionary>
