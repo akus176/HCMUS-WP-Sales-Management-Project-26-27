@@ -18,6 +18,8 @@ public sealed partial class StockRoomPage : Page
     private List<IngredientRow> allIngredientRows = [];
     private List<Ingredient> rawIngredients = [];
     private List<PosStaffOption> staffOptions = [];
+    private List<PurchaseReceipt> rawReceipts = [];
+    private Dictionary<EntityId, string> supplierNames = [];
     private List<StockMovement> recentMovements = [];
 
     private IngredientRow? selectedIngredientRow;
@@ -55,7 +57,7 @@ public sealed partial class StockRoomPage : Page
     {
         if (isBusy) return;
         SetBusy(true);
-        ShowFeedback(WorkflowFeedback.Loading("Syncing inventory and staff..."));
+        ShowFeedback(WorkflowFeedback.Loading("Syncing inventory, suppliers, receipts, and movements..."));
 
         try
         {
@@ -66,6 +68,16 @@ public sealed partial class StockRoomPage : Page
 
             rawIngredients = (await repo.ListIngredientsAsync()).ToList();
             allIngredientRows = rawIngredients.Select(i => new IngredientRow(i)).ToList();
+
+            var suppliers = await repo.ListSuppliersAsync();
+            supplierNames = suppliers.ToDictionary(s => s.Id, s => s.Name);
+            SuppliersListView.ItemsSource = suppliers.Select(s => new SupplierRow(s)).ToList();
+
+            rawReceipts = (await repo.ListReceiptsAsync()).ToList();
+            ReceiptsListView.ItemsSource = rawReceipts.Select(r => new ReceiptPresentationRow(
+                r,
+                supplierNames.TryGetValue(r.SupplierId, out var sName) ? sName : "Unknown Supplier"
+            )).ToList();
 
             var staffResult = await posHandler.GetOptionsAsync();
             staffOptions = staffResult.Staff.ToList();
@@ -97,9 +109,11 @@ public sealed partial class StockRoomPage : Page
             var lowCount = rawIngredients.Count(i => i.Status == StockStatus.LowStock);
             TabBalances.Content = $"BALANCES ({rawIngredients.Count})";
             TabLowStock.Content = $"LOW STOCK ({lowCount})";
+            TabReceipts.Content = $"RECEIPTS ({rawReceipts.Count})";
+            TabSuppliers.Content = $"SUPPLIERS ({suppliers.Count})";
             TabAdjustments.Content = "ADJUSTMENTS";
 
-            SubtitleText.Text = $"{rawIngredients.Count} ingredients, {lowCount} below reorder point.";
+            SubtitleText.Text = $"{rawIngredients.Count} ingredients, {lowCount} below reorder point, {rawReceipts.Count(r => r.Status == PurchaseReceiptStatus.Draft)} open draft receipts.";
             SyncPillText.Text = $"SYNCED {DateTime.Now:HH:mm}";
 
             ApplyIngredientFilters();
@@ -144,6 +158,10 @@ public sealed partial class StockRoomPage : Page
 
     private void SwitchSectionView()
     {
+        BalancesView.Visibility = Visibility.Collapsed;
+        ReceiptsView.Visibility = Visibility.Collapsed;
+        SuppliersView.Visibility = Visibility.Collapsed;
+
         switch (activeSection)
         {
             case "ingredients":
@@ -163,6 +181,16 @@ public sealed partial class StockRoomPage : Page
                 BalancesView.Visibility = Visibility.Visible;
                 DrawerPanel.Visibility = Visibility.Visible;
                 DeltaInputBox.Focus(FocusState.Programmatic);
+                break;
+
+            case "receipts":
+                ReceiptsView.Visibility = Visibility.Visible;
+                DrawerPanel.Visibility = compactLayout ? Visibility.Collapsed : Visibility.Visible;
+                break;
+
+            case "suppliers":
+                SuppliersView.Visibility = Visibility.Visible;
+                DrawerPanel.Visibility = compactLayout ? Visibility.Collapsed : Visibility.Visible;
                 break;
 
             default:
@@ -365,8 +393,120 @@ public sealed partial class StockRoomPage : Page
         finally { SetBusy(false); }
     }
 
-    private void OnReceiveDeliveryClick(object sender, RoutedEventArgs e)
+    private async void OnReceiveDeliveryClick(object sender, RoutedEventArgs e)
     {
+        var activeSuppliers = supplierNames.Values.OrderBy(n => n).ToList();
+        var dialog = new NewReceiptDialog(activeSuppliers);
+        dialog.XamlRoot = XamlRoot;
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+        var supplierEntry = supplierNames.FirstOrDefault(kvp => kvp.Value == dialog.SupplierName);
+        if (supplierEntry.Key is null)
+        {
+            ShowFeedback(WorkflowFeedback.Validation("supplier", "Select an active supplier."));
+            return;
+        }
+
+        SetBusy(true);
+        try
+        {
+            using var scope = App.Services.CreateScope();
+            var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
+            var result = await handler.CreateDraftReceiptAsync(new(supplierEntry.Key, dialog.ReceiptNumber));
+            if (result.IsSuccess)
+            {
+                SelectSection("receipts");
+                await LoadAllDataAsync();
+                ShowFeedback(WorkflowFeedback.Success($"Draft receipt #{dialog.ReceiptNumber} created."));
+            }
+            else ShowFeedback(WorkflowFeedback.FromError(result.Error!));
+        }
+        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create draft receipt", "Verify database connection.")); }
+        finally { SetBusy(false); }
+    }
+
+    private async void OnPostReceiptClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as Button)?.Tag is not ReceiptPresentationRow row) return;
+
+        var op = session.Operator ?? staffOptions.FirstOrDefault();
+        if (op is null)
+        {
+            ShowFeedback(WorkflowFeedback.Validation("operator", "Active staff operator required to post receipt."));
+            return;
+        }
+
+        SetBusy(true);
+        try
+        {
+            using var scope = App.Services.CreateScope();
+            var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
+            var result = await handler.PostReceiptAsync(new PostReceiptCommand(row.Id, op.Id));
+            if (result.IsSuccess)
+            {
+                await LoadAllDataAsync();
+                ShowFeedback(WorkflowFeedback.Success($"Purchase receipt #{row.ReceiptNumber} posted and inventory added."));
+            }
+            else ShowFeedback(WorkflowFeedback.FromError(result.Error!));
+        }
+        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("post purchase receipt", "Inspect receipt status before retrying.")); }
+        finally { SetBusy(false); }
+    }
+
+    private async void OnAddSupplierClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SupplierDialog();
+        dialog.XamlRoot = XamlRoot;
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+        SetBusy(true);
+        try
+        {
+            using var scope = App.Services.CreateScope();
+            var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
+            var result = await handler.CreateSupplierAsync(new(dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
+            if (result.IsSuccess)
+            {
+                await LoadAllDataAsync();
+                ShowFeedback(WorkflowFeedback.Success($"Supplier '{dialog.SupplierName}' created."));
+            }
+            else ShowFeedback(WorkflowFeedback.FromError(result.Error!));
+        }
+        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create supplier", "Verify connection.")); }
+        finally { SetBusy(false); }
+    }
+
+    private async void OnEditSupplierClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as Button)?.Tag is not SupplierRow row) return;
+
+        using var scope = App.Services.CreateScope();
+        var repo = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
+        var supplier = await repo.FindSupplierAsync(row.Id);
+        if (supplier is null)
+        {
+            ShowFeedback(WorkflowFeedback.FromError(Error.NotFound("supplier.not_found", "Supplier not found.")));
+            return;
+        }
+
+        var dialog = new SupplierDialog(supplier);
+        dialog.XamlRoot = XamlRoot;
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+        SetBusy(true);
+        try
+        {
+            var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
+            var result = await handler.UpdateSupplierAsync(new(supplier.Id, dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
+            if (result.IsSuccess)
+            {
+                await LoadAllDataAsync();
+                ShowFeedback(WorkflowFeedback.Success($"Supplier '{dialog.SupplierName}' updated."));
+            }
+            else ShowFeedback(WorkflowFeedback.FromError(result.Error!));
+        }
+        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("update supplier", "Verify connection.")); }
+        finally { SetBusy(false); }
     }
 
     private void OnTabClick(object sender, RoutedEventArgs e)
@@ -401,6 +541,8 @@ public sealed partial class StockRoomPage : Page
             DeltaInputBox.Focus(FocusState.Programmatic);
         }
     }
+
+    private void OnReceiptSelectionChanged(object sender, SelectionChangedEventArgs e) { }
 
     private void OnDrawerCloseClick(object sender, RoutedEventArgs e)
     {
@@ -461,6 +603,16 @@ public sealed partial class StockRoomPage : Page
             DrawerPanel.Visibility = Visibility.Visible;
         }
     }
+}
+
+public sealed record ReceiptPresentationRow(PurchaseReceipt Receipt, string SupplierName)
+{
+    public EntityId Id => Receipt.Id;
+    public string ReceiptNumber => Receipt.ReceiptNumber;
+    public string ReceiptTitle => $"Receipt #{ReceiptNumber}";
+    public string Status => Receipt.Status.ToString();
+    public string LineCountDisplay => $"{Receipt.Lines.Count} item(s)";
+    public bool CanPost => Receipt.Status == PurchaseReceiptStatus.Draft && Receipt.Lines.Count > 0;
 }
 
 public sealed record MovementPresentationRow(StockMovement Movement, string IngredientName)

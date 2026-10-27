@@ -163,6 +163,86 @@
                         </Border>
                         <TextBlock x:Name="BalancesEmptyText" Grid.Row="1" Text="No ingredients match your criteria." Style="{StaticResource ConsoleBodyStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
                     </Grid>
+
+                    <!-- SECTION 2: RECEIPTS -->
+                    <Grid x:Name="ReceiptsView" RowSpacing="12" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="PURCHASE RECEIPTS &amp; PROCUREMENT" Style="{StaticResource ConsoleLabelStyle}" CharacterSpacing="140" VerticalAlignment="Center" />
+                            <Button Grid.Column="1" Content="+ DRAFT RECEIPT" Style="{StaticResource ConsolePrimaryButtonStyle}" Click="OnReceiveDeliveryClick" AutomationProperties.Name="New draft purchase receipt" />
+                        </Grid>
+                        <Border Grid.Row="1" Style="{StaticResource ConsolePaperPanelStyle}" Padding="0">
+                            <ListView x:Name="ReceiptsListView" SelectionMode="Single" SelectionChanged="OnReceiptSelectionChanged" AutomationProperties.Name="Purchase receipts list">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Padding="14,10" ColumnSpacing="12" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Spacing="2">
+                                                <TextBlock Text="{Binding ReceiptTitle}" FontFamily="{StaticResource ConsoleSansMediumFont}" FontSize="13" />
+                                                <TextBlock Text="{Binding SupplierName}" Style="{StaticResource ConsoleLabelStyle}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding LineCountDisplay}" Style="{StaticResource ConsoleBodyStyle}" VerticalAlignment="Center" Margin="0,0,16,0" />
+                                            <Border Grid.Column="2" Style="{StaticResource ConsoleStampStyle}" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Status}" Style="{StaticResource ConsoleLabelStyle}" />
+                                            </Border>
+                                            <Button Grid.Column="3" Content="POST" Style="{StaticResource ConsoleButtonStyle}" MinHeight="36" IsEnabled="{Binding CanPost}" Tag="{Binding}" Click="OnPostReceiptClick" AutomationProperties.Name="Post purchase receipt" Margin="8,0,0,0" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Border>
+                    </Grid>
+
+                    <!-- SECTION 3: SUPPLIERS -->
+                    <Grid x:Name="SuppliersView" RowSpacing="12" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="APPROVED SUPPLIERS &amp; VENDORS" Style="{StaticResource ConsoleLabelStyle}" CharacterSpacing="140" VerticalAlignment="Center" />
+                            <Button Grid.Column="1" Content="+ NEW SUPPLIER" Style="{StaticResource ConsolePrimaryButtonStyle}" Click="OnAddSupplierClick" AutomationProperties.Name="Create supplier" />
+                        </Grid>
+                        <Border Grid.Row="1" Style="{StaticResource ConsolePaperPanelStyle}" Padding="0">
+                            <ListView x:Name="SuppliersListView" SelectionMode="None" AutomationProperties.Name="Suppliers list">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Padding="14,10" ColumnSpacing="12" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center" Spacing="2">
+                                                <TextBlock Text="{Binding Name}" FontFamily="{StaticResource ConsoleSansMediumFont}" FontSize="13" />
+                                                <TextBlock Text="{Binding ContactDisplay}" Style="{StaticResource ConsoleLabelStyle}" />
+                                            </StackPanel>
+                                            <Border Grid.Column="1" Style="{StaticResource ConsoleStampStyle}" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding StatusDisplay}" Style="{StaticResource ConsoleLabelStyle}" />
+                                            </Border>
+                                            <Button Grid.Column="2" Content="EDIT" Style="{StaticResource ConsoleButtonStyle}" MinHeight="36" Tag="{Binding}" Click="OnEditSupplierClick" AutomationProperties.Name="Edit supplier" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Border>
+                    </Grid>
                 </Grid>
 
                 <!-- RIGHT: ADJUSTMENT / INSPECTION DRAWER -->
