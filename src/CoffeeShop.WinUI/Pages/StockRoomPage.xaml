@@ -17,7 +17,7 @@
                 <RowDefinition Height="Auto" />
                 <!-- 2: Workflow Feedback / Status Banner -->
                 <RowDefinition Height="Auto" />
-                <!-- 3: Main Workspace -->
+                <!-- 3: Main Workspace & Drawer Split -->
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
@@ -237,6 +237,39 @@
                                                 <TextBlock Text="{Binding StatusDisplay}" Style="{StaticResource ConsoleLabelStyle}" />
                                             </Border>
                                             <Button Grid.Column="2" Content="EDIT" Style="{StaticResource ConsoleButtonStyle}" MinHeight="36" Tag="{Binding}" Click="OnEditSupplierClick" AutomationProperties.Name="Edit supplier" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Border>
+                    </Grid>
+
+                    <!-- SECTION 4: MOVEMENTS AUDIT LEDGER -->
+                    <Grid x:Name="MovementsView" RowSpacing="12" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="IMMUTABLE STOCK MOVEMENTS (LATEST 100)" Style="{StaticResource ConsoleLabelStyle}" CharacterSpacing="140" />
+                        <Border Grid.Row="1" Style="{StaticResource ConsolePaperPanelStyle}" Padding="0">
+                            <ListView x:Name="MovementsListView" SelectionMode="None" AutomationProperties.Name="Movement audit list">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Padding="14,8" ColumnSpacing="12" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="130" />
+                                                <ColumnDefinition Width="90" />
+                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="110" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding TimeDisplay}" Style="{StaticResource ConsoleLabelStyle}" VerticalAlignment="Center" />
+                                            <Border Grid.Column="1" Style="{StaticResource ConsoleStampStyle}" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding TypeDisplay}" Style="{StaticResource ConsoleLabelStyle}" />
+                                            </Border>
+                                            <TextBlock Grid.Column="2" Text="{Binding DeltaDisplay}" FontFamily="{StaticResource ConsoleSansFont}" FontWeight="Bold" FontSize="12" Foreground="{Binding DeltaBrush}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="3" Text="{Binding ReasonDisplay}" Style="{StaticResource ConsoleBodyStyle}" VerticalAlignment="Center" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Grid.Column="4" Text="{Binding ActorDisplay}" Style="{StaticResource ConsoleLabelStyle}" VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>

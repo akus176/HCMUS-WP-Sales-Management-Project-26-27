@@ -105,6 +105,11 @@ public sealed partial class StockRoomPage : Page
                 recentMovements = [];
             }
 
+            MovementsListView.ItemsSource = recentMovements.Select(m => new MovementPresentationRow(
+                m,
+                selectedIngredientRow?.Name ?? "Selected Ingredient"
+            )).ToList();
+
             // Counts & Subtitle
             var lowCount = rawIngredients.Count(i => i.Status == StockStatus.LowStock);
             TabBalances.Content = $"BALANCES ({rawIngredients.Count})";
@@ -112,6 +117,7 @@ public sealed partial class StockRoomPage : Page
             TabReceipts.Content = $"RECEIPTS ({rawReceipts.Count})";
             TabSuppliers.Content = $"SUPPLIERS ({suppliers.Count})";
             TabAdjustments.Content = "ADJUSTMENTS";
+            TabMovements.Content = $"MOVEMENTS ({recentMovements.Count})";
 
             SubtitleText.Text = $"{rawIngredients.Count} ingredients, {lowCount} below reorder point, {rawReceipts.Count(r => r.Status == PurchaseReceiptStatus.Draft)} open draft receipts.";
             SyncPillText.Text = $"SYNCED {DateTime.Now:HH:mm}";
@@ -161,6 +167,7 @@ public sealed partial class StockRoomPage : Page
         BalancesView.Visibility = Visibility.Collapsed;
         ReceiptsView.Visibility = Visibility.Collapsed;
         SuppliersView.Visibility = Visibility.Collapsed;
+        MovementsView.Visibility = Visibility.Collapsed;
 
         switch (activeSection)
         {
@@ -193,9 +200,9 @@ public sealed partial class StockRoomPage : Page
                 DrawerPanel.Visibility = compactLayout ? Visibility.Collapsed : Visibility.Visible;
                 break;
 
-            default:
-                BalancesView.Visibility = Visibility.Visible;
-                DrawerPanel.Visibility = Visibility.Visible;
+            case "movements":
+                MovementsView.Visibility = Visibility.Visible;
+                DrawerPanel.Visibility = compactLayout ? Visibility.Collapsed : Visibility.Visible;
                 break;
         }
 
