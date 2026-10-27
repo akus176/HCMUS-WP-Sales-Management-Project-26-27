@@ -122,3 +122,28 @@ Covers earning rules, redemption rules, maximum discount caps, ledger transactio
 | `TC-LOY-09` | Order cancellation restores points | Valid | Order completed with 10 points redeemed; Balance is 75 | Cancel order with valid reason | Exactly 10 points restored; customer balance returns to 85; reversal ledger entry written | Balance restored to 85; 1 reversal entry | **PASS** | `OrderCancellationCommandHandlerTests.cs`, DEMO-07 |
 | `TC-LOY-10` | Atomic failure rollback | Invalid | Order ready; loyalty settings temporarily removed in DB | Attempt to complete order | Completion fails due to missing rules; order stays ready, table occupied, NO points or completion recorded | Order stays ready; 0 points awarded; zero partial commits | **PASS** | `MidtermDemonstrationIntegrationTests.cs`, DEMO-09 |
 
+---
+
+## 7. Inventory & Procurement test cases
+
+Covers ingredients, unit definitions, suppliers, purchase receipts, stock adjustments, movement auditing, and low-stock threshold queries (T4.1–T4.7, T7.5).
+
+| Test ID | Feature | Type | Precondition | Input | Expected Result | Actual Result | Status | Evidence Link |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `TC-INV-01` | Ingredient creation | Valid | System initialized | Name: `"Arabica Coffee Beans"`, Unit: `g`, MinThreshold: `50.00` | Ingredient persisted with initial balance `0.00` | Persisted with unit `g` and balance 0 | **PASS** | `IngredientTests.cs`, DEMO-02 |
+| `TC-INV-02` | Supported units validation | Boundary | System initialized | Test units: `g` (weight), `ml` (volume), `pcs` (discrete) | All three units accepted and stored | Successfully mapped to domain unit | **PASS** | `IngredientLifecycleTests.cs`, DEMO-09 |
+| `TC-INV-03` | Negative reorder threshold | Invalid | System initialized | MinThreshold: `-10.00` | Rejected: threshold cannot be negative | Rejected with validation error | **PASS** | `IngredientTests.cs` |
+| `TC-INV-04` | Supplier creation & update | Valid | System initialized | Create supplier `"Highland Farms"`, update contact | Supplier details saved and updated successfully | Persisted and reloaded | **PASS** | `SupplierTests.cs`, DEMO-02 |
+| `TC-INV-05` | Purchase receipt draft | Valid | Active supplier and ingredient exist | Create receipt with line item: 100g at cost 20.00 | Draft receipt created in `Draft` status; inventory not yet modified | Status `Draft`, stock unchanged | **PASS** | `PurchaseReceiptTests.cs`, DEMO-02 |
+| `TC-INV-06` | Purchase receipt posting | Valid | Draft receipt with 100g beans exists; Initial balance: 0g | Post receipt with selected staff actor | Receipt transitions to `Posted`; stock increases by 100g to 100g; immutable movement logged | Status `Posted`; balance 100g; movement recorded | **PASS** | `ReceiptPostingIntegrationTests.cs`, DEMO-02 |
+| `TC-INV-07` | Duplicate receipt posting rejection | Invalid | Receipt is already in `Posted` status | Attempt to re-post the same receipt | Rejected: cannot post an already posted receipt; no duplicate inventory added | Rejected with conflict; balance stays 100g | **PASS** | `ReceiptPostingIntegrationTests.cs`, DEMO-02 |
+| `TC-INV-08` | Stock adjustment blank reason | Invalid | Ingredient balance: 100g | Adjustment: `-5.00g`, Reason: `""` (empty) | Rejected: non-empty reason is mandatory for stock adjustment | Rejected with missing reason validation error | **PASS** | `InventoryCommandHandlerTests.cs`, DEMO-02 |
+| `TC-INV-09` | Manual stock reduction | Valid | Ingredient balance: 100g | Adjustment: `-5.00g`, Reason: `"Spillage during calibration"` | Balance becomes `95.00g`; audit log records negative movement | Balance 95g; adjustment movement logged | **PASS** | `InventoryCommandHandlerTests.cs`, DEMO-02 |
+| `TC-INV-10` | Manual stock addition | Valid | Ingredient balance: 95g | Adjustment: `+5.00g`, Reason: `"Found misplaced bag"` | Balance becomes `100.00g`; audit log records positive movement | Balance 100g; adjustment movement logged | **PASS** | `InventoryCommandHandlerTests.cs`, DEMO-02 |
+| `TC-INV-11` | Consecutive adjustments audit trail | Boundary | Initial balance: 95g | Execute sequence: `-5g`, `+5g`, `-5g` with reasons | Balance resolves to `90.00g`; exactly three distinct immutable movement records created | Balance 90g; all movements preserved in ledger | **PASS** | `StockAuditRepository.cs`, DEMO-02 |
+| `TC-INV-12` | Low stock threshold detection | Boundary | Ingredient threshold: `50.00g`; Current balance: `50.00g` | Query low-stock ingredients | Ingredient returned in low-stock list (`balance <= threshold`) | Listed with status Low Stock | **PASS** | `LowStockQueryTests.cs`, DEMO-08 |
+| `TC-INV-13` | Normal stock excluded from low stock | Valid | Ingredient threshold: `50.00g`; Current balance: `51.00g` | Query low-stock ingredients | Ingredient excluded from low-stock list (`balance > threshold`) | Excluded from alert list | **PASS** | `LowStockReportTests.cs` |
+| `TC-INV-14` | Zero stock condition | Boundary | Ingredient balance: `0.00g`, Threshold: `10.00g` | Query low-stock ingredients | Ingredient flagged as critical out-of-stock | Displayed with zero balance warning | **PASS** | `LowStockReportIntegrationTests.cs` |
+| `TC-INV-15` | External update isolation | Valid | Inventory screen loaded; order confirmed in background | Refresh inventory page | Fresh service scope queries DB; updated stock balance reflected immediately | Updated balance observed without app restart | **PASS** | `OperationsWorkspaceTests.cs`, `inventory-refresh.txt` |
+
+
