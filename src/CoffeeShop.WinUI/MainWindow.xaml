@@ -2,103 +2,147 @@
     x:Class="CoffeeShop.WinUI.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Coffee Shop — Menu, Customers and Inventory">
-    <Grid Background="{StaticResource SketchBackgroundBrush}" RequestedTheme="Light">
+    Title="Corner Cafe — Service Console">
+    <Grid x:Name="ShellRoot"
+          Background="{StaticResource SketchBackgroundBrush}"
+          RequestedTheme="Light"
+          SizeChanged="OnShellSizeChanged">
         <Grid.RowDefinitions>
+            <RowDefinition Height="34" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Border x:Name="DatabaseStatusBar"
+
+        <Border x:Name="ShellStatusBar"
                 Grid.Row="0"
-                Padding="16,10"
-                Background="{StaticResource SketchMutedBrush}">
+                Padding="12,0"
+                Background="{StaticResource SketchSurfaceBrush}"
+                BorderBrush="{StaticResource SketchSoftBorderBrush}"
+                BorderThickness="0,0,0,1">
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock x:Name="DatabaseStatusText"
+                <Border Width="20"
+                        Height="20"
+                        VerticalAlignment="Center"
+                        Background="{StaticResource SketchPostItBrush}"
+                        BorderBrush="{StaticResource SketchBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="10">
+                    <FontIcon Glyph="&#xE719;" FontSize="11" />
+                </Border>
+                <TextBlock Grid.Column="1"
                            VerticalAlignment="Center"
-                           Text="Checking database connection..."
-                           TextWrapping="Wrap" />
+                           FontFamily="{StaticResource SketchHeadingFontFamily}"
+                           FontSize="15"
+                           Text="Corner Cafe" />
+                <TextBlock x:Name="ShellTitle"
+                           Grid.Column="2"
+                           VerticalAlignment="Center"
+                           Foreground="{StaticResource SketchTertiaryForegroundBrush}"
+                           FontFamily="{StaticResource SketchBodyFontFamily}"
+                           FontSize="12"
+                           CharacterSpacing="120"
+                           Text="SERVICE CONSOLE" />
+                <StackPanel Grid.Column="3"
+                            Orientation="Horizontal"
+                            Spacing="6"
+                            VerticalAlignment="Center"
+                            AutomationProperties.LiveSetting="Polite">
+                    <Ellipse x:Name="ConnectionStatusDot"
+                             Width="7"
+                             Height="7"
+                             Fill="{StaticResource SketchTertiaryForegroundBrush}" />
+                    <TextBlock x:Name="ConnectionStatusText"
+                               VerticalAlignment="Center"
+                               FontFamily="{StaticResource SketchBodyFontFamily}"
+                               FontSize="12"
+                               Text="Checking connection" />
+                    <TextBlock x:Name="ConnectionStatusDetail"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource SketchTertiaryForegroundBrush}"
+                               FontFamily="{StaticResource SketchNumericFontFamily}"
+                               FontSize="10" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border x:Name="DatabaseFailurePanel"
+                Grid.Row="1"
+                Style="{StaticResource ServiceConsoleWarningRowStyle}"
+                Visibility="Collapsed"
+                AutomationProperties.LiveSetting="Assertive">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <FontIcon Glyph="&#xE7BA;"
+                          Foreground="{StaticResource SketchAccentBrush}"
+                          AutomationProperties.Name="Connection warning" />
+                <StackPanel Grid.Column="1" Spacing="2">
+                    <TextBlock Text="The service console is offline"
+                               Style="{StaticResource ServiceConsoleSectionTitleStyle}"
+                               FontSize="18" />
+                    <TextBlock x:Name="DatabaseStatusText"
+                               Text="Checking database connection..."
+                               TextWrapping="Wrap" />
+                </StackPanel>
                 <Button x:Name="RetryDatabaseButton"
-                        Grid.Column="1"
-                        Content="Retry"
+                        Grid.Column="2"
+                        Content="Retry connection"
+                        Style="{StaticResource ServiceConsoleSecondaryButtonStyle}"
                         Click="OnRetryDatabaseClick"
                         Visibility="Collapsed" />
             </Grid>
         </Border>
+
         <NavigationView x:Name="Nav"
-                        Grid.Row="1"
+                        Grid.Row="2"
                         IsEnabled="False"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="False"
+                        CompactPaneLength="58"
+                        OpenPaneLength="226"
                         PaneDisplayMode="Left"
-                        OpenPaneLength="220"
+                        Background="{StaticResource SketchBackgroundBrush}"
                         SelectionChanged="OnNavSelectionChanged">
-            <NavigationView.MenuItems>
-                <NavigationViewItem Content="Point of Sale" Tag="pos">
-                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE719;"/></NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Fulfillment &amp; Operations" Tag="operations">
-                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE768;"/></NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Menu and Recipes" Tag="catalog">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8F1;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Customers and Loyalty" Tag="customers">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE716;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Ingredients"
-                        Tag="ingredients">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8F1;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Suppliers"
-                        Tag="suppliers">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE77B;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Purchase Receipts"
-                        Tag="receipts">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8A5;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Low Stock"
-                        Tag="lowstock">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE7BA;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Reports"
-                        Tag="reports">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE9D2;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Stock Adjustments"
-                        Tag="adjustments">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE8D7;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="Movement History"
-                        Tag="movements">
-                    <NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE81C;"/>
-                    </NavigationViewItem.Icon>
-                </NavigationViewItem>
-            </NavigationView.MenuItems>
+            <NavigationView.PaneHeader>
+                <Grid Padding="8,12,8,10" ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="42" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="40"
+                            Height="40"
+                            Background="{StaticResource SketchPostItBrush}"
+                            BorderBrush="{StaticResource SketchBorderBrush}"
+                            BorderThickness="1.5"
+                            CornerRadius="20">
+                        <FontIcon Glyph="&#xE719;"
+                                  FontSize="20"
+                                  AutomationProperties.Name="Corner Cafe" />
+                    </Border>
+                    <StackPanel x:Name="BrandCopy" Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock FontFamily="{StaticResource SketchHeadingFontFamily}"
+                                   FontSize="22"
+                                   Text="Corner Cafe" />
+                        <TextBlock Style="{StaticResource ServiceConsoleCaptionStyle}"
+                                   CharacterSpacing="120"
+                                   Text="SERVICE CONSOLE" />
+                    </StackPanel>
+                </Grid>
+            </NavigationView.PaneHeader>
 
             <Frame x:Name="ContentFrame"
-                    Background="Transparent"/>
+                   Background="Transparent"
+                   HorizontalAlignment="Stretch"
+                   HorizontalContentAlignment="Stretch" />
         </NavigationView>
     </Grid>
 </Window>
