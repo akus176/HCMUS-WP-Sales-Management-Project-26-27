@@ -9,7 +9,7 @@
     Background="{StaticResource ConsoleGroundBrush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid x:Name="RootGrid" Padding="32,24" RowSpacing="20">
+        <Grid x:Name="RootGrid" Padding="32,24" RowSpacing="20" SizeChanged="OnRootSizeChanged">
             <Grid.RowDefinitions>
                 <!-- 0: Page Header -->
                 <RowDefinition Height="Auto" />
@@ -79,9 +79,210 @@
                 </Grid>
             </Border>
 
-            <!-- Section Host (populated by subsequent commits) -->
-            <Grid x:Name="SectionsHost" Grid.Row="3">
-                <TextBlock Text="Stock room workspace loading…" Style="{StaticResource ConsoleBodyStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <!-- Main Split Grid: Left = Workspace Section Table/List, Right = Drawer / Details -->
+            <Grid x:Name="ContentSplitGrid" Grid.Row="3" ColumnSpacing="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="MainColumn" Width="*" />
+                    <ColumnDefinition x:Name="DrawerColumn" Width="360" />
+                </Grid.ColumnDefinitions>
+
+                <!-- LEFT: Section Views Container -->
+                <Grid x:Name="SectionsHost" Grid.Column="0">
+                    <!-- SECTION 1: BALANCES & LOW STOCK -->
+                    <Grid x:Name="BalancesView" RowSpacing="12" Visibility="Visible">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <!-- Filter Toolbar -->
+                        <Grid Grid.Row="0" ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="SearchBox" PlaceholderText="Filter ingredients…" Style="{StaticResource ConsoleFieldStyle}" TextChanged="OnSearchTextChanged" AutomationProperties.Name="Filter ingredients" />
+                            <ComboBox x:Name="UnitFilterBox" Grid.Column="1" SelectionChanged="OnUnitFilterChanged" MinWidth="110" MinHeight="48" AutomationProperties.Name="Filter by unit">
+                                <ComboBoxItem Content="All units" IsSelected="True" />
+                                <ComboBoxItem Content="g (Weight)" />
+                                <ComboBoxItem Content="ml (Volume)" />
+                                <ComboBoxItem Content="pcs (Count)" />
+                            </ComboBox>
+                            <CheckBox x:Name="LowStockOnlyCheck" Grid.Column="2" Content="Low stock only" VerticalAlignment="Center" Checked="OnLowStockFilterChecked" Unchecked="OnLowStockFilterUnchecked" />
+                            <TextBlock x:Name="BalancesCountText" Grid.Column="4" Style="{StaticResource ConsoleLabelStyle}" VerticalAlignment="Center" Text="Showing 0 ingredients" />
+                        </Grid>
+
+                        <!-- Table -->
+                        <Border Grid.Row="1" Style="{StaticResource ConsolePaperPanelStyle}" Padding="0">
+                            <ListView x:Name="IngredientsListView" SelectionMode="Single" SelectionChanged="OnIngredientSelectionChanged" AutomationProperties.Name="Ingredients table">
+                                <ListView.Header>
+                                    <Border BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1" Padding="12,8">
+                                        <Grid ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*" />
+                                                <ColumnDefinition Width="90" />
+                                                <ColumnDefinition Width="90" />
+                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="70" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="INGREDIENT" Style="{StaticResource ConsoleLabelStyle}" />
+                                            <TextBlock Grid.Column="1" Text="ON HAND" Style="{StaticResource ConsoleLabelStyle}" />
+                                            <TextBlock Grid.Column="2" Text="REORDER AT" Style="{StaticResource ConsoleLabelStyle}" />
+                                            <TextBlock Grid.Column="3" Text="STATUS" Style="{StaticResource ConsoleLabelStyle}" />
+                                            <TextBlock Grid.Column="4" Text="ACTIONS" Style="{StaticResource ConsoleLabelStyle}" />
+                                        </Grid>
+                                    </Border>
+                                </ListView.Header>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Padding="12,10" ColumnSpacing="8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*" />
+                                                <ColumnDefinition Width="90" />
+                                                <ColumnDefinition Width="90" />
+                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="70" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontFamily="{StaticResource ConsoleSansMediumFont}" FontSize="13" Foreground="{StaticResource ConsoleInkBrush}" />
+                                                <TextBlock Text="{Binding UnitDisplay}" Style="{StaticResource ConsoleLabelStyle}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding BalanceDisplay}" FontFamily="{StaticResource ConsoleSansFont}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" Text="{Binding ThresholdDisplay}" FontFamily="{StaticResource ConsoleSansFont}" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" VerticalAlignment="Center" />
+                                            <Border Grid.Column="3" Style="{StaticResource ConsoleStampStyle}" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding StatusDisplay}" Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                                            </Border>
+                                            <Button Grid.Column="4" Content="ADJUST" Style="{StaticResource ConsoleButtonStyle}" MinWidth="60" MinHeight="36" Padding="6,2" Tag="{Binding}" Click="OnRowAdjustClick" AutomationProperties.Name="{Binding AdjustActionName}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </Border>
+                        <TextBlock x:Name="BalancesEmptyText" Grid.Row="1" Text="No ingredients match your criteria." Style="{StaticResource ConsoleBodyStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
+                    </Grid>
+                </Grid>
+
+                <!-- RIGHT: ADJUSTMENT / INSPECTION DRAWER -->
+                <Border x:Name="DrawerPanel" Grid.Column="1" Style="{StaticResource ConsolePaperPanelStyle}" Background="{StaticResource ConsolePanelBrush}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="16">
+                            <!-- Drawer Header -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="ADJUST STOCK · IMMUTABLE MOVEMENT" Style="{StaticResource ConsoleLabelStyle}" CharacterSpacing="140" />
+                                    <TextBlock x:Name="DrawerIngredientTitle" Text="Select an ingredient" Style="{StaticResource ConsoleSectionTitleStyle}" />
+                                </StackPanel>
+                                <Button x:Name="DrawerCloseButton" Grid.Column="1" Content="✕" Style="{StaticResource ConsoleIconButtonStyle}" Width="36" Height="36" Click="OnDrawerCloseClick" AutomationProperties.Name="Close adjustment drawer" />
+                            </Grid>
+
+                            <!-- Tags -->
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Border x:Name="DrawerStatusStamp" Style="{StaticResource ConsoleStampStyle}">
+                                    <TextBlock x:Name="DrawerStatusText" Text="STATUS" Style="{StaticResource ConsoleLabelStyle}" />
+                                </Border>
+                                <Border Style="{StaticResource ConsoleStampStyle}">
+                                    <TextBlock x:Name="DrawerUnitTag" Text="UNIT" Style="{StaticResource ConsoleLabelStyle}" />
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Balance Block -->
+                            <Border Style="{StaticResource ConsolePaperPanelStyle}" Background="{StaticResource ConsoleGroundBrush}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="ON HAND" Style="{StaticResource ConsoleLabelStyle}" />
+                                    <TextBlock x:Name="DrawerBalanceValue" Text="0.00" Style="{StaticResource ConsoleNumberStyle}" FontSize="32" Foreground="{StaticResource ConsoleInkBrush}" />
+                                    <TextBlock x:Name="DrawerThresholdMeta" Text="Reorder threshold: 0.00" Style="{StaticResource ConsoleLabelStyle}" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Adjustment Form -->
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="QUANTITY CHANGE" Style="{StaticResource ConsoleLabelStyle}" />
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="DeltaInputBox" PlaceholderText="e.g. -5 or 10" Style="{StaticResource ConsoleFieldStyle}" TextChanged="OnDeltaInputChanged" AutomationProperties.Name="Adjustment delta quantity" />
+                                    <TextBlock x:Name="DeltaUnitText" Grid.Column="1" Text="g" Style="{StaticResource ConsoleLabelStyle}" VerticalAlignment="Center" Margin="4,0" />
+                                </Grid>
+
+                                <!-- Quick Chips -->
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <Button Content="-5" Style="{StaticResource ConsoleButtonStyle}" MinWidth="48" MinHeight="36" Padding="4,2" Click="OnQuickChipClick" Tag="-5" />
+                                    <Button Content="-10" Style="{StaticResource ConsoleButtonStyle}" MinWidth="48" MinHeight="36" Padding="4,2" Click="OnQuickChipClick" Tag="-10" />
+                                    <Button Content="+5" Style="{StaticResource ConsoleButtonStyle}" MinWidth="48" MinHeight="36" Padding="4,2" Click="OnQuickChipClick" Tag="+5" />
+                                    <Button Content="+10" Style="{StaticResource ConsoleButtonStyle}" MinWidth="48" MinHeight="36" Padding="4,2" Click="OnQuickChipClick" Tag="+10" />
+                                    <Button Content="+100" Style="{StaticResource ConsoleButtonStyle}" MinWidth="52" MinHeight="36" Padding="4,2" Click="OnQuickChipClick" Tag="+100" />
+                                </StackPanel>
+
+                                <!-- Projected Balance Preview -->
+                                <Border Style="{StaticResource ConsolePaperPanelStyle}" Padding="10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="PROJECTED BALANCE" Style="{StaticResource ConsoleLabelStyle}" />
+                                            <TextBlock x:Name="ProjectedBalanceText" Text="—" FontFamily="{StaticResource ConsoleSansMediumFont}" FontSize="15" />
+                                        </StackPanel>
+                                        <Border x:Name="ProjectedStatusStamp" Grid.Column="1" Style="{StaticResource ConsoleStampStyle}" VerticalAlignment="Center" Visibility="Collapsed">
+                                            <TextBlock x:Name="ProjectedStatusText" Text="BELOW REORDER" Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Operator Selector -->
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="STAFF OPERATOR" Style="{StaticResource ConsoleLabelStyle}" />
+                                    <ComboBox x:Name="DrawerOperatorBox" HorizontalAlignment="Stretch" MinHeight="48" SelectionChanged="OnDrawerOperatorChanged" AutomationProperties.Name="Adjustment staff operator" />
+                                </StackPanel>
+
+                                <!-- Reason -->
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="REASON (REQUIRED)" Style="{StaticResource ConsoleLabelStyle}" />
+                                    <TextBox x:Name="ReasonInputBox" PlaceholderText="Reason for adjustment…" AcceptsReturn="True" Height="60" TextWrapping="Wrap" Style="{StaticResource ConsoleFieldStyle}" AutomationProperties.Name="Adjustment reason" />
+                                </StackPanel>
+
+                                <!-- Action Button -->
+                                <Button x:Name="RecordAdjustmentButton" Content="RECORD ADJUSTMENT" Style="{StaticResource ConsolePrimaryButtonStyle}" HorizontalAlignment="Stretch" Click="OnRecordAdjustmentClick" AutomationProperties.Name="Record stock adjustment" />
+
+                                <TextBlock x:Name="AuditActorNote" Text="Movement is immutable and will be audited." Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleMutedInkBrush}" TextWrapping="Wrap" />
+                            </StackPanel>
+
+                            <!-- Recent Movements List for Selected Ingredient -->
+                            <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+                                <StackPanel Spacing="8">
+                                    <TextBlock Text="RECENT MOVEMENTS" Style="{StaticResource ConsoleLabelStyle}" />
+                                    <ListView x:Name="IngredientMovementsList" SelectionMode="None" MaxHeight="220" AutomationProperties.Name="Recent ingredient movements">
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Padding="4,6" ColumnSpacing="6" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="65" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding DeltaDisplay}" FontFamily="{StaticResource ConsoleSansFont}" FontWeight="Bold" FontSize="11" Foreground="{Binding DeltaBrush}" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding ReasonDisplay}" Style="{StaticResource ConsoleLabelStyle}" VerticalAlignment="Center" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Grid.Column="2" Text="{Binding TimeDisplay}" Style="{StaticResource ConsoleLabelStyle}" VerticalAlignment="Center" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                    <TextBlock x:Name="NoMovementsText" Text="No recorded movements." Style="{StaticResource ConsoleLabelStyle}" Visibility="Collapsed" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
             </Grid>
         </Grid>
     </ScrollViewer>
