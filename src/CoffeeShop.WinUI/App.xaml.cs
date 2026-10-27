@@ -22,8 +22,17 @@ public partial class App : Microsoft.UI.Xaml.Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        if (Environment.GetCommandLineArgs().Contains("--components"))
+        {
+            _window = new Window { Title = "Corner Cafe · Component gallery", Content = new Pages.ComponentGalleryPage() };
+            _window.AppWindow.ResizeClient(new Windows.Graphics.SizeInt32(1440, 900));
+            _window.Activate();
+            _window.AppWindow.Show();
+            return;
+        }
         _window = new MainWindow();
         _window.Activate();
+        if (Environment.GetCommandLineArgs().Contains("--verify-shell")) _window.AppWindow.Show();
         _ = ((MainWindow)_window).ConnectToDatabaseAsync();
     }
 

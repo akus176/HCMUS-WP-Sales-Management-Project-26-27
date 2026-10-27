@@ -5,6 +5,44 @@
   --pattern-rule: url("patterns/rule.svg");
 }
 
+/* Approved native-shell revision: 48px primary targets; unsupported global
+   search, notifications, ticket counters, avatars, and shift chrome omitted. */
+.nav-item, .btn, .icon-btn {
+  min-height: 48px;
+}
+
+.btn, .icon-btn {
+  height: 48px;
+}
+
+.icon-btn {
+  width: 48px;
+  flex: none;
+}
+
+.workspace-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 8px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* Reserve the same caption-button region as the native window title bar. */
+.titlebar { padding-right: 0; }
+.win-controls { width: 138px; height: 40px; gap: 0; }
+.win-controls span { width: 46px; height: 40px; display: grid; place-items: center; }
+
+.sidebar-ornament {
+  flex-shrink: 1;
+}
+
+.ticket .order-type, .ticket .customer-row {
+  padding-block: 5px;
+}
+
 .sidebar {
   background-image: var(--pattern-rule);
   background-size: 100% 7px;
@@ -109,7 +147,7 @@
 }
 
 .ticket .order-type, .ticket .customer-row {
-  padding-block: 7px;
+  padding-block: 5px;
 }
 
 .ticket, .selected-ticket, .next-order-card {
@@ -490,7 +528,7 @@
 }
 
 .stock-row.data {
-  min-height: 49px;
+  min-height: 45px;
 }
 
 .stock-row.head {
@@ -507,7 +545,7 @@
 }
 
 .stock-ornament {
-  height: 76px;
+  height: 60px;
   flex: none;
   margin: 8px 0;
   border-block: 1px solid var(--rule);
@@ -543,6 +581,9 @@
 .drawer-hist {
   padding-top: 3px;
 }
+
+.hist-row { padding-block: 3px; }
+.detail-section { margin-top: 7px; }
 
 .balance-value {
   padding-left: 0;

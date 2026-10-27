@@ -1,0 +1,71 @@
+namespace CoffeeShop.WinUI.ViewModels;
+
+public enum ServiceConsoleWorkspace { Counter, ServiceBoard, Menu, StockRoom, Customers, Reports }
+public enum ServiceConsoleLayoutMode { Compact, Medium, Expanded }
+
+public sealed record ServiceConsoleDestination(string Tag, string Label, string Numeral, string Group, ServiceConsoleWorkspace Workspace);
+public sealed record ServiceConsoleRoute(ServiceConsoleDestination Destination, string? StockSection = null);
+
+public static class ServiceConsoleNavigation
+{
+    public const string DefaultTag = "counter";
+    public static IReadOnlyList<ServiceConsoleDestination> PrimaryDestinations { get; } = Array.AsReadOnly<ServiceConsoleDestination>(
+    [
+        new("counter", "Counter", "I", "Service", ServiceConsoleWorkspace.Counter),
+        new("service-board", "Service board", "II", "Service", ServiceConsoleWorkspace.ServiceBoard),
+        new("menu", "Menu", "III", "Manage", ServiceConsoleWorkspace.Menu),
+        new("stock-room", "Stock room", "IV", "Manage", ServiceConsoleWorkspace.StockRoom),
+        new("customers", "Customers", "V", "Manage", ServiceConsoleWorkspace.Customers),
+        new("reports", "Reports", "VI", "Insights", ServiceConsoleWorkspace.Reports),
+    ]);
+    public static IReadOnlyDictionary<string, string> StockSections { get; } =
+        new System.Collections.ObjectModel.ReadOnlyDictionary<string, string>(new Dictionary<string, string>
+        {
+            ["ingredients"] = "Balances",
+            ["lowstock"] = "Low stock",
+            ["receipts"] = "Receipts",
+            ["suppliers"] = "Suppliers",
+            ["adjustments"] = "Adjustments",
+            ["movements"] = "Movements",
+        });
+
+    public static ServiceConsoleRoute Resolve(string tag)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tag);
+        var key = tag.ToLowerInvariant();
+        var section = StockSections.ContainsKey(key) ? key : null;
+        var primary = key switch
+        {
+            "pos" => "counter",
+            "operations" => "service-board",
+            "catalog" => "menu",
+            _ when section is not null => "stock-room",
+            _ => key,
+        };
+        var destination = PrimaryDestinations.SingleOrDefault(item => item.Tag == primary)
+            ?? throw new ArgumentException("Unknown service-console destination.", nameof(tag));
+        return new(destination, section ?? (primary == "stock-room" ? "ingredients" : null));
+    }
+
+    public static ServiceConsoleLayoutMode LayoutFor(double width)
+    {
+        if (!double.IsFinite(width) || width < 0) throw new ArgumentOutOfRangeException(nameof(width));
+        return width < 641 ? ServiceConsoleLayoutMode.Compact
+            : width < 1008 ? ServiceConsoleLayoutMode.Medium : ServiceConsoleLayoutMode.Expanded;
+    }
+}
+
+public sealed class ServiceConsoleConnection
+{
+    public bool IsConnected { get; private set; }
+    public bool IsChecking { get; private set; } = true;
+    public string? Failure { get; private set; }
+    public string Status => IsChecking ? "CHECKING CONNECTION" : IsConnected ? "LOCAL · CONNECTED" : "LOCAL · OFFLINE";
+    public void Begin() { IsConnected = false; IsChecking = true; Failure = null; }
+    public void Connected() { IsConnected = true; IsChecking = false; Failure = null; }
+    public void Failed(string message)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(message);
+        IsConnected = false; IsChecking = false; Failure = message;
+    }
+}
