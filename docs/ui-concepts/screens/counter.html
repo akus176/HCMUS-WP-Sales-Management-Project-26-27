@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440">
+<title>Counter · Corner Cafe concept</title>
+<link rel="stylesheet" href="../assets/app.css">
+</head>
+<body class="screen">
+<script src="../assets/icons.js"></script>
+<div class="window">
+  <div class="titlebar">
+    <div class="win-brand"><span class="logo-dot"><svg class="ico"><use href="#i-counter"/></svg></span><b>Corner Cafe</b></div>
+    <div class="win-title">Service Console</div>
+    <div class="win-right">
+      <span class="conn"><i></i> Local · connected</span>
+      <span class="win-clock">10:42</span>
+      <div class="win-controls"><span>—</span><span>□</span><span>×</span></div>
+    </div>
+  </div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="side-brand">
+        <div class="logo"><svg class="ico"><use href="#i-counter"/></svg></div>
+        <div class="brand-copy">
+          <div class="brand-name">Corner Cafe</div>
+          <div class="brand-sub">service console</div>
+        </div>
+      </div>
+      <nav class="nav-groups">
+        <div class="nav-group">
+          <div class="nav-group-label">Service</div>
+          <a class="nav-item active" aria-current="page" href="#"><svg class="ico"><use href="#i-counter"/></svg><span>Counter</span><span class="key">1</span></a>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-board"/></svg><span>Service board</span><span class="count-badge">3</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">Manage</div>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-menu"/></svg><span>Menu</span><span class="key">3</span></a>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-stock"/></svg><span>Stock room</span><span class="key">4</span></a>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-customers"/></svg><span>Customers</span><span class="key">5</span></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-label">Insights</div>
+          <a class="nav-item" href="#"><svg class="ico"><use href="#i-reports"/></svg><span>Reports</span><span class="key">6</span></a>
+        </div>
+      </nav>
+      <div class="side-foot">
+        <div class="shift-card">
+          <div class="shift-top"><span>Shift 01</span><span>Open</span></div>
+          <div class="shift-name">Mai Tran</div>
+          <div class="shift-meta">Cashier · 07:00 — 15:00</div>
+          <div class="shift-end"><span>3 open tickets</span><svg class="ico"><use href="#i-arrow"/></svg></div>
+        </div>
+        <div class="side-fine"><i></i> WinUI · direct PostgreSQL</div>
+      </div>
+    </aside>
+    <div class="workspace">
+      <div class="topbar">
+        <div class="searchbar">
+          <svg class="ico"><use href="#i-search"/></svg>
+          <input aria-label="Search" placeholder="Search drinks, tickets, customers…">
+          <kbd>Ctrl K</kbd>
+        </div>
+        <div class="top-meta">
+          <span class="top-ticket"><b>3</b> open tickets</span>
+          <span class="top-date">Mon 26 Oct</span>
+          <button class="icon-btn" aria-label="Notifications"><svg class="ico"><use href="#i-bell"/></svg><span class="dot"></span></button>
+          <div class="avatar">MT</div>
+        </div>
+      </div>
+      <main class="page">
+        <div class="page-head">
+          <div class="title-wrap">
+            <div class="eyebrow"><span class="live-dot"></span> Service <span class="sep">/</span> Monday, 26 October</div>
+            <h1 class="page-title">Counter</h1>
+            <div class="page-sub">Good morning, Mai. Three tickets are open and six orders are on the board.</div>
+          </div>
+          <div class="page-actions">
+            <button class="btn"><svg class="ico"><use href="#i-chevron"/></svg> Mai Tran · Cashier</button>
+            <button class="btn btn-primary"><svg class="ico"><use href="#i-plus"/></svg> New ticket</button>
+          </div>
+        </div>
+
+        <div class="pos-grid">
+          <section class="menu-zone">
+            <div class="menu-toolbar">
+              <div class="chip-row">
+                <button class="chip active">All <span class="count">12</span></button>
+                <button class="chip">Espresso <span class="count">3</span></button>
+                <button class="chip">Brewed <span class="count">3</span></button>
+                <button class="chip">Tea <span class="count">3</span></button>
+                <button class="chip">Pastry <span class="count">3</span></button>
+              </div>
+              <div class="input-search"><svg class="ico"><use href="#i-search"/></svg><input aria-label="Find a drink" placeholder="Find a drink"></div>
+            </div>
+            <div class="menu-heading">
+              <h2>All drinks</h2>
+              <span>Tap once for size and toppings.</span>
+              <div class="right"><span class="pill pill-blue"><svg class="ico"><use href="#i-leaf"/></svg> 12 available</span></div>
+            </div>
+            <div class="dish-grid">
+              <article class="dish">
+                <div class="art"><img class="d-photo" src="../assets/drinks/americano.jpg" alt="Americano"></div>
+                <div class="dish-name">Americano</div>
+                <div class="dish-cat">Espresso</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$4.50</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+              <article class="dish selected">
+                <div class="art"><img class="d-photo" src="../assets/drinks/cappuccino.jpg" alt="Cappuccino"></div>
+                <div class="dish-name">Cappuccino</div>
+                <div class="dish-cat">Espresso</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$5.50</b></span><span class="dish-add"><svg class="ico"><use href="#i-check"/></svg></span></div>
+              </article>
+              <article class="dish">
+                <div class="art"><img class="d-photo" src="../assets/drinks/flat-white.jpg" alt="Flat White"></div>
+                <div class="dish-name">Flat White</div>
+                <div class="dish-cat">Espresso</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$5.25</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+              <article class="dish">
+                <div class="art"><img class="d-photo" src="../assets/drinks/espresso-tonic.jpg" alt="Espresso Tonic"></div>
+                <div class="dish-name">Espresso Tonic</div>
+                <div class="dish-cat">Brewed</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$5.75</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+              <article class="dish">
+                <span class="popular">popular</span>
+                <div class="art"><img class="d-photo" src="../assets/drinks/cold-brew.jpg" alt="Cold Brew"></div>
+                <div class="dish-name">Cold Brew</div>
+                <div class="dish-cat">Brewed</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$5.50</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+              <article class="dish">
+                <div class="art"><img class="d-photo" src="../assets/drinks/vietnamese-iced.jpg" alt="Vietnamese Iced Coffee"></div>
+                <div class="dish-name">Vietnamese Iced</div>
+                <div class="dish-cat">Brewed</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$5.00</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+              <article class="dish">
+                <div class="art"><img class="d-photo" src="../assets/drinks/matcha-latte.jpg" alt="Matcha Latte"></div>
+                <div class="dish-name">Matcha Latte</div>
+                <div class="dish-cat">Tea</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$6.00</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+              <article class="dish">
+                <div class="art"><img class="d-photo" src="../assets/drinks/chai-latte.jpg" alt="Chai Latte"></div>
+                <div class="dish-name">Chai Latte</div>
+                <div class="dish-cat">Tea</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$5.75</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+              <article class="dish">
+                <div class="art"><img class="d-photo" src="../assets/drinks/peach-iced-tea.jpg" alt="Peach Iced Tea"></div>
+                <div class="dish-name">Peach Iced Tea</div>
+                <div class="dish-cat">Tea</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$5.25</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+              <article class="dish">
+                <div class="art"><img class="d-photo" src="../assets/drinks/butter-croissant.jpg" alt="Butter Croissant"></div>
+                <div class="dish-name">Butter Croissant</div>
+                <div class="dish-cat">Pastry</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$4.00</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+              <article class="dish">
+                <div class="art"><img class="d-photo" src="../assets/drinks/almond-croissant.jpg" alt="Almond Croissant"></div>
+                <div class="dish-name">Almond Croissant</div>
+                <div class="dish-cat">Pastry</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$4.75</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+              <article class="dish out">
+                <div class="art"><img class="d-photo" src="../assets/drinks/banana-bread.jpg" alt="Banana Bread"></div>
+                <div class="dish-name">Banana Bread</div>
+                <div class="dish-cat">Pastry</div>
+                <div class="dish-foot"><span class="dish-price">from <b>$4.25</b></span><span class="dish-add"><svg class="ico"><use href="#i-plus"/></svg></span></div>
+              </article>
+            </div>
+          </section>
+
+          <aside class="ticket-wrap">
+            <div class="ticket">
+              <div class="ticket-head">
+                <div>
+                  <div class="ticket-kicker">TICKET A-104 <span class="pill pill-stamp pill-yellow open-badge">3 open</span></div>
+                  <div class="ticket-title">Table 04 <small>· 2 guests</small><span class="ticket-change">change <svg class="ico"><use href="#i-chevron"/></svg></span></div>
+                </div>
+              </div>
+
+              <div class="order-type">
+                <button class="chip active">Dine-in</button>
+                <button class="chip">Takeaway</button>
+                <button class="chip">Delivery</button>
+              </div>
+
+              <div class="customer-row">
+                <div class="avatar avatar-small">LN</div>
+                <div class="customer-copy">
+                  <div class="customer-name">Linh Nguyen</div>
+                  <div class="customer-sub">Gold cup · 2 saved addresses</div>
+                </div>
+                <div class="customer-points"><b>85</b><span>points</span></div>
+              </div>
+
+              <div class="ticket-lines">
+                <div class="ticket-line">
+                  <div class="qty"><span class="qty-btn">−</span>1<span class="qty-btn">+</span></div>
+                  <div class="ticket-line-copy">
+                    <div class="ticket-line-name">Cappuccino <span class="muted">· M</span></div>
+                    <div class="ticket-line-mod">Oat milk · extra shot</div>
+                  </div>
+                  <div class="ticket-line-price">$6.50</div>
+                </div>
+                <div class="ticket-line">
+                  <div class="qty"><span class="qty-btn">−</span>1<span class="qty-btn">+</span></div>
+                  <div class="ticket-line-copy">
+                    <div class="ticket-line-name">Cold Brew <span class="muted">· L</span></div>
+                    <div class="ticket-line-mod">No ice</div>
+                  </div>
+                  <div class="ticket-line-price">$6.00</div>
+                </div>
+                <div class="ticket-line">
+                  <div class="qty"><span class="qty-btn">−</span>2<span class="qty-btn">+</span></div>
+                  <div class="ticket-line-copy">
+                    <div class="ticket-line-name">Butter Croissant</div>
+                    <div class="ticket-line-mod">Warmed</div>
+                  </div>
+                  <div class="ticket-line-price">$8.00</div>
+                </div>
+                <div class="ticket-line">
+                  <div class="qty"><span class="qty-btn">−</span>1<span class="qty-btn">+</span></div>
+                  <div class="ticket-line-copy">
+                    <div class="ticket-line-name">Almond Croissant</div>
+                    <div class="ticket-line-mod">Bag separately</div>
+                  </div>
+                  <div class="ticket-line-price">$4.00</div>
+                </div>
+              </div>
+
+              <div class="ticket-note"><svg class="ico"><use href="#i-note"/></svg> Add a note for the bar…</div>
+
+              <div class="totals">
+                <div class="total-row"><span>Subtotal</span><b>$24.50</b></div>
+                <div class="total-row discount"><span>Loyalty · 10 pts</span><b>−$1.00</b></div>
+                <div class="total-row"><span>Service</span><b>$0.00</b></div>
+                <div class="grand-total"><span>Total</span><div><b>$23.50</b><small>tax included</small></div></div>
+              </div>
+
+              <div class="pay-row">
+                <span class="pay-label">Pay</span>
+                <span class="pay-chip active"><svg class="ico"><use href="#i-cash"/></svg> Cash</span>
+                <span class="pay-chip"><svg class="ico"><use href="#i-card"/></svg> Card</span>
+                <span class="pay-chip"><svg class="ico"><use href="#i-wallet"/></svg> Wallet</span>
+              </div>
+
+              <div class="ticket-actions">
+                <button class="btn">Save draft</button>
+                <button class="btn btn-primary">Charge $23.50</button>
+              </div>
+              <div class="ticket-hint"><span class="kbd">Ctrl ↵</span> charge &nbsp;·&nbsp; <span class="kbd">Esc</span> hold &nbsp;·&nbsp; <span class="kbd">F2</span> customer</div>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+</body>
+</html>
