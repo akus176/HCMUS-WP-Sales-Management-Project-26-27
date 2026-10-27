@@ -60,3 +60,65 @@ Every test case records its **Test ID, feature, category (Valid / Invalid / Boun
 | **Payments** | `Payment`, `PaymentMethod`, `CashierDrawer` | `PaymentCommandHandler`, `PaymentAllocation` | `PaymentRepository` | `PaymentTests.cs`, `PaymentCommandHandlerTests.cs`, `PaymentPersistenceIntegrationTests.cs` |
 | **Fulfillment** | `DeliveryOrder`, `CourierAssignment`, `TableState` | `DeliveryCommandHandler`, `TableReleaseService` | `DeliveryRepository` | `DeliveryTests.cs`, `DeliveryCommandHandlerTests.cs`, `OrderCancellationIntegrationTests.cs` |
 | **Reports** | `RevenueRecognition`, `BestSellerAggregator` | `RevenueReportQuery`, `LowStockQuery` | `RevenueReportRepository`, `LowStockRepository` | `RevenueRecognitionRuleTests.cs`, `BestSellerReportQueryHandlerTests.cs`, `LowStockReportIntegrationTests.cs` |
+
+---
+
+## 4. Catalog & Menu test cases
+
+Covers category management, menu items, size variants, add-ons/toppings, ingredient recipes, and ordering availability rules (T3.1–T3.6).
+
+| Test ID | Feature | Type | Precondition | Input | Expected Result | Actual Result | Status | Evidence Link |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `TC-CAT-01` | Category creation | Valid | System initialized | Name: `"Coffee"`, Active: `true` | Category created with trimmed name and unique ID | Category created with ID and active state | **PASS** | `CatalogLifecycleTests.cs`, DEMO-03 |
+| `TC-CAT-02` | Category blank name | Invalid | System initialized | Name: `""` or `"   "` | Validation error: name cannot be empty | Rejected with validation error | **PASS** | `CatalogLifecycleTests.cs` |
+| `TC-CAT-03` | Category max name length | Boundary | System initialized | Name: 80 characters string | Category created successfully | Accepted at exact 80 chars | **PASS** | `CatalogLifecycleTests.cs` |
+| `TC-CAT-04` | Category excessive length | Invalid | System initialized | Name: 81 characters string | Validation error: name exceeds 80 characters limit | Rejected with length validation error | **PASS** | `CatalogLifecycleTests.cs` |
+| `TC-CAT-05` | Product creation with category | Valid | Category `"Coffee"` exists and is active | Name: `"Espresso"`, Category: `"Coffee"`, BasePrice: `35.00` | Product created linked to category | Product persisted with category link | **PASS** | `CatalogLifecycleTests.cs`, DEMO-03 |
+| `TC-CAT-06` | Product with inactive category | Invalid | Category `"Seasonal"` is deactivated | Attempt to create product under `"Seasonal"` | Creation rejected: category must be active | Rejected with conflict error | **PASS** | `CatalogLifecycleTests.cs` |
+| `TC-CAT-07` | Product name boundary | Boundary | Active category exists | Name: 120 characters string | Product created successfully | Accepted at exact 120 chars | **PASS** | `CatalogLifecycleTests.cs` |
+| `TC-CAT-08` | Product name over-length | Invalid | Active category exists | Name: 121 characters string | Validation error: name exceeds 120 characters | Rejected with length validation error | **PASS** | `CatalogLifecycleTests.cs` |
+| `TC-CAT-09` | Size variant pricing | Valid | Product `"Latte"` exists with base price `40.00` | Add size variant `"Large"` with delta price `+10.00` | Variant saved; effective price resolves to `50.00` | Effective price calculated as `50.00` | **PASS** | `SizeVariantTests.cs`, DEMO-03 |
+| `TC-CAT-10` | Negative base price | Invalid | Active category exists | BasePrice: `-5.00` | Validation error: price must be non-negative | Rejected with non-negative validation error | **PASS** | `CatalogLifecycleTests.cs` |
+| `TC-CAT-11` | Zero base price | Boundary | Active category exists (e.g. complimentary item) | BasePrice: `0.00` | Product created with zero price | Allowed and stored as `0.00` | **PASS** | `MoneyTests.cs` |
+| `TC-CAT-12` | Addon compatibility link | Valid | Drink `"Latte"` and addon `"Oat Milk"` (price `8.00`) exist | Link `"Oat Milk"` as compatible topping for `"Latte"` | Compatibility stored; available in POS for `"Latte"` | Linked and reloaded in POS menu | **PASS** | `AddonTests.cs`, DEMO-03 |
+| `TC-CAT-13` | Size recipe ingredient specification | Valid | Ingredient `"Coffee Beans"` exists | Recipe: `10.00 g` of `"Coffee Beans"` for Large Latte | Recipe persisted with unit `g` and quantity `10.00` | Recipe reloaded and consumed upon order | **PASS** | `RecipeIngredientTests.cs`, DEMO-03 |
+| `TC-CAT-14` | Unsupported recipe unit | Invalid | Ingredient measured in `ml` | Recipe specifies unit `kg` without conversion | Recipe creation rejected: incompatible unit | Incompatible unit rejected | **PASS** | `RecipeIngredientTests.cs` |
+| `TC-CAT-15` | Menu availability filter | Valid | Active product in active category | Query POS menu items | Item marked `IsAvailableForOrdering = true` | Displayed and selectable in POS | **PASS** | `CatalogPersistenceIntegrationTests.cs`, DEMO-03 |
+| `TC-CAT-16` | Deactivated product excluded | Boundary | Product deactivated via management screen | Query POS menu items | Item marked `IsAvailableForOrdering = false` | Excluded from new POS order selection | **PASS** | `CatalogLifecycleTests.cs`, DEMO-08 |
+
+---
+
+## 5. Customer management test cases
+
+Covers customer profiles, contact info validation, delivery addresses, and walk-in guest handling (T5.1, T5.6).
+
+| Test ID | Feature | Type | Precondition | Input | Expected Result | Actual Result | Status | Evidence Link |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `TC-CUST-01` | Customer profile creation | Valid | System initialized | Name: `"Alice Nguyen"`, Phone: `"+84901234567"`, Email: `"alice@example.com"` | Profile created with unique customer ID, zero loyalty balance | Customer persisted with correct profile data | **PASS** | `CustomerTests.cs`, DEMO-04 |
+| `TC-CUST-02` | Invalid phone number format | Invalid | System initialized | Phone: `"invalid-phone"`, Name: `"Bob"` | Rejected: phone number fails format validation | Validation error returned | **PASS** | `CustomerTests.cs` |
+| `TC-CUST-03` | Duplicate phone number | Invalid | Customer with phone `"+84901234567"` exists | Attempt to register new customer with same phone | Rejected: duplicate phone number conflict | Conflict error returned | **PASS** | `CustomerLoyaltyPersistenceIntegrationTests.cs` |
+| `TC-CUST-04` | Saved delivery address | Valid | Customer profile exists | Address: `"123 Le Loi, D1, HCMC"`, IsDefault: `true` | Address linked to customer profile, marked as default | Address saved and auto-populated in delivery order | **PASS** | `CustomerAddressTests.cs`, DEMO-04 |
+| `TC-CUST-05` | Multiple addresses / default switch | Boundary | Customer already has default address A | Add address B marked as default | Address B becomes default; Address A unflagged as default | Exactly one default address maintained | **PASS** | `CustomerAddressTests.cs` |
+| `TC-CUST-06` | Customer profile update | Valid | Customer profile exists | Update name to `"Alice M. Nguyen"` | Name updated; loyalty balance and address links preserved | Changes saved without affecting loyalty points | **PASS** | `CustomerTests.cs`, DEMO-04 |
+| `TC-CUST-07` | Customer search by phone | Valid | Customer `"+84901234567"` seeded | POS customer search query: `"0901234567"` | Customer profile matched and loaded into POS order draft | Customer loaded with current loyalty balance | **PASS** | `CustomerWorkspaceTests.cs`, DEMO-05 |
+| `TC-CUST-08` | Walk-in guest order | Boundary | POS order draft opened | Select no customer (Guest / Walk-in) | Allowed: order proceeds without customer profile | Order completes with null customer ID, no points | **PASS** | `OrderDraftFactoryTests.cs`, DEMO-05-takeaway |
+
+---
+
+## 6. Loyalty program test cases
+
+Covers earning rules, redemption rules, maximum discount caps, ledger transactions, and rollback behavior (T5.2–T5.5).
+
+| Test ID | Feature | Type | Precondition | Input | Expected Result | Actual Result | Status | Evidence Link |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `TC-LOY-01` | Loyalty earning calculation | Valid | Earning rate: 1 point per 1.00 currency unit | Customer attached to completed order of `40.00` | Customer earns `40` points; ledger records positive credit | Points balance increased by 40; 1 ledger entry | **PASS** | `LoyaltyRulesTests.cs`, DEMO-06 |
+| `TC-LOY-02` | Earning rounding policy | Boundary | Earning rate: 1 point per 1.00; Order total: `45.80` | Complete order with fractional total | Rounded down (floor) to `45` points earned | Points credited as 45 according to rule | **PASS** | `LoyaltyRulesTests.cs` |
+| `TC-LOY-03` | Walk-in order zero points | Boundary | Walk-in order completed (no customer ID) | Complete order of `45.00` | No points awarded; no loyalty ledger entries generated | Zero points awarded | **PASS** | `LoyaltyLedgerTests.cs`, DEMO-06 |
+| `TC-LOY-04` | Redemption deduction | Valid | Customer has 85 points; rule: 1 point = 1.00; Cap: 50% | Order total `40.00`; customer redeems 10 points | Order payable total reduced to `30.00`; 10 points deducted | Total becomes 30.00; balance becomes 75 | **PASS** | `LoyaltyRulesTests.cs`, DEMO-07 |
+| `TC-LOY-05` | Redemption exceeding balance | Invalid | Customer has 20 points | Attempt to redeem 25 points on `50.00` order | Rejected: redemption points exceed available customer balance | Rejected with insufficient balance error | **PASS** | `LoyaltyRulesTests.cs` |
+| `TC-LOY-06` | Redemption exceeding percentage cap | Boundary | Order total `40.00`, Max redemption cap: 50% (`20.00`); Customer has 30 points | Attempt to redeem 25 points (`25.00` discount) | Rejected: discount exceeds 50% cap of `20.00` | Rejected with cap violation error | **PASS** | `LoyaltyRulesTests.cs` |
+| `TC-LOY-07` | Exact cap redemption | Boundary | Order total `40.00`, Cap: 50% (`20.00`); Customer has 50 points | Redeem exactly 20 points (`20.00` discount) | Accepted: payable total becomes `20.00`; exactly 20 points deducted | Succeeded; balance reduced by 20 | **PASS** | `LoyaltyRulesTests.cs` |
+| `TC-LOY-08` | Inactive customer redemption | Invalid | Customer profile is deactivated | Attempt to redeem points for order | Rejected: inactive customer cannot redeem points | Rejected with customer inactive error | **PASS** | `LoyaltyRulesTests.cs` |
+| `TC-LOY-09` | Order cancellation restores points | Valid | Order completed with 10 points redeemed; Balance is 75 | Cancel order with valid reason | Exactly 10 points restored; customer balance returns to 85; reversal ledger entry written | Balance restored to 85; 1 reversal entry | **PASS** | `OrderCancellationCommandHandlerTests.cs`, DEMO-07 |
+| `TC-LOY-10` | Atomic failure rollback | Invalid | Order ready; loyalty settings temporarily removed in DB | Attempt to complete order | Completion fails due to missing rules; order stays ready, table occupied, NO points or completion recorded | Order stays ready; 0 points awarded; zero partial commits | **PASS** | `MidtermDemonstrationIntegrationTests.cs`, DEMO-09 |
+
