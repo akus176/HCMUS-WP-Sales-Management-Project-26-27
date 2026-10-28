@@ -6,13 +6,35 @@ using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace CoffeeShop.WinUI.Pages;
+
+public sealed record CounterCategory(EntityId? Id, string Label);
+
+public sealed record CounterMenuCard(MenuItemSummary Item)
+{
+    private static readonly Dictionary<string, string> Photos = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Americano"] = "espresso", ["Cappuccino"] = "cappuccino", ["Flat White"] = "flat-white",
+        ["Espresso Tonic"] = "iced-coffee", ["Cold Brew"] = "cold-brew",
+        ["Vietnamese Iced Coffee"] = "iced-coffee", ["Matcha Latte"] = "matcha",
+        ["Chai Latte"] = "chai", ["Peach Iced Tea"] = "iced-tea",
+        ["Butter Croissant"] = "croissant", ["Almond Croissant"] = "croissant",
+        ["Banana Bread"] = "banana-bread"
+    };
+    public string Name => Item.Name;
+    public string Category => Item.CategoryName.ToUpperInvariant();
+    public string Price => $"from {Item.SizeVariants.Where(size => size.IsActive).Min(size => size.Price):0.00}";
+    public BitmapImage Photo => new(new Uri($"ms-appx:///Assets/Photos/{(Photos.TryGetValue(Item.Name, out var file) ? file : "cafe-bar")}.jpg"));
+}
 
 public sealed partial class PosPage : Page
 {
     private readonly PosWorkspace model;
     private bool rendering;
+    private EntityId? selectedMenuId;
 
     public PosPage()
     {
@@ -31,11 +53,40 @@ public sealed partial class PosPage : Page
 
     private void OnUnloaded(object sender, RoutedEventArgs args) => model.PropertyChanged -= OnModelChanged;
     private void OnModelChanged(object? sender, PropertyChangedEventArgs args) => Render();
-    private async void OnReload(object sender, RoutedEventArgs args) => await model.LoadAsync();
+    private async void OnReload(object sender, RoutedEventArgs args)
+    {
+        ClearMenuSelection();
+        await model.LoadAsync();
+    }
     private async void OnSearch(object sender, RoutedEventArgs args)
     {
+        ClearMenuSelection();
         model.Search = SearchBox.Text;
         await model.LoadAsync();
+    }
+    private void OnSearchKeyDown(object sender, KeyRoutedEventArgs args)
+    {
+        if (args.Key == Windows.System.VirtualKey.Enter) OnSearch(sender, args);
+    }
+    private void OnCategoryClick(object sender, RoutedEventArgs args)
+    {
+        if (sender is not Button { Tag: CounterCategory category }) return;
+        ClearMenuSelection();
+        model.SelectCategory(category.Id);
+    }
+    private void OnMenuCardChanged(object sender, SelectionChangedEventArgs args)
+    {
+        if (rendering || MenuGrid.SelectedItem is not CounterMenuCard card) return;
+        selectedMenuId = card.Item.Id;
+        DrinkBox.SelectedItem = card.Item;
+        CustomizationPanel.IsExpanded = true;
+    }
+    private void ClearMenuSelection()
+    {
+        selectedMenuId = null;
+        if (MenuGrid is not null) MenuGrid.SelectedItem = null;
+        if (DrinkBox is not null) DrinkBox.SelectedItem = null;
+        if (CustomizationPanel is not null) CustomizationPanel.IsExpanded = false;
     }
 
     private void OnOperatorChanged(object sender, SelectionChangedEventArgs args)
@@ -115,6 +166,18 @@ public sealed partial class PosPage : Page
     {
         if (CartList.SelectedItem is PosCartLine line) model.RemoveLine(line);
     }
+    private void OnCartSelectionChanged(object sender, SelectionChangedEventArgs args)
+    {
+        if (!rendering) RemoveButton.IsEnabled = model.CanEdit && CartList.SelectedItem is PosCartLine;
+    }
+    private void OnIncreaseLine(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button { Tag: PosCartLine line }) model.ChangeQuantity(line, line.Quantity + 1);
+    }
+    private void OnDecreaseLine(object sender, RoutedEventArgs args)
+    {
+        if (sender is Button { Tag: PosCartLine line }) model.ChangeQuantity(line, line.Quantity - 1);
+    }
 
     private async void OnSaveDraft(object sender, RoutedEventArgs args)
     {
@@ -182,6 +245,7 @@ public sealed partial class PosPage : Page
         };
         if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
         model.NewTicket();
+        ClearMenuSelection();
         RestoreForm();
     }
 
@@ -225,13 +289,31 @@ public sealed partial class PosPage : Page
         Status.Apply(model.Feedback);
         ReloadButton.IsEnabled = !model.IsBusy;
         EntryPanel.IsEnabled = model.CanEdit;
+        TicketEntryPanel.IsEnabled = model.CanEdit;
+        MenuGrid.IsEnabled = model.CanEdit;
         OperatorBox.IsEnabled = !model.IsBusy;
         OperatorBox.ItemsSource = model.Options.Staff;
         OperatorBox.SelectedItem = model.Options.Staff.FirstOrDefault(staff => staff.Id == model.Session.Id);
+        CategoryList.ItemsSource = new[] { new CounterCategory(null, $"ALL  {model.Menu.Count}") }
+            .Concat(model.Categories.Select(category => new CounterCategory(category.Id,
+                $"{category.Name.ToUpperInvariant()}  {model.Menu.Count(item => item.CategoryId == category.Id)}"))).ToArray();
+        MenuHeading.Text = model.CategoryId is { } categoryId
+            ? model.Categories.FirstOrDefault(category => category.Id == categoryId)?.Name ?? "All drinks"
+            : "All drinks";
+        MenuCount.Text = $"{model.VisibleMenu.Count} AVAILABLE";
+        var visible = model.VisibleMenu;
+        if (selectedMenuId is { } selectedId && visible.All(item => item.Id != selectedId))
+        {
+            selectedMenuId = null;
+            CustomizationPanel.IsExpanded = false;
+        }
+        var cards = visible.Select(item => new CounterMenuCard(item)).ToArray();
+        MenuGrid.ItemsSource = cards;
+        MenuGrid.SelectedItem = cards.FirstOrDefault(card => card.Item.Id == selectedMenuId);
         if (!ReferenceEquals(DrinkBox.ItemsSource, model.Menu))
         {
             DrinkBox.ItemsSource = model.Menu;
-            DrinkBox.SelectedIndex = -1;
+            DrinkBox.SelectedItem = model.Menu.FirstOrDefault(item => item.Id == selectedMenuId);
             SizeBox.ItemsSource = null;
             AddonsList.ItemsSource = null;
             SizePriceText.Text = "Choose a drink and size.";
@@ -240,23 +322,28 @@ public sealed partial class PosPage : Page
         TableBox.ItemsSource = model.Options.Tables;
         TableBox.SelectedItem = model.Options.Tables.FirstOrDefault(table => table.Id == model.TableId);
         CartList.ItemsSource = model.Cart;
-        EmptyText.Visibility = model.IsEmpty ? Visibility.Visible : Visibility.Collapsed;
+        CartList.Visibility = model.Order is null ? Visibility.Visible : Visibility.Collapsed;
+        SavedLinesList.ItemsSource = model.Order?.Lines;
+        SavedLinesList.Visibility = model.Order is null ? Visibility.Collapsed : Visibility.Visible;
+        RemoveButton.IsEnabled = model.CanEdit && CartList.SelectedItem is PosCartLine;
+        EmptyText.Visibility = !model.IsBusy && visible.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ConfirmButton.IsEnabled = model.CanConfirm;
         DiscountPanel.IsEnabled = model.CanConfirm;
         NewButton.IsEnabled = !model.IsBusy && !model.RequiresReload;
         OpenButton.IsEnabled = !model.IsBusy;
+        SaveButton.IsEnabled = model.CanEdit && model.Cart.Count > 0;
+        TicketHeading.Text = model.Order?.OrderNumber ?? "New ticket";
         TicketIdText.Text = $"Order ID: {model.TicketId}";
-        TicketText.Text = model.Order is { } order ? FormatTicket(order) : "Save the draft to see persisted names, sizes, topping prices and exact totals here.";
+        TicketText.Text = model.Order is { } order ? FormatTicket(order)
+            : model.Cart.Count == 0 ? "Add a drink to begin. Save the draft to review exact totals."
+            : $"Estimated total: {model.Cart.Sum(line => (line.Size.Price + line.Addons.Sum(addon => addon.Price)) * line.Quantity):0.00}\nSave the draft for exact totals.";
         rendering = false;
     }
 
     private static string FormatTicket(PosOrderDetail order) =>
-        $"{order.OrderNumber}\n{order.Channel} / {order.Status}\nCustomer: {order.CustomerName ?? "Walk-in"}"
+        $"{order.Channel} / {order.Status}\nCustomer: {order.CustomerName ?? "Walk-in"}"
         + (order.TableNumber is null ? "" : $"\nTable: {order.TableNumber}")
         + (order.AddressLine is null ? "" : $"\nDeliver to: {order.RecipientName}, {order.ContactNumber}\n{order.AddressLine}")
-        + "\n\n" + string.Join("\n\n", order.Lines.Select(line =>
-            $"{line.Quantity} x {line.ItemName} / {line.SizeName} @ {line.UnitPrice:0.00}"
-            + string.Concat(line.Addons.Select(addon => $"\n+ {addon.Name} @ {addon.UnitPrice:0.00} per drink")) + $"\nLine total: {line.Total:0.00}"))
-        + $"\n\nSubtotal: {order.Subtotal:0.00}\nApproved discounts: {order.DiscountTotal:0.00}\nPayable total: {order.Total:0.00}"
+        + $"\nSubtotal: {order.Subtotal:0.00}\nApproved discounts: {order.DiscountTotal:0.00}\nPayable total: {order.Total:0.00}"
         + string.Concat(order.Discounts.Select(discount => $"\n{discount.Type} {discount.Value:0.00}: {discount.Status} (applied {discount.Amount ?? 0:0.00})"));
 }
