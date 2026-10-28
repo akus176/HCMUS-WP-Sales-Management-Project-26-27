@@ -39,6 +39,27 @@ public sealed class PosWorkspaceTests
     }
 
     [Fact]
+    public void QuantityEditing_UpdatesDraftLinesAndNewTicketClearsCategory()
+    {
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new(), new());
+        var size = new SizeVariantSummary(EntityId.New(), "Small", 25m, true);
+        var categoryId = EntityId.New();
+        var item = new MenuItemSummary(EntityId.New(), categoryId, "Coffee", "Latte", null, true, [size], []);
+        model.SelectCategory(categoryId);
+        model.AddLine(item, size, 1, []);
+
+        var line = Assert.Single(model.Cart);
+        model.ChangeQuantity(line, 3);
+        Assert.Equal(3, Assert.Single(model.Cart).Quantity);
+        model.ChangeQuantity(Assert.Single(model.Cart), 0);
+        Assert.Empty(model.Cart);
+
+        model.NewTicket();
+        Assert.Null(model.CategoryId);
+    }
+
+    [Fact]
     public async Task UnexpectedFailure_RequiresReloadAndPreservesTicketIdentity()
     {
         // A missing service simulates an unexpected adapter/composition failure.

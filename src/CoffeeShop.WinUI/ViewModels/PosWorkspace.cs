@@ -27,6 +27,10 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
     public PosOperatorSession Session => session;
     public EntityId TicketId { get; private set; } = EntityId.New();
     public IReadOnlyList<MenuItemSummary> Menu { get; private set; } = [];
+    public IReadOnlyList<CategorySummary> Categories { get; private set; } = [];
+    public EntityId? CategoryId { get; private set; }
+    public IReadOnlyList<MenuItemSummary> VisibleMenu => CategoryId is { } id
+        ? Menu.Where(item => item.CategoryId == id).ToArray() : Menu;
     public PosOptions Options { get; private set; } = new([], []);
     public IReadOnlyList<PosCartLine> Cart { get; private set; } = [];
     public PosOrderDetail? Order { get; private set; }
@@ -46,6 +50,8 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
         var categories = await queries.SearchCategoriesAsync(new(IsActive: true, Limit: 200));
         if (!Accept(menu) || !Accept(categories)) return;
         var activeCategories = categories.Value.Select(category => category.Id).ToHashSet();
+        Categories = categories.Value;
+        if (CategoryId is { } selectedCategory && !activeCategories.Contains(selectedCategory)) CategoryId = null;
         Menu = menu.Value.Where(item => activeCategories.Contains(item.CategoryId) && item.SizeVariants.Any(size => size.IsActive)).ToArray();
         var handler = provider.GetRequiredService<PosOrderHandler>();
         Options = await handler.GetOptionsAsync();
@@ -107,6 +113,30 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
         var rows = Cart.ToList();
         rows.Remove(line);
         Cart = rows;
+        Notify();
+    }
+
+    public void ChangeQuantity(PosCartLine line, int quantity)
+    {
+        if (!CanEdit) return;
+        if (quantity <= 0)
+        {
+            RemoveLine(line);
+            return;
+        }
+        var rows = Cart.ToList();
+        var index = rows.IndexOf(line);
+        if (index < 0) return;
+        rows[index] = line with { Quantity = quantity };
+        Cart = rows;
+        Error = null;
+        Message = "Ticket quantity updated. Save the draft to review exact totals.";
+        Notify();
+    }
+
+    public void SelectCategory(EntityId? id)
+    {
+        CategoryId = id;
         Notify();
     }
 
@@ -183,6 +213,7 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
         TicketId = EntityId.New();
         Order = null;
         Cart = [];
+        CategoryId = null;
         TableId = null;
         Customer = new();
         CustomerLabel = "Walk-in";
