@@ -17,17 +17,30 @@ public sealed record CounterMenuCard(MenuItemSummary Item)
 {
     private static readonly Dictionary<string, string> Photos = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["Americano"] = "espresso", ["Cappuccino"] = "cappuccino", ["Flat White"] = "flat-white",
-        ["Espresso Tonic"] = "iced-coffee", ["Cold Brew"] = "cold-brew",
-        ["Vietnamese Iced Coffee"] = "iced-coffee", ["Matcha Latte"] = "matcha",
-        ["Chai Latte"] = "chai", ["Peach Iced Tea"] = "iced-tea",
-        ["Butter Croissant"] = "croissant", ["Almond Croissant"] = "croissant",
+        ["Americano"] = "espresso",
+        ["Cappuccino"] = "cappuccino",
+        ["Flat White"] = "flat-white",
+        ["Espresso Tonic"] = "iced-coffee",
+        ["Cold Brew"] = "cold-brew",
+        ["Vietnamese Iced Coffee"] = "iced-coffee",
+        ["Matcha Latte"] = "matcha",
+        ["Chai Latte"] = "chai",
+        ["Peach Iced Tea"] = "iced-tea",
+        ["Butter Croissant"] = "croissant",
+        ["Almond Croissant"] = "croissant",
         ["Banana Bread"] = "banana-bread"
     };
-    public string Name => Item.Name;
-    public string Category => Item.CategoryName.ToUpperInvariant();
-    public string Price => $"from {Item.SizeVariants.Where(size => size.IsActive).Min(size => size.Price):0.00}";
-    public BitmapImage Photo => new(new Uri($"ms-appx:///Assets/Photos/{(Photos.TryGetValue(Item.Name, out var file) ? file : "cafe-bar")}.jpg"));
+    public string Name =>
+        Item.Name;
+
+    public string Category =>
+        Item.CategoryName.ToUpperInvariant();
+
+    public string Price =>
+        $"from {Item.SizeVariants.Where(size => size.IsActive).Min(size => size.Price):0.00}";
+
+    public BitmapImage Photo =>
+        new(new Uri($"ms-appx:///Assets/Photos/{(Photos.TryGetValue(Item.Name, out var file) ? file : "cafe-bar")}.jpg"));
 }
 
 public sealed partial class PosPage : Page
