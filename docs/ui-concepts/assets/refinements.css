@@ -750,3 +750,52 @@
   background-position: right top;
   background-repeat: no-repeat;
 }
+
+
+/* Approved Stock room UX refinement: four tabs, readable labels, intentional editing. */
+.stock-room-refined .page-head .eyebrow { display: none; }
+.stock-room-refined .page-title { font-size: 44px; }
+.stock-room-refined .page-sub { font-size: 12px; }
+.stock-room-refined .page-ornament { width: 84px; opacity: .55; }
+.stock-room-refined .btn { font-size: 11px; letter-spacing: .02em; text-transform: none; }
+.stock-room-refined .tabs { gap: 28px; }
+.stock-room-refined .tab { font-size: 11px; letter-spacing: .02em; text-transform: none; }
+.stock-room-refined .tab .count { font-size: 13px; }
+.stock-room-refined .stock-toolbar { min-height: 56px; }
+.stock-room-refined .stock-toolbar input { font-size: 12px; }
+.stock-room-refined .stock-toolbar select { height: 40px; border: 0; background: transparent; font: 11px var(--sans); color: var(--ink); }
+.stock-room-refined .stock-low-filter { display: inline-flex; align-items: center; gap: 8px; font: 11px var(--sans); white-space: nowrap; }
+.stock-room-refined .stock-low-filter input { accent-color: var(--accent-text); }
+.stock-room-refined .stock-row { grid-template-columns: minmax(0, 1.5fr) 70px 70px 76px minmax(0, 1.1fr) 48px; }
+.stock-room-refined .stock-row.head { font-size: 9px; letter-spacing: .02em; }
+.stock-room-refined .stock-row.data { height: 52px; min-height: 52px; padding-top: 0; padding-bottom: 0; }
+.stock-room-refined .stock-table { margin-top: 9px; }
+.stock-room-refined .ing-name b, .stock-room-refined .qty-cell { font-size: 16px; }
+.stock-room-refined .ing-name span, .stock-room-refined .qty-cell small { font-size: 9px; letter-spacing: 0; }
+.stock-room-refined .last-cell, .stock-room-refined .last-cell .mono { font-size: 10px; }
+.stock-room-refined .row-action { width: 48px; height: 44px; font: 11px var(--sans); }
+.stock-room-refined .stock-ornament { height: 36px; opacity: .55; }
+.stock-room-refined .stock-ornament img { height: 34px; }
+.stock-room-refined .stock-footer { font-size: 10px; }
+.stock-room-refined .drawer { padding-right: 16px; }
+.stock-room-refined .drawer-kicker, .stock-room-refined .balance-label, .stock-room-refined .field-label { font-size: 11px; letter-spacing: .02em; text-transform: none; }
+.stock-room-refined .drawer-title { font-size: 26px; }
+.stock-room-refined .drawer-close { width: 44px; height: 44px; }
+.stock-room-refined .balance-block { background: #ece5d9; }
+.stock-room-refined .balance-value { font-size: 36px; }
+.stock-room-refined .balance-meta { font-size: 11px; }
+.stock-room-refined .drawer-tags { min-height: 30px; }
+.stock-room-refined .unit-tag { font: 11px var(--sans); color: var(--ink-2); }
+.stock-room-refined .drawer-actions { padding-top: 16px; }
+.stock-room-refined .drawer-hist { min-height: 180px; }
+.stock-room-refined .drawer-hist-head { font-size: 10px; letter-spacing: .02em; text-transform: none; min-height: 44px; }
+.stock-room-refined .hist-row { min-height: 32px; font-size: 10px; align-items: center; }
+.stock-room-refined .hist-row .when { font-size: 10px; }
+.stock-room-editing .drawer-tags, .stock-room-editing .drawer-hist { display: none; }
+.stock-room-editing .quick-row .chip { height: 44px; min-width: 44px; font-size: 11px; }
+.stock-room-editing .drawer-note { font-size: 10px; }
+.stock-room-editing .stock-cancel { margin-top: 8px; }
+.stock-room-editing .drawer-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px; }
+.stock-room-editing .drawer-form > * { grid-column: 1 / -1; }
+.stock-room-editing .drawer-form > .btn-block { grid-column: 1; }
+.stock-room-editing .drawer-form > .stock-cancel { grid-column: 2; }

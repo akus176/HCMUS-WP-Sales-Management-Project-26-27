@@ -8,13 +8,15 @@ namespace CoffeeShop.WinUI.Pages;
 /// </summary>
 public sealed record ReceiptLineRow
 {
-    public ReceiptLineRow(PurchaseReceiptLine line, string ingredientName)
+    public ReceiptLineRow(PurchaseReceiptLine line, string ingredientName, string unit = "")
     {
         Id = line.Id;
         IngredientName = ingredientName;
-        QuantityDisplay = $"{line.Quantity:0.###}";
+        QuantityDisplay = $"{line.Quantity:#,0.###} {unit}".TrimEnd();
         UnitCostDisplay = line.UnitCost.Amount.ToString("0.00");
-        LineTotalDisplay = (line.Quantity * line.UnitCost.Amount).ToString("0.00");
+        LineTotal = line.Quantity * line.UnitCost.Amount;
+        LineTotalDisplay = LineTotal.ToString("0.00");
+        DetailDisplay = $"{QuantityDisplay} × {UnitCostDisplay}";
     }
 
     public EntityId Id { get; }
@@ -25,5 +27,9 @@ public sealed record ReceiptLineRow
 
     public string UnitCostDisplay { get; }
 
+    public decimal LineTotal { get; }
+
     public string LineTotalDisplay { get; }
+
+    public string DetailDisplay { get; }
 }

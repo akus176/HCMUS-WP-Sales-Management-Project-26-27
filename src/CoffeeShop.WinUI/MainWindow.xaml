@@ -65,7 +65,6 @@
                             <TextBlock Text="/" Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleAccentBrush}" />
                             <TextBlock x:Name="BreadcrumbText" Style="{StaticResource ConsoleLabelStyle}" CharacterSpacing="140" />
                         </StackPanel>
-                        <Button x:Name="StockSectionButton" Grid.Column="2" Content="BALANCES ▾" Style="{StaticResource ConsoleButtonStyle}" Visibility="Collapsed" AutomationProperties.Name="Choose Stock room section"><Button.Flyout><MenuFlyout x:Name="StockSectionsFlyout" /></Button.Flyout></Button>
                         <TextBlock x:Name="DateText" Grid.Column="3" Style="{StaticResource ConsoleLabelStyle}" VerticalAlignment="Center" />
                     </Grid>
                 </Border>

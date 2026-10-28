@@ -1,4 +1,5 @@
 using System.Text.Json;
+using CoffeeShop.WinUI.Pages;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
@@ -18,14 +19,27 @@ public sealed partial class MainWindow
         {
             NavigateTo(tag);
             await Task.Delay(120);
-            results.Add(new { requested = tag, selected = ((NavigationViewItem)Nav.SelectedItem).Tag, page = ContentFrame.Content.GetType().Name, route = currentRoute });
+            results.Add(new
+            {
+                requested = tag,
+                selected = ((NavigationViewItem)Nav.SelectedItem).Tag,
+                page = ContentFrame.Content.GetType().Name,
+                route = currentRoute,
+                stockSection = (ContentFrame.Content as StockRoomPage)?.CurrentSection,
+                stockInteraction = (ContentFrame.Content as StockRoomPage)?.VerificationState()
+            });
         }
-        NavigateTo("counter");
+        var verifyStockRoom = Environment.GetCommandLineArgs().Contains("--verify-stock-room");
+        NavigateTo(verifyStockRoom ? "ingredients" : "counter");
+        var stockUx = verifyStockRoom && ContentFrame.Content is StockRoomPage interactionPage
+            ? await interactionPage.VerifyInteractionsAsync() : null;
+        if (verifyStockRoom && ContentFrame.Content is StockRoomPage stockRoom) stockRoom.PrepareReferenceCapture();
         var activePage = ContentFrame.Content;
         var resize = new List<object>();
         foreach (var width in new[] { 1440, 1008, 1007, 641, 640, 600, 1440 })
         {
             await ResizeForVerificationAsync(width, 900);
+            if (verifyStockRoom && width == 600) await PresentationVerification.CaptureAsync(ShellRoot, "native-stock-room-compact.png");
             resize.Add(new
             {
                 requestedWidth = width,
@@ -42,7 +56,8 @@ public sealed partial class MainWindow
         ShellRoot.Height = 900;
         ShellRoot.UpdateLayout();
         await Task.Delay(100);
-        var keyboardFocus = item.Focus(FocusState.Keyboard);
+        if (verifyStockRoom && ContentFrame.Content is StockRoomPage referencePage) referencePage.PrepareReferenceCapture();
+        var keyboardFocus = !verifyStockRoom && item.Focus(FocusState.Keyboard);
         var controls = Nav.MenuItems.OfType<NavigationViewItem>().Select(control => new
         {
             tag = control.Tag,
@@ -56,6 +71,8 @@ public sealed partial class MainWindow
             foreach (var key in dictionary.Keys) { _ = dictionary[key]; allResources.Add(key.ToString() ?? ""); }
         var report = new
         {
+            stockBalanceRendered = !verifyStockRoom || ((StockRoomPage)ContentFrame.Content).HasRenderedBalanceName(),
+            stockUx,
             defaultIsCounter,
             connected = connection.IsConnected,
             routes = results,
@@ -67,8 +84,15 @@ public sealed partial class MainWindow
         };
         var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CoffeeShop");
         Directory.CreateDirectory(directory);
-        await File.WriteAllTextAsync(Path.Combine(directory, "shell-verification.json"), JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
-        await PresentationVerification.CaptureAsync(ShellRoot, "native-shell.png");
+        await File.WriteAllTextAsync(Path.Combine(directory, verifyStockRoom ? "stock-room-verification.json" : "shell-verification.json"), JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
+        await PresentationVerification.CaptureAsync(ShellRoot, verifyStockRoom ? "native-stock-room.png" : "native-shell.png");
+        if (verifyStockRoom && ContentFrame.Content is StockRoomPage adjustmentPage)
+        {
+            adjustmentPage.PrepareAdjustmentCapture();
+            await Task.Delay(100);
+            await PresentationVerification.CaptureAsync(ShellRoot, "native-stock-room-adjustment.png");
+            adjustmentPage.ClearCaptureDraft();
+        }
         ShellRoot.Width = ShellRoot.Height = double.NaN;
     }
 

@@ -63,12 +63,6 @@ public sealed partial class MainWindow : Window
             ToolTipService.SetToolTip(item, destination.Label);
             Nav.MenuItems.Add(item);
         }
-        foreach (var section in ServiceConsoleNavigation.StockSections)
-        {
-            var item = new MenuFlyoutItem { Text = section.Value, Tag = section.Key };
-            item.Click += (_, _) => NavigateTo(section.Key);
-            StockSectionsFlyout.Items.Add(item);
-        }
     }
     private static StackPanel NavigationContent(ServiceConsoleDestination destination)
     {
@@ -150,9 +144,9 @@ public sealed partial class MainWindow : Window
     }
     private void OnNavSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (!selecting && args.SelectedItem is NavigationViewItem { Tag: string tag }) ShowRoute(ServiceConsoleNavigation.Resolve(tag));
+        if (!selecting && args.SelectedItem is NavigationViewItem { Tag: string tag }) ShowRoute(ServiceConsoleNavigation.Resolve(tag), tag == "stock-room");
     }
-    private void ShowRoute(ServiceConsoleRoute route)
+    private void ShowRoute(ServiceConsoleRoute route, bool preserveStockSection = false)
     {
         if (route.Destination.Workspace == ServiceConsoleWorkspace.StockRoom)
         {
@@ -166,7 +160,7 @@ public sealed partial class MainWindow : Window
                 ContentFrame.Content = stockPage;
                 currentRoute = stockKey;
             }
-            if (stockPage is StockRoomPage page)
+            if (!preserveStockSection && stockPage is StockRoomPage page)
             {
                 page.SelectSection(route.StockSection ?? "ingredients");
             }
@@ -184,8 +178,6 @@ public sealed partial class MainWindow : Window
 
         BreadcrumbGroup.Text = route.Destination.Group.ToUpperInvariant();
         BreadcrumbText.Text = route.Destination.Label.ToUpperInvariant();
-        StockSectionButton.Visibility = route.StockSection is null ? Visibility.Collapsed : Visibility.Visible;
-        if (route.StockSection is { } section) StockSectionButton.Content = ServiceConsoleNavigation.StockSections[section].ToUpperInvariant() + " ▾";
         if (layout != ServiceConsoleLayoutMode.Expanded) Nav.IsPaneOpen = false;
     }
     private static Page CreatePage(ServiceConsoleRoute route) => route.Destination.Workspace switch

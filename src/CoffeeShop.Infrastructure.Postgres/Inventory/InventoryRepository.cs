@@ -53,6 +53,14 @@ public sealed class InventoryRepository : IInventoryRepository, IStockMovementRe
             .OrderByDescending(movement => movement.OccurredAt).ThenBy(movement => movement.Id)
             .Take(100).ToArrayAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<StockMovement>> ListRecentForAllAsync(int take = 200, CancellationToken cancellationToken = default)
+    {
+        var limit = Math.Clamp(take, 1, 500);
+        return await context.StockMovements.AsNoTracking()
+            .OrderByDescending(movement => movement.OccurredAt).ThenBy(movement => movement.Id)
+            .Take(limit).ToArrayAsync(cancellationToken);
+    }
+
     public async Task LockOrderForRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default)
     {
         RequireTransaction();
