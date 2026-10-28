@@ -13,8 +13,11 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public IReadOnlyList<OperationalOrder> Orders { get; private set; } = [];
     public IReadOnlyList<OperationalTable> Tables { get; private set; } = [];
     public IReadOnlyList<DeliveryStaffOption> DeliveryStaff { get; private set; } = [];
+    public IReadOnlyDictionary<EntityId, PosOrderDetail> OrderDetails { get; private set; } =
+        new Dictionary<EntityId, PosOrderDetail>();
     public EntityId? SelectedOrderId { get; private set; }
     public OperationalOrder? SelectedOrder => Orders.SingleOrDefault(order => order.Id == SelectedOrderId);
+    public PosOrderDetail? SelectedDetail => SelectedOrderId is { } id && OrderDetails.TryGetValue(id, out var detail) ? detail : null;
     public bool IsBusy { get; private set; }
     public Error? Error { get; private set; }
     public string Message { get; private set; } = "Load operational work to see the current queue, tables and fulfillment controls.";
@@ -30,7 +33,9 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         Orders = await queries.GetOrdersAsync();
         Tables = await queries.GetTablesAsync();
         DeliveryStaff = await queries.GetDeliveryStaffAsync();
-        if (SelectedOrderId is null || Orders.All(order => order.Id != SelectedOrderId)) SelectedOrderId = Orders.FirstOrDefault()?.Id;
+        await LoadDetailsAsync(provider);
+        if (SelectedOrderId is null || Orders.All(order => order.Id != SelectedOrderId))
+            SelectedOrderId = Orders.FirstOrDefault(order => order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready)?.Id;
         Message = Orders.Count == 0 && Tables.Count == 0
             ? "No operational records yet. Create and confirm an order from Point of Sale to begin."
             : "Choose an order. Controls are enabled only for its current lifecycle state.";
@@ -40,6 +45,12 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     {
         SelectedOrderId = order?.Id;
         Error = null;
+        Notify();
+    }
+
+    public void FocusOrder(EntityId id)
+    {
+        SelectedOrderId = id;
         Notify();
     }
 
@@ -107,7 +118,21 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         Orders = await queries.GetOrdersAsync();
         Tables = await queries.GetTablesAsync();
         DeliveryStaff = await queries.GetDeliveryStaffAsync();
+        await LoadDetailsAsync(provider);
         Message = success;
+    }
+
+    private async Task LoadDetailsAsync(IServiceProvider provider)
+    {
+        var handler = provider.GetRequiredService<PosOrderHandler>();
+        var details = new Dictionary<EntityId, PosOrderDetail>();
+        foreach (var order in Orders.Where(order => order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready
+                     || order.Id == SelectedOrderId))
+        {
+            var result = await handler.GetOrderAsync(order.Id);
+            if (result.IsSuccess) details[order.Id] = result.Value!;
+        }
+        OrderDetails = details;
     }
 
     private bool Accept(Result result)
