@@ -59,6 +59,12 @@ public sealed partial class OperationsPage : Page
     {
         if (!rendering) AssignButton.IsEnabled = model.SelectedOrder?.CanAssignDelivery == true && DeliveryStaffBox.SelectedItem is DeliveryStaffOption && model.HasOperator;
     }
+    private void OnDiscountChanged(object sender, SelectionChangedEventArgs args)
+    {
+        if (rendering) return;
+        var enabled = DiscountList.SelectedItem is EntityId && model.HasOperator && !model.IsBusy;
+        ApproveButton.IsEnabled = RejectButton.IsEnabled = enabled;
+    }
     private async void OnPrepare(object sender, RoutedEventArgs args) => await model.StartPreparingAsync();
     private async void OnReady(object sender, RoutedEventArgs args) => await model.MarkReadyAsync();
     private async void OnComplete(object sender, RoutedEventArgs args)
@@ -129,8 +135,12 @@ public sealed partial class OperationsPage : Page
         TotalText.Text = selected is null ? "" : selected.Total.ToString("0.00", CultureInfo.CurrentCulture);
         BalanceText.Text = selected is null ? "" : $"Paid {selected.PaidAmount:0.00} · Outstanding {selected.OutstandingBalance:0.00}" +
             (detail?.AddressLine is { } address ? $" · Delivery: {address}" : "");
+        var selectedDiscount = DiscountList.SelectedItem as EntityId;
         DiscountList.ItemsSource = selected?.PendingDiscountIds ?? [];
+        DiscountList.SelectedItem = selected?.PendingDiscountIds.FirstOrDefault(id => id == selectedDiscount);
+        var selectedStaffId = (DeliveryStaffBox.SelectedItem as DeliveryStaffOption)?.Id;
         DeliveryStaffBox.ItemsSource = model.DeliveryStaff;
+        DeliveryStaffBox.SelectedItem = model.DeliveryStaff.FirstOrDefault(staff => staff.Id == selectedStaffId);
         PrepareButton.Visibility = selected?.CanStartPreparing == true ? Visibility.Visible : Visibility.Collapsed;
         ReadyButton.Visibility = selected?.CanMarkReady == true ? Visibility.Visible : Visibility.Collapsed;
         CompleteButton.Visibility = selected?.CanComplete == true ? Visibility.Visible : Visibility.Collapsed;
@@ -139,7 +149,7 @@ public sealed partial class OperationsPage : Page
         CompleteButton.IsEnabled = selected?.CanComplete == true && model.HasOperator && !model.IsBusy;
         PayButton.IsEnabled = selected?.CanRecordPayment == true && selected.OutstandingBalance > 0 && model.HasOperator && !model.IsBusy;
         CancelButton.IsEnabled = selected?.CanCancel == true && model.HasOperator && !model.IsBusy;
-        ApproveButton.IsEnabled = RejectButton.IsEnabled = selected?.PendingDiscountIds.Count > 0 && model.HasOperator && !model.IsBusy;
+        ApproveButton.IsEnabled = RejectButton.IsEnabled = DiscountList.SelectedItem is EntityId && model.HasOperator && !model.IsBusy;
         AssignButton.IsEnabled = selected?.CanAssignDelivery == true && DeliveryStaffBox.SelectedItem is DeliveryStaffOption && model.HasOperator && !model.IsBusy;
         OutButton.IsEnabled = selected?.CanStartDelivery == true && model.HasOperator && !model.IsBusy;
         DeliveredButton.IsEnabled = FailButton.IsEnabled = selected?.CanFinishDelivery == true && model.HasOperator && !model.IsBusy;

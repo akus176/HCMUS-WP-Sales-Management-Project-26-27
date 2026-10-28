@@ -37,14 +37,21 @@
     </Page.Resources>
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <StackPanel Padding="32,22,32,28" Spacing="16">
-            <Grid MinHeight="112" ColumnSpacing="16">
-                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <Grid x:Name="HeaderLayout" MinHeight="112" ColumnSpacing="16">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition x:Name="HeaderActionColumn" Width="Auto"/></Grid.ColumnDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <VisualStateManager.VisualStateGroups><VisualStateGroup>
+                    <VisualState x:Name="HeaderWide"><VisualState.StateTriggers><AdaptiveTrigger MinWindowWidth="641"/></VisualState.StateTriggers>
+                        <VisualState.Setters><Setter Target="HeaderActionColumn.Width" Value="Auto"/><Setter Target="HeaderActions.(Grid.Column)" Value="1"/><Setter Target="HeaderActions.(Grid.Row)" Value="0"/><Setter Target="HeaderActions.Orientation" Value="Horizontal"/></VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="HeaderNarrow"><VisualState.Setters><Setter Target="HeaderActionColumn.Width" Value="0"/><Setter Target="HeaderActions.(Grid.Column)" Value="0"/><Setter Target="HeaderActions.(Grid.Row)" Value="1"/><Setter Target="HeaderActions.Orientation" Value="Vertical"/></VisualState.Setters></VisualState>
+                </VisualStateGroup></VisualStateManager.VisualStateGroups>
                 <StackPanel Spacing="3">
                     <TextBlock Text="●  SERVICE  /  LIVE FLOOR" Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleAccentTextBrush}"/>
                     <TextBlock Text="Service board" Style="{StaticResource ConsolePageTitleStyle}"/>
                     <TextBlock x:Name="SummaryText" Style="{StaticResource ConsoleBodyStyle}"/>
                 </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                     <Button Content="REFRESH" Click="OnReload" Style="{StaticResource ConsoleButtonStyle}" AutomationProperties.Name="Refresh service board"/>
                     <Button Content="OPEN COUNTER" Click="OnOpenCounter" Style="{StaticResource ConsolePrimaryButtonStyle}"/>
                 </StackPanel>
@@ -66,7 +73,7 @@
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition x:Name="PreparingColumn" Width="*"/><ColumnDefinition x:Name="ReadyColumn" Width="*"/></Grid.ColumnDefinitions>
                     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                     <VisualStateManager.VisualStateGroups><VisualStateGroup>
-                        <VisualState x:Name="NotesExpanded"><VisualState.StateTriggers><AdaptiveTrigger MinWindowWidth="1008"/></VisualState.StateTriggers>
+                        <VisualState x:Name="NotesExpanded"><VisualState.StateTriggers><AdaptiveTrigger MinWindowWidth="1400"/></VisualState.StateTriggers>
                             <VisualState.Setters><Setter Target="PreparingColumn.Width" Value="*"/><Setter Target="ReadyColumn.Width" Value="*"/><Setter Target="PreparingPanel.(Grid.Column)" Value="1"/><Setter Target="PreparingPanel.(Grid.Row)" Value="0"/><Setter Target="ReadyPanel.(Grid.Column)" Value="2"/><Setter Target="ReadyPanel.(Grid.Row)" Value="0"/></VisualState.Setters>
                         </VisualState>
                         <VisualState x:Name="NotesCompact"><VisualState.Setters><Setter Target="PreparingColumn.Width" Value="0"/><Setter Target="ReadyColumn.Width" Value="0"/><Setter Target="PreparingPanel.(Grid.Column)" Value="0"/><Setter Target="PreparingPanel.(Grid.Row)" Value="1"/><Setter Target="ReadyPanel.(Grid.Column)" Value="0"/><Setter Target="ReadyPanel.(Grid.Row)" Value="2"/></VisualState.Setters></VisualState>
@@ -92,7 +99,7 @@
                     <Expander Header="Payment and discount"><StackPanel Spacing="8" Padding="8">
                         <ComboBox x:Name="PaymentMethodBox" Header="Payment method" SelectedIndex="0"><ComboBoxItem Tag="cash" Content="Cash"/><ComboBoxItem Tag="card" Content="Card"/><ComboBoxItem Tag="e_wallet" Content="E-wallet"/></ComboBox>
                         <TextBox x:Name="PaymentAmountBox" Header="Amount"/><TextBox x:Name="PaymentReferenceBox" Header="Reference"/><Button x:Name="PayButton" Content="RECORD PAYMENT" Click="OnPay" Style="{StaticResource ConsoleButtonStyle}"/>
-                        <ListView x:Name="DiscountList" MaxHeight="110" SelectionMode="Single" AutomationProperties.Name="Pending discount requests"/><StackPanel Orientation="Horizontal" Spacing="8"><Button x:Name="ApproveButton" Content="APPROVE" Click="OnApprove" Style="{StaticResource ConsoleButtonStyle}"/><Button x:Name="RejectButton" Content="REJECT" Click="OnReject" Style="{StaticResource ConsoleButtonStyle}"/></StackPanel>
+                        <ListView x:Name="DiscountList" MaxHeight="110" SelectionMode="Single" SelectionChanged="OnDiscountChanged" AutomationProperties.Name="Pending discount requests"/><StackPanel Orientation="Horizontal" Spacing="8"><Button x:Name="ApproveButton" Content="APPROVE" Click="OnApprove" Style="{StaticResource ConsoleButtonStyle}"/><Button x:Name="RejectButton" Content="REJECT" Click="OnReject" Style="{StaticResource ConsoleButtonStyle}"/></StackPanel>
                     </StackPanel></Expander>
                     <Expander Header="Cancellation and delivery"><StackPanel Spacing="8" Padding="8">
                         <TextBox x:Name="CancelReasonBox" Header="Cancellation reason"/>

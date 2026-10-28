@@ -126,7 +126,8 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     {
         var handler = provider.GetRequiredService<PosOrderHandler>();
         var details = new Dictionary<EntityId, PosOrderDetail>();
-        foreach (var order in Orders)
+        foreach (var order in Orders.Where(order => order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready
+                     || order.Id == SelectedOrderId))
         {
             var result = await handler.GetOrderAsync(order.Id);
             if (result.IsSuccess) details[order.Id] = result.Value!;

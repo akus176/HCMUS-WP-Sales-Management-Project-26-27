@@ -35,8 +35,15 @@
     </Page.Resources>
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <StackPanel Padding="32,22,32,28" Spacing="16">
-            <Grid MinHeight="112" ColumnSpacing="16">
-                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <Grid x:Name="HeaderLayout" MinHeight="112" ColumnSpacing="16">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition x:Name="HeaderActionColumn" Width="Auto"/></Grid.ColumnDefinitions>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <VisualStateManager.VisualStateGroups><VisualStateGroup>
+                    <VisualState x:Name="HeaderWide"><VisualState.StateTriggers><AdaptiveTrigger MinWindowWidth="641"/></VisualState.StateTriggers>
+                        <VisualState.Setters><Setter Target="HeaderActionColumn.Width" Value="Auto"/><Setter Target="NewButton.(Grid.Column)" Value="1"/><Setter Target="NewButton.(Grid.Row)" Value="0"/></VisualState.Setters>
+                    </VisualState>
+                    <VisualState x:Name="HeaderNarrow"><VisualState.Setters><Setter Target="HeaderActionColumn.Width" Value="0"/><Setter Target="NewButton.(Grid.Column)" Value="0"/><Setter Target="NewButton.(Grid.Row)" Value="1"/></VisualState.Setters></VisualState>
+                </VisualStateGroup></VisualStateManager.VisualStateGroups>
                 <StackPanel Spacing="3">
                     <TextBlock Text="●  SERVICE  /  COUNTER" Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleAccentTextBrush}"/>
                     <TextBlock Text="Counter" Style="{StaticResource ConsolePageTitleStyle}"/>
@@ -119,6 +126,7 @@
                         </StackPanel></UserControl></Expander>
                         <Button x:Name="SaveButton" Content="SAVE DRAFT AND REVIEW TOTAL" Click="OnSaveDraft" Style="{StaticResource ConsoleButtonStyle}" Foreground="{StaticResource ConsoleOnFieldBrush}"/>
                         <Button x:Name="ConfirmButton" Content="CONFIRM REVIEWED ORDER" Click="OnConfirm" Style="{StaticResource ConsolePrimaryButtonStyle}" Background="{StaticResource ConsoleOnFieldBrush}" Foreground="{StaticResource ConsoleInkBrush}" IsEnabled="False"/>
+                        <Button x:Name="ServiceBoardButton" Content="CONTINUE IN SERVICE BOARD" Click="OnServiceBoard" Style="{StaticResource ConsoleButtonStyle}" Foreground="{StaticResource ConsoleOnFieldBrush}" Visibility="Collapsed"/>
                         <Expander Header="Reopen saved ticket"><StackPanel Spacing="8" Padding="8"><TextBox x:Name="OpenIdBox" Header="Order ID"/><Button x:Name="OpenButton" Content="OPEN SAVED TICKET" Click="OnOpen" Style="{StaticResource ConsoleButtonStyle}"/></StackPanel></Expander>
                     </StackPanel>
                 </Border>

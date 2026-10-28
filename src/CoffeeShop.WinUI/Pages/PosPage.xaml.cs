@@ -80,6 +80,7 @@ public sealed partial class PosPage : Page
         selectedMenuId = card.Item.Id;
         DrinkBox.SelectedItem = card.Item;
         CustomizationPanel.IsExpanded = true;
+        CustomizationPanel.StartBringIntoView();
     }
     private void ClearMenuSelection()
     {
@@ -219,7 +220,10 @@ public sealed partial class PosPage : Page
             CloseButtonText = "Keep reviewing",
             DefaultButton = ContentDialogButton.Close
         };
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary) await model.ConfirmAsync();
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+        await model.ConfirmAsync();
+        if (model.Order is { Status: CoffeeShop.Domain.Sales.OrderStatus.Confirmed } confirmed)
+            OpenServiceBoard(confirmed.Id);
     }
 
     private async void OnRedeemLoyalty(object sender, RoutedEventArgs args)
@@ -247,6 +251,15 @@ public sealed partial class PosPage : Page
         model.NewTicket();
         ClearMenuSelection();
         RestoreForm();
+    }
+    private void OnServiceBoard(object sender, RoutedEventArgs args)
+    {
+        if (model.Order is { } order) OpenServiceBoard(order.Id);
+    }
+    private static void OpenServiceBoard(EntityId orderId)
+    {
+        App.Services.GetRequiredService<OperationsWorkspace>().FocusOrder(orderId);
+        if (((App)Microsoft.UI.Xaml.Application.Current).Window is MainWindow main) main.NavigateTo("service-board");
     }
 
     private async void OnOpen(object sender, RoutedEventArgs args)
@@ -328,6 +341,8 @@ public sealed partial class PosPage : Page
         RemoveButton.IsEnabled = model.CanEdit && CartList.SelectedItem is PosCartLine;
         EmptyText.Visibility = !model.IsBusy && visible.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ConfirmButton.IsEnabled = model.CanConfirm;
+        ServiceBoardButton.Visibility = model.Order is { Status: CoffeeShop.Domain.Sales.OrderStatus.Confirmed or CoffeeShop.Domain.Sales.OrderStatus.Preparing or CoffeeShop.Domain.Sales.OrderStatus.Ready }
+            ? Visibility.Visible : Visibility.Collapsed;
         DiscountPanel.IsEnabled = model.CanConfirm;
         NewButton.IsEnabled = !model.IsBusy && !model.RequiresReload;
         OpenButton.IsEnabled = !model.IsBusy;
