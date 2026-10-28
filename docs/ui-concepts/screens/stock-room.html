@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="../assets/app.css">
 <link rel="stylesheet" href="../assets/refinements.css">
 </head>
-<body class="screen">
+<body class="screen stock-room-refined">
 <script src="../assets/icons.js"></script>
 <div class="window">
   <div class="titlebar">
@@ -68,22 +68,20 @@
         </div>
 
         <div class="tabs">
-          <div class="tab active"><span>Balances</span> <span class="count">12</span></div>
-          <div class="tab"><span>Low stock</span> <span class="count">3</span></div>
+          <div class="tab active"><span>Inventory</span> <span class="count">12</span></div>
           <div class="tab"><span>Receipts</span> <span class="count">8</span></div>
           <div class="tab"><span>Suppliers</span> <span class="count">4</span></div>
-          <div class="tab"><span>Adjustments</span> <span class="count">24</span></div>
-          <div class="tab"><span>Movements</span> <span class="count">100</span></div>
-          <div class="right"><span class="pill pill-stamp pill-blue">Synced 10:40</span></div>
+          <div class="tab"><span>History</span></div>
+          <div class="right"><span class="pill pill-stamp pill-blue">Updated 10:40</span></div>
         </div>
 
         <div class="stock-cols">
           <section class="stock-main">
             <div class="stock-toolbar">
               <div class="input-search"><svg class="ico"><use href="#i-search"/></svg><input aria-label="Filter ingredients" placeholder="Filter ingredients…"></div>
-              <button class="chip"><svg class="ico"><use href="#i-filter"/></svg> All units</button>
-              <button class="chip chip-red"><svg class="ico"><use href="#i-warning"/></svg> Low stock only</button>
-              <div class="right"><span class="pill">8 of 12</span><button class="icon-btn" aria-label="Export"><svg class="ico"><use href="#i-download"/></svg></button></div>
+              <select aria-label="Filter by unit"><option>All units</option><option>g</option><option>ml</option><option>pcs</option></select>
+              <label class="stock-low-filter"><input type="checkbox"> Low stock only</label>
+              <div class="right"><span class="pill">8 of 12</span></div>
             </div>
             <div class="stock-table">
               <div class="stock-row head"><span>Ingredient</span><span>On hand</span><span>Reorder at</span><span>Status</span><span>Last movement</span><span></span></div>
@@ -93,7 +91,7 @@
                 <div class="qty-cell"><b>500</b><small>g</small></div>
                 <span class="pill pill-stamp pill-red">Low</span>
                 <div class="last-cell">−120 g · waste<span class="mono">10:36 · Mai T.</span></div>
-                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+                <button class="row-action" aria-label="Adjust ingredient stock">Adjust</button>
               </div>
               <div class="stock-row data low">
                 <div class="ing-name"><b>Matcha powder</b><span>Tea · ceremonial</span></div>
@@ -101,7 +99,7 @@
                 <div class="qty-cell"><b>200</b><small>g</small></div>
                 <span class="pill pill-stamp pill-red">Low</span>
                 <div class="last-cell">−40 g · waste<span class="mono">08:45 · Mai T.</span></div>
-                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+                <button class="row-action" aria-label="Adjust ingredient stock">Adjust</button>
               </div>
               <div class="stock-row data">
                 <div class="ing-name"><b>Whole milk</b><span>Dairy · 1 L bottles</span></div>
@@ -109,7 +107,7 @@
                 <div class="qty-cell"><b>3.0</b><small>L</small></div>
                 <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> OK</span>
                 <div class="last-cell">−2 L · service<span class="mono">10:21 · Mai T.</span></div>
-                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+                <button class="row-action" aria-label="Adjust ingredient stock">Adjust</button>
               </div>
               <div class="stock-row data">
                 <div class="ing-name"><b>Oat milk</b><span>Dairy · 1 L cartons</span></div>
@@ -117,7 +115,7 @@
                 <div class="qty-cell"><b>2.0</b><small>L</small></div>
                 <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> OK</span>
                 <div class="last-cell">+6 L · receipt<span class="mono">09:12 · Bao L.</span></div>
-                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+                <button class="row-action" aria-label="Adjust ingredient stock">Adjust</button>
               </div>
               <div class="stock-row data">
                 <div class="ing-name"><b>Vanilla syrup</b><span>Syrup · 750 ml bottle</span></div>
@@ -125,7 +123,7 @@
                 <div class="qty-cell"><b>250</b><small>ml</small></div>
                 <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> OK</span>
                 <div class="last-cell">+750 ml · receipt<span class="mono">yesterday · Mai T.</span></div>
-                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+                <button class="row-action" aria-label="Adjust ingredient stock">Adjust</button>
               </div>
               <div class="stock-row data">
                 <div class="ing-name"><b>Paper cups · 12 oz</b><span>Packaging · sleeves</span></div>
@@ -133,7 +131,7 @@
                 <div class="qty-cell"><b>200</b><small>pcs</small></div>
                 <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> OK</span>
                 <div class="last-cell">−50 pcs · service<span class="mono">10:40 · Mai T.</span></div>
-                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+                <button class="row-action" aria-label="Adjust ingredient stock">Adjust</button>
               </div>
               <div class="stock-row data">
                 <div class="ing-name"><b>Croissant dough</b><span>Bakery · frozen</span></div>
@@ -141,7 +139,7 @@
                 <div class="qty-cell"><b>10</b><small>pcs</small></div>
                 <span class="pill pill-stamp pill-green"><svg class="ico"><use href="#i-check"/></svg> OK</span>
                 <div class="last-cell">+12 pcs · receipt<span class="mono">07:55 · Bao L.</span></div>
-                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+                <button class="row-action" aria-label="Adjust ingredient stock">Adjust</button>
               </div>
               <div class="stock-row data low">
                 <div class="ing-name"><b>Cocoa powder</b><span>Dry goods · tub</span></div>
@@ -149,44 +147,33 @@
                 <div class="qty-cell"><b>250</b><small>g</small></div>
                 <span class="pill pill-stamp pill-red">Low</span>
                 <div class="last-cell">−80 g · waste<span class="mono">09:20 · Mai T.</span></div>
-                <button class="row-action" aria-label="Open ingredient"><svg class="ico"><use href="#i-dots"/></svg></button>
+                <button class="row-action" aria-label="Adjust ingredient stock">Adjust</button>
               </div>
             </div>
             <div class="stock-ornament" aria-hidden="true"><img src="../assets/ornaments/stock-room.svg" alt=""></div>
             <div class="stock-footer">
               <span>Showing 8 of 12 ingredients</span>
-              <span class="right"><span>Last sync 10:40</span><button class="icon-btn" style="width:24px;height:24px;" aria-label="Refresh"><svg class="ico" style="width:12px;height:12px;"><use href="#i-refresh"/></svg></button></span>
+              <span class="right"><button class="icon-btn" style="width:24px;height:24px;" aria-label="Refresh"><svg class="ico" style="width:12px;height:12px;"><use href="#i-refresh"/></svg></button></span>
             </div>
           </section>
 
-          <aside class="drawer" aria-label="Adjust Arabica beans">
+          <aside class="drawer" aria-label="Arabica beans details">
             <div class="drawer-head">
               <div>
-                <div class="drawer-kicker">Adjust stock · immutable movement</div>
+                <div class="drawer-kicker">Ingredient details</div>
                 <div class="drawer-title">Arabica beans</div>
               </div>
               <button class="drawer-close" aria-label="Close"><svg class="ico"><use href="#i-x"/></svg></button>
             </div>
-            <div class="drawer-tags"><span class="pill pill-stamp pill-red">Low</span><span class="pill">Beans</span><span class="pill pill-stamp pill-blue">Counted 08:10</span></div>
+            <div class="drawer-tags"><span class="pill pill-stamp pill-red">Low</span><span class="unit-tag">g</span></div>
             <div class="balance-block">
               <div class="balance-label">On hand</div>
               <div class="balance-value">500 <small>g</small></div>
-              <div class="balance-meta">Reorder at 500 g · last movement 10:36</div>
+              <div class="balance-meta">Reorder threshold 500 g</div>
             </div>
-            <div class="drawer-form">
-              <label class="field-label" for="delta">Change quantity</label>
-              <div class="amount-box"><span class="sign">−</span><input id="delta" value="120" aria-label="Quantity change"><span class="unit">g</span></div>
-              <div class="quick-row"><span class="chip">−5</span><span class="chip">−10</span><span class="chip">+5</span><span class="chip">+10</span><span class="chip">+250</span></div>
-              <div class="balance-preview"><span>New balance</span><b>380 g</b><span class="pill pill-stamp pill-red">Below reorder</span></div>
-              <div class="field">
-                <label class="field-label" for="reason">Reason (required)</label>
-                <textarea class="textarea" id="reason" rows="2">Grinder calibration waste — morning dial-in.</textarea>
-              </div>
-              <button class="btn btn-primary btn-block"><svg class="ico"><use href="#i-check"/></svg> Record −120 g adjustment</button>
-              <div class="drawer-note">Written against Mai Tran · Shift 01. The movement cannot be edited or deleted; correct it with a new adjustment.</div>
-            </div>
+<div class="drawer-actions"><button class="btn btn-primary btn-block">Adjust stock</button></div>
             <div class="drawer-hist">
-              <div class="drawer-hist-head"><svg class="ico"><use href="#i-clock"/></svg> Recent movements <span class="right">Open full history</span></div>
+              <div class="drawer-hist-head"><svg class="ico"><use href="#i-clock"/></svg> Recent movements <span class="right">View history</span></div>
               <div class="hist-row"><span class="delta neg">−120 g</span><span class="why">Grinder calibration waste</span><span class="when">10:36</span></div>
               <div class="hist-row"><span class="delta pos">+2,000 g</span><span class="why">Receipt #R-221 · Vietnam Beans</span><span class="when">08:10</span></div>
               <div class="hist-row"><span class="delta neg">−35 g</span><span class="why">Dial-in sample</span><span class="when">yest.</span></div>

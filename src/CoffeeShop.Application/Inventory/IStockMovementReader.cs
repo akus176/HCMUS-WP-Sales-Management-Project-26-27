@@ -6,4 +6,6 @@ using CoffeeShop.Domain.Inventory;
 public interface IStockMovementReader
 {
     Task<IReadOnlyList<StockMovement>> ListRecentAsync(EntityId ingredientId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<StockMovement>> ListRecentForAllAsync(int take = 200, CancellationToken cancellationToken = default);
 }

@@ -85,6 +85,26 @@ The Menu workspace SHALL provide Drinks and recipes, Categories, and Add-ons vie
 ### Requirement: Consolidated Stock room workspace
 The Stock room SHALL consolidate Balances, Low stock, Receipts, Suppliers, Adjustments, and Movements under one workspace without removing existing inventory and procurement actions.
 
+#### Scenario: Staff chooses a Stock room function
+- **WHEN** Stock room is opened
+- **THEN** its primary tabs are Inventory, Receipts, Suppliers, and History
+- **AND** Low stock is a filter within Inventory and Adjust stock opens the selected ingredient's editor
+- **AND** legacy low-stock and adjustment routes continue to open the corresponding filter or editor
+
+#### Scenario: Staff switches ingredients while drafting an adjustment
+- **WHEN** an unsaved adjustment exists and another ingredient is selected
+- **THEN** the previous quantity and reason stay associated with their original ingredient
+- **AND** they are not reused for the newly selected ingredient
+- **AND** Cancel discards only the current ingredient's draft
+
+#### Scenario: An adjustment cannot be submitted
+- **WHEN** the quantity or resulting balance is invalid, or no operator is selected
+- **THEN** submission is unavailable and the editor explains the required correction
+
+#### Scenario: Staff leaves an adjustment reason blank
+- **WHEN** a valid quantity change and staff operator are selected without a reason
+- **THEN** submission is available and the movement records a manual stock adjustment
+
 #### Scenario: Inventory staff changes stock-room function
 - **WHEN** inventory staff chooses a Stock room section
 - **THEN** the selected section is displayed within the Stock room workspace
