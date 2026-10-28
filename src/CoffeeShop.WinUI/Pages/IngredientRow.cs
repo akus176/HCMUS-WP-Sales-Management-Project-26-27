@@ -36,4 +36,8 @@ public sealed record IngredientRow
     public string ToggleActiveLabel { get; }
 
     public bool IsActive { get; }
+
+    public string UnitDisplay => $"Unit: {BaseUnit}";
+
+    public string AdjustActionName => $"Adjust {Name}";
 }
