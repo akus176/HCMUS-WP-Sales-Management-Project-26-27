@@ -8,6 +8,49 @@ namespace CoffeeShop.WinUI.Tests;
 public sealed class PosWorkspaceTests
 {
     [Fact]
+    public void IdenticalItems_HaveIndependentIdentity_AndStaleReferencesTargetTheSameLine()
+    {
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new(), new());
+        var size = new SizeVariantSummary(EntityId.New(), "Small", 25m, true);
+        var item = new MenuItemSummary(EntityId.New(), EntityId.New(), "Coffee", "Latte", null, true, [size], []);
+        model.AddLine(item, size, 1, []);
+        model.AddLine(item, size, 1, []);
+        var first = model.Cart[0];
+        var second = model.Cart[1];
+        Assert.NotEqual(first.LineId, second.LineId);
+
+        model.ChangeQuantity(second, 3);
+        model.ChangeQuantity(second, 4);
+        Assert.Equal(1, model.Cart[0].Quantity);
+        Assert.Equal(4, model.Cart[1].Quantity);
+        Assert.Equal(second.LineId, model.Cart[1].LineId);
+        Assert.Equal("100.00", model.Cart[1].Amount);
+
+        model.RemoveLine(second);
+        Assert.Equal(first.LineId, Assert.Single(model.Cart).LineId);
+        model.ChangeQuantity(second, 2);
+        model.RemoveLine(second);
+        Assert.Equal(first.LineId, Assert.Single(model.Cart).LineId);
+    }
+
+    [Fact]
+    public void RemovingALine_ClearsObsoleteValidation_AndKeepsOtherItems()
+    {
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new(), new());
+        var size = new SizeVariantSummary(EntityId.New(), "Small", 25m, true);
+        var item = new MenuItemSummary(EntityId.New(), EntityId.New(), "Coffee", "Latte", null, true, [size], []);
+        model.AddLine(item, size, 1, []);
+        model.AddLine(item, size, 2, []);
+        model.ShowValidation("Choose an operator.");
+        model.RemoveLine(model.Cart[0]);
+        Assert.Null(model.Error);
+        Assert.Equal(2, Assert.Single(model.Cart).Quantity);
+        Assert.Contains("removed", model.Message);
+    }
+
+    [Fact]
     public void InvalidQuantityAndDuplicateAddons_KeepCartUnchanged()
     {
         using var services = new ServiceCollection().BuildServiceProvider();

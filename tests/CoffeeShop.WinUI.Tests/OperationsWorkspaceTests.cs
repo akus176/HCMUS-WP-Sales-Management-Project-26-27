@@ -9,6 +9,30 @@ namespace CoffeeShop.WinUI.Tests;
 public sealed class OperationsWorkspaceTests
 {
     [Fact]
+    public void BoardMoves_AllowOnlyForwardStates_AndRequirePaymentBeforeCompletion()
+    {
+        Assert.True(OperationsWorkspace.IsMoveAllowed(Order(OrderStatus.Confirmed), OrderStatus.Preparing));
+        Assert.True(OperationsWorkspace.IsMoveAllowed(Order(OrderStatus.Preparing), OrderStatus.Ready));
+        Assert.False(OperationsWorkspace.IsMoveAllowed(Order(OrderStatus.Confirmed), OrderStatus.Ready));
+        Assert.False(OperationsWorkspace.IsMoveAllowed(Order(OrderStatus.Preparing), OrderStatus.Confirmed));
+        Assert.False(OperationsWorkspace.IsMoveAllowed(Order(OrderStatus.Ready, 30, 10), OrderStatus.Completed));
+        Assert.True(OperationsWorkspace.IsMoveAllowed(Order(OrderStatus.Ready, 30, 30), OrderStatus.Completed));
+        Assert.False(OperationsWorkspace.IsMoveAllowed(Order(OrderStatus.Completed), OrderStatus.Preparing));
+        Assert.False(OperationsWorkspace.IsMoveAllowed(Order(OrderStatus.Confirmed), OrderStatus.Cancelled));
+    }
+
+    [Fact]
+    public async Task BoardMoveWithoutOperator_ShowsValidation_WithoutAccessingPersistence()
+    {
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var model = new OperationsWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new());
+        await model.MoveOrderAsync(EntityId.New(), OrderStatus.Preparing);
+        Assert.Equal("operations.invalid_input", model.Error?.Code);
+        Assert.Contains("operator", model.Error!.Description);
+        Assert.Equal(WorkflowFeedbackKind.Validation, model.Feedback.Kind);
+        Assert.False(model.IsBusy);
+    }
+    [Fact]
     public void BaristaControls_FollowTheOrderStateMachine()
     {
         var confirmed = Order(OrderStatus.Confirmed);
