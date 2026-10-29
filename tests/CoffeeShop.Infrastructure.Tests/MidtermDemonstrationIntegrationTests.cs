@@ -315,6 +315,58 @@ public sealed class MidtermDemonstrationIntegrationTests(ITestOutputHelper outpu
         output.WriteLine("PASS DEMO-09: missing loyalty settings rolled back completion/history/table release; configuration restored; retry completed and earned once.");
     }
 
+    [PostgresFact]
+    public async Task BoardActions_TargetTheRequestedNote_AndRejectSkippingOrUnpaidCompletion()
+    {
+        var pos = services.GetRequiredService<PosWorkspace>();
+        await pos.LoadAsync();
+        Assert.Null(pos.Error);
+        pos.Session.Operator = pos.Options.Staff.First();
+        pos.Channel = "takeaway";
+        var item = pos.Menu.Single(menu => menu.Name == "Midterm Almond Croissant");
+        pos.AddLine(item, item.SizeVariants.Single(size => size.SizeName == "Regular"), 1, []);
+        await pos.SaveDraftAsync();
+        Assert.Null(pos.Error);
+        await pos.ConfirmAsync();
+        Assert.Null(pos.Error);
+        var firstId = pos.TicketId;
+
+        pos.NewTicket();
+        pos.AddLine(item, item.SizeVariants.Single(size => size.SizeName == "Regular"), 1, []);
+        await pos.SaveDraftAsync();
+        Assert.Null(pos.Error);
+        await pos.ConfirmAsync();
+        Assert.Null(pos.Error);
+        var secondId = pos.TicketId;
+
+        var board = services.GetRequiredService<OperationsWorkspace>();
+        board.EnableOperationalWorkflow();
+        await board.LoadAsync();
+        Assert.Null(board.Error);
+        board.Select(board.Orders.Single(order => order.Id == firstId));
+        await board.MoveOrderAsync(secondId, OrderStatus.Ready);
+        Assert.NotNull(board.Error);
+        Assert.Equal(OrderStatus.Confirmed, board.Orders.Single(order => order.Id == secondId).Status);
+        await board.MoveOrderAsync(secondId, OrderStatus.Preparing);
+        Assert.Null(board.Error);
+        Assert.Equal(secondId, board.SelectedOrderId);
+        Assert.Equal(OrderStatus.Preparing, board.Orders.Single(order => order.Id == secondId).Status);
+        Assert.Equal(OrderStatus.Confirmed, board.Orders.Single(order => order.Id == firstId).Status);
+
+        await board.MoveOrderAsync(secondId, OrderStatus.Ready);
+        Assert.Null(board.Error);
+        await board.MoveOrderAsync(secondId, OrderStatus.Completed);
+        Assert.NotNull(board.Error);
+        Assert.Equal(OrderStatus.Ready, board.Orders.Single(order => order.Id == secondId).Status);
+        await board.RecordPaymentAsync(PaymentMethod.Cash, pos.Order!.Total, "BOARD-TEST");
+        Assert.Null(board.Error);
+        await board.MoveOrderAsync(secondId, OrderStatus.Completed);
+        Assert.Null(board.Error);
+        Assert.Equal(OrderStatus.Completed, board.Orders.Single(order => order.Id == secondId).Status);
+        await board.MoveOrderAsync(secondId, OrderStatus.Preparing);
+        Assert.NotNull(board.Error);
+    }
+
     private async Task<decimal> BalanceAsync(EntityId ingredient)
     {
         using var scope = services.CreateScope();
