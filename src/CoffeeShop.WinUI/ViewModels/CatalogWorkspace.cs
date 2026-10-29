@@ -23,7 +23,10 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
     public IReadOnlyList<RecipeIngredientOption> Ingredients { get; private set; } = [];
     public MenuItemDetail? SelectedItem { get; private set; }
     public bool IsEmpty => !IsBusy && !IsError && Items.Count == 0;
-    public WorkflowFeedback Feedback => WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
+    private bool commandSucceeded;
+    public WorkflowFeedback Feedback => commandSucceeded && !IsBusy && !IsError
+        ? WorkflowFeedback.Success(Message)
+        : WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
 
     public Task LoadAsync() => RunAsync(async () =>
     {
@@ -38,7 +41,6 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
 
     public Task SelectAsync(EntityId id) => RunAsync(async () =>
     {
-        SelectedItem = null;
         using var scope = scopes.CreateScope();
         var result = await scope.ServiceProvider.GetRequiredService<CatalogQueryHandler>().GetMenuItemDetailAsync(id);
         if (Accept(result))
@@ -46,7 +48,7 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
             SelectedItem = result.Value;
             Message = $"Editing {SelectedItem.Name}. Changes are saved per section.";
         }
-    });
+    }, clearSelection: true);
 
     public async Task<bool> SaveAsync(
         Func<CatalogCommandHandler, RecipeCommandHandler, Task<Result>> action,
@@ -65,6 +67,7 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
 
             if (saved)
             {
+                commandSucceeded = true;
                 Message = successMessage;
                 try
                 {
@@ -106,6 +109,11 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
         Items = items.Value;
         Addons = addons.Value;
         Ingredients = ingredients.Value;
+        if (SelectedItem is not null && Items.All(item => item.Id != SelectedItem.Id))
+        {
+            SelectedItem = null;
+        }
+
         if (SelectedItem is not null)
         {
             var detail = await queries.GetMenuItemDetailAsync(SelectedItem.Id);
@@ -131,7 +139,7 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
         return false;
     }
 
-    private async Task RunAsync(Func<Task> action)
+    private async Task RunAsync(Func<Task> action, bool clearSelection = false)
     {
         if (IsBusy)
         {
@@ -139,6 +147,11 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
         }
 
         IsBusy = true;
+        commandSucceeded = false;
+        if (clearSelection)
+        {
+            SelectedItem = null;
+        }
         Error = null;
         Message = "Working...";
         Notify();

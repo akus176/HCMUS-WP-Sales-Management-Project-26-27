@@ -11,7 +11,38 @@ namespace CoffeeShop.WinUI.Pages;
 
 public sealed partial class CatalogPage : Page
 {
+    internal object VerificationState() => new { activeTab, search = SearchBox.Text, inactive = IncludeInactive.IsChecked, categoryFilterId, selected = model.SelectedItem?.Id };
+
+    internal async Task<object> PrepareVerificationAsync()
+    {
+        while (model.IsBusy) await Task.Delay(50);
+        await model.LoadAsync();
+        if (model.Items.Count > 0) await model.SelectAsync(model.Items[0].Id);
+        var search = model.Search;
+        model.Search = SearchBox.Text = "__verification_no_matching_drink__";
+        await model.LoadAsync();
+        var emptySearchClearsDetail = model.SelectedItem is null && EmptyMessage.Visibility == Visibility.Visible;
+        model.Search = SearchBox.Text = search;
+        await model.LoadAsync();
+        if (model.Items.Count > 0) await model.SelectAsync(model.Items[0].Id);
+        return new { items = model.Items.Count, categories = model.Categories.Count, selected = model.SelectedItem?.Name, emptySearchClearsDetail, error = model.Error?.Code };
+    }
+
     private readonly CatalogWorkspace model;
+    private bool rendering;
+    private string activeTab = "drinks";
+    private IReadOnlyList<MenuItemSummary>? renderedItems;
+    private IReadOnlyList<CategorySummary>? renderedCategories;
+    private EntityId? categoryFilterId;
+    public sealed record CategoryOption(EntityId? Id, string Name);
+    public sealed record CatalogRow(object Record, string Name, string StateDisplay);
+    public sealed record DrinkRow(MenuItemSummary Item)
+    {
+        public string Name => Item.Name;
+        public string CategoryName => $"{Item.CategoryName} · {Item.SizeVariants.Count} sizes";
+        public string StateDisplay => Item.IsActive ? "ACTIVE" : "INACTIVE";
+        public string PriceDisplay => Item.SizeVariants.Count == 0 ? "No sizes" : $"from {Item.SizeVariants.Min(size => size.Price):N2}";
+    }
 
     public CatalogPage()
     {
@@ -34,43 +65,151 @@ public sealed partial class CatalogPage : Page
 
     private async void OnDrinkSelected(object sender, SelectionChangedEventArgs args)
     {
-        if (DrinksList.SelectedItem is MenuItemSummary item)
+        if (!rendering && DrinksList.SelectedItem is DrinkRow { Item: var item })
         {
             await model.SelectAsync(item.Id);
         }
     }
 
+    private void OnDrinkContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+    {
+        if (args.Item is DrinkRow row)
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(args.ItemContainer,
+                $"{row.Name}, {row.CategoryName}, {row.PriceDisplay}, {row.StateDisplay}");
+    }
+
     private void Render()
     {
-        LoadingBar.Visibility = model.IsBusy ? Visibility.Visible : Visibility.Collapsed;
-        WorkspaceTabs.IsEnabled = !model.IsBusy;
-        ReloadButton.IsEnabled = !model.IsBusy;
-        Status.Apply(model.Feedback);
-        EmptyMessage.Visibility = model.IsEmpty ? Visibility.Visible : Visibility.Collapsed;
-        // Do not reassign ItemsSource during a selection load: it would clear selection.
-        if (!ReferenceEquals(DrinksList.ItemsSource, model.Items))
+        rendering = true;
+        try
         {
-            DrinksList.ItemsSource = model.Items;
+            LoadingBar.Visibility = model.IsBusy ? Visibility.Visible : Visibility.Collapsed;
+            WorkspaceContent.IsEnabled = !model.IsBusy;
+            DrinksList.IsEnabled = CategoriesList.IsEnabled = AddonsList.IsEnabled = !model.IsBusy;
+            ReloadButton.IsEnabled = NewButton.IsEnabled = !model.IsBusy;
+            Status.Apply(model.Feedback);
+            if (model.Feedback.Kind == WorkflowFeedbackKind.Ready) Status.IsOpen = false;
+            CatalogCount.Text = $"MANAGE / CATALOG / {model.Items.Count} drinks · {model.Categories.Count} categories";
+            CatalogHealth.Text = $"{model.Items.Count(item => item.IsActive)} active in results\n{model.Items.Count(item => !item.IsActive)} inactive in results";
+            if (!ReferenceEquals(renderedCategories, model.Categories))
+            {
+                renderedCategories = model.Categories;
+                var options = new[] { new CategoryOption(null, "All drinks") }.Concat(model.Categories.Select(item => new CategoryOption(item.Id, item.Name))).ToArray();
+                CategoryFilter.ItemsSource = options;
+                CategoryFilter.SelectedItem = options.FirstOrDefault(item => item.Id == categoryFilterId) ?? options[0];
+                var selectedId = (CategoriesList.SelectedItem as CatalogRow)?.Record is CategorySummary category ? category.Id : null;
+                CategoriesList.ItemsSource = model.Categories.Select(item => new CatalogRow(item, item.Name, item.IsActive ? "Active" : "Inactive")).ToArray();
+                CategoriesList.SelectedItem = ((IEnumerable<CatalogRow>)CategoriesList.ItemsSource).FirstOrDefault(row => ((CategorySummary)row.Record).Id == selectedId);
+            }
+            if (!ReferenceEquals(renderedItems, model.Items))
+            {
+                renderedItems = model.Items;
+                ApplyDrinkFilter();
+            }
+            if (!ReferenceEquals(AddonsList.Tag, model.Addons))
+            {
+                var selectedId = (AddonsList.SelectedItem as CatalogRow)?.Record is AddonSummary addon ? addon.Id : null;
+                AddonsList.Tag = model.Addons;
+                AddonsList.ItemsSource = model.Addons.Select(item => new CatalogRow(item, item.Name, $"{item.Price:N2} · {(item.IsActive ? "Active" : "Inactive")}")).ToArray();
+                AddonsList.SelectedItem = ((IEnumerable<CatalogRow>)AddonsList.ItemsSource).FirstOrDefault(row => ((AddonSummary)row.Record).Id == selectedId);
+            }
+            if (!model.IsBusy && DrinksList.ItemsSource is IEnumerable<DrinkRow> rows)
+                DrinksList.SelectedItem = rows.FirstOrDefault(row => row.Item.Id == model.SelectedItem?.Id);
+            EmptyMessage.Visibility = activeTab == "drinks" && DrinksList.Items.Count == 0 && !model.IsBusy && !model.IsError ? Visibility.Visible : Visibility.Collapsed;
+            CategoriesEmpty.Visibility = activeTab == "categories" && model.Categories.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            AddonsEmpty.Visibility = activeTab == "addons" && model.Addons.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            CategoryLimit.Visibility = activeTab == "categories" && model.Categories.Count == 200 ? Visibility.Visible : Visibility.Collapsed;
+            RenderDetail();
         }
-
-        CategoriesList.ItemsSource = model.Categories;
-        AddonsList.ItemsSource = model.Addons;
-        CategoriesEmpty.Visibility = model.Categories.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        AddonsEmpty.Visibility = model.Addons.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        CategoryLimit.Visibility = model.Categories.Count == 200 ? Visibility.Visible : Visibility.Collapsed;
-        var detail = model.SelectedItem;
+        finally { rendering = false; }
+    }
+    private void ApplyDrinkFilter()
+    {
+        var rows = model.Items.Where(item => categoryFilterId is null || item.CategoryId == categoryFilterId).Select(item => new DrinkRow(item)).ToArray();
+        DrinksList.ItemsSource = rows;
+        DrinksList.SelectedItem = rows.FirstOrDefault(row => row.Item.Id == model.SelectedItem?.Id);
+        EmptyMessage.Visibility = activeTab == "drinks" && rows.Length == 0 && !model.IsBusy && !model.IsError ? Visibility.Visible : Visibility.Collapsed;
+    }
+    private void RenderDetail()
+    {
+        var detail = activeTab == "drinks" ? model.SelectedItem : null;
+        if (detail is not null && categoryFilterId is not null && detail.CategoryId != categoryFilterId) detail = null;
         ItemActions.Visibility = detail is null ? Visibility.Collapsed : Visibility.Visible;
-        DetailHeading.Text = detail is null ? "Select a drink to open its notebook." : $"{detail.Name} ({(detail.IsActive ? "active" : "inactive")})";
-        DetailDescription.Text = detail is null ? "" : $"{detail.CategoryName}\n{detail.Description}";
+        RecordActions.Visibility = Visibility.Collapsed;
+        DetailHeading.Text = detail?.Name ?? $"Select {(activeTab == "drinks" ? "a drink" : activeTab == "categories" ? "a category" : "an add-on")}";
+        DetailDescription.Text = detail is null ? "Details and available actions appear here." : $"{detail.CategoryName} · {(detail.IsActive ? "Active" : "Inactive")}\n{detail.Description}";
         VariantsList.ItemsSource = detail?.SizeVariants;
-        CompatibilityText.Text = detail is null || detail.CompatibleAddons.Count == 0
-            ? "No compatible add-ons selected."
-            : string.Join(", ", detail.CompatibleAddons.Select(addon => $"{addon.Name}{(addon.IsActive ? "" : " (inactive)")}"));
+        DeactivateDrinkButton.IsEnabled = detail?.IsActive == true;
+        CompatibilityText.Text = detail is null || detail.CompatibleAddons.Count == 0 ? "No compatible add-ons selected."
+            : string.Join(", ", detail.CompatibleAddons.Select(addon => $"{addon.Name} +{addon.Price:N2}{(addon.IsActive ? "" : " (inactive)")}"));
+        var record = activeTab == "categories" ? CategoriesList.SelectedItem as CatalogRow : activeTab == "addons" ? AddonsList.SelectedItem as CatalogRow : null;
+        if (record is null) return;
+        DetailHeading.Text = record.Name;
+        DetailDescription.Text = activeTab == "categories" ? "Category availability controls drinks on new orders." : "Each compatible add-on can be chosen once per drink.";
+        RecordState.Text = record.StateDisplay;
+        EditRecordButton.Tag = DeactivateRecordButton.Tag = record.Record;
+        DeactivateRecordButton.IsEnabled = record.Record switch { CategorySummary category => category.IsActive, AddonSummary addon => addon.IsActive, _ => false };
+        RecordActions.Visibility = Visibility.Visible;
+    }
+    private void OnRecordSelected(object sender, SelectionChangedEventArgs args) { if (!rendering) RenderDetail(); }
+    private void OnTab(object sender, RoutedEventArgs args)
+    {
+        activeTab = (string)((Microsoft.UI.Xaml.Controls.Primitives.ToggleButton)sender).Tag;
+        DrinksTab.IsChecked = activeTab == "drinks";
+        CategoriesTab.IsChecked = activeTab == "categories";
+        AddonsTab.IsChecked = activeTab == "addons";
+        DrinksList.Visibility = CategoryRail.Visibility = SearchBox.Visibility = SearchControls.Visibility = activeTab == "drinks" ? Visibility.Visible : Visibility.Collapsed;
+        CategoriesList.Visibility = activeTab == "categories" ? Visibility.Visible : Visibility.Collapsed;
+        AddonsList.Visibility = activeTab == "addons" ? Visibility.Visible : Visibility.Collapsed;
+        NewButton.Content = activeTab == "drinks" ? "+ New drink" : activeTab == "categories" ? "+ New category" : "+ New add-on";
+        ConfigureLayout(); Render();
+    }
+    private async void OnNewRecord(object sender, RoutedEventArgs args)
+    {
+        if (activeTab == "drinks") await EditDrinkAsync(null);
+        else if (activeTab == "categories") await EditCategoryAsync(null);
+        else await EditAddonAsync(null);
+    }
+    private async void OnEditRecord(object sender, RoutedEventArgs args)
+    {
+        if (((Button)sender).Tag is CategorySummary category) await EditCategoryAsync(category);
+        else if (((Button)sender).Tag is AddonSummary addon) await EditAddonAsync(addon);
+    }
+    private void OnDeactivateRecord(object sender, RoutedEventArgs args)
+    {
+        if (((Button)sender).Tag is CategorySummary) OnDeactivateCategory(sender, args);
+        else OnDeactivateAddon(sender, args);
+    }
+    private void OnCategoryFilter(object sender, SelectionChangedEventArgs args)
+    {
+        if (rendering) return;
+        categoryFilterId = (CategoryFilter.SelectedItem as CategoryOption)?.Id;
+        rendering = true; ApplyDrinkFilter(); rendering = false; RenderDetail();
+    }
+    private void OnSearchKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs args)
+    {
+        if (args.Key == Windows.System.VirtualKey.Enter) { args.Handled = true; OnSearch(sender, new RoutedEventArgs()); }
+    }
+    private void OnPageSizeChanged(object sender, SizeChangedEventArgs args) => ConfigureLayout();
+    private void ConfigureLayout()
+    {
+        if (DetailColumn is null) return;
+        var wide = ActualWidth >= 1000;
+        CategoryRail.Visibility = wide && activeTab == "drinks" ? Visibility.Visible : Visibility.Collapsed;
+        RailColumn.Width = new GridLength(wide && activeTab == "drinks" ? 155 : 0);
+        DetailColumn.Width = new GridLength(wide ? 330 : 0);
+        Grid.SetColumn(DetailPanel, wide ? 2 : 1);
+        Grid.SetRow(DetailPanel, wide ? 0 : 1);
+        HeaderOrnament.Visibility = ActualWidth >= 850 ? Visibility.Visible : Visibility.Collapsed;
+        Header.ColumnDefinitions[1].Width = new GridLength(ActualWidth >= 850 ? 116 : 0);
+        HeaderActions.Orientation = ActualWidth >= 700 ? Orientation.Horizontal : Orientation.Vertical;
+        var available = Math.Max(160, DrinksList.ActualWidth - 20);
+        if (DrinksList.ItemsPanelRoot is not ItemsWrapGrid drinkWrap) return;
+        drinkWrap.ItemWidth = Math.Max(160, available / (available >= 560 ? 2 : 1));
+        drinkWrap.MaximumRowsOrColumns = available >= 560 ? 2 : 1;
     }
 
     private async void OnNewCategory(object sender, RoutedEventArgs args) => await EditCategoryAsync(null);
-
-    private async void OnEditCategory(object sender, RoutedEventArgs args) => await EditCategoryAsync((CategorySummary)((Button)sender).Tag);
 
     private Task EditCategoryAsync(CategorySummary? category)
     {
@@ -87,8 +226,6 @@ public sealed partial class CatalogPage : Page
         await ConfirmAsync($"Deactivate {category.Name}?", "Its drinks become unavailable for new orders. Historical records are preserved.",
             (commands, _) => commands.DeactivateCategoryAsync(new DeactivateCategoryCommand(category.Id)));
     }
-
-    private async void OnNewDrink(object sender, RoutedEventArgs args) => await EditDrinkAsync(null);
 
     private async void OnEditDrink(object sender, RoutedEventArgs args)
     {
@@ -108,12 +245,13 @@ public sealed partial class CatalogPage : Page
             Header = "Active category",
             DisplayMemberPath = "Name",
             MinHeight = 48,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             ItemsSource = model.Categories.Where(candidate => candidate.IsActive).ToArray()
         };
         category.SelectedItem = model.Categories.FirstOrDefault(candidate => candidate.Id == item?.CategoryId && candidate.IsActive);
         var size = TextField("Initial size name", "Regular");
         var price = TextField("Initial size price");
-        var fields = Form(name, description, category);
+        var fields = Form(name, category, description);
         if (item is null)
         {
             fields.Children.Add(size);
@@ -171,10 +309,6 @@ public sealed partial class CatalogPage : Page
         await ConfirmAsync($"Deactivate {variant.SizeName}?", "This size becomes unavailable; its recipe and historical references remain.",
             (commands, _) => commands.DeactivateSizeVariantAsync(new DeactivateSizeVariantCommand(variant.Id)));
     }
-
-    private async void OnNewAddon(object sender, RoutedEventArgs args) => await EditAddonAsync(null);
-
-    private async void OnEditAddon(object sender, RoutedEventArgs args) => await EditAddonAsync((AddonSummary)((Button)sender).Tag);
 
     private Task EditAddonAsync(AddonSummary? addon)
     {
@@ -301,12 +435,13 @@ public sealed partial class CatalogPage : Page
         var content = Form(error, progress, editor);
         var dialog = new ContentDialog
         {
-            Title = title,
+            Title = new TextBlock { Text = title, FontFamily = (FontFamily)ResourcesLookup("ConsoleSerifFont"), FontSize = 32, TextWrapping = TextWrapping.Wrap },
+            Style = (Style)ResourcesLookup("WorkspaceDialog"),
             PrimaryButtonText = button,
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = XamlRoot,
-            FontFamily = (FontFamily)ResourcesLookup("SketchBodyFontFamily"),
+            FontFamily = (FontFamily)ResourcesLookup("ConsoleSansFont"),
             Content = new ScrollViewer { Content = content, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, MaxHeight = 520 }
         };
         dialog.Closing += (_, args) => args.Cancel = model.IsBusy;
@@ -344,9 +479,7 @@ public sealed partial class CatalogPage : Page
         Header = header,
         Text = value ?? "",
         MinHeight = 48,
-        BorderThickness = new Thickness(2),
-        CornerRadius = (CornerRadius)ResourcesLookup("SketchCornerRadiusWobbly"),
-        BorderBrush = (Brush)ResourcesLookup("SketchBorderBrush")
+        Style = (Style)ResourcesLookup("ConsoleFieldStyle")
     };
 
     private static StackPanel Form(params UIElement[] elements)

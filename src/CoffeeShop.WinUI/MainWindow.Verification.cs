@@ -13,6 +13,11 @@ public sealed partial class MainWindow
     // without submitting business commands or writing business data.
     private async Task VerifyShellAsync()
     {
+        if (Environment.GetCommandLineArgs().Contains("--verify-workspaces"))
+        {
+            await VerifyWorkspacesAsync();
+            return;
+        }
         var results = new List<object>();
         var defaultIsCounter = currentRoute == ServiceConsoleNavigation.DefaultTag;
         foreach (var tag in new[] { "counter", "service-board", "menu", "customers", "reports", "ingredients", "lowstock", "receipts", "suppliers", "adjustments", "movements" })
@@ -94,6 +99,47 @@ public sealed partial class MainWindow
             adjustmentPage.ClearCaptureDraft();
         }
         ShellRoot.Width = ShellRoot.Height = double.NaN;
+    }
+
+    private async Task VerifyWorkspacesAsync()
+    {
+        var results = new List<object>();
+        foreach (var tag in new[] { "menu", "customers", "reports" })
+        {
+            NavigateTo(tag);
+            await Task.Delay(300);
+            object initial = ContentFrame.Content switch
+            {
+                CatalogPage page => await page.PrepareVerificationAsync(),
+                CustomersPage page => await page.PrepareVerificationAsync(),
+                ReportsPage page => await page.PrepareVerificationAsync(),
+                _ => throw new InvalidOperationException("Unexpected workspace.")
+            };
+            object WorkspaceState() => ContentFrame.Content switch
+            {
+                CatalogPage page => page.VerificationState(),
+                CustomersPage page => page.VerificationState(),
+                ReportsPage page => page.VerificationState(),
+                _ => throw new InvalidOperationException("Unexpected workspace.")
+            };
+            var initialState = JsonSerializer.Serialize(WorkspaceState());
+            var pageInstance = ContentFrame.Content;
+            foreach (var width in new[] { 1440, 1008, 1007, 641, 640, 600, 1440 })
+            {
+                await ResizeForVerificationAsync(width, 900);
+                // A complete logical viewport is captured even on shorter monitors.
+                ShellRoot.Width = width;
+                ShellRoot.Height = 900;
+                ShellRoot.UpdateLayout();
+                await Task.Delay(150);
+                if (width is 1440 or 600)
+                    await PresentationVerification.CaptureAsync(ShellRoot, $"native-{tag}-{width}.png");
+                results.Add(new { tag, width, initial, statePreserved = initialState == JsonSerializer.Serialize(WorkspaceState()), samePage = ReferenceEquals(pageInstance, ContentFrame.Content), actualWidth = ShellRoot.ActualWidth, actualHeight = ShellRoot.ActualHeight });
+                ShellRoot.Width = ShellRoot.Height = double.NaN;
+            }
+        }
+        Directory.CreateDirectory(PresentationVerification.DirectoryPath);
+        await File.WriteAllTextAsync(Path.Combine(PresentationVerification.DirectoryPath, "workspace-verification.json"), JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     private async Task ResizeForVerificationAsync(int width, int height)

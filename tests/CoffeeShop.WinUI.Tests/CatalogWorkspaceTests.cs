@@ -24,6 +24,7 @@ public sealed class CatalogWorkspaceTests
         Assert.True(model.IsEmpty);
 
         Assert.True(await model.SaveAsync(async (commands, _) => await commands.CreateCategoryAsync(new("Coffee")), "Category saved."));
+        Assert.Equal(WorkflowFeedbackKind.Success, model.Feedback.Kind);
         var category = Assert.Single(model.Categories);
         Assert.True(await model.SaveAsync(async (commands, _) => await commands.CreateMenuItemAsync(
             new(category.Id, "Latte", "Milk coffee", [new("Small", 25.50m)])), "Drink saved."));
@@ -59,7 +60,10 @@ public sealed class CatalogWorkspaceTests
         model.Search = "no match";
         await model.LoadAsync();
         Assert.True(model.IsEmpty);
+        Assert.Null(model.SelectedItem);
         model.Search = "";
+        await model.LoadAsync();
+        await model.SelectAsync(item.Id);
         Assert.True(await model.SaveAsync((commands, _) => commands.DeactivateSizeVariantAsync(new(large.Id)), "Size deactivated."));
         Assert.True(await model.SaveAsync((commands, _) => commands.DeactivateAddonAsync(new(addon.Id)), "Add-on deactivated."));
         Assert.True(await model.SaveAsync((commands, _) => commands.DeactivateMenuItemAsync(new(item.Id)), "Drink deactivated."));
@@ -67,12 +71,34 @@ public sealed class CatalogWorkspaceTests
         model.IncludeInactive = true;
         await model.LoadAsync();
         Assert.False(Assert.Single(model.Items).IsActive);
+        await model.SelectAsync(item.Id);
+        Assert.NotNull(model.SelectedItem);
         Assert.False(model.SelectedItem.IsActive);
         Assert.False(model.SelectedItem.SizeVariants.Single(variant => variant.Id == large.Id).IsActive);
         Assert.False(Assert.Single(model.SelectedItem.CompatibleAddons).IsActive);
         Assert.True(await model.SaveAsync((commands, _) => commands.DeactivateCategoryAsync(new(category.Id)), "Category deactivated."));
         Assert.False(Assert.Single(model.Categories).IsActive);
         Assert.False(model.IsBusy);
+    }
+
+    [Fact]
+    public async Task FailedSelection_ClearsPreviousDetailWhileLoading()
+    {
+        var repository = new FakeCatalogRepository();
+        using var services = Services(repository, new WorkspaceReads(repository));
+        var model = new CatalogWorkspace(services.GetRequiredService<IServiceScopeFactory>());
+        await model.SaveAsync(async (commands, _) => await commands.CreateCategoryAsync(new("Coffee")), "Saved.");
+        await model.SaveAsync(async (commands, _) => await commands.CreateMenuItemAsync(new(model.Categories[0].Id, "Latte", null, [new("Small", 20m)])), "Saved.");
+        await model.SelectAsync(model.Items[0].Id);
+        var staleDetailWasPublished = false;
+        model.PropertyChanged += (_, _) => staleDetailWasPublished |= model.IsBusy && model.SelectedItem is not null;
+
+        await model.SelectAsync(EntityId.New());
+
+        Assert.False(staleDetailWasPublished);
+        Assert.Null(model.SelectedItem);
+        Assert.True(model.IsError);
+        Assert.Single(model.Items);
     }
 
     [Fact]

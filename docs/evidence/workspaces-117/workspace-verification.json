@@ -1,0 +1,352 @@
+[
+  {
+    "tag": "menu",
+    "width": 1440,
+    "initial": {
+      "items": 20,
+      "categories": 5,
+      "selected": "Midterm Almond Croissant",
+      "emptySearchClearsDetail": true,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1440,
+    "actualHeight": 900
+  },
+  {
+    "tag": "menu",
+    "width": 1008,
+    "initial": {
+      "items": 20,
+      "categories": 5,
+      "selected": "Midterm Almond Croissant",
+      "emptySearchClearsDetail": true,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1008,
+    "actualHeight": 900
+  },
+  {
+    "tag": "menu",
+    "width": 1007,
+    "initial": {
+      "items": 20,
+      "categories": 5,
+      "selected": "Midterm Almond Croissant",
+      "emptySearchClearsDetail": true,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1007,
+    "actualHeight": 900
+  },
+  {
+    "tag": "menu",
+    "width": 641,
+    "initial": {
+      "items": 20,
+      "categories": 5,
+      "selected": "Midterm Almond Croissant",
+      "emptySearchClearsDetail": true,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 641,
+    "actualHeight": 900
+  },
+  {
+    "tag": "menu",
+    "width": 640,
+    "initial": {
+      "items": 20,
+      "categories": 5,
+      "selected": "Midterm Almond Croissant",
+      "emptySearchClearsDetail": true,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 640,
+    "actualHeight": 900
+  },
+  {
+    "tag": "menu",
+    "width": 600,
+    "initial": {
+      "items": 20,
+      "categories": 5,
+      "selected": "Midterm Almond Croissant",
+      "emptySearchClearsDetail": true,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 600,
+    "actualHeight": 900
+  },
+  {
+    "tag": "menu",
+    "width": 1440,
+    "initial": {
+      "items": 20,
+      "categories": 5,
+      "selected": "Midterm Almond Croissant",
+      "emptySearchClearsDetail": true,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1440,
+    "actualHeight": 900
+  },
+  {
+    "tag": "customers",
+    "width": 1440,
+    "initial": {
+      "profiles": 12,
+      "selected": "An Nguyen",
+      "addresses": 1,
+      "history": 0,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1440,
+    "actualHeight": 900
+  },
+  {
+    "tag": "customers",
+    "width": 1008,
+    "initial": {
+      "profiles": 12,
+      "selected": "An Nguyen",
+      "addresses": 1,
+      "history": 0,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1008,
+    "actualHeight": 900
+  },
+  {
+    "tag": "customers",
+    "width": 1007,
+    "initial": {
+      "profiles": 12,
+      "selected": "An Nguyen",
+      "addresses": 1,
+      "history": 0,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1007,
+    "actualHeight": 900
+  },
+  {
+    "tag": "customers",
+    "width": 641,
+    "initial": {
+      "profiles": 12,
+      "selected": "An Nguyen",
+      "addresses": 1,
+      "history": 0,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 641,
+    "actualHeight": 900
+  },
+  {
+    "tag": "customers",
+    "width": 640,
+    "initial": {
+      "profiles": 12,
+      "selected": "An Nguyen",
+      "addresses": 1,
+      "history": 0,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 640,
+    "actualHeight": 900
+  },
+  {
+    "tag": "customers",
+    "width": 600,
+    "initial": {
+      "profiles": 12,
+      "selected": "An Nguyen",
+      "addresses": 1,
+      "history": 0,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 600,
+    "actualHeight": 900
+  },
+  {
+    "tag": "customers",
+    "width": 1440,
+    "initial": {
+      "profiles": 12,
+      "selected": "An Nguyen",
+      "addresses": 1,
+      "history": 0,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1440,
+    "actualHeight": 900
+  },
+  {
+    "tag": "reports",
+    "width": 1440,
+    "initial": {
+      "revenue": 2260.10,
+      "orders": 19,
+      "bestSellers": 10,
+      "lowStock": 2,
+      "errors": [
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1440,
+    "actualHeight": 900
+  },
+  {
+    "tag": "reports",
+    "width": 1008,
+    "initial": {
+      "revenue": 2260.10,
+      "orders": 19,
+      "bestSellers": 10,
+      "lowStock": 2,
+      "errors": [
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1008,
+    "actualHeight": 900
+  },
+  {
+    "tag": "reports",
+    "width": 1007,
+    "initial": {
+      "revenue": 2260.10,
+      "orders": 19,
+      "bestSellers": 10,
+      "lowStock": 2,
+      "errors": [
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1007,
+    "actualHeight": 900
+  },
+  {
+    "tag": "reports",
+    "width": 641,
+    "initial": {
+      "revenue": 2260.10,
+      "orders": 19,
+      "bestSellers": 10,
+      "lowStock": 2,
+      "errors": [
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 641,
+    "actualHeight": 900
+  },
+  {
+    "tag": "reports",
+    "width": 640,
+    "initial": {
+      "revenue": 2260.10,
+      "orders": 19,
+      "bestSellers": 10,
+      "lowStock": 2,
+      "errors": [
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 640,
+    "actualHeight": 900
+  },
+  {
+    "tag": "reports",
+    "width": 600,
+    "initial": {
+      "revenue": 2260.10,
+      "orders": 19,
+      "bestSellers": 10,
+      "lowStock": 2,
+      "errors": [
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 600,
+    "actualHeight": 900
+  },
+  {
+    "tag": "reports",
+    "width": 1440,
+    "initial": {
+      "revenue": 2260.10,
+      "orders": 19,
+      "bestSellers": 10,
+      "lowStock": 2,
+      "errors": [
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1440,
+    "actualHeight": 900
+  }
+]
