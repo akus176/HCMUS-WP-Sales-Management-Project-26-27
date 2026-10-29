@@ -163,16 +163,33 @@ public sealed partial class MainWindow
                 await Task.Delay(150);
                 if (width is 1440 or 600)
                     await PresentationVerification.CaptureAsync(ShellRoot, $"native-{tag}-{width}.png");
-                results.Add(new { tag, width, initial, statePreserved = initialState == JsonSerializer.Serialize(WorkspaceState()), samePage = ReferenceEquals(pageInstance, ContentFrame.Content), actualWidth = ShellRoot.ActualWidth, actualHeight = ShellRoot.ActualHeight });
+                results.Add(new { tag, width, initial, statePreserved = initialState == JsonSerializer.Serialize(WorkspaceState()), samePage = ReferenceEquals(pageInstance, ContentFrame.Content), actualWidth = ShellRoot.ActualWidth, actualHeight = ShellRoot.ActualHeight, targets = PresentationVerification.ButtonTargets((FrameworkElement)pageInstance) });
                 ShellRoot.Width = ShellRoot.Height = double.NaN;
             }
         }
         Directory.CreateDirectory(PresentationVerification.DirectoryPath);
         await File.WriteAllTextAsync(Path.Combine(PresentationVerification.DirectoryPath, "workspace-verification.json"), JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true }));
+        NavigateTo("menu");
+        await Task.Delay(300);
+        if (ContentFrame.Content is CatalogPage editorPage)
+        {
+            await editorPage.PrepareVerificationAsync();
+            var editorResult = await editorPage.VerifyEditorAsync(async width =>
+            {
+                await ResizeForVerificationAsync(width, 900);
+                ShellRoot.Width = width;
+                ShellRoot.Height = 900;
+                ShellRoot.UpdateLayout();
+                await Task.Delay(150);
+            });
+            ShellRoot.Width = ShellRoot.Height = double.NaN;
+            await File.WriteAllTextAsync(Path.Combine(PresentationVerification.DirectoryPath, "editor-verification.json"), JsonSerializer.Serialize(editorResult, new JsonSerializerOptions { WriteIndented = true }));
+        }
     }
 
     private async Task ResizeForVerificationAsync(int width, int height)
     {
+        ShellRoot.Width = ShellRoot.Height = double.NaN;
         var scale = ShellRoot.XamlRoot.RasterizationScale;
         var presenter = (Microsoft.UI.Windowing.OverlappedPresenter)AppWindow.Presenter;
         if (presenter.State != Microsoft.UI.Windowing.OverlappedPresenterState.Restored) presenter.Restore();
@@ -180,10 +197,11 @@ public sealed partial class MainWindow
         await Task.Delay(150);
         // AppWindow coordinates and rasterization can differ with display DPI;
         // use observed client dimensions to reach the requested logical viewport.
-        if (Math.Abs(ShellRoot.ActualWidth - width) > 1 || Math.Abs(ShellRoot.ActualHeight - height) > 1)
+        var viewport = ShellRoot.XamlRoot.Size;
+        if (Math.Abs(viewport.Width - width) > 1 || Math.Abs(viewport.Height - height) > 1)
         {
-            var adjustedWidth = (int)Math.Ceiling(AppWindow.ClientSize.Width * width / ShellRoot.ActualWidth);
-            var adjustedHeight = (int)Math.Ceiling(AppWindow.ClientSize.Height * height / ShellRoot.ActualHeight);
+            var adjustedWidth = AppWindow.ClientSize.Width + (int)Math.Round((width - viewport.Width) * scale);
+            var adjustedHeight = AppWindow.ClientSize.Height + (int)Math.Round((height - viewport.Height) * scale);
             AppWindow.ResizeClient(new Windows.Graphics.SizeInt32(adjustedWidth, adjustedHeight));
             await Task.Delay(150);
         }

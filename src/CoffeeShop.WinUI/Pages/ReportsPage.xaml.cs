@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
+using Windows.Foundation;
 
 namespace CoffeeShop.WinUI.Pages;
 
@@ -18,6 +20,15 @@ public sealed partial class ReportsPage : Page
     }
 
     private readonly ReportsWorkspace model;
+    private bool showRefreshFeedback;
+    public sealed record SellerChartRow(BestSellerViewRow Row, long Maximum)
+    {
+        public string Rank => Row.Rank.ToString("00");
+        public string NameDisplay => Row.NameDisplay;
+        public long Quantity => Row.Quantity;
+        public string RevenueDisplay => Row.RevenueDisplay;
+    }
+    public sealed record PaymentChartRow(string Name, string RevenueDisplay, string Percentage, Brush Color);
 
     public ReportsPage()
     {
@@ -33,6 +44,7 @@ public sealed partial class ReportsPage : Page
     private Task LoadAsync() => model.LoadAsync(FirstDate.Date, LastDate.Date, TimeZoneInfo.Local);
     private async void OnRefresh(object sender, RoutedEventArgs args)
     {
+        showRefreshFeedback = true;
         PeriodFlyout.Hide();
         await LoadAsync();
     }
@@ -42,6 +54,7 @@ public sealed partial class ReportsPage : Page
         LoadingIndicator.Visibility = model.IsBusy ? Visibility.Visible : Visibility.Collapsed;
         RefreshButton.IsEnabled = PeriodButton.IsEnabled = FirstDate.IsEnabled = LastDate.IsEnabled = !model.IsBusy;
         Status.Apply(model.Feedback);
+        if (!showRefreshFeedback && !model.Feedback.IsError) Status.IsOpen = false;
         PeriodLabel.Text = ReportPresentation.PeriodLabel(model.FirstDate, model.LastDate);
         PeriodButton.Content = $"{model.FirstDate:dd MMM} – {model.LastDate:dd MMM}";
         var revenue = model.Revenue.Value;
@@ -58,7 +71,8 @@ public sealed partial class ReportsPage : Page
         RevenueEmpty.Visibility = revenue is { OrderCount: 0 } ? Visibility.Visible : Visibility.Collapsed;
         BestSellersEmpty.Visibility = model.BestSellers.Value is { Items.Count: 0 } ? Visibility.Visible : Visibility.Collapsed;
         LowStockEmpty.Visibility = model.LowStock.Value is { Count: 0 } ? Visibility.Visible : Visibility.Collapsed;
-        BestSellersList.ItemsSource = model.BestSellers.Value is { } best ? ReportPresentation.BestSellers(best) : null;
+        BestSellersList.ItemsSource = model.BestSellers.Value is { } best
+            ? ReportPresentation.BestSellers(best).Select(row => new SellerChartRow(row, Math.Max(1, best.Items.Max(item => item.Quantity)))).ToArray() : null;
         LowStockList.ItemsSource = model.LowStock.Value is { } stock ? ReportPresentation.LowStock(stock) : null;
         ApplyPaymentFilter();
         ApplyChannelFilter();
@@ -78,6 +92,12 @@ public sealed partial class ReportsPage : Page
         var days = model.Revenue.Value?.Daily;
         if (days is null || days.Count == 0) return;
         var maximum = days.Max(day => day.Revenue);
+        for (var i = 0; i < 4; i++)
+        {
+            var rule = new Border { Height = 1, Background = ResourceBrush("ConsoleRuleBrush"), Opacity = .5, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 42 * i + 40, 0, 0) };
+            Grid.SetColumnSpan(rule, days.Count);
+            RevenueChart.Children.Add(rule);
+        }
         foreach (var day in days)
         {
             RevenueChart.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -108,16 +128,55 @@ public sealed partial class ReportsPage : Page
     {
         var report = model.Revenue.Value;
         var rows = report is null ? null : ReportPresentation.RevenuePayments(report, SelectedTag(PaymentFilter));
-        RevenuePaymentsList.ItemsSource = rows;
+        var total = rows?.Sum(row => row.Revenue) ?? 0;
+        RevenuePaymentsList.ItemsSource = rows?.Select(row => new PaymentChartRow(
+            row.PaymentMethod switch { "cash" => "Cash", "card" => "Card", "e_wallet" => "E-wallet", _ => row.PaymentMethod },
+            row.RevenueDisplay, total == 0 ? "0%" : $"{row.Revenue / total:P1}", PaymentBrush(row.PaymentMethod))).ToArray();
         PaymentsEmpty.Visibility = rows is { Count: 0 } ? Visibility.Visible : Visibility.Collapsed;
+        PaymentArcs.Children.Clear();
+        var orderCount = string.IsNullOrWhiteSpace(SelectedTag(PaymentFilter)) ? report?.OrderCount : rows?.Sum(row => row.OrderCount);
+        PaymentOrderCount.Text = orderCount?.ToString("N0") ?? "—";
+        PaymentDonut.Visibility = total > 0 && rows!.All(row => row.Revenue >= 0) ? Visibility.Visible : Visibility.Collapsed;
+        if (PaymentDonut.Visibility == Visibility.Collapsed) return;
+        var outline = new Ellipse { Width = 118, Height = 118, Stroke = ResourceBrush("ConsoleRuleBrush"), StrokeThickness = 1 };
+        Canvas.SetLeft(outline, 1);
+        Canvas.SetTop(outline, 1);
+        PaymentArcs.Children.Add(outline);
+        var angle = -Math.PI / 2;
+        foreach (var row in rows!)
+        {
+            if (row.Revenue <= 0) continue;
+            var sweep = (double)(row.Revenue / total) * Math.PI * 2;
+            var end = angle + Math.Min(sweep, Math.PI * 2 - .0001);
+            var figure = new PathFigure { StartPoint = new Point(60 + 45 * Math.Cos(angle), 60 + 45 * Math.Sin(angle)), IsClosed = false };
+            figure.Segments.Add(new ArcSegment { Point = new Point(60 + 45 * Math.Cos(end), 60 + 45 * Math.Sin(end)), Size = new Size(45, 45), SweepDirection = SweepDirection.Clockwise, IsLargeArc = sweep > Math.PI });
+            var geometry = new PathGeometry();
+            geometry.Figures.Add(figure);
+            PaymentArcs.Children.Add(new Microsoft.UI.Xaml.Shapes.Path { Data = geometry, Stroke = PaymentBrush(row.PaymentMethod), StrokeThickness = 9 });
+            angle += sweep;
+        }
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(PaymentDonut, $"Payment revenue distribution, {orderCount} distinct recognized orders for the selected payment filter");
     }
     private void ApplyChannelFilter()
     {
         var report = model.Channels.Value;
         var rows = report is null ? null : ReportPresentation.Channels(report, SelectedTag(ChannelFilter));
-        ChannelsList.ItemsSource = rows;
+        ChannelsGrid.Children.Clear();
+        ChannelsGrid.ColumnDefinitions.Clear();
+        foreach (var row in rows ?? [])
+        {
+            ChannelsGrid.ColumnDefinitions.Add(new ColumnDefinition());
+            var stack = new StackPanel { Spacing = 2, Padding = new Thickness(10, 8, 10, 8), BorderBrush = ResourceBrush("ConsoleRuleBrush"), BorderThickness = new Thickness(0, 0, 1, 0) };
+            stack.Children.Add(new TextBlock { Text = row.ChannelDisplay.ToUpperInvariant(), FontSize = 7, CharacterSpacing = 100 });
+            stack.Children.Add(new TextBlock { Text = row.RevenueDisplay, FontFamily = (FontFamily)Microsoft.UI.Xaml.Application.Current.Resources["ConsoleSerifFont"], FontSize = 16 });
+            stack.Children.Add(new TextBlock { Text = $"{row.OrderCount} recognized orders", FontSize = 7 });
+            Grid.SetColumn(stack, ChannelsGrid.ColumnDefinitions.Count - 1);
+            ChannelsGrid.Children.Add(stack);
+        }
         ChannelsEmpty.Visibility = rows is not null && rows.All(row => row.OrderCount == 0) ? Visibility.Visible : Visibility.Collapsed;
     }
+    private static Brush ResourceBrush(string key) => (Brush)Microsoft.UI.Xaml.Application.Current.Resources[key];
+    private static Brush PaymentBrush(string method) => ResourceBrush(method switch { "cash" => "ConsoleAccentBrush", "card" => "ConsoleFieldBrush", _ => "ConsoleMutedInkBrush" });
     private static string? SelectedTag(ComboBox comboBox) => (comboBox.SelectedItem as ComboBoxItem)?.Tag as string;
     private void OnOpenStockRoom(object sender, RoutedEventArgs args) => (((App)Microsoft.UI.Xaml.Application.Current).Window as MainWindow)?.NavigateTo("lowstock");
     private void OnPageSizeChanged(object sender, SizeChangedEventArgs args)

@@ -12,7 +12,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1440,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New drink",
+        "width": 77,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "\u002B Add a category",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "SEARCH",
+        "width": 49,
+        "height": 28
+      },
+      {
+        "name": "\u002B Size",
+        "width": 37,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "EDIT",
+        "width": 35,
+        "height": 28
+      },
+      {
+        "name": "Choose add-ons",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "Edit drink",
+        "width": 152,
+        "height": 48
+      },
+      {
+        "name": "Deactivate",
+        "width": 151,
+        "height": 48
+      }
+    ]
   },
   {
     "tag": "menu",
@@ -27,7 +89,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1008,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New drink",
+        "width": 77,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "\u002B Add a category",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "SEARCH",
+        "width": 49,
+        "height": 28
+      },
+      {
+        "name": "\u002B Size",
+        "width": 37,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "EDIT",
+        "width": 35,
+        "height": 28
+      },
+      {
+        "name": "Choose add-ons",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "Edit drink",
+        "width": 333,
+        "height": 48
+      },
+      {
+        "name": "Deactivate",
+        "width": 332,
+        "height": 48
+      }
+    ]
   },
   {
     "tag": "menu",
@@ -42,7 +166,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1007,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New drink",
+        "width": 77,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "\u002B Add a category",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "SEARCH",
+        "width": 49,
+        "height": 28
+      },
+      {
+        "name": "\u002B Size",
+        "width": 37,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "EDIT",
+        "width": 35,
+        "height": 28
+      },
+      {
+        "name": "Choose add-ons",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "Edit drink",
+        "width": 408,
+        "height": 48
+      },
+      {
+        "name": "Deactivate",
+        "width": 408,
+        "height": 48
+      }
+    ]
   },
   {
     "tag": "menu",
@@ -57,7 +243,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 641,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New drink",
+        "width": 77,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "\u002B Add a category",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "SEARCH",
+        "width": 49,
+        "height": 28
+      },
+      {
+        "name": "\u002B Size",
+        "width": 37,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "EDIT",
+        "width": 35,
+        "height": 28
+      },
+      {
+        "name": "Choose add-ons",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "Edit drink",
+        "width": 225,
+        "height": 48
+      },
+      {
+        "name": "Deactivate",
+        "width": 225,
+        "height": 48
+      }
+    ]
   },
   {
     "tag": "menu",
@@ -72,7 +320,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 640,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New drink",
+        "width": 77,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "\u002B Add a category",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "SEARCH",
+        "width": 49,
+        "height": 28
+      },
+      {
+        "name": "\u002B Size",
+        "width": 37,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "EDIT",
+        "width": 35,
+        "height": 28
+      },
+      {
+        "name": "Choose add-ons",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "Edit drink",
+        "width": 257,
+        "height": 48
+      },
+      {
+        "name": "Deactivate",
+        "width": 256,
+        "height": 48
+      }
+    ]
   },
   {
     "tag": "menu",
@@ -87,7 +397,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 600,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New drink",
+        "width": 77,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "\u002B Add a category",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "SEARCH",
+        "width": 49,
+        "height": 28
+      },
+      {
+        "name": "\u002B Size",
+        "width": 37,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "EDIT",
+        "width": 35,
+        "height": 28
+      },
+      {
+        "name": "Choose add-ons",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "Edit drink",
+        "width": 237,
+        "height": 48
+      },
+      {
+        "name": "Deactivate",
+        "width": 236,
+        "height": 48
+      }
+    ]
   },
   {
     "tag": "menu",
@@ -102,7 +474,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1440,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New drink",
+        "width": 77,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "\u002B Add a category",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "SEARCH",
+        "width": 49,
+        "height": 28
+      },
+      {
+        "name": "\u002B Size",
+        "width": 37,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Size actions",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "EDIT",
+        "width": 35,
+        "height": 28
+      },
+      {
+        "name": "Choose add-ons",
+        "width": 78,
+        "height": 28
+      },
+      {
+        "name": "Edit drink",
+        "width": 152,
+        "height": 48
+      },
+      {
+        "name": "Deactivate",
+        "width": 151,
+        "height": 48
+      }
+    ]
   },
   {
     "tag": "customers",
@@ -117,7 +551,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1440,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 94,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "Search",
+        "width": 42,
+        "height": 28
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "\u002B Add",
+        "width": 38,
+        "height": 28
+      },
+      {
+        "name": "Manage saved address",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Previous",
+        "width": 66,
+        "height": 48
+      },
+      {
+        "name": "Next",
+        "width": 52,
+        "height": 48
+      },
+      {
+        "name": "SET FOR NEXT ORDER",
+        "width": 250,
+        "height": 48
+      },
+      {
+        "name": "CLEAR SELECTION \u00B7 STAY WALK-IN",
+        "width": 250,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "customers",
@@ -132,7 +628,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1008,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 94,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "Search",
+        "width": 42,
+        "height": 28
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "\u002B Add",
+        "width": 38,
+        "height": 28
+      },
+      {
+        "name": "Manage saved address",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Previous",
+        "width": 66,
+        "height": 48
+      },
+      {
+        "name": "Next",
+        "width": 52,
+        "height": 48
+      },
+      {
+        "name": "SET FOR NEXT ORDER",
+        "width": 660,
+        "height": 48
+      },
+      {
+        "name": "CLEAR SELECTION \u00B7 STAY WALK-IN",
+        "width": 660,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "customers",
@@ -147,7 +705,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1007,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 94,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "Search",
+        "width": 42,
+        "height": 28
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "\u002B Add",
+        "width": 38,
+        "height": 28
+      },
+      {
+        "name": "Manage saved address",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Previous",
+        "width": 66,
+        "height": 48
+      },
+      {
+        "name": "Next",
+        "width": 52,
+        "height": 48
+      },
+      {
+        "name": "SET FOR NEXT ORDER",
+        "width": 811,
+        "height": 48
+      },
+      {
+        "name": "CLEAR SELECTION \u00B7 STAY WALK-IN",
+        "width": 811,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "customers",
@@ -162,7 +782,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 641,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 94,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "Search",
+        "width": 42,
+        "height": 28
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "\u002B Add",
+        "width": 38,
+        "height": 28
+      },
+      {
+        "name": "Manage saved address",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Previous",
+        "width": 66,
+        "height": 48
+      },
+      {
+        "name": "Next",
+        "width": 52,
+        "height": 48
+      },
+      {
+        "name": "SET FOR NEXT ORDER",
+        "width": 445,
+        "height": 48
+      },
+      {
+        "name": "CLEAR SELECTION \u00B7 STAY WALK-IN",
+        "width": 445,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "customers",
@@ -177,7 +859,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 640,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 94,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "Search",
+        "width": 42,
+        "height": 28
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "\u002B Add",
+        "width": 38,
+        "height": 28
+      },
+      {
+        "name": "Manage saved address",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Previous",
+        "width": 66,
+        "height": 48
+      },
+      {
+        "name": "Next",
+        "width": 52,
+        "height": 48
+      },
+      {
+        "name": "SET FOR NEXT ORDER",
+        "width": 508,
+        "height": 48
+      },
+      {
+        "name": "CLEAR SELECTION \u00B7 STAY WALK-IN",
+        "width": 508,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "customers",
@@ -192,7 +936,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 600,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 94,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "Search",
+        "width": 42,
+        "height": 28
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "\u002B Add",
+        "width": 38,
+        "height": 28
+      },
+      {
+        "name": "Manage saved address",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Previous",
+        "width": 66,
+        "height": 48
+      },
+      {
+        "name": "Next",
+        "width": 52,
+        "height": 48
+      },
+      {
+        "name": "SET FOR NEXT ORDER",
+        "width": 468,
+        "height": 48
+      },
+      {
+        "name": "CLEAR SELECTION \u00B7 STAY WALK-IN",
+        "width": 468,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "customers",
@@ -207,7 +1013,69 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1440,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 94,
+        "height": 48
+      },
+      {
+        "name": "Close",
+        "width": 38,
+        "height": 38
+      },
+      {
+        "name": "Search",
+        "width": 42,
+        "height": 28
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "\u002B Add",
+        "width": 38,
+        "height": 28
+      },
+      {
+        "name": "Manage saved address",
+        "width": 28,
+        "height": 28
+      },
+      {
+        "name": "Previous",
+        "width": 66,
+        "height": 48
+      },
+      {
+        "name": "Next",
+        "width": 52,
+        "height": 48
+      },
+      {
+        "name": "SET FOR NEXT ORDER",
+        "width": 250,
+        "height": 48
+      },
+      {
+        "name": "CLEAR SELECTION \u00B7 STAY WALK-IN",
+        "width": 250,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "reports",
@@ -227,7 +1095,34 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1440,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Choose reporting period",
+        "width": 90,
+        "height": 48
+      },
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "DAILY DETAILS",
+        "width": 73,
+        "height": 28
+      },
+      {
+        "name": "FILTERS",
+        "width": 47,
+        "height": 28
+      },
+      {
+        "name": "Open stock room",
+        "width": 80,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "reports",
@@ -247,7 +1142,34 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1008,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Choose reporting period",
+        "width": 90,
+        "height": 48
+      },
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "DAILY DETAILS",
+        "width": 73,
+        "height": 28
+      },
+      {
+        "name": "FILTERS",
+        "width": 47,
+        "height": 28
+      },
+      {
+        "name": "Open stock room",
+        "width": 80,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "reports",
@@ -267,7 +1189,34 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1007,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Choose reporting period",
+        "width": 90,
+        "height": 48
+      },
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "DAILY DETAILS",
+        "width": 73,
+        "height": 28
+      },
+      {
+        "name": "FILTERS",
+        "width": 47,
+        "height": 28
+      },
+      {
+        "name": "Open stock room",
+        "width": 80,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "reports",
@@ -287,7 +1236,34 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 641,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Choose reporting period",
+        "width": 90,
+        "height": 48
+      },
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "DAILY DETAILS",
+        "width": 73,
+        "height": 28
+      },
+      {
+        "name": "FILTERS",
+        "width": 47,
+        "height": 28
+      },
+      {
+        "name": "Open stock room",
+        "width": 80,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "reports",
@@ -307,7 +1283,34 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 640,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Choose reporting period",
+        "width": 90,
+        "height": 48
+      },
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "DAILY DETAILS",
+        "width": 73,
+        "height": 28
+      },
+      {
+        "name": "FILTERS",
+        "width": 47,
+        "height": 28
+      },
+      {
+        "name": "Open stock room",
+        "width": 80,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "reports",
@@ -327,7 +1330,34 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 600,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Choose reporting period",
+        "width": 90,
+        "height": 48
+      },
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "DAILY DETAILS",
+        "width": 73,
+        "height": 28
+      },
+      {
+        "name": "FILTERS",
+        "width": 47,
+        "height": 28
+      },
+      {
+        "name": "Open stock room",
+        "width": 80,
+        "height": 28
+      }
+    ]
   },
   {
     "tag": "reports",
@@ -347,6 +1377,33 @@
     "statePreserved": true,
     "samePage": true,
     "actualWidth": 1440,
-    "actualHeight": 900
+    "actualHeight": 900,
+    "targets": [
+      {
+        "name": "Choose reporting period",
+        "width": 90,
+        "height": 48
+      },
+      {
+        "name": "Refresh",
+        "width": 63,
+        "height": 48
+      },
+      {
+        "name": "DAILY DETAILS",
+        "width": 73,
+        "height": 28
+      },
+      {
+        "name": "FILTERS",
+        "width": 47,
+        "height": 28
+      },
+      {
+        "name": "Open stock room",
+        "width": 80,
+        "height": 28
+      }
+    ]
   }
 ]

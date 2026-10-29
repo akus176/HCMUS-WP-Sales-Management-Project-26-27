@@ -9,13 +9,13 @@
             <Setter Property="FontSize" Value="11"/>
         </Style>
     </Page.Resources>
-    <Grid Padding="28,20,28,18" RowSpacing="12">
+    <Grid Padding="32,20,32,22" RowSpacing="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid x:Name="Header" Padding="0,0,0,14" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,3" ColumnSpacing="18">
+        <Grid x:Name="Header" Padding="0,0,0,10" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,3" ColumnSpacing="18">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="116"/>
@@ -41,7 +41,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="ListColumn" Width="280"/>
                     <ColumnDefinition x:Name="DetailColumn" Width="*"/>
-                    <ColumnDefinition x:Name="OrderColumn" Width="270"/>
+                    <ColumnDefinition x:Name="OrderColumn" Width="282"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -58,17 +58,21 @@
                     <ListView x:Name="CustomersList" SelectionMode="Single" SelectionChanged="OnCustomerSelected" ContainerContentChanging="OnContainerContentChanging" MaxHeight="530" AutomationProperties.Name="Customer search results">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid Padding="8,12" ColumnSpacing="9" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                <Grid Padding="0,8" ColumnSpacing="9" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="28"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="40"/>
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel Spacing="4">
-                                        <TextBlock Text="{Binding FullName}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="20" Foreground="{StaticResource ConsoleInkBrush}"/>
-                                        <TextBlock Text="{Binding Phone}"/>
+                                    <Border Width="28" Height="28" Background="{StaticResource ConsolePanelBrush}" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1">
+                                        <TextBlock Text="{Binding Initials}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Spacing="1">
+                                        <TextBlock Text="{Binding FullName}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="16" Foreground="{StaticResource ConsoleInkBrush}"/>
+                                        <TextBlock Text="{Binding Phone}" FontSize="7"/>
                                     </StackPanel>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding LoyaltyPointsBalance}" Style="{StaticResource ConsoleNumberStyle}" HorizontalAlignment="Right"/>
+                                    <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding LoyaltyPointsBalance}" Style="{StaticResource ConsoleNumberStyle}" FontSize="16" HorizontalAlignment="Right"/>
                                         <TextBlock Text="points" FontSize="9" HorizontalAlignment="Right"/>
                                     </StackPanel>
                                 </Grid>
@@ -77,17 +81,30 @@
                     </ListView>
                 </StackPanel>
                 <StackPanel x:Name="DetailPanel" Grid.Column="1" Spacing="14">
-                    <Border BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,1,0,1" Padding="0,12">
-                        <StackPanel Spacing="8">
-                            <TextBlock x:Name="DetailHeading" Text="Select a customer" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="30" Foreground="{StaticResource ConsoleInkBrush}"/>
-                            <TextBlock x:Name="ContactDetails" IsTextSelectionEnabled="True"/>
-                            <Border Background="{StaticResource ConsoleRaisedGroundBrush}" Padding="10">
-                                <TextBlock x:Name="BalanceText" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="25" AutomationProperties.LiveSetting="Polite"/>
+                    <Border BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1" Padding="0,4,0,9">
+                        <StackPanel Spacing="10">
+                            <Grid ColumnSpacing="11">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="64"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <Border Width="64" Height="64" Padding="4" Background="{StaticResource ConsoleFieldBrush}">
+                                    <Border BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="1">
+                                        <TextBlock x:Name="ProfileInitials" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="28" Foreground="{StaticResource ConsoleOnFieldBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3">
+                                    <TextBlock x:Name="DetailHeading" Text="Select a customer" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="30" Foreground="{StaticResource ConsoleInkBrush}"/>
+                                    <TextBlock x:Name="ContactDetails" FontSize="8" IsTextSelectionEnabled="True"/>
+                                </StackPanel>
+                                <StackPanel x:Name="ProfileActions" Grid.Column="2" Orientation="Horizontal">
+                                    <Button x:Name="EditCustomerButton" Content="✎" AutomationProperties.Name="Edit customer profile" Click="OnEditCustomer" Style="{StaticResource WorkspaceLink}"/>
+                                    <Button x:Name="DeactivateCustomerButton" Content="···" AutomationProperties.Name="Deactivate customer" Click="OnDeactivateCustomer" Style="{StaticResource WorkspaceLink}"/>
+                                </StackPanel>
+                            </Grid>
+                            <Border Background="{StaticResource ConsolePanelBrush}" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Padding="10,7">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="LOYALTY BALANCE" Style="{StaticResource WorkspaceLabel}" FontSize="6"/>
+                                    <TextBlock x:Name="BalanceText" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="24" AutomationProperties.LiveSetting="Polite"/>
+                                </StackPanel>
                             </Border>
-                            <StackPanel x:Name="ProfileActions" Orientation="Horizontal" Spacing="8">
-                                <Button x:Name="EditCustomerButton" Content="Edit profile" Click="OnEditCustomer" Style="{StaticResource WorkspaceLink}"/>
-                                <Button x:Name="DeactivateCustomerButton" Content="Deactivate" Click="OnDeactivateCustomer" Style="{StaticResource WorkspaceLink}"/>
-                            </StackPanel>
                         </StackPanel>
                     </Border>
                     <Grid x:Name="ProfileLower" ColumnSpacing="16" RowSpacing="16">
@@ -113,19 +130,24 @@
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <Border Style="{StaticResource ConsolePaperPanelStyle}" Padding="10" Margin="0,0,0,8">
-                                            <StackPanel Spacing="5">
-                                                <TextBlock Text="{Binding Label}" FontWeight="SemiBold"/>
-                                                <TextBlock Text="{Binding AddressLine}"/>
-                                                <CheckBox Content="Default" IsChecked="{Binding IsDefault}" IsEnabled="False"/>
-                                                <Button Content="Manage address" AutomationProperties.Name="Manage saved address" HorizontalAlignment="Stretch">
+                                            <StackPanel Spacing="4">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="48"/></Grid.ColumnDefinitions>
+                                                    <StackPanel VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Label}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="16"/>
+                                                        <TextBlock Text="{Binding StateDisplay}" Style="{StaticResource WorkspaceLabel}" FontSize="7"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="1" Content="···" AutomationProperties.Name="Manage saved address" Style="{StaticResource WorkspaceLink}">
                                                     <Button.Flyout>
                                                         <MenuFlyout>
-                                                            <MenuFlyoutItem Text="Edit address" Tag="{Binding}" Click="OnEditAddress" IsEnabled="{Binding IsActive}"/>
-                                                            <MenuFlyoutItem Text="Make default" Tag="{Binding}" Click="OnDefaultAddress" IsEnabled="{Binding IsActive}"/>
-                                                            <MenuFlyoutItem Text="Deactivate" Tag="{Binding}" Click="OnDeactivateAddress" IsEnabled="{Binding IsActive}"/>
+                                                            <MenuFlyoutItem Text="Edit address" Tag="{Binding Address}" Click="OnEditAddress" IsEnabled="{Binding IsActive}"/>
+                                                            <MenuFlyoutItem Text="Make default" Tag="{Binding Address}" Click="OnDefaultAddress" IsEnabled="{Binding IsActive}"/>
+                                                            <MenuFlyoutItem Text="Deactivate" Tag="{Binding Address}" Click="OnDeactivateAddress" IsEnabled="{Binding IsActive}"/>
                                                         </MenuFlyout>
                                                     </Button.Flyout>
-                                                </Button>
+                                                    </Button>
+                                                </Grid>
+                                                <TextBlock Text="{Binding AddressLine}" FontSize="8"/>
                                             </StackPanel>
                                         </Border>
                                     </DataTemplate>
@@ -167,26 +189,26 @@
                     </Grid>
                 </StackPanel>
                 <StackPanel x:Name="OrderPanel" Grid.Column="2" Spacing="16">
-                    <Border Background="{StaticResource ConsoleFieldBrush}" Padding="18" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,2,0,0">
-                        <StackPanel Spacing="10">
+                    <Border RequestedTheme="Dark" Background="{StaticResource ConsoleFieldBrush}" Padding="16" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,2,0,0">
+                        <StackPanel Spacing="6">
+                            <controls:ConceptPattern Height="12"/>
                             <TextBlock Text="NEXT ORDER" Style="{StaticResource WorkspaceLabel}" Foreground="{StaticResource ConsoleOnFieldMutedBrush}"/>
-                            <TextBlock x:Name="OrderSummary" Text="Walk-in — no profile required." FontFamily="{StaticResource ConsoleSerifFont}" FontSize="26" Foreground="{StaticResource ConsoleOnFieldBrush}" AutomationProperties.LiveSetting="Polite"/>
-                            <Button Content="Continue as walk-in" Click="OnWalkIn" Foreground="{StaticResource ConsoleOnFieldBrush}" BorderBrush="{StaticResource ConsoleOnFieldMutedBrush}" HorizontalAlignment="Stretch"/>
+                            <TextBlock x:Name="OrderSummary" Text="Walk-in — no profile required." FontFamily="{StaticResource ConsoleSerifFont}" FontSize="25" Foreground="{StaticResource ConsoleOnFieldBrush}" AutomationProperties.LiveSetting="Polite"/>
+                            <TextBlock Text="Dine-in, takeaway, or delivery. Points and saved addresses are available at the counter." FontSize="8" Foreground="{StaticResource ConsoleOnFieldMutedBrush}"/>
+                            <StackPanel Spacing="4">
+                                <CheckBox x:Name="UseSelectedProfile" Content="Use the selected profile" Foreground="{StaticResource ConsoleOnFieldBrush}" Checked="OnOrderOptionsChanged" Unchecked="OnOrderOptionsChanged"/>
+                                <CheckBox x:Name="DeliveryOrder" Content="Delivery order" Foreground="{StaticResource ConsoleOnFieldBrush}" Checked="OnOrderOptionsChanged" Unchecked="OnOrderOptionsChanged"/>
+                                <StackPanel x:Name="DeliveryFields" RequestedTheme="Light" Spacing="12" Visibility="Collapsed" Background="{StaticResource ConsoleGroundBrush}" Padding="8">
+                                    <TextBox x:Name="RecipientName" Header="Recipient name" MaxLength="120"/>
+                                    <TextBox x:Name="ContactNumber" Header="Contact number" MaxLength="30"/>
+                                    <ComboBox x:Name="AddressChoice" Header="Delivery address" DisplayMemberPath="DisplayName" SelectionChanged="OnAddressChoiceChanged" MinHeight="48" HorizontalAlignment="Stretch"/>
+                                    <TextBox x:Name="OrderAddress" Header="Order-only address" PlaceholderText="Used for this order without saving to a profile" MaxLength="500" AcceptsReturn="True" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <Button x:Name="SelectForOrderButton" Content="SET FOR NEXT ORDER" Click="OnSelectForOrder" Background="{StaticResource ConsoleGroundBrush}" HorizontalAlignment="Stretch"/>
+                                <Button Content="CLEAR SELECTION · STAY WALK-IN" Click="OnWalkIn" Foreground="{StaticResource ConsoleOnFieldBrush}" Style="{StaticResource WorkspaceLink}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
-                    <Expander Header="Next-order details" IsExpanded="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                        <StackPanel Spacing="8">
-                            <CheckBox x:Name="UseSelectedProfile" Content="Use the selected profile" Checked="OnOrderOptionsChanged" Unchecked="OnOrderOptionsChanged"/>
-                            <CheckBox x:Name="DeliveryOrder" Content="Delivery order" Checked="OnOrderOptionsChanged" Unchecked="OnOrderOptionsChanged"/>
-                            <StackPanel x:Name="DeliveryFields" Spacing="12" Visibility="Collapsed">
-                                <TextBox x:Name="RecipientName" Header="Recipient name" MaxLength="120"/>
-                                <TextBox x:Name="ContactNumber" Header="Contact number" MaxLength="30"/>
-                                <ComboBox x:Name="AddressChoice" Header="Delivery address" DisplayMemberPath="DisplayName" SelectionChanged="OnAddressChoiceChanged" MinHeight="48" HorizontalAlignment="Stretch"/>
-                                <TextBox x:Name="OrderAddress" Header="Order-only address" PlaceholderText="Used for this order without saving to a profile" MaxLength="500" AcceptsReturn="True" TextWrapping="Wrap"/>
-                            </StackPanel>
-                            <Button x:Name="SelectForOrderButton" Content="Use these details for next order" Click="OnSelectForOrder"/>
-                        </StackPanel>
-                    </Expander>
                     <StackPanel Spacing="8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
                         <TextBlock Text="Recent orders" Style="{StaticResource WorkspaceHeading}"/>
                         <TextBlock x:Name="OrdersEmpty" Text="No recent orders."/>
