@@ -7,7 +7,7 @@ Provides staff with a cohesive, task-oriented desktop console that presents exis
 ## ADDED Requirements
 
 ### Requirement: Exact concept-art fidelity
-The production UI SHALL match the updated concept art exactly at the 1440 by 900 reference content viewport. The authoritative visual specification is `docs/ui-concepts/screens/*.html`, `docs/ui-concepts/assets/app.css`, `docs/ui-concepts/assets/refinements.css`, and their bundled fonts, photos, icons, ornaments, and patterns; the regenerated screen PNGs and Menu editor PNG provide review evidence. Matching only the general hierarchy or palette SHALL NOT satisfy this requirement.
+The production UI SHALL match the updated concept art exactly at the 1440 by 900 reference content viewport. The authoritative visual specification is `docs/ui-concepts/screens/*.html`, `docs/ui-concepts/assets/app.css`, `docs/ui-concepts/assets/refinements.css`, and their bundled fonts, photos, icons, ornaments, and patterns; the regenerated screen PNGs and Menu editor PNG provide review evidence. The explicitly approved differences in `docs/ui-concepts/workspaces-117-native-revision.md` SHALL govern the four #117 compositions within that supplement's scope. Matching only the general hierarchy or palette SHALL NOT satisfy this requirement.
 
 #### Scenario: A workspace is reviewed for visual acceptance
 - **WHEN** Counter, Service board, Menu, Stock room, Customers, Reports, or the Menu editor is presented for completion
@@ -24,6 +24,22 @@ The production UI SHALL match the updated concept art exactly at the 1440 by 900
 - **WHEN** the approved concept art changes
 - **THEN** the affected completed checklist items are reopened and revalidated against the updated concept commit
 - **AND** previous behavioral test results alone do not establish visual completion
+
+#### Scenario: Approved capability revision for Menu, Customers, and Reports
+- **WHEN** #117 is compared with the reference concepts after the user approval of 2026-10-29
+- **THEN** drink imagery uses a fixed decorative icon and the drink editor contains text fields without picture or icon persistence controls
+- **AND** seasonal flags, catalog performance/audit labels, and customer lifetime totals are omitted
+- **AND** Reports uses current-period totals and order channels instead of prior-period comparisons or peak-hour metrics, and offers Refresh instead of Export
+- **AND** all existing catalog, customer, loyalty, next-order, date-filter, and payment-filter workflows remain available
+- **AND** this targeted approval does not waive the exact visual acceptance requirement for other visible differences
+
+#### Scenario: Approved native composition revision for #117
+- **WHEN** the four #117 compositions are reviewed following the user's subsequent 2026-10-29 answer “Approve these native compositions”
+- **THEN** the native captures at implementation commit `9e619622f30366f3f258716a9e004a602879e46d` and the enumerated differences in `docs/ui-concepts/workspaces-117-native-revision.md` define the approved targeted revision
+- **AND** the shown native controls/spacing, Menu action/detail arrangement, Customers form/history density, Reports flyouts/rows, and editor field/footer arrangement are accepted
+- **AND** real seeded fixture state and the editor's 1442 by 933 native window framing are accepted for this review instead of claiming a matched-state 1440 by 900 editor comparison
+- **AND** supported workflows, accounting behavior, responsive state preservation, visible keyboard focus, meaningful accessible names, and 48-DIP primary targets remain required
+- **AND** the revision does not waive visual acceptance for other details, other workspaces, or future changes
 
 ### Requirement: Task-oriented application shell
 The system SHALL present the staff client as one Corner Cafe service console with primary navigation for Counter, Service board, Menu, Stock room, Customers, and Reports.

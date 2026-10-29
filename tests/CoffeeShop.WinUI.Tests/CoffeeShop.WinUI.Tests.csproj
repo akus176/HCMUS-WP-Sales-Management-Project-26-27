@@ -19,6 +19,7 @@
     <Compile Include="..\..\src\CoffeeShop.WinUI\Pages\ReceiptLineRow.cs" Link="Presentation\ReceiptLineRow.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\Pages\SupplierRow.cs" Link="Presentation\SupplierRow.cs" />
     <Compile Include="..\CoffeeShop.Application.Tests\Testing\FakeCatalogRepository.cs" Link="Testing\FakeCatalogRepository.cs" />
+    <Compile Include="..\CoffeeShop.Application.Tests\Testing\FakeInventoryRepository.cs" Link="Testing\FakeInventoryRepository.cs" />
     <Compile Include="..\CoffeeShop.Application.Tests\Testing\FakeCustomerRepository.cs" Link="Testing\FakeCustomerRepository.cs" />
     <Compile Include="..\CoffeeShop.Application.Tests\Testing\TestCurrentUser.cs" Link="Testing\TestCurrentUser.cs" />
     <Compile Include="..\CoffeeShop.Application.Tests\Testing\FakeUnitOfWork.cs" Link="Testing\FakeUnitOfWork.cs" />

@@ -27,7 +27,10 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
     public CustomerOrderSelection OrderSelection => orderContext.Selection;
     public CustomerOrderSelectionRequest OrderRequest => orderContext.Request;
     public bool IsEmpty => !IsBusy && !IsError && Customers.Count == 0;
-    public WorkflowFeedback Feedback => WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
+    private bool commandSucceeded;
+    public WorkflowFeedback Feedback => commandSucceeded && !IsBusy && !IsError
+        ? WorkflowFeedback.Success(Message)
+        : WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
     public bool CanEdit => !IsBusy && !RequiresReload && SelectedCustomer is { IsActive: true };
     public bool CanPrevious => !IsBusy && !RequiresReload && History.Offset > 0;
     public bool CanNext => !IsBusy && !RequiresReload && History.Offset + History.Items.Count < History.TotalCount;
@@ -134,6 +137,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
             {
                 orderContext.Set(request, result.Value);
                 saved = true;
+                commandSucceeded = true;
                 Message = "Customer and delivery details selected for the next order.";
             }
         });
@@ -149,6 +153,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
 
         orderContext.Clear();
         Error = null;
+        commandSucceeded = true;
         Message = "Walk-in selected. No customer profile is required.";
         Notify();
     }
@@ -175,6 +180,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
             }
 
             await ReloadCoreAsync();
+            commandSucceeded = !IsError;
             Message = IsError
                 ? $"{successMessage} Refresh failed. Reload before continuing; do not submit again."
                 : successMessage;
@@ -300,6 +306,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
         }
 
         IsBusy = true;
+        commandSucceeded = false;
         Error = null;
         Message = "Working...";
         Notify();

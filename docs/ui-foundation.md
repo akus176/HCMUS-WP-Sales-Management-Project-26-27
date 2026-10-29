@@ -44,3 +44,7 @@ The verification modes write measured target sizes, resolved-resource counts, co
 - Visual review covers the shared shell and component gallery: geometry and alignment, font assets, palette, vector icon/ornament treatment, paper/tape/fold states, and focus treatment. Workspace-interior fidelity and full transactional smoke verification remain assigned to later checklist sections.
 
 Review captures and measurement reports are in `docs/evidence/ui-foundation/`. The shell capture deliberately contains the pre-migration Counter interior; it is evidence for the shell, not acceptance of the future Counter layout.
+
+## Menu, Customers, and Reports verification
+
+Launch with `--verify-shell --verify-workspaces` to load real seeded data in Menu, Customers, and Reports, exercise an empty Menu search, resize each page through the shell breakpoint boundaries, compare presentation state, and capture expanded/compact native images. See [#117 evidence](evidence/workspaces-117/README.md) for the exact reference revision, automated results, native captures, and outstanding visual acceptance work. This mode does not submit business commands. Successful resize checks alone do not satisfy the concept fidelity gate.

@@ -12,6 +12,14 @@ The updated concept assets committed with this change are the authoritative visu
 
 During part 1 implementation, the user approved revising the artboards to use 48-pixel primary controls and navigation rows and omit unsupported shell controls. The revised HTML/PNG artboards are the implementation target. Global search, notifications, open-ticket chrome, operator avatars, and shift-management chrome are omitted; a workspace breadcrumb and the current date remain. Native caption buttons retain their operating-system behavior. The Stock room shell temporarily offers a section selector for the six existing inventory routes so consolidation does not remove workflows before the section views are migrated. Individual workspace interiors are migrated in later parts; part 1 visual review covers the common shell and shared component gallery.
 
+### Approved Menu, Customers, and Reports capability revision
+
+On 2026-10-29, the user approved the targeted #117 concept changes: use one fixed decorative drink icon and a text-only drink editor; omit seasonal flags, catalog performance/audit labels, and customer lifetime totals; replace report comparisons and peak-hour metrics with current-period totals and order channels; replace Export with Refresh. Existing editing, recipes, compatibility, addresses, loyalty, next-order selection, payment filters, and report date filters remain required. The revised HTML and regenerated PNGs are the reference for these capability changes. This approval does not accept unrelated native layout, typography, control, or selection differences; exact matched-state visual verification remains required.
+
+### Approved Menu, Customers, Reports, and editor native compositions
+
+In a subsequent 2026-10-29 review, the user explicitly answered “Approve these native compositions” after seeing a side-by-side comparison of the four native compositions at implementation commit `9e619622f30366f3f258716a9e004a602879e46d` with reference commit `0ec5463`. The exact approved differences and immutable capture revision are recorded in `docs/ui-concepts/workspaces-117-native-revision.md`. That supplement governs the listed native controls/header spacing, Menu action/detail arrangement, Customers form/history density, Reports flyouts/rows, and editor field/footer arrangement. It also approves real seeded fixture state and native editor window framing instead of an equivalent-fixture 1440 by 900 editor comparison. This targeted revision satisfies the visual acceptance conflict for #117; it does not change other workspaces, supported workflows, accessibility, accounting, or future visual review requirements.
+
 ## Goals / Non-Goals
 
 **Goals:**

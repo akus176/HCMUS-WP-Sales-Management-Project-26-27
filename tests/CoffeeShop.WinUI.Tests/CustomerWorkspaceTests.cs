@@ -22,6 +22,7 @@ public sealed class CustomerWorkspaceTests
         Assert.Null(model.OrderSelection.CustomerId);
 
         Assert.True(await model.CreateAsync(new(" Alice ", "0901234567", "ALICE@EXAMPLE.COM")));
+        Assert.Equal(WorkflowFeedbackKind.Success, model.Feedback.Kind);
         var id = model.SelectedCustomer!.Id;
         Assert.Equal("alice@example.com", model.SelectedCustomer.Email);
         Assert.True(await model.UpdateAsync(new(id, "Alice Nguyen", "0901234567")));
@@ -82,6 +83,7 @@ public sealed class CustomerWorkspaceTests
         Assert.Empty(setup.Store.Customers);
         setup.Model.ContinueAsWalkIn();
         Assert.Null(setup.Model.OrderSelection.Delivery);
+        Assert.Equal(WorkflowFeedbackKind.Success, setup.Model.Feedback.Kind);
     }
 
     [Fact]

@@ -13,10 +13,36 @@ namespace CoffeeShop.WinUI.Pages;
 
 public sealed partial class CustomersPage : Page
 {
+    internal object VerificationState() => new { search = SearchBox.Text, selected = model.SelectedCustomer?.Id, profile = UseSelectedProfile.IsChecked, delivery = DeliveryOrder.IsChecked, recipient = RecipientName.Text, contact = ContactNumber.Text, address = OrderAddress.Text };
+
+    internal async Task<object> PrepareVerificationAsync()
+    {
+        while (model.IsBusy) await Task.Delay(50);
+        await model.LoadAsync();
+        if (model.Customers.Count > 0) await model.SelectAsync(model.Customers[0].Id);
+        return new { profiles = model.Customers.Count, selected = model.SelectedCustomer?.FullName, addresses = model.SelectedCustomer?.Addresses.Count, history = model.History.TotalCount, error = model.Error?.Code };
+    }
+
     private readonly CustomerWorkspace model;
     private bool rendering;
     private bool ready;
     private EntityId? renderedCustomerId;
+    public sealed record CustomerRow(CustomerSummary Customer)
+    {
+        public EntityId Id => Customer.Id;
+        public string FullName => Customer.FullName;
+        public string Phone => Customer.Phone ?? "";
+        public int LoyaltyPointsBalance => Customer.LoyaltyPointsBalance;
+        public string Initials => InitialsFor(FullName);
+    }
+    public sealed record AddressRow(CustomerAddressSummary Address)
+    {
+        public string Label => Address.Label ?? "Saved address";
+        public string AddressLine => Address.AddressLine;
+        public bool IsActive => Address.IsActive;
+        public string StateDisplay => Address.IsDefault ? "DEFAULT" : Address.IsActive ? "ACTIVE" : "INACTIVE";
+    }
+    private static string InitialsFor(string name) => string.Concat(name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(part => part[0]));
 
     public CustomersPage()
     {
@@ -64,7 +90,7 @@ public sealed partial class CustomersPage : Page
 
     private async void OnCustomerSelected(object sender, SelectionChangedEventArgs args)
     {
-        if (!rendering && CustomersList.SelectedItem is CustomerSummary customer)
+        if (!rendering && CustomersList.SelectedItem is CustomerRow { Customer: var customer })
         {
             await model.SelectAsync(customer.Id);
         }
@@ -74,8 +100,8 @@ public sealed partial class CustomersPage : Page
     {
         var name = args.Item switch
         {
-            CustomerSummary customer => $"{customer.FullName}, {customer.Phone}, {(customer.IsActive ? "active" : "inactive")}",
-            CustomerAddressSummary address => $"{address.Label}, {address.AddressLine}",
+            CustomerRow { Customer: var customer } => $"{customer.FullName}, {customer.Phone}, {(customer.IsActive ? "active" : "inactive")}",
+            AddressRow { Address: var address } => $"{address.Label}, {address.AddressLine}, {(address.IsDefault ? "default" : "")}",
             LoyaltyTransactionSummary transaction => $"{transaction.Type}, {transaction.Points} points, balance {transaction.BalanceAfter}",
             CustomerOrderSummary order => $"{order.OrderNumber}, {order.Status}, total {order.Total:N2}",
             _ => ""
@@ -93,25 +119,29 @@ public sealed partial class CustomersPage : Page
             ReloadButton.IsEnabled = !model.IsBusy;
             NewCustomerButton.IsEnabled = !model.RequiresReload;
             Status.Apply(model.Feedback);
+            if (model.Feedback.Kind == WorkflowFeedbackKind.Ready) Status.IsOpen = false;
+            ProfileCount.Text = $"MANAGE / CUSTOMER NOTEBOOK / {model.Customers.Count} profiles";
             EmptyMessage.Visibility = model.IsEmpty ? Visibility.Visible : Visibility.Collapsed;
             var customer = model.SelectedCustomer;
-            if (!ReferenceEquals(CustomersList.ItemsSource, model.Customers))
+            if (!ReferenceEquals(CustomersList.Tag, model.Customers))
             {
-                CustomersList.ItemsSource = model.Customers;
-                CustomersList.SelectedItem = model.Customers.FirstOrDefault(item => item.Id == customer?.Id);
+                CustomersList.Tag = model.Customers;
+                CustomersList.ItemsSource = model.Customers.Select(item => new CustomerRow(item)).ToArray();
             }
+            CustomersList.SelectedItem = ((IEnumerable<CustomerRow>)CustomersList.ItemsSource).FirstOrDefault(item => item.Id == customer?.Id);
 
             DetailHeading.Text = customer is null
-                ? "Select a customer to open their notebook."
-                : $"{customer.FullName} ({(customer.IsActive ? "active" : "inactive")})";
-            ContactDetails.Text = customer is null ? "" : $"{customer.Phone}\n{customer.Email}";
-            BalanceText.Text = customer is null ? "" : $"{customer.LoyaltyPointsBalance:N0} loyalty points";
+                ? "Select a customer"
+                : customer.FullName;
+            ProfileInitials.Text = customer is null ? "" : InitialsFor(customer.FullName);
+            ContactDetails.Text = customer is null ? "" : $"{customer.Phone} · {customer.Email}{(customer.IsActive ? "" : " · Inactive")}";
+            BalanceText.Text = customer is null ? "" : $"{customer.LoyaltyPointsBalance:N0} pts";
             ProfileActions.Visibility = customer is null ? Visibility.Collapsed : Visibility.Visible;
             EditCustomerButton.IsEnabled = model.CanEdit;
             DeactivateCustomerButton.IsEnabled = model.CanEdit;
             AddAddressButton.IsEnabled = model.CanEdit;
             AddressesList.IsEnabled = model.CanEdit;
-            AddressesList.ItemsSource = customer?.Addresses;
+            AddressesList.ItemsSource = customer?.Addresses.Select(address => new AddressRow(address)).ToArray();
             AddressesEmpty.Visibility = customer is not null && customer.Addresses.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             HistoryList.ItemsSource = model.History.Items.Select(item => item with
             {
@@ -134,8 +164,8 @@ public sealed partial class CustomersPage : Page
             UseSelectedProfile.IsEnabled = model.CanEdit;
             UseSelectedProfile.Content = customer is null ? "Select an active profile above to attach it" : $"Attach {customer.FullName}";
             SelectForOrderButton.IsEnabled = !model.RequiresReload;
-            OrderSummary.Text = model.OrderSelection.CustomerName ?? "Walk-in — no profile required.";
-            if (model.OrderSelection.Delivery is { } delivery)
+            OrderSummary.Text = customer is null ? "Walk-in — no profile required." : $"Use {customer.FullName.Split(' ')[0]} for the next ticket";
+            if (model.OrderSelection.CustomerId == customer?.Id && model.OrderSelection.Delivery is { } delivery)
             {
                 OrderSummary.Text += $"\nDelivery to {delivery.RecipientName} · {delivery.ContactNumber}\n{model.OrderSelection.AddressLine}";
             }
@@ -164,6 +194,25 @@ public sealed partial class CustomersPage : Page
         }
 
         UpdateOrderOptions();
+    }
+
+    private void OnPageSizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        if (ListColumn is null) return;
+        var wide = ActualWidth >= 1000;
+        ListColumn.Width = wide ? new GridLength(280) : new GridLength(1, GridUnitType.Star);
+        DetailColumn.Width = wide ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        OrderColumn.Width = new GridLength(wide ? 282 : 0);
+        Grid.SetColumn(DetailPanel, wide ? 1 : 0);
+        Grid.SetRow(DetailPanel, wide ? 0 : 1);
+        Grid.SetColumn(OrderPanel, wide ? 2 : 0);
+        Grid.SetRow(OrderPanel, wide ? 0 : 2);
+        HistoryColumn.Width = wide && ActualWidth >= 1200 ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        Grid.SetColumn(HistoryPanel, wide && ActualWidth >= 1200 ? 1 : 0);
+        Grid.SetRow(HistoryPanel, wide && ActualWidth >= 1200 ? 0 : 1);
+        HeaderOrnament.Visibility = ActualWidth >= 850 ? Visibility.Visible : Visibility.Collapsed;
+        Header.ColumnDefinitions[1].Width = new GridLength(ActualWidth >= 850 ? 116 : 0);
+        HeaderActions.Orientation = ActualWidth >= 700 ? Orientation.Horizontal : Orientation.Vertical;
     }
 
     private string StatusMessage() => model.Error is { Details.Count: > 0 } error
@@ -218,7 +267,7 @@ public sealed partial class CustomersPage : Page
     private async void OnAddAddress(object sender, RoutedEventArgs args) => await EditAddressAsync(null);
 
     private async void OnEditAddress(object sender, RoutedEventArgs args) =>
-        await EditAddressAsync((CustomerAddressSummary)((Button)sender).Tag);
+        await EditAddressAsync((CustomerAddressSummary)((FrameworkElement)sender).Tag);
 
     private Task EditAddressAsync(CustomerAddressSummary? address)
     {
@@ -239,7 +288,7 @@ public sealed partial class CustomersPage : Page
 
     private async void OnDefaultAddress(object sender, RoutedEventArgs args)
     {
-        if (model.SelectedCustomer is { IsActive: true } customer && ((Button)sender).Tag is CustomerAddressSummary address)
+        if (model.SelectedCustomer is { IsActive: true } customer && ((FrameworkElement)sender).Tag is CustomerAddressSummary address)
         {
             await model.SetDefaultAddressAsync(customer.Id, address.Id);
         }
@@ -247,7 +296,7 @@ public sealed partial class CustomersPage : Page
 
     private async void OnDeactivateAddress(object sender, RoutedEventArgs args)
     {
-        if (model.SelectedCustomer is { IsActive: true } customer && ((Button)sender).Tag is CustomerAddressSummary address)
+        if (model.SelectedCustomer is { IsActive: true } customer && ((FrameworkElement)sender).Tag is CustomerAddressSummary address)
         {
             await ConfirmAsync("Deactivate this address?", "Existing deliveries keep their saved address. This address will be unavailable for new orders.",
                 () => model.DeactivateAddressAsync(customer.Id, address.Id));
@@ -348,13 +397,14 @@ public sealed partial class CustomersPage : Page
         var editor = new ContentControl { Content = fields, HorizontalContentAlignment = HorizontalAlignment.Stretch };
         var dialog = new ContentDialog
         {
-            Title = title,
+            Title = new TextBlock { Text = title, FontFamily = (FontFamily)Resource("ConsoleSerifFont"), FontSize = 32, TextWrapping = TextWrapping.Wrap },
+            Style = (Style)Resource("WorkspaceDialog"),
             PrimaryButtonText = button,
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = XamlRoot,
             RequestedTheme = ElementTheme.Light,
-            FontFamily = (FontFamily)Resource("SketchBodyFontFamily"),
+            FontFamily = (FontFamily)Resource("ConsoleSansFont"),
             Content = new ScrollViewer { Content = Form(error, progress, editor), MaxHeight = 520 }
         };
         dialog.Closing += (_, args) => args.Cancel = model.IsBusy;
@@ -390,7 +440,7 @@ public sealed partial class CustomersPage : Page
         Header = header,
         Text = value ?? "",
         MaxLength = maxLength,
-        Style = (Style)Resource("SketchCustomerFieldStyle")
+        Style = (Style)Resource("ConsoleFieldStyle")
     };
 
     private static object Resource(string key) => Microsoft.UI.Xaml.Application.Current.Resources[key];

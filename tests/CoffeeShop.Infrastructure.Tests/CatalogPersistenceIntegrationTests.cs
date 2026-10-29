@@ -111,9 +111,12 @@ public sealed class CatalogPersistenceIntegrationTests : IAsyncLifetime
         Assert.False(Assert.Single(model.Addons).IsActive);
         Assert.True(await model.SaveAsync((commands, _) => commands.DeactivateMenuItemAsync(new(item.Id)), "Drink deactivated."));
         Assert.True(model.IsEmpty);
+        Assert.Null(model.SelectedItem);
         model.IncludeInactive = true;
         await model.LoadAsync();
         Assert.False(Assert.Single(model.Items).IsActive);
+        await model.SelectAsync(item.Id);
+        Assert.NotNull(model.SelectedItem);
         Assert.Single(model.SelectedItem.SizeVariants.Single(variant => variant.Id == small.Id).Recipe);
         Assert.False(model.IsError);
     }
