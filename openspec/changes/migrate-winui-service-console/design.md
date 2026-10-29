@@ -12,6 +12,10 @@ The updated concept assets committed with this change are the authoritative visu
 
 During part 1 implementation, the user approved revising the artboards to use 48-pixel primary controls and navigation rows and omit unsupported shell controls. The revised HTML/PNG artboards are the implementation target. Global search, notifications, open-ticket chrome, operator avatars, and shift-management chrome are omitted; a workspace breadcrumb and the current date remain. Native caption buttons retain their operating-system behavior. The Stock room shell temporarily offers a section selector for the six existing inventory routes so consolidation does not remove workflows before the section views are migrated. Individual workspace interiors are migrated in later parts; part 1 visual review covers the common shell and shared component gallery.
 
+### Approved Menu, Customers, and Reports capability revision
+
+On 2026-10-29, the user approved the targeted #117 concept changes: use one fixed decorative drink icon and a text-only drink editor; omit seasonal flags, catalog performance/audit labels, and customer lifetime totals; replace report comparisons and peak-hour metrics with current-period totals and order channels; replace Export with Refresh. Existing editing, recipes, compatibility, addresses, loyalty, next-order selection, payment filters, and report date filters remain required. The revised HTML and regenerated PNGs are the reference for these capability changes. This approval does not accept unrelated native layout, typography, control, or selection differences; exact matched-state visual verification remains required.
+
 ## Goals / Non-Goals
 
 **Goals:**

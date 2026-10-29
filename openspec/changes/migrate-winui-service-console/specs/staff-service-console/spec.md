@@ -25,6 +25,14 @@ The production UI SHALL match the updated concept art exactly at the 1440 by 900
 - **THEN** the affected completed checklist items are reopened and revalidated against the updated concept commit
 - **AND** previous behavioral test results alone do not establish visual completion
 
+#### Scenario: Approved capability revision for Menu, Customers, and Reports
+- **WHEN** #117 is compared with the reference concepts after the user approval of 2026-10-29
+- **THEN** drink imagery uses a fixed decorative icon and the drink editor contains text fields without picture or icon persistence controls
+- **AND** seasonal flags, catalog performance/audit labels, and customer lifetime totals are omitted
+- **AND** Reports uses current-period totals and order channels instead of prior-period comparisons or peak-hour metrics, and offers Refresh instead of Export
+- **AND** all existing catalog, customer, loyalty, next-order, date-filter, and payment-filter workflows remain available
+- **AND** this targeted approval does not waive the exact visual acceptance requirement for other visible differences
+
 ### Requirement: Task-oriented application shell
 The system SHALL present the staff client as one Corner Cafe service console with primary navigation for Counter, Service board, Menu, Stock room, Customers, and Reports.
 
