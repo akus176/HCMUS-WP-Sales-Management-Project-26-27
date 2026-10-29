@@ -6,10 +6,8 @@ using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
-using Windows.ApplicationModel.DataTransfer;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Automation;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace CoffeeShop.WinUI.Pages;
 
@@ -380,9 +378,15 @@ public sealed partial class OperationsPage : Page
             list.UpdateLayout();
             var paper = list.Items.Count == 0 ? null : FindPaper(list.ContainerFromIndex(0));
             double? paperX = paper?.TransformToVisual(NotesLayout).TransformPoint(new Windows.Foundation.Point()).X;
-            return new { column = (string)((FrameworkElement)list.Parent).Tag, titleX = positions[index].X,
-                paperX, matchesPaper = paperX is null ? (bool?)null : Math.Abs(positions[index].X - paperX.Value) < 1,
-                notes = list.Items.Count, dragEnabled = list.CanDragItems };
+            return new
+            {
+                column = (string)((FrameworkElement)list.Parent).Tag,
+                titleX = positions[index].X,
+                paperX,
+                matchesPaper = paperX is null ? (bool?)null : Math.Abs(positions[index].X - paperX.Value) < 1,
+                notes = list.Items.Count,
+                dragEnabled = list.CanDragItems
+            };
         }).ToArray();
         var originalSelection = model.SelectedOrder;
         object? forms = null;
@@ -431,9 +435,15 @@ public sealed partial class OperationsPage : Page
             InspectorScroll.ChangeView(null, 0, null, true);
             await Task.Delay(120);
         }
-        return new { headersAligned = aligned, withoutOperatorDisabled, measurements, forms,
+        return new
+        {
+            headersAligned = aligned,
+            withoutOperatorDisabled,
+            measurements,
+            forms,
             moveButtons = lists.SelectMany(list => list.Items.OfType<ServiceBoardCard>()).Select(card => new
-            { card.Number, card.Status, card.ActionLabel, card.ActionEnabled, card.NextStatus }).ToArray() };
+            { card.Number, card.Status, card.ActionLabel, card.ActionEnabled, card.NextStatus }).ToArray()
+        };
     }
 
     internal void RestoreVerificationOperator() => model.Operator = verificationOperator;

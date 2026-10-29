@@ -4,14 +4,14 @@ using CoffeeShop.Application.Sales;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Text;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace CoffeeShop.WinUI.Pages;
 
