@@ -1,8 +1,8 @@
 # Menu, Customers, and Reports verification (#117)
 
-Status: functional implementation available for review; exact visual acceptance remains open. Do not close #117 or check off the affected #111 implementation items from this evidence alone.
+Status: functional verification passes and the user approved the four current native compositions on 2026-10-29. The targeted concept/spec revision is [recorded here](../../ui-concepts/workspaces-117-native-revision.md). PR merge still requires passing CI and the required fresh reviewer approval.
 
-The reference concepts are commit `0ec5463dcd850d00fbc0223a7e4528a09d12d879`, based on main `3bd95aa`. The user approved the capability changes recorded in that commit on 2026-10-29: fixed decorative drink icons, a text-only editor, omission of seasonal flags/catalog audit and performance/customer lifetime totals, current-period reporting and order channels, and Refresh in place of Export. Other visual differences were not approved.
+The HTML reference concepts are commit `0ec5463dcd850d00fbc0223a7e4528a09d12d879`, based on main `3bd95aa`. The user first approved the capability changes recorded in that commit on 2026-10-29: fixed decorative drink icons, a text-only editor, omission of seasonal flags/catalog audit and performance/customer lifetime totals, current-period reporting and order channels, and Refresh in place of Export. In a separate review, the user approved the current native compositions from implementation commit `9e619622f30366f3f258716a9e004a602879e46d`, including the enumerated layout/control differences, real fixture state, and editor window framing. The [comparison](concept-native-comparison.png) preserves the concrete reviewed result.
 
 ## Captures
 
@@ -14,7 +14,7 @@ The reference concepts are commit `0ec5463dcd850d00fbc0223a7e4528a09d12d879`, ba
 
 [Native Menu editor](native-menu-editor.png) / [revised editor concept](../../ui-concepts/menu-picture-editor.png). The updated editor image is an actual window capture (1442 × 933), including operating-system borders. It shows the new 760-DIP cream dialog, name/category fields, description, Cancel, and Save drink. It was captured before the invalid-save smoke check and cancelled without saving. It is not a matched 1440 × 900 reference capture.
 
-The six workspace images come from native `RenderTargetBitmap` captures, using live data from a disposable PostgreSQL 18 database migrated and populated with `scripts/postgres/midterm-seed.sql`. They are not browser mockups. The concept samples use different people, products, and reporting dates; these captures therefore do not establish a matched-state visual pass.
+The six workspace images come from native `RenderTargetBitmap` captures, using live data from a disposable PostgreSQL 18 database migrated and populated with `scripts/postgres/midterm-seed.sql`. They are not browser mockups. The concept samples use different people, products, and reporting dates. This fixture difference was explicitly approved for the targeted revision; the captures do not claim to pixel-match the original HTML.
 
 ## Verified behavior
 
@@ -29,9 +29,9 @@ The six workspace images come from native `RenderTargetBitmap` captures, using l
 - Native keyboard smoke: the drink editor cycles name → category → description → Cancel → Save drink → name, with visible focus and no escape into the page. Blank-name Save shows local validation, re-enables input, and keeps the dialog open; Cancel closes it without changing the saved drink. Customers tabs from Delivery order through recipient, contact, saved-address choice, order-only address, and Set for next order. The report filter flyout tabs from payment method to order channel. UI Automation's focused-element field was stale during these checks; visible native focus was inspected instead.
 - Native inspection confirmed meaningful Menu item names, editor field labels, report bar summaries, and reachable Menu edit/deactivate actions by vertical scrolling. Size actions expose Edit size and price, Edit recipe, and Deactivate size. Compact Menu includes a category selector; Customers and Reports stack their existing regions in vertical scroll content. Dialogs use the light console palette; delivery fields remain readable inside the dark next-order panel. These are representative checks, not an exhaustive assistive-technology audit.
 
-## Remaining acceptance work
+## Accepted visual revision
 
-Direct comparison with the revised concepts still shows these differences:
+Direct comparison with the HTML reference showed the following differences, now explicitly accepted in the targeted revision:
 
 - Native fields, checkboxes, category rows, functional icons, tab labels/counts, selected navigation/card rules, and header action spacing differ. Menu/Customers retain Refresh in the header; category creation remains available in the Menu rail and Categories view.
 - Menu now has brass selected-card framing, compact size rows with action flyouts, a recipe summary, and compatible-topping actions. Its record metadata, size actions, recipe selection, and footer positioning still differ from the concept.
@@ -39,7 +39,7 @@ Direct comparison with the revised concepts still shows these differences:
 - Reports now has the native donut/legend and best-seller progress tracks. Supported payment/channel filters are in a flyout and daily details have a flyout; chart labels, stock rows, panel spacing, and selected-period copy differ.
 - The Menu editor now uses a 760-DIP custom dialog with name/category in two columns, full-width description, and Cancel/Save at opposite footer edges. The concept stacks the fields, places both footer buttons on the left, and includes additional header decoration/close affordance. Native Cancel and Escape are available.
 
-The current native screenshots are the concrete proposed compositions for review. Accepting them requires explicit targeted concept/spec approval covering the differences above, the real seeded fixture state, and the editor's native window framing. Otherwise, correct the remaining differences and repeat equivalent-state 1440 × 900 comparison before marking the corresponding OpenSpec tasks complete. The earlier capability approval does not waive this gate. No affected #111/#117 checkbox is checked by this evidence update.
+The user answered “Approve these native compositions” to the question covering these differences, the real seeded fixture state, and native editor framing. The approval is recorded in the concept supplement, OpenSpec design, and specification. The four captures remain unchanged from `9e61962`; this documentation records acceptance rather than silently replacing the original references. All seven #117 implementation items and its acceptance items can now be evaluated against that approved revision and the behavioral evidence above. The parent change's all-six-workspace verification and unrelated implementation items remain outside this evidence's scope.
 
 ## Reproduce
 
