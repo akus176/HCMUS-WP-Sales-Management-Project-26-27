@@ -1,0 +1,11 @@
+{
+  "emptySearchWorks": true,
+  "searchRecovers": true,
+  "independentDirectoryScroll": true,
+  "deliveryFieldsWork": true,
+  "editor": {
+    "compactPreserved": true,
+    "expandedPreserved": true,
+    "savedRecordUnchanged": true
+  }
+}

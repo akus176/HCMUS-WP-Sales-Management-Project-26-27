@@ -66,10 +66,8 @@ public sealed partial class MainWindow : Window
     }
     private static StackPanel NavigationContent(ServiceConsoleDestination destination)
     {
-        var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
-        // Cancel the native presenter's content inset; the concept text starts
-        // on the same 18-DIP rail as the group headings and selected surface.
-        content.RenderTransform = new Microsoft.UI.Xaml.Media.TranslateTransform { X = -8 };
+        // Add breathing room within the native presenter's selected surface.
+        var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Margin = new Thickness(4, 0, 4, 0) };
         content.Children.Add(new TextBlock { Text = destination.Numeral, Width = 17, FontSize = 13, FontFamily = (Microsoft.UI.Xaml.Media.FontFamily)Resource("ConsoleSerifFont") });
         var image = new Image { Width = 13, Height = 13, Source = new SvgImageSource(new Uri($"ms-appx:///Assets/Icons/{IconName(destination.Tag)}.svg")) };
         AutomationProperties.SetAccessibilityView(image, Microsoft.UI.Xaml.Automation.Peers.AccessibilityView.Raw);

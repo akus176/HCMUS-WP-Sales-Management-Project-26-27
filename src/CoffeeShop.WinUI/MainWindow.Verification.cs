@@ -13,7 +13,7 @@ public sealed partial class MainWindow
     // without submitting business commands or writing business data.
     private async Task VerifyShellAsync()
     {
-        if (Environment.GetCommandLineArgs().Contains("--verify-workspaces"))
+        if (Environment.GetCommandLineArgs().Contains("--verify-workspaces") || Environment.GetCommandLineArgs().Contains("--verify-menu") || Environment.GetCommandLineArgs().Contains("--verify-customers") || Environment.GetCommandLineArgs().Contains("--verify-reports"))
         {
             await VerifyWorkspacesAsync();
             return;
@@ -133,7 +133,10 @@ public sealed partial class MainWindow
     private async Task VerifyWorkspacesAsync()
     {
         var results = new List<object>();
-        foreach (var tag in new[] { "menu", "customers", "reports" })
+        var menuOnly = Environment.GetCommandLineArgs().Contains("--verify-menu");
+        var customersOnly = Environment.GetCommandLineArgs().Contains("--verify-customers");
+        var reportsOnly = Environment.GetCommandLineArgs().Contains("--verify-reports");
+        foreach (var tag in reportsOnly ? new[] { "reports" } : customersOnly ? new[] { "customers" } : menuOnly ? new[] { "menu" } : new[] { "menu", "customers", "reports" })
         {
             NavigateTo(tag);
             await Task.Delay(300);
@@ -163,17 +166,42 @@ public sealed partial class MainWindow
                 await Task.Delay(150);
                 if (width is 1440 or 600)
                     await PresentationVerification.CaptureAsync(ShellRoot, $"native-{tag}-{width}.png");
-                results.Add(new { tag, width, initial, statePreserved = initialState == JsonSerializer.Serialize(WorkspaceState()), samePage = ReferenceEquals(pageInstance, ContentFrame.Content), actualWidth = ShellRoot.ActualWidth, actualHeight = ShellRoot.ActualHeight, targets = PresentationVerification.ButtonTargets((FrameworkElement)pageInstance) });
+                results.Add(new { tag, width, initial, statePreserved = initialState == JsonSerializer.Serialize(WorkspaceState()), samePage = ReferenceEquals(pageInstance, ContentFrame.Content), actualWidth = ShellRoot.ActualWidth, actualHeight = ShellRoot.ActualHeight, menuLayout = (pageInstance as CatalogPage)?.VerificationLayout(), customerLayout = (pageInstance as CustomersPage)?.VerificationLayout(), reportLayout = (pageInstance as ReportsPage)?.VerificationLayout(), targets = PresentationVerification.ButtonTargets((FrameworkElement)pageInstance) });
                 ShellRoot.Width = ShellRoot.Height = double.NaN;
             }
         }
         Directory.CreateDirectory(PresentationVerification.DirectoryPath);
         await File.WriteAllTextAsync(Path.Combine(PresentationVerification.DirectoryPath, "workspace-verification.json"), JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true }));
+        if (reportsOnly && ContentFrame.Content is ReportsPage reportsPage)
+        {
+            var interactions = await reportsPage.VerifyReportInteractionsAsync();
+            await File.WriteAllTextAsync(Path.Combine(PresentationVerification.DirectoryPath, "report-interactions.json"), JsonSerializer.Serialize(interactions, new JsonSerializerOptions { WriteIndented = true }));
+            return;
+        }
+        if (customersOnly && ContentFrame.Content is CustomersPage customerPage)
+        {
+            var interactions = await customerPage.VerifyCustomerInteractionsAsync(async width =>
+            {
+                await ResizeForVerificationAsync(width, 900);
+                ShellRoot.Width = width;
+                ShellRoot.Height = 900;
+                ShellRoot.UpdateLayout();
+                await Task.Delay(200);
+            });
+            ShellRoot.Width = ShellRoot.Height = double.NaN;
+            await File.WriteAllTextAsync(Path.Combine(PresentationVerification.DirectoryPath, "customer-interactions.json"), JsonSerializer.Serialize(interactions, new JsonSerializerOptions { WriteIndented = true }));
+            return;
+        }
         NavigateTo("menu");
         await Task.Delay(300);
         if (ContentFrame.Content is CatalogPage editorPage)
         {
             await editorPage.PrepareVerificationAsync();
+            if (menuOnly)
+            {
+                var interactions = await editorPage.VerifyMenuInteractionsAsync();
+                await File.WriteAllTextAsync(Path.Combine(PresentationVerification.DirectoryPath, "menu-interactions.json"), JsonSerializer.Serialize(interactions, new JsonSerializerOptions { WriteIndented = true }));
+            }
             var editorResult = await editorPage.VerifyEditorAsync(async width =>
             {
                 await ResizeForVerificationAsync(width, 900);

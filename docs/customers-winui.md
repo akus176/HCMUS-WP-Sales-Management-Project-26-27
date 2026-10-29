@@ -1,9 +1,23 @@
 # Customer and loyalty screens (T5.6 / #55)
 
-Open **Customers and Loyalty** from the desktop navigation. Search by name,
+Open **Customers** from the desktop navigation. Search by name,
 phone, or email; normal search excludes inactive profiles. Include inactive
 profiles to inspect historical addresses, orders, balances, and loyalty entries.
 Search shows up to 100 matches and asks the operator to narrow a full result set.
+
+The existing desktop layout remains: customer directory on the left, profile,
+saved addresses, and loyalty ledger in the middle, and the next-order card and
+recent orders on the right. Page-local styles use the cream, charcoal, and brass
+theme with readable contact text, named profile actions, and a prominent loyalty
+balance. Search and its button share one surface; the inactive filter refreshes
+results immediately, and empty results offer Clear search.
+
+Desktop columns scroll independently. Narrow windows retain the existing stacked
+reading order with all controls reachable by scrolling. Loyalty entries show
+signed point changes and balances, local dates, and shortened order/reversal
+references with the complete references in tooltips and accessibility names.
+Order totals use two decimal places. The next-order heading reflects whether the
+form currently attaches a profile or continues as a walk-in.
 
 An operator can create, edit, or deactivate a profile and add, edit, deactivate,
 or choose a default saved address. Deactivation requires confirmation and keeps
@@ -25,8 +39,8 @@ not create or complete a sale. The shared selection survives page navigation;
 `CustomerOrderSelectionHandler`. `CustomerWorkspace` and `CustomerOrderContext`
 are singletons containing presentation state; every operation creates and disposes
 a service scope so EF tracking never outlives an operation. Pages and view models
-use Application contracts without referencing database types. The existing sketch
-fonts, colors, shapes, and focus visuals are reused.
+use Application contracts without referencing database types. Page-local styles
+reuse the existing serif/sans fonts, semantic brushes, and visible focus outlines.
 
 The POS implementation in T6.9 should consume `CustomerOrderContext.Request` using
 `CustomerOrderSelectionHandler.CreateDraftAsync(draftRequest, selectionRequest)`.
@@ -56,6 +70,13 @@ refresh fails closes the editor and explicitly tells the operator not to resubmi
 Saved order selections are refreshed after edits and cleared if unavailable.
 
 ## Verification
+
+The native `--verify-shell --verify-customers` launch captures the page at 1440
+and 600 logical pixels, checks the original three-column/stacked layouts, and
+confirms selection is preserved through seven resize steps. It exercises empty
+search and recovery, independent directory scrolling, delivery-form drafts, and
+an unsaved profile editor across resizing without submitting writes. Captures
+and reports are in [evidence/customers](evidence/customers).
 
 ```powershell
 dotnet build CoffeeShop.slnx
