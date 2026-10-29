@@ -23,15 +23,90 @@ public sealed partial class CustomersPage : Page
         return new { profiles = model.Customers.Count, selected = model.SelectedCustomer?.FullName, addresses = model.SelectedCustomer?.Addresses.Count, history = model.History.TotalCount, error = model.Error?.Code };
     }
 
+    internal object VerificationLayout() => new
+    {
+        threeColumns = Grid.GetColumn(DetailScroll) == 1 && Grid.GetColumn(OrderScroll) == 2,
+        contentFits = CustomerLayout.ActualWidth <= ActualWidth - 47,
+        directoryFits = DirectoryPanel.ActualWidth <= ActualWidth - 47,
+        detailFits = DetailScroll.ActualWidth <= ActualWidth - 47,
+        orderFits = OrderScroll.ActualWidth <= ActualWidth - 47,
+        independentScrolling = WorkspaceContent.VerticalScrollMode == ScrollMode.Disabled,
+        listHeight = CustomersList.ActualHeight
+    };
+
+    internal async Task<object> VerifyCustomerInteractionsAsync(Func<int, Task> resize)
+    {
+        var originalSearch = SearchBox.Text;
+        SearchBox.Text = "__verification_no_customer_matches__";
+        await SearchAsync();
+        var emptySearchWorks = model.IsEmpty && EmptyState.Visibility == Visibility.Visible && CustomersList.Items.Count == 0;
+        SearchBox.Text = originalSearch;
+        await SearchAsync();
+        var searchRecovers = CustomersList.Items.Count == model.Customers.Count && EmptyState.Visibility == Visibility.Collapsed;
+        await Task.Delay(350);
+        var directoryScroll = PresentationVerification.Elements(CustomersList).OfType<ScrollViewer>().FirstOrDefault();
+        var profilePosition = DetailScroll.TransformToVisual(this).TransformPoint(new Windows.Foundation.Point());
+        var independentDirectoryScroll = directoryScroll is not null;
+        if (directoryScroll is { ScrollableHeight: > 0 })
+        {
+            directoryScroll.ChangeView(null, Math.Min(150, directoryScroll.ScrollableHeight), null, true);
+            await Task.Delay(150);
+            independentDirectoryScroll = directoryScroll.VerticalOffset > 0
+                && DetailScroll.TransformToVisual(this).TransformPoint(new Windows.Foundation.Point()) == profilePosition;
+            directoryScroll.ChangeView(null, 0, null, true);
+        }
+
+        var wasDelivery = DeliveryOrder.IsChecked;
+        var recipient = RecipientName.Text;
+        var contact = ContactNumber.Text;
+        var address = OrderAddress.Text;
+        DeliveryOrder.IsChecked = true;
+        RecipientName.Text = "Unsaved delivery draft";
+        OrderAddress.Text = "Unsaved order-only address";
+        await resize(600);
+        var compactDraftPreserved = RecipientName.Text == "Unsaved delivery draft" && OrderAddress.Text == "Unsaved order-only address";
+        await resize(1440);
+        var deliveryFieldsWork = DeliveryFields.Visibility == Visibility.Visible && compactDraftPreserved
+            && RecipientName.Text == "Unsaved delivery draft" && OrderAddress.Text == "Unsaved order-only address";
+        await PresentationVerification.CaptureAsync(this, "native-customers-delivery.png");
+        DeliveryOrder.IsChecked = wasDelivery;
+        RecipientName.Text = recipient;
+        ContactNumber.Text = contact;
+        OrderAddress.Text = address;
+
+        object editor = new { skipped = "No active customer available" };
+        if (model.SelectedCustomer is { IsActive: true } customer)
+        {
+            editorVerification = async (dialog, fields) =>
+            {
+                var name = fields.Children.OfType<TextBox>().First();
+                var savedName = name.Text;
+                name.Text = savedName + " unsaved draft";
+                await resize(600);
+                var compactPreserved = name.Text == savedName + " unsaved draft";
+                await resize(1440);
+                if (PresentationVerification.Elements(dialog).OfType<Border>().FirstOrDefault(border => border.Name == "BackgroundElement") is { } frame)
+                    await PresentationVerification.CaptureAsync(frame, "native-customers-editor.png");
+                editor = new { compactPreserved, expandedPreserved = name.Text == savedName + " unsaved draft", savedRecordUnchanged = model.SelectedCustomer?.FullName == savedName };
+                dialog.Hide();
+            };
+            try { await EditCustomerAsync(customer); }
+            finally { editorVerification = null; }
+        }
+        return new { emptySearchWorks, searchRecovers, independentDirectoryScroll, deliveryFieldsWork, editor };
+    }
+
     private readonly CustomerWorkspace model;
     private bool rendering;
     private bool ready;
     private EntityId? renderedCustomerId;
+    private Func<ContentDialog, StackPanel, Task>? editorVerification;
     public sealed record CustomerRow(CustomerSummary Customer)
     {
         public EntityId Id => Customer.Id;
         public string FullName => Customer.FullName;
         public string Phone => Customer.Phone ?? "";
+        public string ContactDisplay => Phone + (Customer.IsActive ? "" : " · Inactive");
         public int LoyaltyPointsBalance => Customer.LoyaltyPointsBalance;
         public string Initials => InitialsFor(FullName);
     }
@@ -40,7 +115,31 @@ public sealed partial class CustomersPage : Page
         public string Label => Address.Label ?? "Saved address";
         public string AddressLine => Address.AddressLine;
         public bool IsActive => Address.IsActive;
-        public string StateDisplay => Address.IsDefault ? "DEFAULT" : Address.IsActive ? "ACTIVE" : "INACTIVE";
+        public string StateDisplay => !Address.IsActive ? "Inactive" : Address.IsDefault ? "Default address" : "Active";
+    }
+    public sealed record LoyaltyRow(LoyaltyTransactionSummary Transaction)
+    {
+        public string Type => Transaction.Type switch
+        {
+            "earn" => "Points earned",
+            "redeem" => "Points redeemed",
+            "reverse_earn" => "Earning reversed",
+            "reverse_redeem" => "Redemption restored",
+            _ => Transaction.Type
+        };
+        public string DateDisplay => Transaction.CreatedAt.ToLocalTime().ToString("dd MMM yyyy · HH:mm");
+        public string OrderDisplay => (Transaction.OrderId is { } id ? $"Order {id.ToString()[..8].ToUpperInvariant()}" : "No linked order")
+            + (Transaction.ReversesTransactionId is { } reversal ? $"\nReverses {reversal.ToString()[..8].ToUpperInvariant()}" : "");
+        public string ReferenceDetails => $"Order: {Transaction.OrderId}\nReverses: {Transaction.ReversesTransactionId}";
+        public string PointsDisplay => Transaction.Points.ToString("+0;-0;0");
+        public string BalanceDisplay => $"Balance {Transaction.BalanceAfter:N0}";
+    }
+    public sealed record RecentOrderRow(CustomerOrderSummary Order)
+    {
+        public string OrderNumber => Order.OrderNumber;
+        public string StatusDisplay => System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Order.Status.Replace('_', ' '));
+        public string DateDisplay => Order.CreatedAt.ToLocalTime().ToString("dd MMM yyyy · HH:mm");
+        public string TotalDisplay => Order.Total.ToString("N2");
     }
     private static string InitialsFor(string name) => string.Concat(name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(part => part[0]));
 
@@ -72,6 +171,38 @@ public sealed partial class CustomersPage : Page
 
     private async void OnSearch(object sender, RoutedEventArgs args) => await SearchAsync();
 
+    private void OnSearchBoxLoaded(object sender, RoutedEventArgs args)
+    {
+        // The native TextBox template does not bind VerticalContentAlignment.
+        foreach (var part in PresentationVerification.Elements(SearchBox))
+        {
+            if (part is ScrollViewer { Name: "ContentElement" } content)
+            {
+                content.VerticalAlignment = VerticalAlignment.Center;
+                content.VerticalContentAlignment = VerticalAlignment.Center;
+            }
+            if (part is TextBlock { Name: "PlaceholderTextContentPresenter" } placeholder)
+            {
+                placeholder.Style = null;
+                placeholder.FontFamily = SearchBox.FontFamily;
+                placeholder.FontSize = SearchBox.FontSize;
+                placeholder.LineHeight = 0;
+                placeholder.VerticalAlignment = VerticalAlignment.Center;
+            }
+        }
+    }
+
+    private async void OnInactiveChanged(object sender, RoutedEventArgs args)
+    {
+        if (ready && !rendering && !model.IsBusy) await SearchAsync();
+    }
+
+    private async void OnClearSearch(object sender, RoutedEventArgs args)
+    {
+        SearchBox.Text = "";
+        await SearchAsync();
+    }
+
     private async void OnSearchKeyDown(object sender, KeyRoutedEventArgs args)
     {
         if (args.Key == Windows.System.VirtualKey.Enter)
@@ -102,8 +233,8 @@ public sealed partial class CustomersPage : Page
         {
             CustomerRow { Customer: var customer } => $"{customer.FullName}, {customer.Phone}, {(customer.IsActive ? "active" : "inactive")}",
             AddressRow { Address: var address } => $"{address.Label}, {address.AddressLine}, {(address.IsDefault ? "default" : "")}",
-            LoyaltyTransactionSummary transaction => $"{transaction.Type}, {transaction.Points} points, balance {transaction.BalanceAfter}",
-            CustomerOrderSummary order => $"{order.OrderNumber}, {order.Status}, total {order.Total:N2}",
+            LoyaltyRow { Transaction: var transaction } => $"{transaction.Type}, {transaction.Points} points, balance {transaction.BalanceAfter}, order {transaction.OrderId}, reverses {transaction.ReversesTransactionId}",
+            RecentOrderRow { Order: var order } => $"{order.OrderNumber}, {order.Status}, total {order.Total:N2}",
             _ => ""
         };
         AutomationProperties.SetName(args.ItemContainer, name);
@@ -117,11 +248,12 @@ public sealed partial class CustomersPage : Page
             LoadingBar.Visibility = model.IsBusy ? Visibility.Visible : Visibility.Collapsed;
             WorkspaceContent.IsEnabled = !model.IsBusy;
             ReloadButton.IsEnabled = !model.IsBusy;
-            NewCustomerButton.IsEnabled = !model.RequiresReload;
+            NewCustomerButton.IsEnabled = !model.IsBusy && !model.RequiresReload;
             Status.Apply(model.Feedback);
             if (model.Feedback.Kind == WorkflowFeedbackKind.Ready) Status.IsOpen = false;
-            ProfileCount.Text = $"MANAGE / CUSTOMER NOTEBOOK / {model.Customers.Count} profiles";
-            EmptyMessage.Visibility = model.IsEmpty ? Visibility.Visible : Visibility.Collapsed;
+            ProfileCount.Text = "MANAGE / CUSTOMERS";
+            ResultsCount.Text = model.Customers.Count == 100 ? "100+ matches" : $"{model.Customers.Count} profiles";
+            EmptyState.Visibility = model.IsEmpty ? Visibility.Visible : Visibility.Collapsed;
             var customer = model.SelectedCustomer;
             if (!ReferenceEquals(CustomersList.Tag, model.Customers))
             {
@@ -134,8 +266,9 @@ public sealed partial class CustomersPage : Page
                 ? "Select a customer"
                 : customer.FullName;
             ProfileInitials.Text = customer is null ? "" : InitialsFor(customer.FullName);
-            ContactDetails.Text = customer is null ? "" : $"{customer.Phone} · {customer.Email}{(customer.IsActive ? "" : " · Inactive")}";
-            BalanceText.Text = customer is null ? "" : $"{customer.LoyaltyPointsBalance:N0} pts";
+            ContactDetails.Text = customer is null ? "Choose a profile from the directory to view its details."
+                : string.Join("\n", new[] { customer.Phone, customer.Email, customer.IsActive ? null : "Inactive profile" }.Where(value => !string.IsNullOrWhiteSpace(value)));
+            BalanceText.Text = customer is null ? "—" : $"{customer.LoyaltyPointsBalance:N0} points";
             ProfileActions.Visibility = customer is null ? Visibility.Collapsed : Visibility.Visible;
             EditCustomerButton.IsEnabled = model.CanEdit;
             DeactivateCustomerButton.IsEnabled = model.CanEdit;
@@ -143,32 +276,18 @@ public sealed partial class CustomersPage : Page
             AddressesList.IsEnabled = model.CanEdit;
             AddressesList.ItemsSource = customer?.Addresses.Select(address => new AddressRow(address)).ToArray();
             AddressesEmpty.Visibility = customer is not null && customer.Addresses.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-            HistoryList.ItemsSource = model.History.Items.Select(item => item with
-            {
-                Type = item.Type switch
-                {
-                    "earn" => "Points earned",
-                    "redeem" => "Points redeemed",
-                    "reverse_earn" => "Earning reversed",
-                    "reverse_redeem" => "Redemption restored",
-                    _ => item.Type
-                }
-            }).ToArray();
+            HistoryList.ItemsSource = model.History.Items.Select(item => new LoyaltyRow(item)).ToArray();
             HistoryEmpty.Visibility = customer is not null && model.History.TotalCount == 0 ? Visibility.Visible : Visibility.Collapsed;
             HistoryPageText.Text = customer is null || model.History.TotalCount == 0 ? ""
                 : $"Transactions {model.History.Offset + 1}–{model.History.Offset + model.History.Items.Count} of {model.History.TotalCount}";
             PreviousButton.IsEnabled = model.CanPrevious;
             NextButton.IsEnabled = model.CanNext;
-            OrdersList.ItemsSource = customer?.RecentOrders;
+            OrdersList.ItemsSource = customer?.RecentOrders.Select(order => new RecentOrderRow(order)).ToArray();
             OrdersEmpty.Visibility = customer is not null && customer.RecentOrders.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             UseSelectedProfile.IsEnabled = model.CanEdit;
-            UseSelectedProfile.Content = customer is null ? "Select an active profile above to attach it" : $"Attach {customer.FullName}";
+            UseSelectedProfile.Content = "Use this customer profile";
+            ToolTipService.SetToolTip(UseSelectedProfile, customer?.FullName ?? "Select an active customer in the directory first.");
             SelectForOrderButton.IsEnabled = !model.RequiresReload;
-            OrderSummary.Text = customer is null ? "Walk-in — no profile required." : $"Use {customer.FullName.Split(' ')[0]} for the next ticket";
-            if (model.OrderSelection.CustomerId == customer?.Id && model.OrderSelection.Delivery is { } delivery)
-            {
-                OrderSummary.Text += $"\nDelivery to {delivery.RecipientName} · {delivery.ContactNumber}\n{model.OrderSelection.AddressLine}";
-            }
 
             if (!model.IsBusy)
             {
@@ -200,19 +319,36 @@ public sealed partial class CustomersPage : Page
     {
         if (ListColumn is null) return;
         var wide = ActualWidth >= 1000;
+        var height = Math.Max(260, WorkspaceContent.ActualHeight);
+        WorkspaceContent.VerticalScrollMode = wide ? ScrollMode.Disabled : ScrollMode.Enabled;
+        WorkspaceContent.VerticalScrollBarVisibility = wide ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
+        CustomerLayout.Height = wide ? height : double.NaN;
+        CustomerLayout.RowDefinitions[0].Height = wide ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
+        DirectoryPanel.Height = wide ? height : Math.Min(420, Math.Max(260, height * .7));
+        DirectoryPanel.BorderThickness = wide ? new Thickness(0, 0, 1, 0) : new Thickness(0, 0, 0, 1);
+        DirectoryPanel.Padding = wide ? new Thickness(0, 0, 12, 0) : new Thickness(0, 0, 0, 12);
+        DetailScroll.MaxHeight = OrderScroll.MaxHeight = wide ? height : double.PositiveInfinity;
         ListColumn.Width = wide ? new GridLength(280) : new GridLength(1, GridUnitType.Star);
         DetailColumn.Width = wide ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
         OrderColumn.Width = new GridLength(wide ? 282 : 0);
-        Grid.SetColumn(DetailPanel, wide ? 1 : 0);
-        Grid.SetRow(DetailPanel, wide ? 0 : 1);
-        Grid.SetColumn(OrderPanel, wide ? 2 : 0);
-        Grid.SetRow(OrderPanel, wide ? 0 : 2);
+        CustomerLayout.ColumnSpacing = wide ? 18 : 0;
+        CustomerLayout.RowSpacing = wide ? 0 : 18;
+        Grid.SetColumn(DetailScroll, wide ? 1 : 0);
+        Grid.SetRow(DetailScroll, wide ? 0 : 1);
+        Grid.SetColumn(OrderScroll, wide ? 2 : 0);
+        Grid.SetRow(OrderScroll, wide ? 0 : 2);
         HistoryColumn.Width = wide && ActualWidth >= 1200 ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
         Grid.SetColumn(HistoryPanel, wide && ActualWidth >= 1200 ? 1 : 0);
         Grid.SetRow(HistoryPanel, wide && ActualWidth >= 1200 ? 0 : 1);
-        HeaderOrnament.Visibility = ActualWidth >= 850 ? Visibility.Visible : Visibility.Collapsed;
-        Header.ColumnDefinitions[1].Width = new GridLength(ActualWidth >= 850 ? 116 : 0);
-        HeaderActions.Orientation = ActualWidth >= 700 ? Orientation.Horizontal : Orientation.Vertical;
+        var headerInline = ActualWidth >= 720;
+        HeaderOrnament.Visibility = ActualWidth >= 1000 ? Visibility.Visible : Visibility.Collapsed;
+        Header.ColumnDefinitions[1].Width = new GridLength(ActualWidth >= 1000 ? 116 : 0);
+        Header.ColumnDefinitions[2].Width = headerInline ? GridLength.Auto : new GridLength(0);
+        Header.ColumnSpacing = headerInline ? 18 : 0;
+        Grid.SetColumn(HeaderActions, headerInline ? 2 : 0);
+        Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 3);
+        Grid.SetRow(HeaderActions, headerInline ? 0 : 1);
+        CustomerTitle.FontSize = headerInline ? 52 : 40;
     }
 
     private string StatusMessage() => model.Error is { Details.Count: > 0 } error
@@ -280,7 +416,7 @@ public sealed partial class CustomersPage : Page
         var line = Field("Address", address?.AddressLine, 500);
         line.AcceptsReturn = true;
         line.TextWrapping = TextWrapping.Wrap;
-        var defaultAddress = new CheckBox { Content = "Default delivery address", IsChecked = address?.IsDefault == true, MinHeight = 48 };
+        var defaultAddress = new CheckBox { Content = "Default delivery address", IsChecked = address?.IsDefault == true, MinHeight = 44, FontSize = 14 };
         return ShowEditorAsync(address is null ? "Add delivery address" : "Edit delivery address", Form(label, line, defaultAddress), () => address is null
             ? model.AddAddressAsync(new(customer.Id, line.Text, label.Text, defaultAddress.IsChecked == true))
             : model.UpdateAddressAsync(new(customer.Id, address.Id, line.Text, label.Text, defaultAddress.IsChecked == true)));
@@ -347,6 +483,8 @@ public sealed partial class CustomersPage : Page
     {
         DeliveryFields.Visibility = DeliveryOrder.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         OrderAddress.IsEnabled = (AddressChoice.SelectedItem as AddressOption)?.Id is null;
+        OrderSummary.Text = UseSelectedProfile.IsChecked == true && model.SelectedCustomer is { IsActive: true } customer
+            ? $"Order for {customer.FullName.Split(' ')[0]}" : "Walk-in order";
     }
 
     private void RestoreOrderForm()
@@ -398,15 +536,32 @@ public sealed partial class CustomersPage : Page
         var dialog = new ContentDialog
         {
             Title = new TextBlock { Text = title, FontFamily = (FontFamily)Resource("ConsoleSerifFont"), FontSize = 32, TextWrapping = TextWrapping.Wrap },
-            Style = (Style)Resource("WorkspaceDialog"),
+            Style = (Style)Resources["CustomerDialog"],
             PrimaryButtonText = button,
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = XamlRoot,
             RequestedTheme = ElementTheme.Light,
             FontFamily = (FontFamily)Resource("ConsoleSansFont"),
+            FontSize = 14,
             Content = new ScrollViewer { Content = Form(error, progress, editor), MaxHeight = 520 }
         };
+        dialog.Opened += (_, _) =>
+        {
+            if (PresentationVerification.Elements(dialog).OfType<Button>().FirstOrDefault(button => button.Name == "PrimaryButton") is { } primary)
+            {
+                // The native dialog replaces the default button style in its visual state.
+                primary.Background = (Brush)Resource("ConsoleFieldBrush");
+                primary.Foreground = (Brush)Resource("ConsoleOnFieldBrush");
+                primary.BorderBrush = (Brush)Resource("ConsoleFieldBrush");
+                primary.CornerRadius = new CornerRadius(0);
+                primary.MinHeight = 44;
+                primary.FontSize = 13;
+                primary.Resources["AccentButtonBackgroundPointerOver"] = Resource("ConsoleFieldDeepBrush");
+                primary.Resources["AccentButtonBackgroundPressed"] = Resource("ConsoleFieldDeepBrush");
+            }
+        };
+        if (editorVerification is { } verify) dialog.Opened += async (_, _) => await verify(dialog, fields);
         dialog.Closing += (_, args) => args.Cancel = model.IsBusy;
         dialog.PrimaryButtonClick += async (_, args) =>
         {
@@ -440,6 +595,8 @@ public sealed partial class CustomersPage : Page
         Header = header,
         Text = value ?? "",
         MaxLength = maxLength,
+        FontSize = 14,
+        MinHeight = 44,
         Style = (Style)Resource("ConsoleFieldStyle")
     };
 

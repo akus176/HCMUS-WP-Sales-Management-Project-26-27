@@ -1,236 +1,345 @@
-<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="using:CoffeeShop.WinUI.Controls" x:Class="CoffeeShop.WinUI.Pages.ReportsPage" FontFamily="{StaticResource ConsoleSansFont}" Foreground="{StaticResource ConsoleInkBrush}" Background="{StaticResource ConsoleGroundBrush}" RequestedTheme="Light" SizeChanged="OnPageSizeChanged">
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:controls="using:CoffeeShop.WinUI.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="CoffeeShop.WinUI.Pages.ReportsPage" FontFamily="{StaticResource ConsoleSansFont}" Foreground="{StaticResource ConsoleInkBrush}" Background="{StaticResource ConsoleGroundBrush}" RequestedTheme="Light" SizeChanged="OnPageSizeChanged">
     <Page.Resources>
-        <Style TargetType="TextBlock" BasedOn="{StaticResource WorkspaceText}"/>
-        <Style TargetType="Button" BasedOn="{StaticResource WorkspaceButton}"/>
-        <Style TargetType="ListViewItem" BasedOn="{StaticResource WorkspaceListItem}"/>
+        <Style x:Key="ReportText" TargetType="TextBlock" BasedOn="{StaticResource ConsoleBodyStyle}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="LineHeight" Value="21" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="ReportLabel" TargetType="TextBlock" BasedOn="{StaticResource ConsoleLabelStyle}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="CharacterSpacing" Value="60" />
+        </Style>
+        <Style x:Key="ReportHeading" TargetType="TextBlock" BasedOn="{StaticResource ConsoleSectionTitleStyle}">
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="ReportButton" TargetType="Button" BasedOn="{StaticResource ConsoleButtonStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CharacterSpacing" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="14,0" />
+        </Style>
+        <Style x:Key="ReportPrimary" TargetType="Button" BasedOn="{StaticResource ConsolePrimaryButtonStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CharacterSpacing" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="14,0" />
+        </Style>
+        <Style x:Key="ReportLink" TargetType="Button" BasedOn="{StaticResource ReportButton}">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource ConsoleAccentTextBrush}" />
+            <Setter Property="Padding" Value="8,0" />
+        </Style>
+        <Style x:Key="ReportPanel" TargetType="Border" BasedOn="{StaticResource WorkspacePanel}">
+            <Setter Property="Padding" Value="0,12,0,16" />
+        </Style>
+        <Style x:Key="ReportListItem" TargetType="ListViewItem" BasedOn="{StaticResource WorkspaceListItem}">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource ReportText}" />
+        <Style TargetType="Button" BasedOn="{StaticResource ReportButton}" />
+        <Style TargetType="ListViewItem" BasedOn="{StaticResource ReportListItem}" />
+        <Style x:Key="ReportFlyout" TargetType="FlyoutPresenter">
+            <Setter Property="RequestedTheme" Value="Light" />
+            <Setter Property="FontFamily" Value="{StaticResource ConsoleSansFont}" />
+            <Setter Property="Background" Value="{StaticResource ConsoleGroundBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource ConsoleInkBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ConsoleRuleBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
     </Page.Resources>
-    <Grid Padding="32,20,32,22" RowSpacing="8">
+    <Grid Padding="24,18,24,24" RowSpacing="6">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid x:Name="Header" Padding="0,0,0,10" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,3" ColumnSpacing="18">
+        <Grid x:Name="Header" Padding="0,0,0,16" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1" ColumnSpacing="18" RowSpacing="10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="116"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="116" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
             <StackPanel Spacing="3">
-                <TextBlock x:Name="PeriodLabel" Text="INSIGHTS / REPORTS" Style="{StaticResource WorkspaceLabel}"/>
-                <TextBlock Text="Reports" Style="{StaticResource ConsolePageTitleStyle}"/>
-                <TextBlock Text="A short read on the period: what sold, how they paid, and what needs fixing before close."/>
+                <TextBlock x:Name="PeriodLabel" Text="INSIGHTS / REPORTS" Style="{StaticResource ReportLabel}" />
+                <TextBlock Text="Reports" Style="{StaticResource ConsolePageTitleStyle}" x:Name="ReportsTitle" FontSize="52" />
+                <TextBlock Text="A short read on the period: what sold, how they paid, and what needs fixing before close." />
             </StackPanel>
-            <Image x:Name="HeaderOrnament" Grid.Column="1" Source="ms-appx:///Assets/Ornaments/reports.svg" Height="78" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw"/>
+            <Image x:Name="HeaderOrnament" Grid.Column="1" Source="ms-appx:///Assets/Ornaments/reports.svg" Height="78" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
             <StackPanel x:Name="HeaderActions" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom" Spacing="8">
                 <Button x:Name="PeriodButton" Content="Reporting period" AutomationProperties.Name="Choose reporting period">
                     <Button.Flyout>
-                        <Flyout x:Name="PeriodFlyout">
-                            <StackPanel Spacing="12">
-                                <DatePicker x:Name="FirstDate" Header="From"/>
-                                <DatePicker x:Name="LastDate" Header="To"/>
-                                <Button Content="Apply period" Click="OnRefresh" Style="{StaticResource WorkspacePrimary}"/>
+                        <Flyout x:Name="PeriodFlyout" FlyoutPresenterStyle="{StaticResource ReportFlyout}" Opened="OnPeriodOpened">
+                            <StackPanel Spacing="12" MinWidth="280" MaxWidth="360">
+                                <TextBlock Text="Reporting period" Style="{StaticResource ReportHeading}" />
+                                <TextBlock Text="Both dates are included. Reports use local time." FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                                <DatePicker x:Name="FirstDate" Header="From" FontSize="14" MinHeight="44" HorizontalAlignment="Stretch" />
+                                <DatePicker x:Name="LastDate" Header="To" FontSize="14" MinHeight="44" HorizontalAlignment="Stretch" />
+                                <InfoBar x:Name="PeriodError" IsOpen="False" IsClosable="False" Severity="Error" />
+                                <Button Content="Apply period" Click="OnApplyPeriod" Style="{StaticResource ReportPrimary}" x:Name="ApplyPeriodButton" HorizontalAlignment="Stretch" />
                             </StackPanel>
                         </Flyout>
                     </Button.Flyout>
                 </Button>
-                <Button x:Name="RefreshButton" Content="Refresh" Click="OnRefresh" Style="{StaticResource WorkspacePrimary}"/>
+                <Button x:Name="RefreshButton" Content="Refresh" Click="OnRefresh" Style="{StaticResource ReportPrimary}" />
             </StackPanel>
         </Grid>
         <StackPanel Grid.Row="1" Spacing="4">
-            <ProgressBar x:Name="LoadingIndicator" IsIndeterminate="True" Visibility="Collapsed" AutomationProperties.Name="Loading reports"/>
-            <InfoBar x:Name="Status" IsOpen="False" IsClosable="True"/>
+            <ProgressBar x:Name="LoadingIndicator" IsIndeterminate="True" Visibility="Collapsed" AutomationProperties.Name="Loading reports" />
+            <InfoBar x:Name="Status" IsOpen="False" IsClosable="True" />
         </StackPanel>
-        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
-            <StackPanel Spacing="16">
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" x:Name="ReportScroll">
+            <StackPanel Spacing="16" Margin="0,0,24,0">
                 <Grid x:Name="Kpis" ColumnSpacing="1" RowSpacing="1" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,1">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <Border x:Name="RevenueKpi" Background="{StaticResource ConsoleFieldBrush}" Padding="18,14">
+                    <Border x:Name="RevenueKpi" Background="{StaticResource ConsoleFieldBrush}" Padding="16,14" MinHeight="120">
                         <StackPanel Spacing="2">
-                            <TextBlock Text="NET REVENUE" Style="{StaticResource WorkspaceLabel}" Foreground="{StaticResource ConsoleOnFieldMutedBrush}"/>
-                            <TextBlock x:Name="RevenueTotal" Text="—" Style="{StaticResource ConsoleNumberStyle}" FontSize="32" Foreground="{StaticResource ConsoleOnFieldBrush}"/>
-                            <TextBlock Text="Recognized payments in period" Foreground="{StaticResource ConsoleOnFieldMutedBrush}" FontSize="7"/>
+                            <TextBlock Text="NET REVENUE" Style="{StaticResource ReportLabel}" Foreground="{StaticResource ConsoleOnFieldMutedBrush}" />
+                            <TextBlock x:Name="RevenueTotal" Text="—" Style="{StaticResource ConsoleNumberStyle}" FontSize="36" Foreground="{StaticResource ConsoleOnFieldBrush}" />
+                            <TextBlock Text="Recognized payments in period" Foreground="{StaticResource ConsoleOnFieldMutedBrush}" FontSize="12" LineHeight="18" />
                         </StackPanel>
                     </Border>
-                    <Border x:Name="OrdersKpi" Grid.Column="1" Padding="18,14">
+                    <Border x:Name="OrdersKpi" Grid.Column="1" Padding="16,14" MinHeight="120">
                         <StackPanel Spacing="2">
-                            <TextBlock Text="RECOGNIZED ORDERS" Style="{StaticResource WorkspaceLabel}"/>
-                            <TextBlock x:Name="RevenueOrderCount" Text="—" Style="{StaticResource ConsoleNumberStyle}" FontSize="32"/>
-                            <TextBlock Text="Distinct orders in period" FontSize="7"/>
+                            <TextBlock Text="RECOGNIZED ORDERS" Style="{StaticResource ReportLabel}" />
+                            <TextBlock x:Name="RevenueOrderCount" Text="—" Style="{StaticResource ConsoleNumberStyle}" FontSize="36" />
+                            <TextBlock Text="Distinct orders in period" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" LineHeight="18" />
                         </StackPanel>
                     </Border>
-                    <Border x:Name="AverageKpi" Grid.Column="2" Padding="18,14">
+                    <Border x:Name="AverageKpi" Grid.Column="2" Padding="16,14" MinHeight="120">
                         <StackPanel Spacing="2">
-                            <TextBlock Text="REVENUE PER ORDER" Style="{StaticResource WorkspaceLabel}"/>
-                            <TextBlock x:Name="AverageTicket" Text="—" Style="{StaticResource ConsoleNumberStyle}" FontSize="32"/>
-                            <TextBlock Text="Recognized revenue / order count" FontSize="7"/>
+                            <TextBlock Text="REVENUE PER ORDER" Style="{StaticResource ReportLabel}" />
+                            <TextBlock x:Name="AverageTicket" Text="—" Style="{StaticResource ConsoleNumberStyle}" FontSize="36" />
+                            <TextBlock Text="Recognized revenue / order count" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" LineHeight="18" />
                         </StackPanel>
                     </Border>
-                    <Border x:Name="StockKpi" Grid.Column="3" Padding="18,14">
+                    <Border x:Name="StockKpi" Grid.Column="3" Padding="16,14" MinHeight="120" Background="{StaticResource ConsoleRaisedGroundBrush}">
                         <StackPanel Spacing="2">
-                            <TextBlock Text="LOW STOCK" Style="{StaticResource WorkspaceLabel}"/>
-                            <TextBlock x:Name="StockCount" Text="—" Style="{StaticResource ConsoleNumberStyle}" FontSize="32" Foreground="{StaticResource ConsoleAccentTextBrush}"/>
-                            <TextBlock Text="Current balances · independent of period" FontSize="7"/>
+                            <TextBlock Text="LOW STOCK" Style="{StaticResource ReportLabel}" />
+                            <TextBlock x:Name="StockCount" Text="—" Style="{StaticResource ConsoleNumberStyle}" FontSize="36" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                            <TextBlock Text="Current balances · independent of period" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" LineHeight="18" />
                         </StackPanel>
                     </Border>
                 </Grid>
-                <Grid x:Name="Dashboard" ColumnSpacing="24" RowSpacing="0">
+                <Grid x:Name="Dashboard" ColumnSpacing="24" RowSpacing="12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition x:Name="LeftColumn" Width="1.15*"/>
-                        <ColumnDefinition x:Name="RightColumn" Width=".85*"/>
+                        <ColumnDefinition x:Name="LeftColumn" Width="1.15*" />
+                        <ColumnDefinition x:Name="RightColumn" Width=".85*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <Border x:Name="RevenuePanel" Style="{StaticResource WorkspacePanel}">
+                    <Border x:Name="RevenuePanel" Style="{StaticResource ReportPanel}">
                         <StackPanel Spacing="3">
-                            <TextBlock Text="Revenue by day" Style="{StaticResource WorkspaceHeading}"/>
-                            <TextBlock Text="Payment-date recognition; cancelled and restored orders excluded." FontSize="7"/>
-                            <TextBlock x:Name="RevenueEmpty" Visibility="Collapsed" Text="No recognized revenue in this period. Choose another period or complete a paid order."/>
-                            <TextBlock x:Name="RevenueError" Visibility="Collapsed" Foreground="{StaticResource ConsoleAccentTextBrush}"/>
-                            <Grid x:Name="RevenueChart" Height="170" VerticalAlignment="Bottom" Margin="0,8,0,0"/>
+                            <TextBlock Text="Revenue by day" Style="{StaticResource ReportHeading}" />
+                            <TextBlock Text="Payment-date recognition; cancelled and restored orders excluded." FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                            <TextBlock x:Name="RevenueEmpty" Visibility="Collapsed" Text="No recognized revenue in this period. Choose another period or complete a paid order." />
+                            <TextBlock x:Name="RevenueError" Visibility="Collapsed" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                            <ScrollViewer x:Name="RevenueChartScroll" Height="220" Margin="0,8,0,0" Padding="0,0,0,16" HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Enabled" VerticalScrollBarVisibility="Disabled" VerticalScrollMode="Disabled" SizeChanged="OnChartSizeChanged">
+                                <Grid x:Name="RevenueChart" Height="200" VerticalAlignment="Bottom" Margin="0" />
+                            </ScrollViewer>
+                            <TextBlock x:Name="RevenueChartHint" Visibility="Collapsed" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                             <Grid ColumnSpacing="8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0">
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                <TextBlock x:Name="RevenueSummary" FontSize="9" VerticalAlignment="Center"/>
-                                <Button Grid.Column="1" Content="DAILY DETAILS" Style="{StaticResource WorkspaceLink}">
-                                    <Button.Flyout><Flyout>
-                                        <ListView x:Name="RevenueDaysList" SelectionMode="None" MaxHeight="300" AutomationProperties.Name="Daily revenue and recognized order counts">
-                                            <ListView.ItemTemplate><DataTemplate>
-                                                <Grid Padding="0,8" ColumnSpacing="12">
-                                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                                    <TextBlock Text="{Binding DateDisplay}"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding RevenueDisplay}"/>
-                                                    <TextBlock Grid.Column="2" Text="{Binding OrderCount}"/>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="RevenueSummary" FontSize="12" VerticalAlignment="Center" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                                <Button Grid.Column="1" Content="Daily details" Style="{StaticResource ReportLink}" x:Name="DailyDetailsButton">
+                                    <Button.Flyout>
+                                        <Flyout FlyoutPresenterStyle="{StaticResource ReportFlyout}">
+                                            <StackPanel Spacing="8">
+                                                <Grid ColumnSpacing="12" Padding="0,0,20,8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="96" />
+                                                        <ColumnDefinition Width="64" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="Date" Style="{StaticResource ReportLabel}" />
+                                                    <TextBlock Grid.Column="1" Text="Revenue" Style="{StaticResource ReportLabel}" TextAlignment="Right" />
+                                                    <TextBlock Grid.Column="2" Text="Orders" Style="{StaticResource ReportLabel}" TextAlignment="Right" />
                                                 </Grid>
-                                            </DataTemplate></ListView.ItemTemplate>
-                                        </ListView>
-                                    </Flyout></Button.Flyout>
+                                                <ListView x:Name="RevenueDaysList" SelectionMode="None" MaxHeight="320" AutomationProperties.Name="Daily revenue and recognized order counts" MinWidth="300" Padding="0,0,20,0">
+                                                    <ListView.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Padding="0,8" ColumnSpacing="12">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="96" />
+                                                                    <ColumnDefinition Width="64" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Text="{Binding DateDisplay}" />
+                                                                <TextBlock Grid.Column="1" Text="{Binding RevenueDisplay}" TextAlignment="Right" />
+                                                                <TextBlock Grid.Column="2" Text="{Binding OrderCount}" TextAlignment="Right" />
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ListView.ItemTemplate>
+                                                </ListView>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
                                 </Button>
                             </Grid>
                         </StackPanel>
                     </Border>
-                    <Border x:Name="BestPanel" Grid.Column="1" Style="{StaticResource WorkspacePanel}">
+                    <Border x:Name="BestPanel" Grid.Column="1" Style="{StaticResource ReportPanel}">
                         <StackPanel Spacing="3">
-                            <TextBlock Text="Best sellers" Style="{StaticResource WorkspaceHeading}"/>
-                            <TextBlock Text="Quantity by completion date · revenue by payment date." FontSize="7"/>
-                            <TextBlock x:Name="BestSellersEmpty" Visibility="Collapsed" Text="No completed items in this period. Choose another period or complete an order."/>
-                            <TextBlock x:Name="BestSellersError" Visibility="Collapsed" Foreground="{StaticResource ConsoleAccentTextBrush}"/>
-                            <ScrollViewer MaxHeight="216" HorizontalScrollBarVisibility="Disabled">
+                            <TextBlock Text="Best sellers" Style="{StaticResource ReportHeading}" />
+                            <TextBlock Text="Quantity by completion date · revenue by payment date." FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                            <TextBlock x:Name="BestSellersEmpty" Visibility="Collapsed" Text="No completed items in this period. Choose another period or complete an order." />
+                            <TextBlock x:Name="BestSellersError" Visibility="Collapsed" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                            <ScrollViewer MaxHeight="240" HorizontalScrollBarVisibility="Disabled" Padding="0,0,24,0">
                                 <ItemsControl x:Name="BestSellersList" IsTabStop="False" AutomationProperties.Name="Best sellers by quantity">
-                                    <ItemsControl.ItemTemplate><DataTemplate>
-                                        <Grid Height="36" ColumnSpacing="8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/><ColumnDefinition Width="48"/></Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Rank}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="14" Foreground="{StaticResource ConsoleAccentTextBrush}" VerticalAlignment="Center"/>
-                                            <Grid Grid.Column="1" RowSpacing="2" Padding="0,5,0,4">
-                                                <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="3"/></Grid.RowDefinitions>
-                                                <TextBlock Text="{Binding NameDisplay}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="14" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
-                                                <ProgressBar Grid.Row="1" Value="{Binding Quantity}" Maximum="{Binding Maximum}" Foreground="{StaticResource ConsoleAccentBrush}" Background="{StaticResource ConsoleRuleBrush}" MinHeight="3" Height="3" IsTabStop="False"/>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Height="48" ColumnSpacing="8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="24" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="70" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding Rank}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="17" Foreground="{StaticResource ConsoleAccentTextBrush}" VerticalAlignment="Center" />
+                                                <Grid Grid.Column="1" RowSpacing="2" Padding="0,5,0,4">
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="*" />
+                                                        <RowDefinition Height="3" />
+                                                    </Grid.RowDefinitions>
+                                                    <TextBlock Text="{Binding NameDisplay}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="18" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" ToolTipService.ToolTip="{Binding NameDisplay}" />
+                                                    <ProgressBar Grid.Row="1" Value="{Binding Quantity}" Maximum="{Binding Maximum}" Foreground="{StaticResource ConsoleAccentBrush}" Background="{StaticResource ConsoleRuleBrush}" MinHeight="3" Height="3" IsTabStop="False" />
+                                                </Grid>
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding QuantityDisplay}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="16" HorizontalAlignment="Right" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding QuantityDisplay}" />
+                                                    <TextBlock Text="{Binding RevenueDisplay}" FontSize="12" HorizontalAlignment="Right" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                                                </StackPanel>
                                             </Grid>
-                                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Quantity}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="14" HorizontalAlignment="Right"/>
-                                                <TextBlock Text="{Binding RevenueDisplay}" FontSize="7" HorizontalAlignment="Right"/>
-                                            </StackPanel>
-                                        </Grid>
-                                    </DataTemplate></ItemsControl.ItemTemplate>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
                         </StackPanel>
                     </Border>
-                    <Border x:Name="ChannelPanel" Grid.Row="1" Style="{StaticResource WorkspacePanel}">
+                    <Border x:Name="ChannelPanel" Grid.Row="1" Style="{StaticResource ReportPanel}">
                         <StackPanel Spacing="3">
                             <Grid>
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
                                 <StackPanel>
-                                    <TextBlock Text="How they paid" Style="{StaticResource WorkspaceHeading}"/>
-                                    <TextBlock Text="Recognized payments and orders in this period." FontSize="7"/>
+                                    <TextBlock Text="How they paid" Style="{StaticResource ReportHeading}" />
+                                    <TextBlock Text="Recognized payments and orders in this period." FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                                 </StackPanel>
-                                <Button Grid.Column="1" Content="FILTERS" Style="{StaticResource WorkspaceLink}">
-                                    <Button.Flyout><Flyout>
-                                        <StackPanel Spacing="12">
-                                            <ComboBox x:Name="PaymentFilter" Header="Payment method" MinHeight="48" HorizontalAlignment="Stretch" SelectionChanged="OnPaymentFilterChanged">
-                                                <ComboBoxItem Content="All payment methods" Tag="" IsSelected="True"/>
-                                                <ComboBoxItem Content="Cash" Tag="cash"/>
-                                                <ComboBoxItem Content="Card" Tag="card"/>
-                                                <ComboBoxItem Content="E-wallet" Tag="e_wallet"/>
-                                            </ComboBox>
-                                            <ComboBox x:Name="ChannelFilter" Header="Order channel" MinHeight="48" HorizontalAlignment="Stretch" SelectionChanged="OnChannelFilterChanged">
-                                                <ComboBoxItem Content="All channels" Tag="" IsSelected="True"/>
-                                                <ComboBoxItem Content="Dine-in" Tag="dine_in"/>
-                                                <ComboBoxItem Content="Takeaway" Tag="takeaway"/>
-                                                <ComboBoxItem Content="Delivery" Tag="delivery"/>
-                                            </ComboBox>
-                                        </StackPanel>
-                                    </Flyout></Button.Flyout>
+                                <Button Grid.Column="1" Content="Filters" Style="{StaticResource ReportLink}" x:Name="FiltersButton">
+                                    <Button.Flyout>
+                                        <Flyout FlyoutPresenterStyle="{StaticResource ReportFlyout}" x:Name="FiltersFlyout">
+                                            <StackPanel Spacing="12" MinWidth="280" MaxWidth="320">
+                                                <TextBlock Text="Breakdown filters" Style="{StaticResource ReportHeading}" />
+                                                <ComboBox x:Name="PaymentFilter" Header="Payment method" MinHeight="44" HorizontalAlignment="Stretch" SelectionChanged="OnPaymentFilterChanged" FontSize="14">
+                                                    <ComboBoxItem Content="All payment methods" Tag="" IsSelected="True" />
+                                                    <ComboBoxItem Content="Cash" Tag="cash" />
+                                                    <ComboBoxItem Content="Card" Tag="card" />
+                                                    <ComboBoxItem Content="E-wallet" Tag="e_wallet" />
+                                                </ComboBox>
+                                                <ComboBox x:Name="ChannelFilter" Header="Order channel" MinHeight="44" HorizontalAlignment="Stretch" SelectionChanged="OnChannelFilterChanged" FontSize="14">
+                                                    <ComboBoxItem Content="All channels" Tag="" IsSelected="True" />
+                                                    <ComboBoxItem Content="Dine-in" Tag="dine_in" />
+                                                    <ComboBoxItem Content="Takeaway" Tag="takeaway" />
+                                                    <ComboBoxItem Content="Delivery" Tag="delivery" />
+                                                </ComboBox>
+                                                <TextBlock Text="These filters affect the payment and channel breakdowns. Summary cards show the full reporting period." FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" TextWrapping="Wrap" />
+                                                <Button x:Name="ResetFiltersButton" Content="Reset filters" Click="OnResetFilters" Style="{StaticResource ReportButton}" HorizontalAlignment="Stretch" />
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
                                 </Button>
                             </Grid>
-                            <TextBlock x:Name="ChannelsEmpty" Visibility="Collapsed" Text="No recognized orders in this channel. Change the period or channel filter."/>
-                            <TextBlock x:Name="ChannelsError" Visibility="Collapsed" Foreground="{StaticResource ConsoleAccentTextBrush}"/>
-                            <TextBlock x:Name="PaymentsEmpty" Visibility="Collapsed" Text="No recognized payments for this filter."/>
+                            <TextBlock x:Name="FilterSummary" FontSize="12" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                            <TextBlock x:Name="ChannelsEmpty" Visibility="Collapsed" Text="No recognized orders in this channel. Change the period or channel filter." />
+                            <TextBlock x:Name="ChannelsError" Visibility="Collapsed" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                            <TextBlock x:Name="PaymentsEmpty" Visibility="Collapsed" Text="No recognized payments for this filter." />
                             <Grid ColumnSpacing="12" Margin="0,8,0,8">
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
                                 <Grid x:Name="PaymentDonut" Width="120" Height="120">
-                                    <Canvas x:Name="PaymentArcs" Width="120" Height="120"/>
+                                    <Canvas x:Name="PaymentArcs" Width="120" Height="120" />
                                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        <TextBlock x:Name="PaymentOrderCount" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="28" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="RECOGNIZED ORDERS" Style="{StaticResource WorkspaceLabel}" FontSize="6" HorizontalAlignment="Center"/>
+                                        <TextBlock x:Name="PaymentOrderCount" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="30" HorizontalAlignment="Center" />
+                                        <TextBlock Text="ORDERS" Style="{StaticResource ReportLabel}" FontSize="10" HorizontalAlignment="Center" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                                     </StackPanel>
                                 </Grid>
                                 <ItemsControl x:Name="RevenuePaymentsList" Grid.Column="1" VerticalAlignment="Center" AutomationProperties.Name="Revenue by payment method">
-                                    <ItemsControl.ItemTemplate><DataTemplate>
-                                        <Grid Height="28" ColumnSpacing="12" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="6"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="42"/></Grid.ColumnDefinitions>
-                                            <Border Width="6" Height="6" Background="{Binding Color}" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="8" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="2" Text="{Binding RevenueDisplay}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="14" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="3" Text="{Binding Percentage}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="12" VerticalAlignment="Center" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                    </DataTemplate></ItemsControl.ItemTemplate>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Height="38" ColumnSpacing="10" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="6" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="52" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border Width="6" Height="6" Background="{Binding Color}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                                                <TextBlock Grid.Column="2" Text="{Binding RevenueDisplay}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="20" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="3" Text="{Binding Percentage}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </Grid>
-                            <Grid x:Name="ChannelsGrid" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0"/>
-                            <TextBlock Text="Split-payment counts can occur in more than one payment bucket." FontSize="7"/>
+                            <Grid x:Name="ChannelsGrid" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" />
+                            <TextBlock Text="Split-payment counts can occur in more than one payment bucket." FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                         </StackPanel>
                     </Border>
-                    <Border x:Name="StockPanel" Grid.Row="1" Grid.Column="1" Style="{StaticResource WorkspacePanel}">
+                    <Border x:Name="StockPanel" Grid.Row="1" Grid.Column="1" Style="{StaticResource ReportPanel}" Background="{StaticResource ConsoleRaisedGroundBrush}" Padding="16,12" BorderThickness="0,2,0,0" BorderBrush="{StaticResource ConsoleAccentBrush}">
                         <StackPanel Spacing="3">
-                            <TextBlock Text="Fix before close" Style="{StaticResource WorkspaceHeading}"/>
-                            <TextBlock Text="Current active ingredients at or below their reorder threshold." FontSize="7"/>
-                            <TextBlock x:Name="LowStockEmpty" Visibility="Collapsed" Text="All active ingredients are above their reorder threshold. No action needed."/>
-                            <TextBlock x:Name="LowStockError" Visibility="Collapsed" Foreground="{StaticResource ConsoleAccentTextBrush}"/>
+                            <TextBlock Text="Fix before close" Style="{StaticResource ReportHeading}" />
+                            <TextBlock Text="Current active ingredients at or below their reorder threshold." FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                            <TextBlock x:Name="LowStockEmpty" Visibility="Collapsed" Text="All active ingredients are above their reorder threshold. No action needed." />
+                            <TextBlock x:Name="LowStockError" Visibility="Collapsed" Foreground="{StaticResource ConsoleAccentTextBrush}" />
                             <ItemsControl x:Name="LowStockList" AutomationProperties.Name="Current low stock">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Padding="0,10" ColumnSpacing="12" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Spacing="2">
-                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                                                <TextBlock Text="{Binding BalanceDisplay}"/>
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding BalanceDisplay}" FontSize="13" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="1">
-                                                <TextBlock Text="REORDER AT" Style="{StaticResource WorkspaceLabel}"/>
-                                                <TextBlock Text="{Binding ThresholdDisplay}" HorizontalAlignment="Right"/>
+                                                <TextBlock Text="REORDER AT" Style="{StaticResource ReportLabel}" />
+                                                <TextBlock Text="{Binding ThresholdDisplay}" HorizontalAlignment="Right" FontSize="20" FontFamily="{StaticResource ConsoleSerifFont}" />
                                             </StackPanel>
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                            <controls:ConceptPattern Height="12" Margin="0,32,0,0"/>
-                            <Button Content="Open stock room" Click="OnOpenStockRoom" Style="{StaticResource WorkspaceLink}" HorizontalAlignment="Left"/>
+                            <controls:ConceptPattern Height="12" Margin="0,12,0,0" />
+                            <Button Content="Open stock room" Click="OnOpenStockRoom" Style="{StaticResource ReportLink}" HorizontalAlignment="Left" />
                         </StackPanel>
                     </Border>
                 </Grid>

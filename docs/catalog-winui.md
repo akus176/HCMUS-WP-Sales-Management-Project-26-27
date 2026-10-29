@@ -1,9 +1,24 @@
-# Catalog notebook (T3.7)
+# Menu workspace
 
-The **Menu and Recipes** navigation entry opens the catalog notebook. It uses the
-existing paper/pencil theme, embedded handwriting fonts, 48px actions, a hard
-offset detail-card shadow, and a stacked layout on narrow windows. Inventory
-navigation remains available.
+The **Menu** navigation entry opens the catalog workspace. The desktop layout
+keeps the category rail, item list, and detail panel, along with the cream,
+charcoal, and brass theme and serif headings. Each column is constrained to the
+viewport: the item list scrolls independently while the search, tabs, and category
+rail stay in place. The detail card has a pinned charcoal photo/title header and
+its own scrolling body. Narrow windows divide the remaining height between the
+list and details and replace the category rail with a dropdown.
+
+Categories and Add-ons use compact, full-width rows with inline Edit and
+Deactivate buttons. Add-on prices occupy their own aligned column. These tabs
+have no detail card; inactive entries retain Edit and disable Deactivate.
+
+Menu-local styles increase body text and action labels without changing other
+workspaces. Compact item cards use square packaged product photographs, readable
+prices, and an active/inactive label. Photos are illustrative assets, with the
+existing cafe image as a fallback. Search and its action share one surface;
+empty results provide a reset action. Native radio tabs ensure only one section
+is selected. Sizes retain their individual price, recipe, and deactivation
+actions, with explicit inactive labels.
 
 ## Run locally
 
@@ -20,7 +35,7 @@ dotnet run --project src/CoffeeShop.WinUI -r win-x64
 ## Operator check
 
 1. Open **Categories**, create `Coffee`, edit its name, and leave it active.
-2. Open **Drinks and recipes** and create `Latte`, a description, that category,
+2. Open **Items & recipes** and create `Latte`, a description, that category,
    initial size `Small`, and price `25.50` (use your Windows decimal separator).
 3. Select the drink. Edit its name/description; add a `Large` size priced `35.75`.
    Edit either size's name/price and verify the refreshed values.
@@ -40,7 +55,7 @@ dotnet run --project src/CoffeeShop.WinUI -r win-x64
 8. Deactivate a size, topping, category, and drink using the confirmation dialogs.
    Verify unavailable labels and retained recipes/references, not physical deletion.
 9. Stop the local database and reload. Verify actionable error guidance, then
-   restart it and use **Reload catalog**. Controls are disabled during operations;
+   restart it and use **Refresh**. Controls are disabled during operations;
    an in-flight save cannot be submitted or dismissed twice. If a write succeeds
    but refresh fails, the editor closes and explicitly warns not to resubmit.
 10. Resize the window below and above 1008px; the detail editor moves below/beside
@@ -71,9 +86,13 @@ repositories, migrations, and fresh database contexts, including invalid-recipe
 preservation and inactive history. It skips explicitly without the test connection.
 The existing catalog-postgres CI job includes this case.
 
-These are headless scripted checks, not pointer-driven UI automation or visual
-layout certification. XAML compilation verifies the controls and event wiring;
-the operator check remains the reproducible manual layout/accessibility check.
+The native `--verify-shell --verify-menu` launch also checks selection preservation
+at window widths from 600 to 1440, exclusive tabs, category filtering, empty
+results, reset, and unsaved editor text across resizing. It captures the rendered
+Menu, independent list scrolling, Categories, Add-ons, and editor without submitting writes. It checks that record rows bind both actions to their own record
+and that the detail column is removed from Categories and Add-ons. Reviewed captures
+and reports are in [evidence/menu](evidence/menu). The operator check remains the
+manual verification for writes, keyboard navigation, and accessibility.
 
 ## Boundaries
 

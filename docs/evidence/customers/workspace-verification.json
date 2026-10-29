@@ -1,0 +1,611 @@
+[
+  {
+    "tag": "customers",
+    "width": 1440,
+    "initial": {
+      "profiles": 9,
+      "selected": "Amelia Nguyen",
+      "addresses": 1,
+      "history": 2,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1440,
+    "actualHeight": 900,
+    "menuLayout": null,
+    "customerLayout": {
+      "threeColumns": true,
+      "contentFits": true,
+      "directoryFits": true,
+      "detailFits": true,
+      "orderFits": true,
+      "independentScrolling": true,
+      "listHeight": 500.79998779296875
+    },
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 76,
+        "height": 44
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 125.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Close",
+        "width": 38.400001525878906,
+        "height": 38.400001525878906
+      },
+      {
+        "name": "Search",
+        "width": 54.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "\u002B Add",
+        "width": 50.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Manage saved address",
+        "width": 48,
+        "height": 44
+      },
+      {
+        "name": "Previous",
+        "width": 81.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Next",
+        "width": 58.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Use for next order",
+        "width": 226.39999389648438,
+        "height": 44
+      },
+      {
+        "name": "Continue as walk-in",
+        "width": 226.39999389648438,
+        "height": 44
+      }
+    ]
+  },
+  {
+    "tag": "customers",
+    "width": 1008,
+    "initial": {
+      "profiles": 9,
+      "selected": "Amelia Nguyen",
+      "addresses": 1,
+      "history": 2,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1008,
+    "actualHeight": 900,
+    "menuLayout": null,
+    "customerLayout": {
+      "threeColumns": false,
+      "contentFits": true,
+      "directoryFits": true,
+      "detailFits": true,
+      "orderFits": true,
+      "independentScrolling": false,
+      "listHeight": 293.6000061035156
+    },
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 76,
+        "height": 44
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 125.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Close",
+        "width": 38.400001525878906,
+        "height": 38.400001525878906
+      },
+      {
+        "name": "Search",
+        "width": 54.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "\u002B Add",
+        "width": 50.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Manage saved address",
+        "width": 48,
+        "height": 44
+      },
+      {
+        "name": "Previous",
+        "width": 81.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Next",
+        "width": 58.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Use for next order",
+        "width": 688,
+        "height": 44
+      },
+      {
+        "name": "Continue as walk-in",
+        "width": 688,
+        "height": 44
+      }
+    ]
+  },
+  {
+    "tag": "customers",
+    "width": 1007,
+    "initial": {
+      "profiles": 9,
+      "selected": "Amelia Nguyen",
+      "addresses": 1,
+      "history": 2,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1007.2000122070312,
+    "actualHeight": 900,
+    "menuLayout": null,
+    "customerLayout": {
+      "threeColumns": false,
+      "contentFits": true,
+      "directoryFits": true,
+      "detailFits": true,
+      "orderFits": true,
+      "independentScrolling": false,
+      "listHeight": 293.6000061035156
+    },
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 76,
+        "height": 44
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 125.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Close",
+        "width": 38.400001525878906,
+        "height": 38.400001525878906
+      },
+      {
+        "name": "Search",
+        "width": 54.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "\u002B Add",
+        "width": 50.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Manage saved address",
+        "width": 48,
+        "height": 44
+      },
+      {
+        "name": "Previous",
+        "width": 81.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Next",
+        "width": 58.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Use for next order",
+        "width": 839.2000122070312,
+        "height": 44
+      },
+      {
+        "name": "Continue as walk-in",
+        "width": 839.2000122070312,
+        "height": 44
+      }
+    ]
+  },
+  {
+    "tag": "customers",
+    "width": 641,
+    "initial": {
+      "profiles": 9,
+      "selected": "Amelia Nguyen",
+      "addresses": 1,
+      "history": 2,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 640.7999877929688,
+    "actualHeight": 900,
+    "menuLayout": null,
+    "customerLayout": {
+      "threeColumns": false,
+      "contentFits": true,
+      "directoryFits": true,
+      "detailFits": true,
+      "orderFits": true,
+      "independentScrolling": false,
+      "listHeight": 283.20001220703125
+    },
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 76,
+        "height": 44
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 125.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Close",
+        "width": 38.400001525878906,
+        "height": 38.400001525878906
+      },
+      {
+        "name": "Search",
+        "width": 54.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "\u002B Add",
+        "width": 50.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Manage saved address",
+        "width": 48,
+        "height": 44
+      },
+      {
+        "name": "Previous",
+        "width": 81.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Next",
+        "width": 58.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Use for next order",
+        "width": 536.7999877929688,
+        "height": 44
+      },
+      {
+        "name": "Continue as walk-in",
+        "width": 536.7999877929688,
+        "height": 44
+      }
+    ]
+  },
+  {
+    "tag": "customers",
+    "width": 640,
+    "initial": {
+      "profiles": 9,
+      "selected": "Amelia Nguyen",
+      "addresses": 1,
+      "history": 2,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 640,
+    "actualHeight": 900,
+    "menuLayout": null,
+    "customerLayout": {
+      "threeColumns": false,
+      "contentFits": true,
+      "directoryFits": true,
+      "detailFits": true,
+      "orderFits": true,
+      "independentScrolling": false,
+      "listHeight": 283.20001220703125
+    },
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 76,
+        "height": 44
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 125.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Close",
+        "width": 38.400001525878906,
+        "height": 38.400001525878906
+      },
+      {
+        "name": "Search",
+        "width": 54.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "\u002B Add",
+        "width": 50.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Manage saved address",
+        "width": 48,
+        "height": 44
+      },
+      {
+        "name": "Previous",
+        "width": 81.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Next",
+        "width": 58.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Use for next order",
+        "width": 536,
+        "height": 44
+      },
+      {
+        "name": "Continue as walk-in",
+        "width": 536,
+        "height": 44
+      }
+    ]
+  },
+  {
+    "tag": "customers",
+    "width": 600,
+    "initial": {
+      "profiles": 9,
+      "selected": "Amelia Nguyen",
+      "addresses": 1,
+      "history": 2,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 600,
+    "actualHeight": 900,
+    "menuLayout": null,
+    "customerLayout": {
+      "threeColumns": false,
+      "contentFits": true,
+      "directoryFits": true,
+      "detailFits": true,
+      "orderFits": true,
+      "independentScrolling": false,
+      "listHeight": 283.20001220703125
+    },
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 76,
+        "height": 44
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 125.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Close",
+        "width": 38.400001525878906,
+        "height": 38.400001525878906
+      },
+      {
+        "name": "Search",
+        "width": 54.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "\u002B Add",
+        "width": 50.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Manage saved address",
+        "width": 48,
+        "height": 44
+      },
+      {
+        "name": "Previous",
+        "width": 81.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Next",
+        "width": 58.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Use for next order",
+        "width": 496,
+        "height": 44
+      },
+      {
+        "name": "Continue as walk-in",
+        "width": 496,
+        "height": 44
+      }
+    ]
+  },
+  {
+    "tag": "customers",
+    "width": 1440,
+    "initial": {
+      "profiles": 9,
+      "selected": "Amelia Nguyen",
+      "addresses": 1,
+      "history": 2,
+      "error": null
+    },
+    "statePreserved": true,
+    "samePage": true,
+    "actualWidth": 1440,
+    "actualHeight": 900,
+    "menuLayout": null,
+    "customerLayout": {
+      "threeColumns": true,
+      "contentFits": true,
+      "directoryFits": true,
+      "detailFits": true,
+      "orderFits": true,
+      "independentScrolling": true,
+      "listHeight": 500.79998779296875
+    },
+    "targets": [
+      {
+        "name": "Refresh",
+        "width": 76,
+        "height": 44
+      },
+      {
+        "name": "\u002B New customer",
+        "width": 125.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Close",
+        "width": 38.400001525878906,
+        "height": 38.400001525878906
+      },
+      {
+        "name": "Search",
+        "width": 54.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Edit customer profile",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "Deactivate customer",
+        "width": 80.80000305175781,
+        "height": 44
+      },
+      {
+        "name": "\u002B Add",
+        "width": 50.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Manage saved address",
+        "width": 48,
+        "height": 44
+      },
+      {
+        "name": "Previous",
+        "width": 81.5999984741211,
+        "height": 44
+      },
+      {
+        "name": "Next",
+        "width": 58.400001525878906,
+        "height": 44
+      },
+      {
+        "name": "Use for next order",
+        "width": 226.39999389648438,
+        "height": 44
+      },
+      {
+        "name": "Continue as walk-in",
+        "width": 226.39999389648438,
+        "height": 44
+      }
+    ]
+  }
+]

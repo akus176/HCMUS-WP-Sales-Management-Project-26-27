@@ -1,0 +1,9 @@
+{
+  "filtersWork": true,
+  "resetWorks": true,
+  "dailyDetailsWork": true,
+  "invalidRejected": true,
+  "refreshKeepsAppliedPeriod": true,
+  "emptyPeriodWorks": true,
+  "stockIndependentOfPeriod": true
+}

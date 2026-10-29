@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace CoffeeShop.WinUI.Pages;
 
@@ -21,7 +22,7 @@ public sealed partial class CatalogPage : Page
         var search = model.Search;
         model.Search = SearchBox.Text = "__verification_no_matching_drink__";
         await model.LoadAsync();
-        var emptySearchClearsDetail = model.SelectedItem is null && EmptyMessage.Visibility == Visibility.Visible;
+        var emptySearchClearsDetail = model.SelectedItem is null && EmptyState.Visibility == Visibility.Visible;
         model.Search = SearchBox.Text = search;
         await model.LoadAsync();
         if (model.Items.Count > 0) await model.SelectAsync(model.Items[0].Id);
@@ -36,6 +37,78 @@ public sealed partial class CatalogPage : Page
     private EntityId? categoryFilterId;
     private Func<ContentDialog, FrameworkElement, Task>? editorVerification;
 
+    internal object VerificationLayout() => new
+    {
+        width = ActualWidth,
+        detailAtSide = Grid.GetColumn(DetailHost) == 2,
+        columns = (DrinksList.ItemsPanelRoot as ItemsWrapGrid)?.MaximumRowsOrColumns,
+        contentFits = WorkspaceTabs.ActualWidth <= ActualWidth - 47,
+        detailFits = DetailHost.ActualHeight <= WorkspaceContent.ActualHeight + 1,
+        workspaceFits = WorkspaceTabs.ActualHeight <= WorkspaceContent.ActualHeight + 1,
+        itemViewportHeight = DrinksList.ActualHeight,
+        tabHeight = SectionBar.ActualHeight,
+        tabsExclusive = new[] { DrinksTab, CategoriesTab, AddonsTab }.Count(tab => tab.IsChecked == true) == 1
+    };
+
+    internal async Task<object> VerifyMenuInteractionsAsync()
+    {
+        var originalSelection = model.SelectedItem?.Id;
+        await Task.Delay(350);
+        UpdateLayout();
+        var listScroll = PresentationVerification.Elements(DrinksList).OfType<ScrollViewer>().FirstOrDefault();
+        var headerPosition = SectionBar.TransformToVisual(this).TransformPoint(new Windows.Foundation.Point());
+        var detailsPosition = DetailHost.TransformToVisual(this).TransformPoint(new Windows.Foundation.Point());
+        var itemListScrollsIndependently = false;
+        if (listScroll is { ScrollableHeight: > 0 })
+        {
+            listScroll.ChangeView(null, Math.Min(240, listScroll.ScrollableHeight), null, true);
+            await Task.Delay(200);
+            itemListScrollsIndependently = listScroll.VerticalOffset > 0
+                && SectionBar.TransformToVisual(this).TransformPoint(new Windows.Foundation.Point()) == headerPosition
+                && DetailHost.TransformToVisual(this).TransformPoint(new Windows.Foundation.Point()) == detailsPosition;
+            await PresentationVerification.CaptureAsync(this, "native-menu-scrolled.png");
+            listScroll.ChangeView(null, 0, null, true);
+        }
+        OnTab(CategoriesTab, new RoutedEventArgs());
+        var categoriesWork = CategoriesTab.IsChecked == true && DrinksTab.IsChecked == false && AddonsTab.IsChecked == false
+            && CategoriesList.Visibility == Visibility.Visible && SearchControls.Visibility == Visibility.Collapsed
+            && DetailHost.Visibility == Visibility.Collapsed && DetailColumn.Width.Value == 0;
+        await Task.Delay(350);
+        var categoryRowActions = VerifyRecordRowActions(CategoriesList);
+        await PresentationVerification.CaptureAsync(this, "native-menu-categories.png");
+        OnTab(AddonsTab, new RoutedEventArgs());
+        var addonsWork = AddonsTab.IsChecked == true && DrinksTab.IsChecked == false && CategoriesTab.IsChecked == false
+            && AddonsList.Visibility == Visibility.Visible && SearchControls.Visibility == Visibility.Collapsed
+            && DetailHost.Visibility == Visibility.Collapsed && DetailColumn.Width.Value == 0;
+        await Task.Delay(350);
+        var addonRowActions = VerifyRecordRowActions(AddonsList);
+        await PresentationVerification.CaptureAsync(this, "native-menu-addons.png");
+        OnTab(DrinksTab, new RoutedEventArgs());
+        var option = CompactCategoryFilter.Items.OfType<CategoryOption>().FirstOrDefault(category => category.Id is not null);
+        bool? filteringWorks = null;
+        if (option is not null)
+        {
+            CompactCategoryFilter.SelectedItem = option;
+            filteringWorks = DrinksList.Items.OfType<DrinkRow>().All(row => row.Item.CategoryId == option.Id);
+        }
+        await ResetFiltersAsync();
+        var resetWorks = SearchBox.Text.Length == 0 && categoryFilterId is null && DrinksList.Items.Count == model.Items.Count;
+        if (originalSelection is { } id && model.Items.Any(item => item.Id == id)) await model.SelectAsync(id);
+        return new { itemListScrollsIndependently, categoriesWork, categoryRowActions, addonsWork, addonRowActions, filteringWorks, resetWorks };
+    }
+
+    private static bool VerifyRecordRowActions(ListView list)
+    {
+        var rows = PresentationVerification.Elements(list).OfType<ListViewItem>().Where(item => item.Content is CatalogRow).ToArray();
+        return rows.Length > 0 && rows.All(item =>
+        {
+            var row = (CatalogRow)item.Content;
+            var buttons = PresentationVerification.Elements(item).OfType<Button>().Where(button => ReferenceEquals(button.Tag, row.Record)).ToArray();
+            return buttons.Length == 2 && buttons.Any(button => Equals(button.Content, "Edit"))
+                && buttons.Any(button => Equals(button.Content, "Deactivate") && button.IsEnabled == row.IsActive);
+        });
+    }
+
     internal async Task<object> VerifyEditorAsync(Func<int, Task> resize)
     {
         object result = new { error = "Editor did not open" };
@@ -49,6 +122,9 @@ public sealed partial class CatalogPage : Page
             var compactPreserved = inputs[0].Text == draft;
             var compactTargets = PresentationVerification.ButtonTargets(dialog);
             await resize(1440);
+            await Task.Delay(150);
+            if (PresentationVerification.Elements(dialog).OfType<Border>().FirstOrDefault(border => border.Name == "BackgroundElement") is { } frame)
+                await PresentationVerification.CaptureAsync(frame, "native-menu-editor.png");
             result = new { compactPreserved, expandedPreserved = inputs[0].Text == draft, savedRecordUnchanged = model.SelectedItem.Name == savedName, compactTargets, expandedTargets = PresentationVerification.ButtonTargets(dialog) };
             dialog.Hide();
         };
@@ -57,13 +133,29 @@ public sealed partial class CatalogPage : Page
         return result;
     }
     public sealed record CategoryOption(EntityId? Id, string Name);
-    public sealed record CatalogRow(object Record, string Name, string StateDisplay);
+    public sealed record CatalogRow(object Record, string Name, string StateDisplay)
+    {
+        public bool IsActive => Record switch { CategorySummary category => category.IsActive, AddonSummary addon => addon.IsActive, _ => false };
+        public string PriceDisplay => Record is AddonSummary addon ? addon.Price.ToString("0.00") : "";
+        public Visibility PriceVisibility => Record is AddonSummary ? Visibility.Visible : Visibility.Collapsed;
+        public string EditLabel => $"Edit {Name}";
+        public string DeactivateLabel => $"Deactivate {Name}";
+    }
+    public sealed record CatalogSizeRow(SizeVariantDetail Variant)
+    {
+        public string SizeName => Variant.SizeName + (Variant.IsActive ? "" : " · Inactive");
+        public string PriceDisplay => Variant.Price.ToString("0.00");
+        public bool IsActive => Variant.IsActive;
+        public string ActionName => $"Actions for {Variant.SizeName}";
+    }
     public sealed record DrinkRow(MenuItemSummary Item)
     {
         public string Name => Item.Name;
-        public string CategoryName => $"{Item.CategoryName} · {Item.SizeVariants.Count} sizes";
-        public string StateDisplay => Item.IsActive ? "ACTIVE" : "INACTIVE";
-        public string PriceDisplay => Item.SizeVariants.Count == 0 ? "No sizes" : $"from {Item.SizeVariants.Min(size => size.Price):N2}";
+        public string CategoryName => $"{Item.CategoryName} · {Item.SizeVariants.Count(size => size.IsActive)} sizes";
+        public string StateDisplay => Item.IsActive ? "Active" : "Inactive";
+        public string PriceDisplay => Item.SizeVariants.Where(size => size.IsActive).ToArray() is { Length: > 0 } sizes
+            ? $"from {sizes.Min(size => size.Price):0.00}" : "No active sizes";
+        public BitmapImage Photo => new CounterMenuCard(Item).Photo;
     }
 
     public CatalogPage()
@@ -95,6 +187,7 @@ public sealed partial class CatalogPage : Page
         if (!rendering && DrinksList.SelectedItem is DrinkRow { Item: var item })
         {
             await model.SelectAsync(item.Id);
+            if (Grid.GetRow(DetailScroll) == 1) DetailHeading.StartBringIntoView();
         }
     }
 
@@ -113,7 +206,8 @@ public sealed partial class CatalogPage : Page
     {
         if (container?.ContentTemplateRoot is not Border card) return;
         card.BorderBrush = (Brush)ResourcesLookup(selected ? "ConsoleAccentBrush" : "ConsoleRuleBrush");
-        card.BorderThickness = new Thickness(0, selected ? 3 : 1, 0, 0);
+        card.BorderThickness = new Thickness(selected ? 2 : 1);
+        card.Background = (Brush)ResourcesLookup(selected ? "ConsolePanelBrush" : "ConsoleRaisedGroundBrush");
         if (card.Child is Grid grid && grid.Children[0] is Border art)
             art.BorderBrush = card.BorderBrush;
     }
@@ -129,19 +223,18 @@ public sealed partial class CatalogPage : Page
             ReloadButton.IsEnabled = NewButton.IsEnabled = !model.IsBusy;
             Status.Apply(model.Feedback);
             if (model.Feedback.Kind == WorkflowFeedbackKind.Ready) Status.IsOpen = false;
-            CatalogCount.Text = $"MANAGE / CATALOG / {model.Items.Count} drinks · {model.Categories.Count} categories";
-            CatalogHealth.Text = $"{model.Items.Count(item => item.IsActive)} active in results\n{model.Items.Count(item => !item.IsActive)} inactive in results";
+            CatalogCount.Text = "MANAGE / MENU";
+            CatalogHealth.Text = $"{model.Items.Count(item => item.IsActive)} active items\n{model.Items.Count(item => !item.IsActive)} inactive in results";
+            DrinksTab.IsEnabled = CategoriesTab.IsEnabled = AddonsTab.IsEnabled = IncludeInactive.IsEnabled = !model.IsBusy;
             if (!ReferenceEquals(renderedCategories, model.Categories))
             {
                 renderedCategories = model.Categories;
-                var options = new[] { new CategoryOption(null, "All drinks") }.Concat(model.Categories.Select(item => new CategoryOption(item.Id, item.Name))).ToArray();
+                var options = new[] { new CategoryOption(null, "All categories") }.Concat(model.Categories.Select(item => new CategoryOption(item.Id, item.Name))).ToArray();
                 CategoryFilter.ItemsSource = options;
                 CategoryFilter.SelectedItem = options.FirstOrDefault(item => item.Id == categoryFilterId) ?? options[0];
                 CompactCategoryFilter.ItemsSource = options;
                 CompactCategoryFilter.SelectedItem = CategoryFilter.SelectedItem;
-                var selectedId = (CategoriesList.SelectedItem as CatalogRow)?.Record is CategorySummary category ? category.Id : null;
                 CategoriesList.ItemsSource = model.Categories.Select(item => new CatalogRow(item, item.Name, item.IsActive ? "Active" : "Inactive")).ToArray();
-                CategoriesList.SelectedItem = ((IEnumerable<CatalogRow>)CategoriesList.ItemsSource).FirstOrDefault(row => ((CategorySummary)row.Record).Id == selectedId);
             }
             if (!ReferenceEquals(renderedItems, model.Items))
             {
@@ -150,21 +243,21 @@ public sealed partial class CatalogPage : Page
             }
             if (!ReferenceEquals(AddonsList.Tag, model.Addons))
             {
-                var selectedId = (AddonsList.SelectedItem as CatalogRow)?.Record is AddonSummary addon ? addon.Id : null;
                 AddonsList.Tag = model.Addons;
-                AddonsList.ItemsSource = model.Addons.Select(item => new CatalogRow(item, item.Name, $"{item.Price:N2} · {(item.IsActive ? "Active" : "Inactive")}")).ToArray();
-                AddonsList.SelectedItem = ((IEnumerable<CatalogRow>)AddonsList.ItemsSource).FirstOrDefault(row => ((AddonSummary)row.Record).Id == selectedId);
+                AddonsList.ItemsSource = model.Addons.Select(item => new CatalogRow(item, item.Name, item.IsActive ? "Active" : "Inactive")).ToArray();
             }
             if (!model.IsBusy && DrinksList.ItemsSource is IEnumerable<DrinkRow> rows)
             {
                 DrinksList.SelectedItem = rows.FirstOrDefault(row => row.Item.Id == model.SelectedItem?.Id);
                 foreach (var row in rows) PaintDrinkSelection(DrinksList.ContainerFromItem(row) as GridViewItem, row.Item.Id == model.SelectedItem?.Id);
             }
-            EmptyMessage.Visibility = activeTab == "drinks" && DrinksList.Items.Count == 0 && !model.IsBusy && !model.IsError ? Visibility.Visible : Visibility.Collapsed;
+            EmptyState.Visibility = activeTab == "drinks" && DrinksList.Items.Count == 0 && !model.IsBusy && !model.IsError ? Visibility.Visible : Visibility.Collapsed;
             CategoriesEmpty.Visibility = activeTab == "categories" && model.Categories.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             AddonsEmpty.Visibility = activeTab == "addons" && model.Addons.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             CategoryLimit.Visibility = activeTab == "categories" && model.Categories.Count == 200 ? Visibility.Visible : Visibility.Collapsed;
+            UpdateResultsSummary();
             RenderDetail();
+            ConfigureLayout();
         }
         finally { rendering = false; }
     }
@@ -173,49 +266,51 @@ public sealed partial class CatalogPage : Page
         var rows = model.Items.Where(item => categoryFilterId is null || item.CategoryId == categoryFilterId).Select(item => new DrinkRow(item)).ToArray();
         DrinksList.ItemsSource = rows;
         DrinksList.SelectedItem = rows.FirstOrDefault(row => row.Item.Id == model.SelectedItem?.Id);
-        EmptyMessage.Visibility = activeTab == "drinks" && rows.Length == 0 && !model.IsBusy && !model.IsError ? Visibility.Visible : Visibility.Collapsed;
+        EmptyState.Visibility = activeTab == "drinks" && rows.Length == 0 && !model.IsBusy && !model.IsError ? Visibility.Visible : Visibility.Collapsed;
+        UpdateResultsSummary();
     }
+
+    private void UpdateResultsSummary() => ResultsSummary.Text = activeTab switch
+    {
+        "categories" => $"{model.Categories.Count} categories · Manage names and availability",
+        "addons" => $"{model.Addons.Count} add-ons · Manage names, prices, and availability",
+        _ => $"{DrinksList.Items.Count} items · {DrinksList.Items.OfType<DrinkRow>().Count(row => row.Item.IsActive)} active"
+            + (model.Items.Count == 200 ? " · First 200 matches; narrow your search to find more" : "")
+    };
     private void RenderDetail()
     {
-        var detail = activeTab == "drinks" ? model.SelectedItem : null;
+        if (activeTab != "drinks") return;
+        var detail = model.SelectedItem;
         if (detail is not null && categoryFilterId is not null && detail.CategoryId != categoryFilterId) detail = null;
         ItemActions.Visibility = detail is null ? Visibility.Collapsed : Visibility.Visible;
-        RecordActions.Visibility = Visibility.Collapsed;
         DetailHeading.Text = detail?.Name ?? $"Select {(activeTab == "drinks" ? "a drink" : activeTab == "categories" ? "a category" : "an add-on")}";
         DetailDescription.Text = detail is null ? "Details and available actions appear here." : $"{detail.CategoryName} · {(detail.IsActive ? "Active" : "Inactive")}\n{detail.Description}";
         DetailArt.Visibility = detail is null ? Visibility.Collapsed : Visibility.Visible;
+        DetailPhoto.Source = detail is not null && model.Items.FirstOrDefault(item => item.Id == detail.Id) is { } item
+            ? new CounterMenuCard(item).Photo : null;
         DetailMeta.Text = detail is null ? "" : $"{detail.CategoryName} · {detail.SizeVariants.Count} sizes · {(detail.IsActive ? "Active" : "Inactive")}";
         if (detail is not null) DetailDescription.Text = detail.Description ?? "";
-        VariantsList.ItemsSource = detail?.SizeVariants;
+        VariantsList.ItemsSource = detail?.SizeVariants.Select(variant => new CatalogSizeRow(variant)).ToArray();
         var recipeVariant = detail?.SizeVariants.FirstOrDefault(size => size.IsActive) ?? detail?.SizeVariants.FirstOrDefault();
         RecipeHeading.Text = recipeVariant is null ? "Recipe" : $"Recipe · {recipeVariant.SizeName}";
         RecipeButton.Tag = recipeVariant;
         RecipeButton.IsEnabled = recipeVariant is not null;
         RecipeSummary.Text = recipeVariant is null || recipeVariant.Recipe.Count == 0 ? "No recipe lines. Add ingredients to deduct stock per cup."
-            : string.Join(" · ", recipeVariant.Recipe.Select(line => $"{line.Quantity:0.###} {line.Unit} {line.IngredientName}"));
+            : string.Join("\n", recipeVariant.Recipe.Select(line => $"{line.Quantity:0.###} {line.Unit} · {line.IngredientName}"));
         DeactivateDrinkButton.IsEnabled = detail?.IsActive == true;
         CompatibilityText.Text = detail is null || detail.CompatibleAddons.Count == 0 ? "No compatible add-ons selected."
-            : string.Join(", ", detail.CompatibleAddons.Select(addon => $"{addon.Name} +{addon.Price:N2}{(addon.IsActive ? "" : " (inactive)")}"));
-        var record = activeTab == "categories" ? CategoriesList.SelectedItem as CatalogRow : activeTab == "addons" ? AddonsList.SelectedItem as CatalogRow : null;
-        if (record is null) return;
-        DetailHeading.Text = record.Name;
-        DetailDescription.Text = activeTab == "categories" ? "Category availability controls drinks on new orders." : "Each compatible add-on can be chosen once per drink.";
-        RecordState.Text = record.StateDisplay;
-        EditRecordButton.Tag = DeactivateRecordButton.Tag = record.Record;
-        DeactivateRecordButton.IsEnabled = record.Record switch { CategorySummary category => category.IsActive, AddonSummary addon => addon.IsActive, _ => false };
-        RecordActions.Visibility = Visibility.Visible;
+            : string.Join("\n", detail.CompatibleAddons.Select(addon => $"{addon.Name}  +{addon.Price:N2}{(addon.IsActive ? "" : " (inactive)")}"));
     }
-    private void OnRecordSelected(object sender, SelectionChangedEventArgs args) { if (!rendering) RenderDetail(); }
     private void OnTab(object sender, RoutedEventArgs args)
     {
         activeTab = (string)((Microsoft.UI.Xaml.Controls.Primitives.ToggleButton)sender).Tag;
         DrinksTab.IsChecked = activeTab == "drinks";
         CategoriesTab.IsChecked = activeTab == "categories";
         AddonsTab.IsChecked = activeTab == "addons";
-        DrinksList.Visibility = CategoryRail.Visibility = SearchBox.Visibility = SearchControls.Visibility = activeTab == "drinks" ? Visibility.Visible : Visibility.Collapsed;
+        DrinksList.Visibility = SearchControls.Visibility = activeTab == "drinks" ? Visibility.Visible : Visibility.Collapsed;
         CategoriesList.Visibility = activeTab == "categories" ? Visibility.Visible : Visibility.Collapsed;
         AddonsList.Visibility = activeTab == "addons" ? Visibility.Visible : Visibility.Collapsed;
-        NewButton.Content = activeTab == "drinks" ? "+ New drink" : activeTab == "categories" ? "+ New category" : "+ New add-on";
+        NewButton.Content = activeTab == "drinks" ? "+ New item" : activeTab == "categories" ? "+ New category" : "+ New add-on";
         ConfigureLayout(); Render();
     }
     private async void OnNewRecord(object sender, RoutedEventArgs args)
@@ -239,7 +334,7 @@ public sealed partial class CatalogPage : Page
         if (rendering) return;
         categoryFilterId = (((Microsoft.UI.Xaml.Controls.Primitives.Selector)sender).SelectedItem as CategoryOption)?.Id;
         rendering = true;
-        CategoryFilter.SelectedItem = CompactCategoryFilter.SelectedItem = ((IEnumerable<CategoryOption>)CategoryFilter.ItemsSource).First(option => option.Id == categoryFilterId);
+        CategoryFilter.SelectedItem = CompactCategoryFilter.SelectedItem = CompactCategoryFilter.Items.OfType<CategoryOption>().First(option => option.Id == categoryFilterId);
         ApplyDrinkFilter();
         rendering = false;
         RenderDetail();
@@ -248,24 +343,54 @@ public sealed partial class CatalogPage : Page
     {
         if (args.Key == Windows.System.VirtualKey.Enter) { args.Handled = true; OnSearch(sender, new RoutedEventArgs()); }
     }
+    private async void OnResetFilters(object sender, RoutedEventArgs args) => await ResetFiltersAsync();
+    private async Task ResetFiltersAsync()
+    {
+        rendering = true;
+        categoryFilterId = null;
+        CategoryFilter.SelectedIndex = CompactCategoryFilter.SelectedIndex = 0;
+        model.Search = SearchBox.Text = "";
+        rendering = false;
+        await model.LoadAsync();
+    }
     private void OnPageSizeChanged(object sender, SizeChangedEventArgs args) => ConfigureLayout();
     private void ConfigureLayout()
     {
         if (DetailColumn is null) return;
-        var wide = ActualWidth >= 1000;
-        CategoryRail.Visibility = wide && activeTab == "drinks" ? Visibility.Visible : Visibility.Collapsed;
+        var wide = ActualWidth >= 1000 && ActualHeight >= 600;
+        var hasDetails = activeTab == "drinks";
+        var stackedDetails = hasDetails && !wide;
+        var showCategoryRail = wide && activeTab == "drinks";
+        CategoryRail.Visibility = showCategoryRail ? Visibility.Visible : Visibility.Collapsed;
         CompactCategoryFilter.Visibility = !wide && activeTab == "drinks" ? Visibility.Visible : Visibility.Collapsed;
-        RailColumn.Width = new GridLength(wide && activeTab == "drinks" ? 155 : 0);
-        DetailColumn.Width = new GridLength(wide ? 330 : 0);
-        Grid.SetColumn(DetailPanel, wide ? 2 : 1);
-        Grid.SetRow(DetailPanel, wide ? 0 : 1);
-        HeaderOrnament.Visibility = ActualWidth >= 850 ? Visibility.Visible : Visibility.Collapsed;
-        Header.ColumnDefinitions[1].Width = new GridLength(ActualWidth >= 850 ? 116 : 0);
-        HeaderActions.Orientation = ActualWidth >= 700 ? Orientation.Horizontal : Orientation.Vertical;
-        var available = Math.Max(160, DrinksList.ActualWidth - 20);
+        RailColumn.Width = new GridLength(showCategoryRail ? 155 : 0);
+        DetailHost.Visibility = hasDetails ? Visibility.Visible : Visibility.Collapsed;
+        DetailColumn.Width = new GridLength(wide && hasDetails ? 330 : 0);
+        WorkspaceTabs.ColumnSpacing = wide && hasDetails ? 18 : 0;
+        WorkspaceTabs.RowDefinitions[0].Height = new GridLength(stackedDetails ? 3 : 1, GridUnitType.Star);
+        WorkspaceTabs.RowDefinitions[1].Height = stackedDetails ? new GridLength(2, GridUnitType.Star) : new GridLength(0);
+        WorkspaceTabs.RowSpacing = stackedDetails ? 12 : 0;
+        Grid.SetColumn(DetailHost, wide ? 2 : 1);
+        Grid.SetRow(DetailHost, wide ? 0 : 1);
+        var headerInline = ActualWidth >= 680;
+        HeaderOrnament.Visibility = ActualWidth >= 1000 ? Visibility.Visible : Visibility.Collapsed;
+        Header.ColumnDefinitions[1].Width = new GridLength(ActualWidth >= 1000 ? 116 : 0);
+        Header.ColumnDefinitions[2].Width = headerInline ? GridLength.Auto : new GridLength(0);
+        Header.ColumnSpacing = headerInline ? 18 : 0;
+        Grid.SetColumn(HeaderActions, headerInline ? 2 : 0);
+        Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 3);
+        Grid.SetRow(HeaderActions, headerInline ? 0 : 1);
+        MenuTitle.FontSize = headerInline ? 52 : 40;
+        Grid.SetColumn(IncludeInactive, ActualWidth >= 520 ? 1 : 0);
+        Grid.SetRow(IncludeInactive, ActualWidth >= 520 ? 0 : 1);
+        var catalogWidth = Math.Max(240, ActualWidth - 48 - (wide ? 366 + (showCategoryRail ? 155 : 0) : 0));
+        var height = WorkspaceContent.ActualHeight;
+        CategoryOrnament.Visibility = CategoryPattern.Visibility = height >= 650 ? Visibility.Visible : Visibility.Collapsed;
+        CategoryFilter.MaxHeight = Math.Max(88, height - 160);
+        var columns = catalogWidth >= 560 ? 2 : 1;
         if (DrinksList.ItemsPanelRoot is not ItemsWrapGrid drinkWrap) return;
-        drinkWrap.ItemWidth = Math.Max(160, available / (available >= 560 ? 2 : 1));
-        drinkWrap.MaximumRowsOrColumns = available >= 560 ? 2 : 1;
+        drinkWrap.ItemWidth = Math.Max(240, (catalogWidth - 4) / columns);
+        drinkWrap.MaximumRowsOrColumns = columns;
     }
 
     private async void OnNewCategory(object sender, RoutedEventArgs args) => await EditCategoryAsync(null);
@@ -510,19 +635,20 @@ public sealed partial class CatalogPage : Page
         var dialog = new ContentDialog
         {
             Title = new TextBlock { Text = title, FontFamily = (FontFamily)ResourcesLookup("ConsoleSerifFont"), FontSize = 32, TextWrapping = TextWrapping.Wrap },
-            Style = (Style)ResourcesLookup("WorkspaceDialog"),
+            Style = (Style)Resources["MenuDialog"],
             PrimaryButtonText = button,
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = XamlRoot,
             FontFamily = (FontFamily)ResourcesLookup("ConsoleSansFont"),
+            FontSize = 14,
             Content = new ScrollViewer { Content = content, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, MaxHeight = 520 }
         };
         if (wide)
         {
-            dialog.Style = (Style)ResourcesLookup("WorkspaceDrinkDialog");
+            dialog.Style = (Style)Resources["MenuDrinkDialog"];
         }
-        dialog.Resources["AccentButtonStyle"] = ResourcesLookup("WorkspacePrimary");
+        dialog.Resources["AccentButtonStyle"] = Resources["MenuPrimary"];
         if (editorVerification is { } verify)
             dialog.Opened += async (_, _) => await verify(dialog, fields);
         dialog.Closing += (_, args) => args.Cancel = model.IsBusy;
@@ -560,6 +686,7 @@ public sealed partial class CatalogPage : Page
         Header = header,
         Text = value ?? "",
         MinHeight = 48,
+        FontSize = 14,
         Style = (Style)ResourcesLookup("ConsoleFieldStyle")
     };
 

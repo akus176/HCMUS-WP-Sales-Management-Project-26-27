@@ -1,205 +1,360 @@
-<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="using:CoffeeShop.WinUI.Controls" x:Class="CoffeeShop.WinUI.Pages.CatalogPage" FontFamily="{StaticResource ConsoleSansFont}" Foreground="{StaticResource ConsoleInkBrush}" Background="{StaticResource ConsoleGroundBrush}" RequestedTheme="Light" SizeChanged="OnPageSizeChanged">
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:controls="using:CoffeeShop.WinUI.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="CoffeeShop.WinUI.Pages.CatalogPage" FontFamily="{StaticResource ConsoleSansFont}" Foreground="{StaticResource ConsoleInkBrush}" Background="{StaticResource ConsoleGroundBrush}" RequestedTheme="Light" SizeChanged="OnPageSizeChanged">
     <Page.Resources>
-        <Style TargetType="Button" BasedOn="{StaticResource WorkspaceButton}"/>
-        <Style TargetType="TextBox" BasedOn="{StaticResource ConsoleFieldStyle}"/>
-        <Style TargetType="TextBlock" BasedOn="{StaticResource WorkspaceText}"/>
-        <Style TargetType="ListViewItem" BasedOn="{StaticResource WorkspaceListItem}"/>
+        <Style x:Key="MenuListItem" TargetType="ListViewItem" BasedOn="{StaticResource WorkspaceListItem}">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style x:Key="MenuLabel" TargetType="TextBlock" BasedOn="{StaticResource ConsoleLabelStyle}">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="CharacterSpacing" Value="60" />
+        </Style>
+        <Style x:Key="MenuHeading" TargetType="TextBlock" BasedOn="{StaticResource ConsoleSectionTitleStyle}">
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="MenuText" TargetType="TextBlock" BasedOn="{StaticResource ConsoleBodyStyle}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="LineHeight" Value="20" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="MenuLink" TargetType="Button" BasedOn="{StaticResource ConsoleButtonStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CharacterSpacing" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource ConsoleAccentTextBrush}" />
+        </Style>
+        <Style x:Key="MenuPrimary" TargetType="Button" BasedOn="{StaticResource ConsolePrimaryButtonStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CharacterSpacing" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="14,0" />
+        </Style>
+        <Style x:Key="MenuButton" TargetType="Button" BasedOn="{StaticResource ConsoleButtonStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CharacterSpacing" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="14,0" />
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource MenuButton}" />
+        <Style TargetType="TextBox" BasedOn="{StaticResource ConsoleFieldStyle}" />
+        <Style TargetType="TextBlock" BasedOn="{StaticResource MenuText}" />
+        <Style TargetType="ListViewItem" BasedOn="{StaticResource MenuListItem}" />
         <DataTemplate x:Key="RecordRow">
-            <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" Padding="10,12">
-                <StackPanel Spacing="4">
-                    <TextBlock Text="{Binding Name}" Style="{StaticResource WorkspaceHeading}"/>
-                    <TextBlock Text="{Binding StateDisplay}"/>
-                </StackPanel>
+            <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" Padding="12,4" MinHeight="48">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Medium" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTipService.ToolTip="{Binding Name}" />
+                    <TextBlock Grid.Column="1" Text="{Binding PriceDisplay}" Visibility="{Binding PriceVisibility}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="20" VerticalAlignment="Center" MinWidth="48" TextAlignment="Right" />
+                    <Border Grid.Column="2" Background="{StaticResource ConsoleRaisedGroundBrush}" CornerRadius="3" Padding="8,3" VerticalAlignment="Center" MinWidth="64">
+                        <TextBlock Text="{Binding StateDisplay}" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" TextAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
+                        <Button Content="Edit" Tag="{Binding Record}" Click="OnEditRecord" Style="{StaticResource MenuLink}" MinHeight="36" MinWidth="48" AutomationProperties.Name="{Binding EditLabel}" />
+                        <Button Content="Deactivate" Tag="{Binding Record}" Click="OnDeactivateRecord" IsEnabled="{Binding IsActive}" Style="{StaticResource MenuButton}" MinHeight="36" FontSize="12" Padding="10,0" BorderBrush="{StaticResource ConsoleRuleBrush}" AutomationProperties.Name="{Binding DeactivateLabel}" />
+                    </StackPanel>
+                </Grid>
             </Border>
         </DataTemplate>
+        <Style x:Key="MenuDialog" TargetType="ContentDialog" BasedOn="{StaticResource WorkspaceDialog}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="PrimaryButtonStyle" Value="{StaticResource MenuPrimary}" />
+            <Setter Property="CloseButtonStyle" Value="{StaticResource MenuButton}" />
+        </Style>
+        <Style x:Key="MenuDrinkDialog" TargetType="ContentDialog" BasedOn="{StaticResource WorkspaceDrinkDialog}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="PrimaryButtonStyle" Value="{StaticResource MenuPrimary}" />
+            <Setter Property="CloseButtonStyle" Value="{StaticResource MenuButton}" />
+        </Style>
+        <Style x:Key="MenuTab" TargetType="RadioButton">
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontFamily" Value="{StaticResource ConsoleSansFont}" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Foreground" Value="{StaticResource ConsoleInkBrush}" />
+            <Setter Property="UseSystemFocusVisuals" Value="True" />
+            <Setter Property="FocusVisualPrimaryBrush" Value="{StaticResource ConsoleAccentTextBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="TabSurface" Background="Transparent" BorderBrush="Transparent" BorderThickness="0,0,0,2" Padding="{TemplateBinding Padding}">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="TabSurface.Opacity" Value=".75" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="TabSurface.Opacity" Value=".6" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Target="TabSurface.Opacity" Value=".4" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="CheckStates">
+                                    <VisualState x:Name="Unchecked" />
+                                    <VisualState x:Name="Checked">
+                                        <VisualState.Setters>
+                                            <Setter Target="TabSurface.Background" Value="{StaticResource ConsolePanelBrush}" />
+                                            <Setter Target="TabSurface.BorderBrush" Value="{StaticResource ConsoleAccentTextBrush}" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter Content="{TemplateBinding Content}" FontSize="{TemplateBinding FontSize}" FontFamily="{TemplateBinding FontFamily}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Page.Resources>
-    <Grid Padding="32,20,32,22" RowSpacing="8">
+    <Grid Padding="24,18,24,24" RowSpacing="0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid x:Name="Header" Padding="0,0,0,10" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,3" ColumnSpacing="18">
+        <Grid x:Name="Header" Padding="0,0,0,16" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1" ColumnSpacing="18" RowSpacing="12">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="116"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="116" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
             <StackPanel Spacing="3">
-                <TextBlock x:Name="CatalogCount" Text="MANAGE / CATALOG" Style="{StaticResource WorkspaceLabel}"/>
-                <TextBlock Text="Menu" Style="{StaticResource ConsolePageTitleStyle}"/>
-                <TextBlock Text="One catalogue for every drink, size, recipe, and topping."/>
+                <TextBlock x:Name="CatalogCount" Text="MANAGE / CATALOG" Style="{StaticResource MenuLabel}" />
+                <TextBlock x:Name="MenuTitle" Text="Menu" Style="{StaticResource ConsolePageTitleStyle}" FontSize="52" />
+                <TextBlock Text="One catalogue for every drink, size, recipe, and topping." />
             </StackPanel>
-            <Image x:Name="HeaderOrnament" Grid.Column="1" Source="ms-appx:///Assets/Ornaments/menu.svg" Height="78" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw"/>
             <StackPanel x:Name="HeaderActions" Grid.Column="2" Spacing="8" Orientation="Horizontal" VerticalAlignment="Bottom">
-                <Button x:Name="ReloadButton" Content="Refresh" Click="OnReload"/>
-                <Button x:Name="NewButton" Content="+ New drink" Style="{StaticResource WorkspacePrimary}" Click="OnNewRecord"/>
+                <Button x:Name="ReloadButton" Content="Refresh" Click="OnReload" />
+                <Button x:Name="NewButton" Content="+ New item" Style="{StaticResource MenuPrimary}" Click="OnNewRecord" />
             </StackPanel>
+            <Image x:Name="HeaderOrnament" Grid.Column="1" Source="ms-appx:///Assets/Ornaments/menu.svg" Height="78" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
         </Grid>
         <StackPanel Grid.Row="1" Spacing="4">
-            <ProgressBar x:Name="LoadingBar" IsIndeterminate="True" Visibility="Collapsed" AutomationProperties.Name="Loading menu"/>
-            <InfoBar x:Name="Status" IsOpen="False" IsClosable="True"/>
+            <ProgressBar x:Name="LoadingBar" IsIndeterminate="True" Visibility="Collapsed" AutomationProperties.Name="Loading menu" />
+            <InfoBar x:Name="Status" IsOpen="False" IsClosable="True" />
         </StackPanel>
-        <Grid Grid.Row="2" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1">
+        <Grid Grid.Row="2" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1" x:Name="SectionBar" RowSpacing="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <StackPanel Orientation="Horizontal" Spacing="6">
-                <ToggleButton x:Name="DrinksTab" Content="Drinks &amp; recipes" Style="{StaticResource WorkspaceTab}" IsChecked="True" Tag="drinks" Click="OnTab"/>
-                <ToggleButton x:Name="CategoriesTab" Content="Categories" Style="{StaticResource WorkspaceTab}" Tag="categories" Click="OnTab"/>
-                <ToggleButton x:Name="AddonsTab" Content="Add-ons" Style="{StaticResource WorkspaceTab}" Tag="addons" Click="OnTab"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal" Spacing="0" x:Name="SectionTabs">
+                <RadioButton x:Name="DrinksTab" Content="Items &amp; recipes" Style="{StaticResource MenuTab}" IsChecked="True" Tag="drinks" Click="OnTab" GroupName="MenuSections" />
+                <RadioButton x:Name="CategoriesTab" Content="Categories" Style="{StaticResource MenuTab}" Tag="categories" Click="OnTab" GroupName="MenuSections" />
+                <RadioButton x:Name="AddonsTab" Content="Add-ons" Style="{StaticResource MenuTab}" Tag="addons" Click="OnTab" GroupName="MenuSections" />
             </StackPanel>
-            <CheckBox x:Name="IncludeInactive" Grid.Column="1" Content="Show inactive" FontSize="8" MinHeight="48" Checked="OnInactiveChanged" Unchecked="OnInactiveChanged"/>
+            <CheckBox x:Name="IncludeInactive" Grid.Column="1" Content="Show inactive" FontSize="13" MinHeight="44" Checked="OnInactiveChanged" Unchecked="OnInactiveChanged" VerticalAlignment="Center" VerticalContentAlignment="Center" />
         </Grid>
-        <ScrollViewer x:Name="WorkspaceContent" Grid.Row="3" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
-            <Grid x:Name="WorkspaceTabs" ColumnSpacing="18" RowSpacing="18">
+        <ContentControl x:Name="WorkspaceContent" Grid.Row="3" Margin="0,6,0,0" SizeChanged="OnPageSizeChanged" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsTabStop="False">
+            <Grid x:Name="WorkspaceTabs" ColumnSpacing="24" RowSpacing="18">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition x:Name="RailColumn" Width="155"/>
-                    <ColumnDefinition x:Name="ListColumn" Width="*"/>
-                    <ColumnDefinition x:Name="DetailColumn" Width="330"/>
+                    <ColumnDefinition x:Name="RailColumn" Width="155" />
+                    <ColumnDefinition x:Name="ListColumn" Width="*" />
+                    <ColumnDefinition x:Name="DetailColumn" Width="330" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="0" />
                 </Grid.RowDefinitions>
                 <StackPanel x:Name="CategoryRail" Spacing="10" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,1,0" Padding="0,12,12,0">
-                    <TextBlock Text="CATEGORIES" Style="{StaticResource WorkspaceLabel}"/>
-                    <ListView x:Name="CategoryFilter" SelectionChanged="OnCategoryFilter" DisplayMemberPath="Name" MaxHeight="340" AutomationProperties.Name="Filter drinks by category"/>
-                    <Button Content="+ Add a category" Click="OnNewCategory" Style="{StaticResource WorkspaceLink}"/>
-                    <Image Source="ms-appx:///Assets/Ornaments/stock-room.svg" Height="116" Margin="0,24" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw"/>
-                    <controls:ConceptPattern Height="12"/>
-                    <TextBlock x:Name="CatalogHealth" TextWrapping="Wrap"/>
+                    <TextBlock Text="CATEGORIES" Style="{StaticResource MenuLabel}" />
+                    <ListView x:Name="CategoryFilter" SelectionChanged="OnCategoryFilter" DisplayMemberPath="Name" MaxHeight="340" AutomationProperties.Name="Filter drinks by category" />
+                    <Button Content="+ Add a category" Click="OnNewCategory" Style="{StaticResource MenuLink}" />
+                    <Image Source="ms-appx:///Assets/Ornaments/stock-room.svg" Height="88" Margin="0,12" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" x:Name="CategoryOrnament" />
+                    <controls:ConceptPattern Height="12" x:Name="CategoryPattern" />
+                    <TextBlock x:Name="CatalogHealth" TextWrapping="Wrap" />
                 </StackPanel>
-                <StackPanel x:Name="RecordsPanel" Grid.Column="1" Spacing="10">
-                    <ComboBox x:Name="CompactCategoryFilter" Visibility="Collapsed" DisplayMemberPath="Name" MinHeight="48" HorizontalAlignment="Stretch" SelectionChanged="OnCategoryFilter" AutomationProperties.Name="Filter drinks by category"/>
-                    <Grid x:Name="SearchControls" ColumnSpacing="8">
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                        <TextBox x:Name="SearchBox" PlaceholderText="Find a drink by name or description…" MaxLength="120" KeyDown="OnSearchKeyDown" AutomationProperties.Name="Find a drink"/>
-                        <Button Grid.Column="1" Content="SEARCH" Click="OnSearch" Style="{StaticResource WorkspaceLink}"/>
+                <Grid x:Name="RecordsPanel" Grid.Column="1" RowSpacing="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <ComboBox x:Name="CompactCategoryFilter" Visibility="Visible" DisplayMemberPath="Name" MinHeight="44" HorizontalAlignment="Stretch" SelectionChanged="OnCategoryFilter" AutomationProperties.Name="Filter drinks by category" FontSize="13" Grid.Row="0" />
+                    <Grid x:Name="SearchControls" ColumnSpacing="0" RowSpacing="10" Grid.Row="1">
+                        <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" Background="{StaticResource ConsoleGroundBrush}" CornerRadius="6">
+                            <Grid ColumnSpacing="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="36" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon Glyph="" FontSize="14" Foreground="{StaticResource ConsoleMutedInkBrush}" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
+                                <TextBox x:Name="SearchBox" PlaceholderText="Search by name or description" MaxLength="120" KeyDown="OnSearchKeyDown" AutomationProperties.Name="Search menu items" FontSize="14" MinHeight="40" VerticalContentAlignment="Center" Padding="0,8" Background="Transparent" BorderThickness="0" Grid.Column="1" />
+                                <Button Grid.Column="2" Content="Search" Click="OnSearch" Style="{StaticResource MenuLink}" Margin="0,3,3,3" MinHeight="34" Padding="12,0" Background="{StaticResource ConsoleRaisedGroundBrush}" />
+                            </Grid>
+                        </Border>
                     </Grid>
-                    <TextBlock x:Name="EmptyMessage" Text="No drinks match. Clear the search or create a drink." Visibility="Collapsed"/>
-                    <GridView x:Name="DrinksList" ContainerContentChanging="OnDrinkContainerContentChanging" SizeChanged="OnPageSizeChanged" SelectionMode="Single" SelectionChanged="OnDrinkSelected" MaxHeight="550" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="Drinks and recipes" IsItemClickEnabled="False">
+                    <TextBlock x:Name="ResultsSummary" Foreground="{StaticResource ConsoleMutedInkBrush}" FontSize="13" Grid.Row="2" />
+                    <GridView x:Name="DrinksList" ContainerContentChanging="OnDrinkContainerContentChanging" SizeChanged="OnPageSizeChanged" SelectionMode="Single" SelectionChanged="OnDrinkSelected" ScrollViewer.HorizontalScrollBarVisibility="Disabled" AutomationProperties.Name="Drinks and recipes" IsItemClickEnabled="False" Padding="0" Grid.Row="3" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Enabled">
                         <GridView.Resources>
-                            <SolidColorBrush x:Key="GridViewItemBackgroundSelected" Color="Transparent"/>
-                            <SolidColorBrush x:Key="GridViewItemBackgroundSelectedPointerOver" Color="#ECE5D9"/>
+                            <SolidColorBrush x:Key="GridViewItemBackgroundSelected" Color="Transparent" />
+                            <SolidColorBrush x:Key="GridViewItemBackgroundSelectedPointerOver" Color="#ECE5D9" />
                         </GridView.Resources>
                         <GridView.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <ItemsWrapGrid x:Name="DrinkWrap" ItemWidth="245" ItemHeight="134" Orientation="Horizontal" MaximumRowsOrColumns="2"/>
+                                <ItemsWrapGrid x:Name="DrinkWrap" ItemWidth="320" ItemHeight="132" Orientation="Horizontal" MaximumRowsOrColumns="2" />
                             </ItemsPanelTemplate>
                         </GridView.ItemsPanel>
                         <GridView.ItemContainerStyle>
                             <Style TargetType="GridViewItem">
-                                <Setter Property="Padding" Value="0"/>
-                                <Setter Property="Margin" Value="0,0,10,10"/>
-                                <Setter Property="MinHeight" Value="110"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                <Setter Property="UseSystemFocusVisuals" Value="True"/>
-                                <Setter Property="FocusVisualPrimaryBrush" Value="{StaticResource ConsoleAccentTextBrush}"/>
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0,0,8,8" />
+                                <Setter Property="MinHeight" Value="124" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="UseSystemFocusVisuals" Value="True" />
+                                <Setter Property="FocusVisualPrimaryBrush" Value="{StaticResource ConsoleAccentTextBrush}" />
                             </Style>
                         </GridView.ItemContainerStyle>
                         <GridView.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Padding="0,10">
-                                    <Grid ColumnSpacing="11">
+                                <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" Padding="8" Background="{StaticResource ConsoleRaisedGroundBrush}" CornerRadius="4">
+                                    <Grid ColumnSpacing="12">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="92"/>
-                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="96" />
+                                            <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="92" Height="92" Padding="12" Background="{StaticResource ConsolePanelBrush}" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" VerticalAlignment="Top">
-                                            <Image Source="ms-appx:///Assets/Icons/i-counter.svg" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw"/>
+                                        <Border Width="96" Height="96" Background="{StaticResource ConsolePanelBrush}" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" VerticalAlignment="Center">
+                                            <Image Source="{Binding Photo}" Stretch="UniformToFill" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
                                         </Border>
-                                        <StackPanel Grid.Column="1" Spacing="4">
-                                            <TextBlock Text="{Binding Name}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="19" TextWrapping="Wrap" Foreground="{StaticResource ConsoleInkBrush}"/>
-                                            <TextBlock Text="{Binding CategoryName}" FontSize="7" TextWrapping="Wrap"/>
-                                            <TextBlock Text="{Binding PriceDisplay}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="17"/>
-                                            <TextBlock Text="{Binding StateDisplay}" FontSize="6" Style="{StaticResource WorkspaceLabel}"/>
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="20" MaxLines="2" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
+                                            <TextBlock Text="{Binding CategoryName}" FontSize="12" MaxLines="1" TextTrimming="CharacterEllipsis" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                                            <TextBlock Text="{Binding PriceDisplay}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="19" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                                            <TextBlock Text="{Binding StateDisplay}" FontSize="11" Foreground="{StaticResource ConsoleAccentTextBrush}" />
                                         </StackPanel>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
                         </GridView.ItemTemplate>
                     </GridView>
-                    <TextBlock x:Name="CategoriesEmpty" Text="No categories yet. Create one to begin." Visibility="Collapsed"/>
-                    <ListView x:Name="CategoriesList" ItemTemplate="{StaticResource RecordRow}" SelectionChanged="OnRecordSelected" MaxHeight="500" Visibility="Collapsed" AutomationProperties.Name="Categories"/>
-                    <TextBlock x:Name="CategoryLimit" Text="Showing the first 200 categories." Visibility="Collapsed"/>
-                    <TextBlock x:Name="AddonsEmpty" Text="No add-ons yet. Toppings are optional." Visibility="Collapsed"/>
-                    <ListView x:Name="AddonsList" ItemTemplate="{StaticResource RecordRow}" SelectionChanged="OnRecordSelected" MaxHeight="500" Visibility="Collapsed" AutomationProperties.Name="Add-ons"/>
-                </StackPanel>
-                <Border x:Name="DetailPanel" Grid.Column="2" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1,0,0,0" Padding="18,12,0,0">
-                    <StackPanel Spacing="8">
-                        <Grid ColumnSpacing="11">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
-                            <Border x:Name="DetailArt" Width="92" Height="106" Background="{StaticResource ConsolePanelBrush}" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="1" Padding="12">
-                                <Image Source="ms-appx:///Assets/Icons/i-counter.svg" VerticalAlignment="Top" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw"/>
+                    <Border x:Name="EmptyState" Visibility="Collapsed" Background="{StaticResource ConsoleRaisedGroundBrush}" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" Padding="20" Grid.Row="3">
+                        <StackPanel Spacing="12">
+                            <TextBlock x:Name="EmptyMessage" Text="No menu items match these filters. Try another search or reset the filters." Visibility="Visible" />
+                            <Button Content="Reset filters" Click="OnResetFilters" Style="{StaticResource MenuButton}" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </Border>
+                    <TextBlock x:Name="CategoriesEmpty" Text="No categories yet. Create one to begin." Visibility="Collapsed" Grid.Row="3" />
+                    <ListView x:Name="CategoriesList" ItemTemplate="{StaticResource RecordRow}" SelectionMode="None" Visibility="Collapsed" AutomationProperties.Name="Categories" Grid.Row="3" Padding="0" />
+                    <TextBlock x:Name="CategoryLimit" Text="Showing the first 200 categories." Visibility="Collapsed" Grid.Row="4" />
+                    <TextBlock x:Name="AddonsEmpty" Text="No add-ons yet. Toppings are optional." Visibility="Collapsed" Grid.Row="3" />
+                    <ListView x:Name="AddonsList" ItemTemplate="{StaticResource RecordRow}" SelectionMode="None" Visibility="Collapsed" AutomationProperties.Name="Add-ons" Grid.Row="3" Padding="0" />
+                </Grid>
+                <Border x:Name="DetailHost" Grid.Column="2">
+                    <Border x:Name="DetailPanel" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="1,3,1,1" Padding="0" Background="{StaticResource ConsoleGroundBrush}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Border Padding="16" Background="{StaticResource ConsoleFieldBrush}">
+                                <Grid ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border x:Name="DetailArt" Width="72" Height="72" Background="{StaticResource ConsolePanelBrush}" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="1" Padding="0">
+                                        <Image IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" Stretch="UniformToFill" x:Name="DetailPhoto" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                        <TextBlock x:Name="DetailHeading" Text="Select a drink" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="27" Foreground="{StaticResource ConsoleOnFieldBrush}" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="DetailMeta" FontSize="13" Foreground="{StaticResource ConsoleOnFieldMutedBrush}" />
+                                    </StackPanel>
+                                </Grid>
                             </Border>
-                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-                                <TextBlock x:Name="DetailHeading" Text="Select a drink" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="30" Foreground="{StaticResource ConsoleInkBrush}"/>
-                                <TextBlock x:Name="DetailMeta" FontSize="8"/>
-                            </StackPanel>
-                        </Grid>
-                        <TextBlock x:Name="DetailDescription"/>
-                        <StackPanel x:Name="ItemActions" Spacing="8" Visibility="Collapsed">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Sizes &amp; prices" Style="{StaticResource WorkspaceHeading}" VerticalAlignment="Center"/>
-                                <Button Grid.Column="1" Content="+ Size" Click="OnNewVariant" Style="{StaticResource WorkspaceLink}"/>
-                            </Grid>
-                            <ListView x:Name="VariantsList" SelectionMode="None" MaxHeight="192" AutomationProperties.Name="Sizes prices and recipes">
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" ColumnSpacing="8">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="48"/></Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding SizeName}" VerticalAlignment="Center"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding Price}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="16" VerticalAlignment="Center"/>
-                                            <Button Grid.Column="2" Content="···" Style="{StaticResource WorkspaceLink}" AutomationProperties.Name="Size actions">
-                                                <Button.Flyout><MenuFlyout>
-                                                    <MenuFlyoutItem Text="Edit size and price" Tag="{Binding}" Click="OnEditVariant"/>
-                                                    <MenuFlyoutItem Text="Edit recipe" Tag="{Binding}" Click="OnRecipe"/>
-                                                    <MenuFlyoutItem Text="Deactivate size" Tag="{Binding}" Click="OnDeactivateVariant" IsEnabled="{Binding IsActive}"/>
-                                                </MenuFlyout></Button.Flyout>
-                                            </Button>
+                            <ScrollViewer x:Name="DetailScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                <StackPanel Spacing="16" Padding="16">
+                                    <TextBlock x:Name="DetailDescription" TextWrapping="Wrap" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                                    <StackPanel x:Name="ItemActions" Spacing="10" Visibility="Collapsed">
+                                        <Grid ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Button Content="Edit drink" Style="{StaticResource MenuPrimary}" Click="OnEditDrink" HorizontalAlignment="Stretch" />
+                                            <Button x:Name="DeactivateDrinkButton" Grid.Column="1" Content="Deactivate" Click="OnDeactivateDrink" HorizontalAlignment="Stretch" />
                                         </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-                            <Grid>
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                <TextBlock x:Name="RecipeHeading" Text="Recipe" Style="{StaticResource WorkspaceHeading}" VerticalAlignment="Center"/>
-                                <Button x:Name="RecipeButton" Grid.Column="1" Content="EDIT" Click="OnRecipe" Style="{StaticResource WorkspaceLink}"/>
-                            </Grid>
-                            <Border Background="{StaticResource ConsoleRaisedGroundBrush}" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="2,0,0,0" Padding="10,8">
-                                <TextBlock x:Name="RecipeSummary" FontSize="9"/>
-                            </Border>
-                            <TextBlock Text="Compatible toppings" Style="{StaticResource WorkspaceHeading}"/>
-                            <Border Background="{StaticResource ConsoleRaisedGroundBrush}" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="2,0,0,0" Padding="10">
-                                <TextBlock x:Name="CompatibilityText"/>
-                            </Border>
-                            <Button Content="Choose add-ons" Click="OnCompatibility" Style="{StaticResource WorkspaceLink}"/>
-                            <Grid ColumnSpacing="8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Button Content="Edit drink" Style="{StaticResource WorkspacePrimary}" Click="OnEditDrink" HorizontalAlignment="Stretch"/>
-                                <Button x:Name="DeactivateDrinkButton" Grid.Column="1" Content="Deactivate" Click="OnDeactivateDrink" HorizontalAlignment="Stretch"/>
-                            </Grid>
-                        </StackPanel>
-                        <StackPanel x:Name="RecordActions" Spacing="10" Visibility="Collapsed">
-                            <TextBlock x:Name="RecordState"/>
-                            <Button x:Name="EditRecordButton" Content="Edit" Click="OnEditRecord" Style="{StaticResource WorkspacePrimary}"/>
-                            <Button x:Name="DeactivateRecordButton" Content="Deactivate" Click="OnDeactivateRecord"/>
-                        </StackPanel>
-                        <controls:ConceptPattern Height="18" Margin="0,12,0,0"/>
-                    </StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="Sizes &amp; prices" Style="{StaticResource MenuHeading}" VerticalAlignment="Center" />
+                                            <Button Grid.Column="1" Content="+ Size" Click="OnNewVariant" Style="{StaticResource MenuLink}" />
+                                        </Grid>
+                                        <ListView x:Name="VariantsList" SelectionMode="None" MaxHeight="240" AutomationProperties.Name="Sizes prices and recipes" Padding="0">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" ColumnSpacing="8">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                            <ColumnDefinition Width="48" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding SizeName}" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding PriceDisplay}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="20" VerticalAlignment="Center" />
+                                                        <Button Grid.Column="2" Content="More" Style="{StaticResource MenuLink}" AutomationProperties.Name="{Binding ActionName}" FontSize="12">
+                                                            <Button.Flyout>
+                                                                <MenuFlyout>
+                                                                    <MenuFlyoutItem Text="Edit size and price" Tag="{Binding Variant}" Click="OnEditVariant" />
+                                                                    <MenuFlyoutItem Text="Edit recipe" Tag="{Binding Variant}" Click="OnRecipe" />
+                                                                    <MenuFlyoutItem Text="Deactivate size" Tag="{Binding Variant}" Click="OnDeactivateVariant" IsEnabled="{Binding IsActive}" />
+                                                                </MenuFlyout>
+                                                            </Button.Flyout>
+                                                        </Button>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock x:Name="RecipeHeading" Text="Recipe" Style="{StaticResource MenuHeading}" VerticalAlignment="Center" />
+                                            <Button x:Name="RecipeButton" Grid.Column="1" Content="Edit" Click="OnRecipe" Style="{StaticResource MenuLink}" />
+                                        </Grid>
+                                        <Border Background="{StaticResource ConsoleRaisedGroundBrush}" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="2,0,0,0" Padding="10,8">
+                                    <TextBlock x:Name="RecipeSummary" FontSize="14" LineHeight="22" />
+                                        </Border>
+                                        <TextBlock Text="Compatible toppings" Style="{StaticResource MenuHeading}" />
+                                        <Border Background="{StaticResource ConsoleRaisedGroundBrush}" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="2,0,0,0" Padding="10">
+                                    <TextBlock x:Name="CompatibilityText" LineHeight="22" />
+                                        </Border>
+                                        <Button Content="Choose add-ons" Click="OnCompatibility" Style="{StaticResource MenuLink}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
                 </Border>
             </Grid>
-        </ScrollViewer>
+        </ContentControl>
     </Grid>
 </Page>

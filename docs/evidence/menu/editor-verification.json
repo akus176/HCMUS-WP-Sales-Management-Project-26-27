@@ -1,0 +1,39 @@
+{
+  "compactPreserved": true,
+  "expandedPreserved": true,
+  "savedRecordUnchanged": true,
+  "compactTargets": [
+    {
+      "name": "Delete",
+      "width": 34.400001525878906,
+      "height": 34.400001525878906
+    },
+    {
+      "name": "Cancel",
+      "width": 71.19999694824219,
+      "height": 44
+    },
+    {
+      "name": "Save drink",
+      "width": 92,
+      "height": 44
+    }
+  ],
+  "expandedTargets": [
+    {
+      "name": "Delete",
+      "width": 34.400001525878906,
+      "height": 34.400001525878906
+    },
+    {
+      "name": "Cancel",
+      "width": 71.19999694824219,
+      "height": 44
+    },
+    {
+      "name": "Save drink",
+      "width": 92,
+      "height": 44
+    }
+  ]
+}
