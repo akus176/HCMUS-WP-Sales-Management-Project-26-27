@@ -13,6 +13,12 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public IReadOnlyList<OperationalOrder> Orders { get; private set; } = [];
     public IReadOnlyList<OperationalTable> Tables { get; private set; } = [];
     public IReadOnlyList<DeliveryStaffOption> DeliveryStaff { get; private set; } = [];
+    public IReadOnlyList<PosStaffOption> Staff { get; private set; } = [];
+    public PosStaffOption? Operator
+    {
+        get => session.Operator;
+        set { if (IsBusy) return; session.Operator = value; Notify(); }
+    }
     public IReadOnlyDictionary<EntityId, PosOrderDetail> OrderDetails { get; private set; } =
         new Dictionary<EntityId, PosOrderDetail>();
     public EntityId? SelectedOrderId { get; private set; }
@@ -33,6 +39,8 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         Orders = await queries.GetOrdersAsync();
         Tables = await queries.GetTablesAsync();
         DeliveryStaff = await queries.GetDeliveryStaffAsync();
+        Staff = (await provider.GetRequiredService<PosOrderHandler>().GetOptionsAsync()).Staff;
+        if (session.Operator is { } actor && Staff.All(staff => staff.Id != actor.Id)) session.Operator = null;
         await LoadDetailsAsync(provider);
         if (SelectedOrderId is null || Orders.All(order => order.Id != SelectedOrderId))
             SelectedOrderId = Orders.FirstOrDefault(order => order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready)?.Id;
@@ -98,12 +106,42 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public Task CompleteDeliveryAsync() => UpdateDeliveryAsync((handler, id, actor) => handler.CompleteAsync(new(id, actor)), "Delivery marked delivered.");
     public Task FailDeliveryAsync(string reason) => UpdateDeliveryAsync((handler, id, actor) => handler.FailAsync(new(id, reason, actor)), "Delivery marked failed.");
 
-    private Task TransitionAsync(string target) => RunAsync(async provider =>
+    public static bool IsMoveAllowed(OperationalOrder order, string target) => target switch
     {
-        if (SelectedOrder is null) return;
-        var result = await provider.GetRequiredService<OrderFulfillmentCommandHandler>().TransitionAsync(new(SelectedOrder.Id, target));
-        if (Accept(result)) await RefreshAsync(provider, $"Order moved to {target}.");
-    });
+        OrderStatus.Preparing => order.CanStartPreparing,
+        OrderStatus.Ready => order.CanMarkReady,
+        OrderStatus.Completed => order.CanComplete,
+        _ => false
+    };
+
+    public bool CanMoveOrder(EntityId id, string target) => !IsBusy && HasOperator
+        && Orders.FirstOrDefault(order => order.Id == id) is { } order && IsMoveAllowed(order, target);
+
+    private Task TransitionAsync(string target) => SelectedOrderId is { } id ? MoveOrderAsync(id, target) : Task.CompletedTask;
+
+    public Task MoveOrderAsync(EntityId id, string target)
+    {
+        if (IsBusy) return Task.CompletedTask;
+        if (!HasOperator)
+        {
+            ShowValidation("Choose an operator before moving a ticket.");
+            return Task.CompletedTask;
+        }
+        var order = Orders.FirstOrDefault(order => order.Id == id);
+        if (order is null || !IsMoveAllowed(order, target))
+        {
+            ShowValidation(order?.Status == OrderStatus.Ready && target == OrderStatus.Completed && order.OutstandingBalance > 0
+                ? "Record the remaining payment before completing this ticket."
+                : "This ticket cannot move to that state. Refresh the board and use its next available action.");
+            return Task.CompletedTask;
+        }
+        return RunAsync(async provider =>
+        {
+            SelectedOrderId = id;
+            var result = await provider.GetRequiredService<OrderFulfillmentCommandHandler>().TransitionAsync(new(id, target));
+            if (Accept(result)) await RefreshAsync(provider, $"{order.OrderNumber} moved to {target}.");
+        });
+    }
 
     private Task UpdateDeliveryAsync(Func<DeliveryCommandHandler, EntityId, EntityId, Task<Result>> action, string success) => RunAsync(async provider =>
     {

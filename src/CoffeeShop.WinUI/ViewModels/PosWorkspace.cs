@@ -11,8 +11,16 @@ namespace CoffeeShop.WinUI.ViewModels;
 
 public sealed record PosCartLine(MenuItemSummary Item, SizeVariantSummary Size, int Quantity, IReadOnlyList<AddonSummary> Addons)
 {
+    public Guid LineId { get; init; } = Guid.NewGuid();
+    public string UnitPrice => $"{Size.Price + Addons.Sum(addon => addon.Price):0.00} each";
+    public string DecreaseLabel => $"Decrease quantity of {Item.Name}";
+    public string IncreaseLabel => $"Increase quantity of {Item.Name}";
+    public string RemoveLabel => $"Remove {Item.Name} from ticket";
     public string Description => $"{Quantity} x {Item.Name} / {Size.SizeName} @ {Size.Price:0.00}"
         + string.Concat(Addons.Select(addon => $"\n+ {addon.Name} @ {addon.Price:0.00} per drink"));
+    public string DisplayName => Item.Name;
+    public string Details => Addons.Count == 0 ? Size.SizeName : $"{Size.SizeName} · {string.Join(" · ", Addons.Select(addon => addon.Name))}";
+    public string Amount => ((Size.Price + Addons.Sum(addon => addon.Price)) * Quantity).ToString("0.00");
     public PosLineRequest Request => new(Item.Id, Size.Id, Quantity, Addons.Select(addon => addon.Id).ToArray());
 }
 
@@ -111,8 +119,10 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
     {
         if (!CanEdit) return;
         var rows = Cart.ToList();
-        rows.Remove(line);
+        if (rows.RemoveAll(row => row.LineId == line.LineId) == 0) return;
         Cart = rows;
+        Error = null;
+        Message = "Item removed from the ticket.";
         Notify();
     }
 
@@ -125,9 +135,9 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
             return;
         }
         var rows = Cart.ToList();
-        var index = rows.IndexOf(line);
+        var index = rows.FindIndex(row => row.LineId == line.LineId);
         if (index < 0) return;
-        rows[index] = line with { Quantity = quantity };
+        rows[index] = rows[index] with { Quantity = quantity };
         Cart = rows;
         Error = null;
         Message = "Ticket quantity updated. Save the draft to review exact totals.";
