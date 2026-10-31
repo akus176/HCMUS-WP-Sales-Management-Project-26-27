@@ -87,7 +87,7 @@ internal sealed class ComponentGalleryPage : Page
                 width = ActualWidth,
                 height = ActualHeight,
             };
-            var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CoffeeShop");
+            var directory = PresentationVerification.DirectoryPath;
             Directory.CreateDirectory(directory);
             await File.WriteAllTextAsync(Path.Combine(directory, "component-verification.json"), JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true }));
             if (capture)

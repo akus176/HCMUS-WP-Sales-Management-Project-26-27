@@ -1,0 +1,22 @@
+Coffee Shop Management System — midterm feature summary
+
+Completed for the midterm:
+- WinUI desktop client with a direct PostgreSQL connection and six workspaces: Counter, Service board, Menu, Stock room, Customers, and Reports.
+- Catalog and category management; drink sizes, add-ons, and recipes.
+- Customer profiles, delivery addresses, and loyalty history.
+- Dine-in, takeaway, and delivery orders; payment, discount approval, cancellation, and fulfillment workflows.
+- Inventory, suppliers, purchase receipts, stock adjustments, low-stock views, and movement history.
+- Revenue, best-seller, order-channel, and low-stock reports.
+- Repeatable demo data with 20 products, 5 categories, 12 customers, and 24 baseline orders.
+
+High-effort work:
+- Transactional order confirmation and cancellation with stock and loyalty compensation.
+- PostgreSQL migrations, restricted midterm runtime role, and repeatable seed data.
+- Automated domain, application, database integration, and WinUI presentation tests.
+- Responsive six-workspace desktop UI and native verification captures.
+
+Planned for the final version:
+- Client-to-API migration, staff authentication, server-side role authorization, and API tests.
+- Optional business-data AI integration.
+
+Evidence and known limits: see docs/midterm-demonstration.md, docs/midterm-test-cases.md, docs/midterm-submission/video-checklist.txt, and README.md. Card and e-wallet tenders are simulated. Midterm staff selection is not final authentication. The final all-workspace visual audit is tracked in GitHub issue #119.

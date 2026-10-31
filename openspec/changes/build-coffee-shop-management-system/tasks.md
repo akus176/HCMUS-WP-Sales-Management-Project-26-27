@@ -69,12 +69,12 @@
 
 ## 8. Midterm Direct-Database Milestone
 
-- [ ] 8.1 Implement the WinUI direct composition root that hosts Application services and PostgreSQL infrastructure in-process; verify the client starts and completes a database health check
-- [ ] 8.2 Configure a restricted PostgreSQL role for the midterm client and local-only connection settings; verify the role cannot perform unneeded database-administration operations
-- [ ] 8.3 Add loading, validation, empty, conflict, and database-error states across midterm WinUI workflows; verify UI tests or scripted checks exercise each state
-- [ ] 8.4 Create realistic seed data with at least 20 menu products, 5 categories, 10 customers, 20 varied orders, ingredients, recipes, suppliers, and tables; verify a seed validation test checks all minimum counts
-- [ ] 8.5 Execute the full midterm demonstration path for menu, customers, inventory, all order channels, reports, and cancellation restoration; verify the documented checklist passes against a rebuilt database
-- [ ] 8.6 Produce the midterm test-case report with inputs, expected results, actual results, and pass/fail status; verify it includes valid, invalid, and boundary cases for every core module
+- [x] 8.1 Implement the WinUI direct composition root that hosts Application services and PostgreSQL infrastructure in-process; verify the client starts and completes a database health check
+- [x] 8.2 Configure a restricted PostgreSQL role for the midterm client and local-only connection settings; verify the role cannot perform unneeded database-administration operations
+- [x] 8.3 Add loading, validation, empty, conflict, and database-error states across midterm WinUI workflows; verify UI tests or scripted checks exercise each state
+- [x] 8.4 Create realistic seed data with at least 20 menu products, 5 categories, 10 customers, 20 varied orders, ingredients, recipes, suppliers, and tables; verify a seed validation test checks all minimum counts
+- [x] 8.5 Execute the full midterm demonstration path for menu, customers, inventory, all order channels, reports, and cancellation restoration; verify the documented checklist passes against a rebuilt database
+- [x] 8.6 Produce the midterm test-case report with inputs, expected results, actual results, and pass/fail status; verify it includes valid, invalid, and boundary cases for every core module
 
 ## 9. ASP.NET Core API and Contracts
 
