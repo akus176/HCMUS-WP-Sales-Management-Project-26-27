@@ -12,10 +12,6 @@
                 <ResourceDictionary Source="ms-appx:///Theme/ServiceConsoleControls.xaml" />
                 <ResourceDictionary Source="ms-appx:///Theme/ServiceConsoleSurfaces.xaml" />
                 <ResourceDictionary Source="ms-appx:///Theme/WorkspaceStyles.xaml" />
-                <ResourceDictionary Source="ms-appx:///Theme/SketchColors.xaml" />
-                <ResourceDictionary Source="ms-appx:///Theme/SketchTypography.xaml" />
-                <ResourceDictionary Source="ms-appx:///Theme/SketchShapes.xaml" />
-                <ResourceDictionary Source="ms-appx:///Theme/CustomerStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

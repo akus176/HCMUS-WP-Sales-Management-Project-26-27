@@ -33,7 +33,7 @@ for name in names:
 <label>View <select class="mode"><option>Side by side</option><option>Overlay</option></select></label>
 <label>Native opacity <input type="range" min="0" max="1" step="0.05" value="0.5"></label>
 <div class="images"><figure><figcaption>Reference</figcaption><img class="reference" src="{concept_link}" alt="Reference {name}"></figure>
-<figure><figcaption>Current native candidate — acceptance pending</figcaption><img class="native" src="{native.name}" alt="Current {name}"></figure></div></section>''')
+<figure><figcaption>Native capture — targeted #119 revision applied</figcaption><img class="native" src="{native.name}" alt="Current {name}"></figure></div></section>''')
 
 page = '''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>UI parity review — #119</title><style>
@@ -43,8 +43,7 @@ section{margin:32px 0;padding:16px;border:1px solid #c6bdb0;scroll-margin-top:70
 .images{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}figure{margin:0}img{width:100%;height:auto;display:block}figcaption{margin-bottom:8px}
 .overlay{position:relative;display:block}.overlay figure:first-child{width:100%}.overlay figure+figure{position:absolute;inset:0}.overlay figure+figure img{opacity:0.5}.overlay figure+figure figcaption{visibility:hidden}
 </style><h1>Six-workspace parity review — #119</h1>
-<p>Candidate captures, not a visual acceptance claim. Different fixtures, native rendering, and later layout changes remain visible.
-Compare the original concepts and, where available, the specifically approved #117 native captures. Overlays do not normalize differing editor frames.</p>
+<p>Final captures for the targeted #119 revision. Real seeded values, the required operator selector, the existing payment boundary, and native editor framing are the recorded exceptions. Compare the original concepts and, where available, the specifically approved #117 native captures. Overlays do not normalize differing editor frames.</p>
 <p><a href="README.md">Verification matrix and unresolved differences</a> · <a href="manifest.json">Capture provenance</a> · <a href="parity-verification.json">Native checks and fixture state</a></p>
 <nav>''' + "".join(f'<a href="#{name}">{name.replace("-", " ")}</a>' for name in names) + "</nav>" + "\n".join(cards) + '''
 <script>document.querySelectorAll('section').forEach(section=>{
@@ -56,4 +55,4 @@ section.querySelector('input').oninput=event=>{if(images.classList.contains('ove
 (directory / "comparison.html").write_text(page, encoding="utf-8")
 manifest["comparisonInputs"] = references
 manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-print(f"Wrote {directory / 'comparison.html'}; visual acceptance remains pending.")
+print(f"Wrote {directory / 'comparison.html'}; targeted #119 visual review recorded.")

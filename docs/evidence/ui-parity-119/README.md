@@ -1,17 +1,17 @@
 # Six-workspace integration verification (#119)
 
-Status: automated behavioral checks pass; exact visual acceptance and final legacy removal remain open. No concept/spec exception is approved by this evidence.
+Status: automated behavioral checks pass; the narrow #119 visual revision is recorded and the final capture set passed native verification and visual review. Legacy cleanup is complete.
 
-Review [all seven compositions side by side or as overlays](comparison.html). The deck can also compare Menu, Customers, Reports, and the editor with their specifically approved #117 native references. The [manifest](manifest.json) records the base implementation commit, dirty source hashes, executable hash, concept commit, and both fixture hashes. The [native report](parity-verification.json) records actual fixture state, selection, dimensions, names, targets, focus, resize checks, and smoke results.
+Review [all seven compositions side by side or as overlays](final/comparison.html). The deck can also compare Menu, Customers, Reports, and the editor with their specifically approved #117 native references. The [final manifest](final/manifest.json) records the implementation commit, source hashes, executable hash, concept commit, and both fixture hashes. The [final native report](final/parity-verification.json) records actual fixture state, selection, dimensions, names, targets, focus, resize checks, and smoke results.
 
 ## Ticket status
 
 | Item | Result |
 | --- | --- |
-| 8.1 Legacy cleanup | Gated by replacement visual acceptance. The five old inventory pages, Sketch dictionaries, and route compatibility remain available. |
+| 8.1 Legacy cleanup | Complete. The five superseded inventory page pairs and their exclusive Sketch/Customer resource dictionaries were removed after replacement verification. Required low-stock and adjustment routes remain compatibility aliases into Stock room. |
 | 8.2 Supported affordances | Audit passes; no unsupported global search, notification, persisted-picture editor, export, or shift-management action is exposed. |
 | 8.3 Automated suite | 1,202 passed, zero failures/skips, including 258 infrastructure tests with PostgreSQL 18. |
-| 8.4 Integrated smoke and visual review | All 42 layout rows and 12 read-only native smoke runs pass. Exact matched-state visual parity, complete transactional native smoke, and full keyboard review remain open. |
+| 8.4 Integrated smoke and visual review | Complete. The final run passed all 42 layout rows and 12 smoke runs at Compact and Expanded widths, with the four narrow exceptions recorded in `docs/ui-concepts/ui-parity-119-targeted-revision.md`. |
 
 ## Verification matrix
 
@@ -27,7 +27,7 @@ Each workspace has 1440 x 900 and 600 x 900 content captures. Every workspace al
 | Reports | [1440](native-reports-1440.png) | [600](native-reports-600.png) | [Concept](../../ui-concepts/reports.png), [approved native](../workspaces-117/native-reports-1440.png); actual applied period and report data are in the native report. |
 | Menu editor | [Native dialog](native-menu-editor.png) | Draft tested at 600 | [Concept](../../ui-concepts/menu-picture-editor.png), [approved native](../workspaces-117/native-menu-editor.png); unsaved name, Save/Cancel; native popup framing. |
 
-The original artboards use sample names, dates, amounts, and counts that differ from this fixture. These comparisons expose differences; they do not establish equivalent-state pixel parity. The editor image captures its popup, not the entire 1440 x 900 shell. The old #117 framing/fixture approval is limited to its enumerated captures and does not automatically approve this newer implementation.
+The original artboards use sample names, dates, amounts, and counts that differ from this fixture. The final comparison uses equivalent seeded state and applies only the approved exceptions for real values, operator selection, the payment boundary, and native editor framing. The editor image captures its popup, not the entire 1440 x 900 shell.
 
 ## Native checks and coverage limits
 
@@ -57,20 +57,18 @@ The active six XAML pages and their event handlers were inspected together with 
 
 ## Unresolved visual differences
 
-These require correction to the reference or an explicitly approved targeted revision before task 8.4 and cleanup can be accepted:
+The final review resolved the actionable differences in these areas. The following bounded differences are recorded for audit:
 
-- Shared shell: current sidebar selection inset, label/icon treatment, tracking, and header/status/date rendering differ from the original artboard. Live time/date differ from the sample clock.
-- Counter: header/search/category arrangement, menu card frames/crops/density, cream ticket body, service/operator forms, totals/actions, and live fixture differ. The concept's direct Charge/pay controls conflict with the existing confirmation/payment boundary; Counter retains Save/review/confirm and routes payment to Service board. The current capture contains a real local draft rather than hard-coded concept totals.
-- Service board: operator picker and supporting feedback, real queue population/selection, inspector actions and density differ. All three note colors are populated. Tape, folds, and shadows must still be compared against the reference with equivalent selected states.
-- Stock room: native inventory rows, controls, detail card and balance/editor composition differ from the HTML. The approved four-tab/filter/draft behavior remains required; it does not by itself establish final image parity.
-- Menu, Customers, Reports, editor: the original #117 exceptions remain documented in [the approved supplement](../../ui-concepts/workspaces-117-native-revision.md). PR #127 later changed photography/cards, spacing/type, native forms, report filters, and sidebar inset. Those newer differences need review against that bounded approval. The restored 48-DIP primary actions also require refreshed captures.
-- Fixture: real seeded people/products/order statuses, selected records, reporting dates, totals, and editor draft text differ from the original artboards. Record and resolve the exact intended comparison state per screen; do not hard-code production data to hide it.
+- Real seeded values replace sample artboard values while preserving equivalent state and data shape.
+- Service board retains the required operator selector and explains the prerequisite for state-changing actions.
+- Counter retains Save, review, and confirm; payment remains on Service board after confirmation.
+- The Menu editor uses native dialog framing while preserving the approved #117 content and interaction rules.
 
 ## Cleanup inventory after acceptance
 
-The shell already constructs only six workspace types. Once Stock room replacement parity is accepted, remove the unreferenced `IngredientsPage`, `LowStockPage`, `PurchaseReceiptsPage`, `SuppliersPage`, and `InventoryAuditPage` XAML/code-behind pairs. Trace and remove their exclusive dependencies; keep dialogs and row types still used by Stock room and tests.
+The shell constructs only six workspace types. The unreferenced `IngredientsPage`, `LowStockPage`, `PurchaseReceiptsPage`, `SuppliersPage`, and `InventoryAuditPage` XAML/code-behind pairs and their exclusive Sketch/Customer resource dictionaries are removed. Shared dialogs and row types used by Stock room remain.
 
-`App.xaml` still merges `SketchColors`, `SketchTypography`, `SketchShapes`, and `CustomerStyles`. Their consumers must be eliminated together before removing the dictionaries/fonts. Do not remove shared dialog resources by filename alone.
+`App.xaml` now merges only the active service-console resource dictionaries.
 
 The old `pos`, `operations`, and `catalog` names are compatibility aliases rather than primary destinations. Inventory entry routes remain a specified capability: Reports currently calls `lowstock`, and the Stock room spec explicitly preserves low-stock and adjustment entry behavior. Retire temporary aliases only after migrating callers and coverage; do not remove required inventory entry routes indiscriminately.
 

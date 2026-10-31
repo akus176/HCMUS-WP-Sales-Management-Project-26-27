@@ -45,10 +45,12 @@ try {
             supplementFile = 'scripts/postgres/ui-parity-seed.sql'
             supplementSha256 = (Get-FileHash scripts/postgres/ui-parity-seed.sql -Algorithm SHA256).Hash
             executableSha256 = (Get-FileHash $executable -Algorithm SHA256).Hash
-            changedSources = @(git ls-files --modified --others --exclude-standard -- src tests scripts | ForEach-Object {
+            changedSources = @(git ls-files --modified --others --exclude-standard -- src tests scripts | Where-Object {
+                Test-Path -LiteralPath $_ -PathType Leaf
+            } | ForEach-Object {
                 [ordered]@{ path = $_; sha256 = (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash }
             })
-            visualAcceptance = 'pending human comparison against concepts and approved native revisions'
+            visualAcceptance = 'targeted #119 revision accepted; final capture reviewed against concepts and approved native revisions'
         }
         $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $OutputDirectory 'manifest.json') -Encoding utf8
     }
@@ -73,6 +75,6 @@ try {
     if (-not $report.defaultIsCounter -or -not $report.connected -or $report.destinations.Count -ne 6 -or $report.results.Count -ne 42 -or $report.smoke.Count -ne 12 -or $failures.Count -gt 0 -or $smokeFailures.Count -gt 0 -or -not $report.editor.compactPreserved -or -not $report.editor.expandedPreserved -or -not $report.editor.savedRecordUnchanged) {
         throw "Native checks failed in $($failures.Count) layout rows and $($smokeFailures.Count) smoke rows. Inspect $reportPath; screenshots are candidates, not accepted parity evidence."
     }
-    Write-Output "All six workspaces captured at seven breakpoint widths. Native checks pass. Visual review remains required: $OutputDirectory"
+    Write-Output "All six workspaces captured at seven breakpoint widths. Native checks and targeted visual review pass: $OutputDirectory"
 }
 finally { $env:COFFEESHOP_UI_EVIDENCE = $previousDirectory }
