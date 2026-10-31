@@ -1,0 +1,7728 @@
+{
+  "defaultIsCounter": true,
+  "connected": true,
+  "destinations": [
+    "counter",
+    "service-board",
+    "menu",
+    "stock-room",
+    "customers",
+    "reports"
+  ],
+  "results": [
+    {
+      "tag": "counter",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "error": null
+      },
+      "state": {
+        "TicketId": {
+          "Value": "c201c891-d6b0-45d5-8c7c-100833b77fe5"
+        },
+        "Search": "",
+        "CategoryId": null,
+        "Channel": "takeaway",
+        "TableId": null,
+        "Customer": {
+          "CustomerId": null,
+          "IsDelivery": false,
+          "CustomerAddressId": null,
+          "RecipientName": null,
+          "ContactNumber": null,
+          "AddressLine": null
+        },
+        "CustomerLabel": "Walk-in",
+        "cart": [
+          {
+            "MenuItemId": {
+              "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+            },
+            "SizeVariantId": {
+              "Value": "09e4b55b-74e6-5097-b080-652dd2ee0a89"
+            },
+            "Quantity": 2,
+            "AddonIds": []
+          },
+          {
+            "MenuItemId": {
+              "Value": "3fbdd505-54b0-46b2-6013-391f8781f2a0"
+            },
+            "SizeVariantId": {
+              "Value": "95fe536c-8c13-416e-b2d0-260bdfe1d12b"
+            },
+            "Quantity": 1,
+            "AddonIds": []
+          }
+        ],
+        "order": null
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Start a new ticket",
+          "width": 126.4000015258789,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search menu",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh menu and ticket",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Almond Croissant from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Pumpkin Spice Latte from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Change",
+          "width": 54.400001525878906,
+          "height": 36,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Ticket details and options",
+          "width": 130.39999389648438,
+          "height": 40,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Save \u0026 review ticket",
+          "width": 318.3999938964844,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [
+        {
+          "Name": "CategoryScroll",
+          "ScrollableWidth": 164.800048828125,
+          "HorizontalScrollMode": 2,
+          "pageLevel": false
+        }
+      ],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "counter",
+      "width": 1008,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "error": null
+      },
+      "state": {
+        "TicketId": {
+          "Value": "c201c891-d6b0-45d5-8c7c-100833b77fe5"
+        },
+        "Search": "",
+        "CategoryId": null,
+        "Channel": "takeaway",
+        "TableId": null,
+        "Customer": {
+          "CustomerId": null,
+          "IsDelivery": false,
+          "CustomerAddressId": null,
+          "RecipientName": null,
+          "ContactNumber": null,
+          "AddressLine": null
+        },
+        "CustomerLabel": "Walk-in",
+        "cart": [
+          {
+            "MenuItemId": {
+              "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+            },
+            "SizeVariantId": {
+              "Value": "09e4b55b-74e6-5097-b080-652dd2ee0a89"
+            },
+            "Quantity": 2,
+            "AddonIds": []
+          },
+          {
+            "MenuItemId": {
+              "Value": "3fbdd505-54b0-46b2-6013-391f8781f2a0"
+            },
+            "SizeVariantId": {
+              "Value": "95fe536c-8c13-416e-b2d0-260bdfe1d12b"
+            },
+            "Quantity": 1,
+            "AddonIds": []
+          }
+        ],
+        "order": null
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1008,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Start a new ticket",
+          "width": 126.4000015258789,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search menu",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh menu and ticket",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Almond Croissant from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Pumpkin Spice Latte from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Change",
+          "width": 54.400001525878906,
+          "height": 36,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Ticket details and options",
+          "width": 130.39999389648438,
+          "height": 40,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Save \u0026 review ticket",
+          "width": 670.4000244140625,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [
+        {
+          "Name": "CategoryScroll",
+          "ScrollableWidth": 54.4000244140625,
+          "HorizontalScrollMode": 2,
+          "pageLevel": false
+        }
+      ],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "counter",
+      "width": 1007,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "error": null
+      },
+      "state": {
+        "TicketId": {
+          "Value": "c201c891-d6b0-45d5-8c7c-100833b77fe5"
+        },
+        "Search": "",
+        "CategoryId": null,
+        "Channel": "takeaway",
+        "TableId": null,
+        "Customer": {
+          "CustomerId": null,
+          "IsDelivery": false,
+          "CustomerAddressId": null,
+          "RecipientName": null,
+          "ContactNumber": null,
+          "AddressLine": null
+        },
+        "CustomerLabel": "Walk-in",
+        "cart": [
+          {
+            "MenuItemId": {
+              "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+            },
+            "SizeVariantId": {
+              "Value": "09e4b55b-74e6-5097-b080-652dd2ee0a89"
+            },
+            "Quantity": 2,
+            "AddonIds": []
+          },
+          {
+            "MenuItemId": {
+              "Value": "3fbdd505-54b0-46b2-6013-391f8781f2a0"
+            },
+            "SizeVariantId": {
+              "Value": "95fe536c-8c13-416e-b2d0-260bdfe1d12b"
+            },
+            "Quantity": 1,
+            "AddonIds": []
+          }
+        ],
+        "order": null
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Medium",
+      "actualWidth": 1007.2000122070312,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Start a new ticket",
+          "width": 126.4000015258789,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search menu",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh menu and ticket",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Almond Croissant from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Pumpkin Spice Latte from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Change",
+          "width": 54.400001525878906,
+          "height": 36,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Ticket details and options",
+          "width": 130.39999389648438,
+          "height": 40,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Save \u0026 review ticket",
+          "width": 821.5999755859375,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "counter",
+      "width": 641,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "error": null
+      },
+      "state": {
+        "TicketId": {
+          "Value": "c201c891-d6b0-45d5-8c7c-100833b77fe5"
+        },
+        "Search": "",
+        "CategoryId": null,
+        "Channel": "takeaway",
+        "TableId": null,
+        "Customer": {
+          "CustomerId": null,
+          "IsDelivery": false,
+          "CustomerAddressId": null,
+          "RecipientName": null,
+          "ContactNumber": null,
+          "AddressLine": null
+        },
+        "CustomerLabel": "Walk-in",
+        "cart": [
+          {
+            "MenuItemId": {
+              "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+            },
+            "SizeVariantId": {
+              "Value": "09e4b55b-74e6-5097-b080-652dd2ee0a89"
+            },
+            "Quantity": 2,
+            "AddonIds": []
+          },
+          {
+            "MenuItemId": {
+              "Value": "3fbdd505-54b0-46b2-6013-391f8781f2a0"
+            },
+            "SizeVariantId": {
+              "Value": "95fe536c-8c13-416e-b2d0-260bdfe1d12b"
+            },
+            "Quantity": 1,
+            "AddonIds": []
+          }
+        ],
+        "order": null
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640.7999877929688,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Start a new ticket",
+          "width": 126.4000015258789,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search menu",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh menu and ticket",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Almond Croissant from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Pumpkin Spice Latte from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Change",
+          "width": 54.400001525878906,
+          "height": 36,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Ticket details and options",
+          "width": 130.39999389648438,
+          "height": 40,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Save \u0026 review ticket",
+          "width": 519.2000122070312,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [
+        {
+          "Name": "CategoryScroll",
+          "ScrollableWidth": 205.60003662109375,
+          "HorizontalScrollMode": 2,
+          "pageLevel": false
+        }
+      ],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "counter",
+      "width": 640,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "error": null
+      },
+      "state": {
+        "TicketId": {
+          "Value": "c201c891-d6b0-45d5-8c7c-100833b77fe5"
+        },
+        "Search": "",
+        "CategoryId": null,
+        "Channel": "takeaway",
+        "TableId": null,
+        "Customer": {
+          "CustomerId": null,
+          "IsDelivery": false,
+          "CustomerAddressId": null,
+          "RecipientName": null,
+          "ContactNumber": null,
+          "AddressLine": null
+        },
+        "CustomerLabel": "Walk-in",
+        "cart": [
+          {
+            "MenuItemId": {
+              "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+            },
+            "SizeVariantId": {
+              "Value": "09e4b55b-74e6-5097-b080-652dd2ee0a89"
+            },
+            "Quantity": 2,
+            "AddonIds": []
+          },
+          {
+            "MenuItemId": {
+              "Value": "3fbdd505-54b0-46b2-6013-391f8781f2a0"
+            },
+            "SizeVariantId": {
+              "Value": "95fe536c-8c13-416e-b2d0-260bdfe1d12b"
+            },
+            "Quantity": 1,
+            "AddonIds": []
+          }
+        ],
+        "order": null
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Start a new ticket",
+          "width": 126.4000015258789,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search menu",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh menu and ticket",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Almond Croissant from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Pumpkin Spice Latte from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Change",
+          "width": 54.400001525878906,
+          "height": 36,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Ticket details and options",
+          "width": 130.39999389648438,
+          "height": 40,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Save \u0026 review ticket",
+          "width": 518.4000244140625,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [
+        {
+          "Name": "CategoryScroll",
+          "ScrollableWidth": 206.4000244140625,
+          "HorizontalScrollMode": 2,
+          "pageLevel": false
+        }
+      ],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "counter",
+      "width": 600,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "error": null
+      },
+      "state": {
+        "TicketId": {
+          "Value": "c201c891-d6b0-45d5-8c7c-100833b77fe5"
+        },
+        "Search": "",
+        "CategoryId": null,
+        "Channel": "takeaway",
+        "TableId": null,
+        "Customer": {
+          "CustomerId": null,
+          "IsDelivery": false,
+          "CustomerAddressId": null,
+          "RecipientName": null,
+          "ContactNumber": null,
+          "AddressLine": null
+        },
+        "CustomerLabel": "Walk-in",
+        "cart": [
+          {
+            "MenuItemId": {
+              "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+            },
+            "SizeVariantId": {
+              "Value": "09e4b55b-74e6-5097-b080-652dd2ee0a89"
+            },
+            "Quantity": 2,
+            "AddonIds": []
+          },
+          {
+            "MenuItemId": {
+              "Value": "3fbdd505-54b0-46b2-6013-391f8781f2a0"
+            },
+            "SizeVariantId": {
+              "Value": "95fe536c-8c13-416e-b2d0-260bdfe1d12b"
+            },
+            "Quantity": 1,
+            "AddonIds": []
+          }
+        ],
+        "order": null
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 600,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Start a new ticket",
+          "width": 126.4000015258789,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search menu",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh menu and ticket",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Almond Croissant from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Pumpkin Spice Latte from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Change",
+          "width": 54.400001525878906,
+          "height": 36,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Ticket details and options",
+          "width": 130.39999389648438,
+          "height": 40,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Save \u0026 review ticket",
+          "width": 510.3999938964844,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [
+        {
+          "Name": "CategoryScroll",
+          "ScrollableWidth": 214.4000244140625,
+          "HorizontalScrollMode": 2,
+          "pageLevel": false
+        }
+      ],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "counter",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "error": null
+      },
+      "state": {
+        "TicketId": {
+          "Value": "c201c891-d6b0-45d5-8c7c-100833b77fe5"
+        },
+        "Search": "",
+        "CategoryId": null,
+        "Channel": "takeaway",
+        "TableId": null,
+        "Customer": {
+          "CustomerId": null,
+          "IsDelivery": false,
+          "CustomerAddressId": null,
+          "RecipientName": null,
+          "ContactNumber": null,
+          "AddressLine": null
+        },
+        "CustomerLabel": "Walk-in",
+        "cart": [
+          {
+            "MenuItemId": {
+              "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+            },
+            "SizeVariantId": {
+              "Value": "09e4b55b-74e6-5097-b080-652dd2ee0a89"
+            },
+            "Quantity": 2,
+            "AddonIds": []
+          },
+          {
+            "MenuItemId": {
+              "Value": "3fbdd505-54b0-46b2-6013-391f8781f2a0"
+            },
+            "SizeVariantId": {
+              "Value": "95fe536c-8c13-416e-b2d0-260bdfe1d12b"
+            },
+            "Quantity": 1,
+            "AddonIds": []
+          }
+        ],
+        "order": null
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Start a new ticket",
+          "width": 126.4000015258789,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search menu",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh menu and ticket",
+          "width": 48,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Almond Croissant",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Almond Croissant from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Decrease quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Increase quantity of Midterm Pumpkin Spice Latte",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Remove Midterm Pumpkin Spice Latte from ticket",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Change",
+          "width": 54.400001525878906,
+          "height": 36,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Ticket details and options",
+          "width": 130.39999389648438,
+          "height": 40,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Save \u0026 review ticket",
+          "width": 318.3999938964844,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [
+        {
+          "Name": "CategoryScroll",
+          "ScrollableWidth": 164.800048828125,
+          "HorizontalScrollMode": 2,
+          "pageLevel": false
+        }
+      ],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "service-board",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "orders": 24,
+        "selected": "MIDTERM-007",
+        "error": null
+      },
+      "state": {
+        "SelectedOrderId": {
+          "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+        },
+        "actor": null,
+        "orders": [
+          {
+            "Id": {
+              "Value": "d9d3a8ca-acd1-2db6-2aae-f10998e7f439"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "942b0acb-ee44-4d40-0f48-c85ba7942c3f"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "32f585a0-be0d-12f5-4581-d6616678a092"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "20df901f-aa15-f9d9-fa50-bcebf248dd7b"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "ee0d710a-bb0c-4cdd-5a98-5e45bfe61ae7"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "52a92f42-211b-e6fe-3ee3-1a541a9d6dcb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "6d04beb9-f20c-84ac-01f9-7e3de049dbf3"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a396c794-c110-5ce6-d248-6e5c40af0213"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "181bdefc-2be9-6530-1638-a83d890d2229"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "87101013-b0ef-33e0-09a4-91d5c21da5d6"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a84eaf99-be26-0e73-1a56-324d567963c8"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "0375ac3e-65b8-c92e-2c5e-cf1e9339c828"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "7a856c6e-13c6-1621-6767-92fb4fcfc749"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "1c56f66a-6176-d690-6b43-7751674b18cb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "8d4fc020-fff7-f59b-8c17-058aa4403062"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "087edc03-6955-5056-6799-71139835d272"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a8feb480-1b02-2aac-8b84-3af508bce7c7"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "cbd1890d-3b72-4b59-15b6-bfd309c07ede"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "6c604f15-ffd9-e57c-fcce-138eb30ba102"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "31ea82bc-b985-300f-ec51-aef86edd831c"
+            },
+            "Status": "preparing"
+          },
+          {
+            "Id": {
+              "Value": "4c2e1238-d1af-a065-d010-3c581ef17cb1"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "bf0575c2-e77a-e95e-5dbf-b22cec1bdae4"
+            },
+            "Status": "confirmed"
+          },
+          {
+            "Id": {
+              "Value": "2515ce66-a926-f31e-b149-b72d11b429e7"
+            },
+            "Status": "completed"
+          }
+        ]
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh service board",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open Counter",
+          "width": 112.80000305175781,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Start preparing: MIDTERM-023",
+          "width": 79.19999694824219,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Mark ready: MIDTERM-021",
+          "width": 62.400001525878906,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete: MIDTERM-007",
+          "width": 57.599998474121094,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Review payment: MIDTERM-016",
+          "width": 84,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete order",
+          "width": 282.3999938964844,
+          "height": 48,
+          "primary": true,
+          "enabled": false
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 1224,
+        "inspectorAtSide": true,
+        "columns": 3,
+        "noteColumnWidth": 261.6000061035156,
+        "contentFits": true,
+        "inspectorFits": true
+      }
+    },
+    {
+      "tag": "service-board",
+      "width": 1008,
+      "height": 900,
+      "fixture": {
+        "orders": 24,
+        "selected": "MIDTERM-007",
+        "error": null
+      },
+      "state": {
+        "SelectedOrderId": {
+          "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+        },
+        "actor": null,
+        "orders": [
+          {
+            "Id": {
+              "Value": "d9d3a8ca-acd1-2db6-2aae-f10998e7f439"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "942b0acb-ee44-4d40-0f48-c85ba7942c3f"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "32f585a0-be0d-12f5-4581-d6616678a092"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "20df901f-aa15-f9d9-fa50-bcebf248dd7b"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "ee0d710a-bb0c-4cdd-5a98-5e45bfe61ae7"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "52a92f42-211b-e6fe-3ee3-1a541a9d6dcb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "6d04beb9-f20c-84ac-01f9-7e3de049dbf3"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a396c794-c110-5ce6-d248-6e5c40af0213"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "181bdefc-2be9-6530-1638-a83d890d2229"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "87101013-b0ef-33e0-09a4-91d5c21da5d6"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a84eaf99-be26-0e73-1a56-324d567963c8"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "0375ac3e-65b8-c92e-2c5e-cf1e9339c828"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "7a856c6e-13c6-1621-6767-92fb4fcfc749"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "1c56f66a-6176-d690-6b43-7751674b18cb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "8d4fc020-fff7-f59b-8c17-058aa4403062"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "087edc03-6955-5056-6799-71139835d272"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a8feb480-1b02-2aac-8b84-3af508bce7c7"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "cbd1890d-3b72-4b59-15b6-bfd309c07ede"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "6c604f15-ffd9-e57c-fcce-138eb30ba102"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "31ea82bc-b985-300f-ec51-aef86edd831c"
+            },
+            "Status": "preparing"
+          },
+          {
+            "Id": {
+              "Value": "4c2e1238-d1af-a065-d010-3c581ef17cb1"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "bf0575c2-e77a-e95e-5dbf-b22cec1bdae4"
+            },
+            "Status": "confirmed"
+          },
+          {
+            "Id": {
+              "Value": "2515ce66-a926-f31e-b149-b72d11b429e7"
+            },
+            "Status": "completed"
+          }
+        ]
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1008,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh service board",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open Counter",
+          "width": 112.80000305175781,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Start preparing: MIDTERM-023",
+          "width": 79.19999694824219,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Mark ready: MIDTERM-021",
+          "width": 62.400001525878906,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete: MIDTERM-007",
+          "width": 57.599998474121094,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Review payment: MIDTERM-016",
+          "width": 84,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete order",
+          "width": 690.4000244140625,
+          "height": 48,
+          "primary": true,
+          "enabled": false
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 792,
+        "inspectorAtSide": false,
+        "columns": 3,
+        "noteColumnWidth": 232,
+        "contentFits": true,
+        "inspectorFits": true
+      }
+    },
+    {
+      "tag": "service-board",
+      "width": 1007,
+      "height": 900,
+      "fixture": {
+        "orders": 24,
+        "selected": "MIDTERM-007",
+        "error": null
+      },
+      "state": {
+        "SelectedOrderId": {
+          "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+        },
+        "actor": null,
+        "orders": [
+          {
+            "Id": {
+              "Value": "d9d3a8ca-acd1-2db6-2aae-f10998e7f439"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "942b0acb-ee44-4d40-0f48-c85ba7942c3f"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "32f585a0-be0d-12f5-4581-d6616678a092"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "20df901f-aa15-f9d9-fa50-bcebf248dd7b"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "ee0d710a-bb0c-4cdd-5a98-5e45bfe61ae7"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "52a92f42-211b-e6fe-3ee3-1a541a9d6dcb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "6d04beb9-f20c-84ac-01f9-7e3de049dbf3"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a396c794-c110-5ce6-d248-6e5c40af0213"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "181bdefc-2be9-6530-1638-a83d890d2229"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "87101013-b0ef-33e0-09a4-91d5c21da5d6"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a84eaf99-be26-0e73-1a56-324d567963c8"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "0375ac3e-65b8-c92e-2c5e-cf1e9339c828"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "7a856c6e-13c6-1621-6767-92fb4fcfc749"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "1c56f66a-6176-d690-6b43-7751674b18cb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "8d4fc020-fff7-f59b-8c17-058aa4403062"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "087edc03-6955-5056-6799-71139835d272"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a8feb480-1b02-2aac-8b84-3af508bce7c7"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "cbd1890d-3b72-4b59-15b6-bfd309c07ede"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "6c604f15-ffd9-e57c-fcce-138eb30ba102"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "31ea82bc-b985-300f-ec51-aef86edd831c"
+            },
+            "Status": "preparing"
+          },
+          {
+            "Id": {
+              "Value": "4c2e1238-d1af-a065-d010-3c581ef17cb1"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "bf0575c2-e77a-e95e-5dbf-b22cec1bdae4"
+            },
+            "Status": "confirmed"
+          },
+          {
+            "Id": {
+              "Value": "2515ce66-a926-f31e-b149-b72d11b429e7"
+            },
+            "Status": "completed"
+          }
+        ]
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Medium",
+      "actualWidth": 1007.2000122070312,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh service board",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open Counter",
+          "width": 112.80000305175781,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Start preparing: MIDTERM-023",
+          "width": 79.19999694824219,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Mark ready: MIDTERM-021",
+          "width": 62.400001525878906,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete: MIDTERM-007",
+          "width": 57.599998474121094,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Review payment: MIDTERM-016",
+          "width": 84,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete order",
+          "width": 841.5999755859375,
+          "height": 48,
+          "primary": true,
+          "enabled": false
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 943.2000122070312,
+        "inspectorAtSide": false,
+        "columns": 3,
+        "noteColumnWidth": 282.3999938964844,
+        "contentFits": true,
+        "inspectorFits": true
+      }
+    },
+    {
+      "tag": "service-board",
+      "width": 641,
+      "height": 900,
+      "fixture": {
+        "orders": 24,
+        "selected": "MIDTERM-007",
+        "error": null
+      },
+      "state": {
+        "SelectedOrderId": {
+          "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+        },
+        "actor": null,
+        "orders": [
+          {
+            "Id": {
+              "Value": "d9d3a8ca-acd1-2db6-2aae-f10998e7f439"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "942b0acb-ee44-4d40-0f48-c85ba7942c3f"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "32f585a0-be0d-12f5-4581-d6616678a092"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "20df901f-aa15-f9d9-fa50-bcebf248dd7b"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "ee0d710a-bb0c-4cdd-5a98-5e45bfe61ae7"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "52a92f42-211b-e6fe-3ee3-1a541a9d6dcb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "6d04beb9-f20c-84ac-01f9-7e3de049dbf3"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a396c794-c110-5ce6-d248-6e5c40af0213"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "181bdefc-2be9-6530-1638-a83d890d2229"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "87101013-b0ef-33e0-09a4-91d5c21da5d6"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a84eaf99-be26-0e73-1a56-324d567963c8"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "0375ac3e-65b8-c92e-2c5e-cf1e9339c828"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "7a856c6e-13c6-1621-6767-92fb4fcfc749"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "1c56f66a-6176-d690-6b43-7751674b18cb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "8d4fc020-fff7-f59b-8c17-058aa4403062"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "087edc03-6955-5056-6799-71139835d272"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a8feb480-1b02-2aac-8b84-3af508bce7c7"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "cbd1890d-3b72-4b59-15b6-bfd309c07ede"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "6c604f15-ffd9-e57c-fcce-138eb30ba102"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "31ea82bc-b985-300f-ec51-aef86edd831c"
+            },
+            "Status": "preparing"
+          },
+          {
+            "Id": {
+              "Value": "4c2e1238-d1af-a065-d010-3c581ef17cb1"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "bf0575c2-e77a-e95e-5dbf-b22cec1bdae4"
+            },
+            "Status": "confirmed"
+          },
+          {
+            "Id": {
+              "Value": "2515ce66-a926-f31e-b149-b72d11b429e7"
+            },
+            "Status": "completed"
+          }
+        ]
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640.7999877929688,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh service board",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open Counter",
+          "width": 112.80000305175781,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Start preparing: MIDTERM-023",
+          "width": 79.19999694824219,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Mark ready: MIDTERM-021",
+          "width": 62.400001525878906,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete: MIDTERM-007",
+          "width": 57.599998474121094,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Review payment: MIDTERM-016",
+          "width": 84,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete order",
+          "width": 539.2000122070312,
+          "height": 48,
+          "primary": true,
+          "enabled": false
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 640.7999877929688,
+        "inspectorAtSide": false,
+        "columns": 1,
+        "noteColumnWidth": 576.7999877929688,
+        "contentFits": true,
+        "inspectorFits": true
+      }
+    },
+    {
+      "tag": "service-board",
+      "width": 640,
+      "height": 900,
+      "fixture": {
+        "orders": 24,
+        "selected": "MIDTERM-007",
+        "error": null
+      },
+      "state": {
+        "SelectedOrderId": {
+          "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+        },
+        "actor": null,
+        "orders": [
+          {
+            "Id": {
+              "Value": "d9d3a8ca-acd1-2db6-2aae-f10998e7f439"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "942b0acb-ee44-4d40-0f48-c85ba7942c3f"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "32f585a0-be0d-12f5-4581-d6616678a092"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "20df901f-aa15-f9d9-fa50-bcebf248dd7b"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "ee0d710a-bb0c-4cdd-5a98-5e45bfe61ae7"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "52a92f42-211b-e6fe-3ee3-1a541a9d6dcb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "6d04beb9-f20c-84ac-01f9-7e3de049dbf3"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a396c794-c110-5ce6-d248-6e5c40af0213"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "181bdefc-2be9-6530-1638-a83d890d2229"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "87101013-b0ef-33e0-09a4-91d5c21da5d6"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a84eaf99-be26-0e73-1a56-324d567963c8"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "0375ac3e-65b8-c92e-2c5e-cf1e9339c828"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "7a856c6e-13c6-1621-6767-92fb4fcfc749"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "1c56f66a-6176-d690-6b43-7751674b18cb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "8d4fc020-fff7-f59b-8c17-058aa4403062"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "087edc03-6955-5056-6799-71139835d272"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a8feb480-1b02-2aac-8b84-3af508bce7c7"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "cbd1890d-3b72-4b59-15b6-bfd309c07ede"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "6c604f15-ffd9-e57c-fcce-138eb30ba102"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "31ea82bc-b985-300f-ec51-aef86edd831c"
+            },
+            "Status": "preparing"
+          },
+          {
+            "Id": {
+              "Value": "4c2e1238-d1af-a065-d010-3c581ef17cb1"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "bf0575c2-e77a-e95e-5dbf-b22cec1bdae4"
+            },
+            "Status": "confirmed"
+          },
+          {
+            "Id": {
+              "Value": "2515ce66-a926-f31e-b149-b72d11b429e7"
+            },
+            "Status": "completed"
+          }
+        ]
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh service board",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open Counter",
+          "width": 112.80000305175781,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Start preparing: MIDTERM-023",
+          "width": 79.19999694824219,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Mark ready: MIDTERM-021",
+          "width": 62.400001525878906,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete: MIDTERM-007",
+          "width": 57.599998474121094,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Review payment: MIDTERM-016",
+          "width": 84,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete order",
+          "width": 538.4000244140625,
+          "height": 48,
+          "primary": true,
+          "enabled": false
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 640,
+        "inspectorAtSide": false,
+        "columns": 1,
+        "noteColumnWidth": 576,
+        "contentFits": true,
+        "inspectorFits": true
+      }
+    },
+    {
+      "tag": "service-board",
+      "width": 600,
+      "height": 900,
+      "fixture": {
+        "orders": 24,
+        "selected": "MIDTERM-007",
+        "error": null
+      },
+      "state": {
+        "SelectedOrderId": {
+          "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+        },
+        "actor": null,
+        "orders": [
+          {
+            "Id": {
+              "Value": "d9d3a8ca-acd1-2db6-2aae-f10998e7f439"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "942b0acb-ee44-4d40-0f48-c85ba7942c3f"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "32f585a0-be0d-12f5-4581-d6616678a092"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "20df901f-aa15-f9d9-fa50-bcebf248dd7b"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "ee0d710a-bb0c-4cdd-5a98-5e45bfe61ae7"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "52a92f42-211b-e6fe-3ee3-1a541a9d6dcb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "6d04beb9-f20c-84ac-01f9-7e3de049dbf3"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a396c794-c110-5ce6-d248-6e5c40af0213"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "181bdefc-2be9-6530-1638-a83d890d2229"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "87101013-b0ef-33e0-09a4-91d5c21da5d6"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a84eaf99-be26-0e73-1a56-324d567963c8"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "0375ac3e-65b8-c92e-2c5e-cf1e9339c828"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "7a856c6e-13c6-1621-6767-92fb4fcfc749"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "1c56f66a-6176-d690-6b43-7751674b18cb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "8d4fc020-fff7-f59b-8c17-058aa4403062"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "087edc03-6955-5056-6799-71139835d272"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a8feb480-1b02-2aac-8b84-3af508bce7c7"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "cbd1890d-3b72-4b59-15b6-bfd309c07ede"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "6c604f15-ffd9-e57c-fcce-138eb30ba102"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "31ea82bc-b985-300f-ec51-aef86edd831c"
+            },
+            "Status": "preparing"
+          },
+          {
+            "Id": {
+              "Value": "4c2e1238-d1af-a065-d010-3c581ef17cb1"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "bf0575c2-e77a-e95e-5dbf-b22cec1bdae4"
+            },
+            "Status": "confirmed"
+          },
+          {
+            "Id": {
+              "Value": "2515ce66-a926-f31e-b149-b72d11b429e7"
+            },
+            "Status": "completed"
+          }
+        ]
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 600,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh service board",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open Counter",
+          "width": 112.80000305175781,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Start preparing: MIDTERM-023",
+          "width": 79.19999694824219,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Mark ready: MIDTERM-021",
+          "width": 62.400001525878906,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete: MIDTERM-007",
+          "width": 57.599998474121094,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Review payment: MIDTERM-016",
+          "width": 84,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete order",
+          "width": 498.3999938964844,
+          "height": 48,
+          "primary": true,
+          "enabled": false
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 600,
+        "inspectorAtSide": false,
+        "columns": 1,
+        "noteColumnWidth": 536,
+        "contentFits": true,
+        "inspectorFits": true
+      }
+    },
+    {
+      "tag": "service-board",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "orders": 24,
+        "selected": "MIDTERM-007",
+        "error": null
+      },
+      "state": {
+        "SelectedOrderId": {
+          "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+        },
+        "actor": null,
+        "orders": [
+          {
+            "Id": {
+              "Value": "d9d3a8ca-acd1-2db6-2aae-f10998e7f439"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "942b0acb-ee44-4d40-0f48-c85ba7942c3f"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "32f585a0-be0d-12f5-4581-d6616678a092"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "20df901f-aa15-f9d9-fa50-bcebf248dd7b"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "ee0d710a-bb0c-4cdd-5a98-5e45bfe61ae7"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "52a92f42-211b-e6fe-3ee3-1a541a9d6dcb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "74b47f9a-8e03-caf5-b66e-82c3a20cf691"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "6d04beb9-f20c-84ac-01f9-7e3de049dbf3"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a396c794-c110-5ce6-d248-6e5c40af0213"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "181bdefc-2be9-6530-1638-a83d890d2229"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "87101013-b0ef-33e0-09a4-91d5c21da5d6"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a84eaf99-be26-0e73-1a56-324d567963c8"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "0375ac3e-65b8-c92e-2c5e-cf1e9339c828"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "7a856c6e-13c6-1621-6767-92fb4fcfc749"
+            },
+            "Status": "cancelled"
+          },
+          {
+            "Id": {
+              "Value": "1c56f66a-6176-d690-6b43-7751674b18cb"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "8d4fc020-fff7-f59b-8c17-058aa4403062"
+            },
+            "Status": "ready"
+          },
+          {
+            "Id": {
+              "Value": "087edc03-6955-5056-6799-71139835d272"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "a8feb480-1b02-2aac-8b84-3af508bce7c7"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "cbd1890d-3b72-4b59-15b6-bfd309c07ede"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "6c604f15-ffd9-e57c-fcce-138eb30ba102"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "31ea82bc-b985-300f-ec51-aef86edd831c"
+            },
+            "Status": "preparing"
+          },
+          {
+            "Id": {
+              "Value": "4c2e1238-d1af-a065-d010-3c581ef17cb1"
+            },
+            "Status": "completed"
+          },
+          {
+            "Id": {
+              "Value": "bf0575c2-e77a-e95e-5dbf-b22cec1bdae4"
+            },
+            "Status": "confirmed"
+          },
+          {
+            "Id": {
+              "Value": "2515ce66-a926-f31e-b149-b72d11b429e7"
+            },
+            "Status": "completed"
+          }
+        ]
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh service board",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open Counter",
+          "width": 112.80000305175781,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Start preparing: MIDTERM-023",
+          "width": 79.19999694824219,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Mark ready: MIDTERM-021",
+          "width": 62.400001525878906,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete: MIDTERM-007",
+          "width": 57.599998474121094,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Review payment: MIDTERM-016",
+          "width": 84,
+          "height": 48,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Complete order",
+          "width": 282.3999938964844,
+          "height": 48,
+          "primary": true,
+          "enabled": false
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 1224,
+        "inspectorAtSide": true,
+        "columns": 3,
+        "noteColumnWidth": 261.6000061035156,
+        "contentFits": true,
+        "inspectorFits": true
+      }
+    },
+    {
+      "tag": "menu",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "categories": 5,
+        "selected": "Midterm Almond Croissant",
+        "emptySearchClearsDetail": true,
+        "error": null
+      },
+      "state": {
+        "activeTab": "drinks",
+        "search": "",
+        "inactive": false,
+        "categoryFilterId": null,
+        "selected": {
+          "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+        }
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New item",
+          "width": 96,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Add a category",
+          "width": 116,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 65.5999984741211,
+          "height": 34.400001525878906,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit drink",
+          "width": 144,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate",
+          "width": 144.8000030517578,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Size",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Large",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Regular",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Choose add-ons",
+          "width": 116,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 1224,
+        "detailAtSide": true,
+        "columns": 2,
+        "contentFits": true,
+        "detailFits": true,
+        "workspaceFits": true,
+        "itemViewportHeight": 484.79998779296875,
+        "tabHeight": 44.79999923706055,
+        "tabsExclusive": true
+      }
+    },
+    {
+      "tag": "menu",
+      "width": 1008,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "categories": 5,
+        "selected": "Midterm Almond Croissant",
+        "emptySearchClearsDetail": true,
+        "error": null
+      },
+      "state": {
+        "activeTab": "drinks",
+        "search": "",
+        "inactive": false,
+        "categoryFilterId": null,
+        "selected": {
+          "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+        }
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1008,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New item",
+          "width": 96,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 65.5999984741211,
+          "height": 34.400001525878906,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit drink",
+          "width": 351.20001220703125,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate",
+          "width": 351.20001220703125,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Size",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Large",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Regular",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Choose add-ons",
+          "width": 116,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 792,
+        "detailAtSide": false,
+        "columns": 2,
+        "contentFits": true,
+        "detailFits": true,
+        "workspaceFits": true,
+        "itemViewportHeight": 201.60000610351562,
+        "tabHeight": 44.79999923706055,
+        "tabsExclusive": true
+      }
+    },
+    {
+      "tag": "menu",
+      "width": 1007,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "categories": 5,
+        "selected": "Midterm Almond Croissant",
+        "emptySearchClearsDetail": true,
+        "error": null
+      },
+      "state": {
+        "activeTab": "drinks",
+        "search": "",
+        "inactive": false,
+        "categoryFilterId": null,
+        "selected": {
+          "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+        }
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Medium",
+      "actualWidth": 1007.2000122070312,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New item",
+          "width": 96,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 65.5999984741211,
+          "height": 34.400001525878906,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit drink",
+          "width": 426.3999938964844,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate",
+          "width": 427.20001220703125,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Size",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Large",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Regular",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Choose add-ons",
+          "width": 116,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 943.2000122070312,
+        "detailAtSide": false,
+        "columns": 2,
+        "contentFits": true,
+        "detailFits": true,
+        "workspaceFits": true,
+        "itemViewportHeight": 201.60000610351562,
+        "tabHeight": 44.79999923706055,
+        "tabsExclusive": true
+      }
+    },
+    {
+      "tag": "menu",
+      "width": 641,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "categories": 5,
+        "selected": "Midterm Almond Croissant",
+        "emptySearchClearsDetail": true,
+        "error": null
+      },
+      "state": {
+        "activeTab": "drinks",
+        "search": "",
+        "inactive": false,
+        "categoryFilterId": null,
+        "selected": {
+          "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+        }
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640.7999877929688,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New item",
+          "width": 96,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 65.5999984741211,
+          "height": 34.400001525878906,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit drink",
+          "width": 276,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate",
+          "width": 275.20001220703125,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Size",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Large",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Regular",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Choose add-ons",
+          "width": 116,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 640.7999877929688,
+        "detailAtSide": false,
+        "columns": 2,
+        "contentFits": true,
+        "detailFits": true,
+        "workspaceFits": true,
+        "itemViewportHeight": 180.8000030517578,
+        "tabHeight": 44.79999923706055,
+        "tabsExclusive": true
+      }
+    },
+    {
+      "tag": "menu",
+      "width": 640,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "categories": 5,
+        "selected": "Midterm Almond Croissant",
+        "emptySearchClearsDetail": true,
+        "error": null
+      },
+      "state": {
+        "activeTab": "drinks",
+        "search": "",
+        "inactive": false,
+        "categoryFilterId": null,
+        "selected": {
+          "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+        }
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New item",
+          "width": 96,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 65.5999984741211,
+          "height": 34.400001525878906,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit drink",
+          "width": 275.20001220703125,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate",
+          "width": 275.20001220703125,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Size",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Large",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Regular",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Choose add-ons",
+          "width": 116,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 640,
+        "detailAtSide": false,
+        "columns": 2,
+        "contentFits": true,
+        "detailFits": true,
+        "workspaceFits": true,
+        "itemViewportHeight": 180.8000030517578,
+        "tabHeight": 44.79999923706055,
+        "tabsExclusive": true
+      }
+    },
+    {
+      "tag": "menu",
+      "width": 600,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "categories": 5,
+        "selected": "Midterm Almond Croissant",
+        "emptySearchClearsDetail": true,
+        "error": null
+      },
+      "state": {
+        "activeTab": "drinks",
+        "search": "",
+        "inactive": false,
+        "categoryFilterId": null,
+        "selected": {
+          "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+        }
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 600,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New item",
+          "width": 96,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 65.5999984741211,
+          "height": 34.400001525878906,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit drink",
+          "width": 255.1999969482422,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate",
+          "width": 255.1999969482422,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Size",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Large",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Regular",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Choose add-ons",
+          "width": 116,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 600,
+        "detailAtSide": false,
+        "columns": 1,
+        "contentFits": true,
+        "detailFits": true,
+        "workspaceFits": true,
+        "itemViewportHeight": 180.8000030517578,
+        "tabHeight": 44.79999923706055,
+        "tabsExclusive": true
+      }
+    },
+    {
+      "tag": "menu",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "items": 20,
+        "categories": 5,
+        "selected": "Midterm Almond Croissant",
+        "emptySearchClearsDetail": true,
+        "error": null
+      },
+      "state": {
+        "activeTab": "drinks",
+        "search": "",
+        "inactive": false,
+        "categoryFilterId": null,
+        "selected": {
+          "Value": "4f2202aa-5ca3-090c-ab9c-99b47b55cb21"
+        }
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New item",
+          "width": 96,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Add a category",
+          "width": 116,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 65.5999984741211,
+          "height": 34.400001525878906,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit drink",
+          "width": 144,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate",
+          "width": 144.8000030517578,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Size",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Large",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Actions for Regular",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Choose add-ons",
+          "width": 116,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "width": 1224,
+        "detailAtSide": true,
+        "columns": 2,
+        "contentFits": true,
+        "detailFits": true,
+        "workspaceFits": true,
+        "itemViewportHeight": 484.79998779296875,
+        "tabHeight": 44.79999923706055,
+        "tabsExclusive": true
+      }
+    },
+    {
+      "tag": "stock-room",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "ingredients": 9,
+        "receipts": 2,
+        "suppliers": 3,
+        "movements": 3
+      },
+      "state": {
+        "selected": {
+          "Value": "8cb4932c-3487-d0c6-5cff-af0c0a5db6f2"
+        },
+        "tab": "ingredients",
+        "visibleTabs": 4,
+        "lowStockFilter": false,
+        "adjusting": false,
+        "canSubmit": false
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Create new ingredient",
+          "width": 133.60000610351562,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Receive delivery and create receipt",
+          "width": 138.39999389648438,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Filter ingredients by unit",
+          "width": 64.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by name",
+          "width": 248,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by quantity on hand",
+          "width": 70.4000015258789,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by reorder threshold",
+          "width": 70.4000015258789,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by stock status, sorted ascending",
+          "width": 76,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by last movement",
+          "width": 182.39999389648438,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Arabica beans",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Vanilla syrup",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Black tea",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Chocolate sauce",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Matcha powder",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Oat milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Pastry",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Peach puree",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Whole milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh stock room data",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Close ingredient details",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust selected ingredient stock",
+          "width": 320,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Open full stock movement history",
+          "width": 62.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "stock-room",
+      "width": 1008,
+      "height": 900,
+      "fixture": {
+        "ingredients": 9,
+        "receipts": 2,
+        "suppliers": 3,
+        "movements": 3
+      },
+      "state": {
+        "selected": {
+          "Value": "8cb4932c-3487-d0c6-5cff-af0c0a5db6f2"
+        },
+        "tab": "ingredients",
+        "visibleTabs": 4,
+        "lowStockFilter": false,
+        "adjusting": false,
+        "canSubmit": false
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1008,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Create new ingredient",
+          "width": 133.60000610351562,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Receive delivery and create receipt",
+          "width": 138.39999389648438,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Filter ingredients by unit",
+          "width": 64.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by name",
+          "width": 447.20001220703125,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by quantity on hand",
+          "width": 60,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by reorder threshold",
+          "width": 60,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by stock status, sorted ascending",
+          "width": 64,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Arabica beans",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Vanilla syrup",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Black tea",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Chocolate sauce",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Matcha powder",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Oat milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Pastry",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Peach puree",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Whole milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh stock room data",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "stock-room",
+      "width": 1007,
+      "height": 900,
+      "fixture": {
+        "ingredients": 9,
+        "receipts": 2,
+        "suppliers": 3,
+        "movements": 3
+      },
+      "state": {
+        "selected": {
+          "Value": "8cb4932c-3487-d0c6-5cff-af0c0a5db6f2"
+        },
+        "tab": "ingredients",
+        "visibleTabs": 4,
+        "lowStockFilter": false,
+        "adjusting": false,
+        "canSubmit": false
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Medium",
+      "actualWidth": 1007.2000122070312,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Create new ingredient",
+          "width": 133.60000610351562,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Receive delivery and create receipt",
+          "width": 138.39999389648438,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Filter ingredients by unit",
+          "width": 64.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by name",
+          "width": 598.4000244140625,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by quantity on hand",
+          "width": 60,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by reorder threshold",
+          "width": 60,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by stock status, sorted ascending",
+          "width": 64,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Arabica beans",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Vanilla syrup",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Black tea",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Chocolate sauce",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Matcha powder",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Oat milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Pastry",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Peach puree",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Whole milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh stock room data",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "stock-room",
+      "width": 641,
+      "height": 900,
+      "fixture": {
+        "ingredients": 9,
+        "receipts": 2,
+        "suppliers": 3,
+        "movements": 3
+      },
+      "state": {
+        "selected": {
+          "Value": "8cb4932c-3487-d0c6-5cff-af0c0a5db6f2"
+        },
+        "tab": "ingredients",
+        "visibleTabs": 4,
+        "lowStockFilter": false,
+        "adjusting": false,
+        "canSubmit": false
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640.7999877929688,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Create new ingredient",
+          "width": 133.60000610351562,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Receive delivery and create receipt",
+          "width": 138.39999389648438,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Filter ingredients by unit",
+          "width": 64.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by name",
+          "width": 296,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by quantity on hand",
+          "width": 60,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by reorder threshold",
+          "width": 60,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by stock status, sorted ascending",
+          "width": 64,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Arabica beans",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Vanilla syrup",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Black tea",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Chocolate sauce",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Matcha powder",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Oat milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Pastry",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Peach puree",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Whole milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh stock room data",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "stock-room",
+      "width": 640,
+      "height": 900,
+      "fixture": {
+        "ingredients": 9,
+        "receipts": 2,
+        "suppliers": 3,
+        "movements": 3
+      },
+      "state": {
+        "selected": {
+          "Value": "8cb4932c-3487-d0c6-5cff-af0c0a5db6f2"
+        },
+        "tab": "ingredients",
+        "visibleTabs": 4,
+        "lowStockFilter": false,
+        "adjusting": false,
+        "canSubmit": false
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Create new ingredient",
+          "width": 133.60000610351562,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Receive delivery and create receipt",
+          "width": 138.39999389648438,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Filter ingredients by unit",
+          "width": 64.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by name",
+          "width": 295.20001220703125,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by quantity on hand",
+          "width": 60,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by reorder threshold",
+          "width": 60,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by stock status, sorted ascending",
+          "width": 64,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Arabica beans",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Vanilla syrup",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Black tea",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Chocolate sauce",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Matcha powder",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Oat milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Pastry",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Peach puree",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Whole milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh stock room data",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "stock-room",
+      "width": 600,
+      "height": 900,
+      "fixture": {
+        "ingredients": 9,
+        "receipts": 2,
+        "suppliers": 3,
+        "movements": 3
+      },
+      "state": {
+        "selected": {
+          "Value": "8cb4932c-3487-d0c6-5cff-af0c0a5db6f2"
+        },
+        "tab": "ingredients",
+        "visibleTabs": 4,
+        "lowStockFilter": false,
+        "adjusting": false,
+        "canSubmit": false
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 600,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Create new ingredient",
+          "width": 133.60000610351562,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Receive delivery and create receipt",
+          "width": 138.39999389648438,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Filter ingredients by unit",
+          "width": 64.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by name",
+          "width": 255.1999969482422,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by quantity on hand",
+          "width": 60,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by reorder threshold",
+          "width": 60,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by stock status, sorted ascending",
+          "width": 64,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Arabica beans",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Vanilla syrup",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Black tea",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Chocolate sauce",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Matcha powder",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Oat milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Pastry",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Peach puree",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Whole milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh stock room data",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "stock-room",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "ingredients": 9,
+        "receipts": 2,
+        "suppliers": 3,
+        "movements": 3
+      },
+      "state": {
+        "selected": {
+          "Value": "8cb4932c-3487-d0c6-5cff-af0c0a5db6f2"
+        },
+        "tab": "ingredients",
+        "visibleTabs": 4,
+        "lowStockFilter": false,
+        "adjusting": false,
+        "canSubmit": false
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Create new ingredient",
+          "width": 133.60000610351562,
+          "height": 48,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Receive delivery and create receipt",
+          "width": 138.39999389648438,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Filter ingredients by unit",
+          "width": 64.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by name",
+          "width": 248,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by quantity on hand",
+          "width": 70.4000015258789,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by reorder threshold",
+          "width": 70.4000015258789,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by stock status, sorted ascending",
+          "width": 76,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Sort ingredients by last movement",
+          "width": 182.39999389648438,
+          "height": 24,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Arabica beans",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Vanilla syrup",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Black tea",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Chocolate sauce",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Matcha powder",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Oat milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Pastry",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Peach puree",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust Midterm Whole milk",
+          "width": 52,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh stock room data",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Close ingredient details",
+          "width": 44,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Adjust selected ingredient stock",
+          "width": 320,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Open full stock movement history",
+          "width": 62.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": null
+    },
+    {
+      "tag": "customers",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "profiles": 12,
+        "selected": "An Nguyen",
+        "addresses": 1,
+        "history": 0,
+        "error": null
+      },
+      "state": {
+        "search": "",
+        "selected": {
+          "Value": "183ce97a-2969-8b0d-45e9-5669554e8c25"
+        },
+        "profile": true,
+        "delivery": false,
+        "recipient": "An Nguyen",
+        "contact": "\u002B84090080001",
+        "address": ""
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New customer",
+          "width": 125.5999984741211,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 54.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit customer profile",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate customer",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Add",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Manage saved address",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Previous",
+          "width": 81.5999984741211,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Next",
+          "width": 58.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Use for next order",
+          "width": 226.39999389648438,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Continue as walk-in",
+          "width": 226.39999389648438,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "threeColumns": true,
+        "contentFits": true,
+        "directoryFits": true,
+        "detailFits": true,
+        "orderFits": true,
+        "independentScrolling": true,
+        "listHeight": 500.79998779296875
+      }
+    },
+    {
+      "tag": "customers",
+      "width": 1008,
+      "height": 900,
+      "fixture": {
+        "profiles": 12,
+        "selected": "An Nguyen",
+        "addresses": 1,
+        "history": 0,
+        "error": null
+      },
+      "state": {
+        "search": "",
+        "selected": {
+          "Value": "183ce97a-2969-8b0d-45e9-5669554e8c25"
+        },
+        "profile": true,
+        "delivery": false,
+        "recipient": "An Nguyen",
+        "contact": "\u002B84090080001",
+        "address": ""
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1008,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New customer",
+          "width": 125.5999984741211,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 54.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit customer profile",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate customer",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Add",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Manage saved address",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Previous",
+          "width": 81.5999984741211,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Next",
+          "width": 58.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Use for next order",
+          "width": 688,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Continue as walk-in",
+          "width": 688,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "threeColumns": false,
+        "contentFits": true,
+        "directoryFits": true,
+        "detailFits": true,
+        "orderFits": true,
+        "independentScrolling": false,
+        "listHeight": 293.6000061035156
+      }
+    },
+    {
+      "tag": "customers",
+      "width": 1007,
+      "height": 900,
+      "fixture": {
+        "profiles": 12,
+        "selected": "An Nguyen",
+        "addresses": 1,
+        "history": 0,
+        "error": null
+      },
+      "state": {
+        "search": "",
+        "selected": {
+          "Value": "183ce97a-2969-8b0d-45e9-5669554e8c25"
+        },
+        "profile": true,
+        "delivery": false,
+        "recipient": "An Nguyen",
+        "contact": "\u002B84090080001",
+        "address": ""
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Medium",
+      "actualWidth": 1007.2000122070312,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New customer",
+          "width": 125.5999984741211,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 54.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit customer profile",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate customer",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Add",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Manage saved address",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Previous",
+          "width": 81.5999984741211,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Next",
+          "width": 58.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Use for next order",
+          "width": 839.2000122070312,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Continue as walk-in",
+          "width": 839.2000122070312,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "threeColumns": false,
+        "contentFits": true,
+        "directoryFits": true,
+        "detailFits": true,
+        "orderFits": true,
+        "independentScrolling": false,
+        "listHeight": 293.6000061035156
+      }
+    },
+    {
+      "tag": "customers",
+      "width": 641,
+      "height": 900,
+      "fixture": {
+        "profiles": 12,
+        "selected": "An Nguyen",
+        "addresses": 1,
+        "history": 0,
+        "error": null
+      },
+      "state": {
+        "search": "",
+        "selected": {
+          "Value": "183ce97a-2969-8b0d-45e9-5669554e8c25"
+        },
+        "profile": true,
+        "delivery": false,
+        "recipient": "An Nguyen",
+        "contact": "\u002B84090080001",
+        "address": ""
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640.7999877929688,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New customer",
+          "width": 125.5999984741211,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 54.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit customer profile",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate customer",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Add",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Manage saved address",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Previous",
+          "width": 81.5999984741211,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Next",
+          "width": 58.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Use for next order",
+          "width": 536.7999877929688,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Continue as walk-in",
+          "width": 536.7999877929688,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "threeColumns": false,
+        "contentFits": true,
+        "directoryFits": true,
+        "detailFits": true,
+        "orderFits": true,
+        "independentScrolling": false,
+        "listHeight": 280
+      }
+    },
+    {
+      "tag": "customers",
+      "width": 640,
+      "height": 900,
+      "fixture": {
+        "profiles": 12,
+        "selected": "An Nguyen",
+        "addresses": 1,
+        "history": 0,
+        "error": null
+      },
+      "state": {
+        "search": "",
+        "selected": {
+          "Value": "183ce97a-2969-8b0d-45e9-5669554e8c25"
+        },
+        "profile": true,
+        "delivery": false,
+        "recipient": "An Nguyen",
+        "contact": "\u002B84090080001",
+        "address": ""
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New customer",
+          "width": 125.5999984741211,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 54.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit customer profile",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate customer",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Add",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Manage saved address",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Previous",
+          "width": 81.5999984741211,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Next",
+          "width": 58.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Use for next order",
+          "width": 536,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Continue as walk-in",
+          "width": 536,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "threeColumns": false,
+        "contentFits": true,
+        "directoryFits": true,
+        "detailFits": true,
+        "orderFits": true,
+        "independentScrolling": false,
+        "listHeight": 280
+      }
+    },
+    {
+      "tag": "customers",
+      "width": 600,
+      "height": 900,
+      "fixture": {
+        "profiles": 12,
+        "selected": "An Nguyen",
+        "addresses": 1,
+        "history": 0,
+        "error": null
+      },
+      "state": {
+        "search": "",
+        "selected": {
+          "Value": "183ce97a-2969-8b0d-45e9-5669554e8c25"
+        },
+        "profile": true,
+        "delivery": false,
+        "recipient": "An Nguyen",
+        "contact": "\u002B84090080001",
+        "address": ""
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 600,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New customer",
+          "width": 125.5999984741211,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 54.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit customer profile",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate customer",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Add",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Manage saved address",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Previous",
+          "width": 81.5999984741211,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Next",
+          "width": 58.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Use for next order",
+          "width": 496,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Continue as walk-in",
+          "width": 496,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "threeColumns": false,
+        "contentFits": true,
+        "directoryFits": true,
+        "detailFits": true,
+        "orderFits": true,
+        "independentScrolling": false,
+        "listHeight": 280
+      }
+    },
+    {
+      "tag": "customers",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "profiles": 12,
+        "selected": "An Nguyen",
+        "addresses": 1,
+        "history": 0,
+        "error": null
+      },
+      "state": {
+        "search": "",
+        "selected": {
+          "Value": "183ce97a-2969-8b0d-45e9-5669554e8c25"
+        },
+        "profile": true,
+        "delivery": false,
+        "recipient": "An Nguyen",
+        "contact": "\u002B84090080001",
+        "address": ""
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B New customer",
+          "width": 125.5999984741211,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Search",
+          "width": 54.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Edit customer profile",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Deactivate customer",
+          "width": 80.80000305175781,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "\u002B Add",
+          "width": 50.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Manage saved address",
+          "width": 48,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Previous",
+          "width": 81.5999984741211,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Next",
+          "width": 58.400001525878906,
+          "height": 44,
+          "primary": false,
+          "enabled": false
+        },
+        {
+          "name": "Use for next order",
+          "width": 226.39999389648438,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Continue as walk-in",
+          "width": 226.39999389648438,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "threeColumns": true,
+        "contentFits": true,
+        "directoryFits": true,
+        "detailFits": true,
+        "orderFits": true,
+        "independentScrolling": true,
+        "listHeight": 500.79998779296875
+      }
+    },
+    {
+      "tag": "reports",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "revenue": 2104.10,
+        "orders": 18,
+        "bestSellers": 10,
+        "lowStock": 2,
+        "errors": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "state": {
+        "first": "2026-10-01T00:00:00+07:00",
+        "last": "2026-10-31T14:12:09.6401778+07:00",
+        "payment": null,
+        "channel": null,
+        "revenue": 2104.10
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Choose reporting period",
+          "width": 118.4000015258789,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Daily details",
+          "width": 88,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Filters",
+          "width": 52.79999923706055,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open stock room",
+          "width": 119.19999694824219,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "twoColumns": true,
+        "fourSummaryCards": true,
+        "summaryFits": true,
+        "dashboardFits": true,
+        "revenueFits": true,
+        "paymentsFit": true,
+        "chartDays": 2,
+        "expectedDays": 2
+      }
+    },
+    {
+      "tag": "reports",
+      "width": 1008,
+      "height": 900,
+      "fixture": {
+        "revenue": 2104.10,
+        "orders": 18,
+        "bestSellers": 10,
+        "lowStock": 2,
+        "errors": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "state": {
+        "first": "2026-10-01T00:00:00+07:00",
+        "last": "2026-10-31T14:12:09.6401778+07:00",
+        "payment": null,
+        "channel": null,
+        "revenue": 2104.10
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1008,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Choose reporting period",
+          "width": 118.4000015258789,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Daily details",
+          "width": 88,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Filters",
+          "width": 52.79999923706055,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open stock room",
+          "width": 119.19999694824219,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "twoColumns": false,
+        "fourSummaryCards": false,
+        "summaryFits": true,
+        "dashboardFits": true,
+        "revenueFits": true,
+        "paymentsFit": true,
+        "chartDays": 2,
+        "expectedDays": 2
+      }
+    },
+    {
+      "tag": "reports",
+      "width": 1007,
+      "height": 900,
+      "fixture": {
+        "revenue": 2104.10,
+        "orders": 18,
+        "bestSellers": 10,
+        "lowStock": 2,
+        "errors": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "state": {
+        "first": "2026-10-01T00:00:00+07:00",
+        "last": "2026-10-31T14:12:09.6401778+07:00",
+        "payment": null,
+        "channel": null,
+        "revenue": 2104.10
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Medium",
+      "actualWidth": 1007.2000122070312,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Choose reporting period",
+          "width": 118.4000015258789,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Daily details",
+          "width": 88,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Filters",
+          "width": 52.79999923706055,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open stock room",
+          "width": 119.19999694824219,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "twoColumns": true,
+        "fourSummaryCards": true,
+        "summaryFits": true,
+        "dashboardFits": true,
+        "revenueFits": true,
+        "paymentsFit": true,
+        "chartDays": 2,
+        "expectedDays": 2
+      }
+    },
+    {
+      "tag": "reports",
+      "width": 641,
+      "height": 900,
+      "fixture": {
+        "revenue": 2104.10,
+        "orders": 18,
+        "bestSellers": 10,
+        "lowStock": 2,
+        "errors": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "state": {
+        "first": "2026-10-01T00:00:00+07:00",
+        "last": "2026-10-31T14:12:09.6401778+07:00",
+        "payment": null,
+        "channel": null,
+        "revenue": 2104.10
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640.7999877929688,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Choose reporting period",
+          "width": 118.4000015258789,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Daily details",
+          "width": 88,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Filters",
+          "width": 52.79999923706055,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open stock room",
+          "width": 119.19999694824219,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "twoColumns": false,
+        "fourSummaryCards": false,
+        "summaryFits": true,
+        "dashboardFits": true,
+        "revenueFits": true,
+        "paymentsFit": true,
+        "chartDays": 2,
+        "expectedDays": 2
+      }
+    },
+    {
+      "tag": "reports",
+      "width": 640,
+      "height": 900,
+      "fixture": {
+        "revenue": 2104.10,
+        "orders": 18,
+        "bestSellers": 10,
+        "lowStock": 2,
+        "errors": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "state": {
+        "first": "2026-10-01T00:00:00+07:00",
+        "last": "2026-10-31T14:12:09.6401778+07:00",
+        "payment": null,
+        "channel": null,
+        "revenue": 2104.10
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 640,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Choose reporting period",
+          "width": 118.4000015258789,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Daily details",
+          "width": 88,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Filters",
+          "width": 52.79999923706055,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open stock room",
+          "width": 119.19999694824219,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "twoColumns": false,
+        "fourSummaryCards": false,
+        "summaryFits": true,
+        "dashboardFits": true,
+        "revenueFits": true,
+        "paymentsFit": true,
+        "chartDays": 2,
+        "expectedDays": 2
+      }
+    },
+    {
+      "tag": "reports",
+      "width": 600,
+      "height": 900,
+      "fixture": {
+        "revenue": 2104.10,
+        "orders": 18,
+        "bestSellers": 10,
+        "lowStock": 2,
+        "errors": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "state": {
+        "first": "2026-10-01T00:00:00+07:00",
+        "last": "2026-10-31T14:12:09.6401778+07:00",
+        "payment": null,
+        "channel": null,
+        "revenue": 2104.10
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Compact",
+      "actualWidth": 600,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Choose reporting period",
+          "width": 118.4000015258789,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Daily details",
+          "width": 88,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Filters",
+          "width": 52.79999923706055,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open stock room",
+          "width": 119.19999694824219,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 0
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 0
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 0
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 0
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 0
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 0
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "twoColumns": false,
+        "fourSummaryCards": false,
+        "summaryFits": true,
+        "dashboardFits": true,
+        "revenueFits": true,
+        "paymentsFit": true,
+        "chartDays": 2,
+        "expectedDays": 2
+      }
+    },
+    {
+      "tag": "reports",
+      "width": 1440,
+      "height": 900,
+      "fixture": {
+        "revenue": 2104.10,
+        "orders": 18,
+        "bestSellers": 10,
+        "lowStock": 2,
+        "errors": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "state": {
+        "first": "2026-10-01T00:00:00+07:00",
+        "last": "2026-10-31T14:12:09.6401778+07:00",
+        "payment": null,
+        "channel": null,
+        "revenue": 2104.10
+      },
+      "samePage": true,
+      "statePreserved": true,
+      "mode": "Expanded",
+      "actualWidth": 1440,
+      "actualHeight": 900,
+      "keyboardFocus": true,
+      "targets": [
+        {
+          "name": "Choose reporting period",
+          "width": 118.4000015258789,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Refresh",
+          "width": 76,
+          "height": 48,
+          "primary": true,
+          "enabled": true
+        },
+        {
+          "name": "Daily details",
+          "width": 88,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Filters",
+          "width": 52.79999923706055,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        },
+        {
+          "name": "Open stock room",
+          "width": 119.19999694824219,
+          "height": 44,
+          "primary": false,
+          "enabled": true
+        }
+      ],
+      "navigation": [
+        {
+          "tag": "counter",
+          "name": "Open Counter workspace",
+          "height": 48
+        },
+        {
+          "tag": "service-board",
+          "name": "Open Service board workspace",
+          "height": 48
+        },
+        {
+          "tag": "menu",
+          "name": "Open Menu workspace",
+          "height": 48
+        },
+        {
+          "tag": "stock-room",
+          "name": "Open Stock room workspace",
+          "height": 48
+        },
+        {
+          "tag": "customers",
+          "name": "Open Customers workspace",
+          "height": 48
+        },
+        {
+          "tag": "reports",
+          "name": "Open Reports workspace",
+          "height": 48
+        }
+      ],
+      "horizontalOverflow": [],
+      "primaryTargetsPass": true,
+      "namesPass": true,
+      "layout": {
+        "twoColumns": true,
+        "fourSummaryCards": true,
+        "summaryFits": true,
+        "dashboardFits": true,
+        "revenueFits": true,
+        "paymentsFit": true,
+        "chartDays": 2,
+        "expectedDays": 2
+      }
+    }
+  ],
+  "smoke": [
+    {
+      "tag": "counter",
+      "width": 1440,
+      "checks": {
+        "serviceHiddenUntilItems": true,
+        "orderFirst": true,
+        "customization": true,
+        "invalidStaysOpen": true,
+        "cancelled": true,
+        "added": true,
+        "addFeedback": {
+          "count": 1,
+          "message": "Drink added. Prices are estimates until the draft is saved and reviewed.",
+          "quantityText": "1",
+          "saveEnabled": true,
+          "canEdit": true
+        },
+        "quantityButton": true,
+        "quantity": true,
+        "keyboardRetained": true,
+        "totalUpdated": true,
+        "operatorValidation": true,
+        "removeButton": true,
+        "stableMenu": true,
+        "removed": true,
+        "emptySearch": true,
+        "serviceForms": {
+          "exclusive": true,
+          "styled": true,
+          "forms": true,
+          "retained": true,
+          "deliveryIndependent": true
+        },
+        "savedReview": true,
+        "savedAction": true,
+        "restored": true
+      }
+    },
+    {
+      "tag": "service-board",
+      "width": 1440,
+      "checks": {
+        "headersAligned": true,
+        "withoutOperatorDisabled": true,
+        "measurements": [
+          {
+            "column": "confirmed",
+            "titleX": 3.200000047683716,
+            "paperX": 3.200000047683716,
+            "matchesPaper": true,
+            "notes": 1,
+            "dragEnabled": true
+          },
+          {
+            "column": "preparing",
+            "titleX": 280.8000183105469,
+            "paperX": 280.8000183105469,
+            "matchesPaper": true,
+            "notes": 1,
+            "dragEnabled": true
+          },
+          {
+            "column": "ready",
+            "titleX": 558.4000244140625,
+            "paperX": 558.4000244140625,
+            "matchesPaper": true,
+            "notes": 2,
+            "dragEnabled": false
+          }
+        ],
+        "forms": {
+          "paymentOpens": true,
+          "formsReset": true,
+          "deliveryIsContextual": true
+        },
+        "moveButtons": [
+          {
+            "Number": "MIDTERM-023",
+            "Status": "Confirmed",
+            "ActionLabel": "Start preparing",
+            "ActionEnabled": true,
+            "NextStatus": "preparing"
+          },
+          {
+            "Number": "MIDTERM-021",
+            "Status": "Preparing",
+            "ActionLabel": "Mark ready",
+            "ActionEnabled": true,
+            "NextStatus": "ready"
+          },
+          {
+            "Number": "MIDTERM-007",
+            "Status": "Ready",
+            "ActionLabel": "Complete",
+            "ActionEnabled": true,
+            "NextStatus": "completed"
+          },
+          {
+            "Number": "MIDTERM-016",
+            "Status": "Ready",
+            "ActionLabel": "Review payment",
+            "ActionEnabled": true,
+            "NextStatus": "completed"
+          }
+        ]
+      }
+    },
+    {
+      "tag": "menu",
+      "width": 1440,
+      "checks": {
+        "itemListScrollsIndependently": true,
+        "categoriesWork": true,
+        "categoryRowActions": true,
+        "addonsWork": true,
+        "addonRowActions": true,
+        "filteringWorks": true,
+        "resetWorks": true
+      }
+    },
+    {
+      "tag": "stock-room",
+      "width": 1440,
+      "checks": {
+        "skipped": false,
+        "validDraftEnabled": true,
+        "isolatedDraft": true,
+        "restoredDraft": true,
+        "negativeResultBlocked": true,
+        "oversizedQuantityBlocked": true,
+        "reasonOptionalEnabled": true,
+        "cancelIsScoped": true,
+        "lowStockUsesInventory": true,
+        "filtersCleared": true,
+        "historyShowsAll": true
+      }
+    },
+    {
+      "tag": "customers",
+      "width": 1440,
+      "checks": {
+        "emptySearchWorks": true,
+        "searchRecovers": true,
+        "independentDirectoryScroll": true,
+        "deliveryFieldsWork": true,
+        "editor": {
+          "compactPreserved": true,
+          "expandedPreserved": true,
+          "savedRecordUnchanged": true
+        }
+      }
+    },
+    {
+      "tag": "reports",
+      "width": 1440,
+      "checks": {
+        "filtersWork": true,
+        "resetWorks": true,
+        "dailyDetailsWork": true,
+        "invalidRejected": true,
+        "refreshKeepsAppliedPeriod": true,
+        "emptyPeriodWorks": true,
+        "stockIndependentOfPeriod": true
+      }
+    },
+    {
+      "tag": "counter",
+      "width": 600,
+      "checks": {
+        "serviceHiddenUntilItems": true,
+        "orderFirst": true,
+        "customization": true,
+        "invalidStaysOpen": true,
+        "cancelled": true,
+        "added": true,
+        "addFeedback": {
+          "count": 1,
+          "message": "Drink added. Prices are estimates until the draft is saved and reviewed.",
+          "quantityText": "1",
+          "saveEnabled": true,
+          "canEdit": true
+        },
+        "quantityButton": true,
+        "quantity": true,
+        "keyboardRetained": true,
+        "totalUpdated": true,
+        "operatorValidation": true,
+        "removeButton": true,
+        "stableMenu": true,
+        "removed": true,
+        "emptySearch": true,
+        "serviceForms": {
+          "exclusive": true,
+          "styled": true,
+          "forms": true,
+          "retained": true,
+          "deliveryIndependent": true
+        },
+        "savedReview": true,
+        "savedAction": true,
+        "restored": true
+      }
+    },
+    {
+      "tag": "service-board",
+      "width": 600,
+      "checks": {
+        "headersAligned": true,
+        "withoutOperatorDisabled": true,
+        "measurements": [
+          {
+            "column": "confirmed",
+            "titleX": 3.200000047683716,
+            "paperX": 3.200000047683716,
+            "matchesPaper": true,
+            "notes": 1,
+            "dragEnabled": true
+          },
+          {
+            "column": "preparing",
+            "titleX": 3.200000047683716,
+            "paperX": 3.200000047683716,
+            "matchesPaper": true,
+            "notes": 1,
+            "dragEnabled": true
+          },
+          {
+            "column": "ready",
+            "titleX": 3.200000047683716,
+            "paperX": 3.200000047683716,
+            "matchesPaper": true,
+            "notes": 2,
+            "dragEnabled": false
+          }
+        ],
+        "forms": {
+          "paymentOpens": true,
+          "formsReset": true,
+          "deliveryIsContextual": true
+        },
+        "moveButtons": [
+          {
+            "Number": "MIDTERM-023",
+            "Status": "Confirmed",
+            "ActionLabel": "Start preparing",
+            "ActionEnabled": true,
+            "NextStatus": "preparing"
+          },
+          {
+            "Number": "MIDTERM-021",
+            "Status": "Preparing",
+            "ActionLabel": "Mark ready",
+            "ActionEnabled": true,
+            "NextStatus": "ready"
+          },
+          {
+            "Number": "MIDTERM-007",
+            "Status": "Ready",
+            "ActionLabel": "Complete",
+            "ActionEnabled": true,
+            "NextStatus": "completed"
+          },
+          {
+            "Number": "MIDTERM-016",
+            "Status": "Ready",
+            "ActionLabel": "Review payment",
+            "ActionEnabled": true,
+            "NextStatus": "completed"
+          }
+        ]
+      }
+    },
+    {
+      "tag": "menu",
+      "width": 600,
+      "checks": {
+        "itemListScrollsIndependently": true,
+        "categoriesWork": true,
+        "categoryRowActions": true,
+        "addonsWork": true,
+        "addonRowActions": true,
+        "filteringWorks": true,
+        "resetWorks": true
+      }
+    },
+    {
+      "tag": "stock-room",
+      "width": 600,
+      "checks": {
+        "skipped": false,
+        "validDraftEnabled": true,
+        "isolatedDraft": true,
+        "restoredDraft": true,
+        "negativeResultBlocked": true,
+        "oversizedQuantityBlocked": true,
+        "reasonOptionalEnabled": true,
+        "cancelIsScoped": true,
+        "lowStockUsesInventory": true,
+        "filtersCleared": true,
+        "historyShowsAll": true
+      }
+    },
+    {
+      "tag": "customers",
+      "width": 600,
+      "checks": {
+        "emptySearchWorks": true,
+        "searchRecovers": true,
+        "independentDirectoryScroll": true,
+        "deliveryFieldsWork": true,
+        "editor": {
+          "compactPreserved": true,
+          "expandedPreserved": true,
+          "savedRecordUnchanged": true
+        }
+      }
+    },
+    {
+      "tag": "reports",
+      "width": 600,
+      "checks": {
+        "filtersWork": true,
+        "resetWorks": true,
+        "dailyDetailsWork": true,
+        "invalidRejected": true,
+        "refreshKeepsAppliedPeriod": true,
+        "emptyPeriodWorks": true,
+        "stockIndependentOfPeriod": true
+      }
+    }
+  ],
+  "editor": {
+    "compactPreserved": true,
+    "expandedPreserved": true,
+    "savedRecordUnchanged": true,
+    "compactTargets": [
+      {
+        "name": "Delete",
+        "width": 34.400001525878906,
+        "height": 34.400001525878906
+      },
+      {
+        "name": "Cancel",
+        "width": 71.19999694824219,
+        "height": 44
+      },
+      {
+        "name": "Save drink",
+        "width": 92,
+        "height": 48
+      }
+    ],
+    "expandedTargets": [
+      {
+        "name": "Delete",
+        "width": 34.400001525878906,
+        "height": 34.400001525878906
+      },
+      {
+        "name": "Cancel",
+        "width": 71.19999694824219,
+        "height": 44
+      },
+      {
+        "name": "Save drink",
+        "width": 92,
+        "height": 48
+      }
+    ]
+  }
+}

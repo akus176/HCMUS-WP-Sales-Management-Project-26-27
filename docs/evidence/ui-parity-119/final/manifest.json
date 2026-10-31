@@ -1,0 +1,58 @@
+{
+  "capturedAtUtc": "2026-10-31T07:12:49.4003087Z",
+  "implementationCommit": "264cee6e8526b09785f513731ed816b93874e7bc",
+  "dirtyWorktree": true,
+  "conceptCommit": "17490e8f9c1435f63c5590a45270cf015a3e3d4c",
+  "approvedNativeCommit": "9e619622f30366f3f258716a9e004a602879e46d",
+  "seedFile": "scripts/postgres/midterm-seed.sql",
+  "seedSha256": "3A028A4C6CB1D8D6320CF0F9FB2A8B9AEB840C31F3DBBFAC4EDD0371FCC26370",
+  "supplementFile": "scripts/postgres/ui-parity-seed.sql",
+  "supplementSha256": "A056E022E39CB80F320FC86A19671CE55E1D8B2AE15E4121A2EC8F350AE48D72",
+  "executableSha256": "06CBBC68EA2F767282C712C46F4FCF76F8E8263AB5B3D830574880F53679F374",
+  "changedSources": [],
+  "visualAcceptance": "targeted #119 revision accepted; final capture reviewed against concepts and approved native revisions",
+  "comparisonInputs": [
+    {
+      "workspace": "counter",
+      "concept": "docs/ui-concepts/counter.png",
+      "conceptSha256": "ef07adfc42e7bde6b99fbc3e2e63b8645f1d4a7f80ad5a67e4babf3f5be1188e",
+      "nativeSha256": "925abe0043dec0c9b1733c07589c7028571d84a92d5ab2d8ed3a7cf18ed3dda4"
+    },
+    {
+      "workspace": "service-board",
+      "concept": "docs/ui-concepts/service-board.png",
+      "conceptSha256": "b53ce50f8bc0b93d6ab0ba11a8609b4d945269d2fa662961e74ec1c00a921f5e",
+      "nativeSha256": "2fb12b61789d754ee713b42c5bef6d475542b6d13cd887bed0f8cbe4e06932eb"
+    },
+    {
+      "workspace": "menu",
+      "concept": "docs/ui-concepts/menu.png",
+      "conceptSha256": "46b37a962230313d94cde27659299e2aced047e5dd771639d28c3536893e9f3c",
+      "nativeSha256": "17116e857f1eba051b76f40b398b45670a8baad407655710005773db48865cc9"
+    },
+    {
+      "workspace": "stock-room",
+      "concept": "docs/ui-concepts/stock-room.png",
+      "conceptSha256": "5e294ee935f86df999afd0530ad69ce515e5c4503c35625450a15c32bdf1b5a3",
+      "nativeSha256": "3baf2daa6de400e71f84feb547008b2650d4b15c9a4682cd2073e71d29bd8677"
+    },
+    {
+      "workspace": "customers",
+      "concept": "docs/ui-concepts/customers.png",
+      "conceptSha256": "761d2feffb8f6225e1ef210020a4ee8355080775e244f76f968768b9e25c72af",
+      "nativeSha256": "40cb6a0a3219fed4574a818419078a268ac27523e27bc970681124c0404d7126"
+    },
+    {
+      "workspace": "reports",
+      "concept": "docs/ui-concepts/reports.png",
+      "conceptSha256": "8ba58ffd609728ff1bdd8cad128275560f30f0d88338a29954f8dfaa86b928c7",
+      "nativeSha256": "c926bd728cf1f5e4afba792176c07643bc2120a3073c868d6a87ee9851724655"
+    },
+    {
+      "workspace": "menu-editor",
+      "concept": "docs/ui-concepts/menu-picture-editor.png",
+      "conceptSha256": "170a4222bc7587aca5e8f0329d697f6efdd615e6c4bde4618bf542b88c44339c",
+      "nativeSha256": "350faf971a260858b643d5c08ecf05f9ac72d654b506ad00881f98d4ee91640b"
+    }
+  ]
+}
