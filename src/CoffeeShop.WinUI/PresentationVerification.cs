@@ -11,7 +11,16 @@ namespace CoffeeShop.WinUI;
 
 internal static class PresentationVerification
 {
-    public static string DirectoryPath => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CoffeeShop");
+    public static string DirectoryPath
+    {
+        get
+        {
+            var output = Environment.GetEnvironmentVariable("COFFEESHOP_VERIFICATION_OUTPUT");
+            return string.IsNullOrWhiteSpace(output)
+                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CoffeeShop")
+                : Path.GetFullPath(output);
+        }
+    }
 
     public static IEnumerable<FrameworkElement> Elements(DependencyObject root)
     {

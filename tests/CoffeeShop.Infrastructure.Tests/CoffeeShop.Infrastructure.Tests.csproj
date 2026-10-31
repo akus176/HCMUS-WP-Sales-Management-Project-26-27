@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <None Update="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\scripts\postgres\midterm-role.sql" Link="midterm-role.sql" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\scripts\postgres\midterm-seed.sql" Link="midterm-seed.sql" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\CatalogWorkspace.cs" Link="ViewModels\CatalogWorkspace.cs" />

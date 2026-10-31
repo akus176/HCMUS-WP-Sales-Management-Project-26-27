@@ -23,6 +23,9 @@ blockers remain for this demonstrated path. Milestone acceptance still requires 
 - [Native smoke observations](evidence/midterm/native-smoke.txt),
   [report accessibility snapshot](evidence/midterm/reports-tree.txt), and
   [report screenshot](evidence/midterm/reports.png) cover the separate freshly rebuilt desktop database.
+  These native captures were recorded on 2026-10-26, before the final demo-data naming cleanup.
+  Re-run the native smoke capture before recording the submission video so visible names match
+  the current seed exactly. Automated seed and workflow evidence below uses the current seed.
   The [inventory audit screenshot](evidence/midterm/inventory-audit.png) shows balance/history controls.
   The [native refresh regression](evidence/midterm/inventory-refresh.txt) confirms an existing
   Ingredients page observes a stock change committed by a separate connection.
@@ -48,7 +51,7 @@ Evidence IDs below refer to the `PASS DEMO-*` lines in the scripted run output.
 | 10. Cancellation restoration | On another dine-in ticket redeem 10 points; confirm; cancel with reason; repeat cancellation. | Redemption reduced total 40.00 → 30.00; confirmation consumed 10g. Cancellation restored exactly 10g, released table, restored points to 85, and retained four loyalty entries. Retry had no duplicate effects; one restoration guard and one consumption/restoration pair. | PASS — DEMO-07 |
 | 11. Reports and final stock | Query revenue, best sellers, channels, and low stock after three completed and one cancelled tickets. | Revenue increased exactly 130.00; channel revenues reconciled; new drink quantity 3; cancelled sale excluded; low-stock rows present; stock 65g. Audit workspace displayed nine immutable movements including cancellation restoration. | PASS — DEMO-08 |
 | 12. Completion rollback | Remove loyalty configuration as owner after a paid pastry order reaches ready; attempt completion; restore rules; retry. | Missing settings returned a failure; order stayed ready, table stayed occupied, and no completion history or earning entry persisted. Restoring rules allowed completion/table release and exactly one earning entry. Pastry confirmation used the supported `pcs` recipe unit. | PASS — DEMO-09 |
-| 13. Native client | Launch against a separately rebuilt/seeded database using the restricted login; open every module. | Startup connected; POS, operations, catalog, customers, ingredients, suppliers, receipts, low stock, and audit pages loaded. October reports showed 2,260.10 across 19 recognized orders, channels 741.60 / 1,059.50 / 459.00, and current low stock. | PASS — native smoke, report snapshot/screenshot |
+| 13. Native client | Launch against a separately rebuilt/seeded database using the restricted login; open every module. | Startup connected; POS, operations, catalog, customers, ingredients, suppliers, receipts, low stock, and audit pages loaded. October reports showed 2,260.10 across 19 recognized orders, channels 741.60 / 1,059.50 / 459.00, and current low stock. | PASS — native smoke captured 2026-10-26; recapture required after current seed naming cleanup |
 
 ## Reproduce
 
@@ -61,7 +64,7 @@ Evidence IDs below refer to the `PASS DEMO-*` lines in the scripted run output.
    ./scripts/verify-midterm.ps1
    ```
 
-   Expected: four selected checks pass with zero failures/skips. The wrapper rejects missing
+   Expected: all five test projects pass with zero failures/skips. The wrapper rejects missing
    configuration, failed tests, zero executed tests, or skipped tests. Raw evidence is
    `artifacts/midterm/midterm.trx`; detailed output contains the step IDs above.
 3. To repeat the desktop smoke check, create a separate empty demo database, apply migrations,
@@ -76,9 +79,10 @@ database for a new run so post-demo records and ledgers are not mistaken for bas
 
 ## Verification and resolved defects
 
-[Verification summary](evidence/midterm/verification.txt) records the full suite: **1,132 passed,
-zero failed, zero skipped** (413 Domain, 422 Application, 257 Infrastructure, 39 WinUI workspace,
-1 API). Release solution build passed with zero warnings/errors. Repository format verification passed.
+[Verification summary](evidence/midterm/verification.txt) records the full suite: **1,202 passed,
+zero failed, zero skipped** (413 Domain, 422 Application, 258 Infrastructure, 108 WinUI workspace,
+1 API). The verification script runs all five test projects. Release solution build passed with zero
+warnings/errors. Repository format verification passed.
 CI now runs the entire Infrastructure suite with PostgreSQL configured and preserves its TRX artifact.
 
 The demonstration uncovered and fixed the inventory repository registration, concurrent report
