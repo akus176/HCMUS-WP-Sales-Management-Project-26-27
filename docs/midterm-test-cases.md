@@ -23,11 +23,11 @@ Every test case records its **Test ID, feature, category (Valid / Invalid / Boun
 
 | Metric | Target | Actual | Evaluation |
 | :--- | :--- | :--- | :--- |
-| **Total Test Suite** | > 1,000 automated tests | **1,132 tests** | Complete |
+| **Total Test Suite** | > 1,000 automated tests | **1,202 tests** | Complete |
 | **Domain Tests** | Core business invariants | **413 passed**, 0 failed, 0 skipped | 100% pass |
 | **Application Tests** | Use cases, handlers, orchestration | **422 passed**, 0 failed, 0 skipped | 100% pass |
-| **Infrastructure Tests** | EF Core, PostgreSQL persistence, migrations | **257 passed**, 0 failed, 0 skipped | 100% pass |
-| **WinUI Workspace Tests** | Native view-models, state machines | **39 passed**, 0 failed, 0 skipped | 100% pass |
+| **Infrastructure Tests** | EF Core, PostgreSQL persistence, migrations | **258 passed**, 0 failed, 0 skipped | 100% pass |
+| **WinUI Workspace Tests** | Native view-models, state machines | **108 passed**, 0 failed, 0 skipped | 100% pass |
 | **API Smoke Tests** | Composition root & health check | **1 passed**, 0 failed, 0 skipped | 100% pass |
 | **Build Warnings & Errors** | 0 warnings, 0 errors | **0 warnings, 0 errors** (`dotnet build -c Release`) | Clean |
 | **Code Formatting** | Exact repository style | **Verified** (`dotnet format --verify-no-changes`) | Clean |
@@ -43,7 +43,7 @@ Every test case records its **Test ID, feature, category (Valid / Invalid / Boun
 - **Database Engine:** PostgreSQL 16 / 18
 - **Database Runtime Role:** Restricted `coffeeshop_midterm` runtime login (least-privilege DML access only, no DDL/DROP rights)
 - **Seed Dataset:** Standard repeatable seed in [`scripts/postgres/midterm-seed.sql`](../scripts/postgres/midterm-seed.sql) (20 products, 5 categories, 12 customers, 24 baseline orders)
-- **Primary Automated Script:** [`scripts/verify-midterm.ps1`](../scripts/verify-midterm.ps1) (TRX evidence retained in `artifacts/midterm/midterm.trx`)
+- **Primary Automated Script:** [`scripts/verify-midterm.ps1`](../scripts/verify-midterm.ps1), which runs all five test projects (TRX evidence is retained as one file per project in `artifacts/midterm/`)
 
 ---
 
@@ -212,7 +212,7 @@ Covers revenue reporting, recognition rules, best-seller rankings, order channel
 | `TC-REP-04` | Best seller quantity ranking | Valid | 3 Large Lattes sold, 1 Espresso sold | Query top-selling products report | Large Latte ranked #1 with quantity 3; Espresso ranked #2 | Quantities aggregated and ranked correctly | **PASS** | `BestSellerReportIntegrationTests.cs`, DEMO-08 |
 | `TC-REP-05` | Best seller ranking tie-breaker | Boundary | Two products have identical sold quantity (e.g. 5 units) | Query best sellers | Deterministic sorting applied (higher total revenue or alphabetical name) | Deterministic order maintained | **PASS** | `BestSellerReportQueryHandlerTests.cs` |
 | `TC-REP-06` | Low stock report aggregation | Valid | 2 ingredients at or below reorder threshold | Generate low stock report | Both ingredients listed with current stock, threshold, and unit | Exactly 2 rows returned with alert badges | **PASS** | `LowStockReportIntegrationTests.cs`, DEMO-08 |
-| `TC-REP-07` | Concurrent report query safety | Valid | Multiple report widgets (Revenue, Best Seller, Channels) on screen | Trigger simultaneous refresh of all reports | Queries execute in parallel without DbContext concurrency collision | Reports refresh cleanly without threading errors | **PASS** | `ReportingDatabaseFixture.cs`, `reports.png` |
+| `TC-REP-07` | Concurrent report query safety | Valid | Multiple report widgets (Revenue, Best Seller, Channels) on screen | Trigger simultaneous refresh of all reports | Queries execute in parallel without DbContext concurrency collision | Reports refresh cleanly without threading errors | **PASS** | `ReportingDatabaseFixture.cs`, `docs/ui-evidences/native-reports-1440.png` |
 
 ---
 
@@ -229,8 +229,8 @@ The table below records defects identified during integration testing and the en
 | `DEF-05` | Sales Completion | POS order completion did not invoke loyalty earning and redemption persistence in the same transaction. | Unified completion, loyalty earning, and table release under a single unit of work. Verified by DEMO-06 and DEMO-09. | commit `0b32817` |
 | `DEF-06` | UI Audit Screen | Stock adjustments and movement history controls were disabled by default on the inventory page. | Enabled controls and bound them to `OperationsWorkspace`. Verified by native audit screenshot. | commit `294a6df` |
 | `DEF-07` | Procurement | Receipt posting used a hard-coded actor identifier rather than the currently authenticated staff operator. | Wired active operator context from session into receipt command. Verified by DEMO-02. | commit `e291fff` |
-| `DEF-08` | WinUI Reports View | Filter controls (dates, channels, payment methods) clipped the Refresh button on smaller display resolutions. | Applied wrapping layout (`WrapPanel`) for report filter headers. Verified by `reports-tree.txt`. | commit `e291fff` |
-| `DEF-09` | Inventory Refresh | Inventory screen retained a stale database context, failing to observe stock deductions made by POS. | Implemented fresh service scope instantiation on each screen refresh. Verified by `inventory-refresh.txt`. | commit `349fe95` |
+| `DEF-08` | WinUI Reports View | Filter controls (dates, channels, payment methods) clipped the Refresh button on smaller display resolutions. | Applied wrapping layout (`WrapPanel`) for report filter headers. Current UI evidence is indexed in `docs/ui-evidences/README.md`. | commit `e291fff` |
+| `DEF-09` | Inventory Refresh | Inventory screen retained a stale database context, failing to observe stock deductions made by POS. | Implemented fresh service scope instantiation on each screen refresh. The behavior remains covered by the infrastructure integration tests. | commit `349fe95` |
 
 ---
 
@@ -242,7 +242,7 @@ The table below records defects identified during integration testing and the en
 3. **Simulated Payment Gateways:** Card and E-Wallet payments are captured synchronously as approved tenders rather than calling live external banking webhooks.
 
 ### 13.2 Critical blockers
-- **None.** All 1,132 tests pass, all 13 midterm demonstration checklist steps succeed, and zero build warnings or format violations exist.
+- **None.** All 1,202 tests pass, all 13 midterm demonstration checklist steps succeed, and zero build warnings or format violations exist.
 
 ---
 
@@ -251,16 +251,9 @@ The table below records defects identified during integration testing and the en
 All test cases and results in this report are verifiable using the following committed repository artifacts:
 
 - **Automated Verification Script:** [`scripts/verify-midterm.ps1`](../scripts/verify-midterm.ps1)
-- **Automated Test Log (TRX):** `artifacts/midterm/midterm.trx`
-- **Scripted Demonstration Trace:** [`docs/evidence/midterm/scripted-run.txt`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/scripted-run.txt)
-- **Full Test Suite Summary:** [`docs/evidence/midterm/verification.txt`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/verification.txt)
-- **Native UI Reports Evidence:**
-  - Visual rendering: [`docs/evidence/midterm/reports.png`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/reports.png)
-  - Accessibility tree snapshot: [`docs/evidence/midterm/reports-tree.txt`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/reports-tree.txt)
-- **Native Inventory Audit Evidence:**
-  - Balance & ledger view: [`docs/evidence/midterm/inventory-audit.png`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/inventory-audit.png)
-  - Multi-connection refresh trace: [`docs/evidence/midterm/inventory-refresh.txt`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/inventory-refresh.txt)
-- **Native Smoke Trace:** [`docs/evidence/midterm/native-smoke.txt`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/native-smoke.txt)
+- **Automated Test Logs (TRX):** one file per project under `artifacts/midterm/`
+- **Full Test Suite Summary:** [`docs/evidence/midterm/verification.txt`](evidence/midterm/verification.txt)
+- **Current UI Evidence:** [`docs/ui-evidences/README.md`](ui-evidences/README.md)
 - **Demonstration Checklist:** [`docs/midterm-demonstration.md`](midterm-demonstration.md)
 
 

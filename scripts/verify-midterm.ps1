@@ -8,18 +8,45 @@ if ([string]::IsNullOrWhiteSpace($env:COFFEESHOP_TEST_POSTGRES)) {
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $resultsDirectory = Join-Path $repositoryRoot 'artifacts/midterm'
+$testProjects = @(
+    'CoffeeShop.Domain.Tests',
+    'CoffeeShop.Application.Tests',
+    'CoffeeShop.Infrastructure.Tests',
+    'CoffeeShop.WinUI.Tests',
+    'CoffeeShop.Api.Tests'
+)
+
 Push-Location $repositoryRoot
 try {
-    dotnet test tests/CoffeeShop.Infrastructure.Tests --configuration Release `
-        --filter 'FullyQualifiedName~DirectClientCompositionTests|FullyQualifiedName~MidtermSeedDataIntegrationTests|FullyQualifiedName~MidtermDemonstrationIntegrationTests' `
-        --logger 'console;verbosity=detailed' --logger 'trx;LogFileName=midterm.trx' `
-        --results-directory $resultsDirectory
-    if ($LASTEXITCODE -ne 0) { throw "Midterm demonstration failed (exit $LASTEXITCODE)." }
-    [xml]$results = Get-Content -LiteralPath (Join-Path $resultsDirectory 'midterm.trx') -Raw
-    $counters = $results.TestRun.ResultSummary.Counters
-    if ([int]$counters.executed -eq 0 -or [int]$counters.notExecuted -ne 0 -or [int]$counters.failed -ne 0) {
-        throw 'Midterm demonstration did not execute every selected check successfully. Inspect artifacts/midterm/midterm.trx.'
+    New-Item -ItemType Directory -Path $resultsDirectory -Force | Out-Null
+
+    dotnet restore CoffeeShop.slnx
+    if ($LASTEXITCODE -ne 0) { throw 'Midterm restore failed.' }
+    dotnet build CoffeeShop.slnx --configuration Release --no-restore
+    if ($LASTEXITCODE -ne 0) { throw 'Midterm Release build failed.' }
+    dotnet format CoffeeShop.slnx --verify-no-changes --no-restore
+    if ($LASTEXITCODE -ne 0) { throw 'Midterm formatting check failed.' }
+
+    $totalPassed = 0
+    foreach ($project in $testProjects) {
+        $resultPath = Join-Path $resultsDirectory "$project.trx"
+        if (Test-Path -LiteralPath $resultPath) { Remove-Item -LiteralPath $resultPath }
+
+        dotnet test "tests/$project/$project.csproj" --configuration Release --no-build --no-restore `
+            --logger "trx;LogFileName=$project.trx" --results-directory $resultsDirectory
+        if ($LASTEXITCODE -ne 0) { throw "$project failed. Inspect $resultPath." }
+        if (-not (Test-Path -LiteralPath $resultPath)) { throw "$project produced no TRX evidence." }
+
+        [xml]$testRun = Get-Content -LiteralPath $resultPath -Raw
+        $counters = $testRun.TestRun.ResultSummary.Counters
+        $passed = [int]$counters.passed
+        if ($passed -eq 0 -or [int]$counters.failed -ne 0 -or [int]$counters.notExecuted -ne 0 -or [int]$counters.executed -ne $passed) {
+            throw "$project did not pass every test. Inspect $resultPath."
+        }
+        $totalPassed += $passed
+        Write-Output "$project`: $passed passed, zero failures/skips."
     }
-    Write-Output "Midterm demonstration passed: $($counters.passed) checks, zero failures/skips. Evidence: artifacts/midterm/midterm.trx"
+
+    Write-Output "Midterm verification passed: $totalPassed tests, clean Release build and format. TRX evidence: artifacts/midterm/."
 }
 finally { Pop-Location }

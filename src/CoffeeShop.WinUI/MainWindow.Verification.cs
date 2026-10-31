@@ -105,7 +105,7 @@ public sealed partial class MainWindow
             resourcesResolved = allResources.Count,
             viewport = new { width = ShellRoot.ActualWidth, height = ShellRoot.ActualHeight, scale = ShellRoot.XamlRoot.RasterizationScale }
         };
-        var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CoffeeShop");
+        var directory = PresentationVerification.DirectoryPath;
         Directory.CreateDirectory(directory);
         await File.WriteAllTextAsync(Path.Combine(directory, verifyStockRoom ? "stock-room-verification.json" : "shell-verification.json"), JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
         await PresentationVerification.CaptureAsync(ShellRoot, verifyStockRoom ? "native-stock-room.png" : "native-shell.png");

@@ -31,7 +31,7 @@ The environment variable takes precedence. Keep this user-local file out of sour
 
 ## Project boundaries
 
-The first stage of the service-console UI migration is documented in [the native foundation and shell guide](docs/ui-foundation.md), including the component gallery, supported routes, and verification commands.
+The current client uses six workspaces: Counter, Service board, Menu, Stock room, Customers, and Reports. The [native foundation and shell guide](docs/ui-foundation.md) explains the shared controls and verification commands. [OpenSpec issue #111](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/111) tracks the UI migration; [issue #119](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/119) tracks the final all-workspace visual audit.
 
 | Project                              | Responsibility                                                        |
 | ------------------------------------ | --------------------------------------------------------------------- |
@@ -41,7 +41,7 @@ The first stage of the service-console UI migration is documented in [the native
 | `CoffeeShop.Infrastructure.Postgres` | EF Core/Npgsql persistence, later migrations                          |
 | `CoffeeShop.WinUI`                   | Desktop presentation; composes Application and PostgreSQL for midterm |
 | `CoffeeShop.Api`                     | Final HTTP composition root, later authentication and permissions     |
-| `tests/*`                            | Unit, infrastructure, API, and future UI-facing tests                 |
+| `tests/*`                            | Unit, PostgreSQL integration, API, and WinUI presentation tests       |
 
 Midterm runs application use cases inside WinUI against a restricted local PostgreSQL account. Follow [restricted midterm PostgreSQL setup](docs/midterm-postgres-role.md) to provision `coffeeshop_midterm`, separate migration credentials, and restrict networking to the local machine. Final WinUI must drop its infrastructure reference and use typed HTTP clients; the API then owns authorization and persistence.
 
@@ -69,7 +69,7 @@ validation, and integration with the later transaction/persistence workflows.
 ### Customer screens (T5.6)
 
 Customer profiles, saved addresses, balances, paginated loyalty history, and next-order
-customer/delivery selection are available under **Customers and Loyalty**. Walk-ins
+customer/delivery selection are available under **Customers**. Walk-ins
 remain available without a profile. See [customer WinUI workflows](docs/customers-winui.md)
 for verification and the POS/order-completion integration contracts.
 
@@ -123,7 +123,7 @@ For the midterm demonstration, apply migrations and then run the repeatable data
 run command, and PostgreSQL integration validation are documented in
 [`docs/midterm-seed-data.md`](docs/midterm-seed-data.md).
 
-JWT and AI placeholders follow the same environment-variable convention (double underscores denote nested keys). No demo accounts or secrets are committed.
+JWT and AI placeholders follow the same environment-variable convention (double underscores denote nested keys). No demo accounts or secrets are committed. The midterm client has no login screen: an operator is selected within the direct-database workflow. Staff accounts, authentication, and role policies belong to the final API stage.
 
 Planned operational roles are Admin, Manager, Cashier, Barista, Inventory Staff, and Delivery Staff; final API role policies are not yet enforced. Docker Compose automation remains future work. The canonical implementation checklist is [issue #26](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/26).
 
@@ -137,11 +137,25 @@ With `COFFEESHOP_TEST_POSTGRES` set to an isolated PostgreSQL administrator conn
 ./scripts/verify-midterm.ps1
 ```
 
-The script creates temporary databases and restricted runtime logins, executes the actual
-client composition/workspaces, and removes its test databases and logins. Missing database
-configuration or skipped checks fail verification. Raw TRX evidence is written to
+The script restores, builds, checks formatting, and runs all five test projects. Its PostgreSQL
+tests create temporary databases and restricted runtime logins, exercise the actual client
+composition/workspaces, and remove their own test resources. Missing database configuration,
+failed tests, or skipped checks fail verification. Per-project TRX evidence is written to
 `artifacts/midterm/`; CI also retains PostgreSQL test results.
 
-## Team workflow
+The [midterm submission files](docs/midterm-submission/) contain build instructions and an honest
+feature summary. `scripts/prepare-midterm-submission.ps1` creates the required five-file archive
+outside the repository after a team member supplies an unlisted YouTube URL and a read-only
+repository token stored outside the repository. Never commit `pat.txt` or the submission archive.
 
-The design calls for five module owners covering catalog, inventory, customers, sales, identity, and reporting/AI. Assign actual contributors and reviewers before parallel feature work. Cross-cutting contracts (money, errors, identity, audit, migrations, CI) require a reviewer outside the owning module. Commit small feature-scoped migrations, rebase before generating a new migration, and validate a rebuild from an empty database once migrations exist. Use concise, imperative commit subjects naming the module (for example, `inventory: add receipt model`).
+## Team
+
+| Member | GitHub | Recent midterm scope |
+| --- | --- | --- |
+| Hieu Nguyen | [JakeConal](https://github.com/JakeConal) | Service-console shell, shared UI, and workspace polish |
+| Nam Anh | [kyrie25](https://github.com/kyrie25) | Menu, Customers, and Reports UI |
+| Long To | [longtoZ](https://github.com/longtoZ) | Stock room UI and test-case report |
+| dipper | [vt-Toan](https://github.com/vt-Toan) | Midterm demonstration and final UI verification |
+| Tran Anh Khoa | [akus176](https://github.com/akus176) | Repository coordination, Counter, and Service board |
+
+Use the [GitHub issues](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues) for ownership and review. Keep commits focused and link them to the issue they implement. Review cross-cutting contracts outside the owning module, rebase before generating migrations, and verify a rebuild from an empty database.

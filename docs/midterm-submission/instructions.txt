@@ -1,0 +1,16 @@
+Coffee Shop Management System — midterm build and run instructions
+
+Requirements: Windows 10 1809 or later, .NET 10 SDK, Windows App SDK runtime, and PostgreSQL 16 or later.
+
+1. Clone the repository from repo.txt. Open PowerShell in the repository root.
+2. Create a dedicated local PostgreSQL database named coffeeshop. Keep PostgreSQL bound to localhost.
+3. Set ConnectionStrings__CoffeeShop to an administrator connection string in your local PowerShell session. Do not save it in the repository.
+4. Run: dotnet tool restore
+5. Run: dotnet ef database update --project src/CoffeeShop.Infrastructure.Postgres --startup-project src/CoffeeShop.Infrastructure.Postgres
+6. Run the seed as the database owner: psql -X -h 127.0.0.1 -U postgres -d coffeeshop -v ON_ERROR_STOP=1 -f scripts/postgres/midterm-seed.sql
+7. Provision the restricted runtime login: psql -X -h 127.0.0.1 -U postgres -d coffeeshop -v ON_ERROR_STOP=1 -f scripts/postgres/midterm-role.sql
+8. In an interactive administrator psql session, run \password coffeeshop_midterm. Enter a local password through the hidden prompt.
+9. Remove the administrator connection string from the WinUI environment. Set ConnectionStrings__CoffeeShop to the restricted coffeeshop_midterm connection, or put it in the user-local %LOCALAPPDATA%\CoffeeShop\appsettings.json file described in README.md.
+10. Run: dotnet run --project src/CoffeeShop.WinUI -r win-x64
+
+The client opens Counter after connecting. Use the seeded records to demonstrate Menu, Customers, Stock room, orders, Service board, and Reports. The repeatable demonstration is in docs/midterm-demonstration.md. To run the full automated verification, set COFFEESHOP_TEST_POSTGRES to an isolated administrator connection and run scripts/verify-midterm.ps1. The verification creates and drops temporary databases and roles; do not aim it at a shared server.

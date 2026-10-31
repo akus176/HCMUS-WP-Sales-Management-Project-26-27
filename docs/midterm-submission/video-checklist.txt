@@ -1,0 +1,21 @@
+Midterm submission video checklist
+
+Record one continuous demo against a fresh migrated and seeded database.
+
+1. Show the repository and the six workspaces: Counter, Service board, Menu, Stock room, Customers, and Reports.
+2. Show a dine-in order with a customer, table, approved discount, payment, and completion.
+3. Show a takeaway order without a customer.
+4. Show a delivery order with a saved address, eligible courier, payment, and delivery completion.
+5. Show Menu data, a recipe, an add-on, and a deactivated item excluded from new orders.
+6. Show supplier receipt posting, stock adjustment with a reason, movement history, and low stock.
+7. Show customer loyalty earning, redemption, and cancellation restoration.
+8. Show revenue, best-seller, order-channel, and low-stock reports.
+9. Show one invalid action and the visible validation or workflow error.
+10. Show the final test summary: 1,202 passed, zero failed, zero skipped.
+
+Before recording:
+
+- Re-run the native smoke capture after the current seed naming cleanup.
+- Confirm no administrator connection string is visible in the recording.
+- Use only a demo account and demo data.
+- Keep the final video link unlisted and place it in youtube.txt.
