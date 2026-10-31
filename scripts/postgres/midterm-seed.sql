@@ -11,32 +11,44 @@ DECLARE
     actor uuid := pg_temp.midterm_id('staff-manager');
     courier uuid := pg_temp.midterm_id('staff-delivery');
 BEGIN
-    -- Remove only this dataset, in dependency order. The fixed actor and names are
-    -- deliberately namespaced so normal application records are not touched.
-    UPDATE sales.tables SET active_order_id = NULL WHERE table_number LIKE 'MIDTERM-%';
+    -- Remove only this dataset, in dependency order. Stable IDs keep cleanup safe
+    -- while the displayed data remains realistic for the midterm demonstration.
+    UPDATE sales.tables SET active_order_id = NULL WHERE id IN
+        (SELECT pg_temp.midterm_id('table-' || n) FROM generate_series(1,8) AS n);
     DELETE FROM customers.loyalty_transactions WHERE customer_id IN
-        (SELECT id FROM customers.customers WHERE phone LIKE '+8409008%');
-    DELETE FROM sales.orders WHERE order_number LIKE 'MIDTERM-%';
-    DELETE FROM sales.tables WHERE table_number LIKE 'MIDTERM-%';
+        (SELECT pg_temp.midterm_id('customer-' || n) FROM generate_series(1,12) AS n);
+    DELETE FROM sales.orders WHERE id IN
+        (SELECT pg_temp.midterm_id('order-' || n) FROM generate_series(1,24) AS n);
+    DELETE FROM sales.tables WHERE id IN
+        (SELECT pg_temp.midterm_id('table-' || n) FROM generate_series(1,8) AS n);
     DELETE FROM inventory.stock_movements WHERE actor_id = actor;
-    DELETE FROM inventory.purchase_receipts WHERE receipt_number LIKE 'MIDTERM-%';
+    DELETE FROM inventory.purchase_receipts WHERE id IN
+        (SELECT pg_temp.midterm_id('receipt-' || n) FROM generate_series(1,2) AS n);
     DELETE FROM catalog.recipe_ingredients WHERE size_variant_id IN
-        (SELECT sv.id FROM catalog.size_variants sv JOIN catalog.menu_items mi ON mi.id = sv.menu_item_id WHERE mi.name LIKE 'Midterm %');
-    DELETE FROM catalog.size_variants WHERE menu_item_id IN (SELECT id FROM catalog.menu_items WHERE name LIKE 'Midterm %');
-    DELETE FROM catalog.menu_items WHERE name LIKE 'Midterm %';
-    DELETE FROM catalog.categories WHERE name LIKE 'Midterm %';
-    DELETE FROM inventory.suppliers WHERE name LIKE 'Midterm %';
-    DELETE FROM customers.customers WHERE phone LIKE '+8409008%';
+        (SELECT pg_temp.midterm_id('size-' || n || '-' || size_key)
+         FROM generate_series(1,20) AS n
+         CROSS JOIN (VALUES ('regular'),('large')) AS sizes(size_key));
+    DELETE FROM catalog.size_variants WHERE menu_item_id IN
+        (SELECT pg_temp.midterm_id('product-' || n) FROM generate_series(1,20) AS n);
+    DELETE FROM catalog.menu_items WHERE id IN
+        (SELECT pg_temp.midterm_id('product-' || n) FROM generate_series(1,20) AS n);
+    DELETE FROM catalog.categories WHERE id IN
+        (SELECT pg_temp.midterm_id('category-' || n) FROM generate_series(1,5) AS n);
+    DELETE FROM inventory.suppliers WHERE id IN
+        (SELECT pg_temp.midterm_id('supplier-' || n) FROM generate_series(1,3) AS n);
+    DELETE FROM customers.customers WHERE id IN
+        (SELECT pg_temp.midterm_id('customer-' || n) FROM generate_series(1,12) AS n);
     DELETE FROM customers.loyalty_settings WHERE id = pg_temp.midterm_id('loyalty-settings');
-    DELETE FROM inventory.ingredients WHERE name LIKE 'Midterm %';
+    DELETE FROM inventory.ingredients WHERE id IN
+        (SELECT pg_temp.midterm_id('ingredient-' || n) FROM generate_series(1,9) AS n);
     DELETE FROM identity.user_roles WHERE user_id IN (actor, courier);
     DELETE FROM identity.users WHERE id IN (actor, courier);
 
     INSERT INTO identity.users (id, username, email, password_hash, full_name, phone, is_active, created_at, updated_at)
-    VALUES (actor, 'midterm_manager', 'midterm-manager@example.test', 'demo-only-not-for-authentication', 'Midterm Demo Manager', '+84900000000', true, stamp, stamp);
+    VALUES (actor, 'demo_manager', 'manager@example.test', 'demo-only-not-for-authentication', 'Linh Tran', '+84900000000', true, stamp, stamp);
 
     INSERT INTO identity.users (id, username, email, password_hash, full_name, phone, is_active, created_at, updated_at)
-    VALUES (courier, 'midterm_delivery', 'midterm-delivery@example.test', 'demo-only-not-for-authentication', 'Midterm Demo Courier', '+84900000001', true, stamp, stamp);
+    VALUES (courier, 'demo_courier', 'courier@example.test', 'demo-only-not-for-authentication', 'Huy Nguyen', '+84900000001', true, stamp, stamp);
     INSERT INTO identity.roles (id, code, name)
     VALUES (pg_temp.midterm_id('role-delivery'), 'DeliveryStaff', 'Delivery Staff')
     ON CONFLICT (code) DO NOTHING;
@@ -44,12 +56,18 @@ BEGIN
     SELECT courier, id, stamp, actor FROM identity.roles WHERE code = 'DeliveryStaff';
 
     INSERT INTO catalog.categories (id, name, display_order, is_active, created_at, updated_at)
-    SELECT pg_temp.midterm_id('category-' || n), 'Midterm ' || name, n, true, stamp, stamp
-    FROM (VALUES (1,'Coffee'),(2,'Tea'),(3,'Blended'),(4,'Bakery'),(5,'Seasonal')) AS c(n,name);
+    SELECT pg_temp.midterm_id('category-' || n), name, n, true, stamp, stamp
+    FROM (VALUES (1,'Coffee'),(2,'Tea'),(3,'Blended Drinks'),(4,'Bakery'),(5,'Seasonal Specials')) AS c(n,name);
 
     INSERT INTO catalog.menu_items (id, category_id, name, description, is_active, created_at, updated_at)
-    SELECT pg_temp.midterm_id('product-' || p.n), pg_temp.midterm_id('category-' || (((p.n - 1) % 5) + 1)),
-           'Midterm ' || p.name, p.description, true, stamp, stamp
+    SELECT pg_temp.midterm_id('product-' || p.n), pg_temp.midterm_id('category-' || CASE
+               WHEN p.n BETWEEN 1 AND 9 THEN 1       -- Coffee
+               WHEN p.n BETWEEN 10 AND 12 THEN 2     -- Tea
+               WHEN p.n BETWEEN 13 AND 15 THEN 3     -- Blended
+               WHEN p.n BETWEEN 16 AND 18 THEN 4     -- Bakery
+               ELSE 5                                 -- Seasonal
+           END),
+           p.name, p.description, true, stamp, stamp
     FROM (VALUES
         (1,'House Espresso','Double shot, chocolate finish'),(2,'Americano','Espresso with hot water'),
         (3,'Cappuccino','Espresso, steamed milk, cocoa'),(4,'Cafe Latte','Balanced espresso and milk'),
@@ -74,15 +92,15 @@ BEGIN
 
     INSERT INTO inventory.ingredients (id, name, base_unit, available_quantity, reorder_threshold, is_active, created_at, updated_at)
     VALUES
-      (pg_temp.midterm_id('ingredient-1'),'Midterm Arabica beans','g',500,500,true,stamp,stamp),
-      (pg_temp.midterm_id('ingredient-2'),'Midterm Whole milk','ml',3000,1000,true,stamp,stamp),
-      (pg_temp.midterm_id('ingredient-3'),'Midterm Oat milk','ml',3500,500,true,stamp,stamp),
-      (pg_temp.midterm_id('ingredient-4'),'Midterm Matcha powder','g',450,100,true,stamp,stamp),
-      (pg_temp.midterm_id('ingredient-5'),'Midterm Black tea','g',700,150,true,stamp,stamp),
-      (pg_temp.midterm_id('ingredient-6'),'Midterm Peach puree','ml',1800,300,true,stamp,stamp),
-      (pg_temp.midterm_id('ingredient-7'),'Midterm Chocolate sauce','ml',1200,250,true,stamp,stamp),
-      (pg_temp.midterm_id('ingredient-8'),'Midterm Vanilla syrup','ml',14,150,true,stamp,stamp),
-      (pg_temp.midterm_id('ingredient-9'),'Midterm Pastry','pcs',80,20,true,stamp,stamp);
+      (pg_temp.midterm_id('ingredient-1'),'Arabica beans','g',500,500,true,stamp,stamp),
+      (pg_temp.midterm_id('ingredient-2'),'Whole milk','ml',3000,1000,true,stamp,stamp),
+      (pg_temp.midterm_id('ingredient-3'),'Oat milk','ml',3500,500,true,stamp,stamp),
+      (pg_temp.midterm_id('ingredient-4'),'Matcha powder','g',450,100,true,stamp,stamp),
+      (pg_temp.midterm_id('ingredient-5'),'Black tea','g',700,150,true,stamp,stamp),
+      (pg_temp.midterm_id('ingredient-6'),'Peach puree','ml',1800,300,true,stamp,stamp),
+      (pg_temp.midterm_id('ingredient-7'),'Chocolate sauce','ml',1200,250,true,stamp,stamp),
+      (pg_temp.midterm_id('ingredient-8'),'Vanilla syrup','ml',14,150,true,stamp,stamp),
+      (pg_temp.midterm_id('ingredient-9'),'Pastry base','pcs',80,20,true,stamp,stamp);
 
     INSERT INTO catalog.recipe_ingredients (id, size_variant_id, ingredient_id, quantity, unit)
     SELECT pg_temp.midterm_id('recipe-' || p.n || '-' || s.size_key), pg_temp.midterm_id('size-' || p.n || '-' || s.size_key),
@@ -97,12 +115,12 @@ BEGIN
 
     INSERT INTO inventory.suppliers (id,name,phone,email,address,is_active,created_at,updated_at)
     VALUES
-      (pg_temp.midterm_id('supplier-1'),'Midterm Highland Roasters','0281234567','beans@example.test','Da Lat',true,stamp,stamp),
-      (pg_temp.midterm_id('supplier-2'),'Midterm Fresh Dairy','0281234568','dairy@example.test','Thu Duc',true,stamp,stamp),
-      (pg_temp.midterm_id('supplier-3'),'Midterm Tea and Pantry','0281234569','tea@example.test','District 5',true,stamp,stamp);
+      (pg_temp.midterm_id('supplier-1'),'Highland Roasters','0281234567','beans@example.test','Da Lat',true,stamp,stamp),
+      (pg_temp.midterm_id('supplier-2'),'Fresh Dairy Co.','0281234568','dairy@example.test','Thu Duc',true,stamp,stamp),
+      (pg_temp.midterm_id('supplier-3'),'Tea and Pantry Co.','0281234569','tea@example.test','District 5',true,stamp,stamp);
 
     INSERT INTO customers.customers (id,full_name,phone,email,is_active,loyalty_points_balance,created_at,updated_at)
-    SELECT pg_temp.midterm_id('customer-' || n), full_name, '+8409008' || lpad(n::text,4,'0'),
+    SELECT pg_temp.midterm_id('customer-' || n), full_name, '+8491008' || lpad(n::text,4,'0'),
            'customer' || n || '@example.test', true, CASE WHEN n <= 4 THEN 120 ELSE 0 END, stamp, stamp
     FROM (VALUES (1,'An Nguyen'),(2,'Binh Tran'),(3,'Chi Le'),(4,'Duc Pham'),(5,'Em Hoang'),(6,'Giang Vo'),
           (7,'Hanh Do'),(8,'Khanh Bui'),(9,'Lan Phan'),(10,'Minh Dang'),(11,'Nga Huynh'),(12,'Oanh Truong')) AS c(n,full_name);
@@ -115,12 +133,12 @@ BEGIN
     VALUES (pg_temp.midterm_id('loyalty-settings'),0.01,0.5,20,stamp,actor);
 
     INSERT INTO sales.tables (id,table_number,seats,is_occupied,active_order_id)
-    SELECT pg_temp.midterm_id('table-' || n), 'MIDTERM-' || lpad(n::text,2,'0'), CASE WHEN n % 2 = 0 THEN 4 ELSE 2 END, false, NULL
+    SELECT pg_temp.midterm_id('table-' || n), 'T' || lpad(n::text,2,'0'), CASE WHEN n % 2 = 0 THEN 4 ELSE 2 END, false, NULL
     FROM generate_series(1,8) AS n;
 
     INSERT INTO inventory.purchase_receipts (id,supplier_id,receipt_number,status,posted_at,created_at,updated_at)
-    VALUES (pg_temp.midterm_id('receipt-1'),pg_temp.midterm_id('supplier-1'),'MIDTERM-RECEIPT-001',1,stamp,stamp,stamp),
-           (pg_temp.midterm_id('receipt-2'),pg_temp.midterm_id('supplier-2'),'MIDTERM-RECEIPT-002',1,stamp + interval '1 day',stamp,stamp);
+    VALUES (pg_temp.midterm_id('receipt-1'),pg_temp.midterm_id('supplier-1'),'RC-2026-1001',1,stamp,stamp,stamp),
+           (pg_temp.midterm_id('receipt-2'),pg_temp.midterm_id('supplier-2'),'RC-2026-1002',1,stamp + interval '1 day',stamp,stamp);
 
     INSERT INTO inventory.purchase_receipt_lines (id,ingredient_id,quantity,unit_cost,purchase_receipt_id)
     VALUES (pg_temp.midterm_id('receipt-line-1'),pg_temp.midterm_id('ingredient-1'),2000,0.08,pg_temp.midterm_id('receipt-1')),
@@ -147,7 +165,7 @@ BEGIN
     )
     INSERT INTO sales.orders (id,order_number,channel,status,customer_id,table_id,subtotal,discount_total,total,paid_amount,
         loyalty_points_redeemed,loyalty_discount_amount,created_by,created_at,confirmed_at,completed_at,cancelled_at,cancel_reason)
-    SELECT pg_temp.midterm_id('order-' || n), 'MIDTERM-' || lpad(n::text,3,'0'),
+    SELECT pg_temp.midterm_id('order-' || n), 'ORD-2026-' || lpad(n::text,3,'0'),
            CASE WHEN n % 3 = 1 THEN 'dine_in' WHEN n % 3 = 2 THEN 'takeaway' ELSE 'delivery' END,
            CASE WHEN n IN (5,14) THEN 'cancelled' WHEN n IN (7,16) THEN 'ready' WHEN n = 21 THEN 'preparing' ELSE 'completed' END,
            CASE WHEN n % 4 = 0 THEN NULL ELSE pg_temp.midterm_id('customer-' || (((n - 1) % 12) + 1)) END,
@@ -172,14 +190,14 @@ BEGIN
     INSERT INTO sales.payments (id,order_id,method,amount,status,reference,paid_at,recorded_by)
     SELECT pg_temp.midterm_id('payment-' || n), pg_temp.midterm_id('order-' || n),
            CASE WHEN n % 3 = 0 THEN 'e_wallet' WHEN n % 3 = 1 THEN 'cash' ELSE 'card' END,
-           o.total, 'succeeded', CASE WHEN n % 3 = 1 THEN NULL ELSE 'MIDTERM-PAY-' || n END, o.created_at + interval '10 minutes', actor
+           o.total, 'succeeded', CASE WHEN n % 3 = 1 THEN NULL ELSE 'PAY-2026-' || n END, o.created_at + interval '10 minutes', actor
     FROM generate_series(1,24) AS n JOIN sales.orders o ON o.id = pg_temp.midterm_id('order-' || n)
     WHERE o.status <> 'cancelled';
 
     INSERT INTO sales.discounts (id,order_id,type,value,reason,status,requested_by,requested_at,approved_by,approved_at,computed_amount)
     SELECT pg_temp.midterm_id('discount-' || n), o.id,
            CASE WHEN n % 2 = 0 THEN 'percentage' ELSE 'fixed' END, CASE WHEN n % 2 = 0 THEN 10 ELSE 8 END,
-           'Midterm demonstration promotion', 'approved', actor, o.created_at,
+           'October opening promotion', 'approved', actor, o.created_at,
            actor, o.created_at, o.discount_total
     FROM generate_series(10,20,5) AS n JOIN sales.orders o ON o.id = pg_temp.midterm_id('order-' || n);
 

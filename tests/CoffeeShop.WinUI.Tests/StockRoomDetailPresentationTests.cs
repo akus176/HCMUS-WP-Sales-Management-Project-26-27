@@ -10,7 +10,7 @@ public sealed class StockRoomDetailPresentationTests
     public void ReceiptLine_FormatsQuantityUnitCostAndLineTotal()
     {
         var now = new UtcTimestamp(DateTimeOffset.UtcNow);
-        var receipt = new PurchaseReceipt(EntityId.New(), EntityId.New(), "MIDTERM-RECEIPT-002", now, now);
+        var receipt = new PurchaseReceipt(EntityId.New(), EntityId.New(), "RC-2026-1002", now, now);
         var line = receipt.AddLine(EntityId.New(), EntityId.New(), 5000m, new Money(0.03m), now);
 
         var row = new ReceiptLineRow(line, "Whole milk", "ml");
@@ -38,7 +38,7 @@ public sealed class StockRoomDetailPresentationTests
     public void SupplierRow_SurfacesContactAddressAndReceiptContext()
     {
         var now = new UtcTimestamp(DateTimeOffset.UtcNow);
-        var supplier = new Supplier(EntityId.New(), "Midterm Fresh Dairy", "0281234568", now, now,
+        var supplier = new Supplier(EntityId.New(), "Fresh Dairy Co.", "0281234568", now, now,
             email: "Dairy@Example.Test", address: "Thu Duc");
 
         var row = new SupplierRow(supplier, receiptCount: 3, postedReceiptCount: 2);
@@ -49,15 +49,15 @@ public sealed class StockRoomDetailPresentationTests
         Assert.Contains($"Since {now.Value.ToLocalTime():d MMM yyyy}", row.SinceDisplay);
         Assert.Contains("Last updated", row.HistoryDisplay);
         Assert.Equal("Active", row.StatusDisplay);
-        Assert.Equal("Edit supplier Midterm Fresh Dairy", row.EditActionName);
-        Assert.Equal("Midterm Fresh Dairy, Active, 0281234568 · dairy@example.test", row.ToString());
+        Assert.Equal("Edit supplier Fresh Dairy Co.", row.EditActionName);
+        Assert.Equal("Fresh Dairy Co., Active, 0281234568 · dairy@example.test", row.ToString());
     }
 
     [Fact]
     public void SupplierRow_UsesReadableFallbacksForMissingContactData()
     {
         var now = new UtcTimestamp(DateTimeOffset.UtcNow);
-        var supplier = new Supplier(EntityId.New(), "Midterm Tea and Pantry", "0281234569", now, now, isActive: false);
+        var supplier = new Supplier(EntityId.New(), "Tea and Pantry Co.", "0281234569", now, now, isActive: false);
 
         var row = new SupplierRow(supplier);
 

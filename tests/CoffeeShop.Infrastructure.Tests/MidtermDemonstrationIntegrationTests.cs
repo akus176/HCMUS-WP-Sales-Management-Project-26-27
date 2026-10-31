@@ -74,7 +74,7 @@ public sealed class MidtermDemonstrationIntegrationTests(ITestOutputHelper outpu
         var pos = services.GetRequiredService<PosWorkspace>();
         await pos.LoadAsync();
         Assert.Null(pos.Error);
-        pos.Session.Operator = pos.Options.Staff.Single(staff => staff.FullName == "Midterm Demo Manager");
+        pos.Session.Operator = pos.Options.Staff.Single(staff => staff.FullName == "Linh Tran");
         var actor = pos.Session.GetRequiredId();
         var operations = services.GetRequiredService<OperationsWorkspace>();
         operations.EnableOperationalWorkflow();
@@ -269,7 +269,7 @@ public sealed class MidtermDemonstrationIntegrationTests(ITestOutputHelper outpu
         pos.Channel = "dine_in";
         pos.TableId = pos.Options.Tables.First().Id;
         pos.Customer = new(customer);
-        var item = pos.Menu.Single(menu => menu.Name == "Midterm Almond Croissant");
+        var item = pos.Menu.Single(menu => menu.Name == "Almond Croissant");
         pos.AddLine(item, item.SizeVariants.Single(size => size.SizeName == "Regular"), 1, []);
         await pos.SaveDraftAsync();
         Assert.Null(pos.Error);
@@ -323,7 +323,7 @@ public sealed class MidtermDemonstrationIntegrationTests(ITestOutputHelper outpu
         Assert.Null(pos.Error);
         pos.Session.Operator = pos.Options.Staff.First();
         pos.Channel = "takeaway";
-        var item = pos.Menu.Single(menu => menu.Name == "Midterm Almond Croissant");
+        var item = pos.Menu.Single(menu => menu.Name == "Almond Croissant");
         pos.AddLine(item, item.SizeVariants.Single(size => size.SizeName == "Regular"), 1, []);
         await pos.SaveDraftAsync();
         Assert.Null(pos.Error);
