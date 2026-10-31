@@ -23,11 +23,11 @@ Every test case records its **Test ID, feature, category (Valid / Invalid / Boun
 
 | Metric | Target | Actual | Evaluation |
 | :--- | :--- | :--- | :--- |
-| **Total Test Suite** | > 1,000 automated tests | **1,132 tests** | Complete |
+| **Total Test Suite** | > 1,000 automated tests | **1,202 tests** | Complete |
 | **Domain Tests** | Core business invariants | **413 passed**, 0 failed, 0 skipped | 100% pass |
 | **Application Tests** | Use cases, handlers, orchestration | **422 passed**, 0 failed, 0 skipped | 100% pass |
-| **Infrastructure Tests** | EF Core, PostgreSQL persistence, migrations | **257 passed**, 0 failed, 0 skipped | 100% pass |
-| **WinUI Workspace Tests** | Native view-models, state machines | **39 passed**, 0 failed, 0 skipped | 100% pass |
+| **Infrastructure Tests** | EF Core, PostgreSQL persistence, migrations | **258 passed**, 0 failed, 0 skipped | 100% pass |
+| **WinUI Workspace Tests** | Native view-models, state machines | **108 passed**, 0 failed, 0 skipped | 100% pass |
 | **API Smoke Tests** | Composition root & health check | **1 passed**, 0 failed, 0 skipped | 100% pass |
 | **Build Warnings & Errors** | 0 warnings, 0 errors | **0 warnings, 0 errors** (`dotnet build -c Release`) | Clean |
 | **Code Formatting** | Exact repository style | **Verified** (`dotnet format --verify-no-changes`) | Clean |
@@ -43,7 +43,7 @@ Every test case records its **Test ID, feature, category (Valid / Invalid / Boun
 - **Database Engine:** PostgreSQL 16 / 18
 - **Database Runtime Role:** Restricted `coffeeshop_midterm` runtime login (least-privilege DML access only, no DDL/DROP rights)
 - **Seed Dataset:** Standard repeatable seed in [`scripts/postgres/midterm-seed.sql`](../scripts/postgres/midterm-seed.sql) (20 products, 5 categories, 12 customers, 24 baseline orders)
-- **Primary Automated Script:** [`scripts/verify-midterm.ps1`](../scripts/verify-midterm.ps1) (TRX evidence retained in `artifacts/midterm/midterm.trx`)
+- **Primary Automated Script:** [`scripts/verify-midterm.ps1`](../scripts/verify-midterm.ps1), which runs all five test projects (TRX evidence retained in `artifacts/midterm/midterm.trx`)
 
 ---
 
@@ -242,7 +242,7 @@ The table below records defects identified during integration testing and the en
 3. **Simulated Payment Gateways:** Card and E-Wallet payments are captured synchronously as approved tenders rather than calling live external banking webhooks.
 
 ### 13.2 Critical blockers
-- **None.** All 1,132 tests pass, all 13 midterm demonstration checklist steps succeed, and zero build warnings or format violations exist.
+- **None.** All 1,202 tests pass, all 13 midterm demonstration checklist steps succeed, and zero build warnings or format violations exist.
 
 ---
 

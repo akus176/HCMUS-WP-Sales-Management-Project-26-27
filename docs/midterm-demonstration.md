@@ -61,7 +61,7 @@ Evidence IDs below refer to the `PASS DEMO-*` lines in the scripted run output.
    ./scripts/verify-midterm.ps1
    ```
 
-   Expected: four selected checks pass with zero failures/skips. The wrapper rejects missing
+   Expected: all five test projects pass with zero failures/skips. The wrapper rejects missing
    configuration, failed tests, zero executed tests, or skipped tests. Raw evidence is
    `artifacts/midterm/midterm.trx`; detailed output contains the step IDs above.
 3. To repeat the desktop smoke check, create a separate empty demo database, apply migrations,
@@ -76,9 +76,10 @@ database for a new run so post-demo records and ledgers are not mistaken for bas
 
 ## Verification and resolved defects
 
-[Verification summary](evidence/midterm/verification.txt) records the full suite: **1,132 passed,
-zero failed, zero skipped** (413 Domain, 422 Application, 257 Infrastructure, 39 WinUI workspace,
-1 API). Release solution build passed with zero warnings/errors. Repository format verification passed.
+[Verification summary](evidence/midterm/verification.txt) records the full suite: **1,202 passed,
+zero failed, zero skipped** (413 Domain, 422 Application, 258 Infrastructure, 108 WinUI workspace,
+1 API). The verification script runs all five test projects. Release solution build passed with zero
+warnings/errors. Repository format verification passed.
 CI now runs the entire Infrastructure suite with PostgreSQL configured and preserves its TRX artifact.
 
 The demonstration uncovered and fixed the inventory repository registration, concurrent report
