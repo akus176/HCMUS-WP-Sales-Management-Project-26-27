@@ -1,9 +1,0 @@
-﻿Verification — 2026-10-26
-dotnet build CoffeeShop.slnx --configuration Release --no-restore: PASS (zero warnings, zero errors)
-dotnet format CoffeeShop.slnx --verify-no-changes --no-restore: PASS
-dotnet test CoffeeShop.slnx --no-build --configuration Release (COFFEESHOP_TEST_POSTGRES configured):
-CoffeeShop.WinUI.Tests : passed=39, failed=0, notExecuted=0
-CoffeeShop.Domain.Tests : passed=413, failed=0, notExecuted=0
-CoffeeShop.Application.Tests : passed=422, failed=0, notExecuted=0
-CoffeeShop.Infrastructure.Tests : passed=257, failed=0, notExecuted=0
-CoffeeShop.Api.Tests : passed=1, failed=0, notExecuted=0
