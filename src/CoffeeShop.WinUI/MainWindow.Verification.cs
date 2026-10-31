@@ -13,6 +13,11 @@ public sealed partial class MainWindow
     // without submitting business commands or writing business data.
     private async Task VerifyShellAsync()
     {
+        if (Environment.GetCommandLineArgs().Contains("--verify-parity"))
+        {
+            await VerifyParityAsync();
+            return;
+        }
         if (Environment.GetCommandLineArgs().Contains("--verify-workspaces") || Environment.GetCommandLineArgs().Contains("--verify-menu") || Environment.GetCommandLineArgs().Contains("--verify-customers") || Environment.GetCommandLineArgs().Contains("--verify-reports"))
         {
             await VerifyWorkspacesAsync();

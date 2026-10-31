@@ -5,6 +5,8 @@
 *.suo
 **/TestResults/
 artifacts/midterm/
+artifacts/ui119-tests/
+artifacts/ui119-final-capture/
 .env
 .env.*
 !.env.example

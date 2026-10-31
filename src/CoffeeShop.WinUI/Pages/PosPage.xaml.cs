@@ -79,6 +79,26 @@ public sealed record CounterMenuCard(MenuItemSummary Item)
 
 public sealed partial class PosPage : Page
 {
+    internal object VerificationState() => new
+    {
+        model.TicketId,
+        model.Search,
+        model.CategoryId,
+        model.Channel,
+        model.TableId,
+        model.Customer,
+        model.CustomerLabel,
+        cart = model.Cart.Select(line => line.Request),
+        order = model.Order?.Id
+    };
+
+    internal async Task<object> PrepareVerificationAsync()
+    {
+        while (model.IsBusy) await Task.Delay(50);
+        await model.LoadAsync();
+        return new { items = model.Menu.Count, error = model.Error?.Code };
+    }
+
     private readonly PosWorkspace model;
     private bool rendering;
     private EntityId? selectedMenuId;

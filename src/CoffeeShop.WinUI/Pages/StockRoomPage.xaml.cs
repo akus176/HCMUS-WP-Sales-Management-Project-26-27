@@ -1085,12 +1085,21 @@ public sealed partial class StockRoomPage : Page
 
     internal object VerificationState() => new
     {
+        selected = selectedIngredientRow?.Id,
         tab = activeSection,
         visibleTabs = TabsPanel.Children.OfType<ToggleButton>().Count(),
         lowStockFilter = LowStockOnlyCheck.IsChecked == true,
         adjusting = isAdjusting,
         canSubmit = RecordAdjustmentButton.IsEnabled,
     };
+
+    internal async Task<object> PrepareVerificationAsync()
+    {
+        while (isBusy) await Task.Delay(50);
+        await LoadAllDataAsync();
+        PrepareReferenceCapture();
+        return new { ingredients = allIngredientRows.Count, receipts = rawReceipts.Count, suppliers = supplierDirectory.Count, movements = allMovements.Count };
+    }
 
     // Native QA only: exercises local editor state without submitting commands.
     internal async Task<object> VerifyInteractionsAsync()

@@ -42,6 +42,15 @@ public sealed record ServiceBoardLine(PosLineSnapshot Line)
 
 public sealed partial class OperationsPage : Page
 {
+    internal object VerificationState() => new { model.SelectedOrderId, actor = model.Operator?.Id, orders = model.Orders.Select(order => new { order.Id, order.Status }) };
+
+    internal async Task<object> PrepareVerificationAsync()
+    {
+        while (model.IsBusy) await Task.Delay(50);
+        await model.LoadAsync();
+        return new { orders = model.Orders.Count, selected = model.SelectedOrder?.OrderNumber, error = model.Error?.Code };
+    }
+
     private readonly OperationsWorkspace model;
     private bool rendering;
     private EntityId? draggedOrderId;

@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>UI parity review — #119</title><style>
+body{font:16px system-ui;margin:24px;background:#f3eee4;color:#262321}a{color:#76591f}h1{font-size:26px}
+nav{position:sticky;top:0;background:#f3eee4;padding:12px;z-index:1;border:1px solid #c6bdb0}nav a{margin-right:18px}
+section{margin:32px 0;padding:16px;border:1px solid #c6bdb0;scroll-margin-top:70px}label{display:inline-flex;gap:8px;align-items:center;margin:8px 20px 12px 0}
+.images{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}figure{margin:0}img{width:100%;height:auto;display:block}figcaption{margin-bottom:8px}
+.overlay{position:relative;display:block}.overlay figure:first-child{width:100%}.overlay figure+figure{position:absolute;inset:0}.overlay figure+figure img{opacity:0.5}.overlay figure+figure figcaption{visibility:hidden}
+</style><h1>Six-workspace parity review — #119</h1>
+<p>Candidate captures, not a visual acceptance claim. Different fixtures, native rendering, and later layout changes remain visible.
+Compare the original concepts and, where available, the specifically approved #117 native captures. Overlays do not normalize differing editor frames.</p>
+<p><a href="README.md">Verification matrix and unresolved differences</a> · <a href="manifest.json">Capture provenance</a> · <a href="parity-verification.json">Native checks and fixture state</a></p>
+<nav><a href="#counter">counter</a><a href="#service-board">service board</a><a href="#menu">menu</a><a href="#stock-room">stock room</a><a href="#customers">customers</a><a href="#reports">reports</a><a href="#menu-editor">menu editor</a></nav><section id="counter"><h2>Counter</h2>
+<p><a href="../../ui-concepts/counter.png">Concept PNG</a> · <a href="native-counter-1440.png">Current native capture</a></p>
+<label>Reference <select><option value="../../ui-concepts/counter.png">HTML concept capture</option></select></label>
+<label>View <select class="mode"><option>Side by side</option><option>Overlay</option></select></label>
+<label>Native opacity <input type="range" min="0" max="1" step="0.05" value="0.5"></label>
+<div class="images"><figure><figcaption>Reference</figcaption><img class="reference" src="../../ui-concepts/counter.png" alt="Reference counter"></figure>
+<figure><figcaption>Current native candidate — acceptance pending</figcaption><img class="native" src="native-counter-1440.png" alt="Current counter"></figure></div></section>
+<section id="service-board"><h2>Service Board</h2>
+<p><a href="../../ui-concepts/service-board.png">Concept PNG</a> · <a href="native-service-board-1440.png">Current native capture</a></p>
+<label>Reference <select><option value="../../ui-concepts/service-board.png">HTML concept capture</option></select></label>
+<label>View <select class="mode"><option>Side by side</option><option>Overlay</option></select></label>
+<label>Native opacity <input type="range" min="0" max="1" step="0.05" value="0.5"></label>
+<div class="images"><figure><figcaption>Reference</figcaption><img class="reference" src="../../ui-concepts/service-board.png" alt="Reference service-board"></figure>
+<figure><figcaption>Current native candidate — acceptance pending</figcaption><img class="native" src="native-service-board-1440.png" alt="Current service-board"></figure></div></section>
+<section id="menu"><h2>Menu</h2>
+<p><a href="../../ui-concepts/menu.png">Concept PNG</a> · <a href="native-menu-1440.png">Current native capture</a></p>
+<label>Reference <select><option value="../../ui-concepts/menu.png">HTML concept capture</option><option value="../workspaces-117/native-menu-1440.png">Approved #117 native revision</option></select></label>
+<label>View <select class="mode"><option>Side by side</option><option>Overlay</option></select></label>
+<label>Native opacity <input type="range" min="0" max="1" step="0.05" value="0.5"></label>
+<div class="images"><figure><figcaption>Reference</figcaption><img class="reference" src="../../ui-concepts/menu.png" alt="Reference menu"></figure>
+<figure><figcaption>Current native candidate — acceptance pending</figcaption><img class="native" src="native-menu-1440.png" alt="Current menu"></figure></div></section>
+<section id="stock-room"><h2>Stock Room</h2>
+<p><a href="../../ui-concepts/stock-room.png">Concept PNG</a> · <a href="native-stock-room-1440.png">Current native capture</a></p>
+<label>Reference <select><option value="../../ui-concepts/stock-room.png">HTML concept capture</option></select></label>
+<label>View <select class="mode"><option>Side by side</option><option>Overlay</option></select></label>
+<label>Native opacity <input type="range" min="0" max="1" step="0.05" value="0.5"></label>
+<div class="images"><figure><figcaption>Reference</figcaption><img class="reference" src="../../ui-concepts/stock-room.png" alt="Reference stock-room"></figure>
+<figure><figcaption>Current native candidate — acceptance pending</figcaption><img class="native" src="native-stock-room-1440.png" alt="Current stock-room"></figure></div></section>
+<section id="customers"><h2>Customers</h2>
+<p><a href="../../ui-concepts/customers.png">Concept PNG</a> · <a href="native-customers-1440.png">Current native capture</a></p>
+<label>Reference <select><option value="../../ui-concepts/customers.png">HTML concept capture</option><option value="../workspaces-117/native-customers-1440.png">Approved #117 native revision</option></select></label>
+<label>View <select class="mode"><option>Side by side</option><option>Overlay</option></select></label>
+<label>Native opacity <input type="range" min="0" max="1" step="0.05" value="0.5"></label>
+<div class="images"><figure><figcaption>Reference</figcaption><img class="reference" src="../../ui-concepts/customers.png" alt="Reference customers"></figure>
+<figure><figcaption>Current native candidate — acceptance pending</figcaption><img class="native" src="native-customers-1440.png" alt="Current customers"></figure></div></section>
+<section id="reports"><h2>Reports</h2>
+<p><a href="../../ui-concepts/reports.png">Concept PNG</a> · <a href="native-reports-1440.png">Current native capture</a></p>
+<label>Reference <select><option value="../../ui-concepts/reports.png">HTML concept capture</option><option value="../workspaces-117/native-reports-1440.png">Approved #117 native revision</option></select></label>
+<label>View <select class="mode"><option>Side by side</option><option>Overlay</option></select></label>
+<label>Native opacity <input type="range" min="0" max="1" step="0.05" value="0.5"></label>
+<div class="images"><figure><figcaption>Reference</figcaption><img class="reference" src="../../ui-concepts/reports.png" alt="Reference reports"></figure>
+<figure><figcaption>Current native candidate — acceptance pending</figcaption><img class="native" src="native-reports-1440.png" alt="Current reports"></figure></div></section>
+<section id="menu-editor"><h2>Menu Editor</h2>
+<p><a href="../../ui-concepts/menu-picture-editor.png">Concept PNG</a> · <a href="native-menu-editor.png">Current native capture</a></p>
+<label>Reference <select><option value="../../ui-concepts/menu-picture-editor.png">HTML concept capture</option><option value="../workspaces-117/native-menu-editor.png">Approved #117 native revision</option></select></label>
+<label>View <select class="mode"><option>Side by side</option><option>Overlay</option></select></label>
+<label>Native opacity <input type="range" min="0" max="1" step="0.05" value="0.5"></label>
+<div class="images"><figure><figcaption>Reference</figcaption><img class="reference" src="../../ui-concepts/menu-picture-editor.png" alt="Reference menu-editor"></figure>
+<figure><figcaption>Current native candidate — acceptance pending</figcaption><img class="native" src="native-menu-editor.png" alt="Current menu-editor"></figure></div></section>
+<script>document.querySelectorAll('section').forEach(section=>{
+const selects=section.querySelectorAll('select'), images=section.querySelector('.images'), native=section.querySelector('.native');
+selects[0].onchange=()=>section.querySelector('.reference').src=selects[0].value;
+selects[1].onchange=()=>{images.classList.toggle('overlay',selects[1].selectedIndex===1);native.style.opacity=selects[1].selectedIndex===1?section.querySelector('input').value:1};
+section.querySelector('input').oninput=event=>{if(images.classList.contains('overlay'))native.style.opacity=event.target.value};
+});</script></html>
