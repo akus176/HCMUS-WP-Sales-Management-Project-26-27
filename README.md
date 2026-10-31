@@ -150,12 +150,18 @@ repository token stored outside the repository. Never commit `pat.txt` or the su
 
 ## Team
 
+We are grateful to all team members for their contributions to this project. The table below
+shows the current ownership areas and GitHub accounts.
+
 | Member | GitHub | Recent midterm scope |
 | --- | --- | --- |
-| Hieu Nguyen | [JakeConal](https://github.com/JakeConal) | Service-console shell, shared UI, and workspace polish |
-| Nam Anh | [kyrie25](https://github.com/kyrie25) | Menu, Customers, and Reports UI |
-| Long To | [longtoZ](https://github.com/longtoZ) | Stock room UI and test-case report |
-| dipper | [vt-Toan](https://github.com/vt-Toan) | Midterm demonstration and final UI verification |
+| Nguyen Minh Hieu | [JakeConal](https://github.com/JakeConal) | Service-console shell, shared UI, and workspace polish |
+| Nguyen Nam Anh | [kyrie25](https://github.com/kyrie25) | Menu, Customers, and Reports UI |
+| To Thanh Long | [longtoZ](https://github.com/longtoZ) | Stock room UI and test-case report |
+| Vo Tat Toan | [vt-Toan](https://github.com/vt-Toan) | Midterm demonstration and final UI verification |
 | Tran Anh Khoa | [akus176](https://github.com/akus176) | Repository coordination, Counter, and Service board |
 
-Use the [GitHub issues](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues) for ownership and review. Keep commits focused and link them to the issue they implement. Review cross-cutting contracts outside the owning module, rebase before generating migrations, and verify a rebuild from an empty database.
+Please use the [GitHub issues](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues)
+for ownership and review. Keep commits focused and link each commit to the issue it implements.
+Please review cross-cutting contracts outside the owning module, rebase before generating migrations,
+and verify a rebuild from an empty database.
