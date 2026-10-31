@@ -5,6 +5,8 @@
 *.suo
 **/TestResults/
 artifacts/midterm/
+artifacts/ui119-tests/
+artifacts/ui119-final-capture/
 artifacts/ui-verification/
 # The Moodle access token belongs only in the submission archive, never in Git.
 pat.txt
@@ -13,3 +15,6 @@ submission/
 .env.*
 !.env.example
 **/appsettings.Local.json
+
+artifacts/ui-current-capture/
+artifacts/ui-parity-review/

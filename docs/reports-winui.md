@@ -33,5 +33,4 @@ The native `--verify-shell --verify-reports` launch checks selection/date state
 through seven window sizes from 600 to 1440 logical pixels. It checks chart data
 counts and panel bounds, payment/channel filtering and reset, daily details,
 invalid dates, applied-period refresh, empty periods, and independent stock
-balances. It only queries data; it submits no business writes. Reviewed captures
-and reports are in [evidence/reports](evidence/reports).
+balances. It only queries data; it submits no business writes. Current screenshots are in [ui-evidences](ui-evidences).

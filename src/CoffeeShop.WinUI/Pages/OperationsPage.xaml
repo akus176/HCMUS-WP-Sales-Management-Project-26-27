@@ -9,7 +9,7 @@
             <Setter Property="BorderBrush" Value="{StaticResource ConsoleRuleBrush}" />
         </Style>
         <DataTemplate x:Key="BoardCardTemplate">
-            <controls:ConceptNote Status="{Binding Status}" IsSelected="{Binding IsSelected}" Height="224">
+            <controls:ConceptNote Status="{Binding Status}" IsSelected="{Binding IsSelected}" Height="174">
                 <Grid RowSpacing="6">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -22,20 +22,20 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding Number}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="18" />
-                        <TextBlock Grid.Column="1" Text="{Binding ChannelLabel}" Style="{StaticResource ConsoleLabelStyle}" VerticalAlignment="Center" FontSize="11" CharacterSpacing="0" />
+                        <TextBlock Text="{Binding Number}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="14" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="1" Text="{Binding ChannelLabel}" Style="{StaticResource ConsoleLabelStyle}" VerticalAlignment="Center" FontSize="8" CharacterSpacing="0" />
                     </Grid>
                     <Border Grid.Row="1" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,1,0,0" />
                     <StackPanel Grid.Row="2" Spacing="2">
-                        <TextBlock Text="{Binding Headline}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="18" TextTrimming="CharacterEllipsis" />
-                        <TextBlock Text="{Binding Items}" Style="{StaticResource ConsoleBodyStyle}" MaxLines="3" TextTrimming="CharacterEllipsis" FontSize="13" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Headline}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="15" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding Items}" Style="{StaticResource ConsoleBodyStyle}" MaxLines="2" TextTrimming="CharacterEllipsis" FontSize="9" TextWrapping="Wrap" />
                     </StackPanel>
                     <Grid Grid.Row="3" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,1,0,0" Padding="0,6,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding BalanceLabel}" Style="{StaticResource ConsoleLabelStyle}" FontSize="11" CharacterSpacing="0" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding BalanceLabel}" Style="{StaticResource ConsoleLabelStyle}" FontSize="8" CharacterSpacing="0" VerticalAlignment="Center" />
                         <Button Grid.Column="1" Content="{Binding ActionLabel}" Tag="{Binding}" Click="OnCardAction" IsEnabled="{Binding ActionEnabled}" Style="{StaticResource BoardNoteAction}" AutomationProperties.Name="{Binding ActionName}" ToolTipService.ToolTip="{Binding ActionHint}" />
                     </Grid>
                 </Grid>
@@ -58,7 +58,7 @@
         </DataTemplate>
         <Style x:Key="BoardNoteItem" TargetType="ListViewItem">
             <Setter Property="Padding" Value="0" />
-            <Setter Property="Margin" Value="0,0,0,8" />
+            <Setter Property="Margin" Value="0,0,18,12" />
             <Setter Property="MinHeight" Value="0" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="UseSystemFocusVisuals" Value="True" />
@@ -72,9 +72,9 @@
             </Setter>
         </Style>
         <Style x:Key="BoardNoteAction" TargetType="Button" BasedOn="{StaticResource ConsoleButtonStyle}">
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontSize" Value="9" />
             <Setter Property="CharacterSpacing" Value="0" />
-            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="MinHeight" Value="48" />
             <Setter Property="Padding" Value="8,0" />
             <Setter Property="Foreground" Value="{StaticResource ConsoleAccentTextBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource ConsoleAccentBrush}" />
@@ -90,31 +90,26 @@
         <Style x:Key="BoardPrimaryButton" TargetType="Button" BasedOn="{StaticResource ConsolePrimaryButtonStyle}">
             <Setter Property="FontSize" Value="12" />
             <Setter Property="CharacterSpacing" Value="0" />
-            <Setter Property="MinHeight" Value="44" />
             <Setter Property="Padding" Value="12,0" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
         </Style>
     </Page.Resources>
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Padding="24,20,24,24" Spacing="16" x:Name="BoardContent">
-            <Grid x:Name="HeaderLayout" MinHeight="96" ColumnSpacing="16" RowSpacing="12">
+        <StackPanel Padding="32,20,32,24" Spacing="8" x:Name="BoardContent">
+            <Grid x:Name="HeaderLayout" MinHeight="96" ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition x:Name="HeaderActionColumn" Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
                 <StackPanel Spacing="3">
                     <TextBlock Text="●  SERVICE  /  LIVE FLOOR" Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleAccentTextBrush}" FontSize="10" />
-                    <TextBlock Text="Service board" Style="{StaticResource ConsolePageTitleStyle}" FontSize="40" />
+                    <TextBlock Text="Service board" Style="{StaticResource ConsolePageTitleStyle}" />
                     <TextBlock x:Name="SummaryText" Style="{StaticResource ConsoleBodyStyle}" FontSize="13" />
                 </StackPanel>
                 <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                     <ComboBox x:Name="OperatorBox" Header="Operator" PlaceholderText="Select operator" DisplayMemberPath="FullName" SelectionChanged="OnOperatorChanged" MinWidth="168" MinHeight="44" FontSize="14" AutomationProperties.Name="Service board operator" />
                     <Button x:Name="RefreshButton" Content="Refresh" Click="OnReload" Style="{StaticResource ConsoleButtonStyle}" MinHeight="44" FontSize="12" CharacterSpacing="0" VerticalAlignment="Bottom" AutomationProperties.Name="Refresh service board" />
-                    <Button Content="Open Counter" Click="OnOpenCounter" Style="{StaticResource ConsolePrimaryButtonStyle}" MinHeight="44" FontSize="12" CharacterSpacing="0" VerticalAlignment="Bottom" />
+                    <Button Content="Open Counter" Click="OnOpenCounter" Style="{StaticResource ConsolePrimaryButtonStyle}" FontSize="12" CharacterSpacing="0" VerticalAlignment="Bottom" />
                 </StackPanel>
             </Grid>
             <Border BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,1,0,0" />
@@ -125,7 +120,7 @@
             <Grid x:Name="BoardLayout" ColumnSpacing="24" RowSpacing="20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="NotesColumn" Width="*" />
-                    <ColumnDefinition x:Name="RailColumn" Width="320" />
+                    <ColumnDefinition x:Name="RailColumn" Width="340" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -151,7 +146,6 @@
                             <TextBlock Text="Confirmed" Style="{StaticResource ConsoleSectionTitleStyle}" VerticalAlignment="Center" FontSize="24" />
                             <TextBlock x:Name="ConfirmedCount" Grid.Column="1" Style="{StaticResource ConsoleNumberStyle}" VerticalAlignment="Center" FontSize="20" />
                         </Grid>
-                        <TextBlock Text="Waiting to start" Margin="3,0,3,4" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                         <ListView x:Name="ConfirmedList" ItemTemplate="{StaticResource BoardCardTemplate}" SelectionChanged="OnOrderChanged" AutomationProperties.Name="Confirmed orders" ItemContainerStyle="{StaticResource BoardNoteItem}" Padding="0" BorderThickness="0" Background="Transparent" CanDragItems="True" DragItemsStarting="OnDragItemsStarting" DragItemsCompleted="OnDragItemsCompleted" AutomationProperties.HelpText="Select a ticket for details. Use its action button or drag it to the next column." MinHeight="0" />
                         <TextBlock x:Name="ConfirmedEmpty" Text="No tickets here" Margin="3,8" FontSize="13" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                     </StackPanel>
@@ -164,7 +158,6 @@
                             <TextBlock Text="Preparing" Style="{StaticResource ConsoleSectionTitleStyle}" VerticalAlignment="Center" FontSize="24" />
                             <TextBlock x:Name="PreparingCount" Grid.Column="1" Style="{StaticResource ConsoleNumberStyle}" VerticalAlignment="Center" FontSize="20" />
                         </Grid>
-                        <TextBlock Text="At the bar" Margin="3,0,3,4" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                         <ListView x:Name="PreparingList" ItemTemplate="{StaticResource BoardCardTemplate}" SelectionChanged="OnOrderChanged" AutomationProperties.Name="Preparing orders" ItemContainerStyle="{StaticResource BoardNoteItem}" Padding="0" BorderThickness="0" Background="Transparent" CanDragItems="True" DragItemsStarting="OnDragItemsStarting" DragItemsCompleted="OnDragItemsCompleted" AutomationProperties.HelpText="Select a ticket for details. Use its action button or drag it to the next column." MinHeight="0" />
                         <TextBlock x:Name="PreparingEmpty" Text="No tickets here" Margin="3,8" FontSize="13" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                     </StackPanel>
@@ -177,7 +170,6 @@
                             <TextBlock Text="Ready" Style="{StaticResource ConsoleSectionTitleStyle}" VerticalAlignment="Center" FontSize="24" />
                             <TextBlock x:Name="ReadyCount" Grid.Column="1" Style="{StaticResource ConsoleNumberStyle}" VerticalAlignment="Center" FontSize="20" />
                         </Grid>
-                        <TextBlock Text="Ready to hand over" Margin="3,0,3,4" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                         <ListView x:Name="ReadyList" ItemTemplate="{StaticResource BoardCardTemplate}" SelectionChanged="OnOrderChanged" AutomationProperties.Name="Ready orders" ItemContainerStyle="{StaticResource BoardNoteItem}" Padding="0" BorderThickness="0" Background="Transparent" CanDragItems="True" DragItemsStarting="OnDragItemsStarting" DragItemsCompleted="OnDragItemsCompleted" AutomationProperties.HelpText="Select a ticket for details. Use its action button or drag it to the next column." MinHeight="0" />
                         <TextBlock x:Name="ReadyEmpty" Text="No tickets here" Margin="3,8" FontSize="13" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                     </StackPanel>

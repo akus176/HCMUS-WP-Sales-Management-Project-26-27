@@ -75,8 +75,7 @@ The native `--verify-shell --verify-customers` launch captures the page at 1440
 and 600 logical pixels, checks the original three-column/stacked layouts, and
 confirms selection is preserved through seven resize steps. It exercises empty
 search and recovery, independent directory scrolling, delivery-form drafts, and
-an unsaved profile editor across resizing without submitting writes. Captures
-and reports are in [evidence/customers](evidence/customers).
+an unsaved profile editor across resizing without submitting writes. Current screenshots are in [ui-evidences](ui-evidences).
 
 ```powershell
 dotnet build CoffeeShop.slnx

@@ -79,6 +79,41 @@ public sealed record CounterMenuCard(MenuItemSummary Item)
 
 public sealed partial class PosPage : Page
 {
+    internal object VerificationState() => new
+    {
+        model.TicketId,
+        model.Search,
+        model.CategoryId,
+        model.Channel,
+        model.TableId,
+        model.Customer,
+        model.CustomerLabel,
+        cart = model.Cart.Select(line => line.Request),
+        order = model.Order?.Id
+    };
+
+    internal async Task<object> PrepareVerificationAsync()
+    {
+        while (model.IsBusy) await Task.Delay(50);
+        await model.LoadAsync();
+        return new { items = model.Menu.Count, error = model.Error?.Code };
+    }
+
+    internal object VerificationLayout()
+    {
+        var panel = MenuGrid.ItemsPanelRoot as ItemsWrapGrid;
+        var itemHeight = panel?.ItemHeight ?? 0;
+        return new
+        {
+            menuHeight = MenuGrid.ActualHeight,
+            itemHeight,
+            fullyVisibleRows = itemHeight > 0 ? (int)Math.Floor((MenuGrid.ActualHeight + 1) / itemHeight) : 0,
+            threeRowsFit = itemHeight > 0 && MenuGrid.ActualHeight + 1 >= itemHeight * 3,
+            menuItems = MenuGrid.Items.Count,
+            ticketWidth = TicketPanel.ActualWidth
+        };
+    }
+
     private readonly PosWorkspace model;
     private bool rendering;
     private EntityId? selectedMenuId;
@@ -116,12 +151,12 @@ public sealed partial class PosPage : Page
 
     private void OnMenuGridSizeChanged(object sender, SizeChangedEventArgs args)
     {
-        if (MenuGrid.ItemsPanelRoot is not ItemsWrapGrid panel || args.NewSize.Width <= 0) return;
+        if (MenuGrid.ItemsPanelRoot is not ItemsWrapGrid panel || args.NewSize.Width <= 0 || args.NewSize.Height <= 0) return;
         var available = Math.Max(1, args.NewSize.Width - 16); // Reserve the native scrollbar gutter.
         var columns = Math.Max(1, (int)(available / 184));
         panel.ItemWidth = Math.Floor(available / columns);
         // Use the actual list viewport so three complete rows fit, including cell gutters.
-        panel.ItemHeight = Math.Clamp(Math.Floor(args.NewSize.Height / 3), 168, 208);
+        panel.ItemHeight = Math.Clamp(Math.Floor(args.NewSize.Height / 3), 1, 208);
     }
 
     private async void OnClearSearch(object sender, RoutedEventArgs args)

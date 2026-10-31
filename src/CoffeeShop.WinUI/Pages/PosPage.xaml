@@ -213,7 +213,7 @@
                 <StackPanel Spacing="3">
                     <TextBlock Text="Counter" Style="{StaticResource ConsolePageTitleStyle}" FontSize="36" LineHeight="42" AutomationProperties.HeadingLevel="Level1" />
                 </StackPanel>
-                <Button Grid.Column="1" x:Name="NewButton" Click="OnNewTicket" Style="{StaticResource CounterPrimary}" VerticalAlignment="Center">
+                <Button Grid.Column="1" x:Name="NewButton" Click="OnNewTicket" Style="{StaticResource CounterPrimary}" VerticalAlignment="Center" AutomationProperties.Name="Start a new ticket">
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <FontIcon Glyph="" FontSize="13" AutomationProperties.AccessibilityView="Raw" />
                         <TextBlock Text="NEW TICKET" />

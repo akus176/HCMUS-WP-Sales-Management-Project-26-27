@@ -16,9 +16,13 @@ internal static class PresentationVerification
         get
         {
             var output = Environment.GetEnvironmentVariable("COFFEESHOP_VERIFICATION_OUTPUT");
-            return string.IsNullOrWhiteSpace(output)
-                ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CoffeeShop")
-                : Path.GetFullPath(output);
+            if (!string.IsNullOrWhiteSpace(output))
+            {
+                return Path.GetFullPath(output);
+            }
+
+            return Environment.GetEnvironmentVariable("COFFEESHOP_UI_EVIDENCE")
+                ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CoffeeShop");
         }
     }
 

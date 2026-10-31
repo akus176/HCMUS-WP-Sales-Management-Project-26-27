@@ -16,19 +16,12 @@ blockers remain for this demonstrated path. Milestone acceptance still requires 
 - The actual `AddCoffeeShopDirectClient` registration is compiled into the tests. POS,
   customer, inventory audit, and operations steps execute the same workspace methods as
   the WinUI pages. Catalog/procurement/report steps execute the registered application services.
-- [Scripted run output](evidence/midterm/scripted-run.txt) records each demonstrated result.
-  Source: [complete path and rollback checks](../tests/CoffeeShop.Infrastructure.Tests/MidtermDemonstrationIntegrationTests.cs),
+- The scripted demonstration is reproduced by [complete path and rollback checks](../tests/CoffeeShop.Infrastructure.Tests/MidtermDemonstrationIntegrationTests.cs),
   [seed validation](../tests/CoffeeShop.Infrastructure.Tests/MidtermSeedDataIntegrationTests.cs), and
   [client registration check](../tests/CoffeeShop.Infrastructure.Tests/DirectClientCompositionTests.cs).
-- [Native smoke observations](evidence/midterm/native-smoke.txt),
-  [report accessibility snapshot](evidence/midterm/reports-tree.txt), and
-  [report screenshot](evidence/midterm/reports.png) cover the separate freshly rebuilt desktop database.
-  These native captures were recorded on 2026-10-26, before the final demo-data naming cleanup.
-  Re-run the native smoke capture before recording the submission video so visible names match
-  the current seed exactly. Automated seed and workflow evidence below uses the current seed.
-  The [inventory audit screenshot](evidence/midterm/inventory-audit.png) shows balance/history controls.
-  The [native refresh regression](evidence/midterm/inventory-refresh.txt) confirms an existing
-  Ingredients page observes a stock change committed by a separate connection.
+- The [current UI evidence index](ui-evidences/README.md) contains the six workspace captures and
+  form captures from the UI parity verification. Re-run the native smoke capture against the
+  current seed before recording the submission video so visible names match the seed exactly.
   Native checks verify startup, navigation, loaded controls/data, and report rendering.
   The full sequence of mutations is demonstrated by the scripted workspace run; this is
   not a claim that every transaction was repeated through pointer/keyboard automation.
@@ -66,7 +59,7 @@ Evidence IDs below refer to the `PASS DEMO-*` lines in the scripted run output.
 
    Expected: all five test projects pass with zero failures/skips. The wrapper rejects missing
    configuration, failed tests, zero executed tests, or skipped tests. Raw evidence is
-   `artifacts/midterm/midterm.trx`; detailed output contains the step IDs above.
+   `artifacts/midterm/<test-project>.trx`; detailed output contains the step IDs above.
 3. To repeat the desktop smoke check, create a separate empty demo database, apply migrations,
    run [seed setup](midterm-seed-data.md) as owner, and provision the
    [restricted runtime role](midterm-postgres-role.md). Set the client's connection to that role

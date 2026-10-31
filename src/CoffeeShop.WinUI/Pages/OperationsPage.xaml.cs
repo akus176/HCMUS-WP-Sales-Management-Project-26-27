@@ -42,6 +42,15 @@ public sealed record ServiceBoardLine(PosLineSnapshot Line)
 
 public sealed partial class OperationsPage : Page
 {
+    internal object VerificationState() => new { model.SelectedOrderId, actor = model.Operator?.Id, orders = model.Orders.Select(order => new { order.Id, order.Status }) };
+
+    internal async Task<object> PrepareVerificationAsync()
+    {
+        while (model.IsBusy) await Task.Delay(50);
+        await model.LoadAsync();
+        return new { orders = model.Orders.Count, selected = model.SelectedOrder?.OrderNumber, error = model.Error?.Code };
+    }
+
     private readonly OperationsWorkspace model;
     private bool rendering;
     private EntityId? draggedOrderId;
@@ -254,7 +263,8 @@ public sealed partial class OperationsPage : Page
         LoadingBar.Visibility = model.IsBusy ? Visibility.Visible : Visibility.Collapsed;
         OperatorBox.IsEnabled = !model.IsBusy;
         RefreshButton.IsEnabled = !model.IsBusy;
-        OperatorHint.Visibility = model.HasOperator ? Visibility.Collapsed : Visibility.Visible;
+        // The selected-order inspector already explains the operator prerequisite.
+        OperatorHint.Visibility = Visibility.Collapsed;
         if (!ReferenceEquals(OperatorBox.ItemsSource, model.Staff)) OperatorBox.ItemsSource = model.Staff;
         OperatorBox.SelectedItem = model.Staff.FirstOrDefault(staff => staff.Id == model.Operator?.Id);
         foreach (var list in new[] { ConfirmedList, PreparingList, ReadyList }) list.CanDragItems = list != ReadyList && model.HasOperator && !model.IsBusy;

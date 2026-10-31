@@ -13,6 +13,11 @@ public sealed partial class MainWindow
     // without submitting business commands or writing business data.
     private async Task VerifyShellAsync()
     {
+        if (Environment.GetCommandLineArgs().Contains("--verify-parity"))
+        {
+            await VerifyParityAsync();
+            return;
+        }
         if (Environment.GetCommandLineArgs().Contains("--verify-workspaces") || Environment.GetCommandLineArgs().Contains("--verify-menu") || Environment.GetCommandLineArgs().Contains("--verify-customers") || Environment.GetCommandLineArgs().Contains("--verify-reports"))
         {
             await VerifyWorkspacesAsync();
@@ -60,6 +65,7 @@ public sealed partial class MainWindow
                 samePage = ReferenceEquals(activePage, ContentFrame.Content),
                 route = currentRoute,
                 contentWidth = ContentFrame.ActualWidth,
+                counterLayout = verifyCounter ? (ContentFrame.Content as PosPage)?.VerificationLayout() : null,
                 boardLayout = verifyBoard ? (ContentFrame.Content as OperationsPage)?.VerificationLayout() : null,
                 paneOpen = Nav.IsPaneOpen
             });
@@ -79,6 +85,7 @@ public sealed partial class MainWindow
             width = control.ActualWidth,
             height = control.ActualHeight,
             position = control.TransformToVisual(ShellRoot).TransformPoint(new Windows.Foundation.Point()),
+            contentInset = NavigationContentInset(control),
         }).ToArray();
         var allResources = new List<string>();
         foreach (var dictionary in Microsoft.UI.Xaml.Application.Current.Resources.MergedDictionaries)
@@ -214,6 +221,10 @@ public sealed partial class MainWindow
             await File.WriteAllTextAsync(Path.Combine(PresentationVerification.DirectoryPath, "editor-verification.json"), JsonSerializer.Serialize(editorResult, new JsonSerializerOptions { WriteIndented = true }));
         }
     }
+
+    private static double? NavigationContentInset(NavigationViewItem item) =>
+        item.Content is FrameworkElement content && item.ActualWidth > 0
+            ? content.TransformToVisual(item).TransformPoint(new Windows.Foundation.Point()).X : null;
 
     private async Task ResizeForVerificationAsync(int width, int height)
     {
