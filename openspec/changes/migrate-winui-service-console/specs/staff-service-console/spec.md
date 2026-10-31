@@ -41,6 +41,14 @@ The production UI SHALL match the updated concept art exactly at the 1440 by 900
 - **AND** supported workflows, accounting behavior, responsive state preservation, visible keyboard focus, meaningful accessible names, and 48-DIP primary targets remain required
 - **AND** the revision does not waive visual acceptance for other details, other workspaces, or future changes
 
+#### Scenario: Targeted native and data revision for #119
+- **WHEN** the final six-workspace captures are compared with the concept art
+- **THEN** the real seeded names, identifiers, dates, amounts, counts, and selected records may differ from sample artboard values while the comparison uses equivalent state and data shape
+- **AND** Service board may show the required operator selector, with its placement and styling still subject to visual review
+- **AND** Counter keeps Save, review, and confirm while payment remains on Service board after confirmation
+- **AND** the Menu editor may use native dialog window framing while its content and interactions remain subject to the approved #117 composition
+- **AND** only these conflicts are approved by `docs/ui-concepts/ui-parity-119-targeted-revision.md`; other visible differences remain unresolved until corrected and reverified
+
 ### Requirement: Task-oriented application shell
 The system SHALL present the staff client as one Corner Cafe service console with primary navigation for Counter, Service board, Menu, Stock room, Customers, and Reports.
 

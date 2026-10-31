@@ -1,0 +1,10 @@
+# Targeted native revision for #119
+
+On 2026-10-31, the user approved a narrow revision for the final six-workspace verification. This revision covers only the four conflicts below. The current images in `docs/evidence/ui-parity-119/` are review candidates, not approved whole-screen references.
+
+1. **Real fixture values.** Product and customer names, order identifiers, dates, amounts, counts, and selected records may reflect the seeded PostgreSQL database. Visual comparison must still use equivalent UI state and data shape; production values remain database-driven. The artboard sample values are not a reason to hard-code production data.
+2. **Required operator selection.** Service board may show an operator selector because supported fulfillment and payment commands require an operator. Its presence is approved; its placement and styling must still fit the artboard composition, and disabled actions must explain the prerequisite.
+3. **Payment boundary.** Counter retains Save, review, and confirm. Payment and Charge belong to Service board after confirmation under the existing order rules. The concept's direct Counter payment controls are replaced by this supported flow; the remaining ticket layout and styling still require visual parity.
+4. **Native editor framing.** The Menu editor may use the native dialog window framing rather than a 1440 by 900 shell capture. Its fields, typography, spacing, actions, and focus behavior remain subject to the approved #117 reference and the current visual contract.
+
+The approved #117 composition revision remains limited to the four captures and differences in `workspaces-117-native-revision.md`. This #119 revision does not approve later visual drift in Menu, Customers, Reports, or the editor. It does not accept the current shell, Counter, Service board, or Stock room screenshots as whole-screen replacements for the HTML artboards. Exact visual review, keyboard and workflow checks, and the 48-DIP primary target requirement remain acceptance gates for tasks 8.1 and 8.4.
