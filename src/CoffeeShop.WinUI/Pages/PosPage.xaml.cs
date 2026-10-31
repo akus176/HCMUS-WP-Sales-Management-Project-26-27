@@ -99,6 +99,21 @@ public sealed partial class PosPage : Page
         return new { items = model.Menu.Count, error = model.Error?.Code };
     }
 
+    internal object VerificationLayout()
+    {
+        var panel = MenuGrid.ItemsPanelRoot as ItemsWrapGrid;
+        var itemHeight = panel?.ItemHeight ?? 0;
+        return new
+        {
+            menuHeight = MenuGrid.ActualHeight,
+            itemHeight,
+            fullyVisibleRows = itemHeight > 0 ? (int)Math.Floor((MenuGrid.ActualHeight + 1) / itemHeight) : 0,
+            threeRowsFit = itemHeight > 0 && MenuGrid.ActualHeight + 1 >= itemHeight * 3,
+            menuItems = MenuGrid.Items.Count,
+            ticketWidth = TicketPanel.ActualWidth
+        };
+    }
+
     private readonly PosWorkspace model;
     private bool rendering;
     private EntityId? selectedMenuId;
@@ -118,11 +133,11 @@ public sealed partial class PosPage : Page
         if (PageLayout is null) return;
         // Use the workspace's available width, after the navigation rail.
         var wide = args.NewSize.Width >= 980 && args.NewSize.Height >= 640;
-        PageLayout.Padding = new Thickness(args.NewSize.Width < 640 ? 16 : 32, 24, args.NewSize.Width < 640 ? 16 : 32, 16);
+        PageLayout.Padding = new Thickness(args.NewSize.Width < 640 ? 16 : 24, 12, args.NewSize.Width < 640 ? 16 : 24, 16);
         PageScroll.VerticalScrollBarVisibility = wide ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
         WorkspaceRow.Height = wide ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
         MenuRow.Height = wide ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
-        TicketColumn.Width = wide ? new GridLength(352) : new GridLength(0);
+        TicketColumn.Width = wide ? new GridLength(390) : new GridLength(0);
         Grid.SetColumn(TicketPanel, wide ? 1 : 0);
         Grid.SetRow(TicketPanel, wide ? 0 : 1);
         TicketPanel.MinHeight = wide ? 0 : 680;
@@ -132,20 +147,16 @@ public sealed partial class PosPage : Page
         HeaderActionColumn.Width = args.NewSize.Width < 640 ? new GridLength(0) : GridLength.Auto;
         Grid.SetColumn(NewButton, args.NewSize.Width < 640 ? 0 : 1);
         Grid.SetRow(NewButton, args.NewSize.Width < 640 ? 1 : 0);
-        FilterSearchColumn.Width = wide ? new GridLength(190) : new GridLength(0);
-        FilterCategoryRow.Height = wide ? new GridLength(0) : GridLength.Auto;
-        Grid.SetColumn(SearchHost, wide ? 1 : 0);
-        Grid.SetRow(CategoryScroll, wide ? 0 : 1);
     }
 
     private void OnMenuGridSizeChanged(object sender, SizeChangedEventArgs args)
     {
-        if (MenuGrid.ItemsPanelRoot is not ItemsWrapGrid panel || args.NewSize.Width <= 0) return;
+        if (MenuGrid.ItemsPanelRoot is not ItemsWrapGrid panel || args.NewSize.Width <= 0 || args.NewSize.Height <= 0) return;
         var available = Math.Max(1, args.NewSize.Width - 16); // Reserve the native scrollbar gutter.
         var columns = Math.Max(1, (int)(available / 184));
         panel.ItemWidth = Math.Floor(available / columns);
         // Use the actual list viewport so three complete rows fit, including cell gutters.
-        panel.ItemHeight = Math.Clamp(Math.Floor(args.NewSize.Height / 3), 184, 208);
+        panel.ItemHeight = Math.Clamp(Math.Floor(args.NewSize.Height / 3), 1, 208);
     }
 
     private async void OnClearSearch(object sender, RoutedEventArgs args)

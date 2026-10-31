@@ -90,8 +90,7 @@ The native `--verify-shell --verify-menu` launch also checks selection preservat
 at window widths from 600 to 1440, exclusive tabs, category filtering, empty
 results, reset, and unsaved editor text across resizing. It captures the rendered
 Menu, independent list scrolling, Categories, Add-ons, and editor without submitting writes. It checks that record rows bind both actions to their own record
-and that the detail column is removed from Categories and Add-ons. Reviewed captures
-and reports are in [evidence/menu](evidence/menu). The operator check remains the
+and that the detail column is removed from Categories and Add-ons. Current screenshots are in [ui-evidences](ui-evidences). The operator check remains the
 manual verification for writes, keyboard navigation, and accessibility.
 
 ## Boundaries

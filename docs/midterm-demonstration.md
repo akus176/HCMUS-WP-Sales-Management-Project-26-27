@@ -16,15 +16,15 @@ blockers remain for this demonstrated path. Milestone acceptance still requires 
 - The actual `AddCoffeeShopDirectClient` registration is compiled into the tests. POS,
   customer, inventory audit, and operations steps execute the same workspace methods as
   the WinUI pages. Catalog/procurement/report steps execute the registered application services.
-- [Scripted run output](evidence/midterm/scripted-run.txt) records each demonstrated result.
+- [Scripted run output](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/scripted-run.txt) records each demonstrated result.
   Source: [complete path and rollback checks](../tests/CoffeeShop.Infrastructure.Tests/MidtermDemonstrationIntegrationTests.cs),
   [seed validation](../tests/CoffeeShop.Infrastructure.Tests/MidtermSeedDataIntegrationTests.cs), and
   [client registration check](../tests/CoffeeShop.Infrastructure.Tests/DirectClientCompositionTests.cs).
-- [Native smoke observations](evidence/midterm/native-smoke.txt),
-  [report accessibility snapshot](evidence/midterm/reports-tree.txt), and
-  [report screenshot](evidence/midterm/reports.png) cover the separate freshly rebuilt desktop database.
-  The [inventory audit screenshot](evidence/midterm/inventory-audit.png) shows balance/history controls.
-  The [native refresh regression](evidence/midterm/inventory-refresh.txt) confirms an existing
+- [Native smoke observations](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/native-smoke.txt),
+  [report accessibility snapshot](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/reports-tree.txt), and
+  [report screenshot](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/reports.png) cover the separate freshly rebuilt desktop database.
+  The [inventory audit screenshot](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/inventory-audit.png) shows balance/history controls.
+  The [native refresh regression](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/inventory-refresh.txt) confirms an existing
   Ingredients page observes a stock change committed by a separate connection.
   Native checks verify startup, navigation, loaded controls/data, and report rendering.
   The full sequence of mutations is demonstrated by the scripted workspace run; this is
@@ -76,7 +76,7 @@ database for a new run so post-demo records and ledgers are not mistaken for bas
 
 ## Verification and resolved defects
 
-[Verification summary](evidence/midterm/verification.txt) records the full suite: **1,132 passed,
+[Verification summary](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/verification.txt) records the full suite: **1,132 passed,
 zero failed, zero skipped** (413 Domain, 422 Application, 257 Infrastructure, 39 WinUI workspace,
 1 API). Release solution build passed with zero warnings/errors. Repository format verification passed.
 CI now runs the entire Infrastructure suite with PostgreSQL configured and preserves its TRX artifact.

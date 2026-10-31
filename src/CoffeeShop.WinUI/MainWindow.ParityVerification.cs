@@ -88,7 +88,8 @@ public sealed partial class MainWindow
                     {
                         tag = item.Tag,
                         name = AutomationProperties.GetName(item),
-                        height = item.ActualHeight
+                        height = item.ActualHeight,
+                        contentInset = NavigationContentInset(item)
                     }).ToArray();
                     results.Add(new
                     {
@@ -110,6 +111,7 @@ public sealed partial class MainWindow
                         namesPass = targets.All(target => !string.IsNullOrWhiteSpace(target.name)),
                         layout = page switch
                         {
+                            PosPage counter => counter.VerificationLayout(),
                             CatalogPage menu => menu.VerificationLayout(),
                             CustomersPage customers => customers.VerificationLayout(),
                             ReportsPage reports => reports.VerificationLayout(),

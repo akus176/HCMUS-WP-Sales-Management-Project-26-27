@@ -2,14 +2,14 @@
 
 On 2026-10-29, the user reviewed the four native compositions from implementation commit `9e619622f30366f3f258716a9e004a602879e46d` beside the HTML reference at `0ec5463dcd850d00fbc0223a7e4528a09d12d879` and answered **“Approve these native compositions.”** This is the targeted concept/spec revision requested under the OpenSpec native-rendering conflict rule. It follows the earlier, separate capability approval.
 
-The approved comparison is [reference left, native right](../evidence/workspaces-117/concept-native-comparison.png). The individual native captures below are unchanged from `9e61962`:
+The approved comparison is [reference left, native right](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/workspaces-117/concept-native-comparison.png). The individual native captures below are unchanged from `9e61962`:
 
 | Composition | Approved native reference | HTML baseline |
 | --- | --- | --- |
-| Menu | [1440 × 900](../evidence/workspaces-117/native-menu-1440.png) | [menu.html](screens/menu.html) |
-| Customers | [1440 × 900](../evidence/workspaces-117/native-customers-1440.png) | [customers.html](screens/customers.html) |
-| Reports | [1440 × 900](../evidence/workspaces-117/native-reports-1440.png) | [reports.html](screens/reports.html) |
-| Drink editor | [1442 × 933 native window](../evidence/workspaces-117/native-menu-editor.png) | [editor capture](menu-picture-editor.png) |
+| Menu | [1440 × 900](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/workspaces-117/native-menu-1440.png) | [menu.html](screens/menu.html) |
+| Customers | [1440 × 900](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/workspaces-117/native-customers-1440.png) | [customers.html](screens/customers.html) |
+| Reports | [1440 × 900](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/workspaces-117/native-reports-1440.png) | [reports.html](screens/reports.html) |
+| Drink editor | [1442 × 933 native window](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/workspaces-117/native-menu-editor.png) | [editor capture](menu-picture-editor.png) |
 
 ## Approved differences
 
@@ -20,4 +20,4 @@ The approved comparison is [reference left, native right](../evidence/workspaces
 - The 760-DIP drink dialog places name/category in two columns, description across both columns, and Cancel/Save at opposite footer edges. Native field treatment and the shown header decoration are accepted; Cancel and Escape close it without requiring the HTML close affordance.
 - Real seeded people, products, dates, counts, empty ledger state, and report values are accepted for this review. The editor's native window framing and 1442 × 933 capture are explicitly accepted instead of requiring a matched 1440 × 900 editor image.
 
-This supplement governs only these approved differences and four compositions. The original HTML/assets remain the baseline for other details and other workspaces. It does not claim that the captures pixel-match the original HTML or permit future visual drift. Supported actions, accounting rules, meaningful accessibility names, visible keyboard focus, responsive state preservation, and 48-DIP primary actions remain required. Verification and limitations are recorded in the [evidence](../evidence/workspaces-117/README.md).
+This supplement governs only these approved differences and four compositions. The original HTML/assets remain the baseline for other details and other workspaces. It does not claim that the captures pixel-match the original HTML or permit future visual drift. Supported actions, accounting rules, meaningful accessibility names, visible keyboard focus, responsive state preservation, and 48-DIP primary actions remain required. Verification and limitations are recorded in the [evidence](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/workspaces-117/README.md).

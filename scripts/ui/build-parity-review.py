@@ -23,10 +23,10 @@ for name in names:
         raise SystemExit(f"Missing comparison input for {name}")
     import os
     concept_link = Path(os.path.relpath(concept, directory)).as_posix()
-    approved = root / "docs/evidence/workspaces-117" / native.name
-    approved_link = Path(os.path.relpath(approved, directory)).as_posix() if name in {"menu", "customers", "reports", "menu-editor"} else ""
+    approved = root / "docs/ui-evidences" / native.name
+    approved_link = Path(os.path.relpath(approved, directory)).as_posix() if approved.is_file() else ""
     references.append({"workspace": name, "concept": concept.relative_to(root).as_posix(), "conceptSha256": hashlib.sha256(concept.read_bytes()).hexdigest(), "nativeSha256": hashlib.sha256(native.read_bytes()).hexdigest()})
-    option = f'<option value="{html.escape(approved_link)}">Approved #117 native revision</option>' if approved_link else ""
+    option = f'<option value="{html.escape(approved_link)}">Current UI reference</option>' if approved_link else ""
     cards.append(f'''<section id="{name}"><h2>{name.replace('-', ' ').title()}</h2>
 <p><a href="{concept_link}">Concept PNG</a> · <a href="{native.name}">Current native capture</a></p>
 <label>Reference <select><option value="{concept_link}">HTML concept capture</option>{option}</select></label>
@@ -43,8 +43,8 @@ section{margin:32px 0;padding:16px;border:1px solid #c6bdb0;scroll-margin-top:70
 .images{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}figure{margin:0}img{width:100%;height:auto;display:block}figcaption{margin-bottom:8px}
 .overlay{position:relative;display:block}.overlay figure:first-child{width:100%}.overlay figure+figure{position:absolute;inset:0}.overlay figure+figure img{opacity:0.5}.overlay figure+figure figcaption{visibility:hidden}
 </style><h1>Six-workspace parity review — #119</h1>
-<p>Final captures for the targeted #119 revision. Real seeded values, the required operator selector, the existing payment boundary, and native editor framing are the recorded exceptions. Compare the original concepts and, where available, the specifically approved #117 native captures. Overlays do not normalize differing editor frames.</p>
-<p><a href="README.md">Verification matrix and unresolved differences</a> · <a href="manifest.json">Capture provenance</a> · <a href="parity-verification.json">Native checks and fixture state</a></p>
+<p>Captures from the selected verification run. Real seeded values, the required operator selector, the existing payment boundary, and native editor framing are the recorded exceptions. Compare the original concepts and, where available, the current screenshots in docs/ui-evidences. Follow the latest user-approved polish instructions when references differ. Overlays do not normalize differing editor frames.</p>
+<p><a href="manifest.json">Capture provenance</a> · <a href="parity-verification.json">Native checks and fixture state</a></p>
 <nav>''' + "".join(f'<a href="#{name}">{name.replace("-", " ")}</a>' for name in names) + "</nav>" + "\n".join(cards) + '''
 <script>document.querySelectorAll('section').forEach(section=>{
 const selects=section.querySelectorAll('select'), images=section.querySelector('.images'), native=section.querySelector('.native');
@@ -55,4 +55,4 @@ section.querySelector('input').oninput=event=>{if(images.classList.contains('ove
 (directory / "comparison.html").write_text(page, encoding="utf-8")
 manifest["comparisonInputs"] = references
 manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-print(f"Wrote {directory / 'comparison.html'}; targeted #119 visual review recorded.")
+print(f"Wrote {directory / 'comparison.html'}; review against current UI references.")

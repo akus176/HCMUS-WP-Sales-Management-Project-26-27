@@ -72,8 +72,8 @@ checks page preservation. The Counter flag adds `native-counter.png`,
 `native-counter-compact.png`, and a `native-counter-customization.png` capture of
 the complete dialog frame in the same local directory. It also captures a
 populated ticket and workspace using an unsaved local cart, then clears that cart.
-Checked-in captures are in `docs/ui-evidence/`, including `counter-populated.png`
-and `counter-ticket.png` for the refactored panel.
+Current screenshots are in [ui-evidences](ui-evidences), including
+`native-counter-1440.png` and `native-counter-ticket.png` for the refactored panel.
 
 The combined Counter and Service Board refactor was verified on 2026-10-29:
 104 workspace tests and 18 PostgreSQL integration tests passed. The database tests create and remove
@@ -84,4 +84,4 @@ and required-operator feedback. Saved-order review is covered by the database
 tests; the checked-in native report skips it when no eligible saved order exists.
 Additional native service-form checks cover exclusive selection, selected-state
 styling, mode-specific fields, and delivery input retention. Per-mode captures
-are `counter-dine-in.png`, `counter-takeaway.png`, and `counter-delivery.png`.
+are `native-counter-dine_in.png`, `native-counter-takeaway.png`, and `native-counter-delivery.png`.

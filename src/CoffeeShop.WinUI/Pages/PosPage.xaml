@@ -74,28 +74,27 @@
             <Setter Property="CharacterSpacing" Value="70" />
         </Style>
         <DataTemplate x:Key="MenuCardTemplate">
-            <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" Background="Transparent">
+            <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" Background="{StaticResource ConsoleRaisedGroundBrush}">
                 <Grid RowSpacing="0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="28" />
                     </Grid.RowDefinitions>
-                    <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1">
+                    <Border Margin="5" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1">
                         <Border.Background>
                             <ImageBrush ImageSource="{Binding Photo}" Stretch="UniformToFill" AlignmentX="Center" AlignmentY="Center" />
                         </Border.Background>
                     </Border>
-                    <StackPanel Grid.Row="1" Padding="0,3,0,2" Spacing="0">
+                    <StackPanel Grid.Row="1" Padding="9,5,9,5" Spacing="0">
                         <TextBlock Text="{Binding Name}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="18" LineHeight="20" LineStackingStrategy="BlockLineHeight" TextWrapping="NoWrap" MaxLines="1" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
-                        <TextBlock Text="{Binding Category}" Style="{StaticResource ConsoleLabelStyle}" FontSize="8" />
                     </StackPanel>
-                    <Grid Grid.Row="2" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Padding="0" VerticalAlignment="Stretch">
+                    <Grid Grid.Row="2" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Padding="9,0" VerticalAlignment="Stretch">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding Price}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="16" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Price}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="19" VerticalAlignment="Center" />
                         <FontIcon Grid.Column="1" Foreground="{StaticResource ConsoleAccentTextBrush}" FontSize="13" VerticalAlignment="Center" Glyph="" AutomationProperties.AccessibilityView="Raw" />
                     </Grid>
                 </Grid>
@@ -196,7 +195,7 @@
         </Style>
     </Page.Resources>
     <ScrollViewer HorizontalScrollBarVisibility="Disabled" x:Name="PageScroll" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-        <Grid Padding="32,24,32,16" x:Name="PageLayout" RowSpacing="12">
+        <Grid Padding="24,12,24,16" x:Name="PageLayout" RowSpacing="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -212,9 +211,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <StackPanel Spacing="3">
-                    <TextBlock Text="SERVICE  /  COUNTER" Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleAccentTextBrush}" />
-                    <TextBlock Text="Counter" Style="{StaticResource ConsolePageTitleStyle}" AutomationProperties.HeadingLevel="Level1" />
-                    <TextBlock Text="Build and review a ticket before confirming it for service." Style="{StaticResource ConsoleBodyStyle}" />
+                    <TextBlock Text="Counter" Style="{StaticResource ConsolePageTitleStyle}" FontSize="36" LineHeight="42" AutomationProperties.HeadingLevel="Level1" />
                 </StackPanel>
                 <Button Grid.Column="1" x:Name="NewButton" Click="OnNewTicket" Style="{StaticResource CounterPrimary}" VerticalAlignment="Center" AutomationProperties.Name="Start a new ticket">
                     <StackPanel Orientation="Horizontal" Spacing="10">
@@ -231,7 +228,7 @@
             <Grid x:Name="Layout" ColumnSpacing="24" RowSpacing="18" Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="MenuColumn" Width="*" />
-                    <ColumnDefinition x:Name="TicketColumn" Width="352" />
+                    <ColumnDefinition x:Name="TicketColumn" Width="350" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" x:Name="MenuRow" />
@@ -241,29 +238,28 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition x:Name="MenuItemsRow" Height="*" />
                     </Grid.RowDefinitions>
-                    <Grid x:Name="MenuFilters" ColumnSpacing="16">
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition x:Name="FilterSearchColumn" Width="190" /></Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition x:Name="FilterCategoryRow" Height="0" /></Grid.RowDefinitions>
-                        <Border x:Name="SearchHost" Grid.Column="1" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" Background="Transparent">
+                    <StackPanel Spacing="8">
+                        <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" Background="Transparent">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="0" />
+                                    <ColumnDefinition Width="36" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <FontIcon Glyph="" FontSize="14" Foreground="{StaticResource ConsoleMutedInkBrush}" AutomationProperties.AccessibilityView="Raw" />
-                                <TextBox x:Name="SearchBox" Grid.Column="1" PlaceholderText="Find a drink" AutomationProperties.Name="Search the menu" MaxLength="120" Style="{StaticResource ConsoleFieldStyle}" KeyDown="OnSearchKeyDown" MinHeight="48" FontSize="11" BorderThickness="0" Background="Transparent" Padding="0,6,8,6" VerticalContentAlignment="Center">
+                                <TextBox x:Name="SearchBox" Grid.Column="1" PlaceholderText="Search the menu" AutomationProperties.Name="Search the menu" MaxLength="120" Style="{StaticResource ConsoleFieldStyle}" KeyDown="OnSearchKeyDown" MinHeight="34" FontSize="13" BorderThickness="0" Background="Transparent" Padding="0,6,8,6" VerticalContentAlignment="Center">
                                     <TextBox.Resources>
                                         <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
                                         <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
                                     </TextBox.Resources>
                                 </TextBox>
-                                <Button x:Name="SearchButton" Grid.Column="2" Content="GO" Click="OnSearch" Style="{StaticResource CounterButton}" MinWidth="48" MinHeight="48" FontSize="10" BorderBrush="Transparent" VerticalAlignment="Stretch" Padding="0" AutomationProperties.Name="Search menu" />
+                                <Button x:Name="SearchButton" Grid.Column="2" Content="SEARCH" Click="OnSearch" Style="{StaticResource CounterButton}" MinHeight="34" FontSize="10" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1,0,0,0" VerticalAlignment="Stretch" Padding="14,0" />
                             </Grid>
                         </Border>
-                        <ScrollViewer x:Name="CategoryScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" VerticalAlignment="Center">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" VerticalAlignment="Center">
                             <ItemsControl x:Name="CategoryList">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -277,20 +273,22 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </ScrollViewer>
-                    </Grid>
+                    </StackPanel>
                     <Grid ColumnSpacing="12" Grid.Row="1">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="MenuHeading" Text="All items" Style="{StaticResource ConsoleSectionTitleStyle}" AutomationProperties.HeadingLevel="Level2" />
-                        <TextBlock x:Name="MenuCount" Grid.Column="1" Style="{StaticResource CounterLabel}" VerticalAlignment="Center" />
+                        <StackPanel>
+                            <TextBlock x:Name="MenuHeading" Text="All items" Style="{StaticResource ConsoleSectionTitleStyle}" AutomationProperties.HeadingLevel="Level2" />
+                            <TextBlock x:Name="MenuCount" Style="{StaticResource CounterLabel}" VerticalAlignment="Center" />
+                        </StackPanel>
                         <Button x:Name="ReloadButton" Grid.Column="2" Click="OnReload" Style="{StaticResource ConsoleIconButtonStyle}" AutomationProperties.Name="Refresh menu and ticket" ToolTipService.ToolTip="Refresh menu and ticket">
                             <FontIcon Glyph="" FontSize="16" />
                         </Button>
                     </Grid>
-                    <Grid Grid.Row="2">
+                    <Grid Grid.Row="3">
                         <StackPanel x:Name="EmptyPanel" Visibility="Collapsed" Padding="24,32" Spacing="12" Background="{StaticResource ConsoleRaisedGroundBrush}" VerticalAlignment="Top">
                             <TextBlock Text="No items found" Style="{StaticResource ConsoleSectionTitleStyle}" />
                             <TextBlock x:Name="EmptyText" Text="Try another search or category to find something on the menu." TextWrapping="Wrap" Style="{StaticResource CounterBody}" />

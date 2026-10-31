@@ -68,7 +68,7 @@ drag eligibility, action state for each note, payment disclosure, form clearing,
 and contextual delivery controls. Resize checks also record column count,
 available note width, and content/inspector bounds at each shell breakpoint.
 Screenshots include wide, compact, payment, and delivery views; reviewed copies
-are under `docs/ui-evidence/`.
+are under [ui-evidences](ui-evidences).
 
 The `ui-ux-pro-max` WinUI layout search supports adapting the layout to available
 space. Its disclosure query returned no relevant match; the separate form

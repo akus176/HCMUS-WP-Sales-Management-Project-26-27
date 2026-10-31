@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$OutputDirectory = 'docs/evidence/ui-parity-119',
+    [string]$OutputDirectory = 'artifacts/ui-parity-review',
     [int]$TimeoutSeconds = 180
 )
 
@@ -39,7 +39,7 @@ try {
             implementationCommit = (git rev-parse HEAD)
             dirtyWorktree = [bool](git status --porcelain)
             conceptCommit = (git log -1 --format=%H -- docs/ui-concepts)
-            approvedNativeCommit = '9e619622f30366f3f258716a9e004a602879e46d'
+            referenceDirectory = 'docs/ui-evidences'
             seedFile = 'scripts/postgres/midterm-seed.sql'
             seedSha256 = (Get-FileHash scripts/postgres/midterm-seed.sql -Algorithm SHA256).Hash
             supplementFile = 'scripts/postgres/ui-parity-seed.sql'
@@ -50,7 +50,7 @@ try {
             } | ForEach-Object {
                 [ordered]@{ path = $_; sha256 = (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash }
             })
-            visualAcceptance = 'targeted #119 revision accepted; final capture reviewed against concepts and approved native revisions'
+            visualAcceptance = 'Pending visual review against docs/ui-evidences and current user instructions'
         }
         $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $OutputDirectory 'manifest.json') -Encoding utf8
     }
@@ -66,15 +66,19 @@ try {
             $_.Value -is [bool] -and $_.Name -ne 'skipped' -and -not $_.Value
         }).Count -gt 0
     })
+    $polishFailures = @($report.results | Where-Object {
+        ($_.tag -eq 'counter' -and $_.layout.menuItems -gt 0 -and -not $_.layout.threeRowsFit) -or
+        @($_.navigation | Where-Object { $null -ne $_.contentInset -and $_.contentInset -lt 11 }).Count -gt 0
+    })
     foreach ($board in @($report.smoke | Where-Object tag -eq 'service-board')) {
         if (-not $board.checks.forms.paymentOpens -or -not $board.checks.forms.formsReset -or -not $board.checks.forms.deliveryIsContextual -or
             @($board.checks.measurements | Where-Object { $_.notes -lt 1 -or -not $_.matchesPaper }).Count -gt 0) {
             $smokeFailures += $board
         }
     }
-    if (-not $report.defaultIsCounter -or -not $report.connected -or $report.destinations.Count -ne 6 -or $report.results.Count -ne 42 -or $report.smoke.Count -ne 12 -or $failures.Count -gt 0 -or $smokeFailures.Count -gt 0 -or -not $report.editor.compactPreserved -or -not $report.editor.expandedPreserved -or -not $report.editor.savedRecordUnchanged) {
-        throw "Native checks failed in $($failures.Count) layout rows and $($smokeFailures.Count) smoke rows. Inspect $reportPath; screenshots are candidates, not accepted parity evidence."
+    if (-not $report.defaultIsCounter -or -not $report.connected -or $report.destinations.Count -ne 6 -or $report.results.Count -ne 42 -or $report.smoke.Count -ne 12 -or $failures.Count -gt 0 -or $smokeFailures.Count -gt 0 -or $polishFailures.Count -gt 0 -or -not $report.editor.compactPreserved -or -not $report.editor.expandedPreserved -or -not $report.editor.savedRecordUnchanged) {
+        throw "Native checks failed in $($failures.Count) layout rows, $($smokeFailures.Count) smoke rows, and $($polishFailures.Count) polish rows. Inspect $reportPath; screenshots are candidates, not accepted parity evidence."
     }
-    Write-Output "All six workspaces captured at seven breakpoint widths. Native checks and targeted visual review pass: $OutputDirectory"
+    Write-Output "All six workspaces captured at seven breakpoint widths. Native checks passed; review screenshots against docs/ui-evidences: $OutputDirectory"
 }
 finally { $env:COFFEESHOP_UI_EVIDENCE = $previousDirectory }

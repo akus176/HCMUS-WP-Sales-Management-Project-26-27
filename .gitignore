@@ -11,3 +11,6 @@ artifacts/ui119-final-capture/
 .env.*
 !.env.example
 **/appsettings.Local.json
+
+artifacts/ui-current-capture/
+artifacts/ui-parity-review/

@@ -252,15 +252,15 @@ All test cases and results in this report are verifiable using the following com
 
 - **Automated Verification Script:** [`scripts/verify-midterm.ps1`](../scripts/verify-midterm.ps1)
 - **Automated Test Log (TRX):** `artifacts/midterm/midterm.trx`
-- **Scripted Demonstration Trace:** [`docs/evidence/midterm/scripted-run.txt`](evidence/midterm/scripted-run.txt)
-- **Full Test Suite Summary:** [`docs/evidence/midterm/verification.txt`](evidence/midterm/verification.txt)
+- **Scripted Demonstration Trace:** [`docs/evidence/midterm/scripted-run.txt`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/scripted-run.txt)
+- **Full Test Suite Summary:** [`docs/evidence/midterm/verification.txt`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/verification.txt)
 - **Native UI Reports Evidence:**
-  - Visual rendering: [`docs/evidence/midterm/reports.png`](evidence/midterm/reports.png)
-  - Accessibility tree snapshot: [`docs/evidence/midterm/reports-tree.txt`](evidence/midterm/reports-tree.txt)
+  - Visual rendering: [`docs/evidence/midterm/reports.png`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/reports.png)
+  - Accessibility tree snapshot: [`docs/evidence/midterm/reports-tree.txt`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/reports-tree.txt)
 - **Native Inventory Audit Evidence:**
-  - Balance & ledger view: [`docs/evidence/midterm/inventory-audit.png`](evidence/midterm/inventory-audit.png)
-  - Multi-connection refresh trace: [`docs/evidence/midterm/inventory-refresh.txt`](evidence/midterm/inventory-refresh.txt)
-- **Native Smoke Trace:** [`docs/evidence/midterm/native-smoke.txt`](evidence/midterm/native-smoke.txt)
+  - Balance & ledger view: [`docs/evidence/midterm/inventory-audit.png`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/inventory-audit.png)
+  - Multi-connection refresh trace: [`docs/evidence/midterm/inventory-refresh.txt`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/inventory-refresh.txt)
+- **Native Smoke Trace:** [`docs/evidence/midterm/native-smoke.txt`](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/midterm/native-smoke.txt)
 - **Demonstration Checklist:** [`docs/midterm-demonstration.md`](midterm-demonstration.md)
 
 

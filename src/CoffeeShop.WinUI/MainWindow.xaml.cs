@@ -66,8 +66,8 @@ public sealed partial class MainWindow : Window
     }
     private static StackPanel NavigationContent(ServiceConsoleDestination destination)
     {
-        // Align the numeral with the artboard rail while retaining the 48-DIP item.
-        var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Margin = new Thickness(-8, 0, 0, 0) };
+        // Keep the approved inset inside the selected navigation surface.
+        var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Margin = new Thickness(4, 0, 4, 0) };
         content.Children.Add(new TextBlock { Text = destination.Numeral, Width = 17, FontSize = 13, FontFamily = (Microsoft.UI.Xaml.Media.FontFamily)Resource("ConsoleSerifFont") });
         var image = new Image { Width = 13, Height = 13, Source = new SvgImageSource(new Uri($"ms-appx:///Assets/Icons/{IconName(destination.Tag)}.svg")) };
         AutomationProperties.SetAccessibilityView(image, Microsoft.UI.Xaml.Automation.Peers.AccessibilityView.Raw);
