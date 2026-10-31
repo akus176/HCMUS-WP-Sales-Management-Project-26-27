@@ -17,4 +17,6 @@ submission/
 **/appsettings.Local.json
 
 artifacts/ui-current-capture/
+artifacts/ui-current-capture-*/
 artifacts/ui-parity-review/
+artifacts/midterm-local/

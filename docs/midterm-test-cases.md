@@ -23,10 +23,10 @@ Every test case records its **Test ID, feature, category (Valid / Invalid / Boun
 
 | Metric | Target | Actual | Evaluation |
 | :--- | :--- | :--- | :--- |
-| **Total Test Suite** | > 1,000 automated tests | **1,202 tests** | Complete |
+| **Total Test Suite** | > 1,000 automated tests | **1,202 combined tests** | Complete |
 | **Domain Tests** | Core business invariants | **413 passed**, 0 failed, 0 skipped | 100% pass |
 | **Application Tests** | Use cases, handlers, orchestration | **422 passed**, 0 failed, 0 skipped | 100% pass |
-| **Infrastructure Tests** | EF Core, PostgreSQL persistence, migrations | **258 passed**, 0 failed, 0 skipped | 100% pass |
+| **Infrastructure Tests** | EF Core, PostgreSQL persistence, migrations | **258 passed**, 0 failed, 0 skipped in the PostgreSQL job | 100% pass |
 | **WinUI Workspace Tests** | Native view-models, state machines | **108 passed**, 0 failed, 0 skipped | 100% pass |
 | **API Smoke Tests** | Composition root & health check | **1 passed**, 0 failed, 0 skipped | 100% pass |
 | **Build Warnings & Errors** | 0 warnings, 0 errors | **0 warnings, 0 errors** (`dotnet build -c Release`) | Clean |
@@ -144,7 +144,7 @@ Covers ingredients, unit definitions, suppliers, purchase receipts, stock adjust
 | `TC-INV-12` | Low stock threshold detection | Boundary | Ingredient threshold: `50.00g`; Current balance: `50.00g` | Query low-stock ingredients | Ingredient returned in low-stock list (`balance <= threshold`) | Listed with status Low Stock | **PASS** | `LowStockQueryTests.cs`, DEMO-08 |
 | `TC-INV-13` | Normal stock excluded from low stock | Valid | Ingredient threshold: `50.00g`; Current balance: `51.00g` | Query low-stock ingredients | Ingredient excluded from low-stock list (`balance > threshold`) | Excluded from alert list | **PASS** | `LowStockReportTests.cs` |
 | `TC-INV-14` | Zero stock condition | Boundary | Ingredient balance: `0.00g`, Threshold: `10.00g` | Query low-stock ingredients | Ingredient flagged as critical out-of-stock | Displayed with zero balance warning | **PASS** | `LowStockReportIntegrationTests.cs` |
-| `TC-INV-15` | External update isolation | Valid | Inventory screen loaded; order confirmed in background | Refresh inventory page | Fresh service scope queries DB; updated stock balance reflected immediately | Updated balance observed without app restart | **PASS** | `OperationsWorkspaceTests.cs`, `inventory-refresh.txt` |
+| `TC-INV-15` | External update isolation | Valid | Inventory screen loaded; order confirmed in background | Refresh inventory page | Fresh service scope queries DB; updated stock balance reflected immediately | Updated balance observed without app restart | **PASS** | `OperationsWorkspaceTests.cs`, [resolved defect evidence](midterm-demonstration.md#verification-and-resolved-defects) |
 
 ---
 
@@ -242,7 +242,7 @@ The table below records defects identified during integration testing and the en
 3. **Simulated Payment Gateways:** Card and E-Wallet payments are captured synchronously as approved tenders rather than calling live external banking webhooks.
 
 ### 13.2 Critical blockers
-- **None.** All 1,202 tests pass, all 13 midterm demonstration checklist steps succeed, and zero build warnings or format violations exist.
+- **None in the combined verification.** The five-project verification records 1,202 passed, zero failed, and zero skipped. The previous Windows CI job skipped 89 PostgreSQL-dependent tests; this PR changes it to select only the non-PostgreSQL projects, while the dedicated PostgreSQL CI job runs the 258 Infrastructure tests. All 13 midterm demonstration checklist steps succeed, and zero build warnings or format violations exist. The new remote counts must be confirmed by the PR workflow.
 
 ---
 

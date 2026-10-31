@@ -11,11 +11,11 @@ Record one continuous demo against a fresh migrated and seeded database.
 7. Show customer loyalty earning, redemption, and cancellation restoration.
 8. Show revenue, best-seller, order-channel, and low-stock reports.
 9. Show one invalid action and the visible validation or workflow error.
-10. Show the final test summary: 1,202 passed, zero failed, zero skipped.
+10. Show the final combined test summary: 1,202 passed, zero failed, zero skipped. Explain that the dedicated PostgreSQL CI job runs the Infrastructure tests; the new Windows job selects only the non-PostgreSQL projects.
 
 Before recording:
 
-- Re-run the native smoke capture after the current seed naming cleanup.
+- Use the current seeded evidence in docs/ui-evidences as the visual reference. If the database is rebuilt before recording, repeat the same migration and seed procedure.
 - Confirm no administrator connection string is visible in the recording.
 - Use only a demo account and demo data.
 - Keep the final video link unlisted and place it in youtube.txt.
