@@ -156,7 +156,7 @@ shows the current ownership areas and GitHub accounts.
 | Student ID | Member | GitHub | Recent midterm scope |
 | --- | --- | --- | --- |
 | 23120124 | Nguyễn Minh Hiếu | [JakeConal](https://github.com/JakeConal) | Service-console shell, shared UI, and workspace polish |
-| 23120111 | Nguyễn Nam Anh | [kyrie25](https://github.com/kyrie25) | Menu, Customers, and Reports UI |
+| 23120111 | Phạm Quốc Nam Anh | [kyrie25](https://github.com/kyrie25) | Menu, Customers, and Reports UI |
 | 23120143 | Tô Thành Long | [longtoZ](https://github.com/longtoZ) | Stock room UI and test-case report |
 | 23120097 | Võ Tất Toàn | [vt-Toan](https://github.com/vt-Toan) | Midterm demonstration and final UI verification |
 | 23120135 | Trần Anh Khoa | [akus176](https://github.com/akus176) | Repository coordination, Counter, and Service board |
