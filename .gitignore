@@ -10,6 +10,7 @@ artifacts/ui119-final-capture/
 artifacts/ui-verification/
 # The Moodle access token belongs only in the submission archive, never in Git.
 pat.txt
+**/pat.txt
 submission/
 .env
 .env.*
