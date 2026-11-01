@@ -18,8 +18,30 @@ jobs:
         run: dotnet build CoffeeShop.slnx --no-restore --configuration Release
       - name: Format
         run: dotnet format CoffeeShop.slnx --verify-no-changes --no-restore
-      - name: Test
-        run: dotnet test CoffeeShop.slnx --no-build --configuration Release
+      - name: Test non-PostgreSQL suites
+        shell: pwsh
+        run: |
+          $projects = @(
+            'tests/CoffeeShop.Domain.Tests/CoffeeShop.Domain.Tests.csproj',
+            'tests/CoffeeShop.Application.Tests/CoffeeShop.Application.Tests.csproj',
+            'tests/CoffeeShop.WinUI.Tests/CoffeeShop.WinUI.Tests.csproj',
+            'tests/CoffeeShop.Api.Tests/CoffeeShop.Api.Tests.csproj'
+          )
+          foreach ($project in $projects) {
+            dotnet test $project --no-build --configuration Release
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Summarize CI test split
+        if: always()
+        shell: pwsh
+        run: |
+          @"
+          ## Test execution split
+
+          - Windows job: Domain, Application, WinUI, and API suites. No PostgreSQL-dependent tests are selected here.
+          - PostgreSQL job: Infrastructure and complete midterm demonstration suites against the PostgreSQL service.
+          - Do not interpret a single job as the complete test total. Use both job summaries and their TRX artifacts.
+          "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
 
   catalog-postgres:
     runs-on: ubuntu-latest
@@ -52,3 +74,13 @@ jobs:
         with:
           name: postgres-test-results
           path: TestResults/*.trx
+      - name: Summarize PostgreSQL coverage
+        if: always()
+        shell: bash
+        run: |
+          cat <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          ## PostgreSQL coverage
+
+          This job runs the Infrastructure suite with `COFFEESHOP_TEST_POSTGRES` configured.
+          The Windows job intentionally does not select this suite, so PostgreSQL integration tests are not reported as skipped there.
+          EOF

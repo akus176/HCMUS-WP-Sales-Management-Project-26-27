@@ -20,8 +20,8 @@ blockers remain for this demonstrated path. Milestone acceptance still requires 
   [seed validation](../tests/CoffeeShop.Infrastructure.Tests/MidtermSeedDataIntegrationTests.cs), and
   [client registration check](../tests/CoffeeShop.Infrastructure.Tests/DirectClientCompositionTests.cs).
 - The [current UI evidence index](ui-evidences/README.md) contains the six workspace captures and
-  form captures from the UI parity verification. Re-run the native smoke capture against the
-  current seed before recording the submission video so visible names match the seed exactly.
+  form captures from the UI parity verification. The captures were regenerated on 2026-11-01
+  from a clean database using the current midterm seed and the documented parity supplement.
   Native checks verify startup, navigation, loaded controls/data, and report rendering.
   The full sequence of mutations is demonstrated by the scripted workspace run; this is
   not a claim that every transaction was repeated through pointer/keyboard automation.
@@ -44,7 +44,7 @@ Evidence IDs below refer to the `PASS DEMO-*` lines in the scripted run output.
 | 10. Cancellation restoration | On another dine-in ticket redeem 10 points; confirm; cancel with reason; repeat cancellation. | Redemption reduced total 40.00 → 30.00; confirmation consumed 10g. Cancellation restored exactly 10g, released table, restored points to 85, and retained four loyalty entries. Retry had no duplicate effects; one restoration guard and one consumption/restoration pair. | PASS — DEMO-07 |
 | 11. Reports and final stock | Query revenue, best sellers, channels, and low stock after three completed and one cancelled tickets. | Revenue increased exactly 130.00; channel revenues reconciled; new drink quantity 3; cancelled sale excluded; low-stock rows present; stock 65g. Audit workspace displayed nine immutable movements including cancellation restoration. | PASS — DEMO-08 |
 | 12. Completion rollback | Remove loyalty configuration as owner after a paid pastry order reaches ready; attempt completion; restore rules; retry. | Missing settings returned a failure; order stayed ready, table stayed occupied, and no completion history or earning entry persisted. Restoring rules allowed completion/table release and exactly one earning entry. Pastry confirmation used the supported `pcs` recipe unit. | PASS — DEMO-09 |
-| 13. Native client | Launch against a separately rebuilt/seeded database using the restricted login; open every module. | Startup connected; POS, operations, catalog, customers, ingredients, suppliers, receipts, low stock, and audit pages loaded. October reports showed 2,260.10 across 19 recognized orders, channels 741.60 / 1,059.50 / 459.00, and current low stock. | PASS — native smoke captured 2026-10-26; recapture required after current seed naming cleanup |
+| 13. Native client | Launch against a separately rebuilt/seeded database using the restricted login; open every module. | Startup connected; POS, operations, catalog, customers, ingredients, suppliers, receipts, low stock, and audit pages loaded. The current parity capture shows 20 menu items, 9 ingredients, current low-stock rows, and all six workspaces. | PASS — native parity capture 2026-11-01; [capture manifest](ui-evidences/current-capture-manifest-2026-11-01.json) |
 
 ## Reproduce
 
@@ -72,11 +72,14 @@ database for a new run so post-demo records and ledgers are not mistaken for bas
 
 ## Verification and resolved defects
 
-[Verification summary](evidence/midterm/verification.txt) records the full suite: **1,202 passed,
+[Verification summary](evidence/midterm/verification.txt) records the combined suite: **1,202 passed,
 zero failed, zero skipped** (413 Domain, 422 Application, 258 Infrastructure, 108 WinUI workspace,
 1 API). The verification script runs all five test projects. Release solution build passed with zero
-warnings/errors. Repository format verification passed.
-CI now runs the entire Infrastructure suite with PostgreSQL configured and preserves its TRX artifact.
+warnings/errors. Repository format verification passed. The previous GitHub Actions run reported
+121 non-PostgreSQL tests passed and 89 PostgreSQL-dependent tests skipped because the Windows job
+ran the whole solution without a PostgreSQL service. This PR changes the Windows job to select the
+four non-PostgreSQL projects explicitly; the separate PostgreSQL job remains responsible for the
+258 Infrastructure tests. Do not claim the new CI counts until the PR workflow completes.
 
 The demonstration uncovered and fixed the inventory repository registration, concurrent report
 queries on one context, missing eligible courier seed, unsupported pastry units, missing completion

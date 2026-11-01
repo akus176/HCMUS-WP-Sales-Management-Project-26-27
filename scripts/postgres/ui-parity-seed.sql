@@ -5,7 +5,7 @@ BEGIN;
 
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM catalog.menu_items WHERE name LIKE 'Midterm %') THEN
+    IF NOT EXISTS (SELECT 1 FROM catalog.menu_items WHERE id = md5('coffeeshop-midterm-v1:product-1')::uuid) THEN
         RAISE EXCEPTION 'Run midterm-seed.sql before ui-parity-seed.sql';
     END IF;
 END $$;

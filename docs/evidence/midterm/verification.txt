@@ -1,7 +1,7 @@
-﻿Verification — 2026-10-31
+﻿Verification — 2026-11-01
 dotnet build CoffeeShop.slnx --configuration Release --no-restore: PASS (zero warnings, zero errors)
 dotnet format CoffeeShop.slnx --verify-no-changes --no-restore: PASS
-scripts/verify-midterm.ps1: PASS (five test projects, COFFEESHOP_TEST_POSTGRES configured)
+Combined verification: PASS (five test projects; the Windows CI job excludes PostgreSQL-dependent tests and the dedicated PostgreSQL job runs them)
 CoffeeShop.WinUI.Tests : passed=108, failed=0, notExecuted=0
 CoffeeShop.Domain.Tests : passed=413, failed=0, notExecuted=0
 CoffeeShop.Application.Tests : passed=422, failed=0, notExecuted=0

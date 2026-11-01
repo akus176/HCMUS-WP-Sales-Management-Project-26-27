@@ -35,7 +35,7 @@ The verification modes write measured target sizes, resolved-resource counts, co
 
 ## Verified results
 
-- The original 39 WinUI tests passed before visual replacement; the expanded 58-test suite passes, including legacy routing and inventory failure/selection characterization.
+- Historical baseline: 39 WinUI tests passed before visual replacement, and the earlier expanded suite reported 58 tests. The current WinUI suite contains 108 passing tests, including legacy routing and inventory failure/selection characterization.
 - Native build succeeds without warnings or errors, and all merged resources resolve during the component smoke run.
 - All eight representative primary gallery controls measure at least 48 × 48 DIPs. Keyboard focus is visible and the primary action updates its feedback; the icon-only add action exposes `Add item`.
 - The actual connected shell opens Counter by default. All eleven existing routes remain available through the six primary destinations; inventory aliases now share the Stock room host and enter the corresponding tab, filter or editor.
@@ -47,4 +47,4 @@ Historical foundation captures and measurements are [archived in Git history](ht
 
 ## Menu, Customers, and Reports verification
 
-Launch with `--verify-shell --verify-workspaces` to load real seeded data in Menu, Customers, and Reports, exercise an empty Menu search, resize each page through the shell breakpoint boundaries, compare presentation state, and capture expanded/compact native images. See [#117 evidence](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/blob/3a43986b29dd2462868f9fadc11c11bd8125514b/docs/evidence/workspaces-117/README.md) for the exact reference revision, automated results, native captures, and outstanding visual acceptance work. This mode does not submit business commands. Successful resize checks alone do not satisfy the concept fidelity gate.
+Launch with `--verify-shell --verify-workspaces` to load real seeded data in Menu, Customers, and Reports, exercise an empty Menu search, resize each page through the shell breakpoint boundaries, compare presentation state, and capture expanded/compact native images. See the [#117 evidence archive](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/tree/d877088/docs/evidence/workspaces-117) and the [current UI evidence index](ui-evidences/README.md) for the reference revision, automated results, native captures, and visual acceptance status. This mode does not submit business commands. Successful resize checks alone do not satisfy the concept fidelity gate.

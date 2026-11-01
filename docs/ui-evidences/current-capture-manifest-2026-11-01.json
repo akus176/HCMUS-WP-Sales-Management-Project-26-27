@@ -1,0 +1,19 @@
+{
+  "capturedAtUtc": "2026-10-31T17:22:03.4495867Z",
+  "implementationCommit": "f64939b6cebe80ef4533357e2eade46736455ce1",
+  "dirtyWorktree": true,
+  "conceptCommit": "f64939b6cebe80ef4533357e2eade46736455ce1",
+  "referenceDirectory": "docs/ui-evidences",
+  "seedFile": "scripts/postgres/midterm-seed.sql",
+  "seedSha256": "2C9D2B7FD4F25FE14151BA3A40F888469E9A6491A0284505E4861C7985F1A166",
+  "supplementFile": "scripts/postgres/ui-parity-seed.sql",
+  "supplementSha256": "771D2898874B00252C8840E21AE8BBACE97A9D31ADB0BF9C6B38B73C257032D5",
+  "executableSha256": "BA00079ECBCEDBCD09DE3E86C858208BFCF051763ADC2983F9909276A268A8AA",
+  "changedSources": [
+    {
+      "path": "scripts/postgres/ui-parity-seed.sql",
+      "sha256": "771D2898874B00252C8840E21AE8BBACE97A9D31ADB0BF9C6B38B73C257032D5"
+    }
+  ],
+  "visualAcceptance": "Pending visual review against docs/ui-evidences and current user instructions"
+}
