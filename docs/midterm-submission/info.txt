@@ -1,22 +1,81 @@
-Coffee Shop Management System — midterm feature summary
+Coffee Shop Management System
+Midterm feature summary
 
-Completed for the midterm:
-- WinUI desktop client with a direct PostgreSQL connection and six workspaces: Counter, Service board, Menu, Stock room, Customers, and Reports.
-- Catalog and category management; drink sizes, add-ons, and recipes.
-- Customer profiles, delivery addresses, and loyalty history.
-- Dine-in, takeaway, and delivery orders; payment, discount approval, cancellation, and fulfillment workflows.
-- Inventory, suppliers, purchase receipts, stock adjustments, low-stock views, and movement history.
-- Revenue, best-seller, order-channel, and low-stock reports.
-- Repeatable demo data with 20 products, 5 categories, 12 customers, and 24 baseline orders.
+1. Project scope
 
-High-effort work:
-- Transactional order confirmation and cancellation with stock and loyalty compensation.
-- PostgreSQL migrations, restricted midterm runtime role, and repeatable seed data.
-- Automated domain, application, database integration, and WinUI presentation tests.
-- Responsive six-workspace desktop UI and native verification captures.
+The midterm version is a Windows WinUI coffee shop management client.
+It uses PostgreSQL for persistent data.
+The client uses a restricted local database account at runtime.
 
-Planned for the final version:
-- Client-to-API migration, staff authentication, server-side role authorization, and API tests.
-- Optional business-data AI integration.
+2. Completed features
 
-Evidence and known limits: see docs/midterm-demonstration.md, docs/midterm-test-cases.md, docs/midterm-submission/video-checklist.txt, and README.md. Card and e-wallet tenders are simulated. Midterm staff selection is not final authentication. The final all-workspace visual audit is tracked in GitHub issue #119.
+Catalog and menu:
+
+- Create and manage categories.
+- Create and manage menu items.
+- Configure sizes, add-ons, and recipes.
+- Deactivate an item and exclude it from new orders.
+
+Customers and orders:
+
+- Create and update customer profiles.
+- Store delivery addresses.
+- Track loyalty history.
+- Create dine-in, takeaway, and delivery orders.
+- Support discount approval, payment, cancellation, and fulfillment workflows.
+
+Inventory and reports:
+
+- Manage ingredients and suppliers.
+- Create and post purchase receipts.
+- Apply stock adjustments with a reason.
+- View stock movements and low-stock items.
+- View revenue, best-seller, order-channel, and low-stock reports.
+
+3. Midterm demo data
+
+The repeatable seed includes:
+
+- 20 products.
+- 5 categories.
+- 12 customers.
+- 24 baseline orders.
+- Ingredients, suppliers, operators, and delivery staff required by the demo.
+
+4. High-effort work completed
+
+- Transactional order confirmation and cancellation.
+- Stock and loyalty compensation during order changes.
+- PostgreSQL migrations and repeatable seed data.
+- Restricted runtime database role.
+- Automated domain, application, database, and WinUI tests.
+- Responsive six-workspace desktop UI.
+
+5. Verification evidence
+
+- Test-case report: [`docs/midterm-test-cases.md`](../midterm-test-cases.md).
+- Demonstration checklist: [`docs/midterm-demonstration.md`](../midterm-demonstration.md).
+- Test summary: [`docs/evidence/midterm/verification.txt`](../evidence/midterm/verification.txt).
+- UI evidence: [`docs/ui-evidences/`](../ui-evidences/).
+
+The recorded combined verification contains 1,202 passed tests, zero failed tests,
+and zero not-executed tests. The remote CI workflow remains the final source of truth
+for the current branch result.
+
+6. Known limitations
+
+- The midterm client connects to PostgreSQL directly.
+- The final version will move the client to the typed API.
+- Final staff authentication and server-side role authorization are not complete.
+- Card and e-wallet tenders are simulated.
+- Staff selection in the midterm client is not final authentication.
+- Optional business-data AI integration is planned for the final version.
+
+7. Submission files
+
+- `repo.txt` contains the repository URL.
+- `youtube.txt` contains the unlisted demo URL.
+- `instructions.txt` explains how to run the project.
+- `info.txt` describes the implemented scope and limitations.
+- `pat.txt` is a private, read-only token file. It must stay outside Git and be added
+  only to the private submission ZIP.
