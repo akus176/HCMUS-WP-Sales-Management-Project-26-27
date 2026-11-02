@@ -89,6 +89,27 @@ Use unit and component tests for permissions, validation, error mapping, and scr
 
 CI builds the Android application, validates TypeScript and lint rules, runs unit tests, checks generated-client drift, and runs backend tests. Device-dependent push delivery can use a provider fake in CI plus a documented real-device verification before release.
 
+### 11. Deliver the application through evidence-gated phases
+
+Keep the complete specification as the product target, but order delivery by demonstrable
+value and dependency readiness. P0 is the only minimum that may support a final mobile
+demonstration: authenticated, permission-aware navigation; barista preparation; manager
+discount approval; inventory low-stock and stock adjustment; delivery completion or
+failure; online-only write protection; and one verified shared-state update visible to
+the Windows client.
+
+P1 adds cashier, cancellation, assignment, device registration, notifications, and
+limited administration. P2 adds release hardening, broader end-to-end coverage, device
+validation, and rollback evidence. A phase entry requires a stable API contract, a
+working implementation, automated evidence, and a reproducible demo state. The final
+submission function list SHALL identify each function as implemented, planned, or out of
+scope; it must never rely on the architecture document as proof of implementation.
+
+A phased delivery model was selected over an all-role parallel build because the current
+mobile client and its required API boundary do not yet exist. It protects the team from
+claiming broad but unverified functionality and gives the video one coherent end-to-end
+story before optional capabilities are added.
+
 ## Risks / Trade-offs
 
 - **[The mobile work depends on unfinished final API and identity endpoints]** → Implement against explicit OpenAPI contracts and provider fakes, then gate end-to-end completion on the relevant backend endpoints.

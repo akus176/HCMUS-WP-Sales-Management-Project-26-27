@@ -133,3 +133,14 @@ The application SHALL provide portrait-first phone layouts and responsive tablet
 #### Scenario: Staff uses enlarged text
 - **WHEN** the operating system text scale is increased
 - **THEN** operational content and primary actions remain readable and usable without hiding required information
+
+### Requirement: Delivery traceability and evidence
+The team SHALL maintain a release-facing function list that labels each mobile capability as implemented, planned, or out of scope and SHALL trace every implemented P0 capability to its API contract, automated verification, GitHub work item, and mobile demonstration segment. The application MUST NOT present a planned or unverified capability as implemented.
+
+#### Scenario: P0 capability is claimed in the final demonstration
+- **WHEN** the team records a P0 mobile workflow for the final demonstration
+- **THEN** the function list identifies the responsible role, required API contract, automated evidence, and exact video segment for that workflow
+
+#### Scenario: Planned capability appears in documentation
+- **WHEN** a P1 or P2 capability is not yet implemented
+- **THEN** the function list labels it as planned or out of scope and does not use it as evidence of completed functionality

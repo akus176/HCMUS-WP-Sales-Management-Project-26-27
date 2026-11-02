@@ -148,6 +148,17 @@ feature summary. `scripts/prepare-midterm-submission.ps1` creates the required f
 outside the repository after a team member supplies an unlisted YouTube URL and a read-only
 repository token stored outside the repository. Never commit `pat.txt` or the submission archive.
 
+## Final staff-mobile delivery
+
+The final deliverable adds an Android-first staff companion. The complete product target is in the
+[staff-mobile OpenSpec](openspec/changes/add-staff-mobile-app/), with the dependency-ordered
+[implementation task list](openspec/changes/add-staff-mobile-app/tasks.md). The team must complete
+the P0 shared-state vertical slice before presenting P1 or P2 capabilities as implemented.
+
+The [final-submission evidence index](docs/final-submission/) links the mobile function list,
+continuous demo script, and evidence-based contribution record. These documents deliberately mark
+unimplemented functions and unassigned self-scores as pending rather than claiming completion.
+
 ## Team
 
 We are grateful to all team members for their contributions to this project. The table below

@@ -12,6 +12,26 @@ Coffee-shop staff need a portable way to act on orders, approvals, deliveries, a
 - Keep the client online-first: cached operational details may remain readable, but state-changing actions require a confirmed server response.
 - Generate the TypeScript API client from the backend OpenAPI document so mobile contracts remain aligned with the server.
 
+## Delivery Boundaries
+
+The complete specification remains the product target. Delivery SHALL proceed in priority
+order so the team can demonstrate a coherent, tested mobile application before adding
+broader operational coverage.
+
+- **P0 — demonstrable shared-state vertical slice:** individual login, permission-aware
+  navigation, barista preparation, manager discount approval, inventory low-stock and
+  adjustment, delivery completion or failure, online-only writes, and one verified
+  mobile-to-Windows state update.
+- **P1 — operational breadth:** cashier payment, cancellation approval, delivery assignment,
+  device registration, privacy-safe notifications, and limited mobile administration.
+- **P2 — release hardening:** complete Android end-to-end coverage, accessibility review,
+  CI Android build, physical-device procedure, rollback drill, and release candidate.
+
+P1 and P2 work MUST NOT be presented as implemented while a P0 dependency lacks a
+server contract, automated evidence, or a working Android demonstration. The task list
+is the authoritative implementation sequence; GitHub Issue #95 remains the team-facing
+tracking surface.
+
 ## Capabilities
 
 ### New Capabilities
