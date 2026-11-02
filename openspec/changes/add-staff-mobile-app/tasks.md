@@ -3,6 +3,7 @@
 ## 1. Delivery gates and foundations
 
 - [ ] 1.1 Create a mobile delivery baseline that records the current API, identity, OpenAPI, emulator, and device-network readiness; verify every P0 dependency has an owner and a GitHub issue before mobile workflow work starts.
+  Evidence: [S0 baseline and dependency map](../../../docs/mobile-delivery-baseline.md) ([#136](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/136)); environment and unassigned-work blockers are explicit. Completion remains subject to the issue's required review.
 - [ ] 1.2 Scaffold `apps/staff-mobile` as a strict TypeScript Expo application with Expo Router; verify the documented command launches it on an Android emulator.
 - [ ] 1.3 Pin package-manager metadata and configure type-checking, linting, formatting, unit tests, component tests, and Android end-to-end tests; verify a clean install and each quality command pass.
 - [ ] 1.4 Add validated environment configuration for emulator, physical device, test, and release API base URLs; verify missing or invalid configuration fails without exposing a secret.
