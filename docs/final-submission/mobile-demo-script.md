@@ -22,7 +22,7 @@ Do not show passwords, PATs, access tokens, refresh tokens, or local connection 
 7. Show the server-confirmed total in the affected order.
 8. Sign in as inventory staff, open low-stock inventory, and submit one valid adjustment with a reason.
 9. Show the resulting balance and movement history.
-10. Sign in as delivery staff, open only the assigned delivery, launch navigation, and mark it delivered or failed.
+10. Sign in as delivery staff, open only the assigned delivery, launch navigation, mark it out for delivery, and then mark it delivered or failed.
 11. If a failure is demonstrated, show that a reason is required.
 12. Disable connectivity, show the visible offline state, and show that a state-changing action is disabled or rejected without a local success claim.
 13. Sign out and show that protected navigation no longer exposes the previous data.
@@ -42,5 +42,5 @@ Do not show passwords, PATs, access tokens, refresh tokens, or local connection 
 
 1. Set the video to Unlisted.
 2. Add exact timestamps to `mobile-function-list.md`.
-3. Add the video URL to the final submission record.
+3. Add the video URL to the final submission form or LMS record required by the course.
 4. Verify the published video does not show a secret or planned-only function.

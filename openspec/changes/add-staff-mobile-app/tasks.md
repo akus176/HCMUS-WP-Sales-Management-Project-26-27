@@ -29,7 +29,7 @@
 - [ ] 4.2 Build confirmed and preparing ticket views, ticket detail, start-preparing, and mark-ready actions for baristas; verify Android end-to-end progression from Confirmed to Preparing to Ready.
 - [ ] 4.3 Build the manager pending-discount inbox and approve or reject actions; verify a server-confirmed decision changes the shared order state.
 - [ ] 4.4 Build inventory balance and low-stock views plus stock adjustment with a required reason; verify valid adjustments update the shared movement history and invalid adjustments do not change stock.
-- [ ] 4.5 Build courier assignment views, operational address/contact display, device navigation launch, and delivered or failed actions; verify a courier cannot load another courier's assignment and a failure requires a reason.
+- [ ] 4.5 Build courier assignment views, operational address/contact display, device navigation launch, and out-for-delivery, delivered, or failed actions; verify a courier cannot load another courier's assignment and a failure requires a reason.
 - [ ] 4.6 Add online, reconnecting, and offline states with manual refresh and disabled mutations; verify no write is queued or reported successful while disconnected.
 - [ ] 4.7 Connect authenticated operational events to cache invalidation and post-reconnect refetch; verify a WinUI or API change refreshes the affected mobile view without overwriting a newer state.
 
@@ -40,10 +40,11 @@
 - [ ] 5.3 Add device registration, token rotation, and removal on logout; verify ownership, invalid-token cleanup, and notification-permission denial.
 - [ ] 5.4 Add privacy-safe actionable notifications and authenticated deep links for urgent work; verify previews omit customer, address, payment, and credential data.
 - [ ] 5.5 Build limited administrator account search, eligible deactivation, and security-event views; verify final-administrator protection and session revocation.
+- [ ] 5.6 Build prepared purchase-receipt review and posting; verify a retry cannot increase shared stock more than once and the resulting movement history is visible.
 
 ## 6. P2 release hardening and evidence
 
-- [ ] 6.1 Run mobile end-to-end coverage for login, permissions, barista progression, discount handling, inventory adjustment, delivery completion, offline-write prevention, and logout cleanup; verify all P0 cases pass on Android.
+- [ ] 6.1 Run mobile end-to-end coverage for all P0 workflows and every implemented P1 workflow, including payment, cancellation, assignment, receipt posting, notifications, and administration; verify P0 passes on Android before a final demo and P1 passes before it is claimed as implemented.
 - [ ] 6.2 Run accessibility checks for each P0 screen with enlarged text, screen-reader semantics, selection feedback, and phone/tablet layout; verify required content remains usable.
 - [ ] 6.3 Add CI jobs for installation, type-checking, linting, unit tests, generated-client drift, Android build, and affected backend tests; verify a clean CI run passes.
 - [ ] 6.4 Validate simultaneous WinUI and mobile use against one API and PostgreSQL database; verify state, conflicts, permissions, and audit actors remain consistent.
