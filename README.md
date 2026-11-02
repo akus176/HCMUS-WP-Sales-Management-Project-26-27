@@ -155,6 +155,9 @@ The final deliverable adds an Android-first staff companion. The complete produc
 [implementation task list](openspec/changes/add-staff-mobile-app/tasks.md). The team must complete
 the P0 shared-state vertical slice before presenting P1 or P2 capabilities as implemented.
 
+Start with the [S0 delivery baseline and dependency map](docs/mobile-delivery-baseline.md)
+for verified API readiness, P0 owners, Android/LAN setup, and current blockers.
+
 The [final-submission evidence index](docs/final-submission/) links the mobile function list,
 continuous demo script, and evidence-based contribution record. These documents deliberately mark
 unimplemented functions and unassigned self-scores as pending rather than claiming completion.

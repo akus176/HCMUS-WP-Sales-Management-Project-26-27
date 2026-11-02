@@ -1,0 +1,8 @@
+{
+  "hostAdapterHealthStatus": 200,
+  "hostAdapterHealthBody": "Healthy",
+  "requestedBindAddress": "0.0.0.0:5232",
+  "networkCategory": "Public",
+  "physicalDeviceVerified": false,
+  "firewallChanged": false
+}

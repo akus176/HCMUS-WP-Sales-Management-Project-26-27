@@ -1,0 +1,11 @@
+{
+  "healthStatus": 200,
+  "healthBody": "Healthy",
+  "openApiStatus": 200,
+  "openApiVersion": "3.1.1",
+  "pathCount": 0,
+  "schemaCount": 0,
+  "repeatedFetchEqual": true,
+  "apiV1Status": 404,
+  "separateProcessFetchEqual": true
+}
