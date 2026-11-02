@@ -3,7 +3,7 @@
 This is the submission-facing function list for the mobile staff application.
 Update the Status, Automated evidence, and Video timestamp fields only after the cited work exists.
 
-| ID | Role | Function | Priority | Status | GitHub work item | Required API or shared-state proof | Automated evidence | Video timestamp / segment |
+| ID | Role | Function | Priority | Status | GitHub work item | Required API or shared-state proof | Automated evidence | Video timestamp/segment |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F-01 | All staff | Sign in, renew session, and sign out securely | P0 | Planned | #95, 2.1, 3.3–3.4 | Authenticated API session and server permission resolution | Session and logout tests | Record after final video |
 | F-02 | All staff | See only permitted mobile modules and actions | P0 | Planned | #95, 4.1–4.2 | Effective permissions from the shared API | Permission-navigation tests | Record after final video |
