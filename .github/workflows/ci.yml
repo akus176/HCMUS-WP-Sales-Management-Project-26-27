@@ -68,6 +68,8 @@ jobs:
           dotnet-version: 10.0.x
       - name: Infrastructure and complete midterm demonstration tests
         run: dotnet test tests/CoffeeShop.Infrastructure.Tests --configuration Release --logger "trx;LogFileName=postgres.trx" --results-directory TestResults
+      - name: API integration tests against PostgreSQL
+        run: dotnet test tests/CoffeeShop.Api.Tests --configuration Release --logger "trx;LogFileName=api-postgres.trx" --results-directory TestResults
       - name: Preserve PostgreSQL test evidence
         if: always()
         uses: actions/upload-artifact@v4
