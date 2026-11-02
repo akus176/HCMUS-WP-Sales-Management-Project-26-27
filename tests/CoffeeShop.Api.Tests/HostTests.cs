@@ -1,8 +1,6 @@
 using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 
 namespace CoffeeShop.Api.Tests;
 
@@ -48,5 +46,10 @@ public sealed class HostTests
 
         Assert.True(document.RootElement.GetProperty("paths").TryGetProperty("/api/v1/categories", out _));
         Assert.False(document.RootElement.GetProperty("paths").TryGetProperty("/api/v1/auth/login", out _));
+        var categoryPath = document.RootElement.GetProperty("paths").GetProperty("/api/v1/categories");
+        Assert.True(categoryPath.TryGetProperty("get", out _));
+        Assert.True(categoryPath.TryGetProperty("post", out _));
+        Assert.True(document.RootElement.GetProperty("components").GetProperty("schemas")
+            .TryGetProperty("CategoryResponse", out _));
     }
 }

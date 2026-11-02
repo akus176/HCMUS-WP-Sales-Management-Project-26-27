@@ -1,6 +1,5 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.Hosting;
 
 namespace CoffeeShop.Api.Tests;
 
