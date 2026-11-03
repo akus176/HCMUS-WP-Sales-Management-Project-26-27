@@ -38,6 +38,7 @@ public sealed class CatalogHttpTests : IAsyncLifetime
         await using (var db = new CoffeeShopDbContext(options.Options)) await db.Database.MigrateAsync();
         host = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
+            builder.UseTestIdentity();
             builder.UseSetting("ConnectionStrings:CoffeeShop", testConnection);
             builder.ConfigureTestServices(services => services.AddAuthentication("Test")
                 .AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>("Test", _ => { }));

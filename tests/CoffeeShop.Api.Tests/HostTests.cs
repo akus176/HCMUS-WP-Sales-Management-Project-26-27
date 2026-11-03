@@ -6,9 +6,20 @@ namespace CoffeeShop.Api.Tests;
 
 public sealed class HostTests
 {
+    [Fact]
+    public void MissingSigningConfigurationFailsWithoutEchoingValues()
+    {
+        using var host = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+            builder.UseTestIdentity().UseSetting("Jwt:SigningKey", "")
+                .UseSetting("ConnectionStrings:CoffeeShop", "Host=127.0.0.1;Port=1;Database=test;Username=test"));
+        var error = Assert.Throws<InvalidOperationException>(() => host.CreateClient());
+        Assert.Contains("Configure Jwt:Issuer", error.Message);
+        Assert.DoesNotContain(TestIdentitySettings.SigningKey, error.Message);
+    }
+
     private static WebApplicationFactory<Program> CreateHost() =>
         new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.UseSetting("ConnectionStrings:CoffeeShop",
+            builder.UseTestIdentity().UseSetting("ConnectionStrings:CoffeeShop",
                 "Host=127.0.0.1;Port=1;Database=coffeeshop;Username=test;Password=test;Timeout=1"));
 
     [Fact]
@@ -45,7 +56,7 @@ public sealed class HostTests
         using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
         Assert.True(document.RootElement.GetProperty("paths").TryGetProperty("/api/v1/categories", out _));
-        Assert.False(document.RootElement.GetProperty("paths").TryGetProperty("/api/v1/auth/login", out _));
+        Assert.True(document.RootElement.GetProperty("paths").TryGetProperty("/api/v1/auth/login", out _));
         var categoryPath = document.RootElement.GetProperty("paths").GetProperty("/api/v1/categories");
         Assert.True(categoryPath.TryGetProperty("get", out _));
         Assert.True(categoryPath.TryGetProperty("post", out _));

@@ -65,4 +65,10 @@ public class RefreshToken
     public string? CreatedByIp { get; protected set; }
 
     public bool IsActive => RevokedAt is null && ExpiresAt.Value > DateTimeOffset.UtcNow;
+
+    public void Revoke(UtcTimestamp now, EntityId? replacement = null)
+    {
+        RevokedAt ??= now;
+        ReplacedById ??= replacement;
+    }
 }

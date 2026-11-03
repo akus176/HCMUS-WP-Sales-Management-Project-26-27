@@ -28,13 +28,17 @@ builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document,
     document.Servers = [];
     return Task.CompletedTask;
 }));
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
-builder.Services.AddAuthorization(options => options.AddPolicy("menu.manage",
-    policy => policy.RequireClaim("permission", "menu.manage")));
+builder.AddStaffIdentity();
 builder.Services.AddHealthChecks()
     .AddCheck("postgres", new PostgresHealthCheck(connectionString), tags: ["ready"]);
 
 var app = builder.Build();
+if (args.Contains("--seed-staff-roles") || args.Contains("--provision-staff"))
+{
+    await StaffProvisioning.RunAsync(app.Services, builder.Configuration, args.Contains("--provision-staff"));
+    await app.DisposeAsync();
+    return;
+}
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseAuthentication();
@@ -49,6 +53,7 @@ app.MapHealthChecks("/health", new() { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new() { Predicate = check => check.Tags.Contains("ready") });
 
 var api = app.MapGroup("/api/v1");
+api.MapStaffIdentity();
 api.MapGet("/categories", async (
     CatalogQueryHandler handler, string? search, bool? isActive, int? limit, CancellationToken cancellationToken) =>
 {

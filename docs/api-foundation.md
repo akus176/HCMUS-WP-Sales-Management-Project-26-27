@@ -1,5 +1,7 @@
 # Shared API foundation (#149)
 
+For current authentication, token provisioning, and effective-permission behavior added by #150, see [shared staff identity](staff-identity.md). The foundation verification below records the pre-identity #149 delivery.
+
 The API now composes the existing Application and PostgreSQL services and exposes a versioned `/api/v1` route group. The current HTTP surface is a small catalog slice: authenticated category search, manager-permitted category creation, and manager-permitted deactivation. It uses contract DTOs, RFC 7807 errors, and the existing catalog application handlers. OpenAPI documents only these implemented routes; [the captured development document](evidence/api-149/openapi.json) is stable across request hostnames. Authentication and effective permission issuance belong to #150; the P0 mobile operation routes and complete mobile OpenAPI contract remain in #142. Do not generate a mobile client for planned routes from this partial document.
 
 Set `ConnectionStrings__CoffeeShop` to a local PostgreSQL connection before launching. The API fails clearly at startup when it is absent. Apply migrations from an empty database before using business routes:
