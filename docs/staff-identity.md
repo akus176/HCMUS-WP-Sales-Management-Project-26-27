@@ -65,7 +65,7 @@ Verified from `feat(identity)/staff-auth-permissions`, based on merged API host 
 | `dotnet test tests/CoffeeShop.Api.Tests --configuration Release --logger "trx;LogFileName=identity-api.trx" --results-directory TestResults` | 20 passed, 0 failed, 0 skipped |
 | `dotnet test tests/CoffeeShop.Infrastructure.Tests --configuration Release --logger "trx;LogFileName=identity-infrastructure.trx" --results-directory TestResults` | 258 passed, 0 failed, 0 skipped |
 | `dotnet test tests/CoffeeShop.Domain.Tests --configuration Release --logger "trx;LogFileName=identity-domain.trx" --results-directory TestResults` | 413 passed, 0 failed, 0 skipped |
-| `dotnet format tests/CoffeeShop.Api.Tests/CoffeeShop.Api.Tests.csproj --include <changed C# files> --no-restore --verify-no-changes --verbosity quiet` | Exit 0 |
+| `dotnet format src/CoffeeShop.Api/CoffeeShop.Api.csproj --no-restore --verify-no-changes --verbosity quiet` and the same check for `tests/CoffeeShop.Api.Tests/CoffeeShop.Api.Tests.csproj` | Exit 0 |
 | `git diff --check` | Exit 0 |
 
 The ignored `TestResults` directory contains exact local TRX results; the PostgreSQL CI job reruns the API and infrastructure suites and uploads its TRX artifacts. Provisioning is tested by persisting an explicitly assigned multi-role account, signing in through HTTP, verifying the persisted password differs from the input, and rejecting a repeated provisioning attempt. Missing signing configuration fails without echoing a signing key. JWT tests reject tampering, wrong issuer/audience, and expiry; refresh tests reject unknown/expired tokens and prove rotation, reuse, concurrent reuse, family isolation, logout ownership, password-change invalidation, and deactivation/reactivation invalidation.

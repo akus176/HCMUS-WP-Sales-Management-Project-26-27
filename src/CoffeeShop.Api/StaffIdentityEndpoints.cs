@@ -4,7 +4,6 @@ using System.Security.Claims;
 using System.Text;
 using CoffeeShop.Application.Common.Security;
 using CoffeeShop.Contracts;
-using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -28,11 +27,15 @@ public static class StaffIdentityEndpoints
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-                ValidateIssuer = true, ValidIssuer = issuer,
-                ValidateAudience = true, ValidAudience = audience,
-                ValidateLifetime = true, ClockSkew = TimeSpan.Zero,
+                ValidateIssuer = true,
+                ValidIssuer = issuer,
+                ValidateAudience = true,
+                ValidAudience = audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero,
                 ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
-                NameClaimType = "sub", RoleClaimType = ClaimTypes.Role,
+                NameClaimType = "sub",
+                RoleClaimType = ClaimTypes.Role,
             };
             options.Events = new JwtBearerEvents
             {

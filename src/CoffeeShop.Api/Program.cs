@@ -7,7 +7,6 @@ using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Common;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("CoffeeShop");
