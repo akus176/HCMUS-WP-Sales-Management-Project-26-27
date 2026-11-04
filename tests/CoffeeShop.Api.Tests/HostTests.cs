@@ -62,5 +62,31 @@ public sealed class HostTests
         Assert.True(categoryPath.TryGetProperty("post", out _));
         Assert.True(document.RootElement.GetProperty("components").GetProperty("schemas")
             .TryGetProperty("CategoryResponse", out _));
+        Assert.False(document.RootElement.GetProperty("paths").TryGetProperty("/api/v1/preparation-tickets", out _));
+        Assert.False(document.RootElement.GetProperty("components").GetProperty("schemas")
+            .TryGetProperty("PreparationTicketResponse", out _));
+    }
+
+    [Fact]
+    public async Task OpenApiDescribesBearerOnProtectedRoutesOnly()
+    {
+        using var host = CreateHost();
+        using var client = host.CreateClient();
+        using var document = JsonDocument.Parse(await client.GetStringAsync("/openapi/v1.json"));
+        var root = document.RootElement;
+
+        var bearer = root.GetProperty("components").GetProperty("securitySchemes").GetProperty("Bearer");
+        Assert.Equal("http", bearer.GetProperty("type").GetString());
+        Assert.Equal("bearer", bearer.GetProperty("scheme").GetString());
+        Assert.True(root.GetProperty("paths").GetProperty("/api/v1/auth/me")
+            .GetProperty("get").GetProperty("security")[0].TryGetProperty("Bearer", out _));
+        Assert.True(root.GetProperty("paths").GetProperty("/api/v1/categories")
+            .GetProperty("post").GetProperty("security")[0].TryGetProperty("Bearer", out _));
+        Assert.False(root.GetProperty("paths").GetProperty("/api/v1/auth/login")
+            .GetProperty("post").TryGetProperty("security", out _));
+        Assert.True(root.GetProperty("paths").GetProperty("/api/v1/auth/me")
+            .GetProperty("get").GetProperty("responses").TryGetProperty("401", out _));
+        Assert.True(root.GetProperty("paths").GetProperty("/api/v1/categories")
+            .GetProperty("post").GetProperty("responses").TryGetProperty("403", out _));
     }
 }
