@@ -3,7 +3,6 @@ namespace CoffeeShop.Api;
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Customers;
 using CoffeeShop.Contracts;
-using CoffeeShop.Domain.Common;
 
 public static class CustomerEndpoints
 {
