@@ -152,6 +152,9 @@ repository token stored outside the repository. Never commit `pat.txt` or the su
 
 ## Final staff-mobile delivery
 
+The [Expo staff-mobile starter](apps/staff-mobile/README.md) documents pinned tooling,
+local checks, Android launch, and the Maestro smoke test for #138.
+
 The final deliverable adds an Android-first staff companion. The complete product target is in the
 [staff-mobile OpenSpec](openspec/changes/add-staff-mobile-app/), with the dependency-ordered
 [implementation task list](openspec/changes/add-staff-mobile-app/tasks.md). The team must complete
