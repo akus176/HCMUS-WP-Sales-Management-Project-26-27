@@ -277,6 +277,7 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         }
         using var forbidden = await client.PostAsJsonAsync("/api/v1/categories", new { name = "Denied after role removal" });
         Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        Assert.Equal("application/problem+json", forbidden.Content.Headers.ContentType?.MediaType);
         await using (var db = Database())
         {
             var user = await db.Users.SingleAsync(u => u.Id == new EntityId(pair.User.Id));
@@ -285,6 +286,7 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         }
         using var denied = await client.GetAsync("/api/v1/auth/me");
         Assert.Equal(HttpStatusCode.Unauthorized, denied.StatusCode);
+        Assert.Equal("application/problem+json", denied.Content.Headers.ContentType?.MediaType);
         await using (var db = Database())
         {
             var user = await db.Users.SingleAsync(u => u.Id == new EntityId(pair.User.Id));

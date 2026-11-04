@@ -7,6 +7,8 @@ using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Common;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("CoffeeShop");
@@ -22,11 +24,35 @@ builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddScoped<CatalogQueryHandler>();
 builder.Services.AddScoped<CatalogCommandHandler>();
 builder.Services.AddProblemDetails();
-builder.Services.AddOpenApi(options => options.AddDocumentTransformer((document, _, _) =>
+builder.Services.AddOpenApi(options =>
 {
-    document.Servers = [];
-    return Task.CompletedTask;
-}));
+    options.AddDocumentTransformer((document, _, _) =>
+    {
+        document.Servers = [];
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+        document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+        };
+        return Task.CompletedTask;
+    });
+    options.AddOperationTransformer((operation, context, _) =>
+    {
+        var metadata = context.Description.ActionDescriptor.EndpointMetadata;
+        if (metadata.OfType<IAuthorizeData>().Any() && !metadata.OfType<IAllowAnonymous>().Any())
+        {
+            operation.Security ??= [];
+            operation.Security.Add(new OpenApiSecurityRequirement
+            {
+                [new OpenApiSecuritySchemeReference("Bearer", context.Document)] = [],
+            });
+        }
+        return Task.CompletedTask;
+    });
+});
 builder.AddStaffIdentity();
 builder.Services.AddHealthChecks()
     .AddCheck("postgres", new PostgresHealthCheck(connectionString), tags: ["ready"]);
@@ -65,6 +91,7 @@ api.MapGet("/categories", async (
 })
 .Produces<CategoryResponse[]>(StatusCodes.Status200OK)
 .ProducesProblem(StatusCodes.Status400BadRequest)
+.ProducesProblem(StatusCodes.Status401Unauthorized)
 .RequireAuthorization();
 
 api.MapPost("/categories", async (
@@ -79,6 +106,8 @@ api.MapPost("/categories", async (
 })
 .Produces<CategoryResponse>(StatusCodes.Status201Created)
 .ProducesProblem(StatusCodes.Status400BadRequest)
+.ProducesProblem(StatusCodes.Status401Unauthorized)
+.ProducesProblem(StatusCodes.Status403Forbidden)
 .RequireAuthorization("menu.manage");
 
 api.MapPost("/categories/{id:guid}/deactivate", async (
@@ -92,6 +121,8 @@ api.MapPost("/categories/{id:guid}/deactivate", async (
 })
 .Produces(StatusCodes.Status204NoContent)
 .ProducesProblem(StatusCodes.Status400BadRequest)
+.ProducesProblem(StatusCodes.Status401Unauthorized)
+.ProducesProblem(StatusCodes.Status403Forbidden)
 .ProducesProblem(StatusCodes.Status404NotFound)
 .ProducesProblem(StatusCodes.Status409Conflict)
 .RequireAuthorization("menu.manage");

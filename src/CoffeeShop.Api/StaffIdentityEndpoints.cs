@@ -85,7 +85,7 @@ public static class StaffIdentityEndpoints
         }).AllowAnonymous().Produces<TokenResponse>().ProducesProblem(401);
         api.MapGet("/auth/me", async (ICurrentUser user, StaffIdentityService service, CancellationToken ct) =>
             Results.Ok(await service.SessionAsync(user.GetRequiredId(), ct)))
-            .RequireAuthorization().Produces<StaffSession>();
+            .RequireAuthorization().Produces<StaffSession>().ProducesProblem(401);
         api.MapPost("/auth/logout", async (RefreshRequest request, ICurrentUser user, StaffIdentityService service, CancellationToken ct) =>
             await service.LogoutAsync(user.GetRequiredId(), request.RefreshToken, false, ct) ? Results.NoContent() : Denied())
             .RequireAuthorization().Produces(204).ProducesProblem(401);
@@ -93,7 +93,7 @@ public static class StaffIdentityEndpoints
         {
             await service.LogoutAsync(user.GetRequiredId(), null, true, ct);
             return Results.NoContent();
-        }).RequireAuthorization().Produces(204);
+        }).RequireAuthorization().Produces(204).ProducesProblem(401);
     }
 
     private static IResult Denied() => Results.Problem(statusCode: 401, title: "Authentication failed", detail: "Invalid credentials or session.");
