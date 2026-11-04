@@ -17,7 +17,9 @@ dotnet test CoffeeShop.slnx
 dotnet run --project src/CoffeeShop.Api
 ```
 
-The API foundation and its current routes are documented in [the shared API foundation guide](docs/api-foundation.md). Run the WinUI project from Visual Studio or use `dotnet run --project src/CoffeeShop.WinUI -r win-x64` on Windows. The desktop client hosts Application services and PostgreSQL infrastructure in-process. Configure its database connection with the `ConnectionStrings__CoffeeShop` environment variable or a user-local `%LOCALAPPDATA%\CoffeeShop\appsettings.json` file containing:
+The API foundation and its current routes are documented in [the shared API foundation guide](docs/api-foundation.md). For the containerized API and PostgreSQL path, follow [Docker Compose setup](docs/docker-compose.md). It applies migrations before serving requests and checks database readiness.
+
+Run the WinUI project from Visual Studio or use `dotnet run --project src/CoffeeShop.WinUI -r win-x64` on Windows. The desktop client hosts Application services and PostgreSQL infrastructure in-process. Configure its database connection with the `ConnectionStrings__CoffeeShop` environment variable or a user-local `%LOCALAPPDATA%\CoffeeShop\appsettings.json` file containing:
 
 ```json
 {

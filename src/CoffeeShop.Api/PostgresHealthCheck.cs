@@ -14,9 +14,12 @@ public sealed class PostgresHealthCheck(string connectionString) : IHealthCheck
         await using var db = new CoffeeShopDbContext(options.Options);
         try
         {
-            return await db.Database.CanConnectAsync(cancellationToken)
-                ? HealthCheckResult.Healthy()
-                : HealthCheckResult.Unhealthy("PostgreSQL is unavailable.");
+            if (!await db.Database.CanConnectAsync(cancellationToken))
+                return HealthCheckResult.Unhealthy("PostgreSQL is unavailable.");
+            var pending = await db.Database.GetPendingMigrationsAsync(cancellationToken);
+            return pending.Any()
+                ? HealthCheckResult.Unhealthy("PostgreSQL migrations are pending.")
+                : HealthCheckResult.Healthy();
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {

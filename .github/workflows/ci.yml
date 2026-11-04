@@ -86,3 +86,10 @@ jobs:
           This job runs the Infrastructure suite with `COFFEESHOP_TEST_POSTGRES` configured.
           The Windows job intentionally does not select this suite, so PostgreSQL integration tests are not reported as skipped there.
           EOF
+
+  compose-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify clean Docker Compose startup and migrations
+        run: bash scripts/verify-compose.sh
