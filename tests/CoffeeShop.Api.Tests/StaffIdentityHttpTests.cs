@@ -330,6 +330,61 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task SalesWorkflow_PersistsDraftPaymentAndPreparationAcrossRoles()
+    {
+        using var manager = host!.CreateClient();
+        var managerLogin = await LoginAsync(manager, "Manager");
+        manager.DefaultRequestHeaders.Authorization = new("Bearer", managerLogin.AccessToken);
+        using var categoryCreated = await manager.PostAsJsonAsync("/api/v1/categories", new CreateCategoryRequest("Sales drinks"));
+        var category = (await categoryCreated.Content.ReadFromJsonAsync<CategoryResponse>())!;
+        using var created = await manager.PostAsJsonAsync("/api/v1/menu-items",
+            new MenuItemRequest(category.Id, "Latte", null, [new SizeVariantRequest("Regular", 5m)]));
+        var item = (await created.Content.ReadFromJsonAsync<MenuItemResponse>())!;
+        var variant = Assert.Single(item.SizeVariants);
+
+        using var cashier = host.CreateClient();
+        var cashierLogin = await LoginAsync(cashier, "Cashier");
+        cashier.DefaultRequestHeaders.Authorization = new("Bearer", cashierLogin.AccessToken);
+        var orderId = Guid.NewGuid();
+        var draftRequest = new CreateOrderRequest(orderId, "takeaway", null, null,
+            [new OrderLineRequest(item.Id, variant.Id, 1, [])]);
+        using var createdDraft = await cashier.PostAsJsonAsync("/api/v1/orders", draftRequest);
+        Assert.Equal(HttpStatusCode.Created, createdDraft.StatusCode);
+        var draft = (await createdDraft.Content.ReadFromJsonAsync<OrderResponse>())!;
+        Assert.Equal(5m, draft.Total);
+        using var retriedDraft = await cashier.PostAsJsonAsync("/api/v1/orders", draftRequest);
+        Assert.Equal(HttpStatusCode.Created, retriedDraft.StatusCode);
+        await using (var db = Database()) Assert.Single(await db.Orders.Where(order => order.Id == new EntityId(orderId)).ToArrayAsync());
+        using var wrongTotal = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/confirm", new ConfirmOrderRequest(4m));
+        Assert.Equal(HttpStatusCode.Conflict, wrongTotal.StatusCode);
+        using var confirmed = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/confirm", new ConfirmOrderRequest(5m));
+        Assert.Equal(HttpStatusCode.OK, confirmed.StatusCode);
+
+        var paymentId = Guid.NewGuid();
+        var payment = new RecordPaymentRequest(paymentId, "cash", 5m);
+        using var paid = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment);
+        Assert.Equal(HttpStatusCode.OK, paid.StatusCode);
+        using var repeated = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment);
+        Assert.Equal(HttpStatusCode.OK, repeated.StatusCode);
+        using var mismatch = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment with { Amount = 4m });
+        Assert.Equal(HttpStatusCode.Conflict, mismatch.StatusCode);
+
+        using var barista = host.CreateClient();
+        var baristaLogin = await LoginAsync(barista, "Barista");
+        barista.DefaultRequestHeaders.Authorization = new("Bearer", baristaLogin.AccessToken);
+        var tickets = await barista.GetFromJsonAsync<PreparationTicketResponse[]>("/api/v1/preparation-tickets");
+        Assert.Contains(tickets!, ticket => ticket.OrderId == orderId && ticket.Lines.Count == 1);
+        using var preparing = await barista.PostAsync($"/api/v1/orders/{orderId}/preparing", null);
+        Assert.Equal(HttpStatusCode.NoContent, preparing.StatusCode);
+        using var ready = await barista.PostAsync($"/api/v1/orders/{orderId}/ready", null);
+        Assert.Equal(HttpStatusCode.NoContent, ready.StatusCode);
+        using var repeatReady = await barista.PostAsync($"/api/v1/orders/{orderId}/ready", null);
+        Assert.Equal(HttpStatusCode.Conflict, repeatReady.StatusCode);
+        var shared = await manager.GetFromJsonAsync<OrderResponse>($"/api/v1/orders/{orderId}");
+        Assert.Equal("ready", shared!.Status);
+    }
+
+    [PostgresFact]
     public async Task CatalogRecipe_IsSharedAcrossSessionsAndRejectsInvalidChanges()
     {
         using var manager = host!.CreateClient();
