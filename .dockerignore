@@ -1,0 +1,16 @@
+.git
+.vs
+.env
+.env.*
+**/bin
+**/obj
+**/TestResults
+artifacts
+docs
+openspec
+scripts
+submission
+tests
+src/CoffeeShop.WinUI
+*.user
+*.suo
