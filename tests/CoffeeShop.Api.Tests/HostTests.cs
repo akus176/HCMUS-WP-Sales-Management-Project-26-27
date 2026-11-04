@@ -120,6 +120,42 @@ public sealed class HostTests
     }
 
     [Fact]
+    public async Task CustomerAndLoyaltyOpenApi_ExposesProtectedRoutesAndContracts()
+    {
+        using var host = CreateHost();
+        using var client = host.CreateClient();
+        using var document = JsonDocument.Parse(await client.GetStringAsync("/openapi/v1.json"));
+        var paths = document.RootElement.GetProperty("paths");
+        var schemas = document.RootElement.GetProperty("components").GetProperty("schemas");
+
+        foreach (var (path, method) in new[]
+        {
+            ("/api/v1/customers", "get"),
+            ("/api/v1/customers", "post"),
+            ("/api/v1/customers/{id}", "get"),
+            ("/api/v1/customers/{id}", "patch"),
+            ("/api/v1/customers/{id}/addresses", "get"),
+            ("/api/v1/customers/{id}/addresses", "post"),
+            ("/api/v1/customers/{id}/loyalty-transactions", "get"),
+            ("/api/v1/loyalty-settings", "get"),
+            ("/api/v1/loyalty-settings", "patch"),
+            ("/api/v1/orders/{id}/loyalty/redeem", "post"),
+        })
+        {
+            var operation = paths.GetProperty(path).GetProperty(method);
+            Assert.True(operation.GetProperty("security")[0].TryGetProperty("Bearer", out _), $"{method} {path} must require bearer authentication.");
+        }
+
+        var redeem = paths.GetProperty("/api/v1/orders/{id}/loyalty/redeem").GetProperty("post");
+        Assert.True(redeem.GetProperty("responses").TryGetProperty("422", out _));
+        foreach (var schema in new[] { "CustomerDetailResponse", "CustomerAddressResponse",
+            "LoyaltyHistoryResponse", "LoyaltySettingsResponse", "LoyaltyOperationResponse" })
+        {
+            Assert.True(schemas.TryGetProperty(schema, out _), $"Missing OpenAPI schema {schema}.");
+        }
+    }
+
+    [Fact]
     public async Task OpenApiDescribesBearerOnProtectedRoutesOnly()
     {
         using var host = CreateHost();
