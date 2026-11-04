@@ -582,6 +582,84 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task OptionalCustomerOrders_ChangeLoyaltyBalanceThroughEarnAndRedemption()
+    {
+        using var manager = host!.CreateClient();
+        var adminLogin = await LoginAsync(manager, "Admin");
+        manager.DefaultRequestHeaders.Authorization = new("Bearer", adminLogin.AccessToken);
+        using var settingsUpdated = await manager.PatchAsJsonAsync("/api/v1/loyalty-settings",
+            new LoyaltySettingsRequest(1m, 0.1m, 100m));
+        Assert.Equal(HttpStatusCode.OK, settingsUpdated.StatusCode);
+
+        using var categoryCreated = await manager.PostAsJsonAsync("/api/v1/categories",
+            new CreateCategoryRequest("Loyalty drinks"));
+        var category = (await categoryCreated.Content.ReadFromJsonAsync<CategoryResponse>())!;
+        using var itemCreated = await manager.PostAsJsonAsync("/api/v1/menu-items",
+            new MenuItemRequest(category.Id, "Loyalty latte", null, [new SizeVariantRequest("Regular", 5m)]));
+        var item = (await itemCreated.Content.ReadFromJsonAsync<MenuItemResponse>())!;
+        var variant = Assert.Single(item.SizeVariants);
+
+        var walkInId = Guid.NewGuid();
+        using var walkIn = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(walkInId,
+            "takeaway", null, null, [new OrderLineRequest(item.Id, variant.Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, walkIn.StatusCode);
+        Assert.Null((await walkIn.Content.ReadFromJsonAsync<OrderResponse>())!.CustomerId);
+
+        using var customerCreated = await manager.PostAsJsonAsync("/api/v1/customers",
+            new CustomerUpsertRequest("Grace Hopper", Random.Shared.NextInt64(100_000_000_000, 999_999_999_999).ToString()));
+        Assert.Equal(HttpStatusCode.Created, customerCreated.StatusCode);
+        var customer = (await customerCreated.Content.ReadFromJsonAsync<CustomerDetailResponse>())!;
+        var earningOrderId = Guid.NewGuid();
+        using var earningDraft = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(earningOrderId,
+            "takeaway", null, new OrderCustomerRequest(customer.Id),
+            [new OrderLineRequest(item.Id, variant.Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, earningDraft.StatusCode);
+        using var earningConfirmed = await manager.PostAsJsonAsync($"/api/v1/orders/{earningOrderId}/confirm",
+            new ConfirmOrderRequest(5m));
+        Assert.Equal(HttpStatusCode.OK, earningConfirmed.StatusCode);
+        using var earningPayment = await manager.PostAsJsonAsync($"/api/v1/orders/{earningOrderId}/payments",
+            new RecordPaymentRequest(Guid.NewGuid(), "cash", 5m));
+        Assert.Equal(HttpStatusCode.OK, earningPayment.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent,
+            (await manager.PostAsync($"/api/v1/orders/{earningOrderId}/preparing", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent,
+            (await manager.PostAsync($"/api/v1/orders/{earningOrderId}/ready", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent,
+            (await manager.PostAsync($"/api/v1/orders/{earningOrderId}/complete", null)).StatusCode);
+
+        var earnedCustomer = await manager.GetFromJsonAsync<CustomerDetailResponse>($"/api/v1/customers/{customer.Id}");
+        Assert.Equal(5, earnedCustomer!.LoyaltyPointsBalance);
+        var history = await manager.GetFromJsonAsync<LoyaltyHistoryResponse>(
+            $"/api/v1/customers/{customer.Id}/loyalty-transactions?offset=0&limit=10");
+        var earned = Assert.Single(history!.Items);
+        Assert.Equal("earn", earned.Type);
+        Assert.Equal(5, earned.Points);
+        Assert.Equal(earningOrderId, earned.OrderId);
+
+        var redemptionOrderId = Guid.NewGuid();
+        using var redemptionDraft = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(redemptionOrderId,
+            "takeaway", null, new OrderCustomerRequest(customer.Id),
+            [new OrderLineRequest(item.Id, variant.Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, redemptionDraft.StatusCode);
+        using var tooManyPoints = await manager.PostAsJsonAsync($"/api/v1/orders/{redemptionOrderId}/loyalty/redeem",
+            new RedeemLoyaltyRequest(6));
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, tooManyPoints.StatusCode);
+        using var redeemed = await manager.PostAsJsonAsync($"/api/v1/orders/{redemptionOrderId}/loyalty/redeem",
+            new RedeemLoyaltyRequest(3));
+        Assert.Equal(HttpStatusCode.OK, redeemed.StatusCode);
+        var redemption = (await redeemed.Content.ReadFromJsonAsync<LoyaltyOperationResponse>())!;
+        Assert.Equal(0.3m, redemption.DiscountAmount);
+        Assert.False(redemption.AlreadyApplied);
+        using var retry = await manager.PostAsJsonAsync($"/api/v1/orders/{redemptionOrderId}/loyalty/redeem",
+            new RedeemLoyaltyRequest(3));
+        Assert.True((await retry.Content.ReadFromJsonAsync<LoyaltyOperationResponse>())!.AlreadyApplied);
+        var redeemedCustomer = await manager.GetFromJsonAsync<CustomerDetailResponse>($"/api/v1/customers/{customer.Id}");
+        Assert.Equal(2, redeemedCustomer!.LoyaltyPointsBalance);
+        await using var db = Database();
+        Assert.Equal(2, await db.LoyaltyTransactions.CountAsync(transaction => transaction.CustomerId == new EntityId(customer.Id)));
+    }
+
+    [PostgresFact]
     public async Task CatalogRecipe_IsSharedAcrossSessionsAndRejectsInvalidChanges()
     {
         using var manager = host!.CreateClient();

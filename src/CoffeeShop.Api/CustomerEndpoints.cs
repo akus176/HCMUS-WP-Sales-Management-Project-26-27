@@ -141,9 +141,15 @@ public static class CustomerEndpoints
         {
             if (id == Guid.Empty) return InvalidId();
             var result = await handler.RedeemForOrderAsync(new RedeemOrderLoyaltyCommand(new(id), request.Points), ct);
-            return result.IsSuccess ? Results.Ok(new LoyaltyOperationResponse(result.Value.TransactionId?.Value,
-                result.Value.Points, result.Value.DiscountAmount, result.Value.AlreadyApplied))
-                : ApiErrorResults.From(result.Error!);
+            if (result.IsFailure)
+            {
+                var error = result.Error!;
+                return ApiErrorResults.From(error, error.Type == ErrorType.Validation
+                    ? StatusCodes.Status422UnprocessableEntity
+                    : null);
+            }
+            return Results.Ok(new LoyaltyOperationResponse(result.Value.TransactionId?.Value,
+                result.Value.Points, result.Value.DiscountAmount, result.Value.AlreadyApplied));
         }).RequireAuthorization("loyalty.redeem").Produces<LoyaltyOperationResponse>()
             .ProducesProblem(400).ProducesProblem(401).ProducesProblem(403).ProducesProblem(404)
             .ProducesProblem(409).ProducesProblem(422);

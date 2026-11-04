@@ -4,9 +4,9 @@ using CoffeeShop.Application.Common.Results;
 
 public static class ApiErrorResults
 {
-    public static IResult From(Error error)
+    public static IResult From(Error error, int? statusCodeOverride = null)
     {
-        var status = error.Type switch
+        var status = statusCodeOverride ?? error.Type switch
         {
             ErrorType.Validation => StatusCodes.Status400BadRequest,
             ErrorType.Authentication => StatusCodes.Status401Unauthorized,
