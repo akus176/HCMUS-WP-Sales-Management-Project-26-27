@@ -62,9 +62,9 @@ public sealed class HostTests
         Assert.True(categoryPath.TryGetProperty("post", out _));
         Assert.True(document.RootElement.GetProperty("components").GetProperty("schemas")
             .TryGetProperty("CategoryResponse", out _));
-        Assert.False(document.RootElement.GetProperty("paths").TryGetProperty("/api/v1/preparation-tickets", out _));
-        Assert.False(document.RootElement.GetProperty("components").GetProperty("schemas")
-            .TryGetProperty("PreparationTicketResponse", out _));
+        Assert.True(document.RootElement.GetProperty("paths").TryGetProperty("/api/v1/preparation-tickets", out _));
+        Assert.True(document.RootElement.GetProperty("paths").TryGetProperty("/api/v1/courier/assignments", out _));
+        Assert.True(document.RootElement.GetProperty("paths").TryGetProperty("/api/v1/ingredients", out _));
     }
 
     [Fact]

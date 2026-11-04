@@ -1,6 +1,8 @@
 namespace CoffeeShop.Application.Tests.Testing;
 
 using CoffeeShop.Application.Inventory;
+using CoffeeShop.Domain.Common;
+using CoffeeShop.Domain.Inventory;
 
 public sealed class FakeInventoryRepository : IInventoryRepository
 {

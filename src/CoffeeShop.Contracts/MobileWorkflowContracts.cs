@@ -29,3 +29,5 @@ public sealed record CourierAssignmentDetailResponse(Guid OrderId, string OrderN
     string RecipientName, string ContactNumber, string AddressLine);
 
 public sealed record FailDeliveryRequest(string? Reason);
+
+public sealed record AssignDeliveryRequest(Guid StaffId);

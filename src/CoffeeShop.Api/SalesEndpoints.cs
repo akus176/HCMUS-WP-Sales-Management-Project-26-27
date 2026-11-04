@@ -12,13 +12,14 @@ public static class SalesEndpoints
     {
         var orders = api.MapGroup("/orders").RequireAuthorization();
         orders.MapGet("/", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
-            Results.Ok((await handler.GetOrdersAsync(ct)).Select(ToOperational).ToArray()));
+            Results.Ok((await handler.GetOrdersAsync(ct)).Select(ToOperational).ToArray()))
+            .RequireAuthorization("orders.create").Produces<OperationalOrderResponse[]>();
         orders.MapGet("/{id:guid}", async (Guid id, PosOrderHandler handler, CancellationToken ct) =>
         {
             if (id == Guid.Empty) return InvalidId();
             var result = await handler.GetOrderAsync(new(id), ct);
             return result.IsSuccess ? Results.Ok(ToOrder(result.Value)) : ApiErrorResults.From(result.Error!);
-        });
+        }).RequireAuthorization("orders.create").Produces<OrderResponse>();
         orders.MapPost("/", async (CreateOrderRequest request, PosOrderHandler handler, CancellationToken ct) =>
         {
             if (request.OrderId == Guid.Empty || request.TableId == Guid.Empty ||
@@ -34,14 +35,14 @@ public static class SalesEndpoints
                 request.Lines.Select(line => new PosLineRequest(new(line.MenuItemId), new(line.SizeVariantId),
                     line.Quantity, (line.AddonIds ?? []).Select(id => new EntityId(id)).ToArray())).ToArray()), ct);
             return result.IsSuccess ? Results.Json(ToOrder(result.Value), statusCode: 201) : ApiErrorResults.From(result.Error!);
-        }).RequireAuthorization("orders.create");
+        }).RequireAuthorization("orders.create").Produces<OrderResponse>(201);
         orders.MapPost("/{id:guid}/confirm", async (Guid id, ConfirmOrderRequest request, PosOrderHandler handler,
             CancellationToken ct) =>
         {
             if (id == Guid.Empty) return InvalidId();
             var result = await handler.ConfirmAsync(new(id), request.ReviewedTotal, ct);
             return result.IsSuccess ? Results.Ok(ToOrder(result.Value)) : ApiErrorResults.From(result.Error!);
-        }).RequireAuthorization("orders.confirm");
+        }).RequireAuthorization("orders.confirm").Produces<OrderResponse>();
         orders.MapPost("/{id:guid}/payments", async (Guid id, RecordPaymentRequest request,
             PaymentCommandHandler handler, CancellationToken ct) =>
         {
@@ -49,7 +50,7 @@ public static class SalesEndpoints
             var result = await handler.RecordAsync(new(new(request.PaymentId), new(id), request.Method ?? string.Empty,
                 request.Amount, request.Status ?? PaymentStatus.Succeeded, request.Reference), ct);
             return result.IsSuccess ? Results.Ok(result.Value) : ApiErrorResults.From(result.Error!);
-        }).RequireAuthorization("payments.record");
+        }).RequireAuthorization("payments.record").Produces<PaymentOperationResult>();
         orders.MapPost("/{id:guid}/discounts", async (Guid id, DiscountRequest request,
             PosOrderHandler handler, CancellationToken ct) =>
         {
@@ -73,7 +74,7 @@ public static class SalesEndpoints
             CancellationToken ct) => Transition(id, OrderStatus.Completed, handler, ct)).RequireAuthorization("orders.complete");
 
         api.MapGet("/tables", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
-            Results.Ok(await handler.GetTablesAsync(ct))).RequireAuthorization();
+            Results.Ok(await handler.GetTablesAsync(ct))).RequireAuthorization("orders.create");
         api.MapGet("/preparation-tickets", async (FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, CancellationToken ct) =>
         {
@@ -90,7 +91,7 @@ public static class SalesEndpoints
                         line.Addons.Select(addon => addon.Name).ToArray())).ToArray()));
             }
             return Results.Ok(tickets);
-        }).RequireAuthorization("orders.fulfill");
+        }).RequireAuthorization("orders.fulfill").Produces<PreparationTicketResponse[]>();
         api.MapGet("/discounts/pending", async (FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, CancellationToken ct) =>
         {
@@ -104,7 +105,7 @@ public static class SalesEndpoints
                         order.OrderNumber, discount.Type, discount.Value, discount.Reason, discount.Amount, order.Total)));
             }
             return Results.Ok(pending);
-        }).RequireAuthorization("discounts.approve");
+        }).RequireAuthorization("discounts.approve").Produces<PendingDiscountResponse[]>();
         api.MapPost("/discounts/{id:guid}/approve", (Guid id, DiscountCommandHandler handler,
             CancellationToken ct) => DecideDiscount(id, true, handler, ct)).RequireAuthorization("discounts.approve");
         api.MapPost("/discounts/{id:guid}/reject", (Guid id, DiscountCommandHandler handler,

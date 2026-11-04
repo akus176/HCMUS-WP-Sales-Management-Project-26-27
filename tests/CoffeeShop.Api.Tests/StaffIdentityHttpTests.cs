@@ -330,6 +330,65 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task CourierAssignment_EnforcesOwnershipAndSingleDeliveryTransition()
+    {
+        await using (var db = Database()) await AddUserAsync(db, "othercourier", ["DeliveryStaff"]);
+        using var manager = host!.CreateClient();
+        var managerLogin = await LoginAsync(manager, "Manager");
+        manager.DefaultRequestHeaders.Authorization = new("Bearer", managerLogin.AccessToken);
+        using var categoryCreated = await manager.PostAsJsonAsync("/api/v1/categories", new CreateCategoryRequest("Delivery drinks"));
+        var category = (await categoryCreated.Content.ReadFromJsonAsync<CategoryResponse>())!;
+        using var itemCreated = await manager.PostAsJsonAsync("/api/v1/menu-items",
+            new MenuItemRequest(category.Id, "Mocha", null, [new SizeVariantRequest("Regular", 5m)]));
+        var item = (await itemCreated.Content.ReadFromJsonAsync<MenuItemResponse>())!;
+        var orderId = Guid.NewGuid();
+        using var draft = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(orderId, "delivery", null,
+            new OrderCustomerRequest(RecipientName: "Customer", ContactNumber: "1234567890", AddressLine: "123 Main St"),
+            [new OrderLineRequest(item.Id, Assert.Single(item.SizeVariants).Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, draft.StatusCode);
+        using var confirmed = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/confirm", new ConfirmOrderRequest(5m));
+        Assert.Equal(HttpStatusCode.OK, confirmed.StatusCode);
+        using var preparing = await manager.PostAsync($"/api/v1/orders/{orderId}/preparing", null);
+        Assert.Equal(HttpStatusCode.NoContent, preparing.StatusCode);
+        using var ready = await manager.PostAsync($"/api/v1/orders/{orderId}/ready", null);
+        Assert.Equal(HttpStatusCode.NoContent, ready.StatusCode);
+        var courierLogin = await LoginAsync(manager, "DeliveryStaff");
+        using var assigned = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery",
+            new AssignDeliveryRequest(courierLogin.User.Id));
+        Assert.Equal(HttpStatusCode.NoContent, assigned.StatusCode);
+        using var repeatedAssignment = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery",
+            new AssignDeliveryRequest(courierLogin.User.Id));
+        Assert.Equal(HttpStatusCode.Conflict, repeatedAssignment.StatusCode);
+
+        using var courier = host.CreateClient();
+        courier.DefaultRequestHeaders.Authorization = new("Bearer", courierLogin.AccessToken);
+        var assignments = await courier.GetFromJsonAsync<CourierAssignmentResponse[]>("/api/v1/courier/assignments");
+        Assert.Equal(orderId, Assert.Single(assignments!).OrderId);
+        var detail = await courier.GetFromJsonAsync<CourierAssignmentDetailResponse>($"/api/v1/courier/assignments/{orderId}");
+        Assert.Equal("123 Main St", detail!.AddressLine);
+        using var other = host.CreateClient();
+        var otherLogin = await LoginAsync(other, "othercourier");
+        other.DefaultRequestHeaders.Authorization = new("Bearer", otherLogin.AccessToken);
+        using var hidden = await other.GetAsync($"/api/v1/courier/assignments/{orderId}");
+        Assert.Equal(HttpStatusCode.NotFound, hidden.StatusCode);
+        using var denied = await other.PostAsync($"/api/v1/courier/assignments/{orderId}/start", null);
+        Assert.Equal(HttpStatusCode.NotFound, denied.StatusCode);
+        using var started = await courier.PostAsync($"/api/v1/courier/assignments/{orderId}/start", null);
+        Assert.Equal(HttpStatusCode.NoContent, started.StatusCode);
+        using var retry = await courier.PostAsync($"/api/v1/courier/assignments/{orderId}/start", null);
+        Assert.Equal(HttpStatusCode.Conflict, retry.StatusCode);
+        using var completed = await courier.PostAsync($"/api/v1/courier/assignments/{orderId}/complete", null);
+        Assert.Equal(HttpStatusCode.NoContent, completed.StatusCode);
+        using var repeatedCompletion = await courier.PostAsync($"/api/v1/courier/assignments/{orderId}/complete", null);
+        Assert.Equal(HttpStatusCode.Conflict, repeatedCompletion.StatusCode);
+        Assert.Empty((await courier.GetFromJsonAsync<CourierAssignmentResponse[]>("/api/v1/courier/assignments"))!);
+        using var expiredDetail = await courier.GetAsync($"/api/v1/courier/assignments/{orderId}");
+        Assert.Equal(HttpStatusCode.NotFound, expiredDetail.StatusCode);
+        await using var finalDb = Database();
+        Assert.Equal(3, await finalDb.DeliveryStatusHistories.CountAsync());
+    }
+
+    [PostgresFact]
     public async Task SalesWorkflow_PersistsDraftPaymentAndPreparationAcrossRoles()
     {
         using var manager = host!.CreateClient();
@@ -355,6 +414,16 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var retriedDraft = await cashier.PostAsJsonAsync("/api/v1/orders", draftRequest);
         Assert.Equal(HttpStatusCode.Created, retriedDraft.StatusCode);
         await using (var db = Database()) Assert.Single(await db.Orders.Where(order => order.Id == new EntityId(orderId)).ToArrayAsync());
+        var discountId = Guid.NewGuid();
+        using var requested = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/discounts",
+            new DiscountRequest(discountId, "fixed", 1m, "Customer apology"));
+        Assert.Equal(HttpStatusCode.Created, requested.StatusCode);
+        var pending = await manager.GetFromJsonAsync<PendingDiscountResponse[]>("/api/v1/discounts/pending");
+        Assert.Equal("Customer apology", Assert.Single(pending!).Reason);
+        using var rejected = await manager.PostAsync($"/api/v1/discounts/{discountId}/reject", null);
+        Assert.Equal(HttpStatusCode.OK, rejected.StatusCode);
+        using var repeatedDecision = await manager.PostAsync($"/api/v1/discounts/{discountId}/reject", null);
+        Assert.Equal(HttpStatusCode.Conflict, repeatedDecision.StatusCode);
         using var wrongTotal = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/confirm", new ConfirmOrderRequest(4m));
         Assert.Equal(HttpStatusCode.Conflict, wrongTotal.StatusCode);
         using var confirmed = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/confirm", new ConfirmOrderRequest(5m));

@@ -4,8 +4,9 @@ Date: 4 November 2026. OpenSpec change: `add-staff-mobile-app`, tasks 2.1–2.3.
 This baseline is for the shared `/api/v1` ASP.NET Core API and PostgreSQL state. It
 does not change the WinUI client or duplicate its domain rules. The active OpenAPI
 document is served at `/openapi/v1.json` in Development and contains only mapped
-routes. The P0 route decisions below are reserved for #142; a client must not call
-them until they are implemented and appear in OpenAPI.
+routes. The P0 route decisions below are reserved for #142. Issue #151 has
+published a subset of shared workflows; see `docs/shared-workflow-api-151.md`
+for the routes now available.
 
 ## Available authentication contract
 
@@ -27,12 +28,12 @@ Refresh tokens rotate and are never sent in a URL. Auth responses set
 
 ## P0 route and DTO decisions for #142
 
-All collection responses use `PageResponse<T>` with `items`, `page`,
+The target mobile contract uses `PageResponse<T>` with `items`, `page`,
 `pageSize`, and `totalCount`; an empty result is `200` with `items: []`.
 Route parameters are GUIDs. Query filters and ordering must be implemented
-and verified by #142 before publication. Names below identify C# transport
-records in `CoffeeShop.Contracts/MobileWorkflowContracts.cs`; they are not
-currently part of the served OpenAPI document.
+and verified by #142 before publication. Some transport records below are now
+used by #151 routes and appear in the served OpenAPI document. The #151 routes
+return arrays until #142 adds page envelopes and mobile aliases.
 
 | Workflow and reserved route | Response / request contract | Required permission and server rule |
 | --- | --- | --- |
@@ -49,10 +50,10 @@ currently part of the served OpenAPI document.
 The API must bind every write to the authenticated staff ID. It must load
 current records and enforce permissions and state transitions on the server,
 using existing Application/Domain handlers and the same PostgreSQL database
-as WinUI. A client must refetch after `204` or `409`. No automatic retry of a
-write after a timeout: #142 must establish idempotency before any such retry.
-Endpoint tests must prove allowed, forbidden, empty, validation, stale-state,
-and cross-courier isolation before these routes are advertised.
+as WinUI. A client must refetch after `204` or `409`. Issue #151 supplies
+idempotency keys for draft, payment, and stock adjustment writes, plus
+state-based conflict responses for delivery writes. The exact #142 mobile
+aliases and pagination remain to be verified.
 
 ## HTTP errors and authorization
 
@@ -73,12 +74,9 @@ traces in problem responses.
 | `409` | Changed order, discount, or delivery state; refetch before a new decision. |
 | `422` | Other domain business rule failure when the existing handler returns that category. |
 
-Authentication, category authorization, and category validation/conflict
-behavior already have PostgreSQL-backed API tests. P0 business routes and
-their integration tests belong to #142. OpenSpec 2.2 and 2.3 remain
-incomplete until the actual P0 routes, OpenAPI schemas, and generated-client
-contract verification are implemented. This document and the DTOs reserve the
-wire contract without publishing placeholder routes or schemas.
+Issue #151 adds PostgreSQL-backed endpoint tests for its business routes.
+OpenSpec mobile tasks 2.2 and 2.3 remain incomplete until the exact #142 P0
+aliases, page envelopes, and generated-client verification are implemented.
 
 ## Reproduction
 
@@ -92,13 +90,13 @@ dotnet test tests/CoffeeShop.Api.Tests --configuration Release
 
 The integration suite creates, migrates, and drops isolated databases. The
 `HostTests` compare OpenAPI bytes across two request origins, assert the
-Bearer scheme and protected operations, and assert that unpublished P0 routes
-and schemas are absent. `StaffIdentityHttpTests` exercise six roles, combined
+Bearer scheme and protected operations. `StaffIdentityHttpTests` exercise six roles, combined
 permissions, inactive accounts, refresh-token rejection, and live permission
 changes. `CatalogHttpTests` exercise allowed/forbidden, invalid, not-found,
 and conflict responses. No mobile or WinUI shared-state demonstration is
 claimed by these tests.
 
+The baseline results below predate #151; see its PR checks for current results.
 On 4 November 2026, the full PostgreSQL-backed API suite passed 24/24,
 Domain passed 413/413, Application passed 422/422, and Infrastructure passed
 258/258. `openspec validate add-staff-mobile-app` passed. These results cover
