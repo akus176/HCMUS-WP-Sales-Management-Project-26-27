@@ -273,12 +273,6 @@ public sealed class InventoryCommandHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var ingredient = await repository.FindIngredientAsync(command.IngredientId, cancellationToken);
-        if (ingredient is null)
-        {
-            return Result.Failure(IngredientNotFound(command.IngredientId));
-        }
-
         if (string.IsNullOrWhiteSpace(command.Reason))
         {
             return Result.Failure(Error.Validation("inventory.adjustment_reason_required", "A stock adjustment requires a reason."));
@@ -293,9 +287,26 @@ public sealed class InventoryCommandHandler
         {
             return await transactionManager.ExecuteInTransactionAsync(async () =>
             {
+                var ingredient = command.AdjustmentId is null
+                    ? await repository.FindIngredientAsync(command.IngredientId, cancellationToken)
+                    : await repository.LoadIngredientForAdjustmentAsync(command.IngredientId, cancellationToken);
+                if (ingredient is null) return Result.Failure(IngredientNotFound(command.IngredientId));
+                if (command.AdjustmentId is not null)
+                {
+                    var existing = await repository.FindStockMovementAsync(command.AdjustmentId, cancellationToken);
+                    if (existing is not null)
+                    {
+                        return existing.Type == StockMovementType.Adjustment && existing.IngredientId == command.IngredientId &&
+                            existing.QuantityDelta == command.QuantityDelta && existing.Reason == command.Reason.Trim() &&
+                            existing.ActorId == command.ActorId
+                            ? Result.Success()
+                            : Result.Failure(Error.Conflict("inventory.adjustment_retry_mismatch",
+                                "The adjustment identifier is already associated with different data."));
+                    }
+                }
                 ingredient.Adjust(command.QuantityDelta, clock.UtcNow);
                 repository.AddStockMovement(new StockMovement(
-                    EntityId.New(), ingredient.Id, StockMovementType.Adjustment, command.QuantityDelta,
+                    command.AdjustmentId ?? EntityId.New(), ingredient.Id, StockMovementType.Adjustment, command.QuantityDelta,
                     command.ActorId, command.Reason, clock.UtcNow));
                 await unitOfWork.SaveChangesAsync(cancellationToken);
                 return Result.Success();

@@ -7,6 +7,10 @@ public interface IInventoryRepository
 {
     Task<Ingredient?> FindIngredientAsync(EntityId id, CancellationToken cancellationToken = default);
 
+    Task<Ingredient?> LoadIngredientForAdjustmentAsync(EntityId id, CancellationToken cancellationToken = default);
+
+    Task<StockMovement?> FindStockMovementAsync(EntityId id, CancellationToken cancellationToken = default);
+
     Task<Supplier?> FindSupplierAsync(EntityId id, CancellationToken cancellationToken = default);
 
     Task<PurchaseReceipt?> FindReceiptWithLinesAsync(EntityId id, CancellationToken cancellationToken = default);

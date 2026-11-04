@@ -3,6 +3,8 @@ using CoffeeShop.Application.Catalog;
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Common.Security;
 using CoffeeShop.Application.Common.Time;
+using CoffeeShop.Application.Customers;
+using CoffeeShop.Application.Sales;
 using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Infrastructure.Postgres;
@@ -24,6 +26,13 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddScoped<CatalogQueryHandler>();
 builder.Services.AddScoped<CatalogCommandHandler>();
+builder.Services.AddScoped<RecipeCommandHandler>();
+builder.Services.AddScoped<CustomerOrderSelectionHandler>();
+builder.Services.AddScoped<OrderConfirmationCommandHandler>();
+builder.Services.AddScoped<DiscountCommandHandler>();
+builder.Services.AddScoped<PosOrderHandler>();
+builder.Services.AddScoped<PaymentCommandHandler>();
+builder.Services.AddScoped<DeliveryCommandHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi(options =>
 {
@@ -90,6 +99,10 @@ app.MapHealthChecks("/health/ready", new() { Predicate = check => check.Tags.Con
 
 var api = app.MapGroup("/api/v1");
 api.MapStaffIdentity();
+api.MapInventoryEndpoints();
+api.MapCatalogEndpoints();
+api.MapSalesEndpoints();
+api.MapDeliveryEndpoints();
 api.MapGet("/categories", async (
     CatalogQueryHandler handler, string? search, bool? isActive, int? limit, CancellationToken cancellationToken) =>
 {

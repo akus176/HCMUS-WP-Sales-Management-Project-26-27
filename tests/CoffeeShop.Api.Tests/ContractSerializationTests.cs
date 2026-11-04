@@ -69,7 +69,7 @@ public sealed class ContractSerializationTests
         Assert.Equal(2.50m, discountJson.RootElement.GetProperty("computedAmount").GetDecimal());
         Assert.Equal(1.25m, balanceJson.RootElement.GetProperty("availableQuantity").GetDecimal());
         Assert.Equal(-0.5m, JsonSerializer.Deserialize<StockAdjustmentRequest>(
-            "{\"quantityDelta\":-0.5,\"reason\":\"Damaged\"}", options)!.QuantityDelta);
+            $"{{\"requestId\":\"{Guid.NewGuid()}\",\"quantityDelta\":-0.5,\"reason\":\"Damaged\"}}", options)!.QuantityDelta);
     }
 
     [Fact]

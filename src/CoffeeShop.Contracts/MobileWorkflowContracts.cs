@@ -18,7 +18,7 @@ public sealed record IngredientBalanceResponse(Guid IngredientId, string Name, s
     decimal AvailableQuantity, decimal ReorderThreshold);
 
 // Actor identity is always read from the authenticated session by the API.
-public sealed record StockAdjustmentRequest(decimal QuantityDelta, string? Reason);
+public sealed record StockAdjustmentRequest(Guid RequestId, decimal QuantityDelta, string? Reason);
 
 public sealed record StockAdjustmentResponse(Guid IngredientId, decimal AvailableQuantity);
 
@@ -29,3 +29,5 @@ public sealed record CourierAssignmentDetailResponse(Guid OrderId, string OrderN
     string RecipientName, string ContactNumber, string AddressLine);
 
 public sealed record FailDeliveryRequest(string? Reason);
+
+public sealed record AssignDeliveryRequest(Guid StaffId);

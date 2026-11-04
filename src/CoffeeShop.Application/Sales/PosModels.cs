@@ -13,7 +13,8 @@ public sealed record CreatePosDraftCommand(EntityId OrderId, string Channel, Ent
 public sealed record PosAddonSnapshot(string Name, decimal UnitPrice);
 public sealed record PosLineSnapshot(string ItemName, string SizeName, int Quantity, decimal UnitPrice,
     decimal Total, IReadOnlyList<PosAddonSnapshot> Addons);
-public sealed record PosDiscountSummary(EntityId Id, string Type, decimal Value, string Status, decimal? Amount);
+public sealed record PosDiscountSummary(EntityId Id, string Type, decimal Value, string Status, decimal? Amount,
+    string Reason);
 public sealed record PosOrderDetail(EntityId Id, string OrderNumber, string Channel, string Status,
     EntityId? CustomerId, string? CustomerName, EntityId? TableId, string? TableNumber,
     string? RecipientName, string? ContactNumber, string? AddressLine, EntityId? CustomerAddressId,
@@ -28,5 +29,5 @@ public sealed record PosOrderDetail(EntityId Id, string OrderNumber, string Chan
             line.Quantity, line.UnitPriceSnapshot.Amount, line.LineTotal.Amount,
             line.Addons.Select(addon => new PosAddonSnapshot(addon.AddonNameSnapshot, addon.AddonPriceSnapshot.Amount)).ToArray())).ToArray(),
         order.Discounts.Select(discount => new PosDiscountSummary(discount.Id, discount.Type,
-            discount.Value, discount.Status, discount.ComputedAmount?.Amount)).ToArray());
+            discount.Value, discount.Status, discount.ComputedAmount?.Amount, discount.Reason)).ToArray());
 }

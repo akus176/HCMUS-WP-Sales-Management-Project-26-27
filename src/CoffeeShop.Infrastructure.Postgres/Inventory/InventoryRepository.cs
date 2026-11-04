@@ -17,6 +17,17 @@ public sealed class InventoryRepository : IInventoryRepository, IStockMovementRe
     public Task<Ingredient?> FindIngredientAsync(EntityId id, CancellationToken cancellationToken = default) =>
         context.Ingredients.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
 
+    public async Task<Ingredient?> LoadIngredientForAdjustmentAsync(EntityId id, CancellationToken cancellationToken = default)
+    {
+        RequireTransaction();
+        return await context.Ingredients.FromSqlInterpolated(
+            $"SELECT * FROM inventory.ingredients WHERE id = {id.Value} FOR UPDATE")
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public Task<StockMovement?> FindStockMovementAsync(EntityId id, CancellationToken cancellationToken = default) =>
+        context.StockMovements.AsNoTracking().FirstOrDefaultAsync(movement => movement.Id == id, cancellationToken);
+
     public Task<Supplier?> FindSupplierAsync(EntityId id, CancellationToken cancellationToken = default) =>
         context.Suppliers.FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
 
