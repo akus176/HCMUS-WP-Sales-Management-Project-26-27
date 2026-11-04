@@ -28,6 +28,8 @@ builder.Services.AddScoped<CatalogQueryHandler>();
 builder.Services.AddScoped<CatalogCommandHandler>();
 builder.Services.AddScoped<RecipeCommandHandler>();
 builder.Services.AddScoped<CustomerOrderSelectionHandler>();
+builder.Services.AddScoped<CustomerCommandHandler>();
+builder.Services.AddScoped<CustomerQueryHandler>();
 builder.Services.AddScoped<OrderConfirmationCommandHandler>();
 builder.Services.AddScoped<DiscountCommandHandler>();
 builder.Services.AddScoped<PosOrderHandler>();
@@ -103,6 +105,7 @@ api.MapInventoryEndpoints();
 api.MapCatalogEndpoints();
 api.MapSalesEndpoints();
 api.MapDeliveryEndpoints();
+api.MapCustomerEndpoints();
 api.MapGet("/categories", async (
     CatalogQueryHandler handler, string? search, bool? isActive, int? limit, CancellationToken cancellationToken) =>
 {

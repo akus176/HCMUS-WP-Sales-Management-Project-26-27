@@ -534,6 +534,54 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task CustomerRoutes_ManageProfilesAndAddressesWithPermissionAndPersistence()
+    {
+        using var manager = host!.CreateClient();
+        using var anonymous = await manager.GetAsync("/api/v1/customers");
+        Assert.Equal(HttpStatusCode.Unauthorized, anonymous.StatusCode);
+
+        var managerLogin = await LoginAsync(manager, "Manager");
+        manager.DefaultRequestHeaders.Authorization = new("Bearer", managerLogin.AccessToken);
+        var customerRequest = new CustomerRequest("Ada Lovelace", Random.Shared.NextInt64(100_000_000_000, 999_999_999_999).ToString(), "ada@example.test");
+        using var created = await manager.PostAsJsonAsync("/api/v1/customers", customerRequest);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var customer = (await created.Content.ReadFromJsonAsync<CustomerResponse>())!;
+
+        using var duplicate = await manager.PostAsJsonAsync("/api/v1/customers", customerRequest);
+        Assert.Equal(HttpStatusCode.Conflict, duplicate.StatusCode);
+        using var addressCreated = await manager.PostAsJsonAsync($"/api/v1/customers/{customer.Id}/addresses",
+            new CustomerAddressRequest("12 Analytical Engine Way", "Home", true));
+        Assert.Equal(HttpStatusCode.Created, addressCreated.StatusCode);
+        var address = (await addressCreated.Content.ReadFromJsonAsync<CustomerAddressResponse>())!;
+
+        var detail = await manager.GetFromJsonAsync<CustomerDetailResponse>($"/api/v1/customers/{customer.Id}");
+        Assert.Equal(customer.Id, detail!.Id);
+        Assert.Equal("Ada Lovelace", detail.FullName);
+        Assert.Equal("12 Analytical Engine Way", Assert.Single(detail.Addresses).AddressLine);
+        Assert.Equal(customer.Id, Assert.Single((await manager.GetFromJsonAsync<CustomerResponse[]>(
+            "/api/v1/customers?search=Ada"))!.Select(item => item.Id)));
+
+        using var updated = await manager.PatchAsJsonAsync($"/api/v1/customers/{customer.Id}",
+            new CustomerRequest("Ada Byron", customerRequest.Phone, customerRequest.Email));
+        Assert.Equal(HttpStatusCode.NoContent, updated.StatusCode);
+        using var inactiveAddress = await manager.PostAsync(
+            $"/api/v1/customers/{customer.Id}/addresses/{address.Id}/deactivate", null);
+        Assert.Equal(HttpStatusCode.NoContent, inactiveAddress.StatusCode);
+        using var deactivated = await manager.PostAsync($"/api/v1/customers/{customer.Id}/deactivate", null);
+        Assert.Equal(HttpStatusCode.NoContent, deactivated.StatusCode);
+        Assert.Empty(await manager.GetFromJsonAsync<CustomerResponse[]>("/api/v1/customers?search=Ada") ?? []);
+        Assert.Single(await manager.GetFromJsonAsync<CustomerResponse[]>("/api/v1/customers?search=Ada&isActive=false") ?? []);
+
+        var barista = host.CreateClient();
+        var baristaLogin = await LoginAsync(barista, "Barista");
+        barista.DefaultRequestHeaders.Authorization = new("Bearer", baristaLogin.AccessToken);
+        using var forbidden = await barista.PostAsJsonAsync("/api/v1/customers", customerRequest with { Phone = "5550000000001" });
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        await using var db = Database();
+        Assert.False((await db.Customers.SingleAsync()).IsActive);
+    }
+
+    [PostgresFact]
     public async Task CatalogRecipe_IsSharedAcrossSessionsAndRejectsInvalidChanges()
     {
         using var manager = host!.CreateClient();
@@ -691,4 +739,12 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         await using var command = new NpgsqlCommand($"DROP DATABASE IF EXISTS \"{databaseName}\" WITH (FORCE)", connection);
         await command.ExecuteNonQueryAsync();
     }
+
+    private sealed record CustomerRequest(string FullName, string Phone, string? Email);
+    private sealed record CustomerResponse(Guid Id, string FullName, string Phone, string? Email, bool IsActive, int LoyaltyPointsBalance);
+    private sealed record CustomerAddressRequest(string AddressLine, string? Label, bool IsDefault);
+    private sealed record CustomerAddressResponse(Guid Id, string AddressLine, string? Label, bool IsDefault, bool IsActive);
+    private sealed record CustomerDetailResponse(Guid Id, string FullName, string Phone, string? Email, bool IsActive,
+        int LoyaltyPointsBalance, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt,
+        IReadOnlyList<CustomerAddressResponse> Addresses, IReadOnlyList<object> RecentOrders);
 }
