@@ -1,0 +1,13 @@
+{
+  "name": "@coffee-shop/mobile-p0-contract",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "generate": "bash ../../scripts/generate-mobile-p0-contract.sh",
+    "check": "npm run generate && git diff --exit-code -- openapi.json schema.d.ts && tsc --noEmit"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.10.1",
+    "typescript": "5.9.3"
+  }
+}

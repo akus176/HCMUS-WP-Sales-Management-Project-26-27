@@ -68,6 +68,58 @@ public sealed class HostTests
     }
 
     [Fact]
+    public async Task MobileP0OpenApiMatchesPublishedResponsesAndPrivacyBoundary()
+    {
+        using var host = CreateHost();
+        using var client = host.CreateClient();
+        using var document = JsonDocument.Parse(await client.GetStringAsync("/openapi/v1.json"));
+        var paths = document.RootElement.GetProperty("paths");
+        var schemas = document.RootElement.GetProperty("components").GetProperty("schemas");
+        foreach (var (path, schema) in new[]
+        {
+            ("/api/v1/preparation-tickets", "PageResponseOfPreparationTicketResponse"),
+            ("/api/v1/discounts/pending", "PageResponseOfPendingDiscountResponse"),
+            ("/api/v1/ingredients", "PageResponseOfIngredientBalanceResponse"),
+            ("/api/v1/ingredients/low-stock", "PageResponseOfIngredientBalanceResponse"),
+            ("/api/v1/courier/assignments", "PageResponseOfCourierAssignmentResponse"),
+        })
+        {
+            var operation = paths.GetProperty(path).GetProperty("get");
+            Assert.Equal($"#/components/schemas/{schema}", operation.GetProperty("responses")
+                .GetProperty("200").GetProperty("content").GetProperty("application/json")
+                .GetProperty("schema").GetProperty("$ref").GetString());
+            Assert.True(operation.GetProperty("security")[0].TryGetProperty("Bearer", out _));
+            Assert.Contains(operation.GetProperty("parameters").EnumerateArray(), parameter =>
+                parameter.GetProperty("name").GetString() == "pageSize");
+            Assert.True(operation.GetProperty("responses").TryGetProperty("400", out _));
+        }
+
+        foreach (var path in new[] { "/api/v1/preparation-tickets/{id}/start",
+            "/api/v1/preparation-tickets/{id}/ready", "/api/v1/courier/assignments/{id}/start",
+            "/api/v1/courier/assignments/{id}/complete", "/api/v1/courier/assignments/{id}/fail" })
+        {
+            var operation = paths.GetProperty(path).GetProperty("post");
+            Assert.True(operation.GetProperty("responses").TryGetProperty("204", out _));
+            Assert.True(operation.GetProperty("responses").TryGetProperty("409", out _));
+            Assert.True(operation.GetProperty("security")[0].TryGetProperty("Bearer", out _));
+        }
+
+        var ticket = schemas.GetProperty("PreparationTicketResponse").GetProperty("properties");
+        Assert.False(ticket.TryGetProperty("customerId", out _));
+        Assert.False(ticket.TryGetProperty("contactNumber", out _));
+        var courier = schemas.GetProperty("CourierAssignmentResponse").GetProperty("properties");
+        Assert.False(courier.TryGetProperty("contactNumber", out _));
+        Assert.False(courier.TryGetProperty("addressLine", out _));
+        Assert.True(schemas.GetProperty("CourierAssignmentDetailResponse").GetProperty("properties")
+            .TryGetProperty("addressLine", out _));
+        var adjustment = schemas.GetProperty("StockAdjustmentRequest").GetProperty("properties");
+        Assert.True(adjustment.TryGetProperty("requestId", out _));
+        Assert.False(adjustment.TryGetProperty("actorId", out _));
+        Assert.Equal("uuid", schemas.GetProperty("PaymentResponse").GetProperty("properties")
+            .GetProperty("paymentId").GetProperty("format").GetString());
+    }
+
+    [Fact]
     public async Task OpenApiDescribesBearerOnProtectedRoutesOnly()
     {
         using var host = CreateHost();

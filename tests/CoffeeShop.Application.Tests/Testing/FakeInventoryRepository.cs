@@ -33,6 +33,8 @@ public sealed class FakeInventoryRepository : IInventoryRepository
     public Task<Ingredient?> LoadIngredientForAdjustmentAsync(EntityId id, CancellationToken cancellationToken = default) =>
         FindIngredientAsync(id, cancellationToken);
 
+    public Task LockAdjustmentRequestAsync(EntityId id, CancellationToken cancellationToken = default) => Task.CompletedTask;
+
     public Task<StockMovement?> FindStockMovementAsync(EntityId id, CancellationToken cancellationToken = default) =>
         Task.FromResult(StockMovements.FirstOrDefault(movement => movement.Id == id));
 

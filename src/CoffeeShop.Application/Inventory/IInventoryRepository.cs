@@ -9,6 +9,8 @@ public interface IInventoryRepository
 
     Task<Ingredient?> LoadIngredientForAdjustmentAsync(EntityId id, CancellationToken cancellationToken = default);
 
+    Task LockAdjustmentRequestAsync(EntityId id, CancellationToken cancellationToken = default);
+
     Task<StockMovement?> FindStockMovementAsync(EntityId id, CancellationToken cancellationToken = default);
 
     Task<Supplier?> FindSupplierAsync(EntityId id, CancellationToken cancellationToken = default);

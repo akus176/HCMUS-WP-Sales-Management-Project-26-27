@@ -13,9 +13,9 @@ from that session; request bodies never supply an authoritative actor ID.
 | Delivery | `/delivery-staff`, `/orders/{id}/assign-delivery`, `/courier/assignments`, `/courier/assignments/{id}/start`, `/complete`, `/fail` | `delivery.assign`, `delivery.update` |
 
 The exact methods, JSON schemas, and response codes are in `/openapi/v1.json`
-when the API runs in Development. Collection responses in this issue are JSON
-arrays. Mobile task #142 still owns page envelopes, filters, and its reserved
-route aliases.
+when the API runs in Development. Issue #142 adds page envelopes, filters, and
+mobile preparation routes for the P0 collections listed in
+`docs/mobile-api-contract-137.md`. Other collection responses remain arrays.
 
 Order creation uses a client-generated `orderId`; identical retries return the
 stored draft. Payment and stock adjustment requests also use client-generated

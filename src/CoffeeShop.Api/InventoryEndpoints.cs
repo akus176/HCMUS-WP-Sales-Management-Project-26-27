@@ -10,22 +10,29 @@ public static class InventoryEndpoints
 {
     public static void MapInventoryEndpoints(this RouteGroupBuilder api)
     {
-        api.MapGet("/ingredients", async (IInventoryRepository repository, string? search, bool? isActive, CancellationToken ct) =>
+        api.MapGet("/ingredients", async (IInventoryRepository repository, string? search, bool? isActive,
+            int? page, int? pageSize, CancellationToken ct) =>
         {
             var ingredients = await repository.ListIngredientsAsync(ct);
-            return Results.Ok(ingredients.Where(ingredient => isActive is null || ingredient.IsActive == isActive)
+            var result = ingredients.Where(ingredient => isActive is null || ingredient.IsActive == isActive)
                 .Where(ingredient => string.IsNullOrWhiteSpace(search) || ingredient.Name.Contains(search.Trim(), StringComparison.OrdinalIgnoreCase))
                 .OrderBy(ingredient => ingredient.Name).ThenBy(ingredient => ingredient.Id.Value)
-                .Select(ToBalance).ToArray());
-        }).RequireAuthorization("inventory.manage").Produces<IngredientBalanceResponse[]>();
+                .Select(ToBalance).ToArray();
+            return MobilePage.From(result, page, pageSize);
+        }).RequireAuthorization("inventory.manage").Produces<PageResponse<IngredientBalanceResponse>>()
+            .ProducesProblem(400).ProducesProblem(403);
 
-        api.MapGet("/ingredients/low-stock", async (IInventoryRepository repository, CancellationToken ct) =>
+        api.MapGet("/ingredients/low-stock", async (IInventoryRepository repository, string? search,
+            int? page, int? pageSize, CancellationToken ct) =>
         {
             var ingredients = await repository.ListIngredientsAsync(ct);
-            return Results.Ok(ingredients.Where(ingredient => ingredient.IsActive && ingredient.AvailableQuantity <= ingredient.ReorderThreshold)
+            var result = ingredients.Where(ingredient => ingredient.IsActive && ingredient.AvailableQuantity <= ingredient.ReorderThreshold)
+                .Where(ingredient => string.IsNullOrWhiteSpace(search) || ingredient.Name.Contains(search.Trim(), StringComparison.OrdinalIgnoreCase))
                 .OrderBy(ingredient => ingredient.Name).ThenBy(ingredient => ingredient.Id.Value)
-                .Select(ToBalance).ToArray());
-        }).RequireAuthorization("reports.lowstock").Produces<IngredientBalanceResponse[]>();
+                .Select(ToBalance).ToArray();
+            return MobilePage.From(result, page, pageSize);
+        }).RequireAuthorization("reports.lowstock").Produces<PageResponse<IngredientBalanceResponse>>()
+            .ProducesProblem(400).ProducesProblem(403);
 
         api.MapPost("/ingredients", async (CreateIngredientRequest request, InventoryCommandHandler handler,
             IInventoryRepository repository, CancellationToken ct) =>

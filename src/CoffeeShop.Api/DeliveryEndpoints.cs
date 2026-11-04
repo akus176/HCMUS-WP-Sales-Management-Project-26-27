@@ -21,12 +21,22 @@ public static class DeliveryEndpoints
         }).RequireAuthorization("delivery.assign");
 
         var courier = api.MapGroup("/courier/assignments").RequireAuthorization("delivery.update");
-        courier.MapGet("/", async (FulfillmentOperationsQueryHandler query, ICurrentUser user, CancellationToken ct) =>
-            Results.Ok((await query.GetOrdersAsync(ct))
+        courier.MapGet("/", async (FulfillmentOperationsQueryHandler query, ICurrentUser user,
+            string? status, int? page, int? pageSize, CancellationToken ct) =>
+        {
+            var states = status?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (states is { Length: > 0 } && states.Any(state => state is not
+                (DeliveryStatusNames.Assigned or DeliveryStatusNames.OutForDelivery)))
+                return ApiErrorResults.From(Error.Validation("delivery.invalid_status", "Filter by assigned or out_for_delivery status."));
+            var assignments = (await query.GetOrdersAsync(ct))
                 .Where(order => order.AssignedStaffId == user.GetRequiredId() && order.Status != OrderStatus.Cancelled &&
                     order.DeliveryStatus is DeliveryStatusNames.Assigned or DeliveryStatusNames.OutForDelivery)
+                .Where(order => states is null || states.Length == 0 || states.Contains(order.DeliveryStatus!))
+                .OrderBy(order => order.OrderNumber).ThenBy(order => order.Id.Value)
                 .Select(order => new CourierAssignmentResponse(order.Id.Value, order.OrderNumber,
-                    order.DeliveryStatus!)).ToArray())).Produces<CourierAssignmentResponse[]>();
+                    order.DeliveryStatus!)).ToArray();
+            return MobilePage.From(assignments, page, pageSize);
+        }).Produces<PageResponse<CourierAssignmentResponse>>().ProducesProblem(400).ProducesProblem(403);
         courier.MapGet("/{id:guid}", async (Guid id, IDeliveryRepository repository, ICurrentUser user,
             PosOrderHandler orders, CancellationToken ct) =>
         {
@@ -38,14 +48,17 @@ public static class DeliveryEndpoints
                 return NotVisible();
             return Results.Ok(new CourierAssignmentDetailResponse(id, order.Value.OrderNumber,
                 visible.Value.Status, order.Value.RecipientName!, order.Value.ContactNumber!, order.Value.AddressLine!));
-        }).Produces<CourierAssignmentDetailResponse>();
+        }).Produces<CourierAssignmentDetailResponse>().ProducesProblem(400).ProducesProblem(403).ProducesProblem(404);
         courier.MapPost("/{id:guid}/start", (Guid id, IDeliveryRepository repository, ICurrentUser user,
-            DeliveryCommandHandler handler, CancellationToken ct) => Transition(id, repository, user, handler, 0, null, ct));
+            DeliveryCommandHandler handler, CancellationToken ct) => Transition(id, repository, user, handler, 0, null, ct))
+            .Produces(204).ProducesProblem(400).ProducesProblem(403).ProducesProblem(404).ProducesProblem(409);
         courier.MapPost("/{id:guid}/complete", (Guid id, IDeliveryRepository repository, ICurrentUser user,
-            DeliveryCommandHandler handler, CancellationToken ct) => Transition(id, repository, user, handler, 1, null, ct));
+            DeliveryCommandHandler handler, CancellationToken ct) => Transition(id, repository, user, handler, 1, null, ct))
+            .Produces(204).ProducesProblem(400).ProducesProblem(403).ProducesProblem(404).ProducesProblem(409);
         courier.MapPost("/{id:guid}/fail", (Guid id, FailDeliveryRequest request, IDeliveryRepository repository,
             ICurrentUser user, DeliveryCommandHandler handler, CancellationToken ct) =>
-            Transition(id, repository, user, handler, 2, request.Reason ?? string.Empty, ct));
+            Transition(id, repository, user, handler, 2, request.Reason ?? string.Empty, ct))
+            .Produces(204).ProducesProblem(400).ProducesProblem(403).ProducesProblem(404).ProducesProblem(409);
     }
 
     private static async Task<IResult> Transition(Guid id, IDeliveryRepository repository, ICurrentUser user,

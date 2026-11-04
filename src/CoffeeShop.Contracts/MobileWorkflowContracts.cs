@@ -1,7 +1,6 @@
 namespace CoffeeShop.Contracts;
 
-// These transport shapes reserve the P0 wire contract. They are not published in
-// OpenAPI until the corresponding HTTP routes are implemented.
+// P0 transport shapes shared by the versioned API and generated mobile contract.
 public sealed record PreparationTicketLine(string ItemName, string SizeName, int Quantity,
     IReadOnlyList<string> Addons);
 
