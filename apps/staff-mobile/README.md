@@ -1,8 +1,8 @@
-# Staff mobile starter (#138)
+# Staff mobile development
 
-Strict TypeScript, Expo SDK 58, React Native 0.88, and Expo Router. The only route
-is a public starter screen. Authentication, API calls, generated clients, and
-staff workflows belong to later issues.
+Strict TypeScript, Expo SDK 58, React Native 0.88, and Expo Router. The public
+starter links to staff sign-in. An authenticated session screen supports sign-out;
+operational workflows and the permission-aware module shell belong to later issues.
 
 ## Install and check
 
@@ -11,19 +11,82 @@ Use **Node 26.5.0** and **npm 11.17.0** (also recorded in `.nvmrc` and
 From the repository root:
 
 ```powershell
+npm ci --prefix contracts/mobile-p0
 cd apps/staff-mobile
 npm ci
+npm run api:generate
+npm run api:check
 npm run check
 npm run test:unit
 npm run test:components
 ```
 
-`check` runs strict TypeScript, ESLint, Prettier, and all Jest tests. The unit
-command tests the starter component; the component command tests the root route
-through Expo Router. Tests live outside `app/` so Router cannot expose them as
+`check` runs strict TypeScript, ESLint, Prettier, and all default Jest tests. The
+unit command covers transport, rotation and secure storage; the component command
+covers sign-in and protected Expo Router navigation. Tests live outside `app/` so Router cannot expose them as
 screens. Jest fails if no tests are discovered. `npm run format` applies Prettier.
 All direct dependencies and the full lockfile are pinned; use `npm ci` for repeat
 installs. Run `npx expo install --check` after changing native dependencies.
+
+## Generated client and sessions (#143)
+
+`api:generate` uses the existing **openapi-typescript 7.10.1** installation and
+lockfile in `contracts/mobile-p0` to regenerate its `schema.d.ts` from the
+committed `openapi.json`. `api:check` fails on a generated diff. The app's
+`src/api/schema.ts` re-exports those generated types; **openapi-fetch 0.17.0**
+provides the typed client. Do not hand-edit generated schemas. Updating the
+snapshot from the running API remains the shared contract pipeline documented
+in [the API baseline](../../docs/mobile-api-contract-137.md). The generator's
+TypeScript 5 dependency stays isolated from the app's TypeScript 6 dependency.
+
+Set the non-secret URL **before starting Metro**, in its terminal:
+
+```powershell
+$env:EXPO_PUBLIC_API_BASE_URL = 'http://10.0.2.2:5232/api/v1'
+```
+
+The URL must end in `/api/v1`, without credentials, query or fragment. Release
+builds require HTTPS. Without valid configuration, the public starter remains
+available and sign-in reports that the service is not configured. `EXPO_PUBLIC_*`
+values are bundled publicly; never place credentials or tokens in them. #139
+owns the complete device/test/release environment setup.
+
+The API must be running with its database, JWT configuration and an explicitly
+provisioned active staff account; the app creates no accounts and seeds no data.
+Access tokens stay in memory. Only refresh tokens and their API origin are saved
+in Expo SecureStore with device-only accessibility; Android backup excludes the
+SecureStore data. A saved token is never sent to a different API origin. Startup
+rotates the saved refresh token before showing protected content.
+
+One refresh mutex covers concurrent and delayed old-token 401s. Safe reads may
+retry once for network/502/503/504 errors and replay once after renewal. Writes,
+login, and refresh are never retried automatically. A write that receives 401
+may renew the session, but still returns its original error for an explicit
+user retry. Errors preserve RFC 7807 fields and use generic UI messages.
+
+Logout and terminal renewal failure immediately clear user/access state,
+cancel requests and queries, clear the TanStack Query cache, and remove protected
+navigation history. Responses finishing after cleanup are discarded. Serialized
+secure-storage writes ensure a late rotation cannot restore a deleted token.
+Logout also attempts server revocation, with a ten-second timeout; local cleanup
+still runs offline. A secure-storage deletion failure is reported for retry.
+Transient renewal network/server failures preserve the saved token for a later
+attempt; protected content is not shown if startup renewal fails.
+
+The default suite uses synthetic transport fixtures. To verify the real protocol
+against an isolated local API, provision a disposable account using the shared
+API's documented provisioning command and set these process-local variables:
+
+```powershell
+$env:COFFEESHOP_MOBILE_TEST_API_BASE_URL = 'http://127.0.0.1:5232/api/v1'
+$env:COFFEESHOP_MOBILE_TEST_USERNAME = '<disposable account>'
+# Set COFFEESHOP_MOBILE_TEST_PASSWORD locally without committing it.
+npm run test:live
+```
+
+This opt-in test requires loopback, rejects invalid login, checks `/auth/me`,
+rotates a saved token, and verifies logout revocation. Its storage adapter is
+in memory; it does not prove device SecureStore behavior.
 
 ## Android emulator
 
@@ -97,20 +160,30 @@ and asserts its visible text. JUnit results go to ignored
 starter fails the command; a JS test or successful bundle is not Android launch
 evidence. This smoke flow is the foundation for later authenticated E2E flows.
 
+The opt-in session flow is `npm run test:e2e:session`. With Metro configured and
+the real API reachable, set `MAESTRO_STAFF_USERNAME`, `MAESTRO_STAFF_PASSWORD`,
+and `MAESTRO_STAFF_NAME` for a **disposable test account** in the test terminal.
+The flow checks rejected/valid login, native process restart with session
+restoration, and logout. Reports/screenshots go to `.maestro/results/`.
+Maestro debug artifacts can record input, so use only isolated test credentials.
+This session flow has not been executed here: automatic approval review rejected
+starting Metro, returning only `blocked by policy`. See the #143 evidence for
+the executed checks and this runtime limit.
+
 ## Shared API convention and scope
 
 The shared API convention is `http://10.0.2.2:5232/api/v1` for the Android emulator;
 `10.0.2.2` refers to the host, while emulator `localhost` refers to Android. Check
 the host's non-secret `/health` endpoint separately when API integration begins.
-There is no API configuration or request in this starter. #139 owns validated
-emulator/device/test/release configuration and native networking; #143 owns the
-generated client and secure sessions. Never add database credentials, tokens,
+The session client calls the shared authentication endpoints. #139 owns validated
+emulator/device/test/release configuration and native networking. Never add database credentials, tokens,
 or private device addresses to app configuration.
 
-This implements the scaffold/tooling slice of local OpenSpec tasks **1.2/1.3**.
-The older parent #95 numbers its scaffold **1.1** and testing foundation **1.4**;
-its dependency item **1.2** covers later functionality as well and must stay
-unchecked for this PR. #138 remains open for @JakeConal's required review.
+The scaffold is #138 (local OpenSpec **1.2/1.3**). #143 implements local Mobile
+**3.1–3.4**, corresponding to the older canonical #95 **3.1–3.5**. Business
+workflows, permission module navigation (#144), and offline write handling are
+outside #143. Its issue remains open for @JakeConal's required review.
 
 See [verification evidence](../../docs/evidence/mobile-scaffold-138/README.md)
-for executed commands and the explicitly authorized S0 review waiver.
+for the scaffold and [session evidence](../../docs/evidence/mobile-sessions-143/README.md)
+for #143's executed commands and limits.

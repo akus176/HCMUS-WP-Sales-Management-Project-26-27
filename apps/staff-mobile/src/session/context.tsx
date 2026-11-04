@@ -1,0 +1,75 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from 'react';
+
+import {
+  apiOrigin,
+  createSessionClient,
+  type SessionClient,
+  type SessionState,
+} from './session';
+import { secureRefreshStorage } from './secure-storage';
+
+const signedOut: SessionState = { status: 'signedOut', user: null };
+const SessionContext = createContext<{
+  client: SessionClient | null;
+  state: SessionState;
+} | null>(null);
+
+export function SessionProvider({
+  children,
+  client: supplied,
+}: {
+  children: ReactNode;
+  client?: SessionClient;
+}) {
+  const [queries] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { retry: false },
+          mutations: { retry: false },
+        },
+      }),
+  );
+  const [client] = useState(() => {
+    if (supplied) return supplied;
+    try {
+      const origin = apiOrigin(process.env.EXPO_PUBLIC_API_BASE_URL);
+      return createSessionClient({
+        origin,
+        storage: secureRefreshStorage(origin),
+        clearData: () => {
+          void queries.cancelQueries();
+          queries.clear();
+        },
+      });
+    } catch {
+      return null;
+    }
+  });
+  const state = useSyncExternalStore(
+    client?.subscribe ?? (() => () => {}),
+    client?.getSnapshot ?? (() => signedOut),
+  );
+  useEffect(() => {
+    void client?.restore();
+  }, [client]);
+  return (
+    <SessionContext.Provider value={{ client, state }}>
+      <QueryClientProvider client={queries}>{children}</QueryClientProvider>
+    </SessionContext.Provider>
+  );
+}
+
+export function useSession() {
+  const session = useContext(SessionContext);
+  if (!session) throw new Error('SessionProvider is required.');
+  return session;
+}
