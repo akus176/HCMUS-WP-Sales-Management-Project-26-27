@@ -1,0 +1,7 @@
+.expo/
+dist/
+coverage/
+android/
+ios/
+expo-env.d.ts
+.maestro/results/

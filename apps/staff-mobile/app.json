@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Coffee Shop Staff",
+    "slug": "coffee-shop-staff",
+    "version": "0.1.0",
+    "scheme": "coffeeshop-staff",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router"],
+    "android": { "package": "com.coffeeshop.staffmobile" },
+    "ios": { "bundleIdentifier": "com.coffeeshop.staffmobile" }
+  }
+}
