@@ -24,6 +24,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddScoped<CatalogQueryHandler>();
 builder.Services.AddScoped<CatalogCommandHandler>();
+builder.Services.AddScoped<RecipeCommandHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi(options =>
 {
@@ -90,6 +91,8 @@ app.MapHealthChecks("/health/ready", new() { Predicate = check => check.Tags.Con
 
 var api = app.MapGroup("/api/v1");
 api.MapStaffIdentity();
+api.MapInventoryEndpoints();
+api.MapCatalogEndpoints();
 api.MapGet("/categories", async (
     CatalogQueryHandler handler, string? search, bool? isActive, int? limit, CancellationToken cancellationToken) =>
 {

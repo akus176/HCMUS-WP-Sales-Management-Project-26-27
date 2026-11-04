@@ -32,7 +32,8 @@ public sealed record RecordStockAdjustmentCommand(
     EntityId IngredientId,
     decimal QuantityDelta,
     string Reason,
-    EntityId ActorId);
+    EntityId ActorId,
+    EntityId? AdjustmentId = null);
 
 public sealed record StockMovementLine(EntityId IngredientId, decimal Quantity);
 

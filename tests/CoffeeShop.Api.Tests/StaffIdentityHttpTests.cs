@@ -329,6 +329,113 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, changedPassword.StatusCode);
     }
 
+    [PostgresFact]
+    public async Task CatalogRecipe_IsSharedAcrossSessionsAndRejectsInvalidChanges()
+    {
+        using var manager = host!.CreateClient();
+        var login = await LoginAsync(manager, "Manager");
+        manager.DefaultRequestHeaders.Authorization = new("Bearer", login.AccessToken);
+        using var categoryCreated = await manager.PostAsJsonAsync("/api/v1/categories", new CreateCategoryRequest("Shared drinks"));
+        var category = (await categoryCreated.Content.ReadFromJsonAsync<CategoryResponse>())!;
+        using var ingredientCreated = await manager.PostAsJsonAsync("/api/v1/ingredients",
+            new CreateIngredientRequest("Coffee beans", "g", 200m, 10m));
+        Assert.Equal(HttpStatusCode.Created, ingredientCreated.StatusCode);
+        var ingredient = (await ingredientCreated.Content.ReadFromJsonAsync<IngredientBalanceResponse>())!;
+        using var created = await manager.PostAsJsonAsync("/api/v1/menu-items",
+            new MenuItemRequest(category.Id, "Espresso", null, [new SizeVariantRequest("Small", 3m)]));
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var item = (await created.Content.ReadFromJsonAsync<MenuItemResponse>())!;
+        var variant = Assert.Single(item.SizeVariants);
+        using var badRecipe = await manager.PutAsJsonAsync($"/api/v1/recipes/{variant.Id}",
+            new ReplaceRecipeRequest([new RecipeLineRequest(Guid.Empty, 10m, "g")]));
+        Assert.Equal(HttpStatusCode.BadRequest, badRecipe.StatusCode);
+        using var recipe = await manager.PutAsJsonAsync($"/api/v1/recipes/{variant.Id}",
+            new ReplaceRecipeRequest([new RecipeLineRequest(ingredient.IngredientId, 10m, "g")]));
+        Assert.Equal(HttpStatusCode.NoContent, recipe.StatusCode);
+
+        using var barista = host.CreateClient();
+        var baristaLogin = await LoginAsync(barista, "Barista");
+        barista.DefaultRequestHeaders.Authorization = new("Bearer", baristaLogin.AccessToken);
+        var shared = await barista.GetFromJsonAsync<MenuItemResponse>($"/api/v1/menu-items/{item.Id}");
+        Assert.Equal(ingredient.IngredientId, Assert.Single(Assert.Single(shared!.SizeVariants).Recipe!).IngredientId);
+        using var forbidden = await barista.PostAsJsonAsync("/api/v1/addons", new AddonRequest("Cream", 1m));
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+    }
+
+    [PostgresFact]
+    public async Task InventoryAdjustment_EnforcesPermissionValidationAndIdempotency()
+    {
+        using var client = host!.CreateClient();
+        var inventory = await LoginAsync(client, "InventoryStaff");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", inventory.AccessToken);
+        using var created = await client.PostAsJsonAsync("/api/v1/ingredients",
+            new CreateIngredientRequest("Test milk", "l", 5m, 2m));
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var ingredient = (await created.Content.ReadFromJsonAsync<IngredientBalanceResponse>())!;
+
+        var requestId = Guid.NewGuid();
+        var adjustment = new StockAdjustmentRequest(requestId, -3m, "Damaged stock");
+        using var first = await client.PostAsJsonAsync($"/api/v1/ingredients/{ingredient.IngredientId}/adjustments", adjustment);
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+        Assert.Equal(2m, (await first.Content.ReadFromJsonAsync<StockAdjustmentResponse>())!.AvailableQuantity);
+        using var retry = await client.PostAsJsonAsync($"/api/v1/ingredients/{ingredient.IngredientId}/adjustments", adjustment);
+        Assert.Equal(HttpStatusCode.OK, retry.StatusCode);
+        using var changedRetry = await client.PostAsJsonAsync($"/api/v1/ingredients/{ingredient.IngredientId}/adjustments",
+            adjustment with { QuantityDelta = 1m });
+        Assert.Equal(HttpStatusCode.Conflict, changedRetry.StatusCode);
+        using var missingReason = await client.PostAsJsonAsync($"/api/v1/ingredients/{ingredient.IngredientId}/adjustments",
+            new StockAdjustmentRequest(Guid.NewGuid(), 1m, " "));
+        Assert.Equal(HttpStatusCode.BadRequest, missingReason.StatusCode);
+
+        var lowStock = await client.GetFromJsonAsync<IngredientBalanceResponse[]>("/api/v1/ingredients/low-stock");
+        Assert.Contains(lowStock!, balance => balance.IngredientId == ingredient.IngredientId);
+        await using (var db = Database())
+            Assert.Single(await db.StockMovements.Where(movement => movement.IngredientId == new EntityId(ingredient.IngredientId)).ToArrayAsync());
+
+        var cashier = await LoginAsync(client, "Cashier");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", cashier.AccessToken);
+        using var forbidden = await client.PostAsJsonAsync($"/api/v1/ingredients/{ingredient.IngredientId}/adjustments",
+            new StockAdjustmentRequest(Guid.NewGuid(), 1m, "Unauthorized"));
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+    }
+
+    [PostgresFact]
+    public async Task ReceiptPosting_ChangesSharedBalanceAndAddsOneAuditedMovement()
+    {
+        using var client = host!.CreateClient();
+        var inventory = await LoginAsync(client, "InventoryStaff");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", inventory.AccessToken);
+        using var createdIngredient = await client.PostAsJsonAsync("/api/v1/ingredients",
+            new CreateIngredientRequest("Receipt milk", "l", 0m, 1m));
+        Assert.Equal(HttpStatusCode.Created, createdIngredient.StatusCode);
+        var ingredient = (await createdIngredient.Content.ReadFromJsonAsync<IngredientBalanceResponse>())!;
+        using var createdSupplier = await client.PostAsJsonAsync("/api/v1/suppliers",
+            new SupplierRequest("Local farm", "555-0100", null, null));
+        Assert.Equal(HttpStatusCode.Created, createdSupplier.StatusCode);
+        var supplier = (await createdSupplier.Content.ReadFromJsonAsync<SupplierResponse>())!;
+        using var createdReceipt = await client.PostAsJsonAsync("/api/v1/purchase-receipts",
+            new CreateReceiptRequest(supplier.Id, "RCPT-151"));
+        Assert.Equal(HttpStatusCode.Created, createdReceipt.StatusCode);
+        var receipt = (await createdReceipt.Content.ReadFromJsonAsync<ReceiptResponse>())!;
+
+        using var emptyPost = await client.PostAsync($"/api/v1/purchase-receipts/{receipt.Id}/post", null);
+        Assert.Equal(HttpStatusCode.Conflict, emptyPost.StatusCode);
+        using var added = await client.PostAsJsonAsync($"/api/v1/purchase-receipts/{receipt.Id}/lines",
+            new ReceiptLineRequest(ingredient.IngredientId, 3m, 2m));
+        Assert.Equal(HttpStatusCode.OK, added.StatusCode);
+        using var posted = await client.PostAsync($"/api/v1/purchase-receipts/{receipt.Id}/post", null);
+        Assert.Equal(HttpStatusCode.NoContent, posted.StatusCode);
+        using var repeated = await client.PostAsync($"/api/v1/purchase-receipts/{receipt.Id}/post", null);
+        Assert.Equal(HttpStatusCode.Conflict, repeated.StatusCode);
+
+        var balance = await client.GetFromJsonAsync<IngredientBalanceResponse>($"/api/v1/ingredients/{ingredient.IngredientId}");
+        Assert.Equal(3m, balance!.AvailableQuantity);
+        var movements = await client.GetFromJsonAsync<StockMovementResponse[]>($"/api/v1/ingredients/{ingredient.IngredientId}/movements");
+        var movement = Assert.Single(movements!);
+        Assert.Equal(inventory.User.Id, movement.ActorId);
+        Assert.Equal(receipt.Id, movement.PurchaseReceiptId);
+    }
+
     public async Task DisposeAsync()
     {
         if (host is not null) await host.DisposeAsync();
