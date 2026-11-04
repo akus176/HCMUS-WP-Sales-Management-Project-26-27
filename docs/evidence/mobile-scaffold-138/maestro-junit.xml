@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="CoffeeShop_138_API36" tests="1" failures="0" time="11.819" timestamp="2026-11-04T23:14:34">
+    <testcase id="Staff-mobile Android starter" name="Staff-mobile Android starter" classname="Staff-mobile Android starter" file=".maestro\starter.yaml" time="11.804" timestamp="2026-11-04T23:14:34" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

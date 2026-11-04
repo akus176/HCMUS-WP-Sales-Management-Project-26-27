@@ -44,6 +44,7 @@
     "test": "jest --runInBand",
     "test:unit": "jest --runInBand tests/starter.test.tsx",
     "test:components": "jest --runInBand tests/router.test.tsx",
+    "pretest:e2e:android": "node -e \"require('node:fs').mkdirSync('.maestro/results', { recursive: true })\"",
     "test:e2e:android": "maestro test --format junit --output .maestro/results/junit.xml .maestro/starter.yaml",
     "check": "npm run type-check && npm run lint && npm run format:check && npm test"
   }

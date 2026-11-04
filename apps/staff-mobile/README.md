@@ -27,9 +27,8 @@ installs. Run `npx expo install --check` after changing native dependencies.
 
 ## Android emulator
 
-**Verification pending:** the emulator boots, but this PR has not yet verified
-the native app launch or Maestro flow. The steps below describe the required
-reproduction path; see the evidence for the current blocker.
+The native build, installed starter screen, and Maestro smoke flow were verified
+on an API 36 emulator. See the linked evidence for results and a screenshot.
 
 Install Android Studio with its Android SDK, Platform Tools, Emulator, Android
 SDK Platform 37.0, Build Tools 37, and an API 36 Google APIs x86_64 system image.
@@ -37,6 +36,20 @@ Use JDK 17 and a hardware-accelerated Android virtual device. On Windows, the
 Android Emulator must report working WHPX acceleration; do not disable Windows
 security features to make it start. Gradle may download its required NDK/CMake
 versions during the first build. Accept SDK licenses through the Android tools.
+
+On Windows, use a short physical checkout path such as `F:\cs138` before
+installing dependencies or generating native projects. Deep workspace paths can
+exceed native-build path limits. A `subst` drive alone does not fix this because
+native dependencies resolve their physical paths.
+
+The SDK's CMake 3.22.1 bundles Ninja 1.10.2, which rejects long generated
+filenames even from a short checkout. Use the Windows executable from
+[Ninja 1.13.2](https://github.com/ninja-build/ninja/releases/tag/v1.13.2) in
+`<SDK>\cmake\3.22.1\bin\ninja.exe`, keeping a backup of the original executable.
+The `ninja-win.zip` SHA256 is
+`07fc8261b42b20e71d1720b39068c2e14ffcee6396b76fb7a795fb460b78dc65`.
+Verify `ninja.exe --version` prints `1.13.2`. The verified Windows host already
+has `HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled=1`.
 
 Create and start an API 36 phone in Android Studio's Device Manager. In
 PowerShell, set the SDK/JDK paths for the current terminal (adjust JDK location):
@@ -59,6 +72,12 @@ shop data is loaded.** Stop Metro with Ctrl+C when finished.
 For an already installed build, `npm start` starts Metro on localhost. If needed,
 run `adb reverse tcp:8081 tcp:8081`, then reopen the app on the emulator. Native
 projects are generated from `app.json`; do not commit `android/` or `ios/`.
+
+If Metro is already running in another terminal, use
+`npm run android -- --no-bundler` to build, install, and open the app without
+starting a second server. On a memory-constrained host, set
+`$env:GRADLE_OPTS = '-Dorg.gradle.workers.max=2 -Dorg.gradle.parallel=false'`
+and `$env:CMAKE_BUILD_PARALLEL_LEVEL = '2'` for the current terminal first.
 
 ## Android E2E smoke test
 
