@@ -8,7 +8,7 @@ public static class CustomerEndpoints
 {
     public static void MapCustomerEndpoints(this RouteGroupBuilder api)
     {
-        var customers = api.MapGroup("/customers").RequireAuthorization();
+        var customers = api.MapGroup("/customers").RequireAuthorization("customers.manage");
         customers.MapGet("/", async (CustomerQueryHandler handler, string? search, bool? isActive,
             int? limit, CancellationToken ct) =>
         {

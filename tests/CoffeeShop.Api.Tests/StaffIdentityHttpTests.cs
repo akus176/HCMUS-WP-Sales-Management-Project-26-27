@@ -560,6 +560,9 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal("12 Analytical Engine Way", Assert.Single(detail.Addresses).AddressLine);
         Assert.Equal(customer.Id, Assert.Single((await manager.GetFromJsonAsync<CustomerResponse[]>(
             "/api/v1/customers?search=Ada"))!.Select(item => item.Id)));
+        using var loyaltyHistory = await manager.GetAsync(
+            $"/api/v1/customers/{customer.Id}/loyalty-transactions?offset=0&limit=10");
+        Assert.Equal(HttpStatusCode.OK, loyaltyHistory.StatusCode);
 
         using var updated = await manager.PatchAsJsonAsync($"/api/v1/customers/{customer.Id}",
             new CustomerRequest("Ada Byron", customerRequest.Phone, customerRequest.Email));
@@ -572,11 +575,37 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Empty(await manager.GetFromJsonAsync<CustomerResponse[]>("/api/v1/customers?search=Ada") ?? []);
         Assert.Single(await manager.GetFromJsonAsync<CustomerResponse[]>("/api/v1/customers?search=Ada&isActive=false") ?? []);
 
-        var barista = host.CreateClient();
-        var baristaLogin = await LoginAsync(barista, "Barista");
-        barista.DefaultRequestHeaders.Authorization = new("Bearer", baristaLogin.AccessToken);
-        using var forbidden = await barista.PostAsJsonAsync("/api/v1/customers", customerRequest with { Phone = "5550000000001" });
-        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        foreach (var role in new[] { "Barista", "InventoryStaff", "DeliveryStaff" })
+        {
+            using var unauthorized = host.CreateClient();
+            var login = await LoginAsync(unauthorized, role);
+            unauthorized.DefaultRequestHeaders.Authorization = new("Bearer", login.AccessToken);
+            foreach (var path in new[]
+            {
+                "/api/v1/customers",
+                $"/api/v1/customers/{customer.Id}",
+                $"/api/v1/customers/{customer.Id}/addresses",
+                $"/api/v1/customers/{customer.Id}/loyalty-transactions"
+            })
+            {
+                using var forbiddenRead = await unauthorized.GetAsync(path);
+                Assert.Equal(HttpStatusCode.Forbidden, forbiddenRead.StatusCode);
+                var errorBody = await forbiddenRead.Content.ReadAsStringAsync();
+                Assert.DoesNotContain("Ada Byron", errorBody, StringComparison.Ordinal);
+                Assert.DoesNotContain("ada@example.test", errorBody, StringComparison.Ordinal);
+                Assert.DoesNotContain(customerRequest.Phone, errorBody, StringComparison.Ordinal);
+                Assert.DoesNotContain("12 Analytical Engine Way", errorBody, StringComparison.Ordinal);
+            }
+        }
+        using var cashier = host.CreateClient();
+        var cashierLogin = await LoginAsync(cashier, "Cashier");
+        cashier.DefaultRequestHeaders.Authorization = new("Bearer", cashierLogin.AccessToken);
+        using var cashierList = await cashier.GetAsync($"/api/v1/customers?search={Uri.EscapeDataString("Ada Byron")}&isActive=false");
+        Assert.Equal(HttpStatusCode.OK, cashierList.StatusCode);
+        var cashierRows = await cashierList.Content.ReadFromJsonAsync<CustomerResponse[]>();
+        Assert.Contains(cashierRows!, row => row.Id == customer.Id);
+        using var cashierDetail = await cashier.GetAsync($"/api/v1/customers/{customer.Id}");
+        Assert.Equal(HttpStatusCode.OK, cashierDetail.StatusCode);
         await using var db = Database();
         Assert.False((await db.Customers.SingleAsync()).IsActive);
     }
