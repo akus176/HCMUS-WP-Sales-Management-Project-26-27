@@ -330,6 +330,48 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task MobileP0Queries_UsePagesFiltersPermissionsAndEmptyResults()
+    {
+        using var client = host!.CreateClient();
+        var barista = await LoginAsync(client, "Barista");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", barista.AccessToken);
+        var tickets = await client.GetFromJsonAsync<PageResponse<PreparationTicketResponse>>(
+            "/api/v1/preparation-tickets?status=confirmed,preparing&page=1&pageSize=2");
+        Assert.Empty(tickets!.Items);
+        Assert.Equal(0, tickets.TotalCount);
+        Assert.Equal(2, tickets.PageSize);
+        using var invalidStatus = await client.GetAsync("/api/v1/preparation-tickets?status=ready");
+        Assert.Equal(HttpStatusCode.BadRequest, invalidStatus.StatusCode);
+        using var missing = await client.GetAsync($"/api/v1/preparation-tickets/{Guid.NewGuid()}");
+        Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
+
+        var manager = await LoginAsync(client, "Manager");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", manager.AccessToken);
+        var pending = await client.GetFromJsonAsync<PageResponse<PendingDiscountResponse>>("/api/v1/discounts/pending");
+        Assert.Empty(pending!.Items);
+        using var badPage = await client.GetAsync("/api/v1/discounts/pending?page=0");
+        Assert.Equal(HttpStatusCode.BadRequest, badPage.StatusCode);
+
+        var inventory = await LoginAsync(client, "InventoryStaff");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", inventory.AccessToken);
+        var balances = await client.GetFromJsonAsync<PageResponse<IngredientBalanceResponse>>("/api/v1/ingredients");
+        Assert.Empty(balances!.Items);
+        using var tooLarge = await client.GetAsync("/api/v1/ingredients/low-stock?pageSize=201");
+        Assert.Equal(HttpStatusCode.BadRequest, tooLarge.StatusCode);
+        using var forbiddenTickets = await client.GetAsync("/api/v1/preparation-tickets");
+        Assert.Equal(HttpStatusCode.Forbidden, forbiddenTickets.StatusCode);
+
+        var courier = await LoginAsync(client, "DeliveryStaff");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", courier.AccessToken);
+        var assignments = await client.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>("/api/v1/courier/assignments");
+        Assert.Empty(assignments!.Items);
+        using var invalidCourierStatus = await client.GetAsync("/api/v1/courier/assignments?status=delivered");
+        Assert.Equal(HttpStatusCode.BadRequest, invalidCourierStatus.StatusCode);
+        using var forbiddenDiscounts = await client.GetAsync("/api/v1/discounts/pending");
+        Assert.Equal(HttpStatusCode.Forbidden, forbiddenDiscounts.StatusCode);
+    }
+
+    [PostgresFact]
     public async Task CourierAssignment_EnforcesOwnershipAndSingleDeliveryTransition()
     {
         await using (var db = Database()) await AddUserAsync(db, "othercourier", ["DeliveryStaff"]);
@@ -362,13 +404,22 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
 
         using var courier = host.CreateClient();
         courier.DefaultRequestHeaders.Authorization = new("Bearer", courierLogin.AccessToken);
-        var assignments = await courier.GetFromJsonAsync<CourierAssignmentResponse[]>("/api/v1/courier/assignments");
-        Assert.Equal(orderId, Assert.Single(assignments!).OrderId);
+        var assignments = await courier.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>("/api/v1/courier/assignments");
+        Assert.Equal(orderId, Assert.Single(assignments!.Items).OrderId);
+        var assignedOnly = await courier.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>(
+            "/api/v1/courier/assignments?status=assigned&pageSize=1");
+        Assert.Equal(1, assignedOnly!.TotalCount);
+        Assert.Equal(orderId, Assert.Single(assignedOnly.Items).OrderId);
+        var laterPage = await courier.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>(
+            "/api/v1/courier/assignments?page=2&pageSize=1");
+        Assert.Empty(laterPage!.Items);
         var detail = await courier.GetFromJsonAsync<CourierAssignmentDetailResponse>($"/api/v1/courier/assignments/{orderId}");
         Assert.Equal("123 Main St", detail!.AddressLine);
         using var other = host.CreateClient();
         var otherLogin = await LoginAsync(other, "othercourier");
         other.DefaultRequestHeaders.Authorization = new("Bearer", otherLogin.AccessToken);
+        Assert.Empty((await other.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>(
+            "/api/v1/courier/assignments"))!.Items);
         using var hidden = await other.GetAsync($"/api/v1/courier/assignments/{orderId}");
         Assert.Equal(HttpStatusCode.NotFound, hidden.StatusCode);
         using var denied = await other.PostAsync($"/api/v1/courier/assignments/{orderId}/start", null);
@@ -381,7 +432,7 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.NoContent, completed.StatusCode);
         using var repeatedCompletion = await courier.PostAsync($"/api/v1/courier/assignments/{orderId}/complete", null);
         Assert.Equal(HttpStatusCode.Conflict, repeatedCompletion.StatusCode);
-        Assert.Empty((await courier.GetFromJsonAsync<CourierAssignmentResponse[]>("/api/v1/courier/assignments"))!);
+        Assert.Empty((await courier.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>("/api/v1/courier/assignments"))!.Items);
         using var expiredDetail = await courier.GetAsync($"/api/v1/courier/assignments/{orderId}");
         Assert.Equal(HttpStatusCode.NotFound, expiredDetail.StatusCode);
         await using var finalDb = Database();
@@ -418,10 +469,13 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var requested = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/discounts",
             new DiscountRequest(discountId, "fixed", 1m, "Customer apology"));
         Assert.Equal(HttpStatusCode.Created, requested.StatusCode);
-        var pending = await manager.GetFromJsonAsync<PendingDiscountResponse[]>("/api/v1/discounts/pending");
-        Assert.Equal("Customer apology", Assert.Single(pending!).Reason);
+        var pending = await manager.GetFromJsonAsync<PageResponse<PendingDiscountResponse>>("/api/v1/discounts/pending");
+        Assert.Equal("Customer apology", Assert.Single(pending!.Items).Reason);
+        Assert.Equal(1, pending.TotalCount);
         using var rejected = await manager.PostAsync($"/api/v1/discounts/{discountId}/reject", null);
         Assert.Equal(HttpStatusCode.OK, rejected.StatusCode);
+        Assert.Empty((await manager.GetFromJsonAsync<PageResponse<PendingDiscountResponse>>(
+            "/api/v1/discounts/pending"))!.Items);
         using var repeatedDecision = await manager.PostAsync($"/api/v1/discounts/{discountId}/reject", null);
         Assert.Equal(HttpStatusCode.Conflict, repeatedDecision.StatusCode);
         using var wrongTotal = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/confirm", new ConfirmOrderRequest(4m));
@@ -441,13 +495,23 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var barista = host.CreateClient();
         var baristaLogin = await LoginAsync(barista, "Barista");
         barista.DefaultRequestHeaders.Authorization = new("Bearer", baristaLogin.AccessToken);
-        var tickets = await barista.GetFromJsonAsync<PreparationTicketResponse[]>("/api/v1/preparation-tickets");
-        Assert.Contains(tickets!, ticket => ticket.OrderId == orderId && ticket.Lines.Count == 1);
-        using var preparing = await barista.PostAsync($"/api/v1/orders/{orderId}/preparing", null);
+        var tickets = await barista.GetFromJsonAsync<PageResponse<PreparationTicketResponse>>("/api/v1/preparation-tickets");
+        Assert.Contains(tickets!.Items, ticket => ticket.OrderId == orderId && ticket.Lines.Count == 1);
+        var filteredTickets = await barista.GetFromJsonAsync<PageResponse<PreparationTicketResponse>>(
+            "/api/v1/preparation-tickets?status=confirmed&pageSize=1");
+        Assert.Equal(orderId, Assert.Single(filteredTickets!.Items).OrderId);
+        Assert.Equal(1, filteredTickets.TotalCount);
+        Assert.Empty((await barista.GetFromJsonAsync<PageResponse<PreparationTicketResponse>>(
+            "/api/v1/preparation-tickets?status=preparing"))!.Items);
+        var ticket = await barista.GetFromJsonAsync<PreparationTicketResponse>($"/api/v1/preparation-tickets/{orderId}");
+        Assert.Equal("Latte", Assert.Single(ticket!.Lines).ItemName);
+        using var preparing = await barista.PostAsync($"/api/v1/preparation-tickets/{orderId}/start", null);
         Assert.Equal(HttpStatusCode.NoContent, preparing.StatusCode);
-        using var ready = await barista.PostAsync($"/api/v1/orders/{orderId}/ready", null);
+        Assert.Equal(orderId, Assert.Single((await barista.GetFromJsonAsync<PageResponse<PreparationTicketResponse>>(
+            "/api/v1/preparation-tickets?status=preparing"))!.Items).OrderId);
+        using var ready = await barista.PostAsync($"/api/v1/preparation-tickets/{orderId}/ready", null);
         Assert.Equal(HttpStatusCode.NoContent, ready.StatusCode);
-        using var repeatReady = await barista.PostAsync($"/api/v1/orders/{orderId}/ready", null);
+        using var repeatReady = await barista.PostAsync($"/api/v1/preparation-tickets/{orderId}/ready", null);
         Assert.Equal(HttpStatusCode.Conflict, repeatReady.StatusCode);
         var shared = await manager.GetFromJsonAsync<OrderResponse>($"/api/v1/orders/{orderId}");
         Assert.Equal("ready", shared!.Status);
@@ -511,8 +575,11 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
             new StockAdjustmentRequest(Guid.NewGuid(), 1m, " "));
         Assert.Equal(HttpStatusCode.BadRequest, missingReason.StatusCode);
 
-        var lowStock = await client.GetFromJsonAsync<IngredientBalanceResponse[]>("/api/v1/ingredients/low-stock");
-        Assert.Contains(lowStock!, balance => balance.IngredientId == ingredient.IngredientId);
+        var lowStock = await client.GetFromJsonAsync<PageResponse<IngredientBalanceResponse>>("/api/v1/ingredients/low-stock");
+        Assert.Contains(lowStock!.Items, balance => balance.IngredientId == ingredient.IngredientId);
+        var searched = await client.GetFromJsonAsync<PageResponse<IngredientBalanceResponse>>(
+            "/api/v1/ingredients/low-stock?search=Test&pageSize=1");
+        Assert.Equal(ingredient.IngredientId, Assert.Single(searched!.Items).IngredientId);
         await using (var db = Database())
             Assert.Single(await db.StockMovements.Where(movement => movement.IngredientId == new EntityId(ingredient.IngredientId)).ToArrayAsync());
 

@@ -76,24 +76,39 @@ public static class SalesEndpoints
         api.MapGet("/tables", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
             Results.Ok(await handler.GetTablesAsync(ct))).RequireAuthorization("orders.create");
         api.MapGet("/preparation-tickets", async (FulfillmentOperationsQueryHandler query,
-            PosOrderHandler ordersHandler, CancellationToken ct) =>
+            PosOrderHandler ordersHandler, string? status, int? page, int? pageSize, CancellationToken ct) =>
         {
+            var states = status?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (states is { Length: > 0 } && states.Any(state => state is not (OrderStatus.Confirmed or OrderStatus.Preparing)))
+                return ApiErrorResults.From(Error.Validation("preparation.invalid_status", "Filter by confirmed or preparing status."));
             var candidates = (await query.GetOrdersAsync(ct)).Where(order => order.Status is
-                OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready);
+                OrderStatus.Confirmed or OrderStatus.Preparing).Where(order => states is null || states.Length == 0 ||
+                    states.Contains(order.Status)).OrderBy(order => order.OrderNumber).ThenBy(order => order.Id.Value);
             var tickets = new List<PreparationTicketResponse>();
             foreach (var candidate in candidates)
             {
                 var detail = await ordersHandler.GetOrderAsync(candidate.Id, ct);
                 if (detail.IsFailure) continue;
-                tickets.Add(new(candidate.Id.Value, candidate.OrderNumber, candidate.Status,
-                    candidate.TableNumber, detail.Value.Lines.Select(line => new PreparationTicketLine(
-                        line.ItemName, line.SizeName, line.Quantity,
-                        line.Addons.Select(addon => addon.Name).ToArray())).ToArray()));
+                tickets.Add(ToTicket(candidate, detail.Value));
             }
-            return Results.Ok(tickets);
-        }).RequireAuthorization("orders.fulfill").Produces<PreparationTicketResponse[]>();
-        api.MapGet("/discounts/pending", async (FulfillmentOperationsQueryHandler query,
+            return MobilePage.From(tickets, page, pageSize);
+        }).RequireAuthorization("orders.fulfill").Produces<PageResponse<PreparationTicketResponse>>();
+        api.MapGet("/preparation-tickets/{id:guid}", async (Guid id, FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, CancellationToken ct) =>
+        {
+            if (id == Guid.Empty) return InvalidId();
+            var candidate = (await query.GetOrdersAsync(ct)).FirstOrDefault(order => order.Id.Value == id &&
+                order.Status is OrderStatus.Confirmed or OrderStatus.Preparing);
+            if (candidate is null) return ApiErrorResults.From(Error.NotFound("preparation.ticket_not_found", "Ticket not found."));
+            var detail = await ordersHandler.GetOrderAsync(candidate.Id, ct);
+            return detail.IsSuccess ? Results.Ok(ToTicket(candidate, detail.Value)) : ApiErrorResults.From(detail.Error!);
+        }).RequireAuthorization("orders.fulfill").Produces<PreparationTicketResponse>();
+        api.MapPost("/preparation-tickets/{id:guid}/start", (Guid id, OrderFulfillmentCommandHandler handler,
+            CancellationToken ct) => Transition(id, OrderStatus.Preparing, handler, ct)).RequireAuthorization("orders.fulfill");
+        api.MapPost("/preparation-tickets/{id:guid}/ready", (Guid id, OrderFulfillmentCommandHandler handler,
+            CancellationToken ct) => Transition(id, OrderStatus.Ready, handler, ct)).RequireAuthorization("orders.fulfill");
+        api.MapGet("/discounts/pending", async (FulfillmentOperationsQueryHandler query,
+            PosOrderHandler ordersHandler, int? page, int? pageSize, CancellationToken ct) =>
         {
             var pending = new List<PendingDiscountResponse>();
             foreach (var order in (await query.GetOrdersAsync(ct)).Where(order => order.PendingDiscountIds.Count > 0))
@@ -104,8 +119,9 @@ public static class SalesEndpoints
                     .Select(discount => new PendingDiscountResponse(discount.Id.Value, order.Id.Value,
                         order.OrderNumber, discount.Type, discount.Value, discount.Reason, discount.Amount, order.Total)));
             }
-            return Results.Ok(pending);
-        }).RequireAuthorization("discounts.approve").Produces<PendingDiscountResponse[]>();
+            return MobilePage.From(pending.OrderBy(discount => discount.OrderNumber)
+                .ThenBy(discount => discount.DiscountId).ToArray(), page, pageSize);
+        }).RequireAuthorization("discounts.approve").Produces<PageResponse<PendingDiscountResponse>>();
         api.MapPost("/discounts/{id:guid}/approve", (Guid id, DiscountCommandHandler handler,
             CancellationToken ct) => DecideDiscount(id, true, handler, ct)).RequireAuthorization("discounts.approve");
         api.MapPost("/discounts/{id:guid}/reject", (Guid id, DiscountCommandHandler handler,
@@ -131,6 +147,11 @@ public static class SalesEndpoints
     private static OperationalOrderResponse ToOperational(OperationalOrder order) => new(order.Id.Value,
         order.OrderNumber, order.Channel, order.Status, order.Total, order.PaidAmount, order.TableNumber,
         order.DeliveryStatus, order.AssignedStaffId?.Value, order.PendingDiscountIds.Select(id => id.Value).ToArray());
+
+    private static PreparationTicketResponse ToTicket(OperationalOrder order, PosOrderDetail detail) => new(
+        order.Id.Value, order.OrderNumber, order.Status, order.TableNumber,
+        detail.Lines.Select(line => new PreparationTicketLine(line.ItemName, line.SizeName, line.Quantity,
+            line.Addons.Select(addon => addon.Name).ToArray())).ToArray());
 
     private static OrderResponse ToOrder(PosOrderDetail order) => new(order.Id.Value, order.OrderNumber,
         order.Channel, order.Status, order.CustomerId?.Value, order.TableId?.Value, order.TableNumber,
