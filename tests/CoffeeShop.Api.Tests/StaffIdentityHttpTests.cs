@@ -428,6 +428,9 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.NoContent, started.StatusCode);
         using var retry = await courier.PostAsync($"/api/v1/courier/assignments/{orderId}/start", null);
         Assert.Equal(HttpStatusCode.Conflict, retry.StatusCode);
+        using var invalidFailure = await courier.PostAsJsonAsync($"/api/v1/courier/assignments/{orderId}/fail",
+            new FailDeliveryRequest(" "));
+        Assert.Equal(HttpStatusCode.BadRequest, invalidFailure.StatusCode);
         using var completed = await courier.PostAsync($"/api/v1/courier/assignments/{orderId}/complete", null);
         Assert.Equal(HttpStatusCode.NoContent, completed.StatusCode);
         using var repeatedCompletion = await courier.PostAsync($"/api/v1/courier/assignments/{orderId}/complete", null);
@@ -436,7 +439,11 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var expiredDetail = await courier.GetAsync($"/api/v1/courier/assignments/{orderId}");
         Assert.Equal(HttpStatusCode.NotFound, expiredDetail.StatusCode);
         await using var finalDb = Database();
-        Assert.Equal(3, await finalDb.DeliveryStatusHistories.CountAsync());
+        var history = await finalDb.DeliveryStatusHistories.ToArrayAsync();
+        Assert.Equal(3, history.Length);
+        Assert.Equal(new EntityId(managerLogin.User.Id), history.Single(change => change.ToStatus == "assigned").ActorId);
+        Assert.All(history.Where(change => change.ToStatus != "assigned"),
+            change => Assert.Equal(new EntityId(courierLogin.User.Id), change.ActorId));
     }
 
     [PostgresFact]
@@ -491,6 +498,9 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, repeated.StatusCode);
         using var mismatch = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment with { Amount = 4m });
         Assert.Equal(HttpStatusCode.Conflict, mismatch.StatusCode);
+        await using (var db = Database())
+            Assert.Equal(new EntityId(cashierLogin.User.Id),
+                (await db.Payments.SingleAsync(entry => entry.Id == new EntityId(paymentId))).RecordedBy);
 
         using var barista = host.CreateClient();
         var baristaLogin = await LoginAsync(barista, "Barista");
@@ -588,6 +598,45 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var forbidden = await client.PostAsJsonAsync($"/api/v1/ingredients/{ingredient.IngredientId}/adjustments",
             new StockAdjustmentRequest(Guid.NewGuid(), 1m, "Unauthorized"));
         Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+    }
+
+    [PostgresFact]
+    public async Task ConcurrentStockAdjustmentRetries_CommitOnceAndRejectCrossIngredientReuse()
+    {
+        using var client = host!.CreateClient();
+        var inventory = await LoginAsync(client, "InventoryStaff");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", inventory.AccessToken);
+        var ingredients = new List<IngredientBalanceResponse>();
+        foreach (var name in new[] { "Concurrent beans A", "Concurrent beans B" })
+        {
+            using var created = await client.PostAsJsonAsync("/api/v1/ingredients",
+                new CreateIngredientRequest(name, "g", 0m, 0m));
+            Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+            ingredients.Add((await created.Content.ReadFromJsonAsync<IngredientBalanceResponse>())!);
+        }
+
+        var sameRequest = new StockAdjustmentRequest(Guid.NewGuid(), 2m, "Counted stock");
+        var sameResponses = await Task.WhenAll(Enumerable.Range(0, 2).Select(_ =>
+            client.PostAsJsonAsync($"/api/v1/ingredients/{ingredients[0].IngredientId}/adjustments", sameRequest)));
+        try { Assert.All(sameResponses, response => Assert.Equal(HttpStatusCode.OK, response.StatusCode)); }
+        finally { foreach (var response in sameResponses) response.Dispose(); }
+
+        var crossRequest = new StockAdjustmentRequest(Guid.NewGuid(), 1m, "Counted stock");
+        var crossResponses = await Task.WhenAll(ingredients.Select(ingredient =>
+            client.PostAsJsonAsync($"/api/v1/ingredients/{ingredient.IngredientId}/adjustments", crossRequest)));
+        try
+        {
+            Assert.Single(crossResponses, response => response.StatusCode == HttpStatusCode.OK);
+            Assert.Single(crossResponses, response => response.StatusCode == HttpStatusCode.Conflict);
+        }
+        finally { foreach (var response in crossResponses) response.Dispose(); }
+
+        await using var db = Database();
+        Assert.Equal(2, await db.StockMovements.CountAsync());
+        Assert.Equal(3m, (await db.Ingredients.Where(ingredient =>
+            ingredient.Id == new EntityId(ingredients[0].IngredientId) || ingredient.Id == new EntityId(ingredients[1].IngredientId))
+            .ToArrayAsync()).Sum(ingredient => ingredient.AvailableQuantity));
+        Assert.All(await db.StockMovements.ToArrayAsync(), movement => Assert.Equal(new EntityId(inventory.User.Id), movement.ActorId));
     }
 
     [PostgresFact]

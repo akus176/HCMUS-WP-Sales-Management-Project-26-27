@@ -25,6 +25,13 @@ public sealed class InventoryRepository : IInventoryRepository, IStockMovementRe
             .FirstOrDefaultAsync(cancellationToken);
     }
 
+    public async Task LockAdjustmentRequestAsync(EntityId id, CancellationToken cancellationToken = default)
+    {
+        RequireTransaction();
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT pg_advisory_xact_lock(142, hashtext({id.Value.ToString()}))", cancellationToken);
+    }
+
     public Task<StockMovement?> FindStockMovementAsync(EntityId id, CancellationToken cancellationToken = default) =>
         context.StockMovements.AsNoTracking().FirstOrDefaultAsync(movement => movement.Id == id, cancellationToken);
 

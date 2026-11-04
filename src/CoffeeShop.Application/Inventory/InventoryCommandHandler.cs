@@ -287,12 +287,9 @@ public sealed class InventoryCommandHandler
         {
             return await transactionManager.ExecuteInTransactionAsync(async () =>
             {
-                var ingredient = command.AdjustmentId is null
-                    ? await repository.FindIngredientAsync(command.IngredientId, cancellationToken)
-                    : await repository.LoadIngredientForAdjustmentAsync(command.IngredientId, cancellationToken);
-                if (ingredient is null) return Result.Failure(IngredientNotFound(command.IngredientId));
                 if (command.AdjustmentId is not null)
                 {
+                    await repository.LockAdjustmentRequestAsync(command.AdjustmentId, cancellationToken);
                     var existing = await repository.FindStockMovementAsync(command.AdjustmentId, cancellationToken);
                     if (existing is not null)
                     {
@@ -304,6 +301,10 @@ public sealed class InventoryCommandHandler
                                 "The adjustment identifier is already associated with different data."));
                     }
                 }
+                var ingredient = command.AdjustmentId is null
+                    ? await repository.FindIngredientAsync(command.IngredientId, cancellationToken)
+                    : await repository.LoadIngredientForAdjustmentAsync(command.IngredientId, cancellationToken);
+                if (ingredient is null) return Result.Failure(IngredientNotFound(command.IngredientId));
                 ingredient.Adjust(command.QuantityDelta, clock.UtcNow);
                 repository.AddStockMovement(new StockMovement(
                     command.AdjustmentId ?? EntityId.New(), ingredient.Id, StockMovementType.Adjustment, command.QuantityDelta,
