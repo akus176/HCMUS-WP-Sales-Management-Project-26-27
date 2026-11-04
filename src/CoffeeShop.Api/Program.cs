@@ -8,6 +8,7 @@ using CoffeeShop.Domain.Common;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Common;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,6 +59,16 @@ builder.Services.AddHealthChecks()
     .AddCheck("postgres", new PostgresHealthCheck(connectionString), tags: ["ready"]);
 
 var app = builder.Build();
+if (args.Contains("--migrate"))
+{
+    await using (var scope = app.Services.CreateAsyncScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        await db.Database.MigrateAsync();
+    }
+    await app.DisposeAsync();
+    return;
+}
 if (args.Contains("--seed-staff-roles") || args.Contains("--provision-staff"))
 {
     await StaffProvisioning.RunAsync(app.Services, builder.Configuration, args.Contains("--provision-staff"));
