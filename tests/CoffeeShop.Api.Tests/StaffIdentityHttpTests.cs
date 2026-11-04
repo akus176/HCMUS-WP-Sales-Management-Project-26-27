@@ -351,6 +351,8 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Empty(pending!.Items);
         using var badPage = await client.GetAsync("/api/v1/discounts/pending?page=0");
         Assert.Equal(HttpStatusCode.BadRequest, badPage.StatusCode);
+        using var forbiddenCourier = await client.GetAsync("/api/v1/courier/assignments");
+        Assert.Equal(HttpStatusCode.Forbidden, forbiddenCourier.StatusCode);
 
         var inventory = await LoginAsync(client, "InventoryStaff");
         client.DefaultRequestHeaders.Authorization = new("Bearer", inventory.AccessToken);
@@ -494,8 +496,12 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         var payment = new RecordPaymentRequest(paymentId, "cash", 5m);
         using var paid = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment);
         Assert.Equal(HttpStatusCode.OK, paid.StatusCode);
+        var paymentResult = (await paid.Content.ReadFromJsonAsync<PaymentResponse>())!;
+        Assert.Equal(paymentId, paymentResult.PaymentId);
+        Assert.False(paymentResult.AlreadyRecorded);
         using var repeated = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment);
         Assert.Equal(HttpStatusCode.OK, repeated.StatusCode);
+        Assert.True((await repeated.Content.ReadFromJsonAsync<PaymentResponse>())!.AlreadyRecorded);
         using var mismatch = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment with { Amount = 4m });
         Assert.Equal(HttpStatusCode.Conflict, mismatch.StatusCode);
         await using (var db = Database())

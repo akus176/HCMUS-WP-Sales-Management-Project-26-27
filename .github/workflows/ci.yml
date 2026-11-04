@@ -87,6 +87,23 @@ jobs:
           The Windows job intentionally does not select this suite, so PostgreSQL integration tests are not reported as skipped there.
           EOF
 
+  mobile-p0-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Build API for deterministic OpenAPI export
+        run: dotnet build src/CoffeeShop.Api --configuration Release
+      - name: Install pinned contract generator
+        run: npm ci --prefix contracts/mobile-p0
+      - name: Verify generated OpenAPI and TypeScript contract
+        run: npm run check --prefix contracts/mobile-p0
+
   compose-smoke:
     runs-on: ubuntu-latest
     steps:

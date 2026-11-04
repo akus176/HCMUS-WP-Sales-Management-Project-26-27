@@ -49,16 +49,21 @@ public static class SalesEndpoints
             if (id == Guid.Empty || request.PaymentId == Guid.Empty) return InvalidId();
             var result = await handler.RecordAsync(new(new(request.PaymentId), new(id), request.Method ?? string.Empty,
                 request.Amount, request.Status ?? PaymentStatus.Succeeded, request.Reference), ct);
-            return result.IsSuccess ? Results.Ok(result.Value) : ApiErrorResults.From(result.Error!);
-        }).RequireAuthorization("payments.record").Produces<PaymentOperationResult>();
+            return result.IsSuccess ? Results.Ok(new PaymentResponse(result.Value.PaymentId.Value,
+                result.Value.PaidAmount, result.Value.OutstandingBalance, result.Value.IsFullyPaid,
+                result.Value.AlreadyRecorded)) : ApiErrorResults.From(result.Error!);
+        }).RequireAuthorization("payments.record").Produces<PaymentResponse>().ProducesProblem(400)
+            .ProducesProblem(403).ProducesProblem(404).ProducesProblem(409);
         orders.MapPost("/{id:guid}/discounts", async (Guid id, DiscountRequest request,
             PosOrderHandler handler, CancellationToken ct) =>
         {
             if (id == Guid.Empty || request.DiscountId == Guid.Empty) return InvalidId();
             var result = await handler.RequestDiscountAsync(new(new(request.DiscountId), new(id),
                 request.Type ?? string.Empty, request.Value, request.Reason ?? string.Empty), ct);
-            return result.IsSuccess ? Results.Json(result.Value, statusCode: 201) : ApiErrorResults.From(result.Error!);
-        }).RequireAuthorization("discounts.request");
+            return result.IsSuccess ? Results.Json(new DiscountDecisionResponse(result.Value.DiscountId.Value,
+                result.Value.Status, result.Value.ComputedAmount, result.Value.DiscountTotal, result.Value.Total),
+                statusCode: 201) : ApiErrorResults.From(result.Error!);
+        }).RequireAuthorization("discounts.request").Produces<DiscountDecisionResponse>(201);
         orders.MapPost("/{id:guid}/cancel", async (Guid id, CancelOrderRequest request,
             OrderCancellationCommandHandler handler, CancellationToken ct) =>
         {
@@ -92,7 +97,8 @@ public static class SalesEndpoints
                 tickets.Add(ToTicket(candidate, detail.Value));
             }
             return MobilePage.From(tickets, page, pageSize);
-        }).RequireAuthorization("orders.fulfill").Produces<PageResponse<PreparationTicketResponse>>();
+        }).RequireAuthorization("orders.fulfill").Produces<PageResponse<PreparationTicketResponse>>()
+            .ProducesProblem(400).ProducesProblem(403);
         api.MapGet("/preparation-tickets/{id:guid}", async (Guid id, FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, CancellationToken ct) =>
         {
@@ -102,11 +108,16 @@ public static class SalesEndpoints
             if (candidate is null) return ApiErrorResults.From(Error.NotFound("preparation.ticket_not_found", "Ticket not found."));
             var detail = await ordersHandler.GetOrderAsync(candidate.Id, ct);
             return detail.IsSuccess ? Results.Ok(ToTicket(candidate, detail.Value)) : ApiErrorResults.From(detail.Error!);
-        }).RequireAuthorization("orders.fulfill").Produces<PreparationTicketResponse>();
+        }).RequireAuthorization("orders.fulfill").Produces<PreparationTicketResponse>()
+            .ProducesProblem(400).ProducesProblem(403).ProducesProblem(404);
         api.MapPost("/preparation-tickets/{id:guid}/start", (Guid id, OrderFulfillmentCommandHandler handler,
-            CancellationToken ct) => Transition(id, OrderStatus.Preparing, handler, ct)).RequireAuthorization("orders.fulfill");
+            CancellationToken ct) => Transition(id, OrderStatus.Preparing, handler, ct))
+            .RequireAuthorization("orders.fulfill").Produces(204).ProducesProblem(400).ProducesProblem(403)
+            .ProducesProblem(404).ProducesProblem(409);
         api.MapPost("/preparation-tickets/{id:guid}/ready", (Guid id, OrderFulfillmentCommandHandler handler,
-            CancellationToken ct) => Transition(id, OrderStatus.Ready, handler, ct)).RequireAuthorization("orders.fulfill");
+            CancellationToken ct) => Transition(id, OrderStatus.Ready, handler, ct))
+            .RequireAuthorization("orders.fulfill").Produces(204).ProducesProblem(400).ProducesProblem(403)
+            .ProducesProblem(404).ProducesProblem(409);
         api.MapGet("/discounts/pending", async (FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, int? page, int? pageSize, CancellationToken ct) =>
         {
@@ -121,11 +132,16 @@ public static class SalesEndpoints
             }
             return MobilePage.From(pending.OrderBy(discount => discount.OrderNumber)
                 .ThenBy(discount => discount.DiscountId).ToArray(), page, pageSize);
-        }).RequireAuthorization("discounts.approve").Produces<PageResponse<PendingDiscountResponse>>();
+        }).RequireAuthorization("discounts.approve").Produces<PageResponse<PendingDiscountResponse>>()
+            .ProducesProblem(400).ProducesProblem(403);
         api.MapPost("/discounts/{id:guid}/approve", (Guid id, DiscountCommandHandler handler,
-            CancellationToken ct) => DecideDiscount(id, true, handler, ct)).RequireAuthorization("discounts.approve");
+            CancellationToken ct) => DecideDiscount(id, true, handler, ct)).RequireAuthorization("discounts.approve")
+            .Produces<DiscountDecisionResponse>().ProducesProblem(400).ProducesProblem(403)
+            .ProducesProblem(404).ProducesProblem(409);
         api.MapPost("/discounts/{id:guid}/reject", (Guid id, DiscountCommandHandler handler,
-            CancellationToken ct) => DecideDiscount(id, false, handler, ct)).RequireAuthorization("discounts.approve");
+            CancellationToken ct) => DecideDiscount(id, false, handler, ct)).RequireAuthorization("discounts.approve")
+            .Produces<DiscountDecisionResponse>().ProducesProblem(400).ProducesProblem(403)
+            .ProducesProblem(404).ProducesProblem(409);
     }
 
     private static async Task<IResult> Transition(Guid id, string status, OrderFulfillmentCommandHandler handler, CancellationToken ct)

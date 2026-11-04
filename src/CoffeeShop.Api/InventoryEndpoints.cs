@@ -19,7 +19,8 @@ public static class InventoryEndpoints
                 .OrderBy(ingredient => ingredient.Name).ThenBy(ingredient => ingredient.Id.Value)
                 .Select(ToBalance).ToArray();
             return MobilePage.From(result, page, pageSize);
-        }).RequireAuthorization("inventory.manage").Produces<PageResponse<IngredientBalanceResponse>>();
+        }).RequireAuthorization("inventory.manage").Produces<PageResponse<IngredientBalanceResponse>>()
+            .ProducesProblem(400).ProducesProblem(403);
 
         api.MapGet("/ingredients/low-stock", async (IInventoryRepository repository, string? search,
             int? page, int? pageSize, CancellationToken ct) =>
@@ -30,7 +31,8 @@ public static class InventoryEndpoints
                 .OrderBy(ingredient => ingredient.Name).ThenBy(ingredient => ingredient.Id.Value)
                 .Select(ToBalance).ToArray();
             return MobilePage.From(result, page, pageSize);
-        }).RequireAuthorization("reports.lowstock").Produces<PageResponse<IngredientBalanceResponse>>();
+        }).RequireAuthorization("reports.lowstock").Produces<PageResponse<IngredientBalanceResponse>>()
+            .ProducesProblem(400).ProducesProblem(403);
 
         api.MapPost("/ingredients", async (CreateIngredientRequest request, InventoryCommandHandler handler,
             IInventoryRepository repository, CancellationToken ct) =>

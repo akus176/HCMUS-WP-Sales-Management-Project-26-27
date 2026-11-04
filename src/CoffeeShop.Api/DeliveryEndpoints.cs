@@ -36,7 +36,7 @@ public static class DeliveryEndpoints
                 .Select(order => new CourierAssignmentResponse(order.Id.Value, order.OrderNumber,
                     order.DeliveryStatus!)).ToArray();
             return MobilePage.From(assignments, page, pageSize);
-        }).Produces<PageResponse<CourierAssignmentResponse>>();
+        }).Produces<PageResponse<CourierAssignmentResponse>>().ProducesProblem(400).ProducesProblem(403);
         courier.MapGet("/{id:guid}", async (Guid id, IDeliveryRepository repository, ICurrentUser user,
             PosOrderHandler orders, CancellationToken ct) =>
         {
@@ -48,14 +48,17 @@ public static class DeliveryEndpoints
                 return NotVisible();
             return Results.Ok(new CourierAssignmentDetailResponse(id, order.Value.OrderNumber,
                 visible.Value.Status, order.Value.RecipientName!, order.Value.ContactNumber!, order.Value.AddressLine!));
-        }).Produces<CourierAssignmentDetailResponse>();
+        }).Produces<CourierAssignmentDetailResponse>().ProducesProblem(400).ProducesProblem(403).ProducesProblem(404);
         courier.MapPost("/{id:guid}/start", (Guid id, IDeliveryRepository repository, ICurrentUser user,
-            DeliveryCommandHandler handler, CancellationToken ct) => Transition(id, repository, user, handler, 0, null, ct));
+            DeliveryCommandHandler handler, CancellationToken ct) => Transition(id, repository, user, handler, 0, null, ct))
+            .Produces(204).ProducesProblem(400).ProducesProblem(403).ProducesProblem(404).ProducesProblem(409);
         courier.MapPost("/{id:guid}/complete", (Guid id, IDeliveryRepository repository, ICurrentUser user,
-            DeliveryCommandHandler handler, CancellationToken ct) => Transition(id, repository, user, handler, 1, null, ct));
+            DeliveryCommandHandler handler, CancellationToken ct) => Transition(id, repository, user, handler, 1, null, ct))
+            .Produces(204).ProducesProblem(400).ProducesProblem(403).ProducesProblem(404).ProducesProblem(409);
         courier.MapPost("/{id:guid}/fail", (Guid id, FailDeliveryRequest request, IDeliveryRepository repository,
             ICurrentUser user, DeliveryCommandHandler handler, CancellationToken ct) =>
-            Transition(id, repository, user, handler, 2, request.Reason ?? string.Empty, ct));
+            Transition(id, repository, user, handler, 2, request.Reason ?? string.Empty, ct))
+            .Produces(204).ProducesProblem(400).ProducesProblem(403).ProducesProblem(404).ProducesProblem(409);
     }
 
     private static async Task<IResult> Transition(Guid id, IDeliveryRepository repository, ICurrentUser user,

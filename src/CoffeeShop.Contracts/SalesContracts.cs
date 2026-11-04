@@ -17,5 +17,7 @@ public sealed record OperationalOrderResponse(Guid Id, string OrderNumber, strin
     IReadOnlyList<Guid> PendingDiscountIds);
 public sealed record RecordPaymentRequest(Guid PaymentId, string? Method, decimal Amount,
     string? Status = null, string? Reference = null);
+public sealed record PaymentResponse(Guid PaymentId, decimal PaidAmount, decimal OutstandingBalance,
+    bool IsFullyPaid, bool AlreadyRecorded);
 public sealed record DiscountRequest(Guid DiscountId, string? Type, decimal Value, string? Reason);
 public sealed record CancelOrderRequest(string? Reason);
