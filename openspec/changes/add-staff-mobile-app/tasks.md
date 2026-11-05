@@ -3,7 +3,7 @@
 ## 1. Delivery gates and foundations
 
 - [ ] 1.1 Create a mobile delivery baseline that records the current API, identity, OpenAPI, emulator, and device-network readiness; verify every P0 dependency has an owner and a GitHub issue before mobile workflow work starts.
-  Evidence: [S0 baseline and dependency map](../../../docs/mobile-delivery-baseline.md) ([#136](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/136)); environment and unassigned-work blockers are explicit. Completion remains subject to the issue's required review.
+      Evidence: [S0 baseline and dependency map](../../../docs/mobile-delivery-baseline.md) ([#136](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/136)); environment and unassigned-work blockers are explicit. Completion remains subject to the issue's required review.
 - [ ] 1.2 Scaffold `apps/staff-mobile` as a strict TypeScript Expo application with Expo Router; verify the documented command launches it on an Android emulator.
 - [ ] 1.3 Pin package-manager metadata and configure type-checking, linting, formatting, unit tests, component tests, and Android end-to-end tests; verify a clean install and each quality command pass.
 - [ ] 1.4 Add validated environment configuration for emulator, physical device, test, and release API base URLs; verify missing or invalid configuration fails without exposing a secret.
@@ -31,7 +31,7 @@
 - [ ] 4.3 Build the manager pending-discount inbox and approve or reject actions; verify a server-confirmed decision changes the shared order state.
 - [ ] 4.4 Build inventory balance and low-stock views plus stock adjustment with a required reason; verify valid adjustments update the shared movement history and invalid adjustments do not change stock.
 - [ ] 4.5 Build courier assignment views, operational address/contact display, device navigation launch, and out-for-delivery, delivered, or failed actions; verify a courier cannot load another courier's assignment and a failure requires a reason.
-- [ ] 4.6 Add online, reconnecting, and offline states with manual refresh and disabled mutations; verify no write is queued or reported successful while disconnected.
+- [x] 4.6 Add online, reconnecting, and offline states with manual refresh and disabled mutations; verify no write is queued or reported successful while disconnected. Evidence: [#145 connectivity implementation and verification](../../../docs/evidence/mobile-connectivity-145/README.md); full quality check, API contract check, and Android export pass.
 - [ ] 4.7 Connect authenticated operational events to cache invalidation and post-reconnect refetch; verify a WinUI or API change refreshes the affected mobile view without overwriting a newer state.
 
 ## 5. P1 operational coverage
