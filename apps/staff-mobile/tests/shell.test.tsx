@@ -115,6 +115,25 @@ test('terminal session loss removes protected content immediately', async () => 
   );
   expect(screen.queryByText('Protected feature content')).toBeNull();
 });
+test('a late permission grant cannot expose a module after session loss', async () => {
+  const pending = deferred<Response>();
+  await session(() => pending.promise);
+  const view = await render(
+    <PermissionBoundary moduleId="barista">
+      {protectedChild}
+    </PermissionBoundary>,
+  );
+  expect(protectedChild).not.toHaveBeenCalled();
+  mockSession.state = { status: 'signedOut', user: null };
+  await view.rerender(
+    <PermissionBoundary moduleId="barista">
+      {protectedChild}
+    </PermissionBoundary>,
+  );
+  await act(async () => pending.resolve(json(user)));
+  expect(protectedChild).not.toHaveBeenCalled();
+  expect(screen.queryByText('Protected feature content')).toBeNull();
+});
 test('background hides content and resume rechecks permissions before remounting', async () => {
   let listener: ((state: AppStateStatus) => void) | undefined;
   jest
