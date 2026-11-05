@@ -29,6 +29,11 @@ jobs:
         run: npm run format:check
       - name: Run mobile tests
         run: npm test -- --ci
+      - name: Export Android bundle smoke test
+        env:
+          EXPO_PUBLIC_APP_ENV: emulator
+          EXPO_PUBLIC_API_BASE_URL: http://10.0.2.2:5232/api/v1
+        run: npm run smoke:android
 
   build-and-test:
     runs-on: windows-latest
