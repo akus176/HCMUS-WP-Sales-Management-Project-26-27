@@ -199,6 +199,26 @@ test('offline mutation rejects immediately and is never replayed after reconnect
   expect(mutationFn).not.toHaveBeenCalled();
 });
 
+test('unknown internet reachability keeps mutations disabled', async () => {
+  onlineManager.setOnline(false);
+  const client = makeClient();
+  getNetworkStateAsync.mockResolvedValue({
+    isConnected: true,
+    isInternetReachable: null,
+  } as unknown as NetworkState);
+  const mutationFn = jest.fn(async (value: string) => value);
+  await render(
+    <MutationProbe mutationFn={mutationFn} attemptWhen="offline" />,
+    { wrapper: wrapperFor(client) },
+  );
+
+  expect(await screen.findByText(/No change was sent or saved/)).toBeVisible();
+  expect(
+    screen.getByRole('button', { name: 'Try write', disabled: true }),
+  ).toBeVisible();
+  expect(mutationFn).not.toHaveBeenCalled();
+});
+
 test.each([
   { status: 422, message: 'Check the submitted information and try again.' },
   { status: 403, message: 'You do not have permission for this action.' },
@@ -215,9 +235,12 @@ test.each([
     let serverValue = 'server version 1';
     const write = jest
       .fn<Promise<void>, []>()
-      .mockRejectedValueOnce(new ApiError(status))
       .mockImplementationOnce(async () => {
-        serverValue = 'server version 2';
+        if (status === 409) serverValue = 'server version 2';
+        throw new ApiError(status);
+      })
+      .mockImplementationOnce(async () => {
+        serverValue = status === 409 ? 'server version 3' : 'server version 2';
       });
     function ServerRecord() {
       const query = useQuery({
@@ -243,11 +266,17 @@ test.each([
 
     await fireEvent.press(screen.getByRole('button', { name: 'Save record' }));
     expect(await screen.findByText(message)).toBeVisible();
-    expect(screen.getByText('server version 1')).toBeVisible();
+    if (status === 409)
+      expect(await screen.findByText('server version 2')).toBeVisible();
+    else expect(screen.getByText('server version 1')).toBeVisible();
     expect(write).toHaveBeenCalledTimes(1);
 
     await fireEvent.press(screen.getByRole('button', { name: 'Save record' }));
-    expect(await screen.findByText('server version 2')).toBeVisible();
+    expect(
+      await screen.findByText(
+        status === 409 ? 'server version 3' : 'server version 2',
+      ),
+    ).toBeVisible();
     expect(write).toHaveBeenCalledTimes(2);
   },
 );

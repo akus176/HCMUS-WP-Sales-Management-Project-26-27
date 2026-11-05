@@ -6,7 +6,7 @@ in `apps/staff-mobile/src/connectivity/` and is mounted by the staff app root.
 ## Behavior
 
 - Expo Network supplies the device connectivity snapshot and change listener.
-  Unknown/disconnected states fail closed for writes.
+  Unknown reachability and disconnected states fail closed for writes.
 - The app shows checking, online, reconnecting, and offline feedback. The online
   and offline states provide a manual data refresh or connection check.
 - TanStack Query caches server results only in memory. A reconnect and manual
@@ -21,10 +21,11 @@ in `apps/staff-mobile/src/connectivity/` and is mounted by the staff app root.
 
 ## Verification
 
-`apps/staff-mobile/tests/connectivity.test.tsx` checks offline, online, reconnect,
-manual refresh, disabled actions, no queued/replayed writes, and server-authoritative
-recovery after validation (`422`), forbidden (`403`), and conflict (`409`) errors.
-The conflict case retries deliberately after the latest server value is refreshed.
+`apps/staff-mobile/tests/connectivity.test.tsx` checks unknown/offline/online,
+reconnect, manual refresh, disabled actions, no queued/replayed writes, and
+server-authoritative recovery after validation (`422`), forbidden (`403`), and
+conflict (`409`) errors. The conflict case verifies the latest server value is
+refreshed before a deliberate retry.
 
 Reproduce with Node 26.5.0 and npm 11.17.0 from `apps/staff-mobile`:
 
@@ -40,7 +41,7 @@ Verified for this change:
 
 | Check               | Result                                                                                       |
 | ------------------- | -------------------------------------------------------------------------------------------- |
-| `npm run check`     | Passed: TypeScript, ESLint, Prettier, and 14 Jest suites (121 tests).                        |
+| `npm run check`     | Passed: TypeScript, ESLint, Prettier, and 14 Jest suites (122 tests).                        |
 | `npm run api:check` | Passed: OpenAPI 7.10.1 regenerated the schema with no diff.                                  |
 | Android Expo export | Passed: release-configured Android bundle exported to `/tmp/mobile-connectivity-145-export`. |
 | `git diff --check`  | Passed: no whitespace errors.                                                                |

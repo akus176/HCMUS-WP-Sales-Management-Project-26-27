@@ -45,7 +45,7 @@ const ConnectivityContext = createContext<ConnectivityContextValue | null>(
 );
 
 function networkIsOnline(state: NetworkState) {
-  return state.isConnected === true && state.isInternetReachable !== false;
+  return state.isConnected === true && state.isInternetReachable === true;
 }
 
 export function ConnectivityProvider({ children }: { children: ReactNode }) {
