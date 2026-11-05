@@ -34,7 +34,7 @@ required versions, without weakening engine checks.
 | Check | Actual result |
 | --- | --- |
 | Clean `npm ci` for `contracts/mobile-p0` and `apps/staff-mobile` | Passed; existing upstream dependency deprecation/install-script notices retained |
-| `npm run check` in `apps/staff-mobile` | TypeScript, ESLint with zero allowed warnings, Prettier, **103 tests in 12 suites passed**, zero failed/skipped |
+| `npm run check` in `apps/staff-mobile` | TypeScript, ESLint with zero allowed warnings, Prettier, **104 tests in 12 suites passed**, zero failed/skipped |
 | `npm run api:check` | Deterministic generation passed; committed schema unchanged |
 | Release-profile `expo export --platform android` | Passed; Android Hermes bundle generated |
 | Browser fixture at 390×844 and 800×1024 | Captured and inspected; no horizontal overflow, all primary targets at least 48×48 |
@@ -117,5 +117,5 @@ and accepts zero-grant users without granting any module. Every active event
 invalidates and restarts verification. New tests cover empty-home grants on
 resume, identity hiding in background, duplicate active events and a retained
 module route returning to focus after permission revocation. The final full
-suite passed 103/103 with zero failures/skips. Required @vt-Toan review is still
+suite passed 104/104 with zero failures/skips. Required @vt-Toan review is still
 separate from this implementation review.
