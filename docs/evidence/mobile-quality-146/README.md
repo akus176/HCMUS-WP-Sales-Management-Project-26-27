@@ -28,3 +28,20 @@ the #138 report documents a prior run before this additional assertion.
 The local and CI bundle export is not a native build or emulator launch.
 Follow the [Android setup guide](../../../apps/staff-mobile/README.md) to install
 Maestro, start the AVD, install the debug app and run `npm run test:e2e:android`.
+
+## Local verification
+
+Executed on 5 November 2026 with Node 26.5.0 and npm 11.17.0:
+
+| Command | Result |
+| --- | --- |
+| `npm ci --no-audit --no-fund` | Passed with the locked mobile dependencies. |
+| `npm run type-check`, `npm run lint`, `npm run format:check` | Passed. |
+| `npm test -- --ci --json --outputFile=mobile-test-results.json` | Passed: 14 suites, 126 tests, zero failures. |
+| `npm run api:check` | Passed after installing the pinned contract generator; generated schema had no diff. |
+| `npm run smoke:android` | Passed Android JavaScript export with the documented emulator environment values; no native launch. |
+| Focused session, shell and connectivity Jest suites | Passed; the connectivity regression exposed and verified the stale-reconnect fix. |
+
+The CI job publishes the Jest JSON report with the counts from its own run;
+the contract drift check remains in the existing `mobile-p0-contract` job. A
+successful local run is not evidence that this branch has passed GitHub Actions.
