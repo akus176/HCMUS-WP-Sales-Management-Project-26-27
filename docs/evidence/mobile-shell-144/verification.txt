@@ -1,0 +1,22 @@
+Date: 2026-11-05
+Node: v26.5.0
+npm: 11.17.0
+
+Command: npm run check --prefix apps/staff-mobile
+Result: exit 0
+- TypeScript: passed
+- ESLint --max-warnings=0: passed
+- Prettier --check: passed
+- Jest: 12 suites passed, 104 tests passed, 0 failed, 0 skipped
+
+Command: npm run api:check --prefix apps/staff-mobile
+Result: exit 0; openapi-typescript 7.10.1 generated the committed schema without a diff.
+
+Command: EXPO_PUBLIC_APP_ENV=release EXPO_PUBLIC_API_BASE_URL=https://staff.example/api/v1 ./node_modules/.bin/expo export --platform android --output-dir /tmp/mobile-144-android-export
+Working directory: apps/staff-mobile
+Result: exit 0; Android Hermes bundle exported (2.7 MB).
+
+Command: Python Playwright browser fixture capture (see capture-browser.py)
+Result: phone 390x844, tablet 800x1024, phone with 2x CSS text simulation and shell control/focus states passed; no horizontal overflow, all primary actions >=48x48, no browser page errors.
+
+Native Android emulator, TalkBack and physical keyboard verification were not run. Browser visual checks and JavaScript bundle export are not claims of native device visual/accessibility execution.

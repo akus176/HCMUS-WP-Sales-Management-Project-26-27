@@ -7,10 +7,10 @@ import StarterScreen from '../app/index';
 import LoginScreen from '../app/login';
 import SessionScreen from '../app/session';
 import { SessionProvider } from '../src/session/context';
-import { harness, json } from './helpers';
+import { harness, json, user } from './helpers';
 
 test('logout removes protected navigation history and rejects a stale session deep link', async () => {
-  const h = harness(async () => json({}, 401));
+  const h = harness(async () => json(user));
   function Layout() {
     return (
       <SessionProvider client={h.client}>
@@ -51,7 +51,12 @@ test('logout removes protected navigation history and rejects a stale session de
 });
 
 test('terminal refresh rejection removes a protected screen and retained navigation', async () => {
-  const h = harness(async () => json({}, 401));
+  let identityChecks = 0;
+  const h = harness(async (request) =>
+    request.url.endsWith('/auth/me') && ++identityChecks === 1
+      ? json(user)
+      : json({}, 401),
+  );
   function Layout() {
     return (
       <SessionProvider client={h.client}>
