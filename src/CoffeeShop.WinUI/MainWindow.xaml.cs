@@ -161,7 +161,7 @@ public sealed partial class MainWindow : Window
     {
         try { await App.Services.GetRequiredService<StaffSessionManager>().LogoutAsync(); }
         catch (ApiException) { /* Local credentials are cleared even when the API is offline. */ }
-        ((App)Application.Current).ShowLoginWindow();
+        ((App)Microsoft.UI.Xaml.Application.Current).ShowLoginWindow();
         Close();
     }
     private void ShowRoute(ServiceConsoleRoute route, bool preserveStockSection = false)

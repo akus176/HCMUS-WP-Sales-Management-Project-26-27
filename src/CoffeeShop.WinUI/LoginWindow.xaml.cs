@@ -20,7 +20,7 @@ public sealed partial class LoginWindow : Window
         {
             await App.Services.GetRequiredService<StaffSessionManager>()
                 .LoginAsync(UsernameBox.Text.Trim(), PasswordBox.Password);
-            ((App)Application.Current).ShowMainWindow();
+            ((App)Microsoft.UI.Xaml.Application.Current).ShowMainWindow();
             Close();
         }
         catch (ApiException exception)

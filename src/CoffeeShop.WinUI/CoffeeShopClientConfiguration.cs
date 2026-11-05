@@ -62,7 +62,7 @@ internal sealed record CoffeeShopClientConfiguration(
             document.TryGetProperty("Api", out var api) && api.TryGetProperty("BaseUrl", out var baseUrl))
             value = baseUrl.GetString();
         return Uri.TryCreate(value, UriKind.Absolute, out var address) &&
-            address.Scheme is "http" or "https" && address.AbsolutePath.EndsWith('/', StringComparison.Ordinal)
+            address.Scheme is "http" or "https" && address.AbsolutePath.EndsWith("/", StringComparison.Ordinal)
             ? address
             : DefaultApiBaseAddress;
     }
