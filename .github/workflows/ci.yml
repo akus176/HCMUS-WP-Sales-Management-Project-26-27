@@ -2,9 +2,41 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
 
 jobs:
+  mobile-quality:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/staff-mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/staff-mobile/.nvmrc
+          cache: npm
+          cache-dependency-path: apps/staff-mobile/package-lock.json
+      - name: Install pinned npm
+        run: npm install --global npm@11.17.0
+      - name: Install mobile dependencies
+        run: npm ci
+      - name: Type-check mobile app
+        run: npm run type-check
+      - name: Lint mobile app
+        run: npm run lint
+      - name: Check mobile formatting
+        run: npm run format:check
+      - name: Run mobile tests
+        run: npm test -- --ci
+      - name: Export Android bundle smoke test
+        env:
+          EXPO_PUBLIC_APP_ENV: emulator
+          EXPO_PUBLIC_API_BASE_URL: http://10.0.2.2:5232/api/v1
+        run: npm run smoke:android
+
   build-and-test:
     runs-on: windows-latest
     steps:

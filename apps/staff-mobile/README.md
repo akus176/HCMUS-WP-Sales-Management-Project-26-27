@@ -28,6 +28,28 @@ screens. Jest fails if no tests are discovered. `npm run format` applies Prettie
 All direct dependencies and the full lockfile are pinned; use `npm ci` for repeat
 installs. Run `npx expo install --check` after changing native dependencies.
 
+### CI quality checks (#141)
+
+The `mobile-quality` job in `.github/workflows/ci.yml` uses the versions above
+and runs the following from `apps/staff-mobile` after a clean checkout:
+
+```powershell
+npm ci
+npm run type-check
+npm run lint
+npm run format:check
+npm test -- --ci
+$env:EXPO_PUBLIC_APP_ENV = 'emulator'
+$env:EXPO_PUBLIC_API_BASE_URL = 'http://10.0.2.2:5232/api/v1'
+npm run smoke:android
+```
+
+The smoke check exports an Android JavaScript bundle to ignored
+`dist/android-smoke`. It checks bundling and configuration only: it does not
+build an APK, start an emulator, or run Maestro. Use the Android emulator and
+E2E instructions below for native launch evidence. The other CI jobs continue
+to run independently, including the shared contract drift and backend checks.
+
 ## Generated client and sessions (#143)
 
 `api:generate` uses the existing **openapi-typescript 7.10.1** installation and
