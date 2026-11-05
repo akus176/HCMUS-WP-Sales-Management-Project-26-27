@@ -42,14 +42,18 @@ TypeScript 5 dependency stays isolated from the app's TypeScript 6 dependency.
 Set the non-secret URL **before starting Metro**, in its terminal:
 
 ```powershell
+$env:EXPO_PUBLIC_APP_ENV = 'emulator'
 $env:EXPO_PUBLIC_API_BASE_URL = 'http://10.0.2.2:5232/api/v1'
 ```
 
-The URL must end in `/api/v1`, without credentials, query or fragment. Release
-builds require HTTPS. Without valid configuration, the public starter remains
-available and sign-in reports that the service is not configured. `EXPO_PUBLIC_*`
-values are bundled publicly; never place credentials or tokens in them. #139
-owns the complete device/test/release environment setup.
+The URL must end in `/api/v1`, without credentials, query or fragment.
+[Environment and device-network setup](../../docs/mobile-environment-139.md)
+defines emulator, physical-device, test and release profiles. Copy the app's
+`.env.example` to ignored `.env.local` for local setup, or set both public values
+in the terminal. Build-time validation rejects invalid configuration, and the
+runtime startup gate blocks session restoration/navigation with a safe message.
+Release bundles require the release profile and a public HTTPS endpoint.
+`EXPO_PUBLIC_*` values are bundled publicly; never place credentials or tokens in them.
 
 The API must be running with its database, JWT configuration and an explicitly
 provisioned active staff account; the app creates no accounts and seeds no data.
@@ -173,11 +177,13 @@ the executed checks and this runtime limit.
 ## Shared API convention and scope
 
 The shared API convention is `http://10.0.2.2:5232/api/v1` for the Android emulator;
-`10.0.2.2` refers to the host, while emulator `localhost` refers to Android. Check
-the host's non-secret `/health` endpoint separately when API integration begins.
-The session client calls the shared authentication endpoints. #139 owns validated
-emulator/device/test/release configuration and native networking. Never add database credentials, tokens,
-or private device addresses to app configuration.
+`10.0.2.2` refers to the host, while emulator `localhost` refers to Android.
+With the configured emulator and API running, `npm run check:android-health`
+checks the real shared API from Android's network stack without a staff account.
+See [the #139 setup guide](../../docs/mobile-environment-139.md) for physical-device
+LAN, HTTPS, cleartext policy and troubleshooting. The session client uses the
+same validated configuration. Never add database credentials, tokens, or actual
+private device addresses to tracked configuration.
 
 The scaffold is #138 (local OpenSpec **1.2/1.3**). #143 implements local Mobile
 **3.1–3.4**, corresponding to the older canonical #95 **3.1–3.5**. Business

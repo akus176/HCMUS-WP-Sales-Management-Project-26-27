@@ -9,12 +9,12 @@ import {
 } from 'react';
 
 import {
-  apiOrigin,
   createSessionClient,
   type SessionClient,
   type SessionState,
 } from './session';
 import { secureRefreshStorage } from './secure-storage';
+import { readMobileEnvironment } from '../config/environment';
 
 const signedOut: SessionState = { status: 'signedOut', user: null };
 const SessionContext = createContext<{
@@ -41,7 +41,7 @@ export function SessionProvider({
   const [client] = useState(() => {
     if (supplied) return supplied;
     try {
-      const origin = apiOrigin(process.env.EXPO_PUBLIC_API_BASE_URL);
+      const { apiOrigin: origin } = readMobileEnvironment();
       return createSessionClient({
         origin,
         storage: secureRefreshStorage(origin),
