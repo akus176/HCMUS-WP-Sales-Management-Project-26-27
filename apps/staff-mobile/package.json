@@ -41,6 +41,7 @@
   "scripts": {
     "start": "expo start --localhost",
     "android": "expo run:android",
+    "check:android-health": "node --env-file-if-exists=.env.local scripts/check-android-health.mjs",
     "api:generate": "node ../../contracts/mobile-p0/node_modules/openapi-typescript/bin/cli.js ../../contracts/mobile-p0/openapi.json --output ../../contracts/mobile-p0/schema.d.ts",
     "api:check": "npm run api:generate && git diff --exit-code -- ../../contracts/mobile-p0/schema.d.ts",
     "type-check": "tsc --noEmit",
@@ -48,7 +49,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest --runInBand",
-    "test:unit": "jest --runInBand tests/session.test.ts tests/secure-storage.test.ts",
+    "test:unit": "jest --runInBand tests/session.test.ts tests/secure-storage.test.ts tests/environment.test.ts",
     "test:components": "jest --runInBand tests/router.test.tsx tests/login.test.tsx tests/navigation.test.tsx",
     "test:live": "jest --runInBand --testMatch **/tests/live-session.integration.ts",
     "pretest:e2e:android": "node -e \"require('node:fs').mkdirSync('.maestro/results', { recursive: true })\"",

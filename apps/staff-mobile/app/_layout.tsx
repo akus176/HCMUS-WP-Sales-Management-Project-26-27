@@ -2,13 +2,16 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Text } from 'react-native';
 
+import { ConfigurationGate } from '../src/config/ConfigurationGate';
 import { SessionProvider, useSession } from '../src/session/context';
 
 export default function RootLayout() {
   return (
-    <SessionProvider>
-      <SessionRoutes />
-    </SessionProvider>
+    <ConfigurationGate>
+      <SessionProvider>
+        <SessionRoutes />
+      </SessionProvider>
+    </ConfigurationGate>
   );
 }
 
