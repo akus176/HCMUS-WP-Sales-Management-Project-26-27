@@ -9,6 +9,16 @@ public sealed record ServiceConsoleRoute(ServiceConsoleDestination Destination, 
 public static class ServiceConsoleNavigation
 {
     public const string DefaultTag = "counter";
+    private static readonly IReadOnlyDictionary<string, string[]> DestinationPermissions =
+        new Dictionary<string, string[]>(StringComparer.Ordinal)
+        {
+            ["counter"] = ["orders.create"],
+            ["service-board"] = ["orders.fulfill"],
+            ["menu"] = ["menu.manage"],
+            ["stock-room"] = ["inventory.manage", "inventory.receive", "inventory.adjust"],
+            ["customers"] = ["customers.manage"],
+            ["reports"] = ["reports.revenue", "reports.bestsellers", "reports.channels", "reports.lowstock"],
+        };
     public static IReadOnlyList<ServiceConsoleDestination> PrimaryDestinations { get; } = Array.AsReadOnly<ServiceConsoleDestination>(
     [
         new("counter", "Counter", "I", "Service", ServiceConsoleWorkspace.Counter),
@@ -45,6 +55,23 @@ public static class ServiceConsoleNavigation
         var destination = PrimaryDestinations.SingleOrDefault(item => item.Tag == primary)
             ?? throw new ArgumentException("Unknown service-console destination.", nameof(tag));
         return new(destination, section ?? (primary == "stock-room" ? "ingredients" : null));
+    }
+
+    public static IReadOnlyList<ServiceConsoleDestination> ForPermissions(IEnumerable<string> permissions)
+    {
+        ArgumentNullException.ThrowIfNull(permissions);
+        var effectivePermissions = permissions.ToHashSet(StringComparer.Ordinal);
+        return PrimaryDestinations
+            .Where(destination => DestinationPermissions[destination.Tag].Any(effectivePermissions.Contains))
+            .ToArray();
+    }
+
+    public static ServiceConsoleRoute Resolve(string tag, IEnumerable<string> permissions)
+    {
+        var route = Resolve(tag);
+        if (!ForPermissions(permissions).Any(destination => destination.Tag == route.Destination.Tag))
+            throw new UnauthorizedAccessException("The signed-in staff member cannot open this workspace.");
+        return route;
     }
 
     public static ServiceConsoleLayoutMode LayoutFor(double width)

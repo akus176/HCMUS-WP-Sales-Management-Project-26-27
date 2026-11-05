@@ -177,4 +177,17 @@ public sealed class HostTests
         Assert.True(root.GetProperty("paths").GetProperty("/api/v1/categories")
             .GetProperty("post").GetProperty("responses").TryGetProperty("403", out _));
     }
+
+    [Fact]
+    public async Task UnauthenticatedRequestsToProtectedRoutes_AreRejectedBeforeDatabaseAccess()
+    {
+        using var host = CreateHost();
+        using var client = host.CreateClient();
+
+        using var identityResponse = await client.GetAsync("/api/v1/auth/me");
+        using var businessResponse = await client.GetAsync("/api/v1/categories");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, identityResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, businessResponse.StatusCode);
+    }
 }
