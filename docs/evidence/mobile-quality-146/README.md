@@ -17,3 +17,14 @@ OpenSpec change `add-staff-mobile-app`; this issue contributes to Mobile tasks
 
 The role modules include planned placeholders. Tests of navigation, fixtures,
 or bundle generation do not prove that operational workflows are implemented.
+
+## Android launch limitation
+
+On 5 November 2026, `adb devices -l` returned no connected devices. The Android
+emulator lists `Pixel_8_Pro_API_36`, but Maestro was not available on PATH or
+under the standard user installation directory. The existing starter flow now
+also checks the public sign-in entry point. It has not been run on this checkout;
+the #138 report documents a prior run before this additional assertion.
+The local and CI bundle export is not a native build or emulator launch.
+Follow the [Android setup guide](../../../apps/staff-mobile/README.md) to install
+Maestro, start the AVD, install the debug app and run `npm run test:e2e:android`.

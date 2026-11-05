@@ -8,3 +8,4 @@ name: Staff-mobile Android starter
     timeout: 60000
 - assertVisible: Staff tools are being prepared.
 - assertVisible: No staff account or shop data is loaded.
+- assertVisible: Staff sign-in
