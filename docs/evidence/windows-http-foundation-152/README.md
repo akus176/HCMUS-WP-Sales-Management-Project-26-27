@@ -36,4 +36,22 @@ The broader database-backed API filter selected 21 tests; all 21 skipped because
 
 ## Remaining acceptance evidence
 
-OpenSpec task 11.2 remains unchecked. The sign-in and refresh flows have mocked HTTP coverage, but the issue requires a Windows WinUI login against the real API. Run the app on Windows with the API/database available, verify login, restart/refresh restore, expiry cleanup, and logout cleanup, then attach that result before checking 11.2 or marking issue #152 ready for closure.
+OpenSpec task 11.2 remains unchecked. The Windows and live API checks below confirm build, startup, API reachability, and API authentication. They do not yet verify the WinUI login form, DPAPI persistence, app restart/refresh restore, expiry recovery, or sign-out cleanup. Complete those app-level checks before checking task 11.2 or marking issue #152 ready for closure.
+
+## Windows and live API validation — 2026-11-05
+
+This run supplements the earlier Linux-only evidence. It used PR head `5bae215242bde5aba0c36d579f8cda579de2afa5` on a Windows 11 host, .NET SDK `10.0.403`, and Docker Compose from Ubuntu 24.04. The Compose stack used an isolated PostgreSQL 18 volume and an API image built from this branch. The API and database were healthy. Temporary test ports were `15232` (API) and `15432` (PostgreSQL).
+
+### Verified
+
+- `dotnet build src/CoffeeShop.WinUI/CoffeeShop.WinUI.csproj --configuration Debug --verbosity minimal` — succeeded with 0 warnings and 0 errors.
+- `dotnet run --no-build --project src/CoffeeShop.WinUI/CoffeeShop.WinUI.csproj --configuration Debug` — opened the actual `Corner Cafe · Sign in` WinUI window.
+- From Windows, API health and readiness returned HTTP 200 (`Healthy`).
+- A disposable local Manager account passed live API checks: login 200; `/auth/me` 200; refresh 200 with refresh-token rotation; logout 204; replay of the revoked refresh token 401.
+- The empty sign-in screen is captured in [windows-sign-in-2026-11-05.jpg](windows-sign-in-2026-11-05.jpg).
+
+No password, access token, refresh token, signing key, or database password is included in this evidence. The test account and database are local disposable test data.
+
+### Remaining manual acceptance
+
+The live API authentication check does not prove the WinUI sign-in form. The app is open at the sign-in screen, but a person must submit the temporary test credentials locally. After that, verify and capture the DPAPI refresh-token file, app restart/refresh, expiry recovery, and sign-out cleanup. These checks are pending. Keep PR #176 in draft and do not request review until this app-level evidence is complete.
