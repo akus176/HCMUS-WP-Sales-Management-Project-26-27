@@ -25,12 +25,15 @@ const SessionContext = createContext<{
 export function SessionProvider({
   children,
   client: supplied,
+  queryClient: suppliedQueries,
 }: {
   children: ReactNode;
   client?: SessionClient;
+  queryClient?: QueryClient;
 }) {
   const [queries] = useState(
     () =>
+      suppliedQueries ??
       new QueryClient({
         defaultOptions: {
           queries: { retry: false },

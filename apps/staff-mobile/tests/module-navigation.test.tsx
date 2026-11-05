@@ -7,6 +7,7 @@ import StarterScreen from '../app/index';
 import LoginScreen from '../app/login';
 import SessionScreen from '../app/session';
 import ModuleScreen from '../app/modules/[module]';
+import DiscountReviewScreen from '../app/modules/approvals/[discountId]';
 import { SessionProvider } from '../src/session/context';
 import { harness, json, user } from './helpers';
 
@@ -74,6 +75,48 @@ test('real routes reject signed-out and unauthorized links, allow a grant, then 
       /\/auth\/(login|me)$/.test(request.url),
     ),
   ).toBe(true);
+});
+
+test('an unauthorized manager-approval deep link loads no discount data', async () => {
+  const h = harness(async () => json(user));
+  function Layout() {
+    return (
+      <SessionProvider client={h.client}>
+        <SessionRoutes />
+      </SessionProvider>
+    );
+  }
+  const discountId = '00000000-0000-0000-0000-000000000011';
+  await renderRouter(
+    {
+      _layout: Layout,
+      index: StarterScreen,
+      login: LoginScreen,
+      session: SessionScreen,
+      'modules/[module]': ModuleScreen,
+      'modules/approvals/[discountId]': DiscountReviewScreen,
+    },
+    { initialUrl: `/modules/approvals/${discountId}` },
+  );
+  await waitFor(() => expect(screen).toHavePathname('/'));
+  expect(h.fetcher).not.toHaveBeenCalled();
+
+  await act(async () => {
+    await h.client.login('staff', 'fixture-password');
+  });
+  await screen.findByRole('header', { name: 'Staff home' });
+  await act(async () => {
+    router.push(`/modules/approvals/${discountId}`);
+  });
+  await screen.findByText(
+    'Access unavailable. Your current permissions do not allow this module.',
+  );
+  expect(screen.queryByRole('header', { name: 'Discount review' })).toBeNull();
+  expect(
+    h.fetcher.mock.calls.some(([request]) =>
+      request.url.includes('/api/v1/discounts/pending'),
+    ),
+  ).toBe(false);
 });
 
 test('a retained module refocuses only after a fresh permission check', async () => {

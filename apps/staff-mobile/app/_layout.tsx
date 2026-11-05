@@ -4,14 +4,17 @@ import { StatusBar } from 'expo-status-bar';
 import { Text } from 'react-native';
 
 import { ConfigurationGate } from '../src/config/ConfigurationGate';
+import { ConnectivityProvider } from '../src/network/ConnectivityContext';
 import { SessionProvider, useSession } from '../src/session/context';
 
 export default function RootLayout() {
   return (
     <ConfigurationGate>
-      <SessionProvider>
-        <SessionRoutes />
-      </SessionProvider>
+      <ConnectivityProvider>
+        <SessionProvider>
+          <SessionRoutes />
+        </SessionProvider>
+      </ConnectivityProvider>
     </ConfigurationGate>
   );
 }
@@ -37,6 +40,7 @@ export function SessionRoutes() {
         <Stack.Protected guard={!!state.user}>
           <Stack.Screen name="session" />
           <Stack.Screen name="modules/[module]" />
+          <Stack.Screen name="modules/approvals/[discountId]" />
         </Stack.Protected>
       </Stack>
     </>
