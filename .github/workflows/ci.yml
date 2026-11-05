@@ -27,6 +27,8 @@ jobs:
         run: npm run lint
       - name: Check mobile formatting
         run: npm run format:check
+      - name: Run mobile tests
+        run: npm test -- --ci
 
   build-and-test:
     runs-on: windows-latest
