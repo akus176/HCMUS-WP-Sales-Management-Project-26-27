@@ -57,6 +57,7 @@ export function ConnectivityProvider({ children }: { children: ReactNode }) {
   });
   const statusRef = useRef(status);
   const mounted = useRef(false);
+  const networkRevision = useRef(0);
 
   const updateStatus = useCallback((next: ConnectivityStatus) => {
     statusRef.current = next;
@@ -66,6 +67,7 @@ export function ConnectivityProvider({ children }: { children: ReactNode }) {
   const applyNetworkState = useCallback(
     async (network: NetworkState, manualRefresh = false) => {
       if (!mounted.current) return;
+      const revision = ++networkRevision.current;
       if (!networkIsOnline(network)) {
         onlineManager.setOnline(false);
         updateStatus('offline');
@@ -78,7 +80,8 @@ export function ConnectivityProvider({ children }: { children: ReactNode }) {
         updateStatus('reconnecting');
         await queryClient.invalidateQueries({ type: 'active' });
       }
-      if (mounted.current) updateStatus('online');
+      if (mounted.current && revision === networkRevision.current)
+        updateStatus('online');
     },
     [queryClient, updateStatus],
   );

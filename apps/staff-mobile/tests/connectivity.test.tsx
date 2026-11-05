@@ -343,3 +343,31 @@ test('blocks mutations during reconnect and never replays them when refresh fini
   expect(await screen.findByText('online')).toBeVisible();
   expect(mutationFn).not.toHaveBeenCalled();
 });
+
+test('a stale reconnect cannot restore online status after a newer disconnect', async () => {
+  const client = makeClient();
+  let finishRefresh!: () => void;
+  const refresh = new Promise<void>((resolve) => {
+    finishRefresh = resolve;
+  });
+  jest.spyOn(client, 'invalidateQueries').mockReturnValue(refresh);
+  const mutationFn = jest.fn(async () => 'saved');
+  await render(
+    <MutationProbe mutationFn={mutationFn} attemptWhen="offline" />,
+    { wrapper: wrapperFor(client) },
+  );
+  await screen.findByText('offline');
+  let reconnect: void | Promise<void>;
+  await act(async () => {
+    reconnect = networkListener?.(onlineState);
+  });
+  await screen.findByText('reconnecting');
+  await emitNetworkState(offlineState);
+  await act(async () => {
+    finishRefresh();
+    await reconnect;
+  });
+  expect(screen.getByText('offline')).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Try write' })).toBeDisabled();
+  expect(mutationFn).not.toHaveBeenCalled();
+});

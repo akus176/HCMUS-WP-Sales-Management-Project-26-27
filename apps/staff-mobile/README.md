@@ -38,7 +38,7 @@ npm ci
 npm run type-check
 npm run lint
 npm run format:check
-npm test -- --ci
+npm test -- --ci --json --outputFile=mobile-test-results.json
 $env:EXPO_PUBLIC_APP_ENV = 'emulator'
 $env:EXPO_PUBLIC_API_BASE_URL = 'http://10.0.2.2:5232/api/v1'
 npm run smoke:android
@@ -49,6 +49,8 @@ The smoke check exports an Android JavaScript bundle to ignored
 build an APK, start an emulator, or run Maestro. Use the Android emulator and
 E2E instructions below for native launch evidence. The other CI jobs continue
 to run independently, including the shared contract drift and backend checks.
+CI uploads the ignored Jest JSON report as `mobile-test-results`, including
+the actual suite and test totals from that run.
 
 ## Generated client and sessions (#143)
 

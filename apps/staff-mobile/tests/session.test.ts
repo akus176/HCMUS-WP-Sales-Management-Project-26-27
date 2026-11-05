@@ -254,6 +254,23 @@ test('restore rotates a saved refresh token before revealing protected state', a
   expect(h.saved()).toBe(pair('restored').refreshToken);
 });
 
+test('restore without a saved token never contacts the API or exposes a session', async () => {
+  const h = harness();
+  await h.client.restore();
+  expect(h.fetcher).not.toHaveBeenCalled();
+  expect(h.client.getSnapshot()).toEqual({ status: 'signedOut', user: null });
+  expect(h.saved()).toBeNull();
+});
+
+test('restore rejects a malformed token response and clears saved credentials', async () => {
+  const h = harness(async () => json({ ...pair(), accessToken: '' }));
+  await h.storage.set('fixture-saved-refresh');
+  await h.client.restore();
+  expect(h.client.getSnapshot()).toEqual({ status: 'signedOut', user: null });
+  expect(h.saved()).toBeNull();
+  expect(h.clearData).toHaveBeenCalled();
+});
+
 test('failed secure rotation persistence fails closed', async () => {
   const h = harness(async () => json(pair('b')));
   await h.storage.set('fixture-saved-refresh');
