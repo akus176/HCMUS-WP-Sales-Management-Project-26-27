@@ -36,7 +36,10 @@ export function SessionProvider({
       suppliedQueries ??
       new QueryClient({
         defaultOptions: {
-          queries: { retry: false },
+          queries: {
+            retry: false,
+            refetchOnReconnect: true,
+          },
           mutations: { retry: false },
         },
       }),

@@ -4,7 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { Text } from 'react-native';
 
 import { ConfigurationGate } from '../src/config/ConfigurationGate';
-import { ConnectivityProvider } from '../src/network/ConnectivityContext';
+import { ConnectivityBanner } from '../src/connectivity/ConnectivityBanner';
+import { ConnectivityProvider } from '../src/connectivity/connectivity';
 import { SessionProvider, useSession } from '../src/session/context';
 
 export default function RootLayout() {
@@ -21,17 +22,42 @@ export default function RootLayout() {
 
 export function SessionRoutes() {
   const { state } = useSession();
+  return (
+    <ConnectivityProvider>
+      <SessionNavigation state={state} />
+    </ConnectivityProvider>
+  );
+}
+
+function SessionNavigation({
+  state,
+}: {
+  state: ReturnType<typeof useSession>['state'];
+}) {
   const [fontsLoaded, fontError] = useFonts({
     Kalam: require('../assets/fonts/Kalam-Bold.ttf'),
     PatrickHand: require('../assets/fonts/PatrickHand-Regular.ttf'),
   });
   if (!fontsLoaded && !fontError)
-    return <Text accessibilityRole="text">Loading interface…</Text>;
+    return (
+      <>
+        <StatusBar style="dark" />
+        <ConnectivityBanner />
+        <Text accessibilityRole="text">Loading interface…</Text>
+      </>
+    );
   if (state.status === 'restoring')
-    return <Text accessibilityRole="alert">Restoring session…</Text>;
+    return (
+      <>
+        <StatusBar style="dark" />
+        <ConnectivityBanner />
+        <Text accessibilityRole="alert">Restoring session…</Text>
+      </>
+    );
   return (
     <>
       <StatusBar style="dark" />
+      <ConnectivityBanner />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={!state.user}>
           <Stack.Screen name="index" />
