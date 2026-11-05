@@ -1,0 +1,50 @@
+[
+  {
+    "fixture": "phone",
+    "viewport": [
+      390,
+      844
+    ],
+    "text_scale_simulation": 1,
+    "buttons": 7,
+    "minimum_target_dp": 48,
+    "horizontal_overflow": false,
+    "browser_errors": []
+  },
+  {
+    "fixture": "tablet",
+    "viewport": [
+      800,
+      1024
+    ],
+    "text_scale_simulation": 1,
+    "buttons": 7,
+    "minimum_target_dp": 48,
+    "horizontal_overflow": false,
+    "browser_errors": []
+  },
+  {
+    "fixture": "phone-large-text",
+    "viewport": [
+      390,
+      844
+    ],
+    "text_scale_simulation": 2,
+    "buttons": 7,
+    "minimum_target_dp": 48,
+    "horizontal_overflow": false,
+    "browser_errors": []
+  },
+  {
+    "fixture": "control-states",
+    "viewport": [
+      390,
+      844
+    ],
+    "text_scale_simulation": 1,
+    "buttons": 3,
+    "minimum_target_dp": 48,
+    "horizontal_overflow": false,
+    "browser_errors": []
+  }
+]

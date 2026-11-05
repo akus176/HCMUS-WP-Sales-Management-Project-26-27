@@ -215,3 +215,43 @@ outside #143. Its issue remains open for @JakeConal's required review.
 See [verification evidence](../../docs/evidence/mobile-scaffold-138/README.md)
 for the scaffold and [session evidence](../../docs/evidence/mobile-sessions-143/README.md)
 for #143's executed commands and limits.
+
+## Shared mobile design foundation (#140)
+
+`src/shell/designTokens.ts` exports the mobile color, typography, spacing, shape,
+and elevation tokens. The shell loads the repository's OFL-licensed Kalam and
+Patrick Hand fonts before displaying authenticated routes. `src/shell/controls.tsx`
+exports shared responsive page/text/heading components, state feedback, and
+accessible 48-dp buttons for S2 workflow screens. Controls preserve system font
+scaling, wrap at enlarged sizes, and expose loading, empty, error, warning,
+selected, disabled, and busy states.
+
+See [#140 design-system evidence](../../docs/evidence/mobile-design-system-140/README.md)
+for contrast ratios, touch-target checks, component coverage, and the native
+accessibility verification limits.
+
+## Permission-aware shell (#144)
+
+After sign-in, `/session` lists only modules permitted by effective API permission
+codes. Role names are never authorization inputs. `/modules/[module]` rechecks
+`/api/v1/auth/me` before mounting module content, including on route focus and app
+resume. Unknown routes, malformed/cross-account responses and missing grants fail
+closed. Failed checks offer retry without displaying protected content. The API
+remains authoritative for every later business request.
+
+Each module currently states that its business screens/actions are **planned**.
+This change implements navigation and guards, not barista, discount, inventory,
+courier, payment or administration workflows. The home also checks current server permissions before displaying navigation,
+including when a previously empty home regains focus or the app resumes.
+Home verification uses an explicit scope, so `/modules/home` is not a valid module.
+
+The permission-aware shell uses these shared controls and preserves the sign-in
+palette. Its scrollable phone/tablet layout, scalable text, accessible labels,
+48-dp action targets, and focus/selection feedback are covered by the #140
+foundation and the #144 shell integration evidence.
+
+`npm test` includes the six-backend-role policy matrix, module action filtering,
+real-router deep links, revocation, permission-check failures, terminal sessions,
+background/resume and late-response checks. [Evidence and remaining verification](../../docs/evidence/mobile-shell-144/README.md) distinguish browser visual fixtures
+from native Android checks. Required reviewer: @vt-Toan. Contributor: @akus176
+(with Codex assistance); the existing ticket owner remains @JakeConal.
