@@ -29,6 +29,7 @@ export function SessionRoutes() {
         </Stack.Protected>
         <Stack.Protected guard={!!state.user}>
           <Stack.Screen name="session" />
+          <Stack.Screen name="modules/[module]" />
         </Stack.Protected>
       </Stack>
     </>

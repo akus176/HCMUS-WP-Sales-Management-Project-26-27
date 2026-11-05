@@ -16,7 +16,7 @@ evidence agreed by the team.
 | 23120111 | Phạm Quốc Nam Anh | [kyrie25](https://github.com/kyrie25) | To be agreed by the team | Add issue, PR, test, and demo links | To be agreed | Pending |
 | 23120143 | Tô Thành Long | [longtoZ](https://github.com/longtoZ) | To be agreed by the team | Add issue, PR, test, and demo links | To be agreed | Pending |
 | 23120097 | Võ Tất Toàn | [vt-Toan](https://github.com/vt-Toan) | To be agreed by the team | Add issue, PR, test, and demo links | To be agreed | Pending |
-| 23120135 | Trần Anh Khoa | [akus176](https://github.com/akus176) | To be agreed by the team | Add issue, PR, test, and demo links | To be agreed | Pending |
+| 23120135 | Trần Anh Khoa | [akus176](https://github.com/akus176) | Contributing permission-aware mobile shell and route guards (#144), with Codex assistance | [Issue #144](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/144), [implementation evidence](../evidence/mobile-shell-144/README.md) | To be agreed | Pending @vt-Toan review |
 
 ## Minimum final review
 
@@ -25,3 +25,14 @@ evidence agreed by the team.
 3. Confirm the total workload is balanced by complexity, not only by number of commits.
 4. Record a reason for any material score difference.
 5. Freeze this document before recording the final video.
+
+## Contribution log — 2026-11-05
+
+At @akus176's explicit request, credit their contribution to #144: permission-driven
+mobile navigation, individual action filtering, fresh API permission checks before
+module content mounts, guarded deep links, session/background cleanup, shell controls,
+and automated/evidence verification. This implementation was prepared with Codex
+assistance. Existing work on scaffold, sessions and API contracts remains credited
+to its original contributors. @JakeConal remains the ticket's accountable owner;
+@vt-Toan remains the required reviewer. This record assigns no self-score, claims
+no reviewer approval and credits no unexecuted Android demonstration.

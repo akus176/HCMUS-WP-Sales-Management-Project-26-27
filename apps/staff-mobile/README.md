@@ -193,3 +193,29 @@ outside #143. Its issue remains open for @JakeConal's required review.
 See [verification evidence](../../docs/evidence/mobile-scaffold-138/README.md)
 for the scaffold and [session evidence](../../docs/evidence/mobile-sessions-143/README.md)
 for #143's executed commands and limits.
+
+## Permission-aware shell (#144)
+
+After sign-in, `/session` lists only modules permitted by effective API permission
+codes. Role names are never authorization inputs. `/modules/[module]` rechecks
+`/api/v1/auth/me` before mounting module content, including on route focus and app
+resume. Unknown routes, malformed/cross-account responses and missing grants fail
+closed. Failed checks offer retry without displaying protected content. The API
+remains authoritative for every later business request.
+
+Each module currently states that its business screens/actions are **planned**.
+This change implements navigation and guards, not barista, discount, inventory,
+courier, payment or administration workflows. The home also checks current server permissions before displaying navigation,
+including when a previously empty home regains focus or the app resumes.
+Home verification uses an explicit scope, so `/modules/home` is not a valid module.
+
+Reusable controls live in `src/shell/controls.tsx` and preserve the sign-in palette.
+They provide scrollable phone/tablet layouts, scalable text, accessible labels,
+48-dp minimum primary targets and focus/selection feedback. They form a small
+integration boundary for the broader #140 design foundation, which remains open.
+
+`npm test` includes the six-backend-role policy matrix, module action filtering,
+real-router deep links, revocation, permission-check failures, terminal sessions,
+background/resume and late-response checks. [Evidence and remaining verification](../../docs/evidence/mobile-shell-144/README.md) distinguish browser visual fixtures
+from native Android checks. Required reviewer: @vt-Toan. Contributor: @akus176
+(with Codex assistance); the existing ticket owner remains @JakeConal.

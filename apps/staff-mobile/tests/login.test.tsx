@@ -6,7 +6,7 @@ import {
 } from '@testing-library/react-native';
 
 import LoginScreen from '../app/login';
-import SessionScreen from '../app/session';
+import { StaffHome as SessionScreen } from '../src/shell/StaffHome';
 import { SessionProvider, useSession } from '../src/session/context';
 import { createSessionClient } from '../src/session/session';
 import { json, pair } from './helpers';
