@@ -21,6 +21,12 @@ jobs:
         run: npm install --global npm@11.17.0
       - name: Install mobile dependencies
         run: npm ci
+      - name: Type-check mobile app
+        run: npm run type-check
+      - name: Lint mobile app
+        run: npm run lint
+      - name: Check mobile formatting
+        run: npm run format:check
 
   build-and-test:
     runs-on: windows-latest
