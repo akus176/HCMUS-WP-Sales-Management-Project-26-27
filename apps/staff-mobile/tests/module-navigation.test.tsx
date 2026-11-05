@@ -9,13 +9,21 @@ import SessionScreen from '../app/session';
 import ModuleScreen from '../app/modules/[module]';
 import { SessionProvider } from '../src/session/context';
 import { harness, json, user } from './helpers';
+import { QueryCleanup } from './query-cleanup';
 
 test('real routes reject signed-out and unauthorized links, allow a grant, then reject revocation', async () => {
   let permissions = user.permissions;
-  const h = harness(async () => json({ ...user, permissions }));
+  const h = harness(async (request) =>
+    json(
+      request.url.includes('preparation-tickets')
+        ? { items: [], totalCount: 0, page: 1, pageSize: 10 }
+        : { ...user, permissions },
+    ),
+  );
   function Layout() {
     return (
       <SessionProvider client={h.client}>
+        <QueryCleanup />
         <SessionRoutes />
       </SessionProvider>
     );
@@ -68,20 +76,30 @@ test('real routes reject signed-out and unauthorized links, allow a grant, then 
     'Access unavailable. Your current permissions do not allow this module.',
   );
   expect(screen.queryByRole('header', { name: 'Preparation' })).toBeNull();
-  // Navigation performs only identity checks: no business query or mutation.
+  // Authorized preparation performs its read; unauthorized modules never load data.
   expect(
-    h.fetcher.mock.calls.every(([request]) =>
-      /\/auth\/(login|me)$/.test(request.url),
+    h.fetcher.mock.calls.every(
+      ([request]) =>
+        /\/auth\/(login|me)$/.test(request.url) ||
+        (request.method === 'GET' &&
+          request.url.includes('/preparation-tickets?')),
     ),
   ).toBe(true);
 });
 
 test('a retained module refocuses only after a fresh permission check', async () => {
   let permissions = user.permissions;
-  const h = harness(async () => json({ ...user, permissions }));
+  const h = harness(async (request) =>
+    json(
+      request.url.includes('preparation-tickets')
+        ? { items: [], totalCount: 0, page: 1, pageSize: 10 }
+        : { ...user, permissions },
+    ),
+  );
   function Layout() {
     return (
       <SessionProvider client={h.client}>
+        <QueryCleanup />
         <SessionRoutes />
       </SessionProvider>
     );

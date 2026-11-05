@@ -1,0 +1,50 @@
+appId: com.coffeeshop.staffmobile
+name: Barista progression against the shared API
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: Staff mobile
+    timeout: 60000
+- tapOn: Staff sign-in
+- tapOn: Username
+- inputText: ${MAESTRO_STAFF_USERNAME}
+- tapOn: Password
+- inputText: ${MAESTRO_STAFF_PASSWORD}
+- hideKeyboard
+- tapOn: Sign in
+- extendedWaitUntil:
+    visible: Open Preparation
+    timeout: 30000
+- tapOn: Open Preparation
+- scrollUntilVisible:
+    element: Open ticket ${MAESTRO_ORDER_NUMBER}
+    direction: DOWN
+- tapOn: Open ticket ${MAESTRO_ORDER_NUMBER}
+- scrollUntilVisible:
+    element: Start preparing
+    direction: DOWN
+- assertVisible: 'Status: Confirmed'
+- takeScreenshot: .maestro/results/barista-confirmed
+- tapOn: Start preparing
+- scrollUntilVisible:
+    element: Confirm start
+    direction: DOWN
+- tapOn: Confirm start
+- scrollUntilVisible:
+    element: 'Status: Preparing'
+    direction: UP
+- scrollUntilVisible:
+    element: Mark ready
+    direction: DOWN
+- takeScreenshot: .maestro/results/barista-preparing
+- tapOn: Mark ready
+- scrollUntilVisible:
+    element: Confirm ready
+    direction: DOWN
+- tapOn: Confirm ready
+- scrollUntilVisible:
+    element: Ticket is Ready. Confirmed by the service.
+    direction: UP
+- assertVisible: Ticket is Ready. Confirmed by the service.
+- takeScreenshot: .maestro/results/barista-ready

@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { PreparationScreen } from '../../src/barista/PreparationScreen';
 
 import { PermissionBoundary } from '../../src/shell/PermissionBoundary';
 import { useRouteAccess } from '../../src/shell/useRouteAccess';
@@ -23,21 +24,25 @@ export default function ModuleScreen() {
         onPress={() => router.replace('/session')}
       />
       <PermissionBoundary moduleId={moduleId} {...access}>
-        {(user) => (
-          <>
-            <ShellHeading>{module!.title}</ShellHeading>
-            <ShellText>Selected module: {module!.title}</ShellText>
-            <ShellText>
-              Workflow screens are planned and are not available yet. No
-              business action can be performed here.
-            </ShellText>
-            {permittedActions(module!, user.permissions).map((action) => (
-              <ShellText key={action.permission}>
-                {action.label} — planned
+        {(user) =>
+          module?.id === 'barista' ? (
+            <PreparationScreen />
+          ) : (
+            <>
+              <ShellHeading>{module!.title}</ShellHeading>
+              <ShellText>Selected module: {module!.title}</ShellText>
+              <ShellText>
+                Workflow screens are planned and are not available yet. No
+                business action can be performed here.
               </ShellText>
-            ))}
-          </>
-        )}
+              {permittedActions(module!, user.permissions).map((action) => (
+                <ShellText key={action.permission}>
+                  {action.label} — planned
+                </ShellText>
+              ))}
+            </>
+          )
+        }
       </PermissionBoundary>
     </ShellPage>
   );
