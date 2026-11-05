@@ -1,11 +1,15 @@
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 
 import { ApiError, NetworkError } from '../../api/errors';
 import type { components } from '../../api/schema';
-import { useConnectivity } from '../../network/ConnectivityContext';
+import {
+  OfflineWriteError,
+  useConnectivity,
+  useSafeMutation,
+} from '../../connectivity/connectivity';
 import { useSession } from '../../session/context';
 import type { StaffSession } from '../../session/session';
 import {
@@ -24,6 +28,7 @@ const money = (amount: number | string) =>
   Number(amount).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
 
 function errorMessage(error: unknown, action = false) {
+  if (error instanceof OfflineWriteError) return error.message;
   if (error instanceof ApiError) {
     if (error.status === 409)
       return 'This discount changed before your decision. Refresh the inbox and review the current order total.';
@@ -54,7 +59,7 @@ export function DiscountApprovals({
   discountId?: string;
 }) {
   const { client } = useSession();
-  const { status, canWrite } = useConnectivity();
+  const { status, canMutate, refreshConnection } = useConnectivity();
   const queryClient = useQueryClient();
   const queryKey = useMemo(
     () => ['discount-approvals', user.id] as const,
@@ -70,11 +75,11 @@ export function DiscountApprovals({
 
   const pendingQuery = useQuery({
     queryKey,
-    enabled: !!client && status === 'online' && !apiForbidden,
+    enabled: !!client && canMutate && !apiForbidden,
     queryFn: async ({ signal }) => {
       if (!client)
         throw new Error('The authenticated API client is unavailable.');
-      if (!canWrite()) throw new NetworkError();
+      if (!canMutate) throw new NetworkError();
       const { data } = await client.api.GET('/api/v1/discounts/pending', {
         params: { query: { page: 1, pageSize: 100 } },
         signal,
@@ -84,7 +89,7 @@ export function DiscountApprovals({
     },
   });
 
-  const decisionMutation = useMutation({
+  const decisionMutation = useSafeMutation({
     mutationFn: async ({
       id,
       action,
@@ -94,7 +99,7 @@ export function DiscountApprovals({
     }) => {
       if (!client)
         throw new Error('The authenticated API client is unavailable.');
-      if (!canWrite()) throw new NetworkError();
+      if (!canMutate) throw new OfflineWriteError();
       const response =
         action === 'approve'
           ? await client.api.POST('/api/v1/discounts/{id}/approve', {
@@ -107,7 +112,7 @@ export function DiscountApprovals({
         throw new Error('The API returned no confirmed discount decision.');
       return { action, result: response.data };
     },
-    onSuccess: async ({ action, result }) => {
+    onSuccess: ({ action, result }) => {
       setActionError(undefined);
       setDecisionResult({ action, result });
       queryClient.setQueryData(queryKey, (current: typeof pendingQuery.data) =>
@@ -121,7 +126,6 @@ export function DiscountApprovals({
             }
           : current,
       );
-      await queryClient.invalidateQueries({ queryKey });
     },
     onError: (error) => {
       setDecisionResult(undefined);
@@ -131,8 +135,6 @@ export function DiscountApprovals({
         queryClient.removeQueries({ queryKey });
         setSelected(undefined);
       }
-      if (error instanceof ApiError && error.status === 409)
-        void queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -146,7 +148,7 @@ export function DiscountApprovals({
       disabled={status !== 'online' || pendingQuery.isFetching}
       loading={pendingQuery.isFetching}
       loadingLabel="Refreshing approvals…"
-      onPress={() => void pendingQuery.refetch()}
+      onPress={() => void refreshConnection()}
     />
   );
 
@@ -226,7 +228,7 @@ export function DiscountApprovals({
                   label="Approve discount"
                   loading={decisionMutation.isPending}
                   loadingLabel="Submitting decision…"
-                  disabled={!canWrite() || decisionMutation.isPending}
+                  disabled={!canMutate || decisionMutation.isPending}
                   onPress={() => {
                     setActionError(undefined);
                     setSelected(discount);
@@ -241,7 +243,7 @@ export function DiscountApprovals({
                   variant="secondary"
                   loading={decisionMutation.isPending}
                   loadingLabel="Submitting decision…"
-                  disabled={!canWrite() || decisionMutation.isPending}
+                  disabled={!canMutate || decisionMutation.isPending}
                   onPress={() => {
                     setActionError(undefined);
                     setSelected(discount);

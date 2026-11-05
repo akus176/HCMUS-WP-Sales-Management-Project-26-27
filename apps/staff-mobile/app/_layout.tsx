@@ -11,11 +11,9 @@ import { SessionProvider, useSession } from '../src/session/context';
 export default function RootLayout() {
   return (
     <ConfigurationGate>
-      <ConnectivityProvider>
-        <SessionProvider>
-          <SessionRoutes />
-        </SessionProvider>
-      </ConnectivityProvider>
+      <SessionProvider>
+        <SessionRoutes />
+      </SessionProvider>
     </ConfigurationGate>
   );
 }

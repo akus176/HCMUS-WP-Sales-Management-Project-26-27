@@ -2,7 +2,6 @@ import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { mobileTokens } from './designTokens';
-import { useConnectivity } from '../network/ConnectivityContext';
 
 // Compatibility alias while existing shell consumers use this name.
 export const shellTheme = {
@@ -13,22 +12,8 @@ export const shellTheme = {
 };
 
 export function ShellPage({ children }: { children: ReactNode }) {
-  const { status } = useConnectivity();
   return (
     <SafeAreaView style={styles.page}>
-      {status !== 'online' && (
-        <View style={styles.connectionBanner}>
-          <Text
-            accessibilityRole="alert"
-            accessibilityLiveRegion="polite"
-            style={styles.connectionText}
-          >
-            {status === 'offline'
-              ? 'Offline. Reconnect to refresh data or make changes.'
-              : 'Reconnecting. Changes are disabled until the service is reachable.'}
-          </Text>
-        </View>
-      )}
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
