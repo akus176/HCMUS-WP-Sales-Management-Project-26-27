@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { Text } from 'react-native';
 
@@ -17,6 +18,12 @@ export default function RootLayout() {
 
 export function SessionRoutes() {
   const { state } = useSession();
+  const [fontsLoaded, fontError] = useFonts({
+    Kalam: require('../assets/fonts/Kalam-Bold.ttf'),
+    PatrickHand: require('../assets/fonts/PatrickHand-Regular.ttf'),
+  });
+  if (!fontsLoaded && !fontError)
+    return <Text accessibilityRole="text">Loading interface…</Text>;
   if (state.status === 'restoring')
     return <Text accessibilityRole="alert">Restoring session…</Text>;
   return (

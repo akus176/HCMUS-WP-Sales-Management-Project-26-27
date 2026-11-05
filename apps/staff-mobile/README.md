@@ -194,6 +194,20 @@ See [verification evidence](../../docs/evidence/mobile-scaffold-138/README.md)
 for the scaffold and [session evidence](../../docs/evidence/mobile-sessions-143/README.md)
 for #143's executed commands and limits.
 
+## Shared mobile design foundation (#140)
+
+`src/shell/designTokens.ts` exports the mobile color, typography, spacing, shape,
+and elevation tokens. The shell loads the repository's OFL-licensed Kalam and
+Patrick Hand fonts before displaying authenticated routes. `src/shell/controls.tsx`
+exports shared responsive page/text/heading components, state feedback, and
+accessible 48-dp buttons for S2 workflow screens. Controls preserve system font
+scaling, wrap at enlarged sizes, and expose loading, empty, error, warning,
+selected, disabled, and busy states.
+
+See [#140 design-system evidence](../../docs/evidence/mobile-design-system-140/README.md)
+for contrast ratios, touch-target checks, component coverage, and the native
+accessibility verification limits.
+
 ## Permission-aware shell (#144)
 
 After sign-in, `/session` lists only modules permitted by effective API permission
@@ -209,10 +223,10 @@ courier, payment or administration workflows. The home also checks current serve
 including when a previously empty home regains focus or the app resumes.
 Home verification uses an explicit scope, so `/modules/home` is not a valid module.
 
-Reusable controls live in `src/shell/controls.tsx` and preserve the sign-in palette.
-They provide scrollable phone/tablet layouts, scalable text, accessible labels,
-48-dp minimum primary targets and focus/selection feedback. They form a small
-integration boundary for the broader #140 design foundation, which remains open.
+The permission-aware shell uses these shared controls and preserves the sign-in
+palette. Its scrollable phone/tablet layout, scalable text, accessible labels,
+48-dp action targets, and focus/selection feedback are covered by the #140
+foundation and the #144 shell integration evidence.
 
 `npm test` includes the six-backend-role policy matrix, module action filtering,
 real-router deep links, revocation, permission-check failures, terminal sessions,
