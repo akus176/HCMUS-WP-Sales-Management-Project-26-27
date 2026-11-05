@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link } from 'expo-router';
 
 export default function StarterScreen() {
   return (
@@ -13,6 +14,9 @@ export default function StarterScreen() {
         <Text style={styles.note}>
           No staff account or shop data is loaded.
         </Text>
+        <Link href="/login" accessibilityRole="link" style={styles.description}>
+          Staff sign-in
+        </Link>
       </View>
     </SafeAreaView>
   );
