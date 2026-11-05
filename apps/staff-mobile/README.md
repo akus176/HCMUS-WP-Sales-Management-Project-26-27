@@ -230,6 +230,17 @@ See [#140 design-system evidence](../../docs/evidence/mobile-design-system-140/R
 for contrast ratios, touch-target checks, component coverage, and the native
 accessibility verification limits.
 
+## Connectivity and online-only writes (#145)
+
+The app root observes device connectivity through Expo Network and displays
+checking, online, reconnecting, and offline feedback. Manual refresh/check actions
+invalidate active TanStack Query results; business data remains in the in-memory
+query cache and the shared API remains authoritative. State-changing requests must
+use `src/connectivity/connectivity.tsx`'s `useSafeMutation`; it disables writes
+while offline/reconnecting, rejects before sending, never pauses/replays a write,
+and refreshes server data after success or a `409` conflict. See [#145 evidence](../../docs/evidence/mobile-connectivity-145/README.md)
+for the test cases and native verification limits.
+
 ## Permission-aware shell (#144)
 
 After sign-in, `/session` lists only modules permitted by effective API permission
