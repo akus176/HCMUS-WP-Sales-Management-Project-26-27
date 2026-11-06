@@ -1,6 +1,7 @@
 .expo/
 dist/
 coverage/
+mobile-test-results.json
 android/
 ios/
 expo-env.d.ts

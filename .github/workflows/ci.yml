@@ -30,7 +30,14 @@ jobs:
       - name: Check mobile formatting
         run: npm run format:check
       - name: Run mobile tests
-        run: npm test -- --ci
+        run: npm test -- --ci --json --outputFile=mobile-test-results.json
+      - name: Publish mobile test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-test-results
+          path: apps/staff-mobile/mobile-test-results.json
+          if-no-files-found: ignore
       - name: Export Android bundle smoke test
         env:
           EXPO_PUBLIC_APP_ENV: emulator
