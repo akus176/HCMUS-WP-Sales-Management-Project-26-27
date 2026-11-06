@@ -1,0 +1,326 @@
+import { useMemo, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
+
+import { ApiError, NetworkError } from '../../api/errors';
+import type { components } from '../../api/schema';
+import {
+  OfflineWriteError,
+  useConnectivity,
+  useSafeMutation,
+} from '../../connectivity/connectivity';
+import { useSession } from '../../session/context';
+import type { StaffSession } from '../../session/session';
+import {
+  ShellButton,
+  ShellFeedback,
+  ShellHeading,
+  ShellText,
+} from '../../shell/controls';
+import { mobileTokens } from '../../shell/designTokens';
+
+type PendingDiscount = components['schemas']['PendingDiscountResponse'];
+type DiscountDecision = components['schemas']['DiscountDecisionResponse'];
+type DecisionAction = 'approve' | 'reject';
+
+const money = (amount: number | string) =>
+  Number(amount).toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+
+function errorMessage(error: unknown, action = false) {
+  if (error instanceof OfflineWriteError) return error.message;
+  if (error instanceof ApiError) {
+    if (error.status === 409)
+      return 'This discount changed before your decision. Refresh the inbox and review the current order total.';
+    if (error.status === 403)
+      return 'Your approval permission has changed. Return to staff home and refresh access.';
+    if (error.status === 404)
+      return 'This discount is no longer pending. Refresh the inbox to see current requests.';
+    return action
+      ? 'The server rejected this decision. No order total was changed; review the request and try again.'
+      : 'Pending approvals could not be loaded. Try refreshing the inbox.';
+  }
+  if (error instanceof NetworkError)
+    return 'The decision was not sent. Reconnect and try again; no write was queued.';
+  return action
+    ? 'The decision could not be confirmed. Refresh before trying again.'
+    : 'Pending approvals could not be loaded. Reconnect and try again.';
+}
+
+function isForbidden(error: unknown) {
+  return error instanceof ApiError && error.status === 403;
+}
+
+export function DiscountApprovals({
+  user,
+  discountId,
+}: {
+  user: StaffSession;
+  discountId?: string;
+}) {
+  const { client } = useSession();
+  const { status, canMutate, refreshConnection } = useConnectivity();
+  const queryClient = useQueryClient();
+  const queryKey = useMemo(
+    () => ['discount-approvals', user.id] as const,
+    [user.id],
+  );
+  const [selected, setSelected] = useState<PendingDiscount>();
+  const [decisionResult, setDecisionResult] = useState<{
+    action: DecisionAction;
+    result: DiscountDecision;
+  }>();
+  const [actionError, setActionError] = useState<string>();
+  const [apiForbidden, setApiForbidden] = useState(false);
+
+  const pendingQuery = useQuery({
+    queryKey,
+    enabled: !!client && canMutate && !apiForbidden,
+    queryFn: async ({ signal }) => {
+      if (!client)
+        throw new Error('The authenticated API client is unavailable.');
+      if (!canMutate) throw new NetworkError();
+      const { data } = await client.api.GET('/api/v1/discounts/pending', {
+        params: { query: { page: 1, pageSize: 100 } },
+        signal,
+      });
+      if (!data) throw new Error('The API returned no pending approvals.');
+      return data;
+    },
+  });
+
+  const decisionMutation = useSafeMutation({
+    mutationFn: async ({
+      id,
+      action,
+    }: {
+      id: string;
+      action: DecisionAction;
+    }) => {
+      if (!client)
+        throw new Error('The authenticated API client is unavailable.');
+      if (!canMutate) throw new OfflineWriteError();
+      const response =
+        action === 'approve'
+          ? await client.api.POST('/api/v1/discounts/{id}/approve', {
+              params: { path: { id } },
+            })
+          : await client.api.POST('/api/v1/discounts/{id}/reject', {
+              params: { path: { id } },
+            });
+      if (!response.data)
+        throw new Error('The API returned no confirmed discount decision.');
+      return { action, result: response.data };
+    },
+    onSuccess: ({ action, result }) => {
+      setActionError(undefined);
+      setDecisionResult({ action, result });
+      queryClient.setQueryData(queryKey, (current: typeof pendingQuery.data) =>
+        current
+          ? {
+              ...current,
+              items: current.items.filter(
+                (item) => item.discountId !== result.discountId,
+              ),
+              totalCount: Math.max(0, Number(current.totalCount) - 1),
+            }
+          : current,
+      );
+    },
+    onError: (error) => {
+      setDecisionResult(undefined);
+      setActionError(errorMessage(error, true));
+      if (error instanceof ApiError && error.status === 403) {
+        setApiForbidden(true);
+        queryClient.removeQueries({ queryKey });
+        setSelected(undefined);
+      }
+    },
+  });
+
+  const item = pendingQuery.data?.items.find(
+    (discount) => discount.discountId === discountId,
+  );
+  const refreshButton = (
+    <ShellButton
+      label="Refresh pending approvals"
+      variant="secondary"
+      disabled={status !== 'online' || pendingQuery.isFetching}
+      loading={pendingQuery.isFetching}
+      loadingLabel="Refreshing approvals…"
+      onPress={() => void refreshConnection()}
+    />
+  );
+
+  if (apiForbidden || (pendingQuery.error && isForbidden(pendingQuery.error)))
+    return (
+      <>
+        <ShellHeading>Access changed</ShellHeading>
+        <ShellFeedback
+          kind="error"
+          label="Your approval permission has changed. Return to staff home and refresh access."
+        />
+        <ShellButton
+          label="Back to staff home"
+          onPress={() => router.replace('/session')}
+        />
+      </>
+    );
+
+  if (discountId) {
+    const discount = item ?? selected;
+    return (
+      <>
+        <ShellButton
+          label="Back to pending approvals"
+          variant="secondary"
+          onPress={() => router.back()}
+        />
+        <ShellHeading>Discount review</ShellHeading>
+        {status !== 'online' && !pendingQuery.data ? (
+          <ShellFeedback
+            kind="warning"
+            label="Reconnect to load this discount. No approval details are shown while offline."
+          />
+        ) : pendingQuery.isPending && !pendingQuery.data ? (
+          <ShellFeedback kind="loading" label="Loading discount details…" />
+        ) : pendingQuery.error ? (
+          <ShellFeedback
+            kind="error"
+            label={errorMessage(pendingQuery.error)}
+          />
+        ) : !discount && !decisionResult ? (
+          <ShellFeedback
+            kind="info"
+            label="This discount is no longer pending. Refresh the inbox to review current requests."
+          />
+        ) : (
+          <>
+            {discount && (
+              <View style={styles.card}>
+                <ShellText>Order {discount.orderNumber}</ShellText>
+                <ShellText>
+                  {discount.type === 'percentage'
+                    ? `${discount.value}% discount`
+                    : `${money(discount.value)} discount`}
+                </ShellText>
+                <ShellText>Reason: {discount.reason}</ShellText>
+                {discount.computedAmount != null && (
+                  <ShellText>
+                    Requested discount: {money(discount.computedAmount)}
+                  </ShellText>
+                )}
+                <ShellText>
+                  Current order total: {money(discount.orderTotal)}
+                </ShellText>
+              </View>
+            )}
+            {decisionResult && (
+              <ShellFeedback
+                kind="info"
+                label={`${decisionResult.action === 'approve' ? 'Approved' : 'Rejected'} by the server. Confirmed order total: ${money(decisionResult.result.orderTotal)}.`}
+              />
+            )}
+            {actionError && <ShellFeedback kind="error" label={actionError} />}
+            {!decisionResult && discount && (
+              <>
+                <ShellButton
+                  label="Approve discount"
+                  loading={decisionMutation.isPending}
+                  loadingLabel="Submitting decision…"
+                  disabled={!canMutate || decisionMutation.isPending}
+                  onPress={() => {
+                    setActionError(undefined);
+                    setSelected(discount);
+                    decisionMutation.mutate({
+                      id: discount.discountId,
+                      action: 'approve',
+                    });
+                  }}
+                />
+                <ShellButton
+                  label="Reject discount"
+                  variant="secondary"
+                  loading={decisionMutation.isPending}
+                  loadingLabel="Submitting decision…"
+                  disabled={!canMutate || decisionMutation.isPending}
+                  onPress={() => {
+                    setActionError(undefined);
+                    setSelected(discount);
+                    decisionMutation.mutate({
+                      id: discount.discountId,
+                      action: 'reject',
+                    });
+                  }}
+                />
+              </>
+            )}
+            {refreshButton}
+          </>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <ShellHeading>Manager approvals</ShellHeading>
+      <ShellText>
+        Review pending discount requests from the shared API.
+      </ShellText>
+      {refreshButton}
+      {actionError && <ShellFeedback kind="error" label={actionError} />}
+      {status !== 'online' && !pendingQuery.data ? (
+        <ShellFeedback
+          kind="warning"
+          label="Reconnect to load pending approvals."
+        />
+      ) : pendingQuery.isPending && !pendingQuery.data ? (
+        <ShellFeedback kind="loading" label="Loading pending approvals…" />
+      ) : pendingQuery.error ? (
+        <ShellFeedback kind="error" label={errorMessage(pendingQuery.error)} />
+      ) : pendingQuery.data?.items.length === 0 ? (
+        <ShellFeedback
+          kind="empty"
+          label="No discounts are waiting for approval."
+        />
+      ) : (
+        pendingQuery.data?.items.map((discount) => (
+          <View key={discount.discountId} style={styles.card}>
+            <ShellText>Order {discount.orderNumber}</ShellText>
+            <ShellText>
+              {discount.type === 'percentage'
+                ? `${discount.value}% discount`
+                : `${money(discount.value)} discount`}
+            </ShellText>
+            <ShellText>Reason: {discount.reason}</ShellText>
+            <ShellText>
+              Current order total: {money(discount.orderTotal)}
+            </ShellText>
+            <ShellButton
+              label={`Review order ${discount.orderNumber} discount`}
+              variant="secondary"
+              onPress={() =>
+                router.push({
+                  pathname: '/modules/approvals/[discountId]',
+                  params: { discountId: discount.discountId },
+                })
+              }
+            />
+          </View>
+        ))
+      )}
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: mobileTokens.color.infoBackground,
+    borderColor: mobileTokens.color.border,
+    borderRadius: mobileTokens.shape.card,
+    borderWidth: 2,
+    gap: mobileTokens.spacing.sm,
+    padding: mobileTokens.spacing.md,
+  },
+});

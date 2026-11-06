@@ -141,6 +141,19 @@ export function ShellButton({
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: mobileTokens.color.background },
+  connectionBanner: {
+    backgroundColor: mobileTokens.color.warningBackground,
+    borderBottomColor: mobileTokens.color.warning,
+    borderBottomWidth: 2,
+    paddingHorizontal: mobileTokens.spacing.md,
+    paddingVertical: mobileTokens.spacing.sm,
+  },
+  connectionText: {
+    color: mobileTokens.color.warning,
+    fontSize: mobileTokens.type.body,
+    fontFamily: mobileTokens.type.bodyFont,
+    textAlign: 'center',
+  },
   scroll: { flexGrow: 1 },
   content: {
     alignSelf: 'center',
