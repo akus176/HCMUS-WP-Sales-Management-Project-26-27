@@ -11,6 +11,7 @@ import {
 } from '../../src/shell/controls';
 import { findModule, permittedActions } from '../../src/shell/permissions';
 import { DiscountApprovals } from '../../src/features/approvals/DiscountApprovals';
+import { InventoryWorkspace } from '../../src/features/inventory/InventoryWorkspace';
 
 export default function ModuleScreen() {
   const { module: moduleId } = useLocalSearchParams<{
@@ -30,6 +31,8 @@ export default function ModuleScreen() {
             <PreparationScreen />
           ) : module?.id === 'approvals' ? (
             <DiscountApprovals user={user} />
+          ) : module?.id === 'inventory' ? (
+            <InventoryWorkspace user={user} />
           ) : (
             <>
               <ShellHeading>{module!.title}</ShellHeading>
