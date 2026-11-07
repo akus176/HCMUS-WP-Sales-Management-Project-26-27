@@ -471,6 +471,8 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Created, createdDraft.StatusCode);
         var draft = (await createdDraft.Content.ReadFromJsonAsync<OrderResponse>())!;
         Assert.Equal(5m, draft.Total);
+        Assert.Empty(Assert.Single(draft.Lines).AddonDetails!);
+        Assert.NotNull(await cashier.GetFromJsonAsync<PosTableResponse[]>("/api/v1/pos/tables"));
         using var retriedDraft = await cashier.PostAsJsonAsync("/api/v1/orders", draftRequest);
         Assert.Equal(HttpStatusCode.Created, retriedDraft.StatusCode);
         await using (var db = Database()) Assert.Single(await db.Orders.Where(order => order.Id == new EntityId(orderId)).ToArrayAsync());
@@ -478,6 +480,8 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var requested = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/discounts",
             new DiscountRequest(discountId, "fixed", 1m, "Customer apology"));
         Assert.Equal(HttpStatusCode.Created, requested.StatusCode);
+        var discountedDraft = await cashier.GetFromJsonAsync<OrderResponse>($"/api/v1/orders/{orderId}");
+        Assert.Equal("Customer apology", Assert.Single(discountedDraft!.Discounts).Reason);
         var pending = await manager.GetFromJsonAsync<PageResponse<PendingDiscountResponse>>("/api/v1/discounts/pending");
         Assert.Equal("Customer apology", Assert.Single(pending!.Items).Reason);
         Assert.Equal(1, pending.TotalCount);

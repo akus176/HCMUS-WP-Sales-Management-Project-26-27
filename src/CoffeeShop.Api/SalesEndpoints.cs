@@ -80,6 +80,10 @@ public static class SalesEndpoints
 
         api.MapGet("/tables", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
             Results.Ok(await handler.GetTablesAsync(ct))).RequireAuthorization("orders.create");
+        api.MapGet("/pos/tables", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
+            Results.Ok((await handler.GetTablesAsync(ct)).Select(table => new PosTableResponse(table.Id.Value,
+                table.TableNumber, table.Seats, table.IsOccupied, table.ActiveOrderId?.Value)).ToArray()))
+            .RequireAuthorization("orders.create").Produces<PosTableResponse[]>().ProducesProblem(403);
         api.MapGet("/preparation-tickets", async (FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, string? status, int? page, int? pageSize, CancellationToken ct) =>
         {
@@ -173,9 +177,11 @@ public static class SalesEndpoints
         order.Channel, order.Status, order.CustomerId?.Value, order.TableId?.Value, order.TableNumber,
         order.Subtotal, order.DiscountTotal, order.Total, order.Lines.Select(line => new OrderLineResponse(
             line.ItemName, line.SizeName, line.Quantity, line.UnitPrice, line.Total,
-            line.Addons.Select(addon => addon.Name).ToArray())).ToArray(),
+            line.Addons.Select(addon => addon.Name).ToArray(),
+            line.Addons.Select(addon => new OrderAddonSnapshotResponse(addon.Name, addon.UnitPrice)).ToArray())).ToArray(),
         order.Discounts.Select(discount => new OrderDiscountResponse(discount.Id.Value, discount.Type,
-            discount.Value, discount.Status, discount.Amount)).ToArray());
+            discount.Value, discount.Status, discount.Amount, discount.Reason)).ToArray(), order.CustomerName,
+        order.RecipientName, order.ContactNumber, order.AddressLine, order.CustomerAddressId?.Value);
 
     private static IResult InvalidId() => ApiErrorResults.From(Error.Validation("sales.invalid_id", "A nonempty identifier is required."));
 }

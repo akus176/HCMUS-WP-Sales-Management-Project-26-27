@@ -3443,6 +3443,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/pos/tables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PosTableResponse"][];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preparation-tickets": {
         parameters: {
             query?: never;
@@ -4992,6 +5036,11 @@ export interface components {
             /** Format: double */
             total: number | string;
         };
+        OrderAddonSnapshotResponse: {
+            name: string;
+            /** Format: double */
+            unitPrice: number | string;
+        };
         OrderCustomerRequest: {
             addressLine?: null | string;
             contactNumber?: null | string;
@@ -5006,6 +5055,7 @@ export interface components {
             amount: null | number | string;
             /** Format: uuid */
             id: string;
+            reason?: null | string;
             status: string;
             type: string;
             /** Format: double */
@@ -5021,6 +5071,7 @@ export interface components {
             sizeVariantId: string;
         };
         OrderLineResponse: {
+            addonDetails?: null | components["schemas"]["OrderAddonSnapshotResponse"][];
             addons: string[];
             itemName: string;
             /** Format: int32 */
@@ -5032,9 +5083,14 @@ export interface components {
             unitPrice: number | string;
         };
         OrderResponse: {
+            addressLine?: null | string;
             channel: string;
+            contactNumber?: null | string;
+            /** Format: uuid */
+            customerAddressId?: null | string;
             /** Format: uuid */
             customerId: null | string;
+            customerName?: null | string;
             /** Format: double */
             discountTotal: number | string;
             discounts: components["schemas"]["OrderDiscountResponse"][];
@@ -5042,6 +5098,7 @@ export interface components {
             id: string;
             lines: components["schemas"]["OrderLineResponse"][];
             orderNumber: string;
+            recipientName?: null | string;
             status: string;
             /** Format: double */
             subtotal: number | string;
@@ -5118,6 +5175,16 @@ export interface components {
             type: string;
             /** Format: double */
             value: number | string;
+        };
+        PosTableResponse: {
+            /** Format: uuid */
+            activeOrderId: null | string;
+            /** Format: uuid */
+            id: string;
+            isOccupied: boolean;
+            /** Format: int32 */
+            seats: null | number | string;
+            tableNumber: string;
         };
         PreparationTicketLine: {
             addons: string[];

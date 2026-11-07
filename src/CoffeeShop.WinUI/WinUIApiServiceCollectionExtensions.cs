@@ -19,6 +19,7 @@ internal static class WinUIApiServiceCollectionExtensions
         services.AddSingleton<StaffSessionManager>();
         services.AddSingleton<AuthenticatedApiClient>();
         services.AddSingleton<ApiReportsSource>();
+        services.AddSingleton<ApiPosSource>();
         services.AddSingleton<PosOperatorSession>(provider => new PosOperatorSession(
             () => provider.GetRequiredService<StaffSessionManager>().CurrentUser));
         services.AddSingleton<ICurrentUser>(provider => provider.GetRequiredService<PosOperatorSession>());

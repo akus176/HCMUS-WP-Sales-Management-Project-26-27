@@ -5,6 +5,7 @@ using CoffeeShop.Application.Customers;
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Sales;
+using CoffeeShop.WinUI.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoffeeShop.WinUI.ViewModels;
@@ -24,7 +25,8 @@ public sealed record PosCartLine(MenuItemSummary Item, SizeVariantSummary Size, 
     public PosLineRequest Request => new(Item.Id, Size.Id, Quantity, Addons.Select(addon => addon.Id).ToArray());
 }
 
-public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderContext customerContext, PosOperatorSession session) : INotifyPropertyChanged
+public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderContext customerContext, PosOperatorSession session,
+    ApiPosSource? api = null) : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public string Search { get; set; } = "";
@@ -53,20 +55,24 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
 
     public Task LoadAsync() => RunAsync(async provider =>
     {
-        var queries = provider.GetRequiredService<CatalogQueryHandler>();
-        var menu = await queries.SearchMenuItemsAsync(new(Search: Search, IsActive: true, Limit: 200));
-        var categories = await queries.SearchCategoriesAsync(new(IsActive: true, Limit: 200));
+        var queries = api is null ? provider.GetRequiredService<CatalogQueryHandler>() : null;
+        var menu = api is null ? await queries!.SearchMenuItemsAsync(new(Search: Search, IsActive: true, Limit: 200))
+            : Result<IReadOnlyList<MenuItemSummary>>.Success(await api.MenuAsync(Search));
+        var categories = api is null ? await queries!.SearchCategoriesAsync(new(IsActive: true, Limit: 200))
+            : Result<IReadOnlyList<CategorySummary>>.Success(await api.CategoriesAsync());
         if (!Accept(menu) || !Accept(categories)) return;
         var activeCategories = categories.Value.Select(category => category.Id).ToHashSet();
         Categories = categories.Value;
         if (CategoryId is { } selectedCategory && !activeCategories.Contains(selectedCategory)) CategoryId = null;
         Menu = menu.Value.Where(item => activeCategories.Contains(item.CategoryId) && item.SizeVariants.Any(size => size.IsActive)).ToArray();
-        var handler = provider.GetRequiredService<PosOrderHandler>();
-        Options = await handler.GetOptionsAsync();
+        var handler = api is null ? provider.GetRequiredService<PosOrderHandler>() : null;
+        Options = api is null ? await handler!.GetOptionsAsync() : await api.OptionsAsync();
+        if (api is not null) session.Operator = Options.Staff.SingleOrDefault();
         if (session.Operator is { } actor && Options.Staff.All(staff => staff.Id != actor.Id)) session.Operator = null;
         if (Order is not null || RequiresReload)
         {
-            var result = await handler.GetOrderAsync(TicketId);
+            var result = api is null ? await handler!.GetOrderAsync(TicketId)
+                : Result<PosOrderDetail>.Success(await api.GetAsync(TicketId));
             if (result.IsSuccess) Order = result.Value;
             else if (result.Error!.Type != ErrorType.NotFound || Order is not null)
             {
@@ -155,8 +161,10 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
         if (Order is not null || RequiresReload) return;
         var selection = Channel == "delivery" ? Customer with { IsDelivery = true }
             : new CustomerOrderSelectionRequest(Customer.CustomerId);
-        var result = await provider.GetRequiredService<PosOrderHandler>().CreateDraftAsync(
-            new(TicketId, Channel, Channel == "dine_in" ? TableId : null, selection, Cart.Select(line => line.Request).ToArray()));
+        var lines = Cart.Select(line => line.Request).ToArray();
+        var result = api is null ? await provider.GetRequiredService<PosOrderHandler>().CreateDraftAsync(
+            new(TicketId, Channel, Channel == "dine_in" ? TableId : null, selection, lines))
+            : Result<PosOrderDetail>.Success(await api.CreateAsync(TicketId, Channel, Channel == "dine_in" ? TableId : null, selection, lines));
         if (Accept(result))
         {
             Order = result.Value;
@@ -167,7 +175,8 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
     public Task ConfirmAsync() => RunAsync(async provider =>
     {
         if (RequiresReload || Order?.Status != OrderStatus.Draft) return;
-        var result = await provider.GetRequiredService<PosOrderHandler>().ConfirmAsync(Order.Id, Order.Total);
+        var result = api is null ? await provider.GetRequiredService<PosOrderHandler>().ConfirmAsync(Order.Id, Order.Total)
+            : Result<PosOrderDetail>.Success(await api.ConfirmAsync(Order.Id, Order.Total));
         if (Accept(result))
         {
             Order = result.Value;
@@ -178,11 +187,17 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
     public Task RequestDiscountAsync(string type, decimal value, string reason) => RunAsync(async provider =>
     {
         if (RequiresReload || Order?.Status != OrderStatus.Draft) return;
-        var handler = provider.GetRequiredService<PosOrderHandler>();
-        var result = await handler.RequestDiscountAsync(new(EntityId.New(), Order.Id, type, value, reason));
-        if (!Accept(result)) return;
+        var handler = api is null ? provider.GetRequiredService<PosOrderHandler>() : null;
+        var discountId = EntityId.New();
+        if (api is null)
+        {
+            var result = await handler!.RequestDiscountAsync(new(discountId, Order.Id, type, value, reason));
+            if (!Accept(result)) return;
+        }
+        else await api.RequestDiscountAsync(Order.Id, discountId, type, value, reason);
         RequiresReload = true;
-        var detail = await handler.GetOrderAsync(Order.Id);
+        var detail = api is null ? await handler!.GetOrderAsync(Order.Id)
+            : Result<PosOrderDetail>.Success(await api.GetAsync(Order.Id));
         if (Accept(detail))
         {
             Order = detail.Value;
@@ -193,7 +208,8 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
 
     public Task OpenAsync(EntityId id) => RunAsync(async provider =>
     {
-        var result = await provider.GetRequiredService<PosOrderHandler>().GetOrderAsync(id);
+        var result = api is null ? await provider.GetRequiredService<PosOrderHandler>().GetOrderAsync(id)
+            : Result<PosOrderDetail>.Success(await api.GetAsync(id));
         if (!Accept(result)) return;
         TicketId = id;
         Order = result.Value;
@@ -204,11 +220,15 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
     public Task RedeemLoyaltyAsync(int points) => RunAsync(async provider =>
     {
         if (RequiresReload || Order?.Status != OrderStatus.Draft) return;
-        var result = await provider.GetRequiredService<LoyaltyCommandHandler>()
-            .RedeemForOrderAsync(new(Order.Id, points));
-        if (!Accept(result)) return;
+        if (api is null)
+        {
+            var result = await provider.GetRequiredService<LoyaltyCommandHandler>().RedeemForOrderAsync(new(Order.Id, points));
+            if (!Accept(result)) return;
+        }
+        else await api.RedeemAsync(Order.Id, points);
         RequiresReload = true;
-        var detail = await provider.GetRequiredService<PosOrderHandler>().GetOrderAsync(Order.Id);
+        var detail = api is null ? await provider.GetRequiredService<PosOrderHandler>().GetOrderAsync(Order.Id)
+            : Result<PosOrderDetail>.Success(await api.GetAsync(Order.Id));
         if (Accept(detail))
         {
             Order = detail.Value;
@@ -260,10 +280,27 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
             using var scope = scopes.CreateScope();
             await action(scope.ServiceProvider);
         }
+        catch (ApiException exception)
+        {
+            RequiresReload = exception.Kind is ApiErrorKind.Conflict or ApiErrorKind.Network or ApiErrorKind.Server or ApiErrorKind.Unexpected;
+            Error = exception.Kind switch
+            {
+                ApiErrorKind.Validation => Error.Validation("pos.api_validation", exception.Detail),
+                ApiErrorKind.Unauthorized => Error.Authentication("pos.api_authentication", exception.Detail),
+                ApiErrorKind.Forbidden => Error.Authorization("pos.api_forbidden", exception.Detail),
+                ApiErrorKind.NotFound => Error.NotFound("pos.api_not_found", exception.Detail),
+                ApiErrorKind.Conflict => Error.Conflict("pos.api_conflict", exception.Detail),
+                ApiErrorKind.BusinessRule => Error.BusinessRule("pos.api_rule", exception.Detail),
+                _ => Error.Unexpected("pos.api_unavailable", "Could not finish the operation. Check the connection and reload the ticket before retrying; the write may have succeeded."),
+            };
+            Message = Error.Description;
+        }
         catch (Exception)
         {
             RequiresReload = true;
-            Error = Error.Unexpected("pos.database_error", "Could not finish the operation. Check the local database connection and reload this ticket before retrying; the write may have succeeded.");
+            Error = Error.Unexpected(api is null ? "pos.database_error" : "pos.api_unavailable", api is null
+                ? "Could not finish the operation. Check the local database connection and reload this ticket before retrying; the write may have succeeded."
+                : "Could not finish the operation. Check the API connection and reload this ticket before retrying; the write may have succeeded.");
             Message = Error.Description;
         }
         finally
