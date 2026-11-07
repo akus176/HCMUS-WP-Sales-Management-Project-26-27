@@ -3,11 +3,13 @@ using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Sales;
+using CoffeeShop.WinUI.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoffeeShop.WinUI.ViewModels;
 
-public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperatorSession session) : INotifyPropertyChanged
+public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperatorSession session,
+    ApiOperationsSource? api = null) : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public IReadOnlyList<OperationalOrder> Orders { get; private set; } = [];
@@ -29,12 +31,36 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public string Message { get; private set; } = "Load operational work to see the current queue, tables and fulfillment controls.";
     public bool IsEmpty => !IsBusy && Error is null && Orders.Count == 0 && Tables.Count == 0;
     public bool HasOperator => session.IsAuthenticated;
+    public bool ApiMode => api is not null;
+    public bool CanFulfill => !ApiMode || session.HasPermission("orders.fulfill");
+    public bool CanComplete => !ApiMode || session.HasPermission("orders.complete");
+    public bool CanRecordPayments => !ApiMode || session.HasPermission("payments.record");
+    public bool CanCancelOrders => !ApiMode || session.HasPermission("orders.cancel");
+    public bool CanApproveDiscounts => !ApiMode || session.HasPermission("discounts.approve");
+    public bool CanAssignDelivery => !ApiMode || session.HasPermission("delivery.assign");
+    public bool CanUpdateDelivery => !ApiMode || session.HasPermission("delivery.update");
     public WorkflowFeedback Feedback => WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
 
     public void EnableOperationalWorkflow() => session.EnableOperationalWorkflow();
 
     public async Task LoadAsync() => await RunAsync(async provider =>
     {
+        if (api is not null)
+        {
+            var snapshot = await api.LoadAsync();
+            Orders = snapshot.Orders;
+            Tables = snapshot.Tables;
+            DeliveryStaff = snapshot.DeliveryStaff;
+            Staff = snapshot.Staff;
+            session.Operator = Staff.SingleOrDefault();
+            await LoadDetailsAsync(provider);
+            if (SelectedOrderId is null || Orders.All(order => order.Id != SelectedOrderId))
+                SelectedOrderId = Orders.FirstOrDefault(order => order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready)?.Id;
+            Message = Orders.Count == 0 && Tables.Count == 0
+                ? "No operational records yet. Create and confirm an order from Point of Sale to begin."
+                : "Choose an order. Controls are enabled only for your permissions and its current lifecycle state.";
+            return;
+        }
         var queries = provider.GetRequiredService<FulfillmentOperationsQueryHandler>();
         Orders = await queries.GetOrdersAsync();
         Tables = await queries.GetTablesAsync();
@@ -76,6 +102,13 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public Task RecordPaymentAsync(string method, decimal amount, string reference) => RunAsync(async provider =>
     {
         if (SelectedOrder is null) return;
+        if (api is not null)
+        {
+            await api.RecordPaymentAsync(SelectedOrder.Id, method, amount,
+                string.IsNullOrWhiteSpace(reference) ? null : reference);
+            await RefreshAsync(provider, "Payment recorded. Reloaded the latest order balance.");
+            return;
+        }
         var result = await provider.GetRequiredService<PaymentCommandHandler>().RecordAsync(
             new(EntityId.New(), SelectedOrder.Id, method, amount, Reference: string.IsNullOrWhiteSpace(reference) ? null : reference));
         if (Accept(result)) await RefreshAsync(provider, $"Payment recorded. Outstanding balance: {result.Value!.OutstandingBalance:0.00}.");
@@ -84,12 +117,24 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public Task CancelAsync(string reason) => RunAsync(async provider =>
     {
         if (SelectedOrder is null) return;
+        if (api is not null)
+        {
+            await api.CancelAsync(SelectedOrder.Id, reason);
+            await RefreshAsync(provider, "Order cancelled. Fulfillment stopped and compensating work was requested.");
+            return;
+        }
         var result = await provider.GetRequiredService<OrderCancellationCommandHandler>().CancelAsync(new(SelectedOrder.Id, reason));
         if (Accept(result)) await RefreshAsync(provider, "Order cancelled. Fulfillment stopped and compensating work was requested.");
     });
 
     public Task DecideDiscountAsync(EntityId discountId, bool approve) => RunAsync(async provider =>
     {
+        if (api is not null)
+        {
+            await api.DecideDiscountAsync(discountId, approve);
+            await RefreshAsync(provider, approve ? "Discount approved and total recalculated." : "Discount rejected.");
+            return;
+        }
         var handler = provider.GetRequiredService<DiscountCommandHandler>();
         var result = approve ? await handler.ApproveAsync(new(discountId)) : await handler.RejectAsync(new(discountId));
         if (Accept(result)) await RefreshAsync(provider, approve ? "Discount approved and total recalculated." : "Discount rejected.");
@@ -98,13 +143,25 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public Task AssignDeliveryAsync(EntityId staffId) => RunAsync(async provider =>
     {
         if (SelectedOrder is null || session.Id is null) return;
+        if (api is not null)
+        {
+            await api.AssignDeliveryAsync(SelectedOrder.Id, staffId);
+            await RefreshAsync(provider, "Delivery staff assigned.");
+            return;
+        }
         var result = await provider.GetRequiredService<DeliveryCommandHandler>().AssignAsync(new(SelectedOrder.Id, staffId, session.Id));
         if (Accept(result)) await RefreshAsync(provider, "Delivery staff assigned.");
     });
 
-    public Task StartDeliveryAsync() => UpdateDeliveryAsync((handler, id, actor) => handler.StartAsync(new(id, actor)), "Delivery is out for delivery.");
-    public Task CompleteDeliveryAsync() => UpdateDeliveryAsync((handler, id, actor) => handler.CompleteAsync(new(id, actor)), "Delivery marked delivered.");
-    public Task FailDeliveryAsync(string reason) => UpdateDeliveryAsync((handler, id, actor) => handler.FailAsync(new(id, reason, actor)), "Delivery marked failed.");
+    public Task StartDeliveryAsync() => api is null
+        ? UpdateDeliveryAsync((handler, id, actor) => handler.StartAsync(new(id, actor)), "Delivery is out for delivery.")
+        : UpdateDeliveryApiAsync((source, id) => source.StartDeliveryAsync(id), "Delivery is out for delivery.");
+    public Task CompleteDeliveryAsync() => api is null
+        ? UpdateDeliveryAsync((handler, id, actor) => handler.CompleteAsync(new(id, actor)), "Delivery marked delivered.")
+        : UpdateDeliveryApiAsync((source, id) => source.CompleteDeliveryAsync(id), "Delivery marked delivered.");
+    public Task FailDeliveryAsync(string reason) => api is null
+        ? UpdateDeliveryAsync((handler, id, actor) => handler.FailAsync(new(id, reason, actor)), "Delivery marked failed.")
+        : UpdateDeliveryApiAsync((source, id) => source.FailDeliveryAsync(id, reason), "Delivery marked failed.");
 
     public static bool IsMoveAllowed(OperationalOrder order, string target) => target switch
     {
@@ -115,6 +172,7 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     };
 
     public bool CanMoveOrder(EntityId id, string target) => !IsBusy && HasOperator
+        && (target == OrderStatus.Completed ? CanComplete : CanFulfill)
         && Orders.FirstOrDefault(order => order.Id == id) is { } order && IsMoveAllowed(order, target);
 
     private Task TransitionAsync(string target) => SelectedOrderId is { } id ? MoveOrderAsync(id, target) : Task.CompletedTask;
@@ -135,9 +193,22 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
                 : "This ticket cannot move to that state. Refresh the board and use its next available action.");
             return Task.CompletedTask;
         }
+        if (!CanMoveOrder(id, target))
+        {
+            ShowValidation(target == OrderStatus.Completed
+                ? "Your account cannot complete orders. Ask a manager for access."
+                : "Your account cannot move preparation tickets.");
+            return Task.CompletedTask;
+        }
         return RunAsync(async provider =>
         {
             SelectedOrderId = id;
+            if (api is not null)
+            {
+                await api.MoveAsync(id, target);
+                await RefreshAsync(provider, $"{order.OrderNumber} moved to {target}.");
+                return;
+            }
             var result = await provider.GetRequiredService<OrderFulfillmentCommandHandler>().TransitionAsync(new(id, target));
             if (Accept(result)) await RefreshAsync(provider, $"{order.OrderNumber} moved to {target}.");
         });
@@ -150,8 +221,26 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         if (Accept(result)) await RefreshAsync(provider, success);
     });
 
+    private Task UpdateDeliveryApiAsync(Func<ApiOperationsSource, EntityId, Task> action, string success) => RunAsync(async provider =>
+    {
+        if (SelectedOrder is null) return;
+        await action(api!, SelectedOrder.Id);
+        await RefreshAsync(provider, success);
+    });
+
     private async Task RefreshAsync(IServiceProvider provider, string success)
     {
+        if (api is not null)
+        {
+            var snapshot = await api.LoadAsync();
+            Orders = snapshot.Orders;
+            Tables = snapshot.Tables;
+            DeliveryStaff = snapshot.DeliveryStaff;
+            Staff = snapshot.Staff;
+            await LoadDetailsAsync(provider);
+            Message = success;
+            return;
+        }
         var queries = provider.GetRequiredService<FulfillmentOperationsQueryHandler>();
         Orders = await queries.GetOrdersAsync();
         Tables = await queries.GetTablesAsync();
@@ -162,6 +251,17 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
 
     private async Task LoadDetailsAsync(IServiceProvider provider)
     {
+        if (api is not null)
+        {
+            var apiDetails = new Dictionary<EntityId, PosOrderDetail>();
+            foreach (var order in Orders.Where(order => order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready
+                         || order.Id == SelectedOrderId))
+            {
+                apiDetails[order.Id] = await api.GetDetailAsync(order.Id);
+            }
+            OrderDetails = apiDetails;
+            return;
+        }
         var handler = provider.GetRequiredService<PosOrderHandler>();
         var details = new Dictionary<EntityId, PosOrderDetail>();
         foreach (var order in Orders.Where(order => order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready
@@ -186,9 +286,24 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         if (IsBusy) return;
         IsBusy = true; Error = null; Notify();
         try { using var scope = scopes.CreateScope(); await action(scope.ServiceProvider); }
+        catch (ApiException exception)
+        {
+            Error = exception.Kind switch
+            {
+                ApiErrorKind.Validation => Error.Validation("operations.api_validation", exception.Detail),
+                ApiErrorKind.Unauthorized => Error.Authentication("operations.api_authentication", exception.Detail),
+                ApiErrorKind.Forbidden => Error.Authorization("operations.api_forbidden", exception.Detail),
+                ApiErrorKind.NotFound => Error.NotFound("operations.api_not_found", exception.Detail),
+                ApiErrorKind.Conflict => Error.Conflict("operations.api_conflict", exception.Detail),
+                ApiErrorKind.BusinessRule => Error.BusinessRule("operations.api_rule", exception.Detail),
+                _ => Error.Unexpected("operations.api_unavailable", "Could not finish the operation. Reload before retrying because a write may have succeeded."),
+            };
+            Message = Error.Description;
+        }
         catch (Exception)
         {
-            Error = Error.Unexpected("operations.database_error", "Could not finish the operation. Reload before retrying because a write may have succeeded.");
+            Error = Error.Unexpected(api is null ? "operations.database_error" : "operations.api_unavailable",
+                "Could not finish the operation. Reload before retrying because a write may have succeeded.");
             Message = Error.Description;
         }
         finally { IsBusy = false; Notify(); }

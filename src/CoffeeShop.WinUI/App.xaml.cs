@@ -74,9 +74,13 @@ public partial class App : Microsoft.UI.Xaml.Application
             .AddCoffeeShopApiClient(configuration.ApiBaseAddress)
             .AddCoffeeShopDirectClient(configuration.ConnectionString ?? string.Empty);
         if (!Environment.GetCommandLineArgs().Contains("--verify-shell"))
+        {
             registrations.AddSingleton(provider => new PosWorkspace(provider.GetRequiredService<IServiceScopeFactory>(),
                 provider.GetRequiredService<CustomerOrderContext>(), provider.GetRequiredService<PosOperatorSession>(),
                 provider.GetRequiredService<ApiPosSource>()));
+            registrations.AddSingleton(provider => new OperationsWorkspace(provider.GetRequiredService<IServiceScopeFactory>(),
+                provider.GetRequiredService<PosOperatorSession>(), provider.GetRequiredService<ApiOperationsSource>()));
+        }
         var services = registrations.BuildServiceProvider();
 
         var previousServices = Services;
