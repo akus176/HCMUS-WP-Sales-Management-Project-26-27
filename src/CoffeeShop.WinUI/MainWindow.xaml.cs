@@ -176,6 +176,7 @@ public sealed partial class MainWindow : Window
         endingSession = true;
         try { await sessionManager.LogoutAsync(); }
         catch (ApiException) { /* Local credentials are cleared even when the API is offline. */ }
+        catch (OperationCanceledException) { /* A timeout must not leave the console open. */ }
         ReturnToSignIn();
     }
     private async Task CheckSessionAsync()

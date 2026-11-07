@@ -204,6 +204,22 @@ public sealed class ApiSessionTests
     }
 
     [Fact]
+    public async Task LogoutTimeout_StillClearsLocalSession()
+    {
+        var identity = new FakeIdentityApi(Token("access", "refresh"))
+        {
+            LogoutError = new TaskCanceledException("Request timed out."),
+        };
+        var store = new MemoryRefreshTokenStore();
+        var session = new StaffSessionManager(identity, store);
+        await session.LoginAsync("barista", "test-password");
+
+        await Assert.ThrowsAsync<TaskCanceledException>(() => session.LogoutAsync());
+        Assert.False(session.IsAuthenticated);
+        Assert.Null(store.Value);
+    }
+
+    [Fact]
     public async Task ProtectedRefreshTokenFileStore_EncryptsAtRestAndClearsOnLogout()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"coffee-shop-token-test-{Guid.NewGuid():N}");
@@ -246,6 +262,7 @@ public sealed class ApiSessionTests
         private TokenResponse? lastResponse;
         public int RefreshCalls { get; private set; }
         public ApiException? RefreshError { get; init; }
+        public Exception? LogoutError { get; init; }
 
         public Task<TokenResponse> LoginAsync(string username, string password, CancellationToken cancellationToken = default) =>
             Task.FromResult(lastResponse = responses.Count > 0 ? responses.Dequeue() : lastResponse!);
@@ -258,7 +275,7 @@ public sealed class ApiSessionTests
         }
 
         public Task LogoutAsync(string refreshToken, string accessToken, CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+            LogoutError is null ? Task.CompletedTask : Task.FromException(LogoutError);
     }
 
     private sealed class MemoryRefreshTokenStore : IRefreshTokenStore
