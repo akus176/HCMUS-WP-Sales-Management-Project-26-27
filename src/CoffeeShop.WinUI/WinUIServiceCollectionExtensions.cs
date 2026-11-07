@@ -8,6 +8,7 @@ using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Common;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CoffeeShop.WinUI;
 
@@ -19,6 +20,9 @@ internal static class WinUIServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        services.TryAddSingleton<PosOperatorSession>();
+        services.TryAddSingleton<ICurrentUser>(provider => provider.GetRequiredService<PosOperatorSession>());
+        if (string.IsNullOrWhiteSpace(connectionString)) return services;
         services.AddCoffeeShopPostgres(connectionString);
         services.AddSingleton<IClock, SystemClock>();
         services.AddScoped<CatalogCommandHandler>();
@@ -29,8 +33,6 @@ internal static class WinUIServiceCollectionExtensions
         services.AddScoped<CustomerOrderSelectionHandler>();
         services.AddSingleton<CustomerOrderContext>();
         services.AddSingleton<CustomerWorkspace>();
-        services.AddSingleton<PosOperatorSession>();
-        services.AddSingleton<ICurrentUser>(provider => provider.GetRequiredService<PosOperatorSession>());
         services.AddScoped<PosOrderHandler>();
         services.AddScoped<OrderConfirmationCommandHandler>();
         services.AddScoped<DiscountCommandHandler>();

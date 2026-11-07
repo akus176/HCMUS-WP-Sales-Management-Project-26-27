@@ -99,12 +99,12 @@
 
 ## 11. Final WinUI API Migration
 
-- [ ] 11.1 Implement a typed HTTP client, consistent error mapping, and API service interfaces matching the WinUI-facing direct adapters; verify mocked client tests cover success and every standard error category
+- [x] 11.1 Implement a typed HTTP client, consistent error mapping, and API service interfaces matching the WinUI-facing direct adapters; verify mocked client tests cover success and every standard error category
 - [ ] 11.2 Implement login, secure Windows token storage, automatic access-token attachment, refresh, logout, and expired-session handling; verify plaintext tokens do not appear in configuration or logs
 - [ ] 11.3 Migrate catalog, recipe, inventory, supplier, and customer screens from direct services to API clients; verify parity tests complete the same workflows through the API
 - [ ] 11.4 Migrate POS, order, table, payment, discount, barista, cancellation, and delivery screens to API clients; verify all channel demonstrations pass through HTTP only
 - [ ] 11.5 Migrate reports and loyalty workflows to API clients; verify results match the seeded direct-query baselines
-- [ ] 11.6 Add role/permission-aware navigation and control visibility for usability; verify server tests still reject direct unauthorized requests regardless of UI visibility
+- [x] 11.6 Add role/permission-aware navigation and control visibility for usability; verify server tests still reject direct unauthorized requests regardless of UI visibility
 - [ ] 11.7 Remove PostgreSQL infrastructure references and connection settings from final WinUI release builds; verify dependency inspection and runtime network tracing show only API communication
 
 ## 12. AI Manager Assistant

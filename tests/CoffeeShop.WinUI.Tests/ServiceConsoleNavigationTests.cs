@@ -1,3 +1,4 @@
+using CoffeeShop.Contracts;
 using CoffeeShop.WinUI.ViewModels;
 
 namespace CoffeeShop.WinUI.Tests;
@@ -31,6 +32,40 @@ public sealed class ServiceConsoleNavigationTests
         Assert.All(ServiceConsoleNavigation.PrimaryDestinations, item => Assert.Equal(item, ServiceConsoleNavigation.Resolve(item.Tag).Destination));
         Assert.Equal("counter", ServiceConsoleNavigation.DefaultTag);
         Assert.Throws<ArgumentException>(() => ServiceConsoleNavigation.Resolve("unknown"));
+    }
+
+    [Fact]
+    public void ForPermissions_ShowsOnlyDestinationsBackedByEffectiveApiPermissions()
+    {
+        Assert.Equal(["counter", "customers"], ServiceConsoleNavigation.ForPermissions(["orders.create", "customers.manage"]).Select(item => item.Tag));
+        Assert.Equal(["service-board"], ServiceConsoleNavigation.ForPermissions(["orders.fulfill"]).Select(item => item.Tag));
+        Assert.Equal(["stock-room"], ServiceConsoleNavigation.ForPermissions(["inventory.manage"]).Select(item => item.Tag));
+        Assert.Equal(["reports"], ServiceConsoleNavigation.ForPermissions(["reports.lowstock"]).Select(item => item.Tag));
+        Assert.Equal(["menu"], ServiceConsoleNavigation.ForPermissions(["menu.manage"]).Select(item => item.Tag));
+        Assert.Empty(ServiceConsoleNavigation.ForPermissions(["unknown.permission"]));
+    }
+
+    [Fact]
+    public void Resolve_WithPermissionsRejectsDirectNavigationToHiddenWorkspace()
+    {
+        Assert.Throws<UnauthorizedAccessException>(() =>
+            ServiceConsoleNavigation.Resolve("reports", ["orders.create"]));
+        Assert.Equal("counter", ServiceConsoleNavigation.Resolve("counter", ["orders.create"]).Destination.Tag);
+    }
+
+    [Fact]
+    public void PosOperatorSession_UsesCurrentServerIssuedRolesAndPermissions()
+    {
+        StaffSession? current = null;
+        var session = new PosOperatorSession(() => current);
+        Assert.False(session.IsAuthenticated);
+
+        current = new StaffSession(Guid.NewGuid(), "Casey Barista", ["Barista"], ["orders.fulfill"]);
+
+        Assert.True(session.IsAuthenticated);
+        Assert.True(session.HasPermission("orders.fulfill"));
+        Assert.False(session.HasPermission("inventory.adjust"));
+        Assert.True(session.IsInRole("barista"));
     }
 
     [Theory]

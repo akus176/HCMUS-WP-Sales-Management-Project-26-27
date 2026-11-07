@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\CoffeeShop.Application\CoffeeShop.Application.csproj" />
+    <ProjectReference Include="..\..\src\CoffeeShop.Contracts\CoffeeShop.Contracts.csproj" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
@@ -15,6 +16,8 @@
 
   <ItemGroup>
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\*.cs" Link="ViewModels\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\*.cs" Link="Services\%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Security\ProtectedRefreshTokenFileStore.cs" Link="Services\ProtectedRefreshTokenFileStore.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\Pages\IngredientRow.cs" Link="Presentation\IngredientRow.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\Pages\ReceiptLineRow.cs" Link="Presentation\ReceiptLineRow.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\Pages\SupplierRow.cs" Link="Presentation\SupplierRow.cs" />

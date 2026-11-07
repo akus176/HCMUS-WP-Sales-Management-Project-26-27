@@ -13,6 +13,7 @@
     <ProjectReference Include="..\CoffeeShop.Contracts\CoffeeShop.Contracts.csproj" />
     <ProjectReference Include="..\CoffeeShop.Infrastructure.Postgres\CoffeeShop.Infrastructure.Postgres.csproj" />
     <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Fonts\*.ttf" CopyToOutputDirectory="PreserveNewest" />
