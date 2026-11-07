@@ -57,12 +57,11 @@ public sealed class StaffAdministrationService(CoffeeShopDbContext db, TimeProvi
                 item.OccurredAt,
                 item.Outcome,
                 item.UserId,
-                Username = item.User == null ? null : item.User.Username,
                 item.IpAddress,
             }).ToArrayAsync(ct);
         return events.Select(item => new SecurityEventResponse(
             item.Id.Value, item.EventType, item.OccurredAt.Value, item.Outcome,
-            item.UserId?.Value, item.Username, item.IpAddress)).ToArray();
+            item.UserId?.Value, item.IpAddress)).ToArray();
     }
 
     public async Task<Result<StaffAccountResponse>> DeactivateAsync(

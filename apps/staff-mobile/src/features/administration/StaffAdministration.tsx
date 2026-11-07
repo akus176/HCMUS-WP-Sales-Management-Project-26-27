@@ -341,8 +341,7 @@ function EventCard({ event }: { event: SecurityEvent }) {
       <ShellText>{event.outcome}</ShellText>
       <ShellText>{new Date(event.occurredAt).toLocaleString()}</ShellText>
       <ShellText>
-        {event.username ??
-          (event.userId ? `Staff ID ${event.userId}` : 'System event')}
+        {event.userId ? `Staff ID ${event.userId}` : 'System event'}
       </ShellText>
       {event.ipAddress && <ShellText>Source IP: {event.ipAddress}</ShellText>}
     </View>

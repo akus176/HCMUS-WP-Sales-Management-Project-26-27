@@ -22,5 +22,4 @@ public sealed record SecurityEventResponse(
     DateTimeOffset OccurredAt,
     string Outcome,
     Guid? UserId,
-    string? Username,
     string? IpAddress);

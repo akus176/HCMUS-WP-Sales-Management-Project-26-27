@@ -2492,12 +2492,6 @@
               "null",
               "string"
             ]
-          },
-          "username": {
-            "type": [
-              "null",
-              "string"
-            ]
           }
         },
         "required": [
@@ -2506,7 +2500,6 @@
           "occurredAt",
           "outcome",
           "userId",
-          "username",
           "ipAddress"
         ],
         "type": "object"

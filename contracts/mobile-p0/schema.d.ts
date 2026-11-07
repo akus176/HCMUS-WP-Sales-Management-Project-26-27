@@ -5746,7 +5746,6 @@ export interface components {
             outcome: string;
             /** Format: uuid */
             userId: null | string;
-            username: null | string;
         };
         SetCompatibleAddonsRequest: {
             addonIds: null | string[];
