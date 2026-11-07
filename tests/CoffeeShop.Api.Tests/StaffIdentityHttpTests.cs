@@ -6,9 +6,11 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text;
 using CoffeeShop.Api;
+using CoffeeShop.Application.Reporting;
 using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Identity;
+using CoffeeShop.Domain.Sales;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Identity;
 using Microsoft.AspNetCore.Authorization;
@@ -535,6 +537,72 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Conflict, repeatReady.StatusCode);
         var shared = await manager.GetFromJsonAsync<OrderResponse>($"/api/v1/orders/{orderId}");
         Assert.Equal("ready", shared!.Status);
+        var serviceQueue = await barista.GetFromJsonAsync<OperationalOrderResponse[]>("/api/v1/operations/orders");
+        var queueOrder = Assert.Single(serviceQueue!);
+        Assert.Equal(orderId, queueOrder.Id);
+        Assert.Equal(0m, queueOrder.Total);
+        var serviceDetail = await barista.GetFromJsonAsync<OperationsOrderDetailResponse>(
+            $"/api/v1/operations/orders/{orderId}");
+        Assert.Equal("Latte", Assert.Single(serviceDetail!.Lines).ItemName);
+        Assert.Empty(serviceDetail.Discounts);
+
+        // Seed a table and verify dine-in creation, occupancy, cancellation, and release over HTTP.
+        var tableId = Guid.NewGuid();
+        await using (var db = Database())
+        {
+            db.DiningTables.Add(new DiningTable(new(tableId), "T-154", 2));
+            await db.SaveChangesAsync();
+        }
+        Assert.Contains((await cashier.GetFromJsonAsync<PosTableResponse[]>("/api/v1/pos/tables"))!,
+            table => table.Id == tableId);
+        var dineInId = Guid.NewGuid();
+        using var dineInDraft = await cashier.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(dineInId,
+            "dine_in", tableId, null, [new OrderLineRequest(item.Id, variant.Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, dineInDraft.StatusCode);
+        using var dineInConfirmed = await cashier.PostAsJsonAsync($"/api/v1/orders/{dineInId}/confirm",
+            new ConfirmOrderRequest(5m));
+        Assert.Equal(HttpStatusCode.OK, dineInConfirmed.StatusCode);
+        var occupiedTable = Assert.Single((await cashier.GetFromJsonAsync<PosTableResponse[]>("/api/v1/pos/tables"))!,
+            table => table.Id == tableId);
+        Assert.True(occupiedTable.IsOccupied);
+        Assert.Equal(dineInId, occupiedTable.ActiveOrderId);
+        using var blankCancellation = await manager.PostAsJsonAsync($"/api/v1/orders/{dineInId}/cancel",
+            new CancelOrderRequest(" "));
+        Assert.Equal(HttpStatusCode.BadRequest, blankCancellation.StatusCode);
+        using var forbiddenCancellation = await cashier.PostAsJsonAsync($"/api/v1/orders/{dineInId}/cancel",
+            new CancelOrderRequest("Customer changed plans"));
+        Assert.Equal(HttpStatusCode.Forbidden, forbiddenCancellation.StatusCode);
+        using var cancelled = await manager.PostAsJsonAsync($"/api/v1/orders/{dineInId}/cancel",
+            new CancelOrderRequest("Customer changed plans"));
+        Assert.Equal(HttpStatusCode.OK, cancelled.StatusCode);
+        Assert.Equal("cancelled", (await manager.GetFromJsonAsync<OrderResponse>($"/api/v1/orders/{dineInId}"))!.Status);
+        using var repeatedCancellation = await manager.PostAsJsonAsync($"/api/v1/orders/{dineInId}/cancel",
+            new CancelOrderRequest("Retry"));
+        Assert.Equal(HttpStatusCode.Conflict, repeatedCancellation.StatusCode);
+        var releasedTable = Assert.Single((await cashier.GetFromJsonAsync<PosTableResponse[]>("/api/v1/pos/tables"))!,
+            table => table.Id == tableId);
+        Assert.False(releasedTable.IsOccupied);
+        Assert.Null(releasedTable.ActiveOrderId);
+
+        // Compare seeded API reports with the application query handlers over the same persisted payments.
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var range = $"from={today:yyyy-MM-dd}&to={today:yyyy-MM-dd}&timeZone=UTC";
+        using var reportScope = host.Services.CreateScope();
+        var revenueBaseline = (await reportScope.ServiceProvider.GetRequiredService<RevenueReportQueryHandler>()
+            .GetRevenueAsync(new(today, today, TimeZoneInfo.Utc))).Value;
+        var bestSellerBaseline = (await reportScope.ServiceProvider.GetRequiredService<BestSellerReportQueryHandler>()
+            .GetBestSellersAsync(new(today, today, TimeZoneInfo.Utc))).Value;
+        var channelBaseline = (await reportScope.ServiceProvider.GetRequiredService<OrderChannelReportQueryHandler>()
+            .GetChannelsAsync(new(today, today, TimeZoneInfo.Utc))).Value;
+        var seededRevenue = await manager.GetFromJsonAsync<RevenueReportResponse>($"/api/v1/reports/revenue?{range}");
+        var seededBestSellers = await manager.GetFromJsonAsync<BestSellerReportResponse>($"/api/v1/reports/best-sellers?{range}");
+        var seededChannels = await manager.GetFromJsonAsync<ChannelReportResponse>($"/api/v1/reports/channels?{range}");
+        Assert.Equal(revenueBaseline.Revenue, seededRevenue!.Revenue);
+        Assert.Equal(revenueBaseline.OrderCount, seededRevenue.OrderCount);
+        Assert.Equal(bestSellerBaseline.Items.Select(row => (row.ItemName, row.Quantity, row.Revenue)),
+            seededBestSellers!.Items.Select(row => (row.ItemName, row.Quantity, row.Revenue)));
+        Assert.Equal(channelBaseline.ByChannel.Select(row => (row.Channel, row.Revenue, row.OrderCount)),
+            seededChannels!.ByChannel.Select(row => (row.Channel, row.Revenue, row.OrderCount)));
     }
 
     [PostgresFact]
