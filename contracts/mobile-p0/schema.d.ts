@@ -1698,6 +1698,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/delivery-staff/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DeliveryStaffResponse"][];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/discounts/pending": {
         parameters: {
             query?: never;
@@ -2911,6 +2955,105 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OperationalOrderResponse"][];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OperationsOrderDetailResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/orders": {
         parameters: {
             query?: never;
@@ -3437,6 +3580,50 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pos/tables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PosTableResponse"][];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4152,6 +4339,223 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/reports/best-sellers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                    timeZone?: string;
+                    sortBy?: string;
+                    limit?: number | string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BestSellerReportResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/channels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                    timeZone?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ChannelReportResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/low-stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["LowStockReportRowResponse"][];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/revenue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    from: string;
+                    to: string;
+                    timeZone?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RevenueReportResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stock-movements": {
         parameters: {
             query?: never;
@@ -4471,6 +4875,34 @@ export interface components {
             /** Format: uuid */
             staffId: string;
         };
+        BestSellerReportResponse: {
+            /** Format: date-time */
+            endUtcExclusive: string;
+            /** Format: date */
+            firstDate: string;
+            items: components["schemas"]["BestSellerRowResponse"][];
+            /** Format: date */
+            lastDateInclusive: string;
+            sortBy: string;
+            /** Format: date-time */
+            startUtc: string;
+            timeZoneId: string;
+            variants: components["schemas"]["BestSellerRowResponse"][];
+        };
+        BestSellerRowResponse: {
+            itemName: string;
+            /** Format: uuid */
+            menuItemId: null | string;
+            /** Format: int64 */
+            quantity: number | string;
+            /** Format: int32 */
+            rank: number | string;
+            /** Format: double */
+            revenue: number | string;
+            sizeName: null | string;
+            /** Format: uuid */
+            sizeVariantId: null | string;
+        };
         CancelOrderRequest: {
             reason: null | string;
         };
@@ -4481,6 +4913,29 @@ export interface components {
             id: string;
             isActive: boolean;
             name: string;
+        };
+        ChannelReportResponse: {
+            byChannel: components["schemas"]["ChannelRevenueResponse"][];
+            /** Format: date-time */
+            endUtcExclusive: string;
+            /** Format: date */
+            firstDate: string;
+            /** Format: date */
+            lastDateInclusive: string;
+            /** Format: int32 */
+            orderCount: number | string;
+            /** Format: double */
+            revenue: number | string;
+            /** Format: date-time */
+            startUtc: string;
+            timeZoneId: string;
+        };
+        ChannelRevenueResponse: {
+            channel: string;
+            /** Format: int32 */
+            orderCount: number | string;
+            /** Format: double */
+            revenue: number | string;
         };
         ConfirmOrderRequest: {
             /** Format: double */
@@ -4586,6 +5041,11 @@ export interface components {
             fullName: null | string;
             phone: null | string;
         };
+        DeliveryStaffResponse: {
+            fullName: string;
+            /** Format: uuid */
+            id: string;
+        };
         DiscountDecisionResponse: {
             /** Format: double */
             computedAmount: null | number | string;
@@ -4621,6 +5081,16 @@ export interface components {
         LoginRequest: {
             password: null | string;
             username: null | string;
+        };
+        LowStockReportRowResponse: {
+            /** Format: double */
+            availableQuantity: number | string;
+            baseUnit: string;
+            /** Format: uuid */
+            id: string;
+            name: string;
+            /** Format: double */
+            reorderThreshold: number | string;
         };
         LoyaltyHistoryResponse: {
             items: components["schemas"]["LoyaltyTransactionResponse"][];
@@ -4714,6 +5184,16 @@ export interface components {
             /** Format: double */
             total: number | string;
         };
+        OperationsOrderDetailResponse: {
+            discounts: components["schemas"]["PendingDiscountResponse"][];
+            lines: components["schemas"]["PreparationTicketLine"][];
+            order: components["schemas"]["OperationalOrderResponse"];
+        };
+        OrderAddonSnapshotResponse: {
+            name: string;
+            /** Format: double */
+            unitPrice: number | string;
+        };
         OrderCustomerRequest: {
             addressLine?: null | string;
             contactNumber?: null | string;
@@ -4728,6 +5208,7 @@ export interface components {
             amount: null | number | string;
             /** Format: uuid */
             id: string;
+            reason?: null | string;
             status: string;
             type: string;
             /** Format: double */
@@ -4743,6 +5224,7 @@ export interface components {
             sizeVariantId: string;
         };
         OrderLineResponse: {
+            addonDetails?: null | components["schemas"]["OrderAddonSnapshotResponse"][];
             addons: string[];
             itemName: string;
             /** Format: int32 */
@@ -4754,9 +5236,14 @@ export interface components {
             unitPrice: number | string;
         };
         OrderResponse: {
+            addressLine?: null | string;
             channel: string;
+            contactNumber?: null | string;
+            /** Format: uuid */
+            customerAddressId?: null | string;
             /** Format: uuid */
             customerId: null | string;
+            customerName?: null | string;
             /** Format: double */
             discountTotal: number | string;
             discounts: components["schemas"]["OrderDiscountResponse"][];
@@ -4764,6 +5251,7 @@ export interface components {
             id: string;
             lines: components["schemas"]["OrderLineResponse"][];
             orderNumber: string;
+            recipientName?: null | string;
             status: string;
             /** Format: double */
             subtotal: number | string;
@@ -4819,6 +5307,13 @@ export interface components {
             /** Format: uuid */
             paymentId: string;
         };
+        PaymentRevenueResponse: {
+            /** Format: int32 */
+            orderCount: number | string;
+            paymentMethod: string;
+            /** Format: double */
+            revenue: number | string;
+        };
         PendingDiscountResponse: {
             /** Format: double */
             computedAmount: null | number | string;
@@ -4833,6 +5328,16 @@ export interface components {
             type: string;
             /** Format: double */
             value: number | string;
+        };
+        PosTableResponse: {
+            /** Format: uuid */
+            activeOrderId: null | string;
+            /** Format: uuid */
+            id: string;
+            isOccupied: boolean;
+            /** Format: int32 */
+            seats: null | number | string;
+            tableNumber: string;
         };
         PreparationTicketLine: {
             addons: string[];
@@ -4929,6 +5434,31 @@ export interface components {
         };
         ReplaceRecipeRequest: {
             lines: null | components["schemas"]["RecipeLineRequest"][];
+        };
+        RevenueDayResponse: {
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            orderCount: number | string;
+            /** Format: double */
+            revenue: number | string;
+        };
+        RevenueReportResponse: {
+            byPaymentMethod: components["schemas"]["PaymentRevenueResponse"][];
+            daily: components["schemas"]["RevenueDayResponse"][];
+            /** Format: date-time */
+            endUtcExclusive: string;
+            /** Format: date */
+            firstDate: string;
+            /** Format: date */
+            lastDateInclusive: string;
+            /** Format: int32 */
+            orderCount: number | string;
+            /** Format: double */
+            revenue: number | string;
+            /** Format: date-time */
+            startUtc: string;
+            timeZoneId: string;
         };
         SetCompatibleAddonsRequest: {
             addonIds: null | string[];

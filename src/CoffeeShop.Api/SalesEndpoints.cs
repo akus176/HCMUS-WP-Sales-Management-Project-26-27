@@ -12,7 +12,7 @@ public static class SalesEndpoints
     {
         var orders = api.MapGroup("/orders").RequireAuthorization();
         orders.MapGet("/", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
-            Results.Ok((await handler.GetOrdersAsync(ct)).Select(ToOperational).ToArray()))
+            Results.Ok((await handler.GetOrdersAsync(ct)).Select(order => ToOperational(order)).ToArray()))
             .RequireAuthorization("orders.create").Produces<OperationalOrderResponse[]>();
         orders.MapGet("/{id:guid}", async (Guid id, PosOrderHandler handler, CancellationToken ct) =>
         {
@@ -80,6 +80,10 @@ public static class SalesEndpoints
 
         api.MapGet("/tables", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
             Results.Ok(await handler.GetTablesAsync(ct))).RequireAuthorization("orders.create");
+        api.MapGet("/pos/tables", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
+            Results.Ok((await handler.GetTablesAsync(ct)).Select(table => new PosTableResponse(table.Id.Value,
+                table.TableNumber, table.Seats, table.IsOccupied, table.ActiveOrderId?.Value)).ToArray()))
+            .RequireAuthorization("orders.create").Produces<PosTableResponse[]>().ProducesProblem(403);
         api.MapGet("/preparation-tickets", async (FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, string? status, int? page, int? pageSize, CancellationToken ct) =>
         {
@@ -99,6 +103,28 @@ public static class SalesEndpoints
             return MobilePage.From(tickets, page, pageSize);
         }).RequireAuthorization("orders.fulfill").Produces<PageResponse<PreparationTicketResponse>>()
             .ProducesProblem(400).ProducesProblem(403);
+        api.MapGet("/operations/orders", async (FulfillmentOperationsQueryHandler query, CancellationToken ct) =>
+            Results.Ok((await query.GetOrdersAsync(ct)).Where(order => order.Status is
+                    OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready)
+                .OrderBy(order => order.OrderNumber).ThenBy(order => order.Id.Value)
+                .Select(order => ToOperational(order, includeFinancials: false)).ToArray()))
+            .RequireAuthorization("orders.fulfill").Produces<OperationalOrderResponse[]>().ProducesProblem(403);
+        api.MapGet("/operations/orders/{id:guid}", async (Guid id, FulfillmentOperationsQueryHandler query,
+            PosOrderHandler ordersHandler, CancellationToken ct) =>
+        {
+            if (id == Guid.Empty) return InvalidId();
+            var summary = (await query.GetOrdersAsync(ct)).FirstOrDefault(order => order.Id.Value == id &&
+                order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready);
+            if (summary is null)
+                return ApiErrorResults.From(Error.NotFound("orders.order_not_found", "Active order not found."));
+            var detail = await ordersHandler.GetOrderAsync(summary.Id, ct);
+            if (detail.IsFailure) return ApiErrorResults.From(detail.Error!);
+            return Results.Ok(new OperationsOrderDetailResponse(ToOperational(summary, includeFinancials: false),
+                detail.Value.Lines.Select(line => new PreparationTicketLine(line.ItemName, line.SizeName,
+                    line.Quantity, line.Addons.Select(addon => addon.Name).ToArray())).ToArray(),
+                []));
+        }).RequireAuthorization("orders.fulfill").Produces<OperationsOrderDetailResponse>()
+            .ProducesProblem(403).ProducesProblem(404);
         api.MapGet("/preparation-tickets/{id:guid}", async (Guid id, FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, CancellationToken ct) =>
         {
@@ -160,8 +186,9 @@ public static class SalesEndpoints
             : ApiErrorResults.From(result.Error!);
     }
 
-    private static OperationalOrderResponse ToOperational(OperationalOrder order) => new(order.Id.Value,
-        order.OrderNumber, order.Channel, order.Status, order.Total, order.PaidAmount, order.TableNumber,
+    private static OperationalOrderResponse ToOperational(OperationalOrder order, bool includeFinancials = true) => new(order.Id.Value,
+        order.OrderNumber, order.Channel, order.Status, includeFinancials ? order.Total : 0m,
+        includeFinancials ? order.PaidAmount : 0m, order.TableNumber,
         order.DeliveryStatus, order.AssignedStaffId?.Value, order.PendingDiscountIds.Select(id => id.Value).ToArray());
 
     private static PreparationTicketResponse ToTicket(OperationalOrder order, PosOrderDetail detail) => new(
@@ -173,9 +200,11 @@ public static class SalesEndpoints
         order.Channel, order.Status, order.CustomerId?.Value, order.TableId?.Value, order.TableNumber,
         order.Subtotal, order.DiscountTotal, order.Total, order.Lines.Select(line => new OrderLineResponse(
             line.ItemName, line.SizeName, line.Quantity, line.UnitPrice, line.Total,
-            line.Addons.Select(addon => addon.Name).ToArray())).ToArray(),
+            line.Addons.Select(addon => addon.Name).ToArray(),
+            line.Addons.Select(addon => new OrderAddonSnapshotResponse(addon.Name, addon.UnitPrice)).ToArray())).ToArray(),
         order.Discounts.Select(discount => new OrderDiscountResponse(discount.Id.Value, discount.Type,
-            discount.Value, discount.Status, discount.Amount)).ToArray());
+            discount.Value, discount.Status, discount.Amount, discount.Reason)).ToArray(), order.CustomerName,
+        order.RecipientName, order.ContactNumber, order.AddressLine, order.CustomerAddressId?.Value);
 
     private static IResult InvalidId() => ApiErrorResults.From(Error.Validation("sales.invalid_id", "A nonempty identifier is required."));
 }

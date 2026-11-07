@@ -25,6 +25,13 @@
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\PosOperatorSession.cs" Link="ViewModels\PosOperatorSession.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\WorkflowFeedback.cs" Link="ViewModels\WorkflowFeedback.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\OperationsWorkspace.cs" Link="ViewModels\OperationsWorkspace.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\ApiPosSource.cs" Link="Services\ApiPosSource.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\ApiOperationsSource.cs" Link="Services\ApiOperationsSource.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\AuthenticatedApiClient.cs" Link="Services\AuthenticatedApiClient.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\ApiResponseParser.cs" Link="Services\ApiResponseParser.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\ApiException.cs" Link="Services\ApiException.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\StaffSessionManager.cs" Link="Services\StaffSessionManager.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\IStaffIdentityApi.cs" Link="Services\IStaffIdentityApi.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\InventoryAuditWorkspace.cs" Link="ViewModels\InventoryAuditWorkspace.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\WinUIServiceCollectionExtensions.cs" Link="WinUIServiceCollectionExtensions.cs" />
   </ItemGroup>

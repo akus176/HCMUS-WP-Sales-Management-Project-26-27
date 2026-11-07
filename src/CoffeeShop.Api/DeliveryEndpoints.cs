@@ -12,6 +12,10 @@ public static class DeliveryEndpoints
     {
         api.MapGet("/delivery-staff", async (FulfillmentOperationsQueryHandler query, CancellationToken ct) =>
             Results.Ok(await query.GetDeliveryStaffAsync(ct))).RequireAuthorization("delivery.assign");
+        api.MapGet("/delivery-staff/options", async (FulfillmentOperationsQueryHandler query, CancellationToken ct) =>
+            Results.Ok((await query.GetDeliveryStaffAsync(ct)).Select(staff =>
+                new DeliveryStaffResponse(staff.Id.Value, staff.FullName)).ToArray()))
+            .RequireAuthorization("delivery.assign").Produces<DeliveryStaffResponse[]>().ProducesProblem(403);
         api.MapPost("/orders/{id:guid}/assign-delivery", async (Guid id, AssignDeliveryRequest request,
             DeliveryCommandHandler handler, ICurrentUser user, CancellationToken ct) =>
         {

@@ -11,7 +11,8 @@ using Windows.ApplicationModel.DataTransfer;
 
 namespace CoffeeShop.WinUI.Pages;
 
-public sealed record ServiceBoardCard(OperationalOrder Order, PosOrderDetail? Detail, bool IsSelected, bool CanInteract = false)
+public sealed record ServiceBoardCard(OperationalOrder Order, PosOrderDetail? Detail, bool IsSelected,
+    bool CanInteract = false, bool ShowFinancials = true)
 {
     public string Status => char.ToUpperInvariant(Order.Status[0]) + Order.Status[1..];
     public string Number => Order.OrderNumber;
@@ -21,7 +22,7 @@ public sealed record ServiceBoardCard(OperationalOrder Order, PosOrderDetail? De
         ? string.Join(" · ", detail.Lines.Select(line => $"{(line.Quantity > 1 ? $"{line.Quantity}× " : "")}{line.ItemName}"))
         : "Order details available on selection";
     public string Footer => IsSelected ? "Selected" : Order.Channel == "dine_in" ? "Dine-in" : Order.Channel == "delivery" ? "Delivery" : "Takeaway";
-    public string BalanceLabel => Order.OutstandingBalance > 0 ? $"Due {Order.OutstandingBalance:0.00}" : "Paid";
+    public string BalanceLabel => !ShowFinancials ? "" : Order.OutstandingBalance > 0 ? $"Due {Order.OutstandingBalance:0.00}" : "Paid";
     public string NextStatus => Order.Status switch { "confirmed" => "preparing", "preparing" => "ready", "ready" => "completed", _ => "" };
     public string ActionLabel => Order.Status switch { "confirmed" => "Start preparing", "preparing" => "Mark ready", "ready" when Order.OutstandingBalance > 0 => "Review payment", "ready" => "Complete", _ => "" };
     public bool ActionEnabled => CanInteract && (OperationsWorkspace.IsMoveAllowed(Order, NextStatus) || Order.Status == "ready" && Order.OutstandingBalance > 0);
@@ -32,12 +33,12 @@ public sealed record ServiceBoardCard(OperationalOrder Order, PosOrderDetail? De
 }
 
 public sealed record ServiceBoardDiscount(EntityId Id, string Label);
-public sealed record ServiceBoardLine(PosLineSnapshot Line)
+public sealed record ServiceBoardLine(PosLineSnapshot Line, bool ShowTotal = true)
 {
     public int Quantity => Line.Quantity;
     public string ItemName => Line.ItemName;
     public string Description => string.Join(" · ", new[] { Line.SizeName }.Concat(Line.Addons.Select(addon => addon.Name)));
-    public string TotalText => Line.Total.ToString("0.00", CultureInfo.CurrentCulture);
+    public string TotalText => ShowTotal ? Line.Total.ToString("0.00", CultureInfo.CurrentCulture) : "";
 }
 
 public sealed partial class OperationsPage : Page
@@ -89,7 +90,7 @@ public sealed partial class OperationsPage : Page
     }
     private void OnOperatorChanged(object sender, SelectionChangedEventArgs args)
     {
-        if (!rendering) model.Operator = OperatorBox.SelectedItem as PosStaffOption;
+        if (!rendering && !model.ApiMode) model.Operator = OperatorBox.SelectedItem as PosStaffOption;
     }
 
     private void OnBoardSizeChanged(object sender, SizeChangedEventArgs args) => ApplyBoardLayout();
@@ -202,12 +203,12 @@ public sealed partial class OperationsPage : Page
     }
     private void OnDeliveryStaffChanged(object sender, SelectionChangedEventArgs args)
     {
-        if (!rendering) AssignButton.IsEnabled = model.SelectedOrder?.CanAssignDelivery == true && DeliveryStaffBox.SelectedItem is DeliveryStaffOption && model.HasOperator && !model.IsBusy;
+        if (!rendering) AssignButton.IsEnabled = model.SelectedOrder?.CanAssignDelivery == true && DeliveryStaffBox.SelectedItem is DeliveryStaffOption && model.CanMutate && model.HasOperator;
     }
     private void OnDiscountChanged(object sender, SelectionChangedEventArgs args)
     {
         if (rendering) return;
-        var enabled = DiscountList.SelectedItem is ServiceBoardDiscount && model.HasOperator && !model.IsBusy;
+        var enabled = DiscountList.SelectedItem is ServiceBoardDiscount && model.CanMutate && model.HasOperator;
         ApproveButton.IsEnabled = RejectButton.IsEnabled = enabled;
     }
     private async void OnPrepare(object sender, RoutedEventArgs args) => await model.StartPreparingAsync();
@@ -256,18 +257,22 @@ public sealed partial class OperationsPage : Page
         rendering = true;
         var active = model.Orders.Where(order => order.Status is "confirmed" or "preparing" or "ready").ToArray();
         var cards = active.Select(order => new ServiceBoardCard(order,
-            model.OrderDetails.GetValueOrDefault(order.Id), order.Id == model.SelectedOrderId, model.HasOperator && !model.IsBusy)).ToArray();
+            model.OrderDetails.GetValueOrDefault(order.Id), order.Id == model.SelectedOrderId,
+            model.HasOperator && model.CanMutate && (order.Status == "ready" && order.OutstandingBalance > 0
+                ? model.CanRecordPayments : model.CanMoveOrder(order.Id, order.Status switch
+                { "confirmed" => "preparing", "preparing" => "ready", "ready" => "completed", _ => "" })),
+            model.CanRecordPayments)).ToArray();
         var selected = model.SelectedOrder;
         var detail = model.SelectedDetail;
 
         LoadingBar.Visibility = model.IsBusy ? Visibility.Visible : Visibility.Collapsed;
-        OperatorBox.IsEnabled = !model.IsBusy;
+        OperatorBox.IsEnabled = !model.ApiMode && !model.IsBusy;
         RefreshButton.IsEnabled = !model.IsBusy;
         // The selected-order inspector already explains the operator prerequisite.
         OperatorHint.Visibility = Visibility.Collapsed;
         if (!ReferenceEquals(OperatorBox.ItemsSource, model.Staff)) OperatorBox.ItemsSource = model.Staff;
         OperatorBox.SelectedItem = model.Staff.FirstOrDefault(staff => staff.Id == model.Operator?.Id);
-        foreach (var list in new[] { ConfirmedList, PreparingList, ReadyList }) list.CanDragItems = list != ReadyList && model.HasOperator && !model.IsBusy;
+        foreach (var list in new[] { ConfirmedList, PreparingList, ReadyList }) list.CanDragItems = list != ReadyList && model.CanFulfill && model.HasOperator && model.CanMutate;
         Status.Apply(model.Feedback);
         if (model.Error is null && (model.Message.StartsWith("Choose an order") || model.Message.StartsWith("Load operational"))) Status.IsOpen = false;
         SummaryText.Text = active.Length == 0 ? "No active service work." :
@@ -289,21 +294,24 @@ public sealed partial class OperationsPage : Page
         SelectedCustomer.Text = detail?.CustomerName ?? (selected is null ? "" : "Walk-in");
         TicketBody.Visibility = TicketForms.Visibility = selected is null ? Visibility.Collapsed : Visibility.Visible;
         InspectorEmpty.Visibility = selected is null ? Visibility.Visible : Visibility.Collapsed;
-        OrderLinesList.ItemsSource = detail?.Lines.Select(line => new ServiceBoardLine(line)).ToArray();
+        OrderLinesList.ItemsSource = detail?.Lines.Select(line => new ServiceBoardLine(line, model.CanRecordPayments)).ToArray();
         TotalText.Text = selected is null ? "" : selected.Total.ToString("0.00", CultureInfo.CurrentCulture);
         BalanceText.Text = selected is null ? "" : $"Paid {selected.PaidAmount:0.00} · Due {selected.OutstandingBalance:0.00}";
+        TotalText.Visibility = BalanceText.Visibility = model.ApiMode && !model.CanRecordPayments
+            ? Visibility.Collapsed : Visibility.Visible;
         ActionHint.Text = selected is null ? "" : !model.HasOperator ? "Choose an operator to manage this ticket."
             : selected.Status == "ready" && selected.OutstandingBalance > 0 ? "Collect the balance before completing this order."
             : selected.Status == "ready" ? "Payment received. This ticket is ready to complete."
             : selected.Status == "confirmed" ? "Send this ticket to the bar to begin preparation." : "Mark ready when every item is prepared.";
         PaymentDueText.Text = selected?.OutstandingBalance > 0 ? $"Balance to collect: {selected.OutstandingBalance:0.00}" : "Paid in full";
-        PaymentSection.Visibility = selected?.OutstandingBalance > 0 ? Visibility.Visible : Visibility.Collapsed;
-        DiscountSection.Visibility = selected?.PendingDiscountIds.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        PaymentSection.Visibility = selected?.OutstandingBalance > 0 && model.CanRecordPayments ? Visibility.Visible : Visibility.Collapsed;
+        DiscountSection.Visibility = selected?.PendingDiscountIds.Count > 0 && model.CanApproveDiscounts ? Visibility.Visible : Visibility.Collapsed;
         DeliverySection.Visibility = selected?.Channel == "delivery" ? Visibility.Visible : Visibility.Collapsed;
-        CancelSection.Visibility = selected?.CanCancel == true ? Visibility.Visible : Visibility.Collapsed;
+        CancelSection.Visibility = selected?.CanCancel == true && model.CanCancelOrders ? Visibility.Visible : Visibility.Collapsed;
         DeliverySummary.Text = $"Status: {Humanize(selected?.DeliveryStatus ?? "unassigned")}" +
             (selected?.Status is "confirmed" or "preparing" ? "\nAssign a courier when this ticket is ready." : "");
-        DeliveryAddress.Text = string.Join("\n", new[] { detail?.RecipientName, detail?.ContactNumber, detail?.AddressLine }.Where(value => !string.IsNullOrWhiteSpace(value)));
+        DeliveryAddress.Text = model.ApiMode && !model.CanUpdateDelivery && !model.CanAssignDelivery && !model.CanRecordPayments
+            ? "" : string.Join("\n", new[] { detail?.RecipientName, detail?.ContactNumber, detail?.AddressLine }.Where(value => !string.IsNullOrWhiteSpace(value)));
         var orderChanged = formOrderId != selected?.Id;
         if (orderChanged)
         {
@@ -327,23 +335,23 @@ public sealed partial class OperationsPage : Page
         var selectedStaffId = orderChanged ? selected?.AssignedStaffId : (DeliveryStaffBox.SelectedItem as DeliveryStaffOption)?.Id;
         DeliveryStaffBox.ItemsSource = model.DeliveryStaff;
         DeliveryStaffBox.SelectedItem = model.DeliveryStaff.FirstOrDefault(staff => staff.Id == selectedStaffId);
-        PrepareButton.Visibility = selected?.CanStartPreparing == true ? Visibility.Visible : Visibility.Collapsed;
-        ReadyButton.Visibility = selected?.CanMarkReady == true ? Visibility.Visible : Visibility.Collapsed;
-        CompleteButton.Visibility = selected?.CanComplete == true ? Visibility.Visible : Visibility.Collapsed;
-        ReviewPaymentButton.Visibility = selected?.Status == "ready" && selected.OutstandingBalance > 0 ? Visibility.Visible : Visibility.Collapsed;
-        ReviewPaymentButton.IsEnabled = model.HasOperator && !model.IsBusy;
-        PrepareButton.IsEnabled = selected?.CanStartPreparing == true && model.HasOperator && !model.IsBusy;
-        ReadyButton.IsEnabled = selected?.CanMarkReady == true && model.HasOperator && !model.IsBusy;
-        CompleteButton.IsEnabled = selected?.CanComplete == true && model.HasOperator && !model.IsBusy;
-        PayButton.IsEnabled = selected?.CanRecordPayment == true && selected.OutstandingBalance > 0 && model.HasOperator && !model.IsBusy;
-        CancelButton.IsEnabled = selected?.CanCancel == true && model.HasOperator && !model.IsBusy;
-        ApproveButton.IsEnabled = RejectButton.IsEnabled = DiscountList.SelectedItem is ServiceBoardDiscount && model.HasOperator && !model.IsBusy;
-        AssignButton.IsEnabled = selected?.CanAssignDelivery == true && DeliveryStaffBox.SelectedItem is DeliveryStaffOption && model.HasOperator && !model.IsBusy;
-        OutButton.IsEnabled = selected?.CanStartDelivery == true && model.HasOperator && !model.IsBusy;
-        DeliveredButton.IsEnabled = FailButton.IsEnabled = selected?.CanFinishDelivery == true && model.HasOperator && !model.IsBusy;
-        DeliveryStaffBox.Visibility = AssignButton.Visibility = selected?.CanAssignDelivery == true ? Visibility.Visible : Visibility.Collapsed;
-        OutButton.Visibility = selected?.CanStartDelivery == true ? Visibility.Visible : Visibility.Collapsed;
-        DeliveredButton.Visibility = DeliveryFailureForm.Visibility = selected?.CanFinishDelivery == true ? Visibility.Visible : Visibility.Collapsed;
+        PrepareButton.Visibility = selected?.CanStartPreparing == true && model.CanFulfill ? Visibility.Visible : Visibility.Collapsed;
+        ReadyButton.Visibility = selected?.CanMarkReady == true && model.CanFulfill ? Visibility.Visible : Visibility.Collapsed;
+        CompleteButton.Visibility = selected?.CanComplete == true && model.CanComplete ? Visibility.Visible : Visibility.Collapsed;
+        ReviewPaymentButton.Visibility = selected?.Status == "ready" && selected.OutstandingBalance > 0 && model.CanRecordPayments ? Visibility.Visible : Visibility.Collapsed;
+        ReviewPaymentButton.IsEnabled = model.CanRecordPayments && model.HasOperator && model.CanMutate;
+        PrepareButton.IsEnabled = selected?.CanStartPreparing == true && model.CanFulfill && model.HasOperator && model.CanMutate;
+        ReadyButton.IsEnabled = selected?.CanMarkReady == true && model.CanFulfill && model.HasOperator && model.CanMutate;
+        CompleteButton.IsEnabled = selected?.CanComplete == true && model.CanComplete && model.HasOperator && model.CanMutate;
+        PayButton.IsEnabled = selected?.CanRecordPayment == true && selected.OutstandingBalance > 0 && model.CanRecordPayments && model.HasOperator && model.CanMutate;
+        CancelButton.IsEnabled = selected?.CanCancel == true && model.CanCancelOrders && model.HasOperator && model.CanMutate;
+        ApproveButton.IsEnabled = RejectButton.IsEnabled = DiscountList.SelectedItem is ServiceBoardDiscount && model.CanApproveDiscounts && model.HasOperator && model.CanMutate;
+        AssignButton.IsEnabled = selected?.CanAssignDelivery == true && DeliveryStaffBox.SelectedItem is DeliveryStaffOption && model.CanAssignDelivery && model.HasOperator && model.CanMutate;
+        OutButton.IsEnabled = selected?.CanStartDelivery == true && model.CanUpdateDelivery && model.HasOperator && model.CanMutate;
+        DeliveredButton.IsEnabled = FailButton.IsEnabled = selected?.CanFinishDelivery == true && model.CanUpdateDelivery && model.HasOperator && model.CanMutate;
+        DeliveryStaffBox.Visibility = AssignButton.Visibility = selected?.CanAssignDelivery == true && model.CanAssignDelivery ? Visibility.Visible : Visibility.Collapsed;
+        OutButton.Visibility = selected?.CanStartDelivery == true && model.CanUpdateDelivery ? Visibility.Visible : Visibility.Collapsed;
+        DeliveredButton.Visibility = DeliveryFailureForm.Visibility = selected?.CanFinishDelivery == true && model.CanUpdateDelivery ? Visibility.Visible : Visibility.Collapsed;
         rendering = false;
         ApplyBoardLayout();
     }

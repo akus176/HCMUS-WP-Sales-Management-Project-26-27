@@ -1,4 +1,5 @@
 using CoffeeShop.WinUI.Services;
+using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 
@@ -69,10 +70,18 @@ public partial class App : Microsoft.UI.Xaml.Application
 
     private static void ConfigureServices(CoffeeShopClientConfiguration configuration)
     {
-        var services = new ServiceCollection()
+        var registrations = new ServiceCollection()
             .AddCoffeeShopApiClient(configuration.ApiBaseAddress)
-            .AddCoffeeShopDirectClient(configuration.ConnectionString ?? string.Empty)
-            .BuildServiceProvider();
+            .AddCoffeeShopDirectClient(configuration.ConnectionString ?? string.Empty);
+        if (!Environment.GetCommandLineArgs().Contains("--verify-shell"))
+        {
+            registrations.AddSingleton(provider => new PosWorkspace(provider.GetRequiredService<IServiceScopeFactory>(),
+                provider.GetRequiredService<CustomerOrderContext>(), provider.GetRequiredService<PosOperatorSession>(),
+                provider.GetRequiredService<ApiPosSource>()));
+            registrations.AddSingleton(provider => new OperationsWorkspace(provider.GetRequiredService<IServiceScopeFactory>(),
+                provider.GetRequiredService<PosOperatorSession>(), provider.GetRequiredService<ApiOperationsSource>()));
+        }
+        var services = registrations.BuildServiceProvider();
 
         var previousServices = Services;
         Services = services;

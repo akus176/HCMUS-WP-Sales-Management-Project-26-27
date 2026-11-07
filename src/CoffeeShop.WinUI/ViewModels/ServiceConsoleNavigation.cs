@@ -13,7 +13,7 @@ public static class ServiceConsoleNavigation
         new Dictionary<string, string[]>(StringComparer.Ordinal)
         {
             ["counter"] = ["orders.create"],
-            ["service-board"] = ["orders.fulfill"],
+            ["service-board"] = ["orders.fulfill", "delivery.update"],
             ["menu"] = ["menu.manage"],
             ["stock-room"] = ["inventory.manage", "inventory.receive", "inventory.adjust"],
             ["customers"] = ["customers.manage"],

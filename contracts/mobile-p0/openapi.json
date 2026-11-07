@@ -66,6 +66,116 @@
         ],
         "type": "object"
       },
+      "BestSellerReportResponse": {
+        "properties": {
+          "endUtcExclusive": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "firstDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BestSellerRowResponse"
+            },
+            "type": "array"
+          },
+          "lastDateInclusive": {
+            "format": "date",
+            "type": "string"
+          },
+          "sortBy": {
+            "type": "string"
+          },
+          "startUtc": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timeZoneId": {
+            "type": "string"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/BestSellerRowResponse"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "firstDate",
+          "lastDateInclusive",
+          "timeZoneId",
+          "startUtc",
+          "endUtcExclusive",
+          "sortBy",
+          "items",
+          "variants"
+        ],
+        "type": "object"
+      },
+      "BestSellerRowResponse": {
+        "properties": {
+          "itemName": {
+            "type": "string"
+          },
+          "menuItemId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "quantity": {
+            "format": "int64",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "rank": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "revenue": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "sizeName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "sizeVariantId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "rank",
+          "menuItemId",
+          "sizeVariantId",
+          "itemName",
+          "sizeName",
+          "quantity",
+          "revenue"
+        ],
+        "type": "object"
+      },
       "CancelOrderRequest": {
         "properties": {
           "reason": {
@@ -106,6 +216,91 @@
           "name",
           "displayOrder",
           "isActive"
+        ],
+        "type": "object"
+      },
+      "ChannelReportResponse": {
+        "properties": {
+          "byChannel": {
+            "items": {
+              "$ref": "#/components/schemas/ChannelRevenueResponse"
+            },
+            "type": "array"
+          },
+          "endUtcExclusive": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "firstDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "lastDateInclusive": {
+            "format": "date",
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "revenue": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "startUtc": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timeZoneId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "firstDate",
+          "lastDateInclusive",
+          "timeZoneId",
+          "startUtc",
+          "endUtcExclusive",
+          "revenue",
+          "orderCount",
+          "byChannel"
+        ],
+        "type": "object"
+      },
+      "ChannelRevenueResponse": {
+        "properties": {
+          "channel": {
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "revenue": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "channel",
+          "revenue",
+          "orderCount"
         ],
         "type": "object"
       },
@@ -523,6 +718,22 @@
         ],
         "type": "object"
       },
+      "DeliveryStaffResponse": {
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "fullName"
+        ],
+        "type": "object"
+      },
       "DiscountDecisionResponse": {
         "properties": {
           "computedAmount": {
@@ -672,6 +883,44 @@
         "required": [
           "username",
           "password"
+        ],
+        "type": "object"
+      },
+      "LowStockReportRowResponse": {
+        "properties": {
+          "availableQuantity": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "baseUnit": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reorderThreshold": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "baseUnit",
+          "availableQuantity",
+          "reorderThreshold"
         ],
         "type": "object"
       },
@@ -1059,6 +1308,51 @@
         ],
         "type": "object"
       },
+      "OperationsOrderDetailResponse": {
+        "properties": {
+          "discounts": {
+            "items": {
+              "$ref": "#/components/schemas/PendingDiscountResponse"
+            },
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/PreparationTicketLine"
+            },
+            "type": "array"
+          },
+          "order": {
+            "$ref": "#/components/schemas/OperationalOrderResponse"
+          }
+        },
+        "required": [
+          "order",
+          "lines",
+          "discounts"
+        ],
+        "type": "object"
+      },
+      "OrderAddonSnapshotResponse": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "unitPrice": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "unitPrice"
+        ],
+        "type": "object"
+      },
       "OrderCustomerRequest": {
         "properties": {
           "addressLine": {
@@ -1110,6 +1404,12 @@
           "id": {
             "format": "uuid",
             "type": "string"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "status": {
             "type": "string"
@@ -1174,6 +1474,15 @@
       },
       "OrderLineResponse": {
         "properties": {
+          "addonDetails": {
+            "items": {
+              "$ref": "#/components/schemas/OrderAddonSnapshotResponse"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
           "addons": {
             "items": {
               "type": "string"
@@ -1223,11 +1532,36 @@
       },
       "OrderResponse": {
         "properties": {
+          "addressLine": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "channel": {
             "type": "string"
           },
+          "contactNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "customerAddressId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "customerId": {
             "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "customerName": {
             "type": [
               "null",
               "string"
@@ -1259,6 +1593,12 @@
           },
           "orderNumber": {
             "type": "string"
+          },
+          "recipientName": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "status": {
             "type": "string"
@@ -1511,6 +1851,35 @@
         ],
         "type": "object"
       },
+      "PaymentRevenueResponse": {
+        "properties": {
+          "orderCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "paymentMethod": {
+            "type": "string"
+          },
+          "revenue": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "paymentMethod",
+          "revenue",
+          "orderCount"
+        ],
+        "type": "object"
+      },
       "PendingDiscountResponse": {
         "properties": {
           "computedAmount": {
@@ -1565,6 +1934,44 @@
           "reason",
           "computedAmount",
           "orderTotal"
+        ],
+        "type": "object"
+      },
+      "PosTableResponse": {
+        "properties": {
+          "activeOrderId": {
+            "format": "uuid",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "isOccupied": {
+            "type": "boolean"
+          },
+          "seats": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ]
+          },
+          "tableNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tableNumber",
+          "seats",
+          "isOccupied",
+          "activeOrderId"
         ],
         "type": "object"
       },
@@ -1950,6 +2357,99 @@
         },
         "required": [
           "lines"
+        ],
+        "type": "object"
+      },
+      "RevenueDayResponse": {
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "revenue": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "revenue",
+          "orderCount"
+        ],
+        "type": "object"
+      },
+      "RevenueReportResponse": {
+        "properties": {
+          "byPaymentMethod": {
+            "items": {
+              "$ref": "#/components/schemas/PaymentRevenueResponse"
+            },
+            "type": "array"
+          },
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/RevenueDayResponse"
+            },
+            "type": "array"
+          },
+          "endUtcExclusive": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "firstDate": {
+            "format": "date",
+            "type": "string"
+          },
+          "lastDateInclusive": {
+            "format": "date",
+            "type": "string"
+          },
+          "orderCount": {
+            "format": "int32",
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ]
+          },
+          "revenue": {
+            "format": "double",
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ]
+          },
+          "startUtc": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "timeZoneId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "firstDate",
+          "lastDateInclusive",
+          "timeZoneId",
+          "startUtc",
+          "endUtcExclusive",
+          "revenue",
+          "orderCount",
+          "daily",
+          "byPaymentMethod"
         ],
         "type": "object"
       },
@@ -4086,6 +4586,43 @@
         ]
       }
     },
+    "/api/v1/delivery-staff/options": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeliveryStaffResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
     "/api/v1/discounts/pending": {
       "get": {
         "parameters": [
@@ -5431,6 +5968,98 @@
         ]
       }
     },
+    "/api/v1/operations/orders": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OperationalOrderResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
+    "/api/v1/operations/orders/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsOrderDetailResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
     "/api/v1/orders": {
       "get": {
         "responses": {
@@ -5953,6 +6582,43 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
+    "/api/v1/pos/tables": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PosTableResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
           }
         },
         "security": [
@@ -6694,6 +7360,275 @@
               }
             },
             "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
+    "/api/v1/reports/best-sellers": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeZone",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int32",
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BestSellerReportResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
+    "/api/v1/reports/channels": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeZone",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelReportResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
+    "/api/v1/reports/low-stock": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LowStockReportRowResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
+    "/api/v1/reports/revenue": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeZone",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevenueReportResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
           }
         },
         "security": [
