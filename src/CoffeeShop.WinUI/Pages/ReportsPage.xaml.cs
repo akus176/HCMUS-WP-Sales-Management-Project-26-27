@@ -1,5 +1,5 @@
-using CoffeeShop.WinUI.ViewModels;
 using CoffeeShop.WinUI.Services;
+using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;

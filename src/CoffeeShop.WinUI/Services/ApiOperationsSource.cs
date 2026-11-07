@@ -1,7 +1,6 @@
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
-using CoffeeShop.Domain.Sales;
 
 namespace CoffeeShop.WinUI.Services;
 

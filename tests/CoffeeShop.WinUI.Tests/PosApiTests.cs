@@ -36,7 +36,8 @@ public sealed class PosApiTests
             };
             if (response is OrderResponse order) orderId = order.Id;
             return new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(response) };
-        })) { BaseAddress = new Uri("https://example.test/api/v1/") };
+        }))
+        { BaseAddress = new Uri("https://example.test/api/v1/") };
         using var services = new ServiceCollection().BuildServiceProvider();
         var actor = new PosOperatorSession(() => session.CurrentUser);
         var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new CustomerOrderContext(), actor,
