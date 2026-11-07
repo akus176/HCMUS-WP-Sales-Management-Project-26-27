@@ -69,9 +69,9 @@ public sealed class ApiOperationsSource(AuthenticatedApiClient client, StaffSess
     public Task MoveAsync(EntityId id, string target) =>
         client.PostAsync<object, object>($"orders/{id.Value}/{target}", new { });
 
-    public Task RecordPaymentAsync(EntityId orderId, string method, decimal amount, string? reference) =>
+    public Task RecordPaymentAsync(EntityId paymentId, EntityId orderId, string method, decimal amount, string? reference) =>
         client.PostAsync<RecordPaymentRequest, PaymentResponse>($"orders/{orderId.Value}/payments",
-            new(Guid.NewGuid(), method, amount, Reference: reference));
+            new(paymentId.Value, method, amount, Reference: reference));
 
     public Task CancelAsync(EntityId id, string reason) =>
         client.PostAsync<CancelOrderRequest, System.Text.Json.JsonElement>($"orders/{id.Value}/cancel", new(reason));

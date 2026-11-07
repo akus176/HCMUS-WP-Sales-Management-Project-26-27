@@ -202,12 +202,12 @@ public sealed partial class OperationsPage : Page
     }
     private void OnDeliveryStaffChanged(object sender, SelectionChangedEventArgs args)
     {
-        if (!rendering) AssignButton.IsEnabled = model.SelectedOrder?.CanAssignDelivery == true && DeliveryStaffBox.SelectedItem is DeliveryStaffOption && model.HasOperator && !model.IsBusy;
+        if (!rendering) AssignButton.IsEnabled = model.SelectedOrder?.CanAssignDelivery == true && DeliveryStaffBox.SelectedItem is DeliveryStaffOption && model.CanMutate && model.HasOperator;
     }
     private void OnDiscountChanged(object sender, SelectionChangedEventArgs args)
     {
         if (rendering) return;
-        var enabled = DiscountList.SelectedItem is ServiceBoardDiscount && model.HasOperator && !model.IsBusy;
+        var enabled = DiscountList.SelectedItem is ServiceBoardDiscount && model.CanMutate && model.HasOperator;
         ApproveButton.IsEnabled = RejectButton.IsEnabled = enabled;
     }
     private async void OnPrepare(object sender, RoutedEventArgs args) => await model.StartPreparingAsync();
@@ -257,7 +257,7 @@ public sealed partial class OperationsPage : Page
         var active = model.Orders.Where(order => order.Status is "confirmed" or "preparing" or "ready").ToArray();
         var cards = active.Select(order => new ServiceBoardCard(order,
             model.OrderDetails.GetValueOrDefault(order.Id), order.Id == model.SelectedOrderId,
-            model.HasOperator && !model.IsBusy && (order.Status == "ready" && order.OutstandingBalance > 0
+            model.HasOperator && model.CanMutate && (order.Status == "ready" && order.OutstandingBalance > 0
                 ? model.CanRecordPayments : model.CanMoveOrder(order.Id, order.Status switch
                 { "confirmed" => "preparing", "preparing" => "ready", "ready" => "completed", _ => "" })))).ToArray();
         var selected = model.SelectedOrder;
@@ -270,7 +270,7 @@ public sealed partial class OperationsPage : Page
         OperatorHint.Visibility = Visibility.Collapsed;
         if (!ReferenceEquals(OperatorBox.ItemsSource, model.Staff)) OperatorBox.ItemsSource = model.Staff;
         OperatorBox.SelectedItem = model.Staff.FirstOrDefault(staff => staff.Id == model.Operator?.Id);
-        foreach (var list in new[] { ConfirmedList, PreparingList, ReadyList }) list.CanDragItems = list != ReadyList && model.CanFulfill && model.HasOperator && !model.IsBusy;
+        foreach (var list in new[] { ConfirmedList, PreparingList, ReadyList }) list.CanDragItems = list != ReadyList && model.CanFulfill && model.HasOperator && model.CanMutate;
         Status.Apply(model.Feedback);
         if (model.Error is null && (model.Message.StartsWith("Choose an order") || model.Message.StartsWith("Load operational"))) Status.IsOpen = false;
         SummaryText.Text = active.Length == 0 ? "No active service work." :
@@ -337,16 +337,16 @@ public sealed partial class OperationsPage : Page
         ReadyButton.Visibility = selected?.CanMarkReady == true && model.CanFulfill ? Visibility.Visible : Visibility.Collapsed;
         CompleteButton.Visibility = selected?.CanComplete == true && model.CanComplete ? Visibility.Visible : Visibility.Collapsed;
         ReviewPaymentButton.Visibility = selected?.Status == "ready" && selected.OutstandingBalance > 0 && model.CanRecordPayments ? Visibility.Visible : Visibility.Collapsed;
-        ReviewPaymentButton.IsEnabled = model.CanRecordPayments && model.HasOperator && !model.IsBusy;
-        PrepareButton.IsEnabled = selected?.CanStartPreparing == true && model.CanFulfill && model.HasOperator && !model.IsBusy;
-        ReadyButton.IsEnabled = selected?.CanMarkReady == true && model.CanFulfill && model.HasOperator && !model.IsBusy;
-        CompleteButton.IsEnabled = selected?.CanComplete == true && model.CanComplete && model.HasOperator && !model.IsBusy;
-        PayButton.IsEnabled = selected?.CanRecordPayment == true && selected.OutstandingBalance > 0 && model.CanRecordPayments && model.HasOperator && !model.IsBusy;
-        CancelButton.IsEnabled = selected?.CanCancel == true && model.CanCancelOrders && model.HasOperator && !model.IsBusy;
-        ApproveButton.IsEnabled = RejectButton.IsEnabled = DiscountList.SelectedItem is ServiceBoardDiscount && model.CanApproveDiscounts && model.HasOperator && !model.IsBusy;
-        AssignButton.IsEnabled = selected?.CanAssignDelivery == true && DeliveryStaffBox.SelectedItem is DeliveryStaffOption && model.CanAssignDelivery && model.HasOperator && !model.IsBusy;
-        OutButton.IsEnabled = selected?.CanStartDelivery == true && model.CanUpdateDelivery && model.HasOperator && !model.IsBusy;
-        DeliveredButton.IsEnabled = FailButton.IsEnabled = selected?.CanFinishDelivery == true && model.CanUpdateDelivery && model.HasOperator && !model.IsBusy;
+        ReviewPaymentButton.IsEnabled = model.CanRecordPayments && model.HasOperator && model.CanMutate;
+        PrepareButton.IsEnabled = selected?.CanStartPreparing == true && model.CanFulfill && model.HasOperator && model.CanMutate;
+        ReadyButton.IsEnabled = selected?.CanMarkReady == true && model.CanFulfill && model.HasOperator && model.CanMutate;
+        CompleteButton.IsEnabled = selected?.CanComplete == true && model.CanComplete && model.HasOperator && model.CanMutate;
+        PayButton.IsEnabled = selected?.CanRecordPayment == true && selected.OutstandingBalance > 0 && model.CanRecordPayments && model.HasOperator && model.CanMutate;
+        CancelButton.IsEnabled = selected?.CanCancel == true && model.CanCancelOrders && model.HasOperator && model.CanMutate;
+        ApproveButton.IsEnabled = RejectButton.IsEnabled = DiscountList.SelectedItem is ServiceBoardDiscount && model.CanApproveDiscounts && model.HasOperator && model.CanMutate;
+        AssignButton.IsEnabled = selected?.CanAssignDelivery == true && DeliveryStaffBox.SelectedItem is DeliveryStaffOption && model.CanAssignDelivery && model.HasOperator && model.CanMutate;
+        OutButton.IsEnabled = selected?.CanStartDelivery == true && model.CanUpdateDelivery && model.HasOperator && model.CanMutate;
+        DeliveredButton.IsEnabled = FailButton.IsEnabled = selected?.CanFinishDelivery == true && model.CanUpdateDelivery && model.HasOperator && model.CanMutate;
         DeliveryStaffBox.Visibility = AssignButton.Visibility = selected?.CanAssignDelivery == true && model.CanAssignDelivery ? Visibility.Visible : Visibility.Collapsed;
         OutButton.Visibility = selected?.CanStartDelivery == true && model.CanUpdateDelivery ? Visibility.Visible : Visibility.Collapsed;
         DeliveredButton.Visibility = DeliveryFailureForm.Visibility = selected?.CanFinishDelivery == true && model.CanUpdateDelivery ? Visibility.Visible : Visibility.Collapsed;

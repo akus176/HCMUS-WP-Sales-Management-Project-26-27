@@ -11,6 +11,7 @@ namespace CoffeeShop.WinUI.ViewModels;
 public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperatorSession session,
     ApiOperationsSource? api = null) : INotifyPropertyChanged
 {
+    private EntityId? pendingPaymentId;
     public event PropertyChangedEventHandler? PropertyChanged;
     public IReadOnlyList<OperationalOrder> Orders { get; private set; } = [];
     public IReadOnlyList<OperationalTable> Tables { get; private set; } = [];
@@ -27,6 +28,8 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public OperationalOrder? SelectedOrder => Orders.SingleOrDefault(order => order.Id == SelectedOrderId);
     public PosOrderDetail? SelectedDetail => SelectedOrderId is { } id && OrderDetails.TryGetValue(id, out var detail) ? detail : null;
     public bool IsBusy { get; private set; }
+    public bool RequiresReload { get; private set; }
+    public bool CanMutate => !IsBusy && !RequiresReload;
     public Error? Error { get; private set; }
     public string Message { get; private set; } = "Load operational work to see the current queue, tables and fulfillment controls.";
     public bool IsEmpty => !IsBusy && Error is null && Orders.Count == 0 && Tables.Count == 0;
@@ -59,6 +62,8 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
             Message = Orders.Count == 0 && Tables.Count == 0
                 ? "No operational records yet. Create and confirm an order from Point of Sale to begin."
                 : "Choose an order. Controls are enabled only for your permissions and its current lifecycle state.";
+            RequiresReload = false;
+            pendingPaymentId = null;
             return;
         }
         var queries = provider.GetRequiredService<FulfillmentOperationsQueryHandler>();
@@ -101,12 +106,15 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
 
     public Task RecordPaymentAsync(string method, decimal amount, string reference) => RunAsync(async provider =>
     {
+        if (api is not null && RequiresReload) { ShowValidation("Reload this board before retrying a payment."); return; }
         if (SelectedOrder is null) return;
         if (api is not null)
         {
-            await api.RecordPaymentAsync(SelectedOrder.Id, method, amount,
+            pendingPaymentId ??= EntityId.New();
+            await api.RecordPaymentAsync(pendingPaymentId, SelectedOrder.Id, method, amount,
                 string.IsNullOrWhiteSpace(reference) ? null : reference);
             await RefreshAsync(provider, "Payment recorded. Reloaded the latest order balance.");
+            pendingPaymentId = null;
             return;
         }
         var result = await provider.GetRequiredService<PaymentCommandHandler>().RecordAsync(
@@ -116,6 +124,7 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
 
     public Task CancelAsync(string reason) => RunAsync(async provider =>
     {
+        if (api is not null && RequiresReload) { ShowValidation("Reload this board before retrying an order change."); return; }
         if (SelectedOrder is null) return;
         if (api is not null)
         {
@@ -129,6 +138,7 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
 
     public Task DecideDiscountAsync(EntityId discountId, bool approve) => RunAsync(async provider =>
     {
+        if (api is not null && RequiresReload) { ShowValidation("Reload this board before retrying an order change."); return; }
         if (api is not null)
         {
             await api.DecideDiscountAsync(discountId, approve);
@@ -142,6 +152,7 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
 
     public Task AssignDeliveryAsync(EntityId staffId) => RunAsync(async provider =>
     {
+        if (api is not null && RequiresReload) { ShowValidation("Reload this board before retrying an order change."); return; }
         if (SelectedOrder is null || session.Id is null) return;
         if (api is not null)
         {
@@ -171,7 +182,7 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         _ => false
     };
 
-    public bool CanMoveOrder(EntityId id, string target) => !IsBusy && HasOperator
+    public bool CanMoveOrder(EntityId id, string target) => CanMutate && HasOperator
         && (target == OrderStatus.Completed ? CanComplete : CanFulfill)
         && Orders.FirstOrDefault(order => order.Id == id) is { } order && IsMoveAllowed(order, target);
 
@@ -223,6 +234,7 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
 
     private Task UpdateDeliveryApiAsync(Func<ApiOperationsSource, EntityId, Task> action, string success) => RunAsync(async provider =>
     {
+        if (RequiresReload) { ShowValidation("Reload this board before retrying a delivery change."); return; }
         if (SelectedOrder is null) return;
         await action(api!, SelectedOrder.Id);
         await RefreshAsync(provider, success);
@@ -238,6 +250,8 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
             DeliveryStaff = snapshot.DeliveryStaff;
             Staff = snapshot.Staff;
             await LoadDetailsAsync(provider);
+            RequiresReload = false;
+            pendingPaymentId = null;
             Message = success;
             return;
         }
@@ -288,6 +302,10 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         try { using var scope = scopes.CreateScope(); await action(scope.ServiceProvider); }
         catch (ApiException exception)
         {
+            if (exception.Kind is ApiErrorKind.Conflict or ApiErrorKind.Network or ApiErrorKind.Server or ApiErrorKind.Unexpected)
+                RequiresReload = true;
+            else if (exception.Kind is ApiErrorKind.Validation or ApiErrorKind.Unauthorized or ApiErrorKind.Forbidden or ApiErrorKind.NotFound)
+                pendingPaymentId = null;
             Error = exception.Kind switch
             {
                 ApiErrorKind.Validation => Error.Validation("operations.api_validation", exception.Detail),
@@ -302,6 +320,7 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         }
         catch (Exception)
         {
+            if (api is not null) RequiresReload = true;
             Error = Error.Unexpected(api is null ? "operations.database_error" : "operations.api_unavailable",
                 "Could not finish the operation. Reload before retrying because a write may have succeeded.");
             Message = Error.Description;
