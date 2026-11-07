@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { PreparationScreen } from '../../src/barista/PreparationScreen';
 
 import { PermissionBoundary } from '../../src/shell/PermissionBoundary';
 import { useRouteAccess } from '../../src/shell/useRouteAccess';
@@ -25,7 +26,9 @@ export default function ModuleScreen() {
       />
       <PermissionBoundary moduleId={moduleId} {...access}>
         {(user) =>
-          module?.id === 'approvals' ? (
+          module?.id === 'barista' ? (
+            <PreparationScreen />
+          ) : module?.id === 'approvals' ? (
             <DiscountApprovals user={user} />
           ) : (
             <>

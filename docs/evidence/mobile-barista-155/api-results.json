@@ -1,0 +1,158 @@
+{
+  "suite": "CoffeeShop.Api.Tests",
+  "source": "Executed local PostgreSQL API test run",
+  "failed": 0,
+  "passed": 37,
+  "total": 37,
+  "results": [
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.ContractSerializationTests.CreateCategoryRequest_ReadsWebJson"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.MobileP0Queries_UsePagesFiltersPermissionsAndEmptyResults"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.HostTests.MissingSigningConfigurationFailsWithoutEchoingValues"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.RefreshRotation_ReuseRevokesFamilyButNotIndependentSession"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.HostTests.MobileP0OpenApiMatchesPublishedResponsesAndPrivacyBoundary"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.ContractSerializationTests.PageResponse_ExposesPagingMetadata"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.HostTests.CustomerAndLoyaltyOpenApi_ExposesProtectedRoutesAndContracts"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.LocalProvisioning_PersistsHashedPasswordAndExplicitRoleAssignments"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ReceiptPosting_ChangesSharedBalanceAndAddsOneAuditedMovement"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.Tokens_HaveMinimalClaimsExpiryAndOnlyHashesInDatabase"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentRefresh_OnlyOneSucceedsAndReuseInvalidatesSuccessor"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.OptionalCustomerOrders_ChangeLoyaltyBalanceThroughEarnAndRedemption"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.InventoryAdjustment_EnforcesPermissionValidationAndIdempotency"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.HostTests.OpenApiOnlyDescribesMappedBusinessRoutes"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.Preparation_RejectsUnauthorizedAndStaleTransitionsWithoutChangingNewerState"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.CatalogRecipe_IsSharedAcrossSessionsAndRejectsInvalidChanges"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.Logout_EnforcesOwnershipAndAccountWideRevocation"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.LoginFailures_AreGenericAndAuditedWithoutCredentials"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.HostTests.OpenApiDescribesBearerOnProtectedRoutesOnly"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.MigrationReadinessHttpTests.ReadinessRequiresAppliedMigrations"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.ContractSerializationTests.PreparationTicket_ExposesOnlyOperationalFields"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.ContractSerializationTests.CourierListOmitsPrivateDetails_AndMutationRequestsCannotSupplyActor"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.ContractSerializationTests.CategoryResponse_UsesStableCamelCaseFields"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.HealthTests.HealthEndpointIsAvailable"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.SalesWorkflow_PersistsDraftPaymentAndPreparationAcrossRoles"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.ContractSerializationTests.DiscountAndInventoryContracts_PreserveMoneyAndQuantityAsDecimals"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentStockAdjustmentRetries_CommitOnceAndRejectCrossIngredientReuse"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.AccountAndRoleChanges_AreAuditedAndTakeEffectOnNextRequest"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.HostTests.ReadinessChecksDatabaseRatherThanOnlyProcess"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.CourierAssignment_EnforcesOwnershipAndSingleDeliveryTransition"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.InvalidAndExpiredTokens_AreRejected"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.CustomerRoutes_ManageProfilesAndAddressesWithPermissionAndPersistence"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.PasswordChange_RevokesAllRefreshFamilies"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.CatalogHttpTests.CategoryWrites_RequireAuthenticationAndPermission"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.CatalogHttpTests.CategoryRoutes_MapSuccessValidationNotFoundAndConflict"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.HostTests.OpenApiIsIndependentOfRequestOrigin"
+    },
+    {
+      "outcome": "Passed",
+      "name": "CoffeeShop.Api.Tests.StaffIdentityHttpTests.SeedAndLogin_CoverSixRolesAndMultiRolePermissions"
+    }
+  ],
+  "skipped": 0
+}
