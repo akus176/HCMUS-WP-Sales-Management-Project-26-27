@@ -20,13 +20,18 @@ public sealed partial class MainWindow : Window
     private ServiceConsoleLayoutMode? layout;
     private bool selecting;
     private bool connecting;
+    private bool checkingSession;
+    private bool endingSession;
     private readonly PosOperatorSession staffSession;
+    private readonly StaffSessionManager sessionManager;
     private readonly bool verifyShell = Environment.GetCommandLineArgs().Contains("--verify-shell");
 
     public MainWindow()
     {
         InitializeComponent();
         staffSession = App.Services.GetRequiredService<PosOperatorSession>();
+        sessionManager = App.Services.GetRequiredService<StaffSessionManager>();
+        sessionManager.SessionExpired += OnSessionExpired;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleDragRegion);
         AppWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
@@ -36,9 +41,17 @@ public sealed partial class MainWindow : Window
         AppWindow.ResizeClient(new Windows.Graphics.SizeInt32(1440, 900));
         InitializeNavigation();
         UpdateClock();
-        clock.Tick += (_, _) => UpdateClock();
+        clock.Tick += async (_, _) =>
+        {
+            UpdateClock();
+            await CheckSessionAsync();
+        };
         clock.Start();
-        Closed += (_, _) => clock.Stop();
+        Closed += (_, _) =>
+        {
+            clock.Stop();
+            sessionManager.SessionExpired -= OnSessionExpired;
+        };
     }
     private static object Resource(string key) => Microsoft.UI.Xaml.Application.Current.Resources[key];
     private static string IconName(string tag) => tag switch
@@ -159,8 +172,32 @@ public sealed partial class MainWindow : Window
     }
     private async void OnSignOut(object sender, RoutedEventArgs e)
     {
-        try { await App.Services.GetRequiredService<StaffSessionManager>().LogoutAsync(); }
+        if (endingSession) return;
+        endingSession = true;
+        try { await sessionManager.LogoutAsync(); }
         catch (ApiException) { /* Local credentials are cleared even when the API is offline. */ }
+        ReturnToSignIn();
+    }
+    private async Task CheckSessionAsync()
+    {
+        if (verifyShell || checkingSession || endingSession) return;
+        checkingSession = true;
+        try { await sessionManager.GetValidAccessTokenAsync(); }
+        catch (ApiException) { /* A temporary network failure is not session revocation. */ }
+        catch (OperationCanceledException) { /* A timeout is not session revocation. */ }
+        finally { checkingSession = false; }
+    }
+    private void OnSessionExpired() => DispatcherQueue.TryEnqueue(() =>
+    {
+        if (endingSession) return;
+        endingSession = true;
+        ReturnToSignIn();
+    });
+    private void ReturnToSignIn()
+    {
+        ContentFrame.Content = null;
+        pages.Clear();
+        staffSession.Operator = null;
         ((App)Microsoft.UI.Xaml.Application.Current).ShowLoginWindow();
         Close();
     }

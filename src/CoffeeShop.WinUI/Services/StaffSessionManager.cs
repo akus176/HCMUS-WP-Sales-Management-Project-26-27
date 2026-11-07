@@ -27,6 +27,7 @@ public sealed class StaffSessionManager
 
     public bool IsAuthenticated => tokens is not null;
     public StaffSession? CurrentUser => tokens?.User;
+    public event Action? SessionExpired;
 
     public async Task<StaffSession> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
     {
@@ -114,8 +115,7 @@ public sealed class StaffSessionManager
         await gate.WaitAsync(cancellationToken);
         try
         {
-            tokens = null;
-            await tokenStore.ClearAsync(cancellationToken);
+            await ExpireSessionAsync(cancellationToken);
         }
         finally { gate.Release(); }
     }
@@ -131,9 +131,19 @@ public sealed class StaffSessionManager
         }
         catch (ApiException exception) when (exception.Kind == ApiErrorKind.Unauthorized)
         {
-            tokens = null;
-            await tokenStore.ClearAsync(cancellationToken);
+            await ExpireSessionAsync(cancellationToken);
             return null;
+        }
+    }
+
+    private async Task ExpireSessionAsync(CancellationToken cancellationToken)
+    {
+        var wasAuthenticated = tokens is not null;
+        tokens = null;
+        try { await tokenStore.ClearAsync(cancellationToken); }
+        finally
+        {
+            if (wasAuthenticated) SessionExpired?.Invoke();
         }
     }
 }

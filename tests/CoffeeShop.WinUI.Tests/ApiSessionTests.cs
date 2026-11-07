@@ -163,16 +163,44 @@ public sealed class ApiSessionTests
         };
         var store = new MemoryRefreshTokenStore();
         var session = new StaffSessionManager(identity, store);
+        var expirations = 0;
+        session.SessionExpired += () => expirations++;
         await session.LoginAsync("barista", "test-password");
 
         Assert.Null(await session.RefreshAfterUnauthorizedAsync("access-1"));
         Assert.Null(store.Value);
         Assert.False(session.IsAuthenticated);
+        Assert.Equal(1, expirations);
+
+        await session.ClearLocalSessionAsync();
+        Assert.Equal(1, expirations);
 
         await session.LoginAsync("barista", "test-password");
         await session.LogoutAsync();
         Assert.Null(store.Value);
         Assert.False(session.IsAuthenticated);
+        Assert.Equal(1, expirations);
+    }
+
+    [Fact]
+    public async Task ExpiredAccessAndRejectedRefresh_NotifyShellAndClearSession()
+    {
+        var time = new ManualTimeProvider(DateTimeOffset.Parse("2026-11-05T00:00:00Z"));
+        var identity = new FakeIdentityApi(Token("access", "refresh", time.GetUtcNow().AddMinutes(2)))
+        {
+            RefreshError = new ApiException(ApiErrorKind.Unauthorized, HttpStatusCode.Unauthorized, "Invalid session.", "Invalid session."),
+        };
+        var store = new MemoryRefreshTokenStore();
+        var session = new StaffSessionManager(identity, store, time);
+        var expirations = 0;
+        session.SessionExpired += () => expirations++;
+        await session.LoginAsync("barista", "test-password");
+
+        time.Advance(TimeSpan.FromMinutes(2));
+        Assert.Null(await session.GetValidAccessTokenAsync());
+        Assert.False(session.IsAuthenticated);
+        Assert.Null(store.Value);
+        Assert.Equal(1, expirations);
     }
 
     [Fact]
