@@ -55,3 +55,13 @@ No password, access token, refresh token, signing key, or database password is i
 ### Remaining manual acceptance
 
 The live API authentication check does not prove the WinUI sign-in form. The app is open at the sign-in screen, but a person must submit the temporary test credentials locally. After that, verify and capture the DPAPI refresh-token file, app restart/refresh, expiry recovery, and sign-out cleanup. These checks are pending. Keep PR #176 in draft and do not request review until this app-level evidence is complete.
+
+## Windows follow-up — 2026-11-07
+
+On the PR branch, `dotnet test tests/CoffeeShop.WinUI.Tests/CoffeeShop.WinUI.Tests.csproj --configuration Release -m:1` passed 126 tests with no failures or skips. `dotnet build src/CoffeeShop.WinUI/CoffeeShop.WinUI.csproj --configuration Debug --verbosity minimal -m:1` succeeded with no warnings or errors.
+
+A uniquely named Docker Compose project was started with a fresh PostgreSQL volume and generated local-only settings. Both services reported healthy, and the API readiness endpoint returned HTTP 200 from Windows. A disposable Manager was provisioned, and the WinUI sign-in window opened against that isolated stack. The existing user application settings and unrelated database were not changed.
+
+The first container startup failed because Windows checked out the Bash startup scripts with CRLF endings. The repository now specifies LF for shell scripts; after normalizing those scripts, rebuilding and restarting the isolated stack succeeded. This verifies the local recovery, not a fresh checkout on another machine.
+
+The computer-use native connection was unavailable for UI inspection, and the sign-in form requires a human handoff. Form sign-in, protected token persistence, restart, expiry and sign-out remain pending until observed; prior API-only evidence must not be treated as app-level proof.
