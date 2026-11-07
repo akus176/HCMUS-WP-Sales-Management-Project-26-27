@@ -14,6 +14,7 @@ public static class StaffIdentityEndpoints
     {
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddScoped<StaffIdentityService>();
+        builder.Services.AddScoped<StaffAdministrationService>();
         var key = builder.Configuration["Jwt:SigningKey"];
         var issuer = builder.Configuration["Jwt:Issuer"];
         var audience = builder.Configuration["Jwt:Audience"];
@@ -94,6 +95,41 @@ public static class StaffIdentityEndpoints
             await service.LogoutAsync(user.GetRequiredId(), null, true, ct);
             return Results.NoContent();
         }).RequireAuthorization().Produces(204).ProducesProblem(401);
+
+        var users = api.MapGroup("/users").RequireAuthorization("users.manage");
+        users.MapGet("/", async (StaffAdministrationService service, HttpContext http, string? search,
+            bool? isActive, int? limit, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            return Results.Ok(await service.SearchAccountsAsync(search, isActive, limit, ct));
+        })
+            .Produces<StaffAccountResponse[]>().ProducesProblem(401).ProducesProblem(403);
+        users.MapGet("/{id:guid}", async (Guid id, StaffAdministrationService service,
+            HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            if (id == Guid.Empty) return Results.Problem(statusCode: 400, title: "Invalid account identifier");
+            var account = await service.GetAccountAsync(id, ct);
+            return account is null ? Results.Problem(statusCode: 404, title: "Staff account not found") : Results.Ok(account);
+        }).Produces<StaffAccountResponse>().ProducesProblem(400).ProducesProblem(401).ProducesProblem(403).ProducesProblem(404);
+        users.MapPost("/{id:guid}/deactivate", async (Guid id, DeactivateStaffRequest request,
+            StaffAdministrationService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            var result = await service.DeactivateAsync(id, request.Confirm,
+                http.Connection.RemoteIpAddress?.ToString(), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : ApiErrorResults.From(result.Error!);
+        }).Produces<StaffAccountResponse>().ProducesProblem(400).ProducesProblem(401).ProducesProblem(403)
+            .ProducesProblem(404).ProducesProblem(409);
+
+        var securityEvents = api.MapGroup("/security-events").RequireAuthorization("users.manage");
+        securityEvents.MapGet("/", async (StaffAdministrationService service, HttpContext http,
+            string? eventType, Guid? userId, int? limit, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            return Results.Ok(await service.GetSecurityEventsAsync(eventType, userId, limit, ct));
+        })
+            .Produces<SecurityEventResponse[]>().ProducesProblem(401).ProducesProblem(403);
     }
 
     private static IResult Denied() => Results.Problem(statusCode: 401, title: "Authentication failed", detail: "Invalid credentials or session.");

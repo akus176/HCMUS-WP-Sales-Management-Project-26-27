@@ -67,4 +67,13 @@ public class User
     public IReadOnlyCollection<UserRole> UserRoles => _userRoles.AsReadOnly();
 
     public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
+
+    public void Deactivate(UtcTimestamp changedAt)
+    {
+        ArgumentNullException.ThrowIfNull(changedAt);
+        if (!IsActive) throw new InvalidOperationException("The staff account is already inactive.");
+        IsActive = false;
+        DeactivatedAt = changedAt;
+        UpdatedAt = changedAt;
+    }
 }

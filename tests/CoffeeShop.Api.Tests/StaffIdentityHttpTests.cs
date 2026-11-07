@@ -308,6 +308,121 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task StaffAdministration_RequiresPermissionAndNeverReturnsCredentialsOrMetadata()
+    {
+        using var client = host!.CreateClient();
+        var cashier = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new("Bearer", cashier.AccessToken);
+        using var forbiddenUsers = await client.GetAsync("/api/v1/users?search=Cashier");
+        using var forbiddenEvents = await client.GetAsync("/api/v1/security-events");
+        Assert.Equal(HttpStatusCode.Forbidden, forbiddenUsers.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, forbiddenEvents.StatusCode);
+        Assert.Equal("application/problem+json", forbiddenUsers.Content.Headers.ContentType?.MediaType);
+
+        var admin = await LoginAsync(client, "Admin");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", admin.AccessToken);
+        using var users = await client.GetAsync("/api/v1/users?search=Cashier&limit=5");
+        Assert.Equal(HttpStatusCode.OK, users.StatusCode);
+        var accountJson = await users.Content.ReadAsStringAsync();
+        Assert.Contains("Cashier", accountJson);
+        Assert.DoesNotContain(Password, accountJson);
+        Assert.DoesNotContain(admin.AccessToken, accountJson);
+        Assert.DoesNotContain(admin.RefreshToken, accountJson);
+        var accounts = await users.Content.ReadFromJsonAsync<StaffAccountResponse[]>();
+        var account = Assert.Single(accounts!);
+        using var detail = await client.GetAsync($"/api/v1/users/{account.Id}");
+        Assert.Equal(HttpStatusCode.OK, detail.StatusCode);
+        var detailJson = await detail.Content.ReadAsStringAsync();
+        Assert.Contains(account.Username, detailJson);
+        Assert.DoesNotContain(Password, detailJson);
+        Assert.DoesNotContain(admin.AccessToken, detailJson);
+        Assert.DoesNotContain(admin.RefreshToken, detailJson);
+
+        await using (var db = Database())
+        {
+            db.SecurityAuditEvents.Add(new SecurityAuditEvent(EntityId.New(), "safe_test_event",
+                new UtcTimestamp(DateTimeOffset.UtcNow), "success", null, null,
+                System.Text.Json.JsonSerializer.Serialize(new { token = admin.AccessToken, password = Password })));
+            await db.SaveChangesAsync();
+        }
+        using var events = await client.GetAsync("/api/v1/security-events?eventType=safe_test_event");
+        Assert.Equal(HttpStatusCode.OK, events.StatusCode);
+        var eventJson = await events.Content.ReadAsStringAsync();
+        Assert.Contains("safe_test_event", eventJson);
+        Assert.DoesNotContain("metadata", eventJson, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(Password, eventJson);
+        Assert.DoesNotContain(admin.AccessToken, eventJson);
+        Assert.DoesNotContain(admin.RefreshToken, eventJson);
+    }
+
+    [PostgresFact]
+    public async Task StaffAdministration_ProtectsFinalAdministratorWithoutChangingState()
+    {
+        using var client = host!.CreateClient();
+        var admin = await LoginAsync(client, "Admin");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", admin.AccessToken);
+        using var response = await client.PostAsJsonAsync($"/api/v1/users/{admin.User.Id}/deactivate",
+            new DeactivateStaffRequest(true));
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+
+        await using var db = Database();
+        var user = await db.Users.SingleAsync(item => item.Id == new EntityId(admin.User.Id));
+        Assert.True(user.IsActive);
+        Assert.Null(user.DeactivatedAt);
+        Assert.False(await db.SecurityAuditEvents.AnyAsync(item => item.UserId == user.Id &&
+            item.EventType == "account_deactivated"));
+        using var refresh = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(admin.RefreshToken));
+        Assert.Equal(HttpStatusCode.OK, refresh.StatusCode);
+    }
+
+    [PostgresFact]
+    public async Task StaffAdministration_DeactivationRequiresConfirmationAndRevokesEverySession()
+    {
+        using var client = host!.CreateClient();
+        var target = await LoginAsync(client, "Manager");
+        var admin = await LoginAsync(client, "Admin");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", admin.AccessToken);
+        using var unconfirmed = await client.PostAsJsonAsync($"/api/v1/users/{target.User.Id}/deactivate",
+            new DeactivateStaffRequest(false));
+        Assert.Equal(HttpStatusCode.BadRequest, unconfirmed.StatusCode);
+        await using (var db = Database())
+        {
+            var unchanged = await db.Users.SingleAsync(item => item.Id == new EntityId(target.User.Id));
+            Assert.True(unchanged.IsActive);
+            Assert.Null(unchanged.DeactivatedAt);
+        }
+
+        using var deactivated = await client.PostAsJsonAsync($"/api/v1/users/{target.User.Id}/deactivate",
+            new DeactivateStaffRequest(true));
+        Assert.Equal(HttpStatusCode.OK, deactivated.StatusCode);
+        var response = await deactivated.Content.ReadFromJsonAsync<StaffAccountResponse>();
+        Assert.NotNull(response);
+        Assert.False(response.IsActive);
+        var serializedResponse = System.Text.Json.JsonSerializer.Serialize(response);
+        Assert.DoesNotContain("password", serializedResponse, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(target.AccessToken, serializedResponse);
+        Assert.DoesNotContain(target.RefreshToken, serializedResponse);
+
+        await using (var db = Database())
+        {
+            var user = await db.Users.SingleAsync(item => item.Id == new EntityId(target.User.Id));
+            Assert.False(user.IsActive);
+            Assert.NotNull(user.DeactivatedAt);
+            Assert.All(await db.RefreshTokens.Where(item => item.UserId == user.Id).ToArrayAsync(),
+                token => Assert.NotNull(token.RevokedAt));
+            Assert.True(await db.SecurityAuditEvents.AnyAsync(item => item.UserId == user.Id &&
+                item.EventType == "account_deactivated"));
+        }
+
+        client.DefaultRequestHeaders.Authorization = new("Bearer", target.AccessToken);
+        using var me = await client.GetAsync("/api/v1/auth/me");
+        using var refresh = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(target.RefreshToken));
+        Assert.Equal(HttpStatusCode.Unauthorized, me.StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, refresh.StatusCode);
+    }
+
+    [PostgresFact]
     public async Task PasswordChange_RevokesAllRefreshFamilies()
     {
         using var client = host!.CreateClient();
