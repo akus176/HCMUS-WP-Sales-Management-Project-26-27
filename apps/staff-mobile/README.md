@@ -285,4 +285,4 @@ access, persistent business storage or live-event subscription.
 
 Run `npm run check` for automated coverage. The opt-in Android flow is
 `npm run test:e2e:barista`; its disposable API fixture, exact setup, executed
-results and remaining device gate are in [#155 evidence](../../docs/evidence/mobile-barista-155/README.md).
+results and remaining emulator acceptance gate are in [#155 evidence](../../docs/evidence/mobile-barista-155/README.md).

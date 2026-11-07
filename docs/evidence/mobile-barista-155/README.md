@@ -73,6 +73,26 @@ The first .NET test attempt encountered an empty ignored runtime configuration
 left by an interrupted build. The clean Release rebuild regenerated it; no source
 or SDK workaround was needed.
 
+### Follow-up verification — 7 November 2026
+
+Merged main `51c85b5`, resolving the module route conflict by retaining both
+Preparation and manager discount approvals. `npm run check` passes TypeScript,
+zero-warning ESLint, formatting and **142/142 tests across 16 suites** (16.159s).
+The forbidden-response regression now leaves subsequent reads stalled and proves
+cached preparation details disappear without waiting for a refetch.
+
+The fixture now uses the actual `initialVariants`/`sizeName` API request fields,
+finds its ticket across every queue page, and supplies the page count to Maestro.
+Its Ready verifier also checks every page. Against a fresh disposable loopback
+API/database, seeded 16 tickets, found a fixture on page 2, advanced it through
+start/ready using a synthetic barista API session, and verified Ready and absence
+from the active queue using a separate manager session. This is **protocol-only**
+fixture verification; no Android workflow acceptance is claimed.
+
+PR #177 already had all five original hosted checks passing. JakeConal is now
+explicitly requested as reviewer; request assignment is not reviewer approval.
+Updated-head CI must be checked separately after the follow-up push.
+
 ## Android gate and reproduction
 
 **Not executed:** real-API Android emulator Confirmed → Preparing → Ready, native
@@ -80,10 +100,14 @@ visual/accessibility checks, and simultaneous WinUI/mobile operation. Per user
 direction, physical-device acceptance is not a gate for this PR. No screenshots
 from another issue or JS-only tests are used as device evidence.
 
-Automatic approval review rejected the combined disposable-account provisioning
-and loopback API startup command, returning only `blocked by policy`. No bypass
-or alternative route to the rejected setup was used. The PR stays draft and
-#155 stays Blocked until the Android acceptance flow can execute.
+The earlier combined setup command was rejected with `blocked by policy`.
+Following the user's request to fix that blocker, explicit foreground migration,
+synthetic staff provisioning and loopback API startup all succeeded on 7 November.
+Automatic approval review then rejected the standalone Metro `npm start` command,
+again returning only `blocked by policy` with no specific reason. No bypass was
+attempted. #155 stays Blocked pending emulator acceptance. PR #177 is currently
+open and ready (it was made ready before this follow-up); that status does not
+represent completed Android acceptance.
 
 For an authorized verification session:
 
@@ -106,6 +130,7 @@ For an authorized verification session:
    $fixture = Join-Path $env:TEMP 'barista-155-fixture.json'
    ./scripts/barista-fixture.ps1 -Action Seed -FixturePath $fixture
    $env:MAESTRO_ORDER_NUMBER = (Get-Content $fixture -Raw | ConvertFrom-Json).orderNumber
+   $env:MAESTRO_QUEUE_PAGE_SKIP = (Get-Content $fixture -Raw | ConvertFrom-Json).queuePageSkip
    $env:MAESTRO_STAFF_USERNAME = '<disposable-barista>'
    # Set MAESTRO_STAFF_PASSWORD privately in this terminal.
    npm run test:e2e:barista
@@ -114,6 +139,8 @@ For an authorized verification session:
 
    Run these commands from `apps/staff-mobile`. Maestro logs can record input;
    use only disposable credentials and never commit raw debug artifacts.
+   Keep the disposable queue stable between seeding and running Maestro so its
+   recorded page count remains valid. Other active fixture tickets are supported.
 4. The Maestro flow signs in, opens the exact fixture ticket, confirms both
    transitions and requires server-confirmed Ready. The separate manager-session
    verifier requires Ready and absence from the active preparation queue. Record
@@ -126,7 +153,7 @@ For an authorized verification session:
    dotnet test tests/CoffeeShop.Api.Tests --configuration Release
    ```
 
-The fixture script and Maestro flow are committed reproduction tooling; they
-have not been run against a device/API in this verification session. Final-video
+The fixture script has passed protocol-only verification against the real API;
+the Maestro flow has not executed. Final-video
 timestamps, enlarged-text phone/tablet checks and named-reviewer approval remain
 pending. Submission statuses are not promoted to Implemented without that evidence.

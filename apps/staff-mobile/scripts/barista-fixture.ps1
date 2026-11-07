@@ -18,23 +18,33 @@ $headers = @{ Authorization = "Bearer $($login.accessToken)" }
 function Send([string]$Path, $Body) {
     Invoke-RestMethod -Method Post -Uri "$base/$Path" -Headers $headers -ContentType 'application/json' -Body ($Body | ConvertTo-Json -Depth 8)
 }
+function Find-QueuePage([string]$OrderId) {
+    $page = 1
+    do {
+        $queue = Invoke-RestMethod -Uri "$base/preparation-tickets?status=confirmed,preparing&page=$page&pageSize=10" -Headers $headers
+        if ($queue.items.orderId -contains $OrderId) { return $page }
+        $page++
+    } while (($page - 1) * 10 -lt $queue.totalCount)
+    return 0
+}
 if ($Action -eq 'Seed') {
     $suffix = [guid]::NewGuid().ToString('N').Substring(0, 8)
     $category = Send 'categories' @{ name = "Barista E2E $suffix"; displayOrder = 0 }
-    $item = Send 'menu-items' @{ categoryId = $category.id; name = "Test latte $suffix"; sizeVariants = @(@{ name = 'Large'; price = 5 }) }
+    $item = Send 'menu-items' @{ categoryId = $category.id; name = "Test latte $suffix"; initialVariants = @(@{ sizeName = 'Large'; price = 5 }) }
     $id = [guid]::NewGuid().ToString()
     $null = Send 'orders' @{
         orderId = $id; channel = 'takeaway'
         lines = @(@{ menuItemId = $item.id; sizeVariantId = $item.sizeVariants[0].id; quantity = 2; addonIds = @() })
     }
     $order = Send "orders/$id/confirm" @{ reviewedTotal = 10 }
-    @{ orderId = $id; orderNumber = $order.orderNumber; itemName = $item.name } | ConvertTo-Json | Set-Content -LiteralPath $FixturePath
-    Write-Output "Confirmed fixture saved to $FixturePath. Set MAESTRO_ORDER_NUMBER to $($order.orderNumber)."
+    $queuePage = Find-QueuePage $id
+    if (!$queuePage) { throw 'Confirmed fixture was not found in the active queue.' }
+    @{ orderId = $id; orderNumber = $order.orderNumber; itemName = $item.name; queuePageSkip = $queuePage - 1 } | ConvertTo-Json | Set-Content -LiteralPath $FixturePath
+    Write-Output "Confirmed fixture saved to $FixturePath. Set MAESTRO_ORDER_NUMBER to $($order.orderNumber) and MAESTRO_QUEUE_PAGE_SKIP to $($queuePage - 1)."
 } else {
     $fixture = Get-Content -LiteralPath $FixturePath -Raw | ConvertFrom-Json
     $order = Invoke-RestMethod -Uri "$base/orders/$($fixture.orderId)" -Headers $headers
     if ($order.status -ne 'ready') { throw "Expected ready; service returned $($order.status)." }
-    $queue = Invoke-RestMethod -Uri "$base/preparation-tickets" -Headers $headers
-    if ($queue.items.orderId -contains $fixture.orderId) { throw 'Ready ticket remained in the active queue.' }
+    if (Find-QueuePage $fixture.orderId) { throw 'Ready ticket remained in the active queue.' }
     Write-Output 'PASS: separate manager session observes Ready and the ticket is absent from the active preparation queue.'
 }

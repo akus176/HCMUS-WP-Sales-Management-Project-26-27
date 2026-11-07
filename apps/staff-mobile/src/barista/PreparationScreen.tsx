@@ -69,7 +69,7 @@ export function PreparationScreen() {
     // A transport failure can have an unknown outcome. Fetch server state before
     // offering another action; never replay the write or infer local success.
     onError: async (error) => {
-      if (!(error instanceof ApiError && error.status === 409))
+      if (!(error instanceof ApiError && [403, 409].includes(error.status)))
         await queries.invalidateQueries({ queryKey: key });
     },
   });

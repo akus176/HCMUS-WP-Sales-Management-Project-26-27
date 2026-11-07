@@ -255,12 +255,17 @@ test('unauthorized route never loads tickets', async () => {
   ).toBe(false);
 });
 
-test('API forbidden response hides cached details and actions', async () => {
-  const h = await mount(async (request) =>
-    request.method === 'POST'
-      ? json({}, 403)
-      : json(request.url.includes(ticket.orderId) ? ticket : page()),
-  );
+test('API forbidden response immediately hides cached details even if refresh would stall', async () => {
+  let denied = false;
+  const stalled = deferred<Response>();
+  const h = await mount(async (request) => {
+    if (request.method === 'POST') {
+      denied = true;
+      return json({}, 403);
+    }
+    if (denied) return stalled.promise;
+    return json(request.url.includes(ticket.orderId) ? ticket : page());
+  });
   await openTicket();
   await fireEvent.press(
     screen.getByRole('button', { name: 'Start preparing' }),

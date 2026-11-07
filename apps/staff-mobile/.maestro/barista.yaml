@@ -17,6 +17,16 @@ name: Barista progression against the shared API
     visible: Open Preparation
     timeout: 30000
 - tapOn: Open Preparation
+- repeat:
+    times: ${MAESTRO_QUEUE_PAGE_SKIP}
+    commands:
+      - scrollUntilVisible:
+          element: Next page
+          direction: DOWN
+      - tapOn: Next page
+- scrollUntilVisible:
+    element: All active
+    direction: UP
 - scrollUntilVisible:
     element: Open ticket ${MAESTRO_ORDER_NUMBER}
     direction: DOWN

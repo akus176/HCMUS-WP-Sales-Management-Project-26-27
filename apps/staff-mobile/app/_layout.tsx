@@ -64,6 +64,7 @@ function SessionNavigation({
         <Stack.Protected guard={!!state.user}>
           <Stack.Screen name="session" />
           <Stack.Screen name="modules/[module]" />
+          <Stack.Screen name="modules/approvals/[discountId]" />
         </Stack.Protected>
       </Stack>
     </>

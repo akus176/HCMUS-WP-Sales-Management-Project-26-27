@@ -10,6 +10,7 @@ import {
   ShellText,
 } from '../../src/shell/controls';
 import { findModule, permittedActions } from '../../src/shell/permissions';
+import { DiscountApprovals } from '../../src/features/approvals/DiscountApprovals';
 
 export default function ModuleScreen() {
   const { module: moduleId } = useLocalSearchParams<{
@@ -27,6 +28,8 @@ export default function ModuleScreen() {
         {(user) =>
           module?.id === 'barista' ? (
             <PreparationScreen />
+          ) : module?.id === 'approvals' ? (
+            <DiscountApprovals user={user} />
           ) : (
             <>
               <ShellHeading>{module!.title}</ShellHeading>
