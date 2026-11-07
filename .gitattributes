@@ -3,4 +3,5 @@
 *.props text eol=lf
 *.xaml text eol=lf
 *.slnx text eol=lf
+*.sh text eol=lf
 *.ttf binary
