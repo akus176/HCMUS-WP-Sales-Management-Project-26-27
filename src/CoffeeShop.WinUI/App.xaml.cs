@@ -1,3 +1,4 @@
+using CoffeeShop.WinUI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 
@@ -20,7 +21,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         InitializeComponent();
     }
 
-    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    protected override async void OnLaunched(LaunchActivatedEventArgs args)
     {
         if (Environment.GetCommandLineArgs().Contains("--components"))
         {
@@ -30,16 +31,47 @@ public partial class App : Microsoft.UI.Xaml.Application
             _window.AppWindow.Show();
             return;
         }
+        var configuration = CoffeeShopClientConfiguration.Load();
+        ConfigureServices(configuration);
+        if (!Environment.GetCommandLineArgs().Contains("--verify-shell"))
+        {
+            try
+            {
+                var session = Services.GetRequiredService<StaffSessionManager>();
+                if (await session.RestoreAsync() is null)
+                {
+                    ShowLoginWindow();
+                    return;
+                }
+            }
+            catch (ApiException)
+            {
+                ShowLoginWindow();
+                return;
+            }
+        }
+        ShowMainWindow();
+    }
+
+    internal void ShowMainWindow()
+    {
         _window = new MainWindow();
         _window.Activate();
         if (Environment.GetCommandLineArgs().Contains("--verify-shell")) _window.AppWindow.Show();
         _ = ((MainWindow)_window).ConnectToDatabaseAsync();
     }
 
-    internal static void ConfigureServices(string connectionString)
+    internal void ShowLoginWindow()
+    {
+        _window = new LoginWindow();
+        _window.Activate();
+    }
+
+    private static void ConfigureServices(CoffeeShopClientConfiguration configuration)
     {
         var services = new ServiceCollection()
-            .AddCoffeeShopDirectClient(connectionString)
+            .AddCoffeeShopApiClient(configuration.ApiBaseAddress)
+            .AddCoffeeShopDirectClient(configuration.ConnectionString ?? string.Empty)
             .BuildServiceProvider();
 
         var previousServices = Services;

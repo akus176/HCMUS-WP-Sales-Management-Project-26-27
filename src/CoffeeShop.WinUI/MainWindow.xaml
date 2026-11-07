@@ -15,7 +15,10 @@
                     <Ellipse Width="5" Height="5" Fill="{StaticResource ConsoleAccentLightBrush}" VerticalAlignment="Center" />
                     <TextBlock x:Name="ConnectionStatusText" Text="CHECKING CONNECTION" Style="{StaticResource ConsoleLabelStyle}" CharacterSpacing="140" Foreground="{StaticResource ConsoleOnFieldMutedBrush}" />
                 </StackPanel>
-                <TextBlock x:Name="ClockText" Grid.Column="4" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="13" Foreground="{StaticResource ConsoleOnFieldBrush}" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock x:Name="ClockText" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="13" Foreground="{StaticResource ConsoleOnFieldBrush}" VerticalAlignment="Center" />
+                    <Button Content="SIGN OUT" Click="OnSignOut" AutomationProperties.Name="Sign out" />
+                </StackPanel>
             </Grid>
         </Border>
         <NavigationView x:Name="Nav" Grid.Row="1" IsEnabled="False" IsBackButtonVisible="Collapsed" IsSettingsVisible="False" IsTitleBarAutoPaddingEnabled="False" IsPaneToggleButtonVisible="False" CompactPaneLength="64" OpenPaneLength="216" PaneDisplayMode="Left" Background="{StaticResource ConsoleGroundBrush}" SelectionChanged="OnNavSelectionChanged" PaneOpened="OnPaneChanged" PaneClosed="OnPaneChanged">

@@ -271,9 +271,9 @@ public sealed partial class StockRoomPage : Page
 
         ApplyIngredientFilters();
         if (activeSection == "movements") SelectHistoryFilter(null);
-        NewIngredientButton.Visibility = activeSection == "ingredients" ? Visibility.Visible : Visibility.Collapsed;
-        ReceiveDeliveryButton.Visibility = activeSection is "ingredients" or "receipts" ? Visibility.Visible : Visibility.Collapsed;
-        NewSupplierButton.Visibility = activeSection == "suppliers" ? Visibility.Visible : Visibility.Collapsed;
+        NewIngredientButton.Visibility = activeSection == "ingredients" && session.HasPermission("inventory.manage") ? Visibility.Visible : Visibility.Collapsed;
+        ReceiveDeliveryButton.Visibility = (activeSection is "ingredients" or "receipts") && session.HasPermission("inventory.receive") ? Visibility.Visible : Visibility.Collapsed;
+        NewSupplierButton.Visibility = activeSection == "suppliers" && session.HasPermission("inventory.manage") ? Visibility.Visible : Visibility.Collapsed;
         UpdateEditor();
     }
 
@@ -1031,7 +1031,8 @@ public sealed partial class StockRoomPage : Page
             (compactLayout ? editing : drawerOpen);
         AdjustmentForm.Visibility = editing ? Visibility.Visible : Visibility.Collapsed;
         AdjustmentActions.Visibility = editing ? Visibility.Visible : Visibility.Collapsed;
-        BeginAdjustmentButton.Visibility = editing ? Visibility.Collapsed : Visibility.Visible;
+        BeginAdjustmentButton.Visibility = editing || !session.HasPermission("inventory.adjust") ? Visibility.Collapsed : Visibility.Visible;
+        RecordAdjustmentButton.Visibility = session.HasPermission("inventory.adjust") ? Visibility.Visible : Visibility.Collapsed;
         DrawerTagsPanel.Visibility = editing ? Visibility.Collapsed : Visibility.Visible;
         RecentHistoryPanel.Visibility = editing ? Visibility.Collapsed : Visibility.Visible;
         DrawerKicker.Text = editing ? "ADJUST STOCK" : selectedIngredientRow?.IsActive == false ? "INACTIVE INGREDIENT" : "INGREDIENT DETAILS";

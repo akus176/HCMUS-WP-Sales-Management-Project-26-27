@@ -1,5 +1,6 @@
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.WinUI.Pages;
+using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
@@ -19,10 +20,18 @@ public sealed partial class MainWindow : Window
     private ServiceConsoleLayoutMode? layout;
     private bool selecting;
     private bool connecting;
+    private bool checkingSession;
+    private bool endingSession;
+    private readonly PosOperatorSession staffSession;
+    private readonly StaffSessionManager sessionManager;
+    private readonly bool verifyShell = Environment.GetCommandLineArgs().Contains("--verify-shell");
 
     public MainWindow()
     {
         InitializeComponent();
+        staffSession = App.Services.GetRequiredService<PosOperatorSession>();
+        sessionManager = App.Services.GetRequiredService<StaffSessionManager>();
+        sessionManager.SessionExpired += OnSessionExpired;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleDragRegion);
         AppWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
@@ -32,9 +41,17 @@ public sealed partial class MainWindow : Window
         AppWindow.ResizeClient(new Windows.Graphics.SizeInt32(1440, 900));
         InitializeNavigation();
         UpdateClock();
-        clock.Tick += (_, _) => UpdateClock();
+        clock.Tick += async (_, _) =>
+        {
+            UpdateClock();
+            await CheckSessionAsync();
+        };
         clock.Start();
-        Closed += (_, _) => clock.Stop();
+        Closed += (_, _) =>
+        {
+            clock.Stop();
+            sessionManager.SessionExpired -= OnSessionExpired;
+        };
     }
     private static object Resource(string key) => Microsoft.UI.Xaml.Application.Current.Resources[key];
     private static string IconName(string tag) => tag switch
@@ -49,7 +66,10 @@ public sealed partial class MainWindow : Window
     private void InitializeNavigation()
     {
         string? group = null;
-        foreach (var destination in ServiceConsoleNavigation.PrimaryDestinations)
+        var destinations = verifyShell
+            ? ServiceConsoleNavigation.PrimaryDestinations
+            : ServiceConsoleNavigation.ForPermissions(staffSession.Permissions);
+        foreach (var destination in destinations)
         {
             if (group != destination.Group)
             {
@@ -108,13 +128,13 @@ public sealed partial class MainWindow : Window
         {
             var configuration = CoffeeShopClientConfiguration.Load();
             if (!configuration.IsConfigured) { Fail(configuration.Error ?? "Database settings are missing."); return; }
-            App.ConfigureServices(configuration.ConnectionString!);
             using var scope = App.Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
             if (!await database.Database.CanConnectAsync()) { Fail("PostgreSQL is unavailable. Check the server and database settings, then retry."); return; }
             connection.Connected();
             PresentConnection();
-            if (currentRoute is null) NavigateTo(ServiceConsoleNavigation.DefaultTag);
+            if (currentRoute is null && Nav.MenuItems.OfType<NavigationViewItem>().FirstOrDefault() is { } firstItem)
+                NavigateTo((string)firstItem.Tag);
             if (Environment.GetCommandLineArgs().Contains("--verify-shell")) await VerifyShellAsync();
         }
         catch (Exception) { Fail("Could not connect to PostgreSQL. Check the server and database settings, then retry."); }
@@ -134,7 +154,9 @@ public sealed partial class MainWindow : Window
     public void NavigateTo(string tag)
     {
         if (!connection.IsConnected) return;
-        var route = ServiceConsoleNavigation.Resolve(tag);
+        var route = verifyShell
+            ? ServiceConsoleNavigation.Resolve(tag)
+            : ServiceConsoleNavigation.Resolve(tag, staffSession.Permissions);
         selecting = true;
         Nav.SelectedItem = Nav.MenuItems.OfType<NavigationViewItem>().Single(item => Equals(item.Tag, route.Destination.Tag));
         selecting = false;
@@ -142,7 +164,43 @@ public sealed partial class MainWindow : Window
     }
     private void OnNavSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        if (!selecting && args.SelectedItem is NavigationViewItem { Tag: string tag }) ShowRoute(ServiceConsoleNavigation.Resolve(tag), tag == "stock-room");
+        if (!selecting && args.SelectedItem is NavigationViewItem { Tag: string tag })
+        {
+            var route = verifyShell ? ServiceConsoleNavigation.Resolve(tag) : ServiceConsoleNavigation.Resolve(tag, staffSession.Permissions);
+            ShowRoute(route, tag == "stock-room");
+        }
+    }
+    private async void OnSignOut(object sender, RoutedEventArgs e)
+    {
+        if (endingSession) return;
+        endingSession = true;
+        try { await sessionManager.LogoutAsync(); }
+        catch (ApiException) { /* Local credentials are cleared even when the API is offline. */ }
+        catch (OperationCanceledException) { /* A timeout must not leave the console open. */ }
+        ReturnToSignIn();
+    }
+    private async Task CheckSessionAsync()
+    {
+        if (verifyShell || checkingSession || endingSession) return;
+        checkingSession = true;
+        try { await sessionManager.GetValidAccessTokenAsync(); }
+        catch (ApiException) { /* A temporary network failure is not session revocation. */ }
+        catch (OperationCanceledException) { /* A timeout is not session revocation. */ }
+        finally { checkingSession = false; }
+    }
+    private void OnSessionExpired() => DispatcherQueue.TryEnqueue(() =>
+    {
+        if (endingSession) return;
+        endingSession = true;
+        ReturnToSignIn();
+    });
+    private void ReturnToSignIn()
+    {
+        ContentFrame.Content = null;
+        pages.Clear();
+        staffSession.Operator = null;
+        ((App)Microsoft.UI.Xaml.Application.Current).ShowLoginWindow();
+        Close();
     }
     private void ShowRoute(ServiceConsoleRoute route, bool preserveStockSection = false)
     {
