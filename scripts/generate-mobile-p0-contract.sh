@@ -41,15 +41,7 @@ if [[ ! -s "$response_file" ]]; then
   exit 1
 fi
 
-python3 - "$response_file" "$contract_dir/openapi.json" <<'PY'
-import json
-import pathlib
-import sys
-
-source = pathlib.Path(sys.argv[1])
-target = pathlib.Path(sys.argv[2])
-target.write_text(json.dumps(json.loads(source.read_text()), sort_keys=True,
-                             indent=2) + "\n")
-PY
+node -e 'const fs = require("node:fs"); const sort = value => Array.isArray(value) ? value.map(sort) : value && typeof value === "object" ? Object.fromEntries(Object.keys(value).sort().map(key => [key, sort(value[key])])) : value; const doc = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); fs.writeFileSync(process.argv[2], JSON.stringify(sort(doc), null, 2) + "\n");' \
+  "$response_file" "$contract_dir/openapi.json"
 "$contract_dir/node_modules/.bin/openapi-typescript" "$contract_dir/openapi.json" \
   --output "$contract_dir/schema.d.ts"
