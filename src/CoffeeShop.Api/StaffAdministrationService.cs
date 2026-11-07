@@ -49,7 +49,7 @@ public sealed class StaffAdministrationService(CoffeeShopDbContext db, TimeProvi
         }
         if (userId is not null) query = query.Where(item => item.UserId == new EntityId(userId.Value));
 
-        var events = await query.OrderByDescending(item => item.OccurredAt.Value)
+        var events = await query.OrderByDescending(item => item.OccurredAt)
             .Take(NormalizeLimit(limit)).Select(item => new
             {
                 item.Id,
