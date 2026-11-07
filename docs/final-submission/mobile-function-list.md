@@ -7,8 +7,8 @@ Update the Status, Automated evidence, and Video timestamp fields only after the
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | F-01 | All staff | Sign in, renew session, and sign out securely | P0 | Planned | #95, 2.1, 3.3–3.4 | Authenticated API session and server permission resolution | Session and logout tests | Record after final video |
 | F-02 | All staff | See only permitted mobile modules and actions | P0 | Planned | #95, 4.1–4.2 | Effective permissions from the shared API | Permission-navigation tests | Record after final video |
-| F-03 | Barista | View confirmed and preparing tickets | P0 | Planned | #95, 4.2 | Shared preparation-ticket query | Ticket-list component tests | Record after final video |
-| F-04 | Barista | Start preparation and mark a ticket ready | P0 | Planned | #95, 4.2 | Server order state transition and audit actor | Android end-to-end state-transition test | Record after final video |
+| F-03 | Barista | View confirmed and preparing tickets | P0 | Planned | #155; #95, Mobile 4.2 | Shared preparation-ticket query | [#155 component/API evidence](../evidence/mobile-barista-155/README.md); emulator/video gate pending | Record after final video |
+| F-04 | Barista | Start preparation and mark a ticket ready | P0 | Planned | #155; #95, Mobile 4.2 | Server order state transition and audit actor | [#155 component/API evidence and Android procedure](../evidence/mobile-barista-155/README.md); Android E2E pending | Record after final video |
 | F-05 | Manager | Review and approve or reject a pending discount | P0 | Planned | #95, 4.3 | Shared discount request and order-total update | API and mobile approval tests | Record after final video |
 | F-06 | Inventory staff | View ingredient balances and low-stock items | P0 | Planned | #95, 4.4 | Shared inventory and low-stock queries | Inventory query tests | Record after final video |
 | F-07 | Inventory staff | Record a stock adjustment with a required reason | P0 | Planned | #95, 4.4 | Server adjustment command and movement history | Valid and missing-reason tests | Record after final video |

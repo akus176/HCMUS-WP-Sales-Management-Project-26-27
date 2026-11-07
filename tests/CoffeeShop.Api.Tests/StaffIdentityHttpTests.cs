@@ -534,6 +534,87 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task Preparation_RejectsUnauthorizedAndStaleTransitionsWithoutChangingNewerState()
+    {
+        using var manager = host!.CreateClient();
+        var managerLogin = await LoginAsync(manager, "Manager");
+        manager.DefaultRequestHeaders.Authorization = new("Bearer", managerLogin.AccessToken);
+        using var categoryCreated = await manager.PostAsJsonAsync("/api/v1/categories", new CreateCategoryRequest("Preparation drinks"));
+        var category = (await categoryCreated.Content.ReadFromJsonAsync<CategoryResponse>())!;
+        using var itemCreated = await manager.PostAsJsonAsync("/api/v1/menu-items",
+            new MenuItemRequest(category.Id, "Latte", null, [new SizeVariantRequest("Large", 5m)]));
+        var item = (await itemCreated.Content.ReadFromJsonAsync<MenuItemResponse>())!;
+
+        async Task<Guid> ConfirmOrder()
+        {
+            var id = Guid.NewGuid();
+            using var created = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(id, "takeaway", null, null,
+                [new OrderLineRequest(item.Id, Assert.Single(item.SizeVariants).Id, 1, [])]));
+            Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+            using var confirmed = await manager.PostAsJsonAsync($"/api/v1/orders/{id}/confirm", new ConfirmOrderRequest(5m));
+            Assert.Equal(HttpStatusCode.OK, confirmed.StatusCode);
+            return id;
+        }
+
+        var orderId = await ConfirmOrder();
+        using var unauthorized = host.CreateClient();
+        foreach (var path in new[] { "/api/v1/preparation-tickets", $"/api/v1/preparation-tickets/{orderId}" })
+        {
+            using var response = await unauthorized.GetAsync(path);
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+        var delivery = await LoginAsync(unauthorized, "DeliveryStaff");
+        unauthorized.DefaultRequestHeaders.Authorization = new("Bearer", delivery.AccessToken);
+        foreach (var path in new[] { "/api/v1/preparation-tickets", $"/api/v1/preparation-tickets/{orderId}" })
+        {
+            using var response = await unauthorized.GetAsync(path);
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+        foreach (var action in new[] { "start", "ready" })
+        {
+            using var response = await unauthorized.PostAsync($"/api/v1/preparation-tickets/{orderId}/{action}", null);
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        }
+
+        using var barista = host.CreateClient();
+        var login = await LoginAsync(barista, "Barista");
+        barista.DefaultRequestHeaders.Authorization = new("Bearer", login.AccessToken);
+        using var startedElsewhere = await manager.PostAsync($"/api/v1/preparation-tickets/{orderId}/start", null);
+        Assert.Equal(HttpStatusCode.NoContent, startedElsewhere.StatusCode);
+        using var staleStart = await barista.PostAsync($"/api/v1/preparation-tickets/{orderId}/start", null);
+        Assert.Equal(HttpStatusCode.Conflict, staleStart.StatusCode);
+        var current = await barista.GetFromJsonAsync<PreparationTicketResponse>($"/api/v1/preparation-tickets/{orderId}");
+        Assert.Equal("preparing", current!.Status);
+        using var ready = await barista.PostAsync($"/api/v1/preparation-tickets/{orderId}/ready", null);
+        Assert.Equal(HttpStatusCode.NoContent, ready.StatusCode);
+        using var repeated = await barista.PostAsync($"/api/v1/preparation-tickets/{orderId}/ready", null);
+        Assert.Equal(HttpStatusCode.Conflict, repeated.StatusCode);
+
+        var cancelledId = await ConfirmOrder();
+        using var cancelled = await manager.PostAsJsonAsync($"/api/v1/orders/{cancelledId}/cancel", new CancelOrderRequest("Changed elsewhere"));
+        Assert.Equal(HttpStatusCode.OK, cancelled.StatusCode);
+        foreach (var action in new[] { "start", "ready" })
+        {
+            using var response = await barista.PostAsync($"/api/v1/preparation-tickets/{cancelledId}/{action}", null);
+            Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        }
+        using var removed = await barista.GetAsync($"/api/v1/preparation-tickets/{cancelledId}");
+        Assert.Equal(HttpStatusCode.NotFound, removed.StatusCode);
+
+        await using var db = Database();
+        Assert.Equal("ready", (await db.Orders.SingleAsync(order => order.Id == new EntityId(orderId))).Status);
+        Assert.Equal("cancelled", (await db.Orders.SingleAsync(order => order.Id == new EntityId(cancelledId))).Status);
+        var changes = await db.OrderStatusHistories.Where(change => change.OrderId == new EntityId(orderId)).ToArrayAsync();
+        var preparing = Assert.Single(changes, change => change.ToStatus == "preparing");
+        var readyChange = Assert.Single(changes, change => change.ToStatus == "ready");
+        Assert.Equal(new EntityId(managerLogin.User.Id), preparing.ChangedBy);
+        Assert.Equal(new EntityId(login.User.Id), readyChange.ChangedBy);
+        Assert.True(readyChange.ChangedAt.Value >= preparing.ChangedAt.Value);
+        Assert.Equal(3, changes.Length);
+        Assert.Single(await db.OrderStatusHistories.Where(change => change.OrderId == new EntityId(cancelledId) && change.ToStatus == "cancelled").ToArrayAsync());
+    }
+
+    [PostgresFact]
     public async Task CustomerRoutes_ManageProfilesAndAddressesWithPermissionAndPersistence()
     {
         using var manager = host!.CreateClient();

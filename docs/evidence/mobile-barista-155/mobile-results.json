@@ -1,0 +1,48 @@
+{
+  "base": "0a257a1",
+  "baristaResults": [
+    {
+      "status": "passed",
+      "name": "shows loading, empty results and manual refresh without inventing tickets"
+    },
+    {
+      "status": "passed",
+      "name": "filters and paginates through generated query parameters"
+    },
+    {
+      "status": "passed",
+      "name": "details contain preparation fields, confirm each write, and show only server-confirmed progression"
+    },
+    {
+      "status": "passed",
+      "name": "a stale start refreshes preparing state and never overwrites it"
+    },
+    {
+      "status": "passed",
+      "name": "a stale start refreshes cancelled state and never overwrites it"
+    },
+    {
+      "status": "passed",
+      "name": "offline confirmation is disabled and reconnect does not replay a write"
+    },
+    {
+      "status": "passed",
+      "name": "unauthorized route never loads tickets"
+    },
+    {
+      "status": "passed",
+      "name": "API forbidden response hides cached details and actions"
+    },
+    {
+      "status": "passed",
+      "name": "queue errors expose retry; uncertain writes refresh without a success claim or replay"
+    }
+  ],
+  "success": true,
+  "skipped": 0,
+  "passed": 135,
+  "source": "Executed final-tree mobile Jest run",
+  "failed": 0,
+  "suites": 15,
+  "total": 135
+}

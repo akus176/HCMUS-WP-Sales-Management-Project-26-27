@@ -252,9 +252,9 @@ resume. Unknown routes, malformed/cross-account responses and missing grants fai
 closed. Failed checks offer retry without displaying protected content. The API
 remains authoritative for every later business request.
 
-Each module currently states that its business screens/actions are **planned**.
-This change implements navigation and guards, not barista, discount, inventory,
-courier, payment or administration workflows. The home also checks current server permissions before displaying navigation,
+The Preparation module now hosts the #155 barista workflow described below.
+Other modules still label their business screens/actions **planned**.
+The home also checks current server permissions before displaying navigation,
 including when a previously empty home regains focus or the app resumes.
 Home verification uses an explicit scope, so `/modules/home` is not a valid module.
 
@@ -268,3 +268,21 @@ real-router deep links, revocation, permission-check failures, terminal sessions
 background/resume and late-response checks. [Evidence and remaining verification](../../docs/evidence/mobile-shell-144/README.md) distinguish browser visual fixtures
 from native Android checks. Required reviewer: @vt-Toan. Contributor: @akus176
 (with Codex assistance); the existing ticket owner remains @JakeConal.
+
+## Barista preparation (#155)
+
+Open **Preparation** from staff home with `orders.fulfill`. The queue filters
+confirmed/preparing tickets and paginates ten tickets at a time. Open a ticket
+to inspect its items, sizes, quantities, add-ons and table. **Start preparing**
+and **Mark ready** each require confirmation and a successful service response.
+Success and conflicts refresh authoritative data; a ticket that has left the
+queue exposes no further action. Shared connectivity feedback and manual refresh
+remain available, while offline/reconnecting writes are disabled and never queued.
+
+The feature uses the generated API client, permission boundary, shared controls
+and in-memory TanStack Query cache. It adds no backend transitions, database
+access, persistent business storage or live-event subscription.
+
+Run `npm run check` for automated coverage. The opt-in Android flow is
+`npm run test:e2e:barista`; its disposable API fixture, exact setup, executed
+results and remaining emulator acceptance gate are in [#155 evidence](../../docs/evidence/mobile-barista-155/README.md).
