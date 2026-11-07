@@ -11,7 +11,8 @@ using Windows.ApplicationModel.DataTransfer;
 
 namespace CoffeeShop.WinUI.Pages;
 
-public sealed record ServiceBoardCard(OperationalOrder Order, PosOrderDetail? Detail, bool IsSelected, bool CanInteract = false)
+public sealed record ServiceBoardCard(OperationalOrder Order, PosOrderDetail? Detail, bool IsSelected,
+    bool CanInteract = false, bool ShowFinancials = true)
 {
     public string Status => char.ToUpperInvariant(Order.Status[0]) + Order.Status[1..];
     public string Number => Order.OrderNumber;
@@ -21,7 +22,7 @@ public sealed record ServiceBoardCard(OperationalOrder Order, PosOrderDetail? De
         ? string.Join(" · ", detail.Lines.Select(line => $"{(line.Quantity > 1 ? $"{line.Quantity}× " : "")}{line.ItemName}"))
         : "Order details available on selection";
     public string Footer => IsSelected ? "Selected" : Order.Channel == "dine_in" ? "Dine-in" : Order.Channel == "delivery" ? "Delivery" : "Takeaway";
-    public string BalanceLabel => Order.OutstandingBalance > 0 ? $"Due {Order.OutstandingBalance:0.00}" : "Paid";
+    public string BalanceLabel => !ShowFinancials ? "" : Order.OutstandingBalance > 0 ? $"Due {Order.OutstandingBalance:0.00}" : "Paid";
     public string NextStatus => Order.Status switch { "confirmed" => "preparing", "preparing" => "ready", "ready" => "completed", _ => "" };
     public string ActionLabel => Order.Status switch { "confirmed" => "Start preparing", "preparing" => "Mark ready", "ready" when Order.OutstandingBalance > 0 => "Review payment", "ready" => "Complete", _ => "" };
     public bool ActionEnabled => CanInteract && (OperationsWorkspace.IsMoveAllowed(Order, NextStatus) || Order.Status == "ready" && Order.OutstandingBalance > 0);
@@ -259,7 +260,8 @@ public sealed partial class OperationsPage : Page
             model.OrderDetails.GetValueOrDefault(order.Id), order.Id == model.SelectedOrderId,
             model.HasOperator && model.CanMutate && (order.Status == "ready" && order.OutstandingBalance > 0
                 ? model.CanRecordPayments : model.CanMoveOrder(order.Id, order.Status switch
-                { "confirmed" => "preparing", "preparing" => "ready", "ready" => "completed", _ => "" })))).ToArray();
+                { "confirmed" => "preparing", "preparing" => "ready", "ready" => "completed", _ => "" })),
+            model.CanRecordPayments)).ToArray();
         var selected = model.SelectedOrder;
         var detail = model.SelectedDetail;
 

@@ -12,7 +12,7 @@ public static class SalesEndpoints
     {
         var orders = api.MapGroup("/orders").RequireAuthorization();
         orders.MapGet("/", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
-            Results.Ok((await handler.GetOrdersAsync(ct)).Select(ToOperational).ToArray()))
+            Results.Ok((await handler.GetOrdersAsync(ct)).Select(order => ToOperational(order)).ToArray()))
             .RequireAuthorization("orders.create").Produces<OperationalOrderResponse[]>();
         orders.MapGet("/{id:guid}", async (Guid id, PosOrderHandler handler, CancellationToken ct) =>
         {
@@ -107,7 +107,7 @@ public static class SalesEndpoints
             Results.Ok((await query.GetOrdersAsync(ct)).Where(order => order.Status is
                     OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready)
                 .OrderBy(order => order.OrderNumber).ThenBy(order => order.Id.Value)
-                .Select(ToOperational).ToArray()))
+                .Select(order => ToOperational(order, includeFinancials: false)).ToArray()))
             .RequireAuthorization("orders.fulfill").Produces<OperationalOrderResponse[]>().ProducesProblem(403);
         api.MapGet("/operations/orders/{id:guid}", async (Guid id, FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, CancellationToken ct) =>
@@ -119,12 +119,10 @@ public static class SalesEndpoints
                 return ApiErrorResults.From(Error.NotFound("orders.order_not_found", "Active order not found."));
             var detail = await ordersHandler.GetOrderAsync(summary.Id, ct);
             if (detail.IsFailure) return ApiErrorResults.From(detail.Error!);
-            return Results.Ok(new OperationsOrderDetailResponse(ToOperational(summary),
+            return Results.Ok(new OperationsOrderDetailResponse(ToOperational(summary, includeFinancials: false),
                 detail.Value.Lines.Select(line => new PreparationTicketLine(line.ItemName, line.SizeName,
                     line.Quantity, line.Addons.Select(addon => addon.Name).ToArray())).ToArray(),
-                detail.Value.Discounts.Select(discount => new PendingDiscountResponse(discount.Id.Value,
-                    summary.Id.Value, summary.OrderNumber, discount.Type, discount.Value, discount.Reason,
-                    discount.Amount, summary.Total)).ToArray()));
+                []));
         }).RequireAuthorization("orders.fulfill").Produces<OperationsOrderDetailResponse>()
             .ProducesProblem(403).ProducesProblem(404);
         api.MapGet("/preparation-tickets/{id:guid}", async (Guid id, FulfillmentOperationsQueryHandler query,
@@ -188,8 +186,9 @@ public static class SalesEndpoints
             : ApiErrorResults.From(result.Error!);
     }
 
-    private static OperationalOrderResponse ToOperational(OperationalOrder order) => new(order.Id.Value,
-        order.OrderNumber, order.Channel, order.Status, order.Total, order.PaidAmount, order.TableNumber,
+    private static OperationalOrderResponse ToOperational(OperationalOrder order, bool includeFinancials = true) => new(order.Id.Value,
+        order.OrderNumber, order.Channel, order.Status, includeFinancials ? order.Total : 0m,
+        includeFinancials ? order.PaidAmount : 0m, order.TableNumber,
         order.DeliveryStatus, order.AssignedStaffId?.Value, order.PendingDiscountIds.Select(id => id.Value).ToArray());
 
     private static PreparationTicketResponse ToTicket(OperationalOrder order, PosOrderDetail detail) => new(
