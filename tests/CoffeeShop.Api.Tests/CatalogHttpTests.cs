@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using CoffeeShop.Application.Reporting;
+using CoffeeShop.Contracts;
 using CoffeeShop.Infrastructure.Postgres;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -109,6 +111,63 @@ public sealed class CatalogHttpTests : IAsyncLifetime
         Assert.Equal("application/problem+json", reader.Content.Headers.ContentType?.MediaType);
     }
 
+    [PostgresFact]
+    public async Task ReportRoutes_EnforcePermissionsValidateAndMatchApplicationQueries()
+    {
+        using var client = host!.CreateClient();
+        const string range = "from=2026-10-01&to=2026-10-31&timeZone=UTC";
+        using var anonymous = await client.GetAsync($"/api/v1/reports/revenue?{range}");
+        Assert.Equal(HttpStatusCode.Unauthorized, anonymous.StatusCode);
+        client.DefaultRequestHeaders.Add("X-Test-User", "reader");
+        foreach (var route in new[] { "revenue", "best-sellers", "channels", "low-stock" })
+        {
+            using var denied = await client.GetAsync($"/api/v1/reports/{route}?{range}");
+            Assert.Equal(HttpStatusCode.Forbidden, denied.StatusCode);
+        }
+        client.DefaultRequestHeaders.Remove("X-Test-User");
+        client.DefaultRequestHeaders.Add("X-Test-User", "manager");
+        foreach (var route in new[] { "revenue", "best-sellers", "channels" })
+        {
+            using var invalidRange = await client.GetAsync($"/api/v1/reports/{route}?from=2026-11-01&to=2026-10-01&timeZone=UTC");
+            Assert.Equal(HttpStatusCode.BadRequest, invalidRange.StatusCode);
+            using var invalidZone = await client.GetAsync($"/api/v1/reports/{route}?from=2026-10-01&to=2026-10-31&timeZone=not-a-zone");
+            Assert.Equal(HttpStatusCode.BadRequest, invalidZone.StatusCode);
+        }
+        using var invalidSort = await client.GetAsync($"/api/v1/reports/best-sellers?{range}&sortBy=bad");
+        Assert.Equal(HttpStatusCode.BadRequest, invalidSort.StatusCode);
+        using var invalidLimit = await client.GetAsync($"/api/v1/reports/best-sellers?{range}&limit=0");
+        Assert.Equal(HttpStatusCode.BadRequest, invalidLimit.StatusCode);
+
+        using var scope = host.Services.CreateScope();
+        var first = new DateOnly(2026, 10, 1);
+        var last = new DateOnly(2026, 10, 31);
+        var directRevenue = (await scope.ServiceProvider.GetRequiredService<RevenueReportQueryHandler>()
+            .GetRevenueAsync(new(first, last, TimeZoneInfo.Utc))).Value;
+        var directBest = (await scope.ServiceProvider.GetRequiredService<BestSellerReportQueryHandler>()
+            .GetBestSellersAsync(new(first, last, TimeZoneInfo.Utc))).Value;
+        var directChannels = (await scope.ServiceProvider.GetRequiredService<OrderChannelReportQueryHandler>()
+            .GetChannelsAsync(new(first, last, TimeZoneInfo.Utc))).Value;
+        var revenue = await client.GetFromJsonAsync<RevenueReportResponse>($"/api/v1/reports/revenue?{range}");
+        var best = await client.GetFromJsonAsync<BestSellerReportResponse>($"/api/v1/reports/best-sellers?{range}");
+        var channels = await client.GetFromJsonAsync<ChannelReportResponse>($"/api/v1/reports/channels?{range}");
+        Assert.Equal(directRevenue.Revenue, revenue!.Revenue);
+        Assert.Equal(directRevenue.OrderCount, revenue.OrderCount);
+        Assert.Equal(directBest.Items.Count, best!.Items.Count);
+        Assert.Equal(directChannels.ByChannel.Select(row => (row.Channel, row.Revenue, row.OrderCount)),
+            channels!.ByChannel.Select(row => (row.Channel, row.Revenue, row.OrderCount)));
+
+        using var created = await client.PostAsJsonAsync("/api/v1/ingredients", new
+        {
+            name = "Low stock fixture",
+            baseUnit = "g",
+            availableQuantity = 1m,
+            reorderThreshold = 2m,
+        });
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var lowStock = await client.GetFromJsonAsync<LowStockReportRowResponse[]>("/api/v1/reports/low-stock");
+        Assert.Contains(lowStock!, row => row.Name == "Low stock fixture" && row.AvailableQuantity == 1m);
+    }
+
     private sealed record CreatedCategory(Guid Id);
 
     private sealed class TestAuthenticationHandler(
@@ -120,7 +179,9 @@ public sealed class CatalogHttpTests : IAsyncLifetime
             if (!Request.Headers.TryGetValue("X-Test-User", out var kind))
                 return Task.FromResult(AuthenticateResult.NoResult());
             var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()) };
-            if (kind == "manager") claims.Add(new Claim("permission", "menu.manage"));
+            if (kind == "manager")
+                foreach (var permission in new[] { "menu.manage", "inventory.manage", "reports.revenue", "reports.bestsellers", "reports.channels", "reports.lowstock" })
+                    claims.Add(new Claim("permission", permission));
             var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"));
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(principal, "Test")));
         }

@@ -106,6 +106,7 @@ api.MapCatalogEndpoints();
 api.MapSalesEndpoints();
 api.MapDeliveryEndpoints();
 api.MapCustomerEndpoints();
+api.MapReportEndpoints();
 api.MapGet("/categories", async (
     CatalogQueryHandler handler, string? search, bool? isActive, int? limit, CancellationToken cancellationToken) =>
 {
