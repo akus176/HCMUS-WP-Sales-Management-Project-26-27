@@ -20,6 +20,9 @@ public sealed record PosTableResponse(Guid Id, string TableNumber, int? Seats, b
 public sealed record OperationalOrderResponse(Guid Id, string OrderNumber, string Channel, string Status,
     decimal Total, decimal PaidAmount, string? TableNumber, string? DeliveryStatus, Guid? AssignedStaffId,
     IReadOnlyList<Guid> PendingDiscountIds);
+public sealed record OperationsOrderDetailResponse(OperationalOrderResponse Order,
+    IReadOnlyList<PreparationTicketLine> Lines, IReadOnlyList<PendingDiscountResponse> Discounts);
+public sealed record DeliveryStaffResponse(Guid Id, string FullName);
 public sealed record RecordPaymentRequest(Guid PaymentId, string? Method, decimal Amount,
     string? Status = null, string? Reference = null);
 public sealed record PaymentResponse(Guid PaymentId, decimal PaidAmount, decimal OutstandingBalance,

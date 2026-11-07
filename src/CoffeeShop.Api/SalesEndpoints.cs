@@ -103,6 +103,30 @@ public static class SalesEndpoints
             return MobilePage.From(tickets, page, pageSize);
         }).RequireAuthorization("orders.fulfill").Produces<PageResponse<PreparationTicketResponse>>()
             .ProducesProblem(400).ProducesProblem(403);
+        api.MapGet("/operations/orders", async (FulfillmentOperationsQueryHandler query, CancellationToken ct) =>
+            Results.Ok((await query.GetOrdersAsync(ct)).Where(order => order.Status is
+                    OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready)
+                .OrderBy(order => order.OrderNumber).ThenBy(order => order.Id.Value)
+                .Select(ToOperational).ToArray()))
+            .RequireAuthorization("orders.fulfill").Produces<OperationalOrderResponse[]>().ProducesProblem(403);
+        api.MapGet("/operations/orders/{id:guid}", async (Guid id, FulfillmentOperationsQueryHandler query,
+            PosOrderHandler ordersHandler, CancellationToken ct) =>
+        {
+            if (id == Guid.Empty) return InvalidId();
+            var summary = (await query.GetOrdersAsync(ct)).FirstOrDefault(order => order.Id.Value == id &&
+                order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready);
+            if (summary is null)
+                return ApiErrorResults.From(Error.NotFound("orders.order_not_found", "Active order not found."));
+            var detail = await ordersHandler.GetOrderAsync(summary.Id, ct);
+            if (detail.IsFailure) return ApiErrorResults.From(detail.Error!);
+            return Results.Ok(new OperationsOrderDetailResponse(ToOperational(summary),
+                detail.Value.Lines.Select(line => new PreparationTicketLine(line.ItemName, line.SizeName,
+                    line.Quantity, line.Addons.Select(addon => addon.Name).ToArray())).ToArray(),
+                detail.Value.Discounts.Select(discount => new PendingDiscountResponse(discount.Id.Value,
+                    summary.Id.Value, summary.OrderNumber, discount.Type, discount.Value, discount.Reason,
+                    discount.Amount, summary.Total)).ToArray()));
+        }).RequireAuthorization("orders.fulfill").Produces<OperationsOrderDetailResponse>()
+            .ProducesProblem(403).ProducesProblem(404);
         api.MapGet("/preparation-tickets/{id:guid}", async (Guid id, FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, CancellationToken ct) =>
         {

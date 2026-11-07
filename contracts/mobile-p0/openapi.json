@@ -718,6 +718,22 @@
         ],
         "type": "object"
       },
+      "DeliveryStaffResponse": {
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "fullName"
+        ],
+        "type": "object"
+      },
       "DiscountDecisionResponse": {
         "properties": {
           "computedAmount": {
@@ -1289,6 +1305,31 @@
           "deliveryStatus",
           "assignedStaffId",
           "pendingDiscountIds"
+        ],
+        "type": "object"
+      },
+      "OperationsOrderDetailResponse": {
+        "properties": {
+          "discounts": {
+            "items": {
+              "$ref": "#/components/schemas/PendingDiscountResponse"
+            },
+            "type": "array"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/PreparationTicketLine"
+            },
+            "type": "array"
+          },
+          "order": {
+            "$ref": "#/components/schemas/OperationalOrderResponse"
+          }
+        },
+        "required": [
+          "order",
+          "lines",
+          "discounts"
         ],
         "type": "object"
       },
@@ -4545,6 +4586,43 @@
         ]
       }
     },
+    "/api/v1/delivery-staff/options": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeliveryStaffResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
     "/api/v1/discounts/pending": {
       "get": {
         "parameters": [
@@ -5878,6 +5956,98 @@
               }
             },
             "description": "Conflict"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
+    "/api/v1/operations/orders": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OperationalOrderResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
+    "/api/v1/operations/orders/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationsOrderDetailResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
           }
         },
         "security": [
