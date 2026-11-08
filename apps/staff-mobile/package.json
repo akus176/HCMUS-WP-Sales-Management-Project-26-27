@@ -63,6 +63,8 @@
     "test:e2e:session": "maestro test --format junit --output .maestro/results/session.xml .maestro/session.yaml",
     "pretest:e2e:barista": "npm run pretest:e2e:android",
     "test:e2e:barista": "maestro test --format junit --output .maestro/results/barista.xml .maestro/barista.yaml",
+    "pretest:e2e:courier": "npm run pretest:e2e:android",
+    "test:e2e:courier": "maestro test --format junit --output .maestro/results/courier.xml .maestro/courier.yaml",
     "pretest:e2e:cashier": "npm run pretest:e2e:android",
     "test:e2e:cashier": "maestro test --format junit --output .maestro/results/cashier.xml .maestro/cashier.yaml",
     "pretest:e2e:manager-orders": "npm run pretest:e2e:android",
