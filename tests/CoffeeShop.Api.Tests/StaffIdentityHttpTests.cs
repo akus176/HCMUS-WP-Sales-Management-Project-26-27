@@ -1227,6 +1227,133 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(receipt.Id, movement.PurchaseReceiptId);
     }
 
+    [PostgresFact]
+    public async Task MobileCashier182_ConcurrentRetriesPersistOnePaymentAndRefreshSharedBalance()
+    {
+        using var manager = host!.CreateClient();
+        var managerLogin = await LoginAsync(manager, "Manager");
+        manager.DefaultRequestHeaders.Authorization = new("Bearer", managerLogin.AccessToken);
+        using var categoryCreated = await manager.PostAsJsonAsync("/api/v1/categories", new CreateCategoryRequest("Counter verification"));
+        var category = (await categoryCreated.Content.ReadFromJsonAsync<CategoryResponse>())!;
+        using var itemCreated = await manager.PostAsJsonAsync("/api/v1/menu-items",
+            new MenuItemRequest(category.Id, "Counter latte", null, [new SizeVariantRequest("Large", 10m)]));
+        var item = (await itemCreated.Content.ReadFromJsonAsync<MenuItemResponse>())!;
+        var orderId = Guid.NewGuid();
+        using var draft = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(orderId, "takeaway", null, null,
+            [new OrderLineRequest(item.Id, Assert.Single(item.SizeVariants).Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, draft.StatusCode);
+        using var confirmed = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/confirm", new ConfirmOrderRequest(10m));
+        Assert.Equal(HttpStatusCode.OK, confirmed.StatusCode);
+        using var cashier = host.CreateClient();
+        var cashierLogin = await LoginAsync(cashier, "Cashier");
+        cashier.DefaultRequestHeaders.Authorization = new("Bearer", cashierLogin.AccessToken);
+        var paymentIds = new List<Guid>();
+        foreach (var method in new[] { "cash", "card", "e_wallet" })
+        {
+            var payment = new RecordPaymentRequest(Guid.NewGuid(), method, 2m, Reference: method == "cash" ? null : $"receipt-{method}");
+            paymentIds.Add(payment.PaymentId);
+            var responses = await Task.WhenAll(Enumerable.Range(0, 3).Select(_ =>
+                cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment)));
+            try
+            {
+                Assert.All(responses, response => Assert.Equal(HttpStatusCode.OK, response.StatusCode));
+                var results = await Task.WhenAll(responses.Select(response => response.Content.ReadFromJsonAsync<PaymentResponse>()));
+                Assert.Single(results, result => !result!.AlreadyRecorded);
+                Assert.Equal(2, results.Count(result => result!.AlreadyRecorded));
+            }
+            finally { foreach (var response in responses) response.Dispose(); }
+            using var mismatch = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment with { Amount = 1m });
+            Assert.Equal(HttpStatusCode.Conflict, mismatch.StatusCode);
+        }
+        var shared = Assert.Single((await manager.GetFromJsonAsync<OperationalOrderResponse[]>("/api/v1/orders"))!, row => row.Id == orderId);
+        Assert.Equal(6m, shared.PaidAmount);
+        Assert.Equal(4m, shared.Total - shared.PaidAmount);
+        using var cancelled = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/cancel", new CancelOrderRequest("Counter verification complete"));
+        Assert.Equal(HttpStatusCode.OK, cancelled.StatusCode);
+        using var rejected = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", new RecordPaymentRequest(Guid.NewGuid(), "cash", 4m));
+        Assert.Equal(HttpStatusCode.Conflict, rejected.StatusCode);
+        using var barista = host.CreateClient();
+        var baristaLogin = await LoginAsync(barista, "Barista");
+        barista.DefaultRequestHeaders.Authorization = new("Bearer", baristaLogin.AccessToken);
+        using var denied = await barista.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", new RecordPaymentRequest(Guid.NewGuid(), "cash", 1m));
+        Assert.Equal(HttpStatusCode.Forbidden, denied.StatusCode);
+        await using var db = Database();
+        var payments = await db.Payments.Where(payment => payment.OrderId == new EntityId(orderId)).ToArrayAsync();
+        Assert.Equal(3, payments.Length);
+        Assert.All(payments, payment =>
+        {
+            Assert.Contains(payment.Id.Value, paymentIds);
+            Assert.Equal(new EntityId(cashierLogin.User.Id), payment.RecordedBy);
+        });
+    }
+
+    [PostgresFact]
+    public async Task MobileManager182_RejectsIneligibleAssignmentsAndAuditsCancellationWithoutDuplicateEffects()
+    {
+        using var manager = host!.CreateClient();
+        var managerLogin = await LoginAsync(manager, "Manager");
+        manager.DefaultRequestHeaders.Authorization = new("Bearer", managerLogin.AccessToken);
+        using var categoryCreated = await manager.PostAsJsonAsync("/api/v1/categories", new CreateCategoryRequest("Manager verification"));
+        var category = (await categoryCreated.Content.ReadFromJsonAsync<CategoryResponse>())!;
+        using var itemCreated = await manager.PostAsJsonAsync("/api/v1/menu-items",
+            new MenuItemRequest(category.Id, "Delivery latte", null, [new SizeVariantRequest("Large", 5m)]));
+        var item = (await itemCreated.Content.ReadFromJsonAsync<MenuItemResponse>())!;
+        var orderId = Guid.NewGuid();
+        using var draft = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(orderId, "delivery", null,
+            new OrderCustomerRequest(RecipientName: "Synthetic customer", ContactNumber: "1234567890", AddressLine: "Test address"),
+            [new OrderLineRequest(item.Id, Assert.Single(item.SizeVariants).Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, draft.StatusCode);
+        using var confirmed = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/confirm", new ConfirmOrderRequest(5m));
+        Assert.Equal(HttpStatusCode.OK, confirmed.StatusCode);
+        var options = (await manager.GetFromJsonAsync<DeliveryStaffResponse[]>("/api/v1/delivery-staff/options"))!;
+        var courier = Assert.Single(options);
+        Assert.DoesNotContain(options, staff => staff.Id == managerLogin.User.Id);
+        using var notReady = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery", new AssignDeliveryRequest(courier.Id));
+        Assert.Equal(HttpStatusCode.Conflict, notReady.StatusCode);
+        using var preparing = await manager.PostAsync($"/api/v1/orders/{orderId}/preparing", null);
+        Assert.Equal(HttpStatusCode.NoContent, preparing.StatusCode);
+        using var ready = await manager.PostAsync($"/api/v1/orders/{orderId}/ready", null);
+        Assert.Equal(HttpStatusCode.NoContent, ready.StatusCode);
+        using var ineligible = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery", new AssignDeliveryRequest(managerLogin.User.Id));
+        Assert.Equal(HttpStatusCode.BadRequest, ineligible.StatusCode);
+        using var cashier = host.CreateClient();
+        var cashierLogin = await LoginAsync(cashier, "Cashier");
+        cashier.DefaultRequestHeaders.Authorization = new("Bearer", cashierLogin.AccessToken);
+        using var forbidden = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery", new AssignDeliveryRequest(courier.Id));
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        await using (var db = Database())
+        {
+            var delivery = await db.Deliveries.SingleAsync(entry => entry.OrderId == new EntityId(orderId));
+            Assert.Equal("unassigned", delivery.Status);
+            Assert.Null(delivery.AssignedStaffId);
+            Assert.Empty(await db.DeliveryStatusHistories.ToArrayAsync());
+        }
+        using var assigned = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery", new AssignDeliveryRequest(courier.Id));
+        Assert.Equal(HttpStatusCode.NoContent, assigned.StatusCode);
+        using var repeatedAssignment = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery", new AssignDeliveryRequest(courier.Id));
+        Assert.Equal(HttpStatusCode.Conflict, repeatedAssignment.StatusCode);
+        using var blank = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/cancel", new CancelOrderRequest(" "));
+        Assert.Equal(HttpStatusCode.BadRequest, blank.StatusCode);
+        using var forbiddenCancel = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/cancel", new CancelOrderRequest("Unauthorized"));
+        Assert.Equal(HttpStatusCode.Forbidden, forbiddenCancel.StatusCode);
+        Assert.Equal("ready", (await manager.GetFromJsonAsync<OrderResponse>($"/api/v1/orders/{orderId}"))!.Status);
+        using var cancelled = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/cancel", new CancelOrderRequest(" Customer changed plans "));
+        Assert.Equal(HttpStatusCode.OK, cancelled.StatusCode);
+        using var repeatedCancellation = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/cancel", new CancelOrderRequest("Retry"));
+        Assert.Equal(HttpStatusCode.Conflict, repeatedCancellation.StatusCode);
+        await using var finalDb = Database();
+        var order = await finalDb.Orders.SingleAsync(entry => entry.Id == new EntityId(orderId));
+        Assert.Equal("cancelled", order.Status);
+        Assert.Equal("Customer changed plans", order.CancelReason);
+        Assert.NotNull(order.CancelledAt);
+        var cancellation = Assert.Single(await finalDb.OrderStatusHistories.Where(change => change.OrderId == order.Id && change.ToStatus == "cancelled").ToArrayAsync());
+        Assert.Equal(new EntityId(managerLogin.User.Id), cancellation.ChangedBy);
+        var assignment = Assert.Single(await finalDb.DeliveryStatusHistories.ToArrayAsync());
+        Assert.Equal(new EntityId(managerLogin.User.Id), assignment.ActorId);
+        Assert.Equal("assigned", assignment.ToStatus);
+        Assert.Empty(await finalDb.StockMovements.ToArrayAsync());
+    }
+
     public async Task DisposeAsync()
     {
         if (host is not null) await host.DisposeAsync();

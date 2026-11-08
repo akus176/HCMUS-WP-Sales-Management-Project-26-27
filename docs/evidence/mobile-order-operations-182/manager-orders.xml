@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="CoffeeShop_138_API36" tests="1" failures="0" time="105.416" timestamp="2026-11-08T13:30:56">
+    <testcase id="Manager cancellation and ready delivery assignment against the shared API" name="Manager cancellation and ready delivery assignment against the shared API" classname="Manager cancellation and ready delivery assignment against the shared API" file=".maestro\manager-orders.yaml" time="105.396" timestamp="2026-11-08T13:30:56" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -13,6 +13,7 @@
     "expo": "58.0.23",
     "expo-asset": "58.0.14",
     "expo-constants": "58.0.15",
+    "expo-crypto": "58.0.7",
     "expo-font": "58.0.11",
     "expo-linking": "58.0.16",
     "expo-network": "58.0.4",
@@ -62,6 +63,10 @@
     "test:e2e:session": "maestro test --format junit --output .maestro/results/session.xml .maestro/session.yaml",
     "pretest:e2e:barista": "npm run pretest:e2e:android",
     "test:e2e:barista": "maestro test --format junit --output .maestro/results/barista.xml .maestro/barista.yaml",
+    "pretest:e2e:cashier": "npm run pretest:e2e:android",
+    "test:e2e:cashier": "maestro test --format junit --output .maestro/results/cashier.xml .maestro/cashier.yaml",
+    "pretest:e2e:manager-orders": "npm run pretest:e2e:android",
+    "test:e2e:manager-orders": "maestro test --format junit --output .maestro/results/manager-orders.xml .maestro/manager-orders.yaml",
     "check": "npm run type-check && npm run lint && npm run format:check && npm test"
   }
 }
