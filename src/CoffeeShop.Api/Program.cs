@@ -24,6 +24,7 @@ builder.Services.AddCoffeeShopPostgres(connectionString);
 builder.Services.AddScoped<IClock, SystemClock>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
+builder.Services.AddScoped<InvalidMobileTokenCleanup>();
 builder.Services.AddScoped<CatalogQueryHandler>();
 builder.Services.AddScoped<CatalogCommandHandler>();
 builder.Services.AddScoped<RecipeCommandHandler>();

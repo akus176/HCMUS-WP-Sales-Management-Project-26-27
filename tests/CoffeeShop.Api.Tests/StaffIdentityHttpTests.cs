@@ -109,6 +109,22 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task InvalidDeviceTokenCleanup_RevokesOnlyMatchingActiveRegistration()
+    {
+        using var client = host!.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(client)).AccessToken);
+        var response = await client.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("android", "invalid-token"));
+        var id = (await response.Content.ReadFromJsonAsync<MobileDeviceResponse>())!.Id;
+        await using var db = Database();
+        var cleanup = new InvalidMobileTokenCleanup(db);
+        Assert.False(await cleanup.RevokeAsync("unknown-token"));
+        Assert.True(await cleanup.RevokeAsync("invalid-token"));
+        Assert.False(await cleanup.RevokeAsync("invalid-token"));
+        db.ChangeTracker.Clear();
+        Assert.NotNull((await db.MobileDeviceRegistrations.SingleAsync(device => device.Id == new EntityId(id))).RevokedAt);
+    }
+
+    [PostgresFact]
     public async Task LocalProvisioning_PersistsHashedPasswordAndExplicitRoleAssignments()
     {
         var values = new Dictionary<string, string?>
