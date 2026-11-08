@@ -127,6 +127,14 @@ public sealed partial class MainWindow : Window
         try
         {
             var configuration = CoffeeShopClientConfiguration.Load();
+            if (configuration.IsApiMode)
+            {
+                connection.Connected();
+                PresentConnection();
+                if (currentRoute is null && Nav.MenuItems.OfType<NavigationViewItem>().FirstOrDefault() is { } apiFirstItem)
+                    NavigateTo((string)apiFirstItem.Tag);
+                return;
+            }
             if (!configuration.IsConfigured) { Fail(configuration.Error ?? "Database settings are missing."); return; }
             using var scope = App.Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();

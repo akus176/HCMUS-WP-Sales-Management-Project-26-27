@@ -1,6 +1,7 @@
 using CoffeeShop.Application.Catalog;
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -161,7 +162,7 @@ public sealed partial class CatalogPage : Page
     public CatalogPage()
     {
         InitializeComponent();
-        model = new CatalogWorkspace(App.Services.GetRequiredService<IServiceScopeFactory>());
+        model = new CatalogWorkspace(App.Services.GetRequiredService<ICatalogWorkspaceSource>());
         model.PropertyChanged += (_, _) => Render();
         Loaded += OnLoaded;
     }
@@ -618,11 +619,11 @@ public sealed partial class CatalogPage : Page
                 inputs.Add(new RecipeLineInput(option.Id, quantity, line.Unit.Text));
             }
 
-            return await model.SaveAsync((_, recipes) => recipes.ReplaceRecipeAsync(new ReplaceRecipeCommand(variant.Id, inputs)), "Recipe saved.");
+            return await model.SaveAsync((commands, _) => commands.ReplaceRecipeAsync(new ReplaceRecipeCommand(variant.Id, inputs)), "Recipe saved.");
         });
     }
 
-    private Task ConfirmAsync(string title, string explanation, Func<CatalogCommandHandler, RecipeCommandHandler, Task<Result>> action) =>
+    private Task ConfirmAsync(string title, string explanation, Func<ICatalogWorkspaceSource, ICatalogWorkspaceSource, Task<Result>> action) =>
         ShowEditorAsync(title, Form(new TextBlock { Text = explanation, TextWrapping = TextWrapping.Wrap }),
             () => model.SaveAsync(action, "Deactivated. Historical references are preserved."), "Deactivate");
 

@@ -14,6 +14,7 @@ public partial class App : Microsoft.UI.Xaml.Application
     private Window? _window;
 
     public static ServiceProvider Services { get; private set; } = null!;
+    public static bool IsApiMode { get; private set; }
 
     public Window? Window => _window;
 
@@ -70,9 +71,10 @@ public partial class App : Microsoft.UI.Xaml.Application
 
     private static void ConfigureServices(CoffeeShopClientConfiguration configuration)
     {
-        var registrations = new ServiceCollection()
-            .AddCoffeeShopApiClient(configuration.ApiBaseAddress)
-            .AddCoffeeShopDirectClient(configuration.ConnectionString ?? string.Empty);
+        IsApiMode = configuration.IsApiMode;
+        var registrations = new ServiceCollection().AddCoffeeShopApiClient(configuration.ApiBaseAddress);
+        if (!configuration.IsApiMode)
+            registrations.AddCoffeeShopDirectClient(configuration.ConnectionString ?? string.Empty);
         if (!Environment.GetCommandLineArgs().Contains("--verify-shell"))
         {
             registrations.AddSingleton(provider => new PosWorkspace(provider.GetRequiredService<IServiceScopeFactory>(),

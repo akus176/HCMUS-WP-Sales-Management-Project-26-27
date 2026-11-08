@@ -6,6 +6,7 @@ using CoffeeShop.Application.Inventory;
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Common;
+using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -28,11 +29,14 @@ internal static class WinUIServiceCollectionExtensions
         services.AddScoped<CatalogCommandHandler>();
         services.AddScoped<CatalogQueryHandler>();
         services.AddScoped<RecipeCommandHandler>();
+        services.AddSingleton<ICatalogWorkspaceSource, DirectCatalogWorkspaceSource>();
         services.AddScoped<CustomerCommandHandler>();
         services.AddScoped<CustomerQueryHandler>();
         services.AddScoped<CustomerOrderSelectionHandler>();
         services.AddSingleton<CustomerOrderContext>();
-        services.AddSingleton<CustomerWorkspace>();
+        services.AddSingleton<ICustomerWorkspaceSource, DirectCustomerWorkspaceSource>();
+        services.AddSingleton<CustomerWorkspace>(provider => new CustomerWorkspace(
+            provider.GetRequiredService<ICustomerWorkspaceSource>(), provider.GetRequiredService<CustomerOrderContext>()));
         services.AddScoped<PosOrderHandler>();
         services.AddScoped<OrderConfirmationCommandHandler>();
         services.AddScoped<DiscountCommandHandler>();
