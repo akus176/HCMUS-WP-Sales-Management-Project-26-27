@@ -435,6 +435,47 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                         });
                 });
 
+            modelBuilder.Entity("CoffeeShop.Domain.Identity.MobileDeviceRegistration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("LastSeenAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("last_seen_at");
+
+                    b.Property<string>("Platform")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("platform");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("token");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique()
+                        .HasFilter("revoked_at IS NULL");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("mobile_device_registrations", "identity");
+                });
+
             modelBuilder.Entity("CoffeeShop.Domain.Identity.Permission", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1752,6 +1793,17 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                     b.Navigation("Customer");
 
                     b.Navigation("ReversesTransaction");
+                });
+
+            modelBuilder.Entity("CoffeeShop.Domain.Identity.MobileDeviceRegistration", b =>
+                {
+                    b.HasOne("CoffeeShop.Domain.Identity.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CoffeeShop.Domain.Identity.RefreshToken", b =>

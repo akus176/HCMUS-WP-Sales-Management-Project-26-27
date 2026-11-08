@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="CoffeeShop_138_API36" tests="1" failures="0" time="65.071" timestamp="2026-11-08T13:29:29">
+    <testcase id="Cashier payment against the shared API" name="Cashier payment against the shared API" classname="Cashier payment against the shared API" file=".maestro\cashier.yaml" time="65.044" timestamp="2026-11-08T13:29:29" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

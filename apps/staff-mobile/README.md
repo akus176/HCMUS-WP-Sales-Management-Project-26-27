@@ -172,6 +172,10 @@ and `$env:CMAKE_BUILD_PARALLEL_LEVEL = '2'` for the current terminal first.
 
 ## Android E2E smoke test
 
+For cashier payment and manager cancellation/assignment, see the
+[#182 workflow evidence and reproduction steps](../../docs/evidence/mobile-order-operations-182/README.md).
+The flows use synthetic data in a disposable shared API and verify server-confirmed outcomes.
+
 Install **Maestro CLI 2.12.1** from the official
 [release](https://github.com/mobile-dev-inc/Maestro/releases/tag/cli-2.12.1).
 Extract its distribution outside this repository and put its `bin` directory on

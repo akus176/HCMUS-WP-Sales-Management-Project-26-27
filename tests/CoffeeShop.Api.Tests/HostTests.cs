@@ -120,6 +120,31 @@ public sealed class HostTests
     }
 
     [Fact]
+    public async Task MobileDeviceOpenApiMatchesProtectedOperations()
+    {
+        using var host = CreateHost();
+        using var client = host.CreateClient();
+        using var document = JsonDocument.Parse(await client.GetStringAsync("/openapi/v1.json"));
+        var paths = document.RootElement.GetProperty("paths");
+        foreach (var (path, method, success) in new[]
+        {
+            ("/api/v1/mobile-devices", "post", "201"),
+            ("/api/v1/mobile-devices/{id}", "put", "204"),
+            ("/api/v1/mobile-devices/{id}", "delete", "204"),
+        })
+        {
+            var operation = paths.GetProperty(path).GetProperty(method);
+            Assert.True(operation.GetProperty("security")[0].TryGetProperty("Bearer", out _));
+            Assert.True(operation.GetProperty("responses").TryGetProperty(success, out _));
+            Assert.True(operation.GetProperty("responses").TryGetProperty("401", out _));
+        }
+        var request = document.RootElement.GetProperty("components").GetProperty("schemas")
+            .GetProperty("MobileDeviceRequest").GetProperty("properties");
+        Assert.True(request.TryGetProperty("platform", out _));
+        Assert.True(request.TryGetProperty("token", out _));
+    }
+
+    [Fact]
     public async Task CustomerAndLoyaltyOpenApi_ExposesProtectedRoutesAndContracts()
     {
         using var host = CreateHost();
