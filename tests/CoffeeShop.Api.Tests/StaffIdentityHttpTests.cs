@@ -3,8 +3,10 @@ namespace CoffeeShop.Api.Tests;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Json;
+using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using CoffeeShop.Api;
 using CoffeeShop.Application.Reporting;
 using CoffeeShop.Contracts;
@@ -14,10 +16,12 @@ using CoffeeShop.Domain.Sales;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 
@@ -49,7 +53,8 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         await AddUserAsync(db, "multi", ["Cashier", "Barista"]);
         await AddUserAsync(db, "inactive", ["Cashier"], false);
         host = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.UseTestIdentity().UseSetting("ConnectionStrings:CoffeeShop", connectionString));
+            builder.UseTestIdentity().UseSetting("ConnectionStrings:CoffeeShop", connectionString)
+                .ConfigureLogging(logging => logging.ClearProviders()));
     }
 
     private CoffeeShopDbContext Database()
@@ -79,6 +84,238 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
         return (await response.Content.ReadFromJsonAsync<TokenResponse>())!;
+    }
+
+    [PostgresFact]
+    public async Task MobileDevices_RequireAuthenticationAndEnforceOwnershipRotationAndRevocation()
+    {
+        using var owner = host!.CreateClient();
+        using var other = host.CreateClient();
+        var request = new MobileDeviceRequest("android", "token-a");
+        Assert.Equal(HttpStatusCode.Unauthorized, (await owner.PostAsJsonAsync("/api/v1/mobile-devices/", request)).StatusCode);
+        owner.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(owner)).AccessToken);
+        other.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(other, "Barista")).AccessToken);
+        Assert.Equal(HttpStatusCode.BadRequest, (await owner.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("android", " "))).StatusCode);
+        using var created = await owner.PostAsJsonAsync("/api/v1/mobile-devices/", request);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var id = (await created.Content.ReadFromJsonAsync<MobileDeviceResponse>())!.Id;
+        var path = $"/api/v1/mobile-devices/{id}";
+        Assert.Equal(HttpStatusCode.Conflict, (await other.PostAsJsonAsync("/api/v1/mobile-devices/", request)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await other.PutAsJsonAsync(path, new MobileDeviceRequest("ios", "token-b"))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await other.DeleteAsync(path)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await owner.PutAsJsonAsync(path, new MobileDeviceRequest("ios", "token-b"))).StatusCode);
+        Assert.Equal(HttpStatusCode.Created, (await other.PostAsJsonAsync("/api/v1/mobile-devices/", request)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await owner.DeleteAsync(path)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await owner.PutAsJsonAsync(path, request)).StatusCode);
+        Assert.Equal(HttpStatusCode.Created, (await owner.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("ios", "token-b"))).StatusCode);
+    }
+
+    [PostgresFact]
+    public async Task InvalidDeviceTokenCleanup_RevokesOnlyMatchingActiveRegistration()
+    {
+        using var client = host!.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(client)).AccessToken);
+        var response = await client.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("android", "invalid-token"));
+        var id = (await response.Content.ReadFromJsonAsync<MobileDeviceResponse>())!.Id;
+        await using var db = Database();
+        var cleanup = new InvalidMobileTokenCleanup(db);
+        Assert.False(await cleanup.RevokeAsync("unknown-token"));
+        Assert.True(await cleanup.RevokeAsync("invalid-token"));
+        Assert.False(await cleanup.RevokeAsync("invalid-token"));
+        db.ChangeTracker.Clear();
+        Assert.NotNull((await db.MobileDeviceRegistrations.SingleAsync(device => device.Id == new EntityId(id))).RevokedAt);
+
+        var next = await client.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("android", "old-token"));
+        var nextId = (await next.Content.ReadFromJsonAsync<MobileDeviceResponse>())!.Id;
+        Assert.Equal(HttpStatusCode.NoContent, (await client.PutAsJsonAsync($"/api/v1/mobile-devices/{nextId}", new MobileDeviceRequest("android", "new-token"))).StatusCode);
+        Assert.False(await cleanup.RevokeAsync("old-token"));
+        db.ChangeTracker.Clear();
+        Assert.Null((await db.MobileDeviceRegistrations.SingleAsync(device => device.Id == new EntityId(nextId))).RevokedAt);
+    }
+
+    [PostgresFact]
+    public async Task OperationalHub_RequiresAuthenticationAndRejectsClientGroupSelection()
+    {
+        using var client = host!.CreateClient();
+        Assert.Equal(HttpStatusCode.Unauthorized,
+            (await client.PostAsync("/api/v1/operational-events/negotiate?negotiateVersion=1", null)).StatusCode);
+        var token = (await LoginAsync(client, "Barista")).AccessToken;
+        var socketClient = host.Server.CreateWebSocketClient();
+        socketClient.ConfigureRequest = request => request.Headers.Authorization = $"Bearer {token}";
+        using var socket = await socketClient.ConnectAsync(new Uri("ws://localhost/api/v1/operational-events"), CancellationToken.None);
+        async Task Send(string value) => await socket.SendAsync(Encoding.UTF8.GetBytes(value + '\u001e'), WebSocketMessageType.Text, true, CancellationToken.None);
+        async Task<string> Receive()
+        {
+            var bytes = new byte[8192];
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var result = await socket.ReceiveAsync(bytes, timeout.Token);
+            return Encoding.UTF8.GetString(bytes, 0, result.Count);
+        }
+        await Send("{\"protocol\":\"json\",\"version\":1}");
+        Assert.Contains("{}", await Receive());
+        await Send("{\"type\":1,\"invocationId\":\"1\",\"target\":\"JoinGroup\",\"arguments\":[\"permission:users.manage\"]}");
+        var reply = await Receive();
+        Assert.Contains("error", reply, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("1", reply);
+    }
+
+    [PostgresFact]
+    public async Task OperationalNotifications_ArriveOnlyAfterCommitAndContainIdentifiersOnly()
+    {
+        await using var listener = new NpgsqlConnection(connectionString);
+        await listener.OpenAsync();
+        var notifications = new List<string>();
+        listener.Notification += (_, args) => notifications.Add(args.Payload);
+        await using (var command = new NpgsqlCommand("LISTEN coffeeshop_operational_events", listener)) await command.ExecuteNonQueryAsync();
+        await using var writer = new NpgsqlConnection(connectionString);
+        await writer.OpenAsync();
+        await using (var tx = await writer.BeginTransactionAsync())
+        {
+            await using var update = new NpgsqlCommand("UPDATE identity.users SET full_name = 'changed private name' WHERE username = 'Cashier'", writer, tx);
+            await update.ExecuteNonQueryAsync();
+            Assert.False(await listener.WaitAsync(300));
+            await tx.RollbackAsync();
+        }
+        Assert.False(await listener.WaitAsync(300));
+        Assert.Empty(notifications);
+        await using (var tx = await writer.BeginTransactionAsync())
+        {
+            await using var update = new NpgsqlCommand("UPDATE identity.users SET full_name = 'changed private name' WHERE username = 'Cashier'", writer, tx);
+            await update.ExecuteNonQueryAsync();
+            Assert.False(await listener.WaitAsync(300));
+            await tx.CommitAsync();
+        }
+        Assert.True(await listener.WaitAsync(5000));
+        using var payload = JsonDocument.Parse(Assert.Single(notifications));
+        Assert.Equal(new[] { "id", "type", "updatedAt" }, payload.RootElement.EnumerateObject().Select(p => p.Name).Order().ToArray());
+        Assert.Equal("account", payload.RootElement.GetProperty("type").GetString());
+        Assert.True(Guid.TryParse(payload.RootElement.GetProperty("id").GetString(), out _));
+        Assert.DoesNotContain("private name", notifications[0]);
+    }
+
+    [PostgresFact]
+    public async Task OperationalNotifications_CoverEveryMappedBusinessArea()
+    {
+        await using var listener = new NpgsqlConnection(connectionString);
+        await listener.OpenAsync();
+        var notifications = new List<string>();
+        listener.Notification += (_, args) => notifications.Add(args.Payload);
+        await using (var listen = new NpgsqlCommand("LISTEN coffeeshop_operational_events", listener)) await listen.ExecuteNonQueryAsync();
+        await using var writer = new NpgsqlConnection(connectionString);
+        await writer.OpenAsync();
+        await using (var tx = await writer.BeginTransactionAsync())
+        {
+            const string sql = """
+                INSERT INTO sales.orders (id, order_number, channel, created_by)
+                  SELECT '11111111-1111-1111-1111-111111111111', 'EVENT-TEST', 'delivery', id FROM identity.users WHERE username = 'Cashier';
+                INSERT INTO sales.discounts (order_id, type, value, reason, requested_by)
+                  SELECT '11111111-1111-1111-1111-111111111111', 'fixed', 1, 'private reason', id FROM identity.users WHERE username = 'Cashier';
+                INSERT INTO sales.payments (order_id, method, amount, recorded_by)
+                  SELECT '11111111-1111-1111-1111-111111111111', 'cash', 1, id FROM identity.users WHERE username = 'Cashier';
+                INSERT INTO inventory.ingredients (name, base_unit) VALUES ('Event Beans', 'g');
+                INSERT INTO sales.deliveries (order_id, recipient_name, contact_number, address_line)
+                  VALUES ('11111111-1111-1111-1111-111111111111', 'private recipient', '123456789', 'private address');
+                UPDATE identity.users SET full_name = 'private name' WHERE username = 'Cashier';
+                """;
+            await using var command = new NpgsqlCommand(sql, writer, tx);
+            await command.ExecuteNonQueryAsync();
+            Assert.False(await listener.WaitAsync(300));
+            await tx.CommitAsync();
+        }
+        while (notifications.Count < 6 && await listener.WaitAsync(5000)) { }
+        var types = notifications.Select(payload =>
+        {
+            using var json = JsonDocument.Parse(payload);
+            Assert.Equal(new[] { "id", "type", "updatedAt" }, json.RootElement.EnumerateObject().Select(p => p.Name).Order().ToArray());
+            Assert.True(Guid.TryParse(json.RootElement.GetProperty("id").GetString(), out _));
+            Assert.DoesNotContain("private", payload, StringComparison.OrdinalIgnoreCase);
+            return json.RootElement.GetProperty("type").GetString();
+        }).Order().ToArray();
+        Assert.Equal(new[] { "account", "delivery", "discount", "inventory", "order", "payment" }, types);
+    }
+
+    [PostgresFact]
+    public async Task OperationalEvents_AreDeliveredOnlyToCurrentlyAuthorizedUsers()
+    {
+        using var http = host!.CreateClient();
+        var admin = (await LoginAsync(http, "Admin")).AccessToken;
+        var barista = (await LoginAsync(http, "Barista")).AccessToken;
+        async Task<WebSocket> Connect(string token)
+        {
+            var client = host.Server.CreateWebSocketClient();
+            client.ConfigureRequest = request => request.Headers.Authorization = $"Bearer {token}";
+            var socket = await client.ConnectAsync(new Uri("ws://localhost/api/v1/operational-events"), CancellationToken.None);
+            await socket.SendAsync(Encoding.UTF8.GetBytes("{\"protocol\":\"json\",\"version\":1}\u001e"), WebSocketMessageType.Text, true, CancellationToken.None);
+            var buffer = new byte[4096];
+            await socket.ReceiveAsync(buffer, CancellationToken.None);
+            return socket;
+        }
+        using var adminSocket = await Connect(admin);
+        using var baristaSocket = await Connect(barista);
+        // Let the background listener establish LISTEN before producing the committed update.
+        await Task.Delay(500);
+        await using (var db = Database())
+            await db.Database.ExecuteSqlRawAsync("UPDATE identity.users SET full_name = 'Private Updated Name' WHERE username = 'Cashier'");
+        var bytes = new byte[4096];
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var received = await adminSocket.ReceiveAsync(bytes, timeout.Token);
+        var message = Encoding.UTF8.GetString(bytes, 0, received.Count);
+        Assert.Contains("OperationalEvent", message);
+        Assert.Contains("account", message);
+        Assert.DoesNotContain("Private Updated Name", message);
+        using var noMessage = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await baristaSocket.ReceiveAsync(bytes, noMessage.Token));
+
+        // Existing connections must stop receiving privileged events after their role is removed.
+        await using (var db = Database())
+            await db.Database.ExecuteSqlRawAsync("DELETE FROM identity.user_roles WHERE user_id = (SELECT id FROM identity.users WHERE username = 'Admin')");
+        using var ownChangeTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        await adminSocket.ReceiveAsync(bytes, ownChangeTimeout.Token); // the user's own account-change hint
+        await using (var db = Database())
+            await db.Database.ExecuteSqlRawAsync("UPDATE identity.users SET full_name = 'Another Private Name' WHERE username = 'Cashier'");
+        using var revokedTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await adminSocket.ReceiveAsync(bytes, revokedTimeout.Token));
+    }
+
+    [PostgresFact]
+    public async Task DeliveryEvents_AreScopedToTheAssignedCourier()
+    {
+        Guid orderId = Guid.NewGuid();
+        await using (var db = Database())
+        {
+            await AddUserAsync(db, "courier2", ["DeliveryStaff"]);
+            var courier = await db.Users.SingleAsync(u => u.Username == "DeliveryStaff");
+            var actor = await db.Users.SingleAsync(u => u.Username == "Cashier");
+            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO sales.orders (id, order_number, channel, created_by) VALUES ({orderId}, 'EVENT-DELIVERY', 'delivery', {actor.Id.Value})");
+            var deliveryId = Guid.NewGuid();
+            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO sales.deliveries (id, order_id, recipient_name, contact_number, address_line, status, assigned_staff_id) VALUES ({deliveryId}, {orderId}, 'Private Name', '123456789', 'Private Address', 'assigned', {courier.Id.Value})");
+        }
+        using var http = host!.CreateClient();
+        var assignedToken = (await LoginAsync(http, "DeliveryStaff")).AccessToken;
+        var otherToken = (await LoginAsync(http, "courier2")).AccessToken;
+        async Task<WebSocket> Connect(string token)
+        {
+            var client = host.Server.CreateWebSocketClient();
+            client.ConfigureRequest = request => request.Headers.Authorization = $"Bearer {token}";
+            var socket = await client.ConnectAsync(new Uri("ws://localhost/api/v1/operational-events"), CancellationToken.None);
+            await socket.SendAsync(Encoding.UTF8.GetBytes("{\"protocol\":\"json\",\"version\":1}\u001e"), WebSocketMessageType.Text, true, CancellationToken.None);
+            await socket.ReceiveAsync(new byte[4096], CancellationToken.None);
+            return socket;
+        }
+        using var assigned = await Connect(assignedToken);
+        using var other = await Connect(otherToken);
+        await Task.Delay(500);
+        await using (var db = Database())
+            await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE sales.deliveries SET address_line = 'New Private Address' WHERE order_id = {orderId}");
+        var buffer = new byte[4096];
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var result = await assigned.ReceiveAsync(buffer, timeout.Token);
+        var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+        Assert.Contains(orderId.ToString(), message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("delivery", message);
+        Assert.DoesNotContain("Private", message);
+        using var noMessage = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await other.ReceiveAsync(buffer, noMessage.Token));
     }
 
     [PostgresFact]
