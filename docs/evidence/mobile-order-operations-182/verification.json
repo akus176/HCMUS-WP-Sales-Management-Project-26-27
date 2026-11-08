@@ -8,13 +8,34 @@
     "format": "passed",
     "tests": { "total": 165, "passed": 165, "failed": 0, "suites": 17 }
   },
-  "apiPostgres": { "total": 41, "executed": 41, "passed": 41, "failed": 0, "notExecuted": 0 },
+  "apiPostgres": {
+    "total": 41,
+    "executed": 41,
+    "passed": 41,
+    "failed": 0,
+    "notExecuted": 0
+  },
   "android": {
     "debugBuild": "passed",
     "install": "passed on Android 16 API 36 x86_64 emulator",
     "apkSha256": "48CF41ACB67F64D0ED9D552BC120771B9DE1A1AC23A9CBFC1AEEF1448DC66524",
     "hermesExport": "passed, 1257 modules",
-    "cashierE2E": "not run: awaiting user-started API and Metro",
-    "managerE2E": "not run: awaiting user-started API and Metro"
-  }
+    "cashierE2E": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "seconds": 65.071,
+      "report": "cashier.xml"
+    },
+    "managerE2E": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "seconds": 105.416,
+      "report": "manager-orders.xml"
+    }
+  },
+  "separateManagerSession": { "total": 3, "passed": 3, "failed": 0 },
+  "contractPipeline": "passed: deterministic OpenAPI, TypeScript generation and contract type checks",
+  "reviewGate": "JakeConal approval required; check current PR decision"
 }

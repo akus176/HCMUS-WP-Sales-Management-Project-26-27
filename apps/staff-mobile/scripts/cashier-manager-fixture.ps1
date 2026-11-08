@@ -15,7 +15,10 @@ $headers = @{ Authorization = "Bearer $($login.accessToken)" }
 function Send([string]$Path, $Body) {
     Invoke-RestMethod -Method Post -Uri "$base/$Path" -Headers $headers -ContentType 'application/json' -Body ($Body | ConvertTo-Json -Depth 8)
 }
-function Read([string]$Path) { Invoke-RestMethod -Uri "$base/$Path" -Headers $headers }
+function Read([string]$Path) {
+    $response = Invoke-RestMethod -Uri "$base/$Path" -Headers $headers
+    $response
+}
 if ($Action -eq 'Seed') {
     $table = @(Read 'pos/tables') | Where-Object { $_.id -eq $env:COFFEESHOP_MOBILE_TEST_TABLE_ID -and !$_.isOccupied }
     if (!$table) { throw 'Supply the ID of an available synthetic table in the disposable database.' }

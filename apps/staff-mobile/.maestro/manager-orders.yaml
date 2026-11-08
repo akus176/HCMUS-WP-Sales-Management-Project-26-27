@@ -45,14 +45,12 @@ name: Manager cancellation and ready delivery assignment against the shared API
 - assertVisible: Cancellation confirmed by the service.
 - takeScreenshot: .maestro/results/manager-cancelled
 - scrollUntilVisible:
-    element: Back to order search
+    element: Back to staff home
     direction: UP
-- tapOn: Back to order search
-- scrollUntilVisible:
-    element: Search orders
-    direction: UP
+- tapOn: Back to staff home
+- tapOn: Open Approvals
+- tapOn: Manage cancellations and deliveries
 - tapOn: Search orders
-- eraseText
 - inputText: ${MAESTRO_DELIVERY_ORDER}
 - hideKeyboard
 - scrollUntilVisible:

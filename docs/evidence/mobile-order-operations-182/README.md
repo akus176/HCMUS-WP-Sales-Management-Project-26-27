@@ -42,11 +42,14 @@ Run commands from the repository root unless an app directory is stated.
 | New order component tests | 22 passed: search/table navigation, refreshed state, payment guards/retry identity, card/e-wallet references, cancellation/assignment, conflicts, authorization, offline behavior and unavailable details |
 | PostgreSQL-backed API suite | **41 passed, 0 failed, 0 skipped**, 6m29s |
 | `npm run api:check` in `apps/staff-mobile` | Passed; generated TypeScript has no content drift |
+| `npm run check` in `contracts/mobile-p0` | Passed; deterministic OpenAPI/TypeScript generation and contract type checks |
 | `openspec validate add-staff-mobile-app --strict` | Passed |
 | `dotnet format tests/CoffeeShop.Api.Tests/CoffeeShop.Api.Tests.csproj --verify-no-changes --no-restore --include tests/CoffeeShop.Api.Tests/StaffIdentityHttpTests.cs` | Passed |
 | Native Android debug build/install | Passed on Android 16 / API 36 x86_64 emulator; 326 tasks, 8m05s |
 | Final-source Android export | Passed; 1,257 modules, 2.8 MB Hermes bundle |
-| Real-API Android cashier and manager flows | Pending environment setup; no pass claimed |
+| `npm run test:e2e:cashier` in `apps/staff-mobile` | **1/1 passed**, 65.071s ([JUnit](cashier.xml)) |
+| `npm run test:e2e:manager-orders` in `apps/staff-mobile` | **1/1 passed**, 105.416s ([JUnit](manager-orders.xml)) |
+| Fixture `-Action Verify` after both native flows | **3/3 passed** from a separate manager API session: exact paid balance, cancellation/table release, assigned courier |
 
 PostgreSQL command:
 
@@ -71,7 +74,20 @@ Native build used a short verification checkout at `F:\cs182` to avoid Windows
 path limits and JDK 17 / the existing task-local Android SDK. Command:
 `android\gradlew.bat -p android :app:assembleDebug -PreactNativeArchitectures=x86_64 --console=plain`.
 APK SHA256: `48CF41ACB67F64D0ED9D552BC120771B9DE1A1AC23A9CBFC1AEEF1448DC66524`.
-Build/install/export are not rendered workflow acceptance evidence.
+Native acceptance used fresh synthetic orders in the disposable API database.
+Visually reviewed screenshots: [payment review](cashier-review.png),
+[confirmed payment and zero balance](cashier-paid.png),
+[confirmed cancellation](manager-cancelled.png), and
+[confirmed eligible courier assignment](manager-assigned.png).
+
+Earlier attempts exposed two test-environment issues: Android System UI ANR before
+login, and Maestro backspacing from the middle of a retained search query. Stopping
+the build daemon/dismissing the observed ANR and reopening the manager search between
+actions resolved them. Neither assertions nor timeouts were weakened. After both
+final native flows passed, the separate-session script initially failed because
+PowerShell retained the REST array as a nested pipeline object. Explicit enumeration
+fixed the script; its unchanged state assertions then passed 3/3. No product change
+was needed for these failures.
 
 ## Reproduce Android workflow verification
 
@@ -113,14 +129,13 @@ or machine-specific settings in the repository.
 
 ## Remaining merge gates
 
-Automatic approval review rejected both the combined disposable database/account/API
-startup command and standalone Metro startup, returning only `blocked by policy`.
-No alternate route or native workflow pass is claimed. Concrete user-run setup scripts
-have been prepared locally. The user created the disposable database, then exposed
-missing issuer/audience values in the setup script; these values and resumability were
-fixed. Real-API emulator verification is pending the user-started API/Metro environment.
+The user started the disposable API and Metro after automatic approval review rejected
+their startup with only `blocked by policy`. The setup script's missing JWT
+issuer/audience values were fixed before the successful native runs.
 
-Final-head hosted CI, mergeability and reviewer decisions must be checked on the PR.
-Required reviewer is **JakeConal**. Requesting review is not approval. #182 remains
-open until its acceptance evidence and the named review decision are complete;
-canonical task checkboxes must not be checked for partial evidence.
+All five hosted checks passed on implementation commit `455c9a1` (run `42454161577`).
+Final-head CI, mergeability and current review decisions are visible on
+[PR #191](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/191).
+Required reviewer is **JakeConal**. #182 remains open until that reviewer records
+approval. The function list retains Planned status because no final video timestamp
+was produced; this does not replace the linked native/API evidence.
