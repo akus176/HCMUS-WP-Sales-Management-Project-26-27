@@ -684,12 +684,30 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
             "/api/v1/courier/assignments?status=delivered,failed"))!.Items);
         using var expiredDetail = await courier.GetAsync($"/api/v1/courier/assignments/{orderId}");
         Assert.Equal(HttpStatusCode.NotFound, expiredDetail.StatusCode);
+        var failedId = Guid.NewGuid();
+        using var failedDraft = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(failedId, "delivery", null,
+            new OrderCustomerRequest(RecipientName: "Customer", ContactNumber: "1234567890", AddressLine: "456 Main St"),
+            [new OrderLineRequest(item.Id, Assert.Single(item.SizeVariants).Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, failedDraft.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await manager.PostAsJsonAsync($"/api/v1/orders/{failedId}/confirm", new ConfirmOrderRequest(5m))).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await manager.PostAsync($"/api/v1/orders/{failedId}/preparing", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await manager.PostAsync($"/api/v1/orders/{failedId}/ready", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await manager.PostAsJsonAsync($"/api/v1/orders/{failedId}/assign-delivery", new AssignDeliveryRequest(courierLogin.User.Id))).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await courier.PostAsync($"/api/v1/courier/assignments/{failedId}/start", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await courier.PostAsJsonAsync($"/api/v1/courier/assignments/{failedId}/fail", new FailDeliveryRequest(" "))).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await courier.PostAsJsonAsync($"/api/v1/courier/assignments/{failedId}/fail", new FailDeliveryRequest("Customer unavailable"))).StatusCode);
+        var failedAssignments = await courier.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>(
+            "/api/v1/courier/assignments?status=failed");
+        Assert.Equal(failedId, Assert.Single(failedAssignments!.Items).OrderId);
+        Assert.Empty((await other.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>("/api/v1/courier/assignments?status=failed"))!.Items);
+        Assert.Equal(HttpStatusCode.NotFound, (await courier.GetAsync($"/api/v1/courier/assignments/{failedId}")).StatusCode);
         await using var finalDb = Database();
         var history = await finalDb.DeliveryStatusHistories.ToArrayAsync();
-        Assert.Equal(3, history.Length);
-        Assert.Equal(new EntityId(managerLogin.User.Id), history.Single(change => change.ToStatus == "assigned").ActorId);
+        Assert.Equal(6, history.Length);
+        Assert.All(history.Where(change => change.ToStatus == "assigned"), change => Assert.Equal(new EntityId(managerLogin.User.Id), change.ActorId));
         Assert.All(history.Where(change => change.ToStatus != "assigned"),
             change => Assert.Equal(new EntityId(courierLogin.User.Id), change.ActorId));
+        Assert.Equal("Customer unavailable", (await finalDb.Deliveries.SingleAsync(delivery => delivery.OrderId == new EntityId(failedId))).FailureReason);
     }
 
     [PostgresFact]
