@@ -101,6 +101,7 @@ app.MapHealthChecks("/health/ready", new() { Predicate = check => check.Tags.Con
 
 var api = app.MapGroup("/api/v1");
 api.MapStaffIdentity();
+api.MapMobileDevices();
 api.MapInventoryEndpoints();
 api.MapCatalogEndpoints();
 api.MapSalesEndpoints();

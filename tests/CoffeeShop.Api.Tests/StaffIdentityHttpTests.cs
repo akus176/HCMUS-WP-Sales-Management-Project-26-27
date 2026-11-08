@@ -14,10 +14,12 @@ using CoffeeShop.Domain.Sales;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 
@@ -49,7 +51,8 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         await AddUserAsync(db, "multi", ["Cashier", "Barista"]);
         await AddUserAsync(db, "inactive", ["Cashier"], false);
         host = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.UseTestIdentity().UseSetting("ConnectionStrings:CoffeeShop", connectionString));
+            builder.UseTestIdentity().UseSetting("ConnectionStrings:CoffeeShop", connectionString)
+                .ConfigureLogging(logging => logging.ClearProviders()));
     }
 
     private CoffeeShopDbContext Database()
@@ -79,6 +82,30 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
         return (await response.Content.ReadFromJsonAsync<TokenResponse>())!;
+    }
+
+    [PostgresFact]
+    public async Task MobileDevices_RequireAuthenticationAndEnforceOwnershipRotationAndRevocation()
+    {
+        using var owner = host!.CreateClient();
+        using var other = host.CreateClient();
+        var request = new MobileDeviceRequest("android", "token-a");
+        Assert.Equal(HttpStatusCode.Unauthorized, (await owner.PostAsJsonAsync("/api/v1/mobile-devices/", request)).StatusCode);
+        owner.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(owner)).AccessToken);
+        other.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(other, "Barista")).AccessToken);
+        Assert.Equal(HttpStatusCode.BadRequest, (await owner.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("android", " "))).StatusCode);
+        using var created = await owner.PostAsJsonAsync("/api/v1/mobile-devices/", request);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var id = (await created.Content.ReadFromJsonAsync<MobileDeviceResponse>())!.Id;
+        var path = $"/api/v1/mobile-devices/{id}";
+        Assert.Equal(HttpStatusCode.Conflict, (await other.PostAsJsonAsync("/api/v1/mobile-devices/", request)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await other.PutAsJsonAsync(path, new MobileDeviceRequest("ios", "token-b"))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await other.DeleteAsync(path)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await owner.PutAsJsonAsync(path, new MobileDeviceRequest("ios", "token-b"))).StatusCode);
+        Assert.Equal(HttpStatusCode.Created, (await other.PostAsJsonAsync("/api/v1/mobile-devices/", request)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await owner.DeleteAsync(path)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await owner.PutAsJsonAsync(path, request)).StatusCode);
+        Assert.Equal(HttpStatusCode.Created, (await owner.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("ios", "token-b"))).StatusCode);
     }
 
     [PostgresFact]

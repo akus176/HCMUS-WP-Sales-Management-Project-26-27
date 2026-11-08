@@ -29,4 +29,15 @@ public class MobileDeviceRegistration
     public UtcTimestamp? RevokedAt { get; protected set; }
 
     public void Revoke(UtcTimestamp now) => RevokedAt ??= now;
+
+    public void Rotate(string platform, string token, UtcTimestamp now)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(platform);
+        ArgumentException.ThrowIfNullOrWhiteSpace(token);
+        ArgumentNullException.ThrowIfNull(now);
+        if (RevokedAt is not null) throw new InvalidOperationException("A revoked registration cannot be rotated.");
+        Platform = platform.Trim();
+        Token = token.Trim();
+        LastSeenAt = now;
+    }
 }
