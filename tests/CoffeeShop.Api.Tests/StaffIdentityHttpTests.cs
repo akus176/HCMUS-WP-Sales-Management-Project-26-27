@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using CoffeeShop.Api;
 using CoffeeShop.Application.Reporting;
 using CoffeeShop.Contracts;
@@ -149,6 +150,73 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         var reply = await Receive();
         Assert.Contains("error", reply, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("1", reply);
+    }
+
+    [PostgresFact]
+    public async Task OperationalNotifications_ArriveOnlyAfterCommitAndContainIdentifiersOnly()
+    {
+        await using var listener = new NpgsqlConnection(connectionString);
+        await listener.OpenAsync();
+        var notifications = new List<string>();
+        listener.Notification += (_, args) => notifications.Add(args.Payload);
+        await using (var command = new NpgsqlCommand("LISTEN coffeeshop_operational_events", listener)) await command.ExecuteNonQueryAsync();
+        await using var writer = new NpgsqlConnection(connectionString);
+        await writer.OpenAsync();
+        await using (var tx = await writer.BeginTransactionAsync())
+        {
+            await using var update = new NpgsqlCommand("UPDATE identity.users SET full_name = 'changed private name' WHERE username = 'Cashier'", writer, tx);
+            await update.ExecuteNonQueryAsync();
+            Assert.False(await listener.WaitAsync(300));
+            await tx.RollbackAsync();
+        }
+        Assert.False(await listener.WaitAsync(300));
+        Assert.Empty(notifications);
+        await using (var tx = await writer.BeginTransactionAsync())
+        {
+            await using var update = new NpgsqlCommand("UPDATE identity.users SET full_name = 'changed private name' WHERE username = 'Cashier'", writer, tx);
+            await update.ExecuteNonQueryAsync();
+            Assert.False(await listener.WaitAsync(300));
+            await tx.CommitAsync();
+        }
+        Assert.True(await listener.WaitAsync(5000));
+        using var payload = JsonDocument.Parse(Assert.Single(notifications));
+        Assert.Equal(new[] { "id", "type", "updatedAt" }, payload.RootElement.EnumerateObject().Select(p => p.Name).Order().ToArray());
+        Assert.Equal("account", payload.RootElement.GetProperty("type").GetString());
+        Assert.True(Guid.TryParse(payload.RootElement.GetProperty("id").GetString(), out _));
+        Assert.DoesNotContain("private name", notifications[0]);
+    }
+
+    [PostgresFact]
+    public async Task OperationalEvents_AreDeliveredOnlyToCurrentlyAuthorizedUsers()
+    {
+        using var http = host!.CreateClient();
+        var admin = (await LoginAsync(http, "Admin")).AccessToken;
+        var barista = (await LoginAsync(http, "Barista")).AccessToken;
+        async Task<WebSocket> Connect(string token)
+        {
+            var client = host.Server.CreateWebSocketClient();
+            client.ConfigureRequest = request => request.Headers.Authorization = $"Bearer {token}";
+            var socket = await client.ConnectAsync(new Uri("ws://localhost/api/v1/operational-events"), CancellationToken.None);
+            await socket.SendAsync(Encoding.UTF8.GetBytes("{\"protocol\":\"json\",\"version\":1}\u001e"), WebSocketMessageType.Text, true, CancellationToken.None);
+            var buffer = new byte[4096];
+            await socket.ReceiveAsync(buffer, CancellationToken.None);
+            return socket;
+        }
+        using var adminSocket = await Connect(admin);
+        using var baristaSocket = await Connect(barista);
+        // Let the background listener establish LISTEN before producing the committed update.
+        await Task.Delay(500);
+        await using (var db = Database())
+            await db.Database.ExecuteSqlRawAsync("UPDATE identity.users SET full_name = 'Private Updated Name' WHERE username = 'Cashier'");
+        var bytes = new byte[4096];
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var received = await adminSocket.ReceiveAsync(bytes, timeout.Token);
+        var message = Encoding.UTF8.GetString(bytes, 0, received.Count);
+        Assert.Contains("OperationalEvent", message);
+        Assert.Contains("account", message);
+        Assert.DoesNotContain("Private Updated Name", message);
+        using var noMessage = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await baristaSocket.ReceiveAsync(bytes, noMessage.Token));
     }
 
     [PostgresFact]
