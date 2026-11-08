@@ -514,6 +514,90 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/categories/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateCategoryRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/categories/{id}/deactivate": {
         parameters: {
             query?: never;
@@ -4556,6 +4640,59 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/size-variants/{variantId}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    variantId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stock-movements": {
         parameters: {
             query?: never;
@@ -5074,6 +5211,8 @@ export interface components {
             baseUnit: string;
             /** Format: uuid */
             ingredientId: string;
+            /** @default true */
+            isActive: boolean;
             name: string;
             /** Format: double */
             reorderThreshold: number | string;
@@ -5381,6 +5520,8 @@ export interface components {
             unitCost: number | string;
         };
         ReceiptResponse: {
+            /** Format: date-time */
+            createdAt?: null | string;
             /** Format: uuid */
             id: string;
             lines: components["schemas"]["ReceiptLineResponse"][];
@@ -5390,6 +5531,8 @@ export interface components {
             status: string;
             /** Format: uuid */
             supplierId: string;
+            /** Format: date-time */
+            updatedAt?: null | string;
         };
         RecipeLineRequest: {
             /** Format: uuid */
@@ -5527,12 +5670,16 @@ export interface components {
         };
         SupplierResponse: {
             address: null | string;
+            /** Format: date-time */
+            createdAt?: null | string;
             email: null | string;
             /** Format: uuid */
             id: string;
             isActive: boolean;
             name: string;
             phone: string;
+            /** Format: date-time */
+            updatedAt?: null | string;
         };
         TokenResponse: {
             accessToken: string;
