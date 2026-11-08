@@ -454,6 +454,49 @@ test('a receipt conflict refreshes state without claiming that posting succeeded
   expect(await view.findByText('Status: draft')).toBeVisible();
 });
 
+test('refreshes receipt status after a post response is lost', async () => {
+  let posted = false;
+  const get = jest.fn(async (path: string) => {
+    if (path === '/api/v1/purchase-receipts') return { data: [receipt] };
+    if (path === '/api/v1/purchase-receipts/{id}')
+      return { data: { ...receipt, status: posted ? 'posted' : 'draft' } };
+    return {
+      data: { items: [balance], page: 1, pageSize: 100, totalCount: 1 },
+    };
+  });
+  const post = jest.fn(async () => {
+    posted = true;
+    throw new NetworkError();
+  });
+  createClient(get as never, post as never);
+  const view = await setup();
+
+  await view.findByText('Oat milk');
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Purchase receipts' }),
+  );
+  await view.findByText('RCPT-184');
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Review receipt RCPT-184' }),
+  );
+  await fireEvent.press(
+    await view.findByRole('button', { name: 'Post receipt RCPT-184' }),
+  );
+  expect(await view.findByText(/could not be confirmed/i)).toBeVisible();
+
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Refresh receipt status' }),
+  );
+
+  expect(await view.findByText('Status: posted')).toBeVisible();
+  expect(
+    view.queryByText('Receipt RCPT-184 was posted by the server.'),
+  ).toBeNull();
+  expect(
+    view.queryByRole('button', { name: 'Post receipt RCPT-184' }),
+  ).toBeNull();
+});
+
 test('a receipt API error result does not claim that posting succeeded', async () => {
   const get = jest.fn(async (path: string) =>
     path.includes('purchase-receipts')

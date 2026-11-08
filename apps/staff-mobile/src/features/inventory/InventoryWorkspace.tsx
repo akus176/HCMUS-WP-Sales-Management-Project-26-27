@@ -523,6 +523,23 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                   {receiptFailure && (
                     <ShellFeedback kind="error" label={receiptFailure} />
                   )}
+                  {receiptFailure && receiptId && (
+                    <ShellButton
+                      label="Refresh receipt status"
+                      variant="secondary"
+                      disabled={
+                        status !== 'online' || receiptDetailQuery.isFetching
+                      }
+                      loading={receiptDetailQuery.isFetching}
+                      loadingLabel="Refreshing receipt status…"
+                      onPress={() => {
+                        setReceiptFailure(undefined);
+                        void queryClient.invalidateQueries({
+                          queryKey: ['purchase-receipt', user.id, receiptId],
+                        });
+                      }}
+                    />
+                  )}
                   {receiptDetailQuery.data.status.toLowerCase() === 'draft' &&
                     receiptDetailQuery.data.lines.length > 0 && (
                       <ShellButton

@@ -39,14 +39,23 @@ Server authorization remains authoritative.
 
 ## Verification
 
-Verified on 8 November 2026:
+Mobile checks re-run on 9 November 2026:
 
-- `npm run check` — passed: type check, lint, formatting, 17 test suites, 154
+- `npm run check` — passed: type check, lint, formatting, 17 test suites, 155
   tests, 0 failures, and 0 skipped tests.
 - `npm run smoke:android` — Android bundle export passed: 1,253 modules and a
   2.8 MB Hermes bundle. This is a build check; it is not a device interaction
   or screenshot.
 - `openspec validate add-staff-mobile-app --strict` — passed.
+
+The current tests also verify that a low-stock-only user does not see a
+movement-history action that requires inventory-management access. They verify
+that staff can refresh receipt status after a post response is lost; the screen
+shows the server's posted state without claiming that the mobile request was
+confirmed.
+
+Backend checks run on 8 November 2026:
+
 - .NET 10 Release API build — passed with 0 warnings and 0 errors in Docker.
 - PostgreSQL-backed API integration tests — 2 passed, 0 failed, 0 skipped in
   disposable Docker PostgreSQL. The tests cover adjustment permissions,
