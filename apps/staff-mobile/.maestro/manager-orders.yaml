@@ -1,0 +1,78 @@
+appId: com.coffeeshop.staffmobile
+name: Manager cancellation and ready delivery assignment against the shared API
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: Staff mobile
+    timeout: 60000
+- tapOn: Staff sign-in
+- tapOn: Username
+- inputText: ${MAESTRO_STAFF_USERNAME}
+- tapOn: Password
+- inputText: ${MAESTRO_STAFF_PASSWORD}
+- hideKeyboard
+- tapOn: Sign in
+- extendedWaitUntil:
+    visible: Open Approvals
+    timeout: 30000
+- tapOn: Open Approvals
+- tapOn: Manage cancellations and deliveries
+- tapOn: Search orders
+- inputText: ${MAESTRO_CANCEL_ORDER}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Open order ${MAESTRO_CANCEL_ORDER}
+    direction: DOWN
+- tapOn: Open order ${MAESTRO_CANCEL_ORDER}
+- scrollUntilVisible:
+    element: Cancellation reason
+    direction: DOWN
+- tapOn: Cancellation reason
+- inputText: Synthetic customer changed plans
+- hideKeyboard
+- scrollUntilVisible:
+    element: Review cancellation
+    direction: DOWN
+- tapOn: Review cancellation
+- scrollUntilVisible:
+    element: Confirm cancellation
+    direction: DOWN
+- tapOn: Confirm cancellation
+- scrollUntilVisible:
+    element: Cancellation confirmed by the service.
+    direction: UP
+- assertVisible: Cancellation confirmed by the service.
+- takeScreenshot: .maestro/results/manager-cancelled
+- scrollUntilVisible:
+    element: Back to order search
+    direction: UP
+- tapOn: Back to order search
+- scrollUntilVisible:
+    element: Search orders
+    direction: UP
+- tapOn: Search orders
+- eraseText
+- inputText: ${MAESTRO_DELIVERY_ORDER}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Open order ${MAESTRO_DELIVERY_ORDER}
+    direction: DOWN
+- tapOn: Open order ${MAESTRO_DELIVERY_ORDER}
+- scrollUntilVisible:
+    element: Select ${MAESTRO_COURIER_NAME}
+    direction: DOWN
+- tapOn: Select ${MAESTRO_COURIER_NAME}
+- scrollUntilVisible:
+    element: Review assignment
+    direction: DOWN
+- tapOn: Review assignment
+- scrollUntilVisible:
+    element: Confirm assignment
+    direction: DOWN
+- tapOn: Confirm assignment
+- scrollUntilVisible:
+    element: Delivery assignment confirmed by the service.
+    direction: UP
+- assertVisible: Delivery assignment confirmed by the service.
+- takeScreenshot: .maestro/results/manager-assigned

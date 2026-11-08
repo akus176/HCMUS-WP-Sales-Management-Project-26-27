@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-08",
+  "issue": 182,
+  "openSpecTasks": ["Mobile 5.1", "Mobile 5.2"],
+  "mobile": {
+    "typeCheck": "passed",
+    "lint": "passed with zero warnings",
+    "format": "passed",
+    "tests": { "total": 165, "passed": 165, "failed": 0, "suites": 17 }
+  },
+  "apiPostgres": { "total": 41, "executed": 41, "passed": 41, "failed": 0, "notExecuted": 0 },
+  "android": {
+    "debugBuild": "passed",
+    "install": "passed on Android 16 API 36 x86_64 emulator",
+    "apkSha256": "48CF41ACB67F64D0ED9D552BC120771B9DE1A1AC23A9CBFC1AEEF1448DC66524",
+    "hermesExport": "passed, 1257 modules",
+    "cashierE2E": "not run: awaiting user-started API and Metro",
+    "managerE2E": "not run: awaiting user-started API and Metro"
+  }
+}

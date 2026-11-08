@@ -65,6 +65,7 @@ function SessionNavigation({
           <Stack.Screen name="session" />
           <Stack.Screen name="modules/[module]" />
           <Stack.Screen name="modules/approvals/[discountId]" />
+          <Stack.Screen name="modules/approvals/operations" />
         </Stack.Protected>
       </Stack>
     </>

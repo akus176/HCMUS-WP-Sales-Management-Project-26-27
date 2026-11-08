@@ -8,9 +8,50 @@ import LoginScreen from '../app/login';
 import SessionScreen from '../app/session';
 import ModuleScreen from '../app/modules/[module]';
 import DiscountReviewScreen from '../app/modules/approvals/[discountId]';
+import ManagerOrdersScreen from '../app/modules/approvals/operations';
 import { SessionProvider } from '../src/session/context';
 import { harness, json, user } from './helpers';
 import { QueryCleanup } from './query-cleanup';
+
+test('manager order-operation deep links require a signed-in authorized session before loading orders', async () => {
+  const h = harness(async () => json(user));
+  function Layout() {
+    return (
+      <SessionProvider client={h.client}>
+        <QueryCleanup />
+        <SessionRoutes />
+      </SessionProvider>
+    );
+  }
+  await renderRouter(
+    {
+      _layout: Layout,
+      index: StarterScreen,
+      login: LoginScreen,
+      session: SessionScreen,
+      'modules/[module]': ModuleScreen,
+      'modules/approvals/operations': ManagerOrdersScreen,
+    },
+    { initialUrl: '/modules/approvals/operations' },
+  );
+  await waitFor(() => expect(screen).toHavePathname('/'));
+  expect(h.fetcher).not.toHaveBeenCalled();
+  await act(async () => {
+    await h.client.login('staff', 'fixture-password');
+  });
+  await screen.findByRole('header', { name: 'Staff home' });
+  await act(async () => {
+    router.push('/modules/approvals/operations');
+  });
+  await screen.findByText(
+    'Access unavailable. Your current permissions do not allow this module.',
+  );
+  expect(
+    h.fetcher.mock.calls.some(([request]) =>
+      request.url.includes('/api/v1/orders'),
+    ),
+  ).toBe(false);
+});
 
 test('real routes reject signed-out and unauthorized links, allow a grant, then reject revocation', async () => {
   let permissions = user.permissions;
