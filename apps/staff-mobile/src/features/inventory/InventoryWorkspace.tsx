@@ -407,11 +407,13 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                       }}
                     />
                   )}
-                  <ShellButton
-                    label={`Show movement history for ${ingredient.name}`}
-                    variant="secondary"
-                    onPress={() => setMovementIngredient(ingredient)}
-                  />
+                  {canManage && (
+                    <ShellButton
+                      label={`Show movement history for ${ingredient.name}`}
+                      variant="secondary"
+                      onPress={() => setMovementIngredient(ingredient)}
+                    />
+                  )}
                   {adjustmentIngredient?.ingredientId ===
                     ingredient.ingredientId && (
                     <View style={styles.form}>

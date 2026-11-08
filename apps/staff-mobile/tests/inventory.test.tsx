@@ -200,6 +200,11 @@ test('a low-stock-only user loads only the endpoint allowed by their permission'
   expect(
     view.queryByRole('button', { name: 'Ingredient balances' }),
   ).toBeNull();
+  expect(
+    view.queryByRole('button', {
+      name: 'Show movement history for Oat milk',
+    }),
+  ).toBeNull();
 });
 
 test('manual refresh reloads the active inventory query', async () => {
