@@ -187,15 +187,15 @@ public static class InventoryEndpoints
     }
 
     private static IngredientBalanceResponse ToBalance(Ingredient ingredient) => new(ingredient.Id.Value,
-        ingredient.Name, ingredient.BaseUnit, ingredient.AvailableQuantity, ingredient.ReorderThreshold);
+        ingredient.Name, ingredient.BaseUnit, ingredient.AvailableQuantity, ingredient.ReorderThreshold, ingredient.IsActive);
 
     private static SupplierResponse ToSupplier(Supplier supplier) => new(supplier.Id.Value, supplier.Name,
-        supplier.Phone, supplier.Email, supplier.Address, supplier.IsActive);
+        supplier.Phone, supplier.Email, supplier.Address, supplier.IsActive, supplier.CreatedAt.Value, supplier.UpdatedAt.Value);
 
     private static ReceiptResponse ToReceipt(PurchaseReceipt receipt) => new(receipt.Id.Value, receipt.SupplierId.Value,
         receipt.ReceiptNumber, receipt.Status.ToString().ToLowerInvariant(), receipt.PostedAt?.Value,
         receipt.Lines.Select(line => new ReceiptLineResponse(line.Id.Value, line.IngredientId.Value,
-            line.Quantity, line.UnitCost.Amount)).ToArray());
+            line.Quantity, line.UnitCost.Amount)).ToArray(), receipt.CreatedAt.Value, receipt.UpdatedAt.Value);
 
     private static IResult InvalidId() => ApiErrorResults.From(Error.Validation("inventory.invalid_id", "A nonempty identifier is required."));
 }
