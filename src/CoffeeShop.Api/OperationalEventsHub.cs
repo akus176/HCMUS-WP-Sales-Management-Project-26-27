@@ -1,11 +1,11 @@
 namespace CoffeeShop.Api;
 
+using System.Security.Claims;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Infrastructure.Postgres;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 [Authorize]
 public sealed class OperationalEventsHub(CoffeeShopDbContext db) : Hub
