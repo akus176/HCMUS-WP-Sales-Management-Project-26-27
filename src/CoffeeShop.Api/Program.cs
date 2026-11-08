@@ -23,6 +23,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddCoffeeShopPostgres(connectionString);
 builder.Services.AddScoped<IClock, SystemClock>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSignalR();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddScoped<InvalidMobileTokenCleanup>();
 builder.Services.AddScoped<CatalogQueryHandler>();
@@ -99,6 +100,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapHealthChecks("/health", new() { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new() { Predicate = check => check.Tags.Contains("ready") });
+app.MapHub<OperationalEventsHub>("/api/v1/operational-events", options => options.CloseOnAuthenticationExpiration = true).RequireAuthorization();
 
 var api = app.MapGroup("/api/v1");
 api.MapStaffIdentity();

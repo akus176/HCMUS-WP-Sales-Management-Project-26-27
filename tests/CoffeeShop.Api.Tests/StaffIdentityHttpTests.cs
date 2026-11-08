@@ -3,6 +3,7 @@ namespace CoffeeShop.Api.Tests;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Json;
+using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Text;
 using CoffeeShop.Api;
@@ -122,6 +123,32 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.False(await cleanup.RevokeAsync("invalid-token"));
         db.ChangeTracker.Clear();
         Assert.NotNull((await db.MobileDeviceRegistrations.SingleAsync(device => device.Id == new EntityId(id))).RevokedAt);
+    }
+
+    [PostgresFact]
+    public async Task OperationalHub_RequiresAuthenticationAndRejectsClientGroupSelection()
+    {
+        using var client = host!.CreateClient();
+        Assert.Equal(HttpStatusCode.Unauthorized,
+            (await client.PostAsync("/api/v1/operational-events/negotiate?negotiateVersion=1", null)).StatusCode);
+        var token = (await LoginAsync(client, "Barista")).AccessToken;
+        var socketClient = host.Server.CreateWebSocketClient();
+        socketClient.ConfigureRequest = request => request.Headers.Authorization = $"Bearer {token}";
+        using var socket = await socketClient.ConnectAsync(new Uri("ws://localhost/api/v1/operational-events"), CancellationToken.None);
+        async Task Send(string value) => await socket.SendAsync(Encoding.UTF8.GetBytes(value + '\u001e'), WebSocketMessageType.Text, true, CancellationToken.None);
+        async Task<string> Receive()
+        {
+            var bytes = new byte[8192];
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var result = await socket.ReceiveAsync(bytes, timeout.Token);
+            return Encoding.UTF8.GetString(bytes, 0, result.Count);
+        }
+        await Send("{\"protocol\":\"json\",\"version\":1}");
+        Assert.Contains("{}", await Receive());
+        await Send("{\"type\":1,\"invocationId\":\"1\",\"target\":\"JoinGroup\",\"arguments\":[\"permission:users.manage\"]}");
+        var reply = await Receive();
+        Assert.Contains("error", reply, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("1", reply);
     }
 
     [PostgresFact]

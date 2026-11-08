@@ -39,6 +39,13 @@ public static class StaffIdentityEndpoints
             };
             options.Events = new JwtBearerEvents
             {
+                OnMessageReceived = context =>
+                {
+                    if (context.Request.Path == "/api/v1/operational-events" &&
+                        context.Request.Query.TryGetValue("access_token", out var token))
+                        context.Token = token;
+                    return Task.CompletedTask;
+                },
                 OnTokenValidated = async context =>
                 {
                     var value = context.Principal?.FindFirstValue("sub");
