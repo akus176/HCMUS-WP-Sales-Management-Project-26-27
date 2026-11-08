@@ -30,12 +30,13 @@ public static class DeliveryEndpoints
         {
             var states = status?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
             if (states is { Length: > 0 } && states.Any(state => state is not
-                (DeliveryStatusNames.Assigned or DeliveryStatusNames.OutForDelivery)))
-                return ApiErrorResults.From(Error.Validation("delivery.invalid_status", "Filter by assigned or out_for_delivery status."));
+                (DeliveryStatusNames.Assigned or DeliveryStatusNames.OutForDelivery or DeliveryStatus.Delivered or DeliveryStatus.Failed)))
+                return ApiErrorResults.From(Error.Validation("delivery.invalid_status", "Filter by assigned, out_for_delivery, delivered, or failed status."));
             var assignments = (await query.GetOrdersAsync(ct))
-                .Where(order => order.AssignedStaffId == user.GetRequiredId() && order.Status != OrderStatus.Cancelled &&
-                    order.DeliveryStatus is DeliveryStatusNames.Assigned or DeliveryStatusNames.OutForDelivery)
-                .Where(order => states is null || states.Length == 0 || states.Contains(order.DeliveryStatus!))
+                .Where(order => order.AssignedStaffId == user.GetRequiredId() && order.Status != OrderStatus.Cancelled)
+                .Where(order => states is null || states.Length == 0
+                    ? order.DeliveryStatus is DeliveryStatusNames.Assigned or DeliveryStatusNames.OutForDelivery
+                    : states.Contains(order.DeliveryStatus!))
                 .OrderBy(order => order.OrderNumber).ThenBy(order => order.Id.Value)
                 .Select(order => new CourierAssignmentResponse(order.Id.Value, order.OrderNumber,
                     order.DeliveryStatus!)).ToArray();

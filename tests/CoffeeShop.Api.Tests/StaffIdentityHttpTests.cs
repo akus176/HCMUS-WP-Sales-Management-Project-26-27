@@ -606,7 +606,7 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         client.DefaultRequestHeaders.Authorization = new("Bearer", courier.AccessToken);
         var assignments = await client.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>("/api/v1/courier/assignments");
         Assert.Empty(assignments!.Items);
-        using var invalidCourierStatus = await client.GetAsync("/api/v1/courier/assignments?status=delivered");
+        using var invalidCourierStatus = await client.GetAsync("/api/v1/courier/assignments?status=unassigned");
         Assert.Equal(HttpStatusCode.BadRequest, invalidCourierStatus.StatusCode);
         using var forbiddenDiscounts = await client.GetAsync("/api/v1/discounts/pending");
         Assert.Equal(HttpStatusCode.Forbidden, forbiddenDiscounts.StatusCode);
@@ -677,6 +677,11 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var repeatedCompletion = await courier.PostAsync($"/api/v1/courier/assignments/{orderId}/complete", null);
         Assert.Equal(HttpStatusCode.Conflict, repeatedCompletion.StatusCode);
         Assert.Empty((await courier.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>("/api/v1/courier/assignments"))!.Items);
+        var completedAssignments = await courier.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>(
+            "/api/v1/courier/assignments?status=delivered,failed");
+        Assert.Equal(orderId, Assert.Single(completedAssignments!.Items).OrderId);
+        Assert.Empty((await other.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>(
+            "/api/v1/courier/assignments?status=delivered,failed"))!.Items);
         using var expiredDetail = await courier.GetAsync($"/api/v1/courier/assignments/{orderId}");
         Assert.Equal(HttpStatusCode.NotFound, expiredDetail.StatusCode);
         await using var finalDb = Database();
