@@ -9,6 +9,10 @@ import SessionScreen from '../app/session';
 import { SessionProvider } from '../src/session/context';
 import { harness, json, user } from './helpers';
 
+jest.mock('../src/realtime/OperationalUpdates', () => ({
+  OperationalUpdates: () => null,
+}));
+
 test('logout removes protected navigation history and rejects a stale session deep link', async () => {
   const h = harness(async () => json(user));
   function Layout() {

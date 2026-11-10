@@ -7,6 +7,11 @@ import {
   requireSuccess,
 } from '../api/errors';
 import type { components, paths } from '../api/schema';
+import {
+  createDeviceRegistration,
+  type DevicePlatform,
+  type DeviceRegistrationStorage,
+} from '../notifications/deviceRegistration';
 
 type TokenPair = components['schemas']['TokenResponse'];
 export type StaffSession = components['schemas']['StaffSession'];
@@ -42,12 +47,19 @@ export function apiOrigin(value: string | undefined) {
 export function createSessionClient(options: {
   origin: string;
   storage: RefreshStorage;
+  deviceStorage?: DeviceRegistrationStorage;
   clearData: () => void;
   fetch?: typeof fetch;
 }) {
   const fetcher = options.fetch ?? globalThis.fetch;
+  const devices = createDeviceRegistration(
+    options.origin,
+    fetcher,
+    options.deviceStorage,
+  );
   let state: SessionState = { status: 'restoring', user: null };
   let accessToken: string | undefined;
+  let accessExpiresAt = 0;
   let epoch = 0;
   let storageQueue: Promise<unknown> = Promise.resolve();
   let renewal: { epoch: number; promise: Promise<void> } | undefined;
@@ -65,6 +77,8 @@ export function createSessionClient(options: {
   function clear() {
     epoch++;
     accessToken = undefined;
+    accessExpiresAt = 0;
+    devices.clearMemory();
     requests.forEach((request) => request.abort());
     options.clearData();
     publish({ status: 'signedOut', user: null });
@@ -108,6 +122,7 @@ export function createSessionClient(options: {
     await stored(() => options.storage.set(pair.refreshToken));
     if (generation !== epoch) throw cancelled();
     accessToken = pair.accessToken;
+    accessExpiresAt = Date.parse(pair.expiresAt);
     publish({ status: 'signedIn', user: pair.user });
   }
   function refresh() {
@@ -208,8 +223,29 @@ export function createSessionClient(options: {
       };
     },
   });
+  async function getOperationalAccessToken(userId: string, generation = epoch) {
+    if (generation !== epoch || state.user?.id !== userId || !accessToken)
+      throw cancelled();
+    if (accessExpiresAt <= Date.now() + 30_000) await refresh();
+    if (generation !== epoch || !accessToken) throw cancelled();
+    return accessToken;
+  }
   return {
     api,
+    getOperationalAccessToken,
+    syncDevice(userId: string, platform: DevicePlatform, token: string) {
+      const generation = epoch;
+      return devices.sync(userId, platform, token, () =>
+        getOperationalAccessToken(userId, generation),
+      );
+    },
+    removeDevice(userId: string) {
+      const generation = epoch;
+      return devices.remove(userId, () =>
+        getOperationalAccessToken(userId, generation),
+      );
+    },
+    operationalHubUrl: `${options.origin}/api/v1/operational-events`,
     getSnapshot: () => state,
     subscribe(listener: () => void) {
       listeners.add(listener);
@@ -242,7 +278,12 @@ export function createSessionClient(options: {
     },
     async logout() {
       const token = accessToken;
+      const userId = state.user?.id;
       const saved = stored(options.storage.get);
+      const unregister =
+        token && userId
+          ? devices.remove(userId, async () => token).catch(() => undefined)
+          : undefined;
       // Clear protected UI, queries and requests synchronously, even offline.
       const cleanup = clear();
       // Attach a rejection handler immediately while server revocation runs.
@@ -253,6 +294,7 @@ export function createSessionClient(options: {
       );
       try {
         const refreshToken = await saved;
+        await unregister;
         if (token && refreshToken) {
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 10000);

@@ -13,7 +13,7 @@ import {
   type SessionClient,
   type SessionState,
 } from './session';
-import { secureRefreshStorage } from './secure-storage';
+import { secureDeviceStorage, secureRefreshStorage } from './secure-storage';
 import { readMobileEnvironment } from '../config/environment';
 
 const signedOut: SessionState = { status: 'signedOut', user: null };
@@ -51,6 +51,7 @@ export function SessionProvider({
       return createSessionClient({
         origin,
         storage: secureRefreshStorage(origin),
+        deviceStorage: secureDeviceStorage(origin),
         clearData: () => {
           void queries.cancelQueries();
           queries.clear();

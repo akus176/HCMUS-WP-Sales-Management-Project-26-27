@@ -27,6 +27,10 @@ builder.Services.AddSignalR();
 builder.Services.AddHostedService<OperationalEventListener>();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddScoped<InvalidMobileTokenCleanup>();
+builder.Services.AddScoped<MobilePushDispatch>();
+if (builder.Configuration.GetValue<bool>("StaffPush:EnableExpo"))
+    builder.Services.AddHttpClient<IMobilePushProvider, ExpoMobilePushProvider>(
+        client => client.Timeout = TimeSpan.FromSeconds(5));
 builder.Services.AddScoped<CatalogQueryHandler>();
 builder.Services.AddScoped<CatalogCommandHandler>();
 builder.Services.AddScoped<RecipeCommandHandler>();
