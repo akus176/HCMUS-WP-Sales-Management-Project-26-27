@@ -78,29 +78,29 @@
 
 ## 9. ASP.NET Core API and Contracts
 
-- [ ] 9.1 Define versioned request, response, paging, filtering, and error contracts without exposing EF Core entities; verify contract serialization tests cover representative payloads
-- [ ] 9.2 Configure the API host, dependency injection, PostgreSQL infrastructure, exception handling, validation, OpenAPI, and health checks; verify the API starts against a clean migrated database
-- [ ] 9.3 Expose catalog and recipe endpoints through existing application use cases; verify API integration tests cover success, validation, not-found, and conflict responses
-- [ ] 9.4 Expose inventory, supplier, receipt, adjustment, and movement endpoints; verify API tests confirm stock-changing operations are transactional
-- [ ] 9.5 Expose customer, address, and loyalty endpoints; verify API tests cover optional customers and loyalty balance changes
-- [ ] 9.6 Expose order, table, payment, discount, preparation, cancellation, and delivery endpoints; verify API tests cover each channel and invalid state transitions
-- [ ] 9.7 Expose report endpoints with date-range validation and consistent metrics; verify API results match direct application-query integration tests
+- [x] 9.1 Define versioned request, response, paging, filtering, and error contracts without exposing EF Core entities; verify contract serialization tests cover representative payloads Evidence: [PR #159](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/159).
+- [x] 9.2 Configure the API host, dependency injection, PostgreSQL infrastructure, exception handling, validation, OpenAPI, and health checks; verify the API starts against a clean migrated database Evidence: [PR #159](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/159).
+- [x] 9.3 Expose catalog and recipe endpoints through existing application use cases; verify API integration tests cover success, validation, not-found, and conflict responses Evidence: [PR #163](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/163), [PR #189](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/189).
+- [x] 9.4 Expose inventory, supplier, receipt, adjustment, and movement endpoints; verify API tests confirm stock-changing operations are transactional Evidence: [PR #163](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/163), [PR #189](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/189).
+- [x] 9.5 Expose customer, address, and loyalty endpoints; verify API tests cover optional customers and loyalty balance changes Evidence: [PR #165](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/165), [PR #189](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/189).
+- [x] 9.6 Expose order, table, payment, discount, preparation, cancellation, and delivery endpoints; verify API tests cover each channel and invalid state transitions Evidence: [PR #163](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/163), [PR #178](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/178).
+- [x] 9.7 Expose report endpoints with date-range validation and consistent metrics; verify API results match direct application-query integration tests Evidence: [PR #178](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/178).
 - [ ] 9.8 Add an API test collection and local environment definition covering representative successful and failing requests; verify it runs against the Docker API without manual payload editing
 
 ## 10. Authentication and Authorization
 
-- [ ] 10.1 Implement staff accounts, password hashing, role, permission, and assignment persistence; verify seed tests create all six operational roles with explicit permission sets
-- [ ] 10.2 Implement login with generic failure responses and active-account checks; verify tests cover valid credentials, invalid passwords, unknown users, and deactivated accounts
-- [ ] 10.3 Implement short-lived JWT access tokens and hashed refresh-token storage; verify token tests check claims, expiry, and absence of sensitive data
-- [ ] 10.4 Implement refresh-token rotation, logout revocation, family revocation on reuse, and account-wide revocation; verify security integration tests cover each invalidation path
-- [ ] 10.5 Implement permission-based API policies and endpoint requirements; verify authorization tests cover allowed and forbidden operations for admin, manager, cashier, barista, inventory, and delivery roles
+- [x] 10.1 Implement staff accounts, password hashing, role, permission, and assignment persistence; verify seed tests create all six operational roles with explicit permission sets Evidence: [PR #160](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/160).
+- [x] 10.2 Implement login with generic failure responses and active-account checks; verify tests cover valid credentials, invalid passwords, unknown users, and deactivated accounts Evidence: [PR #160](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/160).
+- [x] 10.3 Implement short-lived JWT access tokens and hashed refresh-token storage; verify token tests check claims, expiry, and absence of sensitive data Evidence: [PR #160](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/160).
+- [x] 10.4 Implement refresh-token rotation, logout revocation, family revocation on reuse, and account-wide revocation; verify security integration tests cover each invalidation path Evidence: [PR #160](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/160).
+- [x] 10.5 Implement permission-based API policies and endpoint requirements; verify authorization tests cover allowed and forbidden operations for admin, manager, cashier, barista, inventory, and delivery roles Evidence: [PR #160](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/160).
 - [x] 10.6 Implement account administration with final-active-administrator protection; verify attempts to remove the last administrator fail without state changes
-- [ ] 10.7 Implement security audit events for login, token reuse, account state, and role changes; verify audits omit passwords, access tokens, and refresh tokens
+- [x] 10.7 Implement security audit events for login, token reuse, account state, and role changes; verify audits omit passwords, access tokens, and refresh tokens Evidence: [PR #160](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/160).
 
 ## 11. Final WinUI API Migration
 
 - [x] 11.1 Implement a typed HTTP client, consistent error mapping, and API service interfaces matching the WinUI-facing direct adapters; verify mocked client tests cover success and every standard error category
-- [ ] 11.2 Implement login, secure Windows token storage, automatic access-token attachment, refresh, logout, and expired-session handling; verify plaintext tokens do not appear in configuration or logs
+- [x] 11.2 Implement login, secure Windows token storage, automatic access-token attachment, refresh, logout, and expired-session handling; verify plaintext tokens do not appear in configuration or logs Evidence: [PR #176](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/176).
 - [ ] 11.3 Migrate catalog, recipe, inventory, supplier, and customer screens from direct services to API clients; verify parity tests complete the same workflows through the API
 - [ ] 11.4 Migrate POS, order, table, payment, discount, barista, cancellation, and delivery screens to API clients; verify all channel demonstrations pass through HTTP only
 - [ ] 11.5 Migrate reports and loyalty workflows to API clients; verify results match the seeded direct-query baselines
@@ -118,7 +118,7 @@
 
 ## 13. Deployment, Quality, and Final Delivery
 
-- [ ] 13.1 Create Dockerfiles and Docker Compose services for PostgreSQL and the API with health checks, named volumes, and environment configuration; verify a clean `docker compose up` reaches healthy status
+- [x] 13.1 Create Dockerfiles and Docker Compose services for PostgreSQL and the API with health checks, named volumes, and environment configuration; verify a clean `docker compose up` reaches healthy status Evidence: [PR #162](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/162).
 - [ ] 13.2 Add automated migration and seed procedures for development and demo environments; verify rebuilding from empty volumes produces the expected schema and demo counts
 - [ ] 13.3 Add concurrent integration tests for order confirmation, table assignment, cancellation restoration, loyalty reversal, and refresh-token reuse; verify all race-condition tests pass repeatedly
 - [ ] 13.4 Add regression coverage for menu deactivation, historical snapshots, invalid quantities, insufficient stock, payment balance, and authorization boundaries; verify the complete automated suite passes
