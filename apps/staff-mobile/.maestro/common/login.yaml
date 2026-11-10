@@ -1,0 +1,17 @@
+appId: com.coffeeshop.staffmobile
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: Staff mobile
+    timeout: 60000
+- tapOn: Staff sign-in
+- tapOn: Username
+- inputText: ${MAESTRO_STAFF_USERNAME}
+- tapOn: Password
+- inputText: ${MAESTRO_STAFF_PASSWORD}
+- hideKeyboard
+- tapOn: Sign in
+- extendedWaitUntil:
+    visible: Staff home
+    timeout: 30000

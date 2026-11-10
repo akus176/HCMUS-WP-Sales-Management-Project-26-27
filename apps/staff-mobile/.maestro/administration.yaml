@@ -1,0 +1,38 @@
+appId: com.coffeeshop.staffmobile
+name: Account details, deactivation and security event filters
+---
+- runFlow: common/login.yaml
+- scrollUntilVisible:
+    element: Open Administration
+    direction: DOWN
+- tapOn: Open Administration
+- scrollUntilVisible:
+    element: Search staff accounts
+    direction: DOWN
+- tapOn: Search staff accounts
+- inputText: ${MAESTRO_TARGET_NAME}
+- hideKeyboard
+- scrollUntilVisible:
+    element: View details for ${MAESTRO_TARGET_NAME}
+    direction: DOWN
+- tapOn: View details for ${MAESTRO_TARGET_NAME}
+- scrollUntilVisible:
+    element: Account details
+    direction: DOWN
+- assertVisible: Account details
+- scrollUntilVisible:
+    element: Deactivate ${MAESTRO_TARGET_NAME}
+    direction: UP
+- tapOn: Deactivate ${MAESTRO_TARGET_NAME}
+- tapOn:
+    text: Deactivate
+    index: 0
+- scrollUntilVisible:
+    element: '${MAESTRO_TARGET_NAME} is now inactive. Their active sessions were revoked.'
+    direction: DOWN
+- assertVisible: '${MAESTRO_TARGET_NAME} is now inactive. Their active sessions were revoked.'
+- scrollUntilVisible:
+    element: Account changes
+    direction: DOWN
+- tapOn: Account changes
+- assertVisible: '.*Account changes'

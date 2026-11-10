@@ -44,6 +44,44 @@ jobs:
           EXPO_PUBLIC_API_BASE_URL: http://10.0.2.2:5232/api/v1
         run: npm run smoke:android
 
+  mobile-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: apps/staff-mobile
+    env:
+      EXPO_PUBLIC_APP_ENV: emulator
+      EXPO_PUBLIC_API_BASE_URL: http://10.0.2.2:5232/api/v1
+      CI: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/staff-mobile/.nvmrc
+          cache: npm
+          cache-dependency-path: apps/staff-mobile/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install pinned npm and mobile dependencies
+        run: |
+          npm install --global npm@11.17.0
+          npm ci
+      - name: Generate Android native project
+        run: npx expo prebuild --platform android --no-install
+      - name: Build native Android application
+        working-directory: apps/staff-mobile/android
+        run: ./gradlew assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon --max-workers=2
+      - name: Preserve native Android build
+        uses: actions/upload-artifact@v4
+        with:
+          name: staff-mobile-android-debug
+          path: apps/staff-mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
   build-and-test:
     runs-on: windows-latest
     steps:
