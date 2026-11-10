@@ -1,5 +1,7 @@
 using System.Text.Json;
+#if !COFFEESHOP_API_ONLY
 using CoffeeShop.Infrastructure.Postgres;
+#endif
 
 namespace CoffeeShop.WinUI;
 
@@ -22,6 +24,9 @@ internal sealed record CoffeeShopClientConfiguration(
 
     public static CoffeeShopClientConfiguration Load()
     {
+#if COFFEESHOP_API_ONLY
+        return LoadApiOnly(Environment.GetEnvironmentVariable);
+#else
         var clientMode = Environment.GetEnvironmentVariable("COFFEESHOP_CLIENT_MODE")?.Trim();
         if (string.IsNullOrWhiteSpace(clientMode)) clientMode = "api";
         else clientMode = clientMode.ToLowerInvariant();
@@ -59,6 +64,14 @@ internal sealed record CoffeeShopClientConfiguration(
             return new(clientMode, null, LoadApiBaseAddress(null), null,
                 $"Could not read the database connection settings in {path}. Check that it contains a valid ConnectionStrings.CoffeeShop value.");
         }
+#endif
+    }
+
+    internal static CoffeeShopClientConfiguration LoadApiOnly(Func<string, string?> readEnvironmentVariable)
+    {
+        ArgumentNullException.ThrowIfNull(readEnvironmentVariable);
+        var apiBaseAddress = ParseApiBaseAddress(readEnvironmentVariable("COFFEESHOP_API_BASE_URL"));
+        return new("api", null, apiBaseAddress, "API-only Release", null);
     }
 
     private static Uri LoadApiBaseAddress(JsonElement? root)
@@ -67,9 +80,11 @@ internal sealed record CoffeeShopClientConfiguration(
         if (string.IsNullOrWhiteSpace(value) && root is { } document &&
             document.TryGetProperty("Api", out var api) && api.TryGetProperty("BaseUrl", out var baseUrl))
             value = baseUrl.GetString();
-        return Uri.TryCreate(value, UriKind.Absolute, out var address) &&
+        return ParseApiBaseAddress(value);
+    }
+
+    private static Uri ParseApiBaseAddress(string? value) => Uri.TryCreate(value, UriKind.Absolute, out var address) &&
             address.Scheme is "http" or "https" && address.AbsolutePath.EndsWith("/", StringComparison.Ordinal)
             ? address
             : DefaultApiBaseAddress;
-    }
 }

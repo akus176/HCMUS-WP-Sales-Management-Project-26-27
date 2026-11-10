@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <DefineConstants>$(DefineConstants);COFFEESHOP_API_ONLY</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +19,7 @@
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\*.cs" Link="ViewModels\%(Filename)%(Extension)" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\Services\*.cs" Link="Services\%(Filename)%(Extension)" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\Security\ProtectedRefreshTokenFileStore.cs" Link="Services\ProtectedRefreshTokenFileStore.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\CoffeeShopClientConfiguration.cs" Link="Configuration\CoffeeShopClientConfiguration.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\Pages\IngredientRow.cs" Link="Presentation\IngredientRow.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\Pages\ReceiptLineRow.cs" Link="Presentation\ReceiptLineRow.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\Pages\SupplierRow.cs" Link="Presentation\SupplierRow.cs" />
