@@ -29,6 +29,7 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ClientModeText.Text = App.IsApiMode ? "WINUI · HTTP API" : "WINUI · DIRECT POSTGRESQL";
         staffSession = App.Services.GetRequiredService<PosOperatorSession>();
         sessionManager = App.Services.GetRequiredService<StaffSessionManager>();
         sessionManager.SessionExpired += OnSessionExpired;

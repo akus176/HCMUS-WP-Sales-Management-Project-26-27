@@ -45,6 +45,8 @@ public sealed class ApiManagementSourceTests
         Assert.Equal(120m, Assert.Single(Assert.Single(detail.Value.SizeVariants).Recipe).Quantity);
         Assert.True(categoryUpdate.IsSuccess);
         Assert.True(recipeUpdate.IsSuccess);
+        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/categories?search=&limit=200");
+        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/menu-items?search=latte&limit=200&isActive=true");
         Assert.Contains(requests, request => request.Method == "PUT" && request.Path == $"/api/v1/categories/{categoryId}");
         Assert.Contains(requests, request => request.Method == "PUT" && request.Path == $"/api/v1/recipes/{variantId}");
         Assert.All(requests, request => Assert.Equal("fixture-access", request.Token));
@@ -68,12 +70,16 @@ public sealed class ApiManagementSourceTests
         var source = new ApiCustomerWorkspaceSource(new AuthenticatedApiClient(client, CreateSession()));
 
         var customers = await source.SearchAsync(new("Ada", false, 100));
+        var allCustomers = await source.SearchAsync(new("Ada", true, 100));
         var history = await source.GetHistoryAsync(new(customerId), new(0, 20));
         var update = await source.UpdateAddressAsync(new(new(customerId), new(addressId), "12 Example St", "Home", true));
 
         Assert.Equal("Ada Lovelace", Assert.Single(customers.Value).FullName);
+        Assert.True(allCustomers.IsSuccess);
         Assert.Equal(5, Assert.Single(history.Value.Items).Points);
         Assert.True(update.IsSuccess);
+        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/customers?search=Ada&limit=100&isActive=true");
+        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/customers?search=Ada&limit=100");
         Assert.Contains(requests, request => request.Method == "PATCH" && request.Path == $"/api/v1/customers/{customerId}/addresses/{addressId}");
         Assert.All(requests, request => Assert.Equal("fixture-access", request.Token));
     }

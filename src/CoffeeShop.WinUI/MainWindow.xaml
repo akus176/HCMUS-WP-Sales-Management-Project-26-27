@@ -56,7 +56,7 @@
             <NavigationView.PaneFooter>
                 <StackPanel x:Name="SidebarFooter" Margin="18,0,18,18" Spacing="100">
                     <Image Source="ms-appx:///Assets/Ornaments/coffee.svg" Width="164" Height="146" Opacity=".75" AutomationProperties.AccessibilityView="Raw" />
-                    <TextBlock Text="WINUI · DIRECT POSTGRESQL" FontFamily="{StaticResource ConsoleSansFont}" FontSize="7" CharacterSpacing="140" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                    <TextBlock x:Name="ClientModeText" FontFamily="{StaticResource ConsoleSansFont}" FontSize="7" CharacterSpacing="140" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                 </StackPanel>
             </NavigationView.PaneFooter>
             <Grid><Grid.RowDefinitions><RowDefinition Height="52" /><RowDefinition Height="*" /></Grid.RowDefinitions>

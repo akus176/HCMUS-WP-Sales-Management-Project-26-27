@@ -50,9 +50,13 @@ public sealed class DirectCustomerWorkspaceSource(IServiceScopeFactory scopes) :
 
 public sealed class ApiCustomerWorkspaceSource(AuthenticatedApiClient client) : ICustomerWorkspaceSource
 {
-    public async Task<Result<IReadOnlyList<CustomerSummary>>> SearchAsync(CustomerSearchCriteria criteria) =>
-        await RunAsync(async () => (IReadOnlyList<CustomerSummary>)(await client.GetAsync<CustomerResponse[]>($"customers?search={Uri.EscapeDataString(criteria.Query ?? string.Empty)}&isActive={(criteria.IncludeInactive ? string.Empty : "true")}&limit={Math.Clamp(criteria.Limit ?? 100, 1, 100)}"))
+    public Task<Result<IReadOnlyList<CustomerSummary>>> SearchAsync(CustomerSearchCriteria criteria)
+    {
+        var path = $"customers?search={Uri.EscapeDataString(criteria.Query ?? string.Empty)}&limit={Math.Clamp(criteria.Limit ?? 100, 1, 100)}";
+        if (!criteria.IncludeInactive) path += "&isActive=true";
+        return RunAsync(async () => (IReadOnlyList<CustomerSummary>)(await client.GetAsync<CustomerResponse[]>(path))
             .Select(row => new CustomerSummary(new(row.Id), row.FullName, row.Phone, row.Email, row.IsActive, row.LoyaltyPointsBalance)).ToArray());
+    }
 
     public Task<Result<CustomerDetail>> GetDetailAsync(EntityId id) => RunAsync(async () => ToDetail(await client.GetAsync<CustomerDetailResponse>($"customers/{id.Value}")));
     public Task<Result<LoyaltyHistoryPage>> GetHistoryAsync(EntityId id, LoyaltyHistoryCriteria criteria) => RunAsync(async () =>

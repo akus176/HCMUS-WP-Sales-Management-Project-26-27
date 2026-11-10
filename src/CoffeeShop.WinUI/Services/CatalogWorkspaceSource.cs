@@ -134,7 +134,8 @@ public sealed class ApiCatalogWorkspaceSource(AuthenticatedApiClient client) : I
         item.CompatibleAddons.Select(addon => new AddonSummary(new(addon.Id), addon.Name, addon.Price, addon.IsActive)).ToArray());
 
     private static string Query(string? search, bool? isActive, int limit, Guid? categoryId = null) =>
-        $"search={Uri.EscapeDataString(search ?? string.Empty)}&isActive={(isActive?.ToString().ToLowerInvariant() ?? string.Empty)}&limit={Math.Clamp(limit, 1, Limit)}" +
+        $"search={Uri.EscapeDataString(search ?? string.Empty)}&limit={Math.Clamp(limit, 1, Limit)}" +
+        (isActive is { } active ? $"&isActive={active.ToString().ToLowerInvariant()}" : string.Empty) +
         (categoryId is null ? string.Empty : $"&categoryId={categoryId.Value}");
 
     private static async Task<Result<T>> RunAsync<T>(Func<Task<T>> action) where T : notnull

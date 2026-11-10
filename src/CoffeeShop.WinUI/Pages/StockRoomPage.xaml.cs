@@ -72,17 +72,21 @@ public sealed partial class StockRoomPage : Page
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         ConfigureLayout(ActualWidth, ActualHeight);
-        if (!hasLoaded) await LoadAllDataAsync();
+        if (!hasLoaded) await RefreshDataAsync();
         UpdateActiveTabVisuals();
         SwitchSectionView();
     }
 
-    public async Task RefreshDataAsync() => await LoadAllDataAsync();
-
-    private async Task LoadAllDataAsync()
+    public async Task RefreshDataAsync()
     {
         if (isBusy) return;
         SetBusy(true);
+        try { await ReloadStockDataAsync(); }
+        finally { SetBusy(false); }
+    }
+
+    private async Task ReloadStockDataAsync(string? savedMessage = null)
+    {
         ShowFeedback(WorkflowFeedback.Loading("Syncing inventory, suppliers, receipts, and movements..."));
 
         try
@@ -211,15 +215,16 @@ public sealed partial class StockRoomPage : Page
             SelectIngredient(selectedIngredientRow);
             hasLoaded = true;
 
-            ShowFeedback(WorkflowFeedback.Ready("Stock room data refreshed."));
+            ShowFeedback(savedMessage is null
+                ? WorkflowFeedback.Ready("Stock room data refreshed.")
+                : WorkflowFeedback.Success(savedMessage));
         }
         catch (Exception)
         {
-            ShowFeedback(WorkflowFeedback.DatabaseFailure("load stock room data", "Check database connection and select Refresh."));
-        }
-        finally
-        {
-            SetBusy(false);
+            ShowFeedback(savedMessage is null
+                ? WorkflowFeedback.DatabaseFailure("load stock room data", "Check the connection and select Refresh.")
+                : new(WorkflowFeedbackKind.Error, "Saved, but refresh failed", savedMessage, [],
+                    "Select Refresh to see the updated stock room."));
         }
     }
 
@@ -553,8 +558,7 @@ public sealed partial class StockRoomPage : Page
             DeltaInputBox.Text = string.Empty;
             ReasonInputBox.Text = string.Empty;
             isAdjusting = false;
-            await LoadAllDataAsync();
-            ShowFeedback(WorkflowFeedback.Success($"Stock adjustment of {delta:+0.###;-0.###} {selectedIngredientRow.BaseUnit} recorded."));
+            await ReloadStockDataAsync($"Stock adjustment of {delta:+0.###;-0.###} {selectedIngredientRow.BaseUnit} recorded.");
         }
         catch (ApiException exception) { ShowApiFailure("record stock adjustment", exception); }
         catch (Exception)
@@ -588,8 +592,7 @@ public sealed partial class StockRoomPage : Page
                     new(dialog.IngredientName, dialog.BaseUnit, dialog.AvailableQuantity, dialog.ReorderThreshold));
                 if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
             }
-            await LoadAllDataAsync();
-            ShowFeedback(WorkflowFeedback.Success($"Ingredient '{dialog.IngredientName}' created."));
+            await ReloadStockDataAsync($"Ingredient '{dialog.IngredientName}' created.");
         }
         catch (ApiException exception) { ShowApiFailure("create ingredient", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create ingredient", "Retry after verifying connection.")); }
@@ -631,8 +634,7 @@ public sealed partial class StockRoomPage : Page
                 if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
             }
             SelectSection("receipts");
-            await LoadAllDataAsync();
-            ShowFeedback(WorkflowFeedback.Success($"Draft receipt #{dialog.ReceiptNumber} created."));
+            await ReloadStockDataAsync($"Draft receipt #{dialog.ReceiptNumber} created.");
         }
         catch (ApiException exception) { ShowApiFailure("create purchase receipt", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create draft receipt", "Verify database connection.")); }
@@ -665,8 +667,7 @@ public sealed partial class StockRoomPage : Page
                     .PostReceiptAsync(new PostReceiptCommand(row.Id, op.Id));
                 if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
             }
-            await LoadAllDataAsync();
-            ShowFeedback(WorkflowFeedback.Success($"Purchase receipt #{row.ReceiptNumber} posted and inventory added."));
+            await ReloadStockDataAsync($"Purchase receipt #{row.ReceiptNumber} posted and inventory added.");
         }
         catch (ApiException exception) { ShowApiFailure("post purchase receipt", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("post purchase receipt", "Inspect receipt status before retrying.")); }
@@ -697,8 +698,7 @@ public sealed partial class StockRoomPage : Page
                     new AddReceiptLineCommand(row.Id, ingredient.Id, dialog.Quantity, dialog.UnitCost));
                 if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
             }
-            await LoadAllDataAsync();
-            ShowFeedback(WorkflowFeedback.Success($"Added {dialog.Quantity:#,0.###} {ingredient.BaseUnit} of {ingredient.Name} to receipt #{row.ReceiptNumber}."));
+            await ReloadStockDataAsync($"Added {dialog.Quantity:#,0.###} {ingredient.BaseUnit} of {ingredient.Name} to receipt #{row.ReceiptNumber}.");
         }
         catch (ApiException exception) { ShowApiFailure("add purchase receipt line", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("add purchase receipt line", "Reload the receipt before retrying.")); }
@@ -726,8 +726,7 @@ public sealed partial class StockRoomPage : Page
                     new(dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
                 if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
             }
-            await LoadAllDataAsync();
-            ShowFeedback(WorkflowFeedback.Success($"Supplier '{dialog.SupplierName}' created."));
+            await ReloadStockDataAsync($"Supplier '{dialog.SupplierName}' created.");
         }
         catch (ApiException exception) { ShowApiFailure("create supplier", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create supplier", "Verify connection.")); }
@@ -766,8 +765,7 @@ public sealed partial class StockRoomPage : Page
                     new(supplier.Id, dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
                 if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
             }
-            await LoadAllDataAsync();
-            ShowFeedback(WorkflowFeedback.Success($"Supplier '{dialog.SupplierName}' updated."));
+            await ReloadStockDataAsync($"Supplier '{dialog.SupplierName}' updated.");
         }
         catch (ApiException exception) { ShowApiFailure("update supplier", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("update supplier", "Verify connection.")); }
@@ -785,7 +783,7 @@ public sealed partial class StockRoomPage : Page
         }
     }
 
-    private async void OnRefreshClick(object sender, RoutedEventArgs e) => await LoadAllDataAsync();
+    private async void OnRefreshClick(object sender, RoutedEventArgs e) => await RefreshDataAsync();
 
     private void OnSearchTextChanged(object sender, TextChangedEventArgs e) => ApplyIngredientFilters();
     private void OnUnitFilterClick(object sender, RoutedEventArgs e)
@@ -1202,7 +1200,7 @@ public sealed partial class StockRoomPage : Page
     internal async Task<object> PrepareVerificationAsync()
     {
         while (isBusy) await Task.Delay(50);
-        await LoadAllDataAsync();
+        await RefreshDataAsync();
         PrepareReferenceCapture();
         return new { ingredients = allIngredientRows.Count, receipts = rawReceipts.Count, suppliers = supplierDirectory.Count, movements = allMovements.Count };
     }
