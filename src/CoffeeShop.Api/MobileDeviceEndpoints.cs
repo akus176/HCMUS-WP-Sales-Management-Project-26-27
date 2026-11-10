@@ -21,7 +21,14 @@ public static class MobileDeviceEndpoints
             var device = new MobileDeviceRegistration(EntityId.New(), user.GetRequiredId(), request.Platform!, request.Token!, Now());
             db.MobileDeviceRegistrations.Add(device);
             try { await db.SaveChangesAsync(ct); }
-            catch (DbUpdateException e) when (IsDuplicate(e)) { return Conflict(); }
+            catch (DbUpdateException e) when (IsDuplicate(e))
+            {
+                // A client may have lost the response or its locally stored registration ID.
+                var existing = await db.MobileDeviceRegistrations.AsNoTracking().SingleOrDefaultAsync(
+                    registration => registration.Token == device.Token && registration.RevokedAt == null, ct);
+                if (existing is null || existing.UserId != device.UserId) return Conflict();
+                device = existing;
+            }
             return Results.Created($"/api/v1/mobile-devices/{device.Id.Value}", new MobileDeviceResponse(device.Id.Value));
         }).Produces<MobileDeviceResponse>(201).ProducesProblem(400).ProducesProblem(401).ProducesProblem(409);
 

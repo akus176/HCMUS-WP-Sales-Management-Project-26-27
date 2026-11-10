@@ -2,15 +2,27 @@ using System.ComponentModel;
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Customers;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.WinUI.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoffeeShop.WinUI.ViewModels;
 
 // Presentation orchestration only; validation and persistence live in Application.
-public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrderContext orderContext) : INotifyPropertyChanged
+public sealed class CustomerWorkspace : INotifyPropertyChanged
 {
+    private readonly ICustomerWorkspaceSource source;
+    private readonly CustomerOrderContext orderContext;
     public const int HistoryPageSize = 20;
     private EntityId? selectedId;
+
+    public CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrderContext orderContext)
+        : this(new DirectCustomerWorkspaceSource(scopes), orderContext) { }
+
+    public CustomerWorkspace(ICustomerWorkspaceSource source, CustomerOrderContext orderContext)
+    {
+        this.source = source;
+        this.orderContext = orderContext;
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -51,8 +63,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
         selectedId = id;
         SelectedCustomer = null;
         History = new([], 0, HistoryPageSize, 0);
-        using var scope = scopes.CreateScope();
-        await LoadDetailAsync(scope.ServiceProvider.GetRequiredService<CustomerQueryHandler>(), 0);
+        await LoadDetailAsync(0);
         if (!IsError)
         {
             Message = "Profile loaded. Loyalty history is read-only.";
@@ -75,9 +86,9 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
         return LoadAsync();
     }
 
-    public Task<bool> CreateAsync(CreateCustomerCommand command) => SaveAsync(async commands =>
+    public Task<bool> CreateAsync(CreateCustomerCommand command) => SaveAsync(async () =>
     {
-        var result = await commands.CreateCustomerAsync(command);
+        var result = await source.CreateAsync(command);
         if (result.IsSuccess)
         {
             selectedId = result.Value;
@@ -87,11 +98,11 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
     }, "Customer created.");
 
     public Task<bool> UpdateAsync(UpdateCustomerCommand command) =>
-        SaveAsync(commands => commands.UpdateCustomerAsync(command), "Customer saved.");
+        SaveAsync(() => source.UpdateAsync(command), "Customer saved.");
 
-    public Task<bool> DeactivateAsync(EntityId customerId) => SaveAsync(async commands =>
+    public Task<bool> DeactivateAsync(EntityId customerId) => SaveAsync(async () =>
     {
-        var result = await commands.DeactivateCustomerAsync(new(customerId));
+        var result = await source.DeactivateAsync(new(customerId));
         if (result.IsSuccess && OrderSelection.CustomerId == customerId)
         {
             orderContext.Clear();
@@ -101,17 +112,17 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
     }, "Customer deactivated. Historical orders and loyalty entries are preserved.");
 
     public Task<bool> AddAddressAsync(AddCustomerAddressCommand command) =>
-        SaveAsync(async commands => await commands.AddAddressAsync(command), "Address saved.");
+        SaveAsync(async () => await source.AddAddressAsync(command), "Address saved.");
 
     public Task<bool> UpdateAddressAsync(UpdateCustomerAddressCommand command) =>
-        SaveAsync(commands => commands.UpdateAddressAsync(command), "Address saved.");
+        SaveAsync(() => source.UpdateAddressAsync(command), "Address saved.");
 
     public Task<bool> SetDefaultAddressAsync(EntityId customerId, EntityId addressId) =>
-        SaveAsync(commands => commands.SetDefaultAddressAsync(new(customerId, addressId)), "Default address saved.");
+        SaveAsync(() => source.SetDefaultAddressAsync(new(customerId, addressId)), "Default address saved.");
 
-    public Task<bool> DeactivateAddressAsync(EntityId customerId, EntityId addressId) => SaveAsync(async commands =>
+    public Task<bool> DeactivateAddressAsync(EntityId customerId, EntityId addressId) => SaveAsync(async () =>
     {
-        var result = await commands.DeactivateAddressAsync(new(customerId, addressId));
+        var result = await source.DeactivateAddressAsync(new(customerId, addressId));
         if (result.IsSuccess && OrderSelection.Delivery?.CustomerAddressId == addressId)
         {
             orderContext.Clear();
@@ -131,8 +142,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
                 return;
             }
 
-            using var scope = scopes.CreateScope();
-            var result = await scope.ServiceProvider.GetRequiredService<CustomerOrderSelectionHandler>().PrepareAsync(request);
+            var result = await source.PrepareOrderSelectionAsync(request);
             if (Accept(result))
             {
                 orderContext.Set(request, result.Value);
@@ -158,7 +168,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
         Notify();
     }
 
-    private async Task<bool> SaveAsync(Func<CustomerCommandHandler, Task<Result>> action, string successMessage)
+    private async Task<bool> SaveAsync(Func<Task<Result>> action, string successMessage)
     {
         var saved = false;
         await RunAsync(async () =>
@@ -169,10 +179,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
                 return;
             }
 
-            using (var scope = scopes.CreateScope())
-            {
-                saved = Accept(await action(scope.ServiceProvider.GetRequiredService<CustomerCommandHandler>()));
-            }
+            saved = Accept(await action());
 
             if (!saved)
             {
@@ -190,9 +197,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
 
     private async Task ReloadCoreAsync()
     {
-        using var scope = scopes.CreateScope();
-        var queries = scope.ServiceProvider.GetRequiredService<CustomerQueryHandler>();
-        var result = await queries.SearchCustomersAsync(new(Search, IncludeInactive, 100));
+        var result = await source.SearchAsync(new(Search, IncludeInactive, 100));
         if (!Accept(result))
         {
             RequiresReload = true;
@@ -203,13 +208,12 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
         RequiresReload = false;
         if (selectedId is not null)
         {
-            await LoadDetailAsync(queries, History.Offset);
+            await LoadDetailAsync(History.Offset);
         }
 
         if (!IsError && OrderSelection.CustomerId is not null)
         {
-            var prepared = await scope.ServiceProvider.GetRequiredService<CustomerOrderSelectionHandler>()
-                .PrepareAsync(orderContext.Request);
+            var prepared = await source.PrepareOrderSelectionAsync(orderContext.Request);
             if (prepared.IsSuccess)
             {
                 orderContext.Set(orderContext.Request, prepared.Value);
@@ -221,10 +225,10 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
         }
     }
 
-    private async Task LoadDetailAsync(CustomerQueryHandler queries, int offset)
+    private async Task LoadDetailAsync(int offset)
     {
         var customerId = selectedId!;
-        var detail = await queries.GetCustomerDetailAsync(customerId);
+        var detail = await source.GetDetailAsync(customerId);
         if (!Accept(detail))
         {
             if (detail.Error!.Type == ErrorType.NotFound)
@@ -242,7 +246,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
             return;
         }
 
-        var history = await queries.GetLoyaltyHistoryAsync(selectedId!, new(offset, HistoryPageSize));
+        var history = await source.GetHistoryAsync(selectedId!, new(offset, HistoryPageSize));
         if (!Accept(history))
         {
             RequiresReload = true;
@@ -265,9 +269,7 @@ public sealed class CustomerWorkspace(IServiceScopeFactory scopes, CustomerOrder
             return;
         }
 
-        using var scope = scopes.CreateScope();
-        var result = await scope.ServiceProvider.GetRequiredService<CustomerQueryHandler>()
-            .GetLoyaltyHistoryAsync(selectedId, new(offset, HistoryPageSize));
+        var result = await source.GetHistoryAsync(selectedId!, new(offset, HistoryPageSize));
         if (Accept(result))
         {
             History = result.Value;

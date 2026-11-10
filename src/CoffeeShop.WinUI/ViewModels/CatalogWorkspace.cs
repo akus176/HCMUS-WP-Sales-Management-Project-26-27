@@ -2,13 +2,20 @@ using System.ComponentModel;
 using CoffeeShop.Application.Catalog;
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.WinUI.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoffeeShop.WinUI.ViewModels;
 
 // No XAML dependencies: the same presentation workflow runs in headless tests.
-public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPropertyChanged
+public sealed class CatalogWorkspace : INotifyPropertyChanged
 {
+    private readonly ICatalogWorkspaceSource source;
+
+    public CatalogWorkspace(IServiceScopeFactory scopes) : this(new DirectCatalogWorkspaceSource(scopes)) { }
+
+    public CatalogWorkspace(ICatalogWorkspaceSource source) => this.source = source;
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public bool IsBusy { get; private set; }
@@ -41,8 +48,7 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
 
     public Task SelectAsync(EntityId id) => RunAsync(async () =>
     {
-        using var scope = scopes.CreateScope();
-        var result = await scope.ServiceProvider.GetRequiredService<CatalogQueryHandler>().GetMenuItemDetailAsync(id);
+        var result = await source.GetMenuItemDetailAsync(id);
         if (Accept(result))
         {
             SelectedItem = result.Value;
@@ -51,19 +57,13 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
     }, clearSelection: true);
 
     public async Task<bool> SaveAsync(
-        Func<CatalogCommandHandler, RecipeCommandHandler, Task<Result>> action,
+        Func<ICatalogWorkspaceSource, ICatalogWorkspaceSource, Task<Result>> action,
         string successMessage)
     {
         var saved = false;
         await RunAsync(async () =>
         {
-            // A fresh context for each action also discards failed tracked mutations.
-            using (var scope = scopes.CreateScope())
-            {
-                var provider = scope.ServiceProvider;
-                saved = Accept(await action(provider.GetRequiredService<CatalogCommandHandler>(),
-                    provider.GetRequiredService<RecipeCommandHandler>()));
-            }
+            saved = Accept(await action(source, source));
 
             if (saved)
             {
@@ -93,18 +93,16 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
 
     private async Task ReloadAsync()
     {
-        using var scope = scopes.CreateScope();
-        var queries = scope.ServiceProvider.GetRequiredService<CatalogQueryHandler>();
-        var categories = await queries.SearchCategoriesAsync(new CategorySearchCriteria(Limit: 200));
-        var items = await queries.SearchMenuItemsAsync(new MenuItemSearchCriteria(
+        var categories = await source.SearchCategoriesAsync(new CategorySearchCriteria(Limit: 200));
+        var items = await source.SearchMenuItemsAsync(new MenuItemSearchCriteria(
             Search: Search, IsActive: IncludeInactive ? null : true, Limit: 200));
         if (!Accept(categories) || !Accept(items))
         {
             return;
         }
 
-        var addons = await queries.ListAddonsAsync();
-        var ingredients = await queries.ListActiveRecipeIngredientsAsync();
+        var addons = await source.ListAddonsAsync();
+        var ingredients = await source.ListActiveRecipeIngredientsAsync();
         Categories = categories.Value;
         Items = items.Value;
         Addons = addons.Value;
@@ -116,7 +114,7 @@ public sealed class CatalogWorkspace(IServiceScopeFactory scopes) : INotifyPrope
 
         if (SelectedItem is not null)
         {
-            var detail = await queries.GetMenuItemDetailAsync(SelectedItem.Id);
+            var detail = await source.GetMenuItemDetailAsync(SelectedItem.Id);
             SelectedItem = detail.IsSuccess ? detail.Value : null;
         }
     }

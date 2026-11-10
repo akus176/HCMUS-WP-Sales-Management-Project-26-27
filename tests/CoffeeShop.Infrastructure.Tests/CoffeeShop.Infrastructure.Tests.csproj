@@ -20,6 +20,8 @@
     <None Include="..\..\scripts\postgres\midterm-seed.sql" Link="midterm-seed.sql" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\CatalogWorkspace.cs" Link="ViewModels\CatalogWorkspace.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\CustomerWorkspace.cs" Link="ViewModels\CustomerWorkspace.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\CatalogWorkspaceSource.cs" Link="Services\CatalogWorkspaceSource.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\CustomerWorkspaceSource.cs" Link="Services\CustomerWorkspaceSource.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\CustomerOrderContext.cs" Link="ViewModels\CustomerOrderContext.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\PosWorkspace.cs" Link="ViewModels\PosWorkspace.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\PosOperatorSession.cs" Link="ViewModels\PosOperatorSession.cs" />

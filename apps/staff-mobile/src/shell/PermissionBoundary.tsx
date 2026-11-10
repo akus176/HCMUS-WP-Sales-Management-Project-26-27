@@ -15,12 +15,14 @@ type Check = {
 
 export function PermissionBoundary({
   moduleId,
+  requiredPermission,
   scope = 'module',
   focused = true,
   refreshKey = 0,
   children,
 }: {
   moduleId?: string | string[];
+  requiredPermission?: string;
   scope?: 'home' | 'module';
   focused?: boolean;
   refreshKey?: number;
@@ -30,6 +32,9 @@ export function PermissionBoundary({
   const module = findModule(moduleId);
   const snapshot = state.user;
   const accessId = scope === 'home' ? 'home' : module?.id;
+  const checkId = requiredPermission
+    ? `${accessId}:${requiredPermission}`
+    : accessId;
   const [check, setCheck] = useState<Check | null>(null);
   const [retry, setRetry] = useState(0);
   const [active, setActive] = useState(
@@ -45,7 +50,8 @@ export function PermissionBoundary({
     return () => subscription.remove();
   }, []);
   useEffect(() => {
-    if (!client || !snapshot || !accessId || !active || !focused) return;
+    if (!client || !snapshot || !accessId || !checkId || !active || !focused)
+      return;
     let current = true;
     const controller = new AbortController();
     void client.api
@@ -61,10 +67,12 @@ export function PermissionBoundary({
           );
         setCheck({
           snapshot,
-          moduleId: accessId,
+          moduleId: checkId,
           refreshKey,
           result:
             valid &&
+            (!requiredPermission ||
+              data.permissions.includes(requiredPermission)) &&
             (scope === 'home' ||
               (module && permittedActions(module, data.permissions).length))
               ? data
@@ -75,7 +83,7 @@ export function PermissionBoundary({
         if (current)
           setCheck({
             snapshot,
-            moduleId: accessId,
+            moduleId: checkId,
             refreshKey,
             result: 'error',
           });
@@ -89,6 +97,8 @@ export function PermissionBoundary({
     snapshot,
     module,
     accessId,
+    checkId,
+    requiredPermission,
     scope,
     focused,
     active,
@@ -130,7 +140,7 @@ export function PermissionBoundary({
     !active ||
     !check ||
     check.snapshot !== snapshot ||
-    check.moduleId !== accessId ||
+    check.moduleId !== checkId ||
     check.refreshKey !== refreshKey
   )
     return (

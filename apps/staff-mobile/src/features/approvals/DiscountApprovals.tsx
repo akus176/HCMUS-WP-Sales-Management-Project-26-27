@@ -54,9 +54,11 @@ function isForbidden(error: unknown) {
 export function DiscountApprovals({
   user,
   discountId,
+  lookupAllPages = false,
 }: {
   user: StaffSession;
   discountId?: string;
+  lookupAllPages?: boolean;
 }) {
   const { client } = useSession();
   const { status, canMutate, refreshConnection } = useConnectivity();
@@ -74,18 +76,27 @@ export function DiscountApprovals({
   const [apiForbidden, setApiForbidden] = useState(false);
 
   const pendingQuery = useQuery({
-    queryKey,
+    queryKey: lookupAllPages ? [...queryKey, discountId] : queryKey,
     enabled: !!client && canMutate && !apiForbidden,
     queryFn: async ({ signal }) => {
       if (!client)
         throw new Error('The authenticated API client is unavailable.');
       if (!canMutate) throw new NetworkError();
-      const { data } = await client.api.GET('/api/v1/discounts/pending', {
-        params: { query: { page: 1, pageSize: 100 } },
-        signal,
-      });
-      if (!data) throw new Error('The API returned no pending approvals.');
-      return data;
+      for (let page = 1; ; page++) {
+        const { data } = await client.api.GET('/api/v1/discounts/pending', {
+          params: { query: { page, pageSize: 100 } },
+          signal,
+        });
+        if (!data) throw new Error('The API returned no pending approvals.');
+        if (
+          !lookupAllPages ||
+          !discountId ||
+          data.items.some((item) => item.discountId === discountId) ||
+          data.items.length === 0 ||
+          page * Number(data.pageSize) >= Number(data.totalCount)
+        )
+          return data;
+      }
     },
   });
 
