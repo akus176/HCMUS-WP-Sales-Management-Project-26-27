@@ -45,5 +45,25 @@ services:
       retries: 6
       start_period: 10s
 
+  demo-data:
+    profiles: [demo]
+    image: postgres:18-alpine
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGDATABASE: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      PGUSER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - type: bind
+        source: ./scripts/postgres/midterm-seed.sql
+        target: /demo/seed.sql
+        read_only: true
+        bind:
+          create_host_path: false
+    entrypoint: ["psql", "-X", "-v", "ON_ERROR_STOP=1", "-f", "/demo/seed.sql"]
+
 volumes:
   postgres_data:
