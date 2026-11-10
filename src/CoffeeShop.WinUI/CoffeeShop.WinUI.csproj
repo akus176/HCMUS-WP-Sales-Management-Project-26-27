@@ -7,13 +7,18 @@
     <WindowsPackageType>None</WindowsPackageType>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <DefineConstants Condition="'$(Configuration)' == 'Release'">$(DefineConstants);COFFEESHOP_API_ONLY</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CoffeeShop.Application\CoffeeShop.Application.csproj" />
     <ProjectReference Include="..\CoffeeShop.Contracts\CoffeeShop.Contracts.csproj" />
-    <ProjectReference Include="..\CoffeeShop.Infrastructure.Postgres\CoffeeShop.Infrastructure.Postgres.csproj" />
+    <ProjectReference Include="..\CoffeeShop.Infrastructure.Postgres\CoffeeShop.Infrastructure.Postgres.csproj" Condition="'$(Configuration)' != 'Release'" />
     <PackageReference Include="Microsoft.WindowsAppSDK" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <Compile Remove="WinUIServiceCollectionExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Fonts\*.ttf" CopyToOutputDirectory="PreserveNewest" />

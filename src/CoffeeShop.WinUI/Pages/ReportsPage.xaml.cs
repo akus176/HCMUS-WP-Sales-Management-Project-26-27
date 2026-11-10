@@ -115,9 +115,9 @@ public sealed partial class ReportsPage : Page
     public ReportsPage()
     {
         InitializeComponent();
-        model = Environment.GetCommandLineArgs().Contains("--verify-shell")
-            ? new ReportsWorkspace(App.Services.GetRequiredService<IServiceScopeFactory>())
-            : new ReportsWorkspace(App.Services.GetRequiredService<ApiReportsSource>());
+        model = App.IsApiMode
+            ? new ReportsWorkspace(App.Services.GetRequiredService<ApiReportsSource>())
+            : new ReportsWorkspace(App.Services.GetRequiredService<IServiceScopeFactory>());
         model.PropertyChanged += (_, _) => Render();
         var today = DateTimeOffset.Now;
         FirstDate.Date = new DateTimeOffset(today.Year, today.Month, 1, 0, 0, 0, today.Offset);

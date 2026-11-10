@@ -52,9 +52,12 @@ jobs:
         with:
           dotnet-version: 10.0.x
       - name: Restore
-        run: dotnet restore CoffeeShop.slnx
+        run: dotnet restore CoffeeShop.slnx -p:Configuration=Release
       - name: Build
         run: dotnet build CoffeeShop.slnx --no-restore --configuration Release
+      - name: Verify API-only WinUI Release artifact
+        shell: pwsh
+        run: .\scripts\verify-winui-api-release.ps1 -SkipBuild
       - name: Format
         run: dotnet format CoffeeShop.slnx --verify-no-changes --no-restore
       - name: Test non-PostgreSQL suites

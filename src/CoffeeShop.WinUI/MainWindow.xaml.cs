@@ -1,4 +1,6 @@
+#if !COFFEESHOP_API_ONLY
 using CoffeeShop.Infrastructure.Postgres;
+#endif
 using CoffeeShop.WinUI.Pages;
 using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
@@ -30,7 +32,11 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+#if COFFEESHOP_API_ONLY
+        ClientModeText.Text = "WINUI · HTTP API";
+#else
         ClientModeText.Text = App.IsApiMode ? "WINUI · HTTP API" : "WINUI · DIRECT POSTGRESQL";
+#endif
         staffSession = App.Services.GetRequiredService<PosOperatorSession>();
         sessionManager = App.Services.GetService<StaffSessionManager>();
         SignOutButton.Visibility = sessionManager is null ? Visibility.Collapsed : Visibility.Visible;
@@ -136,8 +142,10 @@ public sealed partial class MainWindow : Window
                 PresentConnection();
                 if (currentRoute is null && Nav.MenuItems.OfType<NavigationViewItem>().FirstOrDefault() is { } apiFirstItem)
                     NavigateTo((string)apiFirstItem.Tag);
+                if (verifyShell) await VerifyShellAsync();
                 return;
             }
+#if !COFFEESHOP_API_ONLY
             if (!configuration.IsConfigured) { Fail(configuration.Error ?? "Database settings are missing."); return; }
             using var scope = App.Services.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
@@ -147,8 +155,18 @@ public sealed partial class MainWindow : Window
             if (currentRoute is null && Nav.MenuItems.OfType<NavigationViewItem>().FirstOrDefault() is { } firstItem)
                 NavigateTo((string)firstItem.Tag);
             if (Environment.GetCommandLineArgs().Contains("--verify-shell")) await VerifyShellAsync();
+#else
+            Fail("The API-only Release client requires a valid API configuration.");
+#endif
         }
-        catch (Exception) { Fail("Could not connect to PostgreSQL. Check the server and database settings, then retry."); }
+        catch (Exception)
+        {
+#if COFFEESHOP_API_ONLY
+            Fail("Could not connect to the coffee shop API. Check the server address and retry.");
+#else
+            Fail("Could not connect to PostgreSQL. Check the server and database settings, then retry.");
+#endif
+        }
         finally { connecting = false; }
     }
     private void Fail(string message) { connection.Failed(message); PresentConnection(); }
