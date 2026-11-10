@@ -21,12 +21,13 @@ Verified on 10 November 2026 using setup commit `5ceb12d` and WinUI startup fix 
 
 The [Compose job log](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/actions/runs/42813934365/job/129822083874) records the health and database checks. The automated check removed its containers and test volume afterward.
 
+The issue owner confirmed delivery of the populated `.env` through the team's restricted private channel. The [delivery checkbox on issue #195](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/195) records that confirmation.
+
 | Categories | Products | Sizes | Recipes | Ingredients | Suppliers | Receipts | Customers | Tables | Orders |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 5 | 20 | 40 | 40 | 9 | 3 | 2 | 12 | 8 | 24 |
 
 ## Remaining review evidence
 
-- Run the complete [Windows quickstart](../../README.md#start-the-api-and-winui-on-windows) in one Windows checkout and record the native WinUI sign-in against that Compose stack. The local Docker image download did not finish during verification. The clean Compose check ran on GitHub Actions, and the Windows checks used a separately hosted API and PostgreSQL database.
-- Confirm delivery of a populated `.env` through the five-member private channel. Keep the file and its contents out of GitHub.
+- Run the complete [Windows quickstart](../../README.md#start-the-api-and-winui-on-windows) in one clean Windows checkout. Record the Compose service health, both HTTP health responses, and the Release WinUI Menu after signing in with the disposable Manager. Keep credentials and tokens out of the evidence. The clean Compose check ran on GitHub Actions, and the recorded Windows checks used a separately hosted API and PostgreSQL database.
 - Record reviewer approval after the clean-checkout walkthrough.
