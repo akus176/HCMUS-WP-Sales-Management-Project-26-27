@@ -10,10 +10,11 @@ public static class CustomerEndpoints
     {
         var customers = api.MapGroup("/customers").RequireAuthorization("customers.manage");
         customers.MapGet("/", async (CustomerQueryHandler handler, string? search, bool? isActive,
-            int? limit, CancellationToken ct) =>
+            int? limit, bool? includeInactive, CancellationToken ct) =>
         {
             var result = await handler.SearchCustomersAsync(
-                new CustomerSearchCriteria(search, IncludeInactive: isActive == false, Limit: limit ?? 50), ct);
+                new CustomerSearchCriteria(search, IncludeInactive: isActive == false || (isActive is null && includeInactive == true),
+                    Limit: limit ?? 50), ct);
             if (result.IsFailure) return ApiErrorResults.From(result.Error!);
             var filtered = isActive == false ? result.Value.Where(customer => !customer.IsActive) : result.Value;
             return Results.Ok(filtered.Select(ToResponse).ToArray());

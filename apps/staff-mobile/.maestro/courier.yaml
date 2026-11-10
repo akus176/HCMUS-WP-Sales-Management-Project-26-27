@@ -1,0 +1,74 @@
+appId: com.coffeeshop.staffmobile
+name: Courier delivered and failed workflows against the shared API
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: Staff mobile
+    timeout: 60000
+- tapOn: Staff sign-in
+- tapOn: Username
+- inputText: ${MAESTRO_STAFF_USERNAME}
+- tapOn: Password
+- inputText: ${MAESTRO_STAFF_PASSWORD}
+- hideKeyboard
+- tapOn: Sign in
+- extendedWaitUntil:
+    visible: Open Deliveries
+    timeout: 30000
+- tapOn: Open Deliveries
+- scrollUntilVisible:
+    element: Open delivery ${MAESTRO_DELIVERED_ORDER}
+    direction: DOWN
+- tapOn: Open delivery ${MAESTRO_DELIVERED_ORDER}
+- scrollUntilVisible:
+    element: Start delivery
+    direction: DOWN
+- tapOn: Start delivery
+- extendedWaitUntil:
+    visible: Mark delivered
+    timeout: 30000
+- tapOn: Mark delivered
+- extendedWaitUntil:
+    visible: Delivery delivered. Confirmed by the service.
+    timeout: 30000
+- assertNotVisible: Synthetic test address
+- scrollUntilVisible:
+    element: Back to deliveries
+    direction: UP
+- tapOn: Back to deliveries
+- scrollUntilVisible:
+    element: Open delivery ${MAESTRO_FAILED_ORDER}
+    direction: DOWN
+- tapOn: Open delivery ${MAESTRO_FAILED_ORDER}
+- scrollUntilVisible:
+    element: Start delivery
+    direction: DOWN
+- tapOn: Start delivery
+- extendedWaitUntil:
+    visible: Mark failed
+    timeout: 30000
+- tapOn: Mark failed
+- assertVisible: A failure reason is required.
+- scrollUntilVisible:
+    element: Failure reason
+    direction: DOWN
+- tapOn: Failure reason
+- inputText: Customer unavailable
+- hideKeyboard
+- tapOn: Mark failed
+- extendedWaitUntil:
+    visible: Delivery failed. Confirmed by the service.
+    timeout: 30000
+- assertNotVisible: Synthetic test address
+- scrollUntilVisible:
+    element: Back to deliveries
+    direction: UP
+- tapOn: Back to deliveries
+- tapOn: Completed deliveries
+- scrollUntilVisible:
+    element: ${MAESTRO_DELIVERED_ORDER} · delivered
+    direction: DOWN
+- scrollUntilVisible:
+    element: ${MAESTRO_FAILED_ORDER} · failed
+    direction: DOWN

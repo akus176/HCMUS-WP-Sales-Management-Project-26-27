@@ -21,6 +21,14 @@ internal static class WinUIApiServiceCollectionExtensions
         services.AddSingleton<ApiReportsSource>();
         services.AddSingleton<ApiPosSource>();
         services.AddSingleton<ApiOperationsSource>();
+        services.AddSingleton<ApiInventorySource>();
+        services.AddSingleton<ApiCatalogWorkspaceSource>();
+        services.AddSingleton<ICatalogWorkspaceSource>(provider => provider.GetRequiredService<ApiCatalogWorkspaceSource>());
+        services.AddSingleton<ApiCustomerWorkspaceSource>();
+        services.AddSingleton<ICustomerWorkspaceSource>(provider => provider.GetRequiredService<ApiCustomerWorkspaceSource>());
+        services.AddSingleton<CustomerOrderContext>();
+        services.AddSingleton<CustomerWorkspace>(provider => new CustomerWorkspace(
+            provider.GetRequiredService<ICustomerWorkspaceSource>(), provider.GetRequiredService<CustomerOrderContext>()));
         services.AddSingleton<PosOperatorSession>(provider => new PosOperatorSession(
             () => provider.GetRequiredService<StaffSessionManager>().CurrentUser));
         services.AddSingleton<ICurrentUser>(provider => provider.GetRequiredService<PosOperatorSession>());

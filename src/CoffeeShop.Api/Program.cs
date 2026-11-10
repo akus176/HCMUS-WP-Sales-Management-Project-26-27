@@ -23,7 +23,10 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddCoffeeShopPostgres(connectionString);
 builder.Services.AddScoped<IClock, SystemClock>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSignalR();
+builder.Services.AddHostedService<OperationalEventListener>();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
+builder.Services.AddScoped<InvalidMobileTokenCleanup>();
 builder.Services.AddScoped<CatalogQueryHandler>();
 builder.Services.AddScoped<CatalogCommandHandler>();
 builder.Services.AddScoped<RecipeCommandHandler>();
@@ -98,9 +101,11 @@ if (app.Environment.IsDevelopment())
 
 app.MapHealthChecks("/health", new() { Predicate = _ => false });
 app.MapHealthChecks("/health/ready", new() { Predicate = check => check.Tags.Contains("ready") });
+app.MapHub<OperationalEventsHub>("/api/v1/operational-events", options => options.CloseOnAuthenticationExpiration = true).RequireAuthorization();
 
 var api = app.MapGroup("/api/v1");
 api.MapStaffIdentity();
+api.MapMobileDevices();
 api.MapInventoryEndpoints();
 api.MapCatalogEndpoints();
 api.MapSalesEndpoints();
@@ -145,6 +150,24 @@ api.MapPost("/categories/{id:guid}/deactivate", async (
         return ApiErrorResults.From(Error.Validation("catalog.invalid_id", "Category identifier is required."));
     var result = await handler.DeactivateCategoryAsync(
         new DeactivateCategoryCommand(new EntityId(id)), cancellationToken);
+    return result.IsSuccess ? Results.NoContent() : ApiErrorResults.From(result.Error!);
+})
+.Produces(StatusCodes.Status204NoContent)
+.ProducesProblem(StatusCodes.Status400BadRequest)
+.ProducesProblem(StatusCodes.Status401Unauthorized)
+.ProducesProblem(StatusCodes.Status403Forbidden)
+.ProducesProblem(StatusCodes.Status404NotFound)
+.ProducesProblem(StatusCodes.Status409Conflict)
+.RequireAuthorization("menu.manage");
+
+api.MapPut("/categories/{id:guid}", async (
+    Guid id, CreateCategoryRequest request, CatalogCommandHandler handler,
+    CancellationToken cancellationToken) =>
+{
+    if (id == Guid.Empty)
+        return ApiErrorResults.From(Error.Validation("catalog.invalid_id", "Category identifier is required."));
+    var result = await handler.UpdateCategoryAsync(
+        new UpdateCategoryCommand(new EntityId(id), request.Name ?? string.Empty), cancellationToken);
     return result.IsSuccess ? Results.NoContent() : ApiErrorResults.From(result.Error!);
 })
 .Produces(StatusCodes.Status204NoContent)

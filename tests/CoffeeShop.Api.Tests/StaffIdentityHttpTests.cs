@@ -3,8 +3,10 @@ namespace CoffeeShop.Api.Tests;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Json;
+using System.Net.WebSockets;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using CoffeeShop.Api;
 using CoffeeShop.Application.Reporting;
 using CoffeeShop.Contracts;
@@ -14,10 +16,12 @@ using CoffeeShop.Domain.Sales;
 using CoffeeShop.Infrastructure.Postgres;
 using CoffeeShop.Infrastructure.Postgres.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 
@@ -49,7 +53,8 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         await AddUserAsync(db, "multi", ["Cashier", "Barista"]);
         await AddUserAsync(db, "inactive", ["Cashier"], false);
         host = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.UseTestIdentity().UseSetting("ConnectionStrings:CoffeeShop", connectionString));
+            builder.UseTestIdentity().UseSetting("ConnectionStrings:CoffeeShop", connectionString)
+                .ConfigureLogging(logging => logging.ClearProviders()));
     }
 
     private CoffeeShopDbContext Database()
@@ -79,6 +84,238 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
         return (await response.Content.ReadFromJsonAsync<TokenResponse>())!;
+    }
+
+    [PostgresFact]
+    public async Task MobileDevices_RequireAuthenticationAndEnforceOwnershipRotationAndRevocation()
+    {
+        using var owner = host!.CreateClient();
+        using var other = host.CreateClient();
+        var request = new MobileDeviceRequest("android", "token-a");
+        Assert.Equal(HttpStatusCode.Unauthorized, (await owner.PostAsJsonAsync("/api/v1/mobile-devices/", request)).StatusCode);
+        owner.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(owner)).AccessToken);
+        other.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(other, "Barista")).AccessToken);
+        Assert.Equal(HttpStatusCode.BadRequest, (await owner.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("android", " "))).StatusCode);
+        using var created = await owner.PostAsJsonAsync("/api/v1/mobile-devices/", request);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var id = (await created.Content.ReadFromJsonAsync<MobileDeviceResponse>())!.Id;
+        var path = $"/api/v1/mobile-devices/{id}";
+        Assert.Equal(HttpStatusCode.Conflict, (await other.PostAsJsonAsync("/api/v1/mobile-devices/", request)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await other.PutAsJsonAsync(path, new MobileDeviceRequest("ios", "token-b"))).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await other.DeleteAsync(path)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await owner.PutAsJsonAsync(path, new MobileDeviceRequest("ios", "token-b"))).StatusCode);
+        Assert.Equal(HttpStatusCode.Created, (await other.PostAsJsonAsync("/api/v1/mobile-devices/", request)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await owner.DeleteAsync(path)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await owner.PutAsJsonAsync(path, request)).StatusCode);
+        Assert.Equal(HttpStatusCode.Created, (await owner.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("ios", "token-b"))).StatusCode);
+    }
+
+    [PostgresFact]
+    public async Task InvalidDeviceTokenCleanup_RevokesOnlyMatchingActiveRegistration()
+    {
+        using var client = host!.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(client)).AccessToken);
+        var response = await client.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("android", "invalid-token"));
+        var id = (await response.Content.ReadFromJsonAsync<MobileDeviceResponse>())!.Id;
+        await using var db = Database();
+        var cleanup = new InvalidMobileTokenCleanup(db);
+        Assert.False(await cleanup.RevokeAsync("unknown-token"));
+        Assert.True(await cleanup.RevokeAsync("invalid-token"));
+        Assert.False(await cleanup.RevokeAsync("invalid-token"));
+        db.ChangeTracker.Clear();
+        Assert.NotNull((await db.MobileDeviceRegistrations.SingleAsync(device => device.Id == new EntityId(id))).RevokedAt);
+
+        var next = await client.PostAsJsonAsync("/api/v1/mobile-devices/", new MobileDeviceRequest("android", "old-token"));
+        var nextId = (await next.Content.ReadFromJsonAsync<MobileDeviceResponse>())!.Id;
+        Assert.Equal(HttpStatusCode.NoContent, (await client.PutAsJsonAsync($"/api/v1/mobile-devices/{nextId}", new MobileDeviceRequest("android", "new-token"))).StatusCode);
+        Assert.False(await cleanup.RevokeAsync("old-token"));
+        db.ChangeTracker.Clear();
+        Assert.Null((await db.MobileDeviceRegistrations.SingleAsync(device => device.Id == new EntityId(nextId))).RevokedAt);
+    }
+
+    [PostgresFact]
+    public async Task OperationalHub_RequiresAuthenticationAndRejectsClientGroupSelection()
+    {
+        using var client = host!.CreateClient();
+        Assert.Equal(HttpStatusCode.Unauthorized,
+            (await client.PostAsync("/api/v1/operational-events/negotiate?negotiateVersion=1", null)).StatusCode);
+        var token = (await LoginAsync(client, "Barista")).AccessToken;
+        var socketClient = host.Server.CreateWebSocketClient();
+        socketClient.ConfigureRequest = request => request.Headers.Authorization = $"Bearer {token}";
+        using var socket = await socketClient.ConnectAsync(new Uri("ws://localhost/api/v1/operational-events"), CancellationToken.None);
+        async Task Send(string value) => await socket.SendAsync(Encoding.UTF8.GetBytes(value + '\u001e'), WebSocketMessageType.Text, true, CancellationToken.None);
+        async Task<string> Receive()
+        {
+            var bytes = new byte[8192];
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var result = await socket.ReceiveAsync(bytes, timeout.Token);
+            return Encoding.UTF8.GetString(bytes, 0, result.Count);
+        }
+        await Send("{\"protocol\":\"json\",\"version\":1}");
+        Assert.Contains("{}", await Receive());
+        await Send("{\"type\":1,\"invocationId\":\"1\",\"target\":\"JoinGroup\",\"arguments\":[\"permission:users.manage\"]}");
+        var reply = await Receive();
+        Assert.Contains("error", reply, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("1", reply);
+    }
+
+    [PostgresFact]
+    public async Task OperationalNotifications_ArriveOnlyAfterCommitAndContainIdentifiersOnly()
+    {
+        await using var listener = new NpgsqlConnection(connectionString);
+        await listener.OpenAsync();
+        var notifications = new List<string>();
+        listener.Notification += (_, args) => notifications.Add(args.Payload);
+        await using (var command = new NpgsqlCommand("LISTEN coffeeshop_operational_events", listener)) await command.ExecuteNonQueryAsync();
+        await using var writer = new NpgsqlConnection(connectionString);
+        await writer.OpenAsync();
+        await using (var tx = await writer.BeginTransactionAsync())
+        {
+            await using var update = new NpgsqlCommand("UPDATE identity.users SET full_name = 'changed private name' WHERE username = 'Cashier'", writer, tx);
+            await update.ExecuteNonQueryAsync();
+            Assert.False(await listener.WaitAsync(300));
+            await tx.RollbackAsync();
+        }
+        Assert.False(await listener.WaitAsync(300));
+        Assert.Empty(notifications);
+        await using (var tx = await writer.BeginTransactionAsync())
+        {
+            await using var update = new NpgsqlCommand("UPDATE identity.users SET full_name = 'changed private name' WHERE username = 'Cashier'", writer, tx);
+            await update.ExecuteNonQueryAsync();
+            Assert.False(await listener.WaitAsync(300));
+            await tx.CommitAsync();
+        }
+        Assert.True(await listener.WaitAsync(5000));
+        using var payload = JsonDocument.Parse(Assert.Single(notifications));
+        Assert.Equal(new[] { "id", "type", "updatedAt" }, payload.RootElement.EnumerateObject().Select(p => p.Name).Order().ToArray());
+        Assert.Equal("account", payload.RootElement.GetProperty("type").GetString());
+        Assert.True(Guid.TryParse(payload.RootElement.GetProperty("id").GetString(), out _));
+        Assert.DoesNotContain("private name", notifications[0]);
+    }
+
+    [PostgresFact]
+    public async Task OperationalNotifications_CoverEveryMappedBusinessArea()
+    {
+        await using var listener = new NpgsqlConnection(connectionString);
+        await listener.OpenAsync();
+        var notifications = new List<string>();
+        listener.Notification += (_, args) => notifications.Add(args.Payload);
+        await using (var listen = new NpgsqlCommand("LISTEN coffeeshop_operational_events", listener)) await listen.ExecuteNonQueryAsync();
+        await using var writer = new NpgsqlConnection(connectionString);
+        await writer.OpenAsync();
+        await using (var tx = await writer.BeginTransactionAsync())
+        {
+            const string sql = """
+                INSERT INTO sales.orders (id, order_number, channel, created_by)
+                  SELECT '11111111-1111-1111-1111-111111111111', 'EVENT-TEST', 'delivery', id FROM identity.users WHERE username = 'Cashier';
+                INSERT INTO sales.discounts (order_id, type, value, reason, requested_by)
+                  SELECT '11111111-1111-1111-1111-111111111111', 'fixed', 1, 'private reason', id FROM identity.users WHERE username = 'Cashier';
+                INSERT INTO sales.payments (order_id, method, amount, recorded_by)
+                  SELECT '11111111-1111-1111-1111-111111111111', 'cash', 1, id FROM identity.users WHERE username = 'Cashier';
+                INSERT INTO inventory.ingredients (name, base_unit) VALUES ('Event Beans', 'g');
+                INSERT INTO sales.deliveries (order_id, recipient_name, contact_number, address_line)
+                  VALUES ('11111111-1111-1111-1111-111111111111', 'private recipient', '123456789', 'private address');
+                UPDATE identity.users SET full_name = 'private name' WHERE username = 'Cashier';
+                """;
+            await using var command = new NpgsqlCommand(sql, writer, tx);
+            await command.ExecuteNonQueryAsync();
+            Assert.False(await listener.WaitAsync(300));
+            await tx.CommitAsync();
+        }
+        while (notifications.Count < 6 && await listener.WaitAsync(5000)) { }
+        var types = notifications.Select(payload =>
+        {
+            using var json = JsonDocument.Parse(payload);
+            Assert.Equal(new[] { "id", "type", "updatedAt" }, json.RootElement.EnumerateObject().Select(p => p.Name).Order().ToArray());
+            Assert.True(Guid.TryParse(json.RootElement.GetProperty("id").GetString(), out _));
+            Assert.DoesNotContain("private", payload, StringComparison.OrdinalIgnoreCase);
+            return json.RootElement.GetProperty("type").GetString();
+        }).Order().ToArray();
+        Assert.Equal(new[] { "account", "delivery", "discount", "inventory", "order", "payment" }, types);
+    }
+
+    [PostgresFact]
+    public async Task OperationalEvents_AreDeliveredOnlyToCurrentlyAuthorizedUsers()
+    {
+        using var http = host!.CreateClient();
+        var admin = (await LoginAsync(http, "Admin")).AccessToken;
+        var barista = (await LoginAsync(http, "Barista")).AccessToken;
+        async Task<WebSocket> Connect(string token)
+        {
+            var client = host.Server.CreateWebSocketClient();
+            client.ConfigureRequest = request => request.Headers.Authorization = $"Bearer {token}";
+            var socket = await client.ConnectAsync(new Uri("ws://localhost/api/v1/operational-events"), CancellationToken.None);
+            await socket.SendAsync(Encoding.UTF8.GetBytes("{\"protocol\":\"json\",\"version\":1}\u001e"), WebSocketMessageType.Text, true, CancellationToken.None);
+            var buffer = new byte[4096];
+            await socket.ReceiveAsync(buffer, CancellationToken.None);
+            return socket;
+        }
+        using var adminSocket = await Connect(admin);
+        using var baristaSocket = await Connect(barista);
+        // Let the background listener establish LISTEN before producing the committed update.
+        await Task.Delay(500);
+        await using (var db = Database())
+            await db.Database.ExecuteSqlRawAsync("UPDATE identity.users SET full_name = 'Private Updated Name' WHERE username = 'Cashier'");
+        var bytes = new byte[4096];
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var received = await adminSocket.ReceiveAsync(bytes, timeout.Token);
+        var message = Encoding.UTF8.GetString(bytes, 0, received.Count);
+        Assert.Contains("OperationalEvent", message);
+        Assert.Contains("account", message);
+        Assert.DoesNotContain("Private Updated Name", message);
+        using var noMessage = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await baristaSocket.ReceiveAsync(bytes, noMessage.Token));
+
+        // Existing connections must stop receiving privileged events after their role is removed.
+        await using (var db = Database())
+            await db.Database.ExecuteSqlRawAsync("DELETE FROM identity.user_roles WHERE user_id = (SELECT id FROM identity.users WHERE username = 'Admin')");
+        using var ownChangeTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        await adminSocket.ReceiveAsync(bytes, ownChangeTimeout.Token); // the user's own account-change hint
+        await using (var db = Database())
+            await db.Database.ExecuteSqlRawAsync("UPDATE identity.users SET full_name = 'Another Private Name' WHERE username = 'Cashier'");
+        using var revokedTimeout = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await adminSocket.ReceiveAsync(bytes, revokedTimeout.Token));
+    }
+
+    [PostgresFact]
+    public async Task DeliveryEvents_AreScopedToTheAssignedCourier()
+    {
+        Guid orderId = Guid.NewGuid();
+        await using (var db = Database())
+        {
+            await AddUserAsync(db, "courier2", ["DeliveryStaff"]);
+            var courier = await db.Users.SingleAsync(u => u.Username == "DeliveryStaff");
+            var actor = await db.Users.SingleAsync(u => u.Username == "Cashier");
+            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO sales.orders (id, order_number, channel, created_by) VALUES ({orderId}, 'EVENT-DELIVERY', 'delivery', {actor.Id.Value})");
+            var deliveryId = Guid.NewGuid();
+            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO sales.deliveries (id, order_id, recipient_name, contact_number, address_line, status, assigned_staff_id) VALUES ({deliveryId}, {orderId}, 'Private Name', '123456789', 'Private Address', 'assigned', {courier.Id.Value})");
+        }
+        using var http = host!.CreateClient();
+        var assignedToken = (await LoginAsync(http, "DeliveryStaff")).AccessToken;
+        var otherToken = (await LoginAsync(http, "courier2")).AccessToken;
+        async Task<WebSocket> Connect(string token)
+        {
+            var client = host.Server.CreateWebSocketClient();
+            client.ConfigureRequest = request => request.Headers.Authorization = $"Bearer {token}";
+            var socket = await client.ConnectAsync(new Uri("ws://localhost/api/v1/operational-events"), CancellationToken.None);
+            await socket.SendAsync(Encoding.UTF8.GetBytes("{\"protocol\":\"json\",\"version\":1}\u001e"), WebSocketMessageType.Text, true, CancellationToken.None);
+            await socket.ReceiveAsync(new byte[4096], CancellationToken.None);
+            return socket;
+        }
+        using var assigned = await Connect(assignedToken);
+        using var other = await Connect(otherToken);
+        await Task.Delay(500);
+        await using (var db = Database())
+            await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE sales.deliveries SET address_line = 'New Private Address' WHERE order_id = {orderId}");
+        var buffer = new byte[4096];
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var result = await assigned.ReceiveAsync(buffer, timeout.Token);
+        var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
+        Assert.Contains(orderId.ToString(), message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("delivery", message);
+        Assert.DoesNotContain("Private", message);
+        using var noMessage = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await other.ReceiveAsync(buffer, noMessage.Token));
     }
 
     [PostgresFact]
@@ -484,7 +721,7 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         client.DefaultRequestHeaders.Authorization = new("Bearer", courier.AccessToken);
         var assignments = await client.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>("/api/v1/courier/assignments");
         Assert.Empty(assignments!.Items);
-        using var invalidCourierStatus = await client.GetAsync("/api/v1/courier/assignments?status=delivered");
+        using var invalidCourierStatus = await client.GetAsync("/api/v1/courier/assignments?status=unassigned");
         Assert.Equal(HttpStatusCode.BadRequest, invalidCourierStatus.StatusCode);
         using var forbiddenDiscounts = await client.GetAsync("/api/v1/discounts/pending");
         Assert.Equal(HttpStatusCode.Forbidden, forbiddenDiscounts.StatusCode);
@@ -555,14 +792,37 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var repeatedCompletion = await courier.PostAsync($"/api/v1/courier/assignments/{orderId}/complete", null);
         Assert.Equal(HttpStatusCode.Conflict, repeatedCompletion.StatusCode);
         Assert.Empty((await courier.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>("/api/v1/courier/assignments"))!.Items);
+        var completedAssignments = await courier.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>(
+            "/api/v1/courier/assignments?status=delivered,failed");
+        Assert.Equal(orderId, Assert.Single(completedAssignments!.Items).OrderId);
+        Assert.Empty((await other.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>(
+            "/api/v1/courier/assignments?status=delivered,failed"))!.Items);
         using var expiredDetail = await courier.GetAsync($"/api/v1/courier/assignments/{orderId}");
         Assert.Equal(HttpStatusCode.NotFound, expiredDetail.StatusCode);
+        var failedId = Guid.NewGuid();
+        using var failedDraft = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(failedId, "delivery", null,
+            new OrderCustomerRequest(RecipientName: "Customer", ContactNumber: "1234567890", AddressLine: "456 Main St"),
+            [new OrderLineRequest(item.Id, Assert.Single(item.SizeVariants).Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, failedDraft.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await manager.PostAsJsonAsync($"/api/v1/orders/{failedId}/confirm", new ConfirmOrderRequest(5m))).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await manager.PostAsync($"/api/v1/orders/{failedId}/preparing", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await manager.PostAsync($"/api/v1/orders/{failedId}/ready", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await manager.PostAsJsonAsync($"/api/v1/orders/{failedId}/assign-delivery", new AssignDeliveryRequest(courierLogin.User.Id))).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await courier.PostAsync($"/api/v1/courier/assignments/{failedId}/start", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await courier.PostAsJsonAsync($"/api/v1/courier/assignments/{failedId}/fail", new FailDeliveryRequest(" "))).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await courier.PostAsJsonAsync($"/api/v1/courier/assignments/{failedId}/fail", new FailDeliveryRequest("Customer unavailable"))).StatusCode);
+        var failedAssignments = await courier.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>(
+            "/api/v1/courier/assignments?status=failed");
+        Assert.Equal(failedId, Assert.Single(failedAssignments!.Items).OrderId);
+        Assert.Empty((await other.GetFromJsonAsync<PageResponse<CourierAssignmentResponse>>("/api/v1/courier/assignments?status=failed"))!.Items);
+        Assert.Equal(HttpStatusCode.NotFound, (await courier.GetAsync($"/api/v1/courier/assignments/{failedId}")).StatusCode);
         await using var finalDb = Database();
         var history = await finalDb.DeliveryStatusHistories.ToArrayAsync();
-        Assert.Equal(3, history.Length);
-        Assert.Equal(new EntityId(managerLogin.User.Id), history.Single(change => change.ToStatus == "assigned").ActorId);
+        Assert.Equal(6, history.Length);
+        Assert.All(history.Where(change => change.ToStatus == "assigned"), change => Assert.Equal(new EntityId(managerLogin.User.Id), change.ActorId));
         Assert.All(history.Where(change => change.ToStatus != "assigned"),
             change => Assert.Equal(new EntityId(courierLogin.User.Id), change.ActorId));
+        Assert.Equal("Customer unavailable", (await finalDb.Deliveries.SingleAsync(delivery => delivery.OrderId == new EntityId(failedId))).FailureReason);
     }
 
     [PostgresFact]
@@ -842,6 +1102,13 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.NoContent, deactivated.StatusCode);
         Assert.Empty(await manager.GetFromJsonAsync<CustomerResponse[]>("/api/v1/customers?search=Ada") ?? []);
         Assert.Single(await manager.GetFromJsonAsync<CustomerResponse[]>("/api/v1/customers?search=Ada&isActive=false") ?? []);
+        using var otherCustomer = await manager.PostAsJsonAsync("/api/v1/customers",
+            new CustomerRequest("Ada King", Random.Shared.NextInt64(100_000_000_000, 999_999_999_999).ToString(), "ada-king@example.test"));
+        Assert.Equal(HttpStatusCode.Created, otherCustomer.StatusCode);
+        var allCustomers = (await manager.GetFromJsonAsync<CustomerResponse[]>("/api/v1/customers?search=Ada&includeInactive=true"))!;
+        Assert.Equal(2, allCustomers.Length);
+        Assert.Contains(allCustomers, item => item.Id == customer.Id && !item.IsActive);
+        Assert.Contains(allCustomers, item => item.FullName == "Ada King" && item.IsActive);
 
         foreach (var role in new[] { "Barista", "InventoryStaff", "DeliveryStaff" })
         {
@@ -875,7 +1142,7 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var cashierDetail = await cashier.GetAsync($"/api/v1/customers/{customer.Id}");
         Assert.Equal(HttpStatusCode.OK, cashierDetail.StatusCode);
         await using var db = Database();
-        Assert.False((await db.Customers.SingleAsync()).IsActive);
+        Assert.False((await db.Customers.SingleAsync(item => item.Id == new EntityId(customer.Id))).IsActive);
     }
 
     [PostgresFact]
@@ -1103,6 +1370,133 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         var movement = Assert.Single(movements!);
         Assert.Equal(inventory.User.Id, movement.ActorId);
         Assert.Equal(receipt.Id, movement.PurchaseReceiptId);
+    }
+
+    [PostgresFact]
+    public async Task MobileCashier182_ConcurrentRetriesPersistOnePaymentAndRefreshSharedBalance()
+    {
+        using var manager = host!.CreateClient();
+        var managerLogin = await LoginAsync(manager, "Manager");
+        manager.DefaultRequestHeaders.Authorization = new("Bearer", managerLogin.AccessToken);
+        using var categoryCreated = await manager.PostAsJsonAsync("/api/v1/categories", new CreateCategoryRequest("Counter verification"));
+        var category = (await categoryCreated.Content.ReadFromJsonAsync<CategoryResponse>())!;
+        using var itemCreated = await manager.PostAsJsonAsync("/api/v1/menu-items",
+            new MenuItemRequest(category.Id, "Counter latte", null, [new SizeVariantRequest("Large", 10m)]));
+        var item = (await itemCreated.Content.ReadFromJsonAsync<MenuItemResponse>())!;
+        var orderId = Guid.NewGuid();
+        using var draft = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(orderId, "takeaway", null, null,
+            [new OrderLineRequest(item.Id, Assert.Single(item.SizeVariants).Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, draft.StatusCode);
+        using var confirmed = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/confirm", new ConfirmOrderRequest(10m));
+        Assert.Equal(HttpStatusCode.OK, confirmed.StatusCode);
+        using var cashier = host.CreateClient();
+        var cashierLogin = await LoginAsync(cashier, "Cashier");
+        cashier.DefaultRequestHeaders.Authorization = new("Bearer", cashierLogin.AccessToken);
+        var paymentIds = new List<Guid>();
+        foreach (var method in new[] { "cash", "card", "e_wallet" })
+        {
+            var payment = new RecordPaymentRequest(Guid.NewGuid(), method, 2m, Reference: method == "cash" ? null : $"receipt-{method}");
+            paymentIds.Add(payment.PaymentId);
+            var responses = await Task.WhenAll(Enumerable.Range(0, 3).Select(_ =>
+                cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment)));
+            try
+            {
+                Assert.All(responses, response => Assert.Equal(HttpStatusCode.OK, response.StatusCode));
+                var results = await Task.WhenAll(responses.Select(response => response.Content.ReadFromJsonAsync<PaymentResponse>()));
+                Assert.Single(results, result => !result!.AlreadyRecorded);
+                Assert.Equal(2, results.Count(result => result!.AlreadyRecorded));
+            }
+            finally { foreach (var response in responses) response.Dispose(); }
+            using var mismatch = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", payment with { Amount = 1m });
+            Assert.Equal(HttpStatusCode.Conflict, mismatch.StatusCode);
+        }
+        var shared = Assert.Single((await manager.GetFromJsonAsync<OperationalOrderResponse[]>("/api/v1/orders"))!, row => row.Id == orderId);
+        Assert.Equal(6m, shared.PaidAmount);
+        Assert.Equal(4m, shared.Total - shared.PaidAmount);
+        using var cancelled = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/cancel", new CancelOrderRequest("Counter verification complete"));
+        Assert.Equal(HttpStatusCode.OK, cancelled.StatusCode);
+        using var rejected = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", new RecordPaymentRequest(Guid.NewGuid(), "cash", 4m));
+        Assert.Equal(HttpStatusCode.Conflict, rejected.StatusCode);
+        using var barista = host.CreateClient();
+        var baristaLogin = await LoginAsync(barista, "Barista");
+        barista.DefaultRequestHeaders.Authorization = new("Bearer", baristaLogin.AccessToken);
+        using var denied = await barista.PostAsJsonAsync($"/api/v1/orders/{orderId}/payments", new RecordPaymentRequest(Guid.NewGuid(), "cash", 1m));
+        Assert.Equal(HttpStatusCode.Forbidden, denied.StatusCode);
+        await using var db = Database();
+        var payments = await db.Payments.Where(payment => payment.OrderId == new EntityId(orderId)).ToArrayAsync();
+        Assert.Equal(3, payments.Length);
+        Assert.All(payments, payment =>
+        {
+            Assert.Contains(payment.Id.Value, paymentIds);
+            Assert.Equal(new EntityId(cashierLogin.User.Id), payment.RecordedBy);
+        });
+    }
+
+    [PostgresFact]
+    public async Task MobileManager182_RejectsIneligibleAssignmentsAndAuditsCancellationWithoutDuplicateEffects()
+    {
+        using var manager = host!.CreateClient();
+        var managerLogin = await LoginAsync(manager, "Manager");
+        manager.DefaultRequestHeaders.Authorization = new("Bearer", managerLogin.AccessToken);
+        using var categoryCreated = await manager.PostAsJsonAsync("/api/v1/categories", new CreateCategoryRequest("Manager verification"));
+        var category = (await categoryCreated.Content.ReadFromJsonAsync<CategoryResponse>())!;
+        using var itemCreated = await manager.PostAsJsonAsync("/api/v1/menu-items",
+            new MenuItemRequest(category.Id, "Delivery latte", null, [new SizeVariantRequest("Large", 5m)]));
+        var item = (await itemCreated.Content.ReadFromJsonAsync<MenuItemResponse>())!;
+        var orderId = Guid.NewGuid();
+        using var draft = await manager.PostAsJsonAsync("/api/v1/orders", new CreateOrderRequest(orderId, "delivery", null,
+            new OrderCustomerRequest(RecipientName: "Synthetic customer", ContactNumber: "1234567890", AddressLine: "Test address"),
+            [new OrderLineRequest(item.Id, Assert.Single(item.SizeVariants).Id, 1, [])]));
+        Assert.Equal(HttpStatusCode.Created, draft.StatusCode);
+        using var confirmed = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/confirm", new ConfirmOrderRequest(5m));
+        Assert.Equal(HttpStatusCode.OK, confirmed.StatusCode);
+        var options = (await manager.GetFromJsonAsync<DeliveryStaffResponse[]>("/api/v1/delivery-staff/options"))!;
+        var courier = Assert.Single(options);
+        Assert.DoesNotContain(options, staff => staff.Id == managerLogin.User.Id);
+        using var notReady = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery", new AssignDeliveryRequest(courier.Id));
+        Assert.Equal(HttpStatusCode.Conflict, notReady.StatusCode);
+        using var preparing = await manager.PostAsync($"/api/v1/orders/{orderId}/preparing", null);
+        Assert.Equal(HttpStatusCode.NoContent, preparing.StatusCode);
+        using var ready = await manager.PostAsync($"/api/v1/orders/{orderId}/ready", null);
+        Assert.Equal(HttpStatusCode.NoContent, ready.StatusCode);
+        using var ineligible = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery", new AssignDeliveryRequest(managerLogin.User.Id));
+        Assert.Equal(HttpStatusCode.BadRequest, ineligible.StatusCode);
+        using var cashier = host.CreateClient();
+        var cashierLogin = await LoginAsync(cashier, "Cashier");
+        cashier.DefaultRequestHeaders.Authorization = new("Bearer", cashierLogin.AccessToken);
+        using var forbidden = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery", new AssignDeliveryRequest(courier.Id));
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        await using (var db = Database())
+        {
+            var delivery = await db.Deliveries.SingleAsync(entry => entry.OrderId == new EntityId(orderId));
+            Assert.Equal("unassigned", delivery.Status);
+            Assert.Null(delivery.AssignedStaffId);
+            Assert.Empty(await db.DeliveryStatusHistories.ToArrayAsync());
+        }
+        using var assigned = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery", new AssignDeliveryRequest(courier.Id));
+        Assert.Equal(HttpStatusCode.NoContent, assigned.StatusCode);
+        using var repeatedAssignment = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/assign-delivery", new AssignDeliveryRequest(courier.Id));
+        Assert.Equal(HttpStatusCode.Conflict, repeatedAssignment.StatusCode);
+        using var blank = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/cancel", new CancelOrderRequest(" "));
+        Assert.Equal(HttpStatusCode.BadRequest, blank.StatusCode);
+        using var forbiddenCancel = await cashier.PostAsJsonAsync($"/api/v1/orders/{orderId}/cancel", new CancelOrderRequest("Unauthorized"));
+        Assert.Equal(HttpStatusCode.Forbidden, forbiddenCancel.StatusCode);
+        Assert.Equal("ready", (await manager.GetFromJsonAsync<OrderResponse>($"/api/v1/orders/{orderId}"))!.Status);
+        using var cancelled = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/cancel", new CancelOrderRequest(" Customer changed plans "));
+        Assert.Equal(HttpStatusCode.OK, cancelled.StatusCode);
+        using var repeatedCancellation = await manager.PostAsJsonAsync($"/api/v1/orders/{orderId}/cancel", new CancelOrderRequest("Retry"));
+        Assert.Equal(HttpStatusCode.Conflict, repeatedCancellation.StatusCode);
+        await using var finalDb = Database();
+        var order = await finalDb.Orders.SingleAsync(entry => entry.Id == new EntityId(orderId));
+        Assert.Equal("cancelled", order.Status);
+        Assert.Equal("Customer changed plans", order.CancelReason);
+        Assert.NotNull(order.CancelledAt);
+        var cancellation = Assert.Single(await finalDb.OrderStatusHistories.Where(change => change.OrderId == order.Id && change.ToStatus == "cancelled").ToArrayAsync());
+        Assert.Equal(new EntityId(managerLogin.User.Id), cancellation.ChangedBy);
+        var assignment = Assert.Single(await finalDb.DeliveryStatusHistories.ToArrayAsync());
+        Assert.Equal(new EntityId(managerLogin.User.Id), assignment.ActorId);
+        Assert.Equal("assigned", assignment.ToStatus);
+        Assert.Empty(await finalDb.StockMovements.ToArrayAsync());
     }
 
     public async Task DisposeAsync()

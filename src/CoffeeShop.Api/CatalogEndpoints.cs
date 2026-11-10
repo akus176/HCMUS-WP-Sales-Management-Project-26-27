@@ -71,6 +71,13 @@ public static class CatalogEndpoints
             var result = await handler.DeactivateSizeVariantAsync(new(new(variantId)), ct);
             return result.IsSuccess ? Results.NoContent() : ApiErrorResults.From(result.Error!);
         }).RequireAuthorization("menu.manage").Produces(204).ProducesProblem(404).ProducesProblem(409);
+        api.MapPost("/size-variants/{variantId:guid}/deactivate", async (Guid variantId,
+            CatalogCommandHandler handler, CancellationToken ct) =>
+        {
+            if (variantId == Guid.Empty) return InvalidId();
+            var result = await handler.DeactivateSizeVariantAsync(new(new(variantId)), ct);
+            return result.IsSuccess ? Results.NoContent() : ApiErrorResults.From(result.Error!);
+        }).RequireAuthorization("menu.manage").Produces(204).ProducesProblem(404).ProducesProblem(409);
         items.MapPut("/{id:guid}/addons", async (Guid id, SetCompatibleAddonsRequest request,
             CatalogCommandHandler handler, CancellationToken ct) =>
         {
