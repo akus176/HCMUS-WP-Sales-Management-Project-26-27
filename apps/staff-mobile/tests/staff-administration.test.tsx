@@ -13,6 +13,10 @@ import { SessionProvider } from '../src/session/context';
 import { harness, json, user } from './helpers';
 import { QueryCleanup } from './query-cleanup';
 
+jest.mock('../src/realtime/OperationalUpdates', () => ({
+  OperationalUpdates: () => null,
+}));
+
 jest.mock('../src/connectivity/networkAdapter', () => ({
   addNetworkStateListener: jest.fn(() => ({ remove: jest.fn() })),
   getNetworkStateAsync: jest.fn().mockResolvedValue({
