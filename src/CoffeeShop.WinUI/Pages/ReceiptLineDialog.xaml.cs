@@ -1,3 +1,4 @@
+using CoffeeShop.Domain.Inventory;
 using Microsoft.UI.Xaml.Controls;
 
 namespace CoffeeShop.WinUI.Pages;
@@ -8,10 +9,11 @@ namespace CoffeeShop.WinUI.Pages;
 /// </summary>
 public sealed partial class ReceiptLineDialog : ContentDialog
 {
-    public ReceiptLineDialog(IReadOnlyList<string> ingredientNames)
+    public ReceiptLineDialog(IReadOnlyList<Ingredient> ingredients)
     {
         InitializeComponent();
-        IngredientBox.ItemsSource = ingredientNames;
+        IngredientBox.ItemsSource = ingredients;
+        IngredientBox.DisplayMemberPath = nameof(Ingredient.Name);
 
         Title = "Add receipt line";
         PrimaryButtonText = "Add";
@@ -19,7 +21,7 @@ public sealed partial class ReceiptLineDialog : ContentDialog
         DefaultButton = ContentDialogButton.Primary;
     }
 
-    public string? IngredientName => IngredientBox.SelectedItem as string;
+    public Ingredient? SelectedIngredient => IngredientBox.SelectedItem as Ingredient;
 
     public decimal Quantity { get; private set; }
 
@@ -27,7 +29,7 @@ public sealed partial class ReceiptLineDialog : ContentDialog
 
     private void OnPrimaryClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        if (IngredientName is null)
+        if (SelectedIngredient is null)
         {
             args.Cancel = true;
             IngredientBox.Header = "Select an ingredient.";

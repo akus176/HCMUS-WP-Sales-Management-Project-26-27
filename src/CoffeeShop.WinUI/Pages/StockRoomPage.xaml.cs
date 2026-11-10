@@ -3,6 +3,7 @@ using CoffeeShop.Application.Inventory;
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Inventory;
+using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -71,35 +72,59 @@ public sealed partial class StockRoomPage : Page
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         ConfigureLayout(ActualWidth, ActualHeight);
-        if (!hasLoaded) await LoadAllDataAsync();
+        if (!hasLoaded) await RefreshDataAsync();
         UpdateActiveTabVisuals();
         SwitchSectionView();
     }
 
-    public async Task RefreshDataAsync() => await LoadAllDataAsync();
-
-    private async Task LoadAllDataAsync()
+    public async Task RefreshDataAsync()
     {
         if (isBusy) return;
         SetBusy(true);
+        try { await ReloadStockDataAsync(); }
+        finally { SetBusy(false); }
+    }
+
+    private async Task ReloadStockDataAsync(string? savedMessage = null)
+    {
         ShowFeedback(WorkflowFeedback.Loading("Syncing inventory, suppliers, receipts, and movements..."));
 
         try
         {
             using var scope = App.Services.CreateScope();
-            var repo = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
-            var movementReader = scope.ServiceProvider.GetRequiredService<IStockMovementReader>();
-            var posHandler = scope.ServiceProvider.GetRequiredService<PosOrderHandler>();
-
-            rawIngredients = (await repo.ListIngredientsAsync()).ToList();
+            var api = App.IsApiMode ? App.Services.GetRequiredService<ApiInventorySource>() : null;
+            List<Supplier> suppliers;
+            if (api is null)
+            {
+                var repo = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
+                rawIngredients = (await repo.ListIngredientsAsync()).ToList();
+                suppliers = (await repo.ListSuppliersAsync()).ToList();
+                rawReceipts = (await repo.ListReceiptsAsync()).ToList();
+                var movementReader = scope.ServiceProvider.GetRequiredService<IStockMovementReader>();
+                movementsByIngredient.Clear();
+                foreach (var ingredient in rawIngredients)
+                    movementsByIngredient[ingredient.Id] = await movementReader.ListRecentAsync(ingredient.Id);
+                allMovements = (await movementReader.ListRecentForAllAsync()).ToList();
+                staffOptions = (await scope.ServiceProvider.GetRequiredService<PosOrderHandler>().GetOptionsAsync()).Staff.ToList();
+            }
+            else
+            {
+                rawIngredients = (await api.ListIngredientsAsync()).ToList();
+                suppliers = (await api.ListSuppliersAsync()).ToList();
+                rawReceipts = (await api.ListReceiptsAsync()).ToList();
+                allMovements = (await api.ListMovementsAsync()).ToList();
+                movementsByIngredient.Clear();
+                foreach (var ingredient in rawIngredients)
+                    movementsByIngredient[ingredient.Id] = allMovements.Where(movement => movement.IngredientId == ingredient.Id)
+                        .OrderByDescending(movement => movement.OccurredAt.Value).ToArray();
+                staffOptions = session.Staff is { } staff ? [new(new(staff.Id), staff.FullName)] : [];
+            }
             var ingredientsById = rawIngredients.ToDictionary(ingredient => ingredient.Id);
 
-            var suppliers = await repo.ListSuppliersAsync();
             supplierDirectory = suppliers.ToDictionary(supplier => supplier.Id);
             supplierNames = suppliers.ToDictionary(s => s.Id, s => s.Name);
             activeSupplierNames = suppliers.Where(s => s.IsActive).ToDictionary(s => s.Id, s => s.Name);
 
-            rawReceipts = (await repo.ListReceiptsAsync()).ToList();
             ReceiptsEmptyText.Visibility = rawReceipts.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             var receiptCounts = rawReceipts
                 .GroupBy(receipt => receipt.SupplierId)
@@ -127,16 +152,10 @@ public sealed partial class StockRoomPage : Page
             ReceiptsListView.SelectedItem = receiptSelection;
             ShowReceiptDetail(receiptSelection);
 
-            var staffResult = await posHandler.GetOptionsAsync();
-            staffOptions = staffResult.Staff.ToList();
             DrawerOperatorBox.ItemsSource = staffOptions;
             DrawerOperatorBox.SelectedItem = staffOptions.FirstOrDefault(s => s.Id == session.Id)
                 ?? staffOptions.FirstOrDefault();
 
-            movementsByIngredient.Clear();
-            foreach (var ingredient in rawIngredients)
-                movementsByIngredient[ingredient.Id] = await movementReader.ListRecentAsync(ingredient.Id);
-            allMovements = (await movementReader.ListRecentForAllAsync()).ToList();
             allIngredientRows = rawIngredients.Select(i =>
             {
                 var latest = movementsByIngredient[i.Id].FirstOrDefault();
@@ -196,15 +215,16 @@ public sealed partial class StockRoomPage : Page
             SelectIngredient(selectedIngredientRow);
             hasLoaded = true;
 
-            ShowFeedback(WorkflowFeedback.Ready("Stock room data refreshed."));
+            ShowFeedback(savedMessage is null
+                ? WorkflowFeedback.Ready("Stock room data refreshed.")
+                : WorkflowFeedback.Success(savedMessage));
         }
         catch (Exception)
         {
-            ShowFeedback(WorkflowFeedback.DatabaseFailure("load stock room data", "Check database connection and select Refresh."));
-        }
-        finally
-        {
-            SetBusy(false);
+            ShowFeedback(savedMessage is null
+                ? WorkflowFeedback.DatabaseFailure("load stock room data", "Check the connection and select Refresh.")
+                : new(WorkflowFeedbackKind.Error, "Saved, but refresh failed", savedMessage, [],
+                    "Select Refresh to see the updated stock room."));
         }
     }
 
@@ -510,7 +530,8 @@ public sealed partial class StockRoomPage : Page
         var reason = ReasonInputBox.Text?.Trim();
         if (string.IsNullOrWhiteSpace(reason)) reason = "Manual stock adjustment";
 
-        var op = DrawerOperatorBox.SelectedItem as PosStaffOption ?? session.Operator;
+        var op = App.IsApiMode ? staffOptions.FirstOrDefault(s => s.Id == session.Id)
+            : DrawerOperatorBox.SelectedItem as PosStaffOption ?? session.Operator;
         if (op is null)
         {
             ShowFeedback(WorkflowFeedback.Validation("operator", "Select an active staff operator."));
@@ -522,24 +543,24 @@ public sealed partial class StockRoomPage : Page
 
         try
         {
-            using var scope = App.Services.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
-            var result = await handler.RecordStockAdjustmentAsync(new(selectedIngredientRow.Id, delta, reason, op.Id));
-
-            if (result.IsSuccess)
+            if (App.IsApiMode)
             {
-                adjustmentDrafts.Clear(selectedIngredientRow.Id);
-                DeltaInputBox.Text = string.Empty;
-                ReasonInputBox.Text = string.Empty;
-                isAdjusting = false;
-                await LoadAllDataAsync();
-                ShowFeedback(WorkflowFeedback.Success($"Stock adjustment of {delta:+0.###;-0.###} {selectedIngredientRow.BaseUnit} recorded."));
+                await App.Services.GetRequiredService<ApiInventorySource>().AdjustAsync(selectedIngredientRow.Id, delta, reason);
             }
             else
             {
-                ShowFeedback(WorkflowFeedback.FromError(result.Error!));
+                using var scope = App.Services.CreateScope();
+                var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>()
+                    .RecordStockAdjustmentAsync(new(selectedIngredientRow.Id, delta, reason, op.Id));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
             }
+            adjustmentDrafts.Clear(selectedIngredientRow.Id);
+            DeltaInputBox.Text = string.Empty;
+            ReasonInputBox.Text = string.Empty;
+            isAdjusting = false;
+            await ReloadStockDataAsync($"Stock adjustment of {delta:+0.###;-0.###} {selectedIngredientRow.BaseUnit} recorded.");
         }
+        catch (ApiException exception) { ShowApiFailure("record stock adjustment", exception); }
         catch (Exception)
         {
             ShowFeedback(WorkflowFeedback.DatabaseFailure("record stock adjustment", "Inspect history before retrying."));
@@ -559,16 +580,21 @@ public sealed partial class StockRoomPage : Page
         SetBusy(true);
         try
         {
-            using var scope = App.Services.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
-            var result = await handler.CreateIngredientAsync(new(dialog.IngredientName, dialog.BaseUnit, dialog.AvailableQuantity, dialog.ReorderThreshold));
-            if (result.IsSuccess)
+            if (App.IsApiMode)
             {
-                await LoadAllDataAsync();
-                ShowFeedback(WorkflowFeedback.Success($"Ingredient '{dialog.IngredientName}' created."));
+                await App.Services.GetRequiredService<ApiInventorySource>().CreateIngredientAsync(
+                    dialog.IngredientName, dialog.BaseUnit, dialog.AvailableQuantity, dialog.ReorderThreshold);
             }
-            else ShowFeedback(WorkflowFeedback.FromError(result.Error!));
+            else
+            {
+                using var scope = App.Services.CreateScope();
+                var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>().CreateIngredientAsync(
+                    new(dialog.IngredientName, dialog.BaseUnit, dialog.AvailableQuantity, dialog.ReorderThreshold));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
+            }
+            await ReloadStockDataAsync($"Ingredient '{dialog.IngredientName}' created.");
         }
+        catch (ApiException exception) { ShowApiFailure("create ingredient", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create ingredient", "Retry after verifying connection.")); }
         finally { SetBusy(false); }
     }
@@ -596,17 +622,21 @@ public sealed partial class StockRoomPage : Page
         SetBusy(true);
         try
         {
-            using var scope = App.Services.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
-            var result = await handler.CreateDraftReceiptAsync(new(supplierEntry.Key, dialog.ReceiptNumber));
-            if (result.IsSuccess)
+            if (App.IsApiMode)
             {
-                SelectSection("receipts");
-                await LoadAllDataAsync();
-                ShowFeedback(WorkflowFeedback.Success($"Draft receipt #{dialog.ReceiptNumber} created."));
+                await App.Services.GetRequiredService<ApiInventorySource>().CreateReceiptAsync(supplierEntry.Key, dialog.ReceiptNumber);
             }
-            else ShowFeedback(WorkflowFeedback.FromError(result.Error!));
+            else
+            {
+                using var scope = App.Services.CreateScope();
+                var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>()
+                    .CreateDraftReceiptAsync(new(supplierEntry.Key, dialog.ReceiptNumber));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
+            }
+            SelectSection("receipts");
+            await ReloadStockDataAsync($"Draft receipt #{dialog.ReceiptNumber} created.");
         }
+        catch (ApiException exception) { ShowApiFailure("create purchase receipt", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create draft receipt", "Verify database connection.")); }
         finally { SetBusy(false); }
     }
@@ -615,7 +645,8 @@ public sealed partial class StockRoomPage : Page
     {
         if ((sender as Button)?.Tag is not ReceiptPresentationRow row) return;
 
-        var op = session.Operator ?? staffOptions.FirstOrDefault();
+        var op = App.IsApiMode ? staffOptions.FirstOrDefault(s => s.Id == session.Id)
+            : session.Operator ?? staffOptions.FirstOrDefault();
         if (op is null)
         {
             ShowFeedback(WorkflowFeedback.Validation("operator", "Active staff operator required to post receipt."));
@@ -625,17 +656,52 @@ public sealed partial class StockRoomPage : Page
         SetBusy(true);
         try
         {
-            using var scope = App.Services.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
-            var result = await handler.PostReceiptAsync(new PostReceiptCommand(row.Id, op.Id));
-            if (result.IsSuccess)
+            if (App.IsApiMode)
             {
-                await LoadAllDataAsync();
-                ShowFeedback(WorkflowFeedback.Success($"Purchase receipt #{row.ReceiptNumber} posted and inventory added."));
+                await App.Services.GetRequiredService<ApiInventorySource>().PostReceiptAsync(row.Id);
             }
-            else ShowFeedback(WorkflowFeedback.FromError(result.Error!));
+            else
+            {
+                using var scope = App.Services.CreateScope();
+                var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>()
+                    .PostReceiptAsync(new PostReceiptCommand(row.Id, op.Id));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
+            }
+            await ReloadStockDataAsync($"Purchase receipt #{row.ReceiptNumber} posted and inventory added.");
         }
+        catch (ApiException exception) { ShowApiFailure("post purchase receipt", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("post purchase receipt", "Inspect receipt status before retrying.")); }
+        finally { SetBusy(false); }
+    }
+
+    private async void OnAddReceiptLineClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as Button)?.Tag is not ReceiptPresentationRow row || row.Receipt.Status != PurchaseReceiptStatus.Draft) return;
+        var activeIngredients = rawIngredients.Where(ingredient => ingredient.IsActive).OrderBy(ingredient => ingredient.Name).ToArray();
+        if (activeIngredients.Length == 0)
+        {
+            ShowFeedback(WorkflowFeedback.Validation("ingredient", "Create an active ingredient before adding a receipt line."));
+            return;
+        }
+        var dialog = new ReceiptLineDialog(activeIngredients) { XamlRoot = XamlRoot };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary || dialog.SelectedIngredient is not { } ingredient) return;
+
+        SetBusy(true);
+        try
+        {
+            if (App.IsApiMode)
+                await App.Services.GetRequiredService<ApiInventorySource>().AddReceiptLineAsync(row.Id, ingredient.Id, dialog.Quantity, dialog.UnitCost);
+            else
+            {
+                using var scope = App.Services.CreateScope();
+                var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>().AddReceiptLineAsync(
+                    new AddReceiptLineCommand(row.Id, ingredient.Id, dialog.Quantity, dialog.UnitCost));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
+            }
+            await ReloadStockDataAsync($"Added {dialog.Quantity:#,0.###} {ingredient.BaseUnit} of {ingredient.Name} to receipt #{row.ReceiptNumber}.");
+        }
+        catch (ApiException exception) { ShowApiFailure("add purchase receipt line", exception); }
+        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("add purchase receipt line", "Reload the receipt before retrying.")); }
         finally { SetBusy(false); }
     }
 
@@ -648,16 +714,21 @@ public sealed partial class StockRoomPage : Page
         SetBusy(true);
         try
         {
-            using var scope = App.Services.CreateScope();
-            var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
-            var result = await handler.CreateSupplierAsync(new(dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
-            if (result.IsSuccess)
+            if (App.IsApiMode)
             {
-                await LoadAllDataAsync();
-                ShowFeedback(WorkflowFeedback.Success($"Supplier '{dialog.SupplierName}' created."));
+                await App.Services.GetRequiredService<ApiInventorySource>().CreateSupplierAsync(
+                    dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address);
             }
-            else ShowFeedback(WorkflowFeedback.FromError(result.Error!));
+            else
+            {
+                using var scope = App.Services.CreateScope();
+                var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>().CreateSupplierAsync(
+                    new(dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
+            }
+            await ReloadStockDataAsync($"Supplier '{dialog.SupplierName}' created.");
         }
+        catch (ApiException exception) { ShowApiFailure("create supplier", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create supplier", "Verify connection.")); }
         finally { SetBusy(false); }
     }
@@ -667,8 +738,9 @@ public sealed partial class StockRoomPage : Page
         if ((sender as Button)?.Tag is not SupplierRow row) return;
 
         using var scope = App.Services.CreateScope();
-        var repo = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
-        var supplier = await repo.FindSupplierAsync(row.Id);
+        var supplier = App.IsApiMode
+            ? await App.Services.GetRequiredService<ApiInventorySource>().FindSupplierAsync(row.Id)
+            : await scope.ServiceProvider.GetRequiredService<IInventoryRepository>().FindSupplierAsync(row.Id);
         if (supplier is null)
         {
             ShowFeedback(WorkflowFeedback.FromError(Error.NotFound("supplier.not_found", "Supplier not found.")));
@@ -682,15 +754,20 @@ public sealed partial class StockRoomPage : Page
         SetBusy(true);
         try
         {
-            var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
-            var result = await handler.UpdateSupplierAsync(new(supplier.Id, dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
-            if (result.IsSuccess)
+            if (App.IsApiMode)
             {
-                await LoadAllDataAsync();
-                ShowFeedback(WorkflowFeedback.Success($"Supplier '{dialog.SupplierName}' updated."));
+                await App.Services.GetRequiredService<ApiInventorySource>().UpdateSupplierAsync(
+                    supplier.Id, dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address);
             }
-            else ShowFeedback(WorkflowFeedback.FromError(result.Error!));
+            else
+            {
+                var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>().UpdateSupplierAsync(
+                    new(supplier.Id, dialog.SupplierName, dialog.Phone, dialog.Email, dialog.Address));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
+            }
+            await ReloadStockDataAsync($"Supplier '{dialog.SupplierName}' updated.");
         }
+        catch (ApiException exception) { ShowApiFailure("update supplier", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("update supplier", "Verify connection.")); }
         finally { SetBusy(false); }
     }
@@ -706,7 +783,7 @@ public sealed partial class StockRoomPage : Page
         }
     }
 
-    private async void OnRefreshClick(object sender, RoutedEventArgs e) => await LoadAllDataAsync();
+    private async void OnRefreshClick(object sender, RoutedEventArgs e) => await RefreshDataAsync();
 
     private void OnSearchTextChanged(object sender, TextChangedEventArgs e) => ApplyIngredientFilters();
     private void OnUnitFilterClick(object sender, RoutedEventArgs e)
@@ -813,6 +890,7 @@ public sealed partial class StockRoomPage : Page
 
     private void OnDrawerOperatorChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (App.IsApiMode) return;
         if (DrawerOperatorBox.SelectedItem is PosStaffOption staff)
         {
             session.Operator = staff;
@@ -824,7 +902,9 @@ public sealed partial class StockRoomPage : Page
     private void UpdateActorDisplay()
     {
         if (!isInitialized) return;
-        var actor = DrawerOperatorBox.SelectedItem as PosStaffOption ?? session.Operator;
+        var actor = App.IsApiMode && session.Staff is { } staff
+            ? new PosStaffOption(new EntityId(staff.Id), staff.FullName)
+            : DrawerOperatorBox.SelectedItem as PosStaffOption ?? session.Operator;
         ActorDisplayText.Text = actor is null
             ? "Choose staff operator · change"
             : $"{actor.FullName} · change";
@@ -842,6 +922,27 @@ public sealed partial class StockRoomPage : Page
         StatusMessageText.Text = message;
     }
 
+    private void ShowApiFailure(string operation, ApiException exception)
+    {
+        if (exception.Kind is ApiErrorKind.Validation or ApiErrorKind.Conflict or ApiErrorKind.NotFound or ApiErrorKind.Forbidden)
+        {
+            var kind = exception.Kind switch
+            {
+                ApiErrorKind.Validation => WorkflowFeedbackKind.Validation,
+                ApiErrorKind.Conflict => WorkflowFeedbackKind.Conflict,
+                _ => WorkflowFeedbackKind.Error
+            };
+            ShowFeedback(new(kind, exception.Title, exception.Detail,
+                exception.Errors.SelectMany(group => group.Value.Select(message => new ErrorDetail(group.Key, message))).ToArray(),
+                exception.Kind == ApiErrorKind.Conflict ? "Reload the record before you try again." : null));
+            return;
+        }
+
+        ShowFeedback(new(WorkflowFeedbackKind.DatabaseError, "Service unavailable",
+            $"Could not {operation}. No local database was accessed.", [],
+            "Check the API service, refresh this workspace, and verify the saved state before retrying."));
+    }
+
     private void SetBusy(bool busy)
     {
         isBusy = busy;
@@ -851,7 +952,9 @@ public sealed partial class StockRoomPage : Page
         NewSupplierButton.IsEnabled = !busy;
         IngredientsListView.IsEnabled = SearchBox.IsEnabled = UnitFilterBox.IsEnabled = LowStockOnlyCheck.IsEnabled = !busy;
         foreach (var tab in TabsPanel.Children.OfType<Control>()) tab.IsEnabled = !busy;
-        DeltaInputBox.IsEnabled = ReasonInputBox.IsEnabled = CancelAdjustmentButton.IsEnabled = ActorButton.IsEnabled = !busy;
+        DeltaInputBox.IsEnabled = ReasonInputBox.IsEnabled = CancelAdjustmentButton.IsEnabled = !busy;
+        ActorButton.IsEnabled = !busy && !App.IsApiMode;
+        DrawerOperatorBox.IsEnabled = !busy && !App.IsApiMode;
         ReceiptsListView.IsEnabled = SuppliersListView.IsEnabled = MovementsListView.IsEnabled = HistoryIngredientBox.IsEnabled = !busy;
         ClearFiltersButton.IsEnabled = BalancesEmptyClearButton.IsEnabled = DrawerCloseButton.IsEnabled = !busy;
         SortIngredientButton.IsEnabled = SortOnHandButton.IsEnabled = SortReorderButton.IsEnabled = SortStatusButton.IsEnabled = LastMovementHeaderButton.IsEnabled = !busy;
@@ -1097,7 +1200,7 @@ public sealed partial class StockRoomPage : Page
     internal async Task<object> PrepareVerificationAsync()
     {
         while (isBusy) await Task.Delay(50);
-        await LoadAllDataAsync();
+        await RefreshDataAsync();
         PrepareReferenceCapture();
         return new { ingredients = allIngredientRows.Count, receipts = rawReceipts.Count, suppliers = supplierDirectory.Count, movements = allMovements.Count };
     }
@@ -1219,6 +1322,7 @@ public sealed record ReceiptPresentationRow
     public Visibility NoLinesVisibility { get; }
     public bool CanPost => Receipt.Status == PurchaseReceiptStatus.Draft && Receipt.Lines.Count > 0;
     public Visibility PostVisibility => CanPost ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility AddLineVisibility => Receipt.Status == PurchaseReceiptStatus.Draft ? Visibility.Visible : Visibility.Collapsed;
 
     public override string ToString() =>
         $"{ReceiptTitle}, {SupplierName}, {Status}, {CreatedDisplay}, {LineCountDisplay}, {TotalDisplay}";

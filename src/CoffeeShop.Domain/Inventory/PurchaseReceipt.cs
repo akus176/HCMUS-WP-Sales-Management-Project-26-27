@@ -40,6 +40,16 @@ public class PurchaseReceipt
         UpdatedAt = updatedAt;
     }
 
+    public static PurchaseReceipt Reconstitute(EntityId id, EntityId supplierId, string receiptNumber,
+        UtcTimestamp createdAt, UtcTimestamp updatedAt, UtcTimestamp? postedAt,
+        PurchaseReceiptStatus status, IEnumerable<PurchaseReceiptLine> lines)
+    {
+        ArgumentNullException.ThrowIfNull(lines);
+        var receipt = new PurchaseReceipt(id, supplierId, receiptNumber, createdAt, updatedAt, postedAt, status);
+        receipt._lines.AddRange(lines);
+        return receipt;
+    }
+
     public EntityId Id { get; protected set; } = null!;
 
     public EntityId SupplierId { get; protected set; } = null!;

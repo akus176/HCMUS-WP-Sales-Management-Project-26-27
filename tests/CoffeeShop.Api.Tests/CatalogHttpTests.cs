@@ -76,6 +76,14 @@ public sealed class CatalogHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, listed.StatusCode);
         Assert.Contains(name, await listed.Content.ReadAsStringAsync());
 
+        var updatedName = $"{name} updated";
+        using var updated = await client.PutAsJsonAsync($"/api/v1/categories/{id}", new { name = updatedName });
+        Assert.Equal(HttpStatusCode.NoContent, updated.StatusCode);
+        using var updatedList = await client.GetAsync($"/api/v1/categories?search={Uri.EscapeDataString(updatedName)}");
+        Assert.Contains(updatedName, await updatedList.Content.ReadAsStringAsync());
+        using var missingUpdate = await client.PutAsJsonAsync($"/api/v1/categories/{Guid.NewGuid()}", new { name = "Missing" });
+        Assert.Equal(HttpStatusCode.NotFound, missingUpdate.StatusCode);
+
         using var invalid = await client.PostAsJsonAsync("/api/v1/categories", new { name = "  " });
         Assert.Equal(HttpStatusCode.BadRequest, invalid.StatusCode);
         Assert.Equal("application/problem+json", invalid.Content.Headers.ContentType!.MediaType);

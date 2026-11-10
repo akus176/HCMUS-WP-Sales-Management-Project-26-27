@@ -14,7 +14,7 @@ public sealed record DiscountDecisionResponse(Guid DiscountId, string Status, de
     decimal DiscountTotal, decimal OrderTotal);
 
 public sealed record IngredientBalanceResponse(Guid IngredientId, string Name, string BaseUnit,
-    decimal AvailableQuantity, decimal ReorderThreshold);
+    decimal AvailableQuantity, decimal ReorderThreshold, bool IsActive = true);
 
 // Actor identity is always read from the authenticated session by the API.
 public sealed record StockAdjustmentRequest(Guid RequestId, decimal QuantityDelta, string? Reason);

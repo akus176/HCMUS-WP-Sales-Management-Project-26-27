@@ -4,12 +4,14 @@ using CoffeeShop.Infrastructure.Postgres;
 namespace CoffeeShop.WinUI;
 
 internal sealed record CoffeeShopClientConfiguration(
+    string ClientMode,
     string? ConnectionString,
     Uri ApiBaseAddress,
     string? Source,
     string? Error)
 {
-    public bool IsConfigured => !string.IsNullOrWhiteSpace(ConnectionString);
+    public bool IsApiMode => string.Equals(ClientMode, "api", StringComparison.OrdinalIgnoreCase);
+    public bool IsConfigured => IsApiMode || !string.IsNullOrWhiteSpace(ConnectionString);
 
     public static string ConfigurationFilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -20,17 +22,21 @@ internal sealed record CoffeeShopClientConfiguration(
 
     public static CoffeeShopClientConfiguration Load()
     {
+        var clientMode = Environment.GetEnvironmentVariable("COFFEESHOP_CLIENT_MODE")?.Trim();
+        if (string.IsNullOrWhiteSpace(clientMode)) clientMode = "api";
+        else clientMode = clientMode.ToLowerInvariant();
+        if (clientMode is not ("api" or "direct")) clientMode = "api";
         var environmentValue = Environment.GetEnvironmentVariable(
             CoffeeShopPostgresOptions.ConnectionStringEnvironmentVariable);
         if (!string.IsNullOrWhiteSpace(environmentValue))
         {
-            return new(environmentValue.Trim(), LoadApiBaseAddress(null), CoffeeShopPostgresOptions.ConnectionStringEnvironmentVariable, null);
+            return new(clientMode, environmentValue.Trim(), LoadApiBaseAddress(null), CoffeeShopPostgresOptions.ConnectionStringEnvironmentVariable, null);
         }
 
         var path = ConfigurationFilePath;
         if (!File.Exists(path))
         {
-            return new(null, LoadApiBaseAddress(null), null,
+            return new(clientMode, null, LoadApiBaseAddress(null), null,
                 $"Database connection settings were not found. Set {CoffeeShopPostgresOptions.ConnectionStringEnvironmentVariable} " +
                 $"or create {path}.");
         }
@@ -45,12 +51,12 @@ internal sealed record CoffeeShopClientConfiguration(
 
             var apiBaseAddress = LoadApiBaseAddress(document.RootElement);
             return string.IsNullOrWhiteSpace(connectionString)
-                ? new(null, apiBaseAddress, null, $"The CoffeeShop connection string is empty in {path}.")
-                : new(connectionString.Trim(), apiBaseAddress, path, null);
+                ? new(clientMode, null, apiBaseAddress, null, $"The CoffeeShop connection string is empty in {path}.")
+                : new(clientMode, connectionString.Trim(), apiBaseAddress, path, null);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException)
         {
-            return new(null, LoadApiBaseAddress(null), null,
+            return new(clientMode, null, LoadApiBaseAddress(null), null,
                 $"Could not read the database connection settings in {path}. Check that it contains a valid ConnectionStrings.CoffeeShop value.");
         }
     }

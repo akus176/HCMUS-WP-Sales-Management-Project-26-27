@@ -24,6 +24,9 @@ public sealed class AuthenticatedApiClient
     public Task<TResponse> PutAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken cancellationToken = default) =>
         SendAsync<TResponse>(() => new HttpRequestMessage(HttpMethod.Put, path) { Content = JsonContent.Create(body) }, cancellationToken);
 
+    public Task<TResponse> PatchAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken cancellationToken = default) =>
+        SendAsync<TResponse>(() => new HttpRequestMessage(HttpMethod.Patch, path) { Content = JsonContent.Create(body) }, cancellationToken);
+
     public Task<TResponse> DeleteAsync<TResponse>(string path, CancellationToken cancellationToken = default) =>
         SendAsync<TResponse>(() => new HttpRequestMessage(HttpMethod.Delete, path), cancellationToken);
 
