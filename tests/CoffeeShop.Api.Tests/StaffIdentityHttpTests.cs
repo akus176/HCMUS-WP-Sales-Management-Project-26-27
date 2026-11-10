@@ -1350,6 +1350,12 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var missingReason = await client.PostAsJsonAsync($"/api/v1/ingredients/{ingredient.IngredientId}/adjustments",
             new StockAdjustmentRequest(Guid.NewGuid(), 1m, " "));
         Assert.Equal(HttpStatusCode.BadRequest, missingReason.StatusCode);
+        var unchangedAfterValidation = await client.GetFromJsonAsync<IngredientBalanceResponse>(
+            $"/api/v1/ingredients/{ingredient.IngredientId}");
+        Assert.Equal(2m, unchangedAfterValidation!.AvailableQuantity);
+        var movementsAfterValidation = await client.GetFromJsonAsync<StockMovementResponse[]>(
+            $"/api/v1/ingredients/{ingredient.IngredientId}/movements");
+        Assert.Single(movementsAfterValidation!);
 
         var lowStock = await client.GetFromJsonAsync<PageResponse<IngredientBalanceResponse>>("/api/v1/ingredients/low-stock");
         Assert.Contains(lowStock!.Items, balance => balance.IngredientId == ingredient.IngredientId);
@@ -1364,6 +1370,14 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var forbidden = await client.PostAsJsonAsync($"/api/v1/ingredients/{ingredient.IngredientId}/adjustments",
             new StockAdjustmentRequest(Guid.NewGuid(), 1m, "Unauthorized"));
         Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        var inventoryAfterForbidden = await LoginAsync(client, "InventoryStaff");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", inventoryAfterForbidden.AccessToken);
+        var unchangedAfterForbidden = await client.GetFromJsonAsync<IngredientBalanceResponse>(
+            $"/api/v1/ingredients/{ingredient.IngredientId}");
+        Assert.Equal(2m, unchangedAfterForbidden!.AvailableQuantity);
+        var movementsAfterForbidden = await client.GetFromJsonAsync<StockMovementResponse[]>(
+            $"/api/v1/ingredients/{ingredient.IngredientId}/movements");
+        Assert.Single(movementsAfterForbidden!);
     }
 
     [PostgresFact]
