@@ -1,0 +1,46 @@
+appId: com.coffeeshop.staffmobile
+name: Cashier payment against the shared API
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: Staff mobile
+    timeout: 60000
+- tapOn: Staff sign-in
+- tapOn: Username
+- inputText: ${MAESTRO_STAFF_USERNAME}
+- tapOn: Password
+- inputText: ${MAESTRO_STAFF_PASSWORD}
+- hideKeyboard
+- tapOn: Sign in
+- extendedWaitUntil:
+    visible: Open Counter
+    timeout: 30000
+- tapOn: Open Counter
+- tapOn: Search orders
+- inputText: ${MAESTRO_PAYMENT_ORDER}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Open order ${MAESTRO_PAYMENT_ORDER}
+    direction: DOWN
+- tapOn: Open order ${MAESTRO_PAYMENT_ORDER}
+- scrollUntilVisible:
+    element: Payment amount
+    direction: DOWN
+- tapOn: Payment amount
+- inputText: '10'
+- hideKeyboard
+- scrollUntilVisible:
+    element: Review payment
+    direction: DOWN
+- tapOn: Review payment
+- scrollUntilVisible:
+    element: Confirm payment
+    direction: DOWN
+- takeScreenshot: .maestro/results/cashier-review
+- tapOn: Confirm payment
+- scrollUntilVisible:
+    element: 'Payment confirmed. Paid: 10.00. Balance: 0.00.'
+    direction: UP
+- assertVisible: 'Payment confirmed. Paid: 10.00. Balance: 0.00.'
+- takeScreenshot: .maestro/results/cashier-paid

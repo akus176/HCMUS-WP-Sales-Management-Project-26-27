@@ -11,6 +11,8 @@ import {
 } from '../../src/shell/controls';
 import { findModule, permittedActions } from '../../src/shell/permissions';
 import { DiscountApprovals } from '../../src/features/approvals/DiscountApprovals';
+import { OrdersScreen } from '../../src/features/orders/OrdersScreen';
+import { DeliveryScreen } from '../../src/features/delivery/DeliveryScreen';
 
 export default function ModuleScreen() {
   const { module: moduleId } = useLocalSearchParams<{
@@ -29,7 +31,21 @@ export default function ModuleScreen() {
           module?.id === 'barista' ? (
             <PreparationScreen />
           ) : module?.id === 'approvals' ? (
-            <DiscountApprovals user={user} />
+            <>
+              {user.permissions.some((permission) =>
+                ['orders.cancel', 'delivery.assign'].includes(permission),
+              ) && (
+                <ShellButton
+                  label="Manage cancellations and deliveries"
+                  onPress={() => router.push('/modules/approvals/operations')}
+                />
+              )}
+              <DiscountApprovals user={user} />
+            </>
+          ) : module?.id === 'cashier' ? (
+            <OrdersScreen user={user} />
+          ) : module?.id === 'delivery' ? (
+            <DeliveryScreen />
           ) : (
             <>
               <ShellHeading>{module!.title}</ShellHeading>

@@ -35,6 +35,7 @@ public class ModelMappingTests
     [InlineData(typeof(UserRole), "user_roles", "identity")]
     [InlineData(typeof(RolePermission), "role_permissions", "identity")]
     [InlineData(typeof(RefreshToken), "refresh_tokens", "identity")]
+    [InlineData(typeof(MobileDeviceRegistration), "mobile_device_registrations", "identity")]
     [InlineData(typeof(SecurityAuditEvent), "security_audit_events", "identity")]
     [InlineData(typeof(Customer), "customers", "customers")]
     [InlineData(typeof(CustomerAddress), "customer_addresses", "customers")]
@@ -103,6 +104,11 @@ public class ModelMappingTests
         var tokenHashIndex = refreshToken.GetIndexes().FirstOrDefault(i => i.Properties.Any(p => p.Name == nameof(RefreshToken.TokenHash)));
         Assert.NotNull(tokenHashIndex);
         Assert.True(tokenHashIndex.IsUnique);
+
+        var device = model.FindEntityType(typeof(MobileDeviceRegistration))!;
+        var activeTokenIndex = device.GetIndexes().Single(i => i.Properties.Select(p => p.Name).SequenceEqual([nameof(MobileDeviceRegistration.Token)]));
+        Assert.True(activeTokenIndex.IsUnique);
+        Assert.Equal("revoked_at IS NULL", activeTokenIndex.GetFilter());
     }
 
     [Fact]
