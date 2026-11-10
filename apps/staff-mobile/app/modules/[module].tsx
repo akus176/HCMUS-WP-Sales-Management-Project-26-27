@@ -11,6 +11,7 @@ import {
 } from '../../src/shell/controls';
 import { findModule, permittedActions } from '../../src/shell/permissions';
 import { DiscountApprovals } from '../../src/features/approvals/DiscountApprovals';
+import { StaffAdministration } from '../../src/features/administration/StaffAdministration';
 import { InventoryWorkspace } from '../../src/features/inventory/InventoryWorkspace';
 import { OrdersScreen } from '../../src/features/orders/OrdersScreen';
 import { DeliveryScreen } from '../../src/features/delivery/DeliveryScreen';
@@ -49,6 +50,8 @@ export default function ModuleScreen() {
             <OrdersScreen user={user} />
           ) : module?.id === 'delivery' ? (
             <DeliveryScreen />
+          ) : module?.id === 'administration' ? (
+            <StaffAdministration user={user} />
           ) : (
             <>
               <ShellHeading>{module!.title}</ShellHeading>

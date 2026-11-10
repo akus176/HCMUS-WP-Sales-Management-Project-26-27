@@ -40,7 +40,7 @@
 - [ ] 5.2 Build manager cancellation authorization and ready-delivery assignment; verify required reasons, eligible staff, state rules, and audit actors.
 - [ ] 5.3 Add device registration, token rotation, and removal on logout; verify ownership, invalid-token cleanup, and notification-permission denial.
 - [ ] 5.4 Add privacy-safe actionable notifications and authenticated deep links for urgent work; verify previews omit customer, address, payment, and credential data.
-- [ ] 5.5 Build limited administrator account search, eligible deactivation, and security-event views; verify final-administrator protection and session revocation.
+- [x] 5.5 Build limited administrator account search, eligible deactivation, and security-event views; verify final-administrator protection and session revocation.
 - [x] 5.6 Build prepared purchase-receipt review and posting; verify a retry cannot increase shared stock more than once and the resulting movement history is visible. Evidence: `apps/staff-mobile/tests/inventory.test.tsx`; PostgreSQL-backed API test `ReceiptPosting_ChangesSharedBalanceAndAddsOneAuditedMovement` verifies the retry conflict, one balance increase, and one movement.
 
 ## 6. P2 release hardening and evidence
