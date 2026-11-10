@@ -6,8 +6,8 @@ using Microsoft.UI.Xaml;
 namespace CoffeeShop.WinUI;
 
 /// <summary>
-/// In-process composition root: hosts Application services and PostgreSQL
-/// infrastructure directly in the WinUI client (midterm milestone mode).
+/// Composition root for the WinUI client. Release builds use the shared API;
+/// non-Release builds can also use the direct PostgreSQL development adapter.
 /// </summary>
 public partial class App : Microsoft.UI.Xaml.Application
 {
@@ -73,9 +73,11 @@ public partial class App : Microsoft.UI.Xaml.Application
     {
         IsApiMode = configuration.IsApiMode;
         var registrations = new ServiceCollection().AddCoffeeShopApiClient(configuration.ApiBaseAddress);
+#if !COFFEESHOP_API_ONLY
         if (!configuration.IsApiMode)
             registrations.AddCoffeeShopDirectClient(configuration.ConnectionString ?? string.Empty);
-        if (!Environment.GetCommandLineArgs().Contains("--verify-shell"))
+#endif
+        if (!Environment.GetCommandLineArgs().Contains("--verify-shell") || configuration.IsApiMode)
         {
             registrations.AddSingleton(provider => new PosWorkspace(provider.GetRequiredService<IServiceScopeFactory>(),
                 provider.GetRequiredService<CustomerOrderContext>(), provider.GetRequiredService<PosOperatorSession>(),
