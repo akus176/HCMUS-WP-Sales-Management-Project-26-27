@@ -1029,6 +1029,7 @@ export interface paths {
                     search?: string;
                     isActive?: boolean;
                     limit?: number | string;
+                    includeInactive?: boolean;
                 };
                 header?: never;
                 path?: never;

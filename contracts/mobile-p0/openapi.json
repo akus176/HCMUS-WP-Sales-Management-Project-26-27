@@ -3863,6 +3863,13 @@
                 "string"
               ]
             }
+          },
+          {
+            "in": "query",
+            "name": "includeInactive",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {

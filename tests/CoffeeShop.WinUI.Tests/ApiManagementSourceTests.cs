@@ -79,7 +79,7 @@ public sealed class ApiManagementSourceTests
         Assert.Equal(5, Assert.Single(history.Value.Items).Points);
         Assert.True(update.IsSuccess);
         Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/customers?search=Ada&limit=100&isActive=true");
-        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/customers?search=Ada&limit=100");
+        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/customers?search=Ada&limit=100&includeInactive=true");
         Assert.Contains(requests, request => request.Method == "PATCH" && request.Path == $"/api/v1/customers/{customerId}/addresses/{addressId}");
         Assert.All(requests, request => Assert.Equal("fixture-access", request.Token));
     }

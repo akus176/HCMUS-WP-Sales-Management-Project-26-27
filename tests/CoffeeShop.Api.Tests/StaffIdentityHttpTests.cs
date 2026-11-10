@@ -727,6 +727,13 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.NoContent, deactivated.StatusCode);
         Assert.Empty(await manager.GetFromJsonAsync<CustomerResponse[]>("/api/v1/customers?search=Ada") ?? []);
         Assert.Single(await manager.GetFromJsonAsync<CustomerResponse[]>("/api/v1/customers?search=Ada&isActive=false") ?? []);
+        using var otherCustomer = await manager.PostAsJsonAsync("/api/v1/customers",
+            new CustomerRequest("Ada King", Random.Shared.NextInt64(100_000_000_000, 999_999_999_999).ToString(), "ada-king@example.test"));
+        Assert.Equal(HttpStatusCode.Created, otherCustomer.StatusCode);
+        var allCustomers = (await manager.GetFromJsonAsync<CustomerResponse[]>("/api/v1/customers?search=Ada&includeInactive=true"))!;
+        Assert.Equal(2, allCustomers.Length);
+        Assert.Contains(allCustomers, item => item.Id == customer.Id && !item.IsActive);
+        Assert.Contains(allCustomers, item => item.FullName == "Ada King" && item.IsActive);
 
         foreach (var role in new[] { "Barista", "InventoryStaff", "DeliveryStaff" })
         {
@@ -760,7 +767,7 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var cashierDetail = await cashier.GetAsync($"/api/v1/customers/{customer.Id}");
         Assert.Equal(HttpStatusCode.OK, cashierDetail.StatusCode);
         await using var db = Database();
-        Assert.False((await db.Customers.SingleAsync()).IsActive);
+        Assert.False((await db.Customers.SingleAsync(item => item.Id == new EntityId(customer.Id))).IsActive);
     }
 
     [PostgresFact]

@@ -53,7 +53,7 @@ public sealed class ApiCustomerWorkspaceSource(AuthenticatedApiClient client) : 
     public Task<Result<IReadOnlyList<CustomerSummary>>> SearchAsync(CustomerSearchCriteria criteria)
     {
         var path = $"customers?search={Uri.EscapeDataString(criteria.Query ?? string.Empty)}&limit={Math.Clamp(criteria.Limit ?? 100, 1, 100)}";
-        if (!criteria.IncludeInactive) path += "&isActive=true";
+        path += criteria.IncludeInactive ? "&includeInactive=true" : "&isActive=true";
         return RunAsync(async () => (IReadOnlyList<CustomerSummary>)(await client.GetAsync<CustomerResponse[]>(path))
             .Select(row => new CustomerSummary(new(row.Id), row.FullName, row.Phone, row.Email, row.IsActive, row.LoyaltyPointsBalance)).ToArray());
     }
