@@ -100,6 +100,9 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
         var id = (await created.Content.ReadFromJsonAsync<MobileDeviceResponse>())!.Id;
         var path = $"/api/v1/mobile-devices/{id}";
+        using var retried = await owner.PostAsJsonAsync("/api/v1/mobile-devices/", request);
+        Assert.Equal(HttpStatusCode.Created, retried.StatusCode);
+        Assert.Equal(id, (await retried.Content.ReadFromJsonAsync<MobileDeviceResponse>())!.Id);
         Assert.Equal(HttpStatusCode.Conflict, (await other.PostAsJsonAsync("/api/v1/mobile-devices/", request)).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await other.PutAsJsonAsync(path, new MobileDeviceRequest("ios", "token-b"))).StatusCode);
         Assert.Equal(HttpStatusCode.NotFound, (await other.DeleteAsync(path)).StatusCode);
@@ -131,6 +134,73 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.False(await cleanup.RevokeAsync("old-token"));
         db.ChangeTracker.Clear();
         Assert.Null((await db.MobileDeviceRegistrations.SingleAsync(device => device.Id == new EntityId(nextId))).RevokedAt);
+    }
+
+    [PostgresFact]
+    public async Task StaffPush_UsesCurrentPermissionsAndOnlyOpaqueTargets()
+    {
+        const string orderId = "11111111-1111-1111-1111-111111111181";
+        const string discountId = "22222222-2222-2222-2222-222222222181";
+        const string ingredientId = "33333333-3333-3333-3333-333333333181";
+        const string sql = """
+            INSERT INTO sales.orders (id, order_number, channel, status, confirmed_at, created_by)
+              SELECT '11111111-1111-1111-1111-111111111181', 'PUSH-TEST', 'delivery', 'confirmed', now(), id
+              FROM identity.users WHERE username = 'Cashier';
+            INSERT INTO sales.discounts (id, order_id, type, value, reason, requested_by)
+              SELECT '22222222-2222-2222-2222-222222222181', '11111111-1111-1111-1111-111111111181', 'fixed', 1, 'private reason', id
+              FROM identity.users WHERE username = 'Cashier';
+            INSERT INTO inventory.ingredients (id, name, base_unit) VALUES ('33333333-3333-3333-3333-333333333181', 'Private ingredient name', 'g');
+            INSERT INTO sales.deliveries (order_id, recipient_name, contact_number, address_line, assigned_staff_id, status)
+              SELECT '11111111-1111-1111-1111-111111111181', 'private recipient', '123456789', 'private address', id, 'assigned'
+              FROM identity.users WHERE username = 'DeliveryStaff';
+            """;
+        await using (var db = Database()) await db.Database.ExecuteSqlRawAsync(sql);
+        foreach (var role in new[] { "Manager", "Barista", "InventoryStaff", "DeliveryStaff", "Cashier" })
+        {
+            using var client = host!.CreateClient();
+            client.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(client, role)).AccessToken);
+            using var response = await client.PostAsJsonAsync("/api/v1/mobile-devices", new MobileDeviceRequest("android", $"fixture-{role}"));
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        }
+        await using (var db = Database()) await AddUserAsync(db, "other-courier", ["DeliveryStaff"]);
+        using (var client = host!.CreateClient())
+        {
+            client.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(client, "other-courier")).AccessToken);
+            using var response = await client.PostAsJsonAsync("/api/v1/mobile-devices", new MobileDeviceRequest("android", "fixture-other-courier"));
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        }
+        await using var scope = host!.Services.CreateAsyncScope();
+        var dispatcher = scope.ServiceProvider.GetRequiredService<MobilePushDispatch>();
+        var provider = new DeterministicPushProvider();
+        await dispatcher.DispatchAsync(provider, new("discount", Guid.Parse(orderId), DateTimeOffset.UtcNow), CancellationToken.None);
+        await dispatcher.DispatchAsync(provider, new("delivery", Guid.Parse(orderId), DateTimeOffset.UtcNow), CancellationToken.None);
+        await dispatcher.DispatchAsync(provider, new("inventory", Guid.Parse(ingredientId), DateTimeOffset.UtcNow), CancellationToken.None);
+        await dispatcher.DispatchAsync(provider, new("order", Guid.Parse(orderId), DateTimeOffset.UtcNow), CancellationToken.None);
+
+        Assert.Contains(("fixture-Manager", new StaffPushTarget("approval", Guid.Parse(discountId))), provider.Deliveries);
+        Assert.Equal(("fixture-DeliveryStaff", new StaffPushTarget("assignment", Guid.Parse(orderId))),
+            Assert.Single(provider.Deliveries, delivery => delivery.Target.Kind == "assignment"));
+        Assert.Contains(("fixture-InventoryStaff", new StaffPushTarget("low-stock", Guid.Parse(ingredientId))), provider.Deliveries);
+        Assert.Contains(("fixture-Barista", new StaffPushTarget("urgent-order", Guid.Parse(orderId))), provider.Deliveries);
+        Assert.DoesNotContain(provider.Deliveries, delivery => delivery.Destination == "fixture-Cashier");
+        await using var check = Database();
+        Assert.NotNull((await check.MobileDeviceRegistrations.SingleAsync(device => device.Token == "fixture-InventoryStaff")).RevokedAt);
+    }
+
+    private sealed class DeterministicPushProvider : IMobilePushProvider
+    {
+        public List<(string Destination, StaffPushTarget Target)> Deliveries { get; } = [];
+
+        public Task<PushDeliveryStatus> SendAsync(string destination, StaffPushNotification notification, CancellationToken cancellationToken)
+        {
+            using var document = JsonDocument.Parse(JsonSerializer.Serialize(notification, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+            Assert.Equal(new[] { "body", "data", "title" }, document.RootElement.EnumerateObject().Select(property => property.Name).Order());
+            Assert.Equal(new[] { "kind", "recordId" }, document.RootElement.GetProperty("data").EnumerateObject().Select(property => property.Name).Order());
+            Assert.Equal("Coffee Shop Staff", notification.Title);
+            Assert.Equal("Open the app to review a staff update.", notification.Body);
+            Deliveries.Add((destination, notification.Data));
+            return Task.FromResult(destination == "fixture-InventoryStaff" ? PushDeliveryStatus.InvalidDevice : PushDeliveryStatus.Sent);
+        }
     }
 
     [PostgresFact]

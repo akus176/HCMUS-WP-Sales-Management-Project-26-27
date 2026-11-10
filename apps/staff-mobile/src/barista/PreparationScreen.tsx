@@ -16,12 +16,12 @@ const pageSize = 10;
 type Filter = 'confirmed,preparing' | 'confirmed' | 'preparing';
 type Intent = { id: string; action: 'start' | 'ready'; status: string };
 
-export function PreparationScreen() {
+export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
   const { client, state } = useSession();
   const queries = useQueryClient();
   const [filter, setFilter] = useState<Filter>('confirmed,preparing');
   const [page, setPage] = useState(1);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(ticketId ?? null);
   const [intent, setIntent] = useState<Intent | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const submitting = useRef(false);

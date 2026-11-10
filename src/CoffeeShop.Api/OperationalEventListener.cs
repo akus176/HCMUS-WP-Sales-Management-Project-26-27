@@ -83,5 +83,7 @@ public sealed class OperationalEventListener(
         }
         foreach (var recipient in recipients.Distinct())
             await hub.Clients.Group(OperationalEventsHub.UserGroup(recipient.Value)).SendAsync("OperationalEvent", item, cancellationToken);
+        if (scope.ServiceProvider.GetService<IMobilePushProvider>() is { } provider)
+            await scope.ServiceProvider.GetRequiredService<MobilePushDispatch>().DispatchAsync(provider, item, cancellationToken);
     }
 }

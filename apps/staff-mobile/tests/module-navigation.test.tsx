@@ -14,6 +14,10 @@ import { SessionProvider } from '../src/session/context';
 import { harness, json, user } from './helpers';
 import { QueryCleanup } from './query-cleanup';
 
+jest.mock('../src/realtime/OperationalUpdates', () => ({
+  OperationalUpdates: () => null,
+}));
+
 test('an unauthorized delivery deep link never loads another courier assignment', async () => {
   const h = harness(async () => json(user));
   function Layout() {

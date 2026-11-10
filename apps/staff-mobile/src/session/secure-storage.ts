@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
 import type { RefreshStorage } from './session';
+import type { DeviceRegistrationStorage } from '../notifications/deviceRegistration';
 
 const key = 'staff.refresh';
 const settings = {
@@ -30,5 +31,34 @@ export function secureRefreshStorage(origin: string): RefreshStorage {
         settings,
       ),
     remove: () => SecureStore.deleteItemAsync(key, settings),
+  };
+}
+
+export function secureDeviceStorage(origin: string): DeviceRegistrationStorage {
+  const registrationKey = (owner: string) => `staff.device.${owner}`;
+  return {
+    async get(owner) {
+      const value = await SecureStore.getItemAsync(
+        registrationKey(owner),
+        settings,
+      );
+      if (!value) return null;
+      try {
+        const saved = JSON.parse(value);
+        if (saved.origin === origin && typeof saved.id === 'string')
+          return saved.id;
+      } catch {
+        /* Treat corrupt registration metadata as missing. */
+      }
+      return null;
+    },
+    set: (owner, id) =>
+      SecureStore.setItemAsync(
+        registrationKey(owner),
+        JSON.stringify({ origin, id }),
+        settings,
+      ),
+    remove: (owner) =>
+      SecureStore.deleteItemAsync(registrationKey(owner), settings),
   };
 }
