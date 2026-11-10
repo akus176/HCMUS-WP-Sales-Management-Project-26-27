@@ -29,7 +29,7 @@
 - [ ] 4.1 Build the authenticated shell from effective permission codes, including loading, forbidden, and multi-role states; verify all P0 roles see only allowed modules.
 - [ ] 4.2 Build confirmed and preparing ticket views, ticket detail, start-preparing, and mark-ready actions for baristas; verify Android end-to-end progression from Confirmed to Preparing to Ready.
 - [ ] 4.3 Build the manager pending-discount inbox and approve or reject actions; verify a server-confirmed decision changes the shared order state.
-- [ ] 4.4 Build inventory balance and low-stock views plus stock adjustment with a required reason; verify valid adjustments update the shared movement history and invalid adjustments do not change stock.
+- [x] 4.4 Build inventory balance and low-stock views plus stock adjustment with a required reason; verify valid adjustments update the shared movement history and invalid adjustments do not change stock. Evidence: `apps/staff-mobile/tests/inventory.test.tsx`; PostgreSQL-backed API test `InventoryAdjustment_EnforcesPermissionValidationAndIdempotency` verifies valid/idempotent adjustment, required reason, forbidden access, unchanged balance, and unchanged movement count.
 - [ ] 4.5 Build courier assignment views, operational address/contact display, device navigation launch, and out-for-delivery, delivered, or failed actions; verify a courier cannot load another courier's assignment and a failure requires a reason.
 - [x] 4.6 Add online, reconnecting, and offline states with manual refresh and disabled mutations; verify no write is queued or reported successful while disconnected. Evidence: [#145 connectivity implementation and verification](../../../docs/evidence/mobile-connectivity-145/README.md); full quality check, API contract check, and Android export pass.
 - [ ] 4.7 Connect authenticated operational events to cache invalidation and post-reconnect refetch; verify a WinUI or API change refreshes the affected mobile view without overwriting a newer state.
@@ -41,7 +41,7 @@
 - [ ] 5.3 Add device registration, token rotation, and removal on logout; verify ownership, invalid-token cleanup, and notification-permission denial.
 - [ ] 5.4 Add privacy-safe actionable notifications and authenticated deep links for urgent work; verify previews omit customer, address, payment, and credential data.
 - [ ] 5.5 Build limited administrator account search, eligible deactivation, and security-event views; verify final-administrator protection and session revocation.
-- [ ] 5.6 Build prepared purchase-receipt review and posting; verify a retry cannot increase shared stock more than once and the resulting movement history is visible.
+- [x] 5.6 Build prepared purchase-receipt review and posting; verify a retry cannot increase shared stock more than once and the resulting movement history is visible. Evidence: `apps/staff-mobile/tests/inventory.test.tsx`; PostgreSQL-backed API test `ReceiptPosting_ChangesSharedBalanceAndAddsOneAuditedMovement` verifies the retry conflict, one balance increase, and one movement.
 
 ## 6. P2 release hardening and evidence
 
