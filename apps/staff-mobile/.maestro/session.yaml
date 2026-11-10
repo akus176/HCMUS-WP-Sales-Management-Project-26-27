@@ -9,6 +9,7 @@ name: Staff session login, restore, and logout
 - tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
+- hideKeyboard
 - tapOn: Password
 - inputText: deliberately-invalid-test-password
 - hideKeyboard

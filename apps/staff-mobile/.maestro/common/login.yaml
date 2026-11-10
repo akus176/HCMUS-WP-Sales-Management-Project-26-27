@@ -8,6 +8,7 @@ appId: com.coffeeshop.staffmobile
 - tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
+- hideKeyboard
 - tapOn: Password
 - inputText: ${MAESTRO_STAFF_PASSWORD}
 - hideKeyboard
