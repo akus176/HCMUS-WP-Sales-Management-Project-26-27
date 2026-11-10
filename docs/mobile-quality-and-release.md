@@ -198,8 +198,9 @@ Withdraw internal distribution on regression. Set `StaffPush__EnableExpo=false`
 and restart the affected API deployment to stop provider sends; verify readiness
 and a Windows read/write afterwards. This does **not** disable registration,
 mobile HTTP or hub access. The current backend has no selective mobile
-registration/hub gate. The full mobile-only rollback drill remains blocked on
-canonical #95 task 11.6; do not invent a switch or claim that drill passed.
+registration/hub gate. The full mobile-only rollback drill requires implementing
+the selective gate described in the [OpenSpec migration plan](../openspec/changes/add-staff-mobile-app/design.md#migration-plan);
+do not invent a switch or claim that drill passed.
 Disabling the shared hub or revoking shared users can affect WinUI. Do not drop
 shared data or reverse business migrations to roll back a client. Keep release
 approval pending until that gate and drill are delivered.

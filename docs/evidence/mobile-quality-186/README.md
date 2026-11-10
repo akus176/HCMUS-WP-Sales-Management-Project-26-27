@@ -16,9 +16,10 @@ The PostgreSQL-backed API suite passes 53/53 with no skipped cases.
 `npm run test:e2e:suite` runs ten separate Android workflows, requires fresh
 one-case JUnit reports, and verifies committed business state through independent
 API sessions. It fails on missing/skipped reports or server-state mismatches.
-The final run uses fresh records and a still-active synthetic deactivation
-target; the earlier 9/10 attempt and focused recovery are not combined into a
-passing suite.
+The [final complete run](android-suite-summary.json) passed **10/10 workflows**, with zero failed, missing or
+skipped cases and passing independent API state verification. It used fresh
+records and a still-active synthetic deactivation target. The earlier 9/10
+attempt and focused recovery are not combined into this passing result.
 
 Native verification found and corrected a keyboard-autocorrect bug in staff
 search and a keyboard overlap at 200% text. The root keyboard-avoiding container
@@ -103,7 +104,8 @@ packaged SDK's physical path. The contributor runbook includes that discovery,
 clean setup, LAN/device configuration, notifications, tests, release and rollback.
 Real push delivery still needs Expo project/native credentials; deterministic
 provider tests and the real-device procedure are separate evidence. A debug APK
-is not a production release. The selective mobile feature gate/rollback drill is
-canonical #95 task 11.6, outside #186; the current shared backend has no such gate.
+is not a production release. The selective mobile feature gate/rollback drill
+from the [OpenSpec design's migration plan](../../../openspec/changes/add-staff-mobile-app/design.md#migration-plan) remains outside #186; the current
+shared backend has no such gate.
 The final demo recording is also outside this ticket. Named reviewer vt-Toan's
 approval remains a merge requirement.
