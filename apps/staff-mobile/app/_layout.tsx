@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
-import { Text } from 'react-native';
+import { KeyboardAvoidingView, Text } from 'react-native';
 
 import { ConfigurationGate } from '../src/config/ConfigurationGate';
 import { ConnectivityBanner } from '../src/connectivity/ConnectivityBanner';
@@ -56,7 +56,7 @@ function SessionNavigation({
       </>
     );
   return (
-    <>
+    <KeyboardAvoidingView behavior="height" style={{ flex: 1 }}>
       <StatusBar style="dark" />
       <ConnectivityBanner />
       <Stack screenOptions={{ headerShown: false }}>
@@ -74,6 +74,6 @@ function SessionNavigation({
         </Stack.Protected>
       </Stack>
       <MobileNotifications />
-    </>
+    </KeyboardAvoidingView>
   );
 }

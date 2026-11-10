@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Test Suite" device="CoffeeShop_138_API36" tests="1" failures="0" time="51.703" timestamp="2026-11-10T20:17:46">
+    <testcase id="a11y186-Manager" name="a11y186-Manager" classname="a11y186-Manager" file="audit-flows/a11y186-Manager.yaml" time="51.682" timestamp="2026-11-10T20:17:46" status="SUCCESS" />
+  </testsuite>
+</testsuites>

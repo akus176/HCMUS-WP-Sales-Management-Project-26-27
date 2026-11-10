@@ -1,0 +1,27 @@
+appId: com.coffeeshop.staffmobile
+---
+- runFlow: a11y186-login.yaml
+- scrollUntilVisible:
+    element: Open Deliveries
+    direction: DOWN
+- tapOn: Open Deliveries
+- scrollUntilVisible:
+    element: Active deliveries
+    direction: DOWN
+- takeScreenshot: delivery-list
+- openLink: coffeeshop-staff:///modules/delivery/${MAESTRO_AUDIT_DELIVERY_ID}
+- scrollUntilVisible:
+    element: 'Address: Synthetic test address'
+    direction: DOWN
+- takeScreenshot: delivery-detail
+- scrollUntilVisible:
+    element: Failure reason
+    direction: DOWN
+- tapOn: Failure reason
+- inputText: Accessibility audit only
+- hideKeyboard
+- scrollUntilVisible:
+    element: Mark failed
+    direction: DOWN
+- assertVisible: Mark failed
+- takeScreenshot: delivery-failure

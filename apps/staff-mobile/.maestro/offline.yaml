@@ -18,13 +18,17 @@ name: Offline stock writes stay disabled and are not replayed
     direction: DOWN
 - tapOn: Quantity change
 - inputText: '2'
+- hideKeyboard
+- scrollUntilVisible:
+    element: Adjustment reason
+    direction: DOWN
 - tapOn: Adjustment reason
 - inputText: Must never be saved
 - hideKeyboard
 - setAirplaneMode: enabled
-- scrollUntilVisible:
-    element: 'Offline.*'
-    direction: UP
+- extendedWaitUntil:
+    visible: 'Offline.*'
+    timeout: 30000
 - assertVisible: 'Offline.*'
 - scrollUntilVisible:
     element: Save adjustment
@@ -33,8 +37,8 @@ name: Offline stock writes stay disabled and are not replayed
     text: Save adjustment
     enabled: false
 - setAirplaneMode: disabled
-- scrollUntilVisible:
-    element: 'Online.*'
-    direction: UP
+- extendedWaitUntil:
+    visible: 'Online.*'
+    timeout: 30000
 - assertVisible: 'Online.*'
 - assertNotVisible: 'Adjustment saved by the server.*'

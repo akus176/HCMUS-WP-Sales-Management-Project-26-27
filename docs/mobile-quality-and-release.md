@@ -16,6 +16,12 @@ and, for nonstandard AVD storage, `ANDROID_AVD_HOME`. Put Java, SDK
 Verify `java -version`, `adb version`, `emulator -accel-check`,
 `emulator -list-avds` and `maestro --version` before building.
 
+Resolve the SDK in the terminal that will install the app. Confirm
+`Test-Path "$env:ANDROID_HOME/platform-tools/adb.exe"` returns `True` there.
+A packaged desktop tool can see a virtualized SDK path that an ordinary terminal
+cannot see; use the SDK's physical location instead. An intact SDK does not need
+to be downloaded again.
+
 From the repository root:
 
 ```powershell
@@ -147,6 +153,11 @@ showing no overlap, clipping or hidden fields. Enable TalkBack in Android Settin
 roles, selection/disabled/busy state and feedback announcements. A dumped tree
 does not prove spoken traversal. Restore the recorded settings afterwards; use
 `wm size reset`/`wm density reset` only if no earlier overrides existed.
+
+The [#186 native audit evidence](evidence/mobile-quality-186/README.md) includes
+the phone/tablet screen matrix, reproducible role flows, JUnit outcomes and
+TalkBack speech-caption sequences. Keep native layout evidence separate from
+component semantics and full business-workflow results.
 
 ## Notifications and CI
 

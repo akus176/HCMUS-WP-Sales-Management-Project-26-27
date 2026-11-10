@@ -26,9 +26,9 @@ name: Courier delivered and failed workflows against the shared API
     element: Start delivery
     direction: DOWN
 - tapOn: Start delivery
-- extendedWaitUntil:
-    visible: Mark delivered
-    timeout: 30000
+- scrollUntilVisible:
+    element: Mark delivered
+    direction: DOWN
 - tapOn: Mark delivered
 - extendedWaitUntil:
     visible: Delivery delivered. Confirmed by the service.
@@ -46,9 +46,9 @@ name: Courier delivered and failed workflows against the shared API
     element: Start delivery
     direction: DOWN
 - tapOn: Start delivery
-- extendedWaitUntil:
-    visible: Mark failed
-    timeout: 30000
+- scrollUntilVisible:
+    element: Mark failed
+    direction: DOWN
 - tapOn: Mark failed
 - assertVisible: A failure reason is required.
 - scrollUntilVisible:

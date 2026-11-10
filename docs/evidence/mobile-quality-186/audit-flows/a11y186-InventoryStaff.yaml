@@ -1,0 +1,46 @@
+appId: com.coffeeshop.staffmobile
+---
+- runFlow: a11y186-login.yaml
+- scrollUntilVisible:
+    element: Open Inventory
+    direction: DOWN
+- tapOn: Open Inventory
+- scrollUntilVisible:
+    element: Low stock
+    direction: DOWN
+- tapOn: Low stock
+- scrollUntilVisible:
+    element: Search ingredients
+    direction: DOWN
+- tapOn: Search ingredients
+- inputText: ${MAESTRO_AUDIT_INGREDIENT}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Record adjustment for ${MAESTRO_AUDIT_INGREDIENT}
+    direction: DOWN
+- takeScreenshot: inventory-balances
+- tapOn: Record adjustment for ${MAESTRO_AUDIT_INGREDIENT}
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- tapOn: Quantity change
+- inputText: '2'
+- scrollUntilVisible:
+    element: Quantity change
+    direction: UP
+    centerElement: true
+- takeScreenshot: adjustment-keyboard
+- hideKeyboard
+- scrollUntilVisible:
+    element: Adjustment reason
+    direction: DOWN
+- tapOn: Adjustment reason
+- inputText: Accessibility audit only
+- hideKeyboard
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- assertVisible:
+    text: Save adjustment
+    enabled: true
+- takeScreenshot: inventory-adjustment

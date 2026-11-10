@@ -39,9 +39,9 @@ name: Low stock, required adjustment reason, receipt posting and history
     direction: UP
 - tapOn: Show movement history for ${MAESTRO_INGREDIENT}
 - scrollUntilVisible:
-    element: Quality physical count
+    element: 'adjustment: 2 l · Quality physical count'
     direction: DOWN
-- assertVisible: Quality physical count
+- assertVisible: 'adjustment: 2 l · Quality physical count'
 - scrollUntilVisible:
     element: Purchase receipts
     direction: UP
