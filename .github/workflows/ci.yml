@@ -66,6 +66,8 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - name: Install pinned npm and mobile dependencies
         run: |
           npm install --global npm@11.17.0
