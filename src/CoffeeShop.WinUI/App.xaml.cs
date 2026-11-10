@@ -35,7 +35,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         }
         var configuration = CoffeeShopClientConfiguration.Load();
         ConfigureServices(configuration);
-        if (!Environment.GetCommandLineArgs().Contains("--verify-shell"))
+        if (configuration.IsApiMode && !Environment.GetCommandLineArgs().Contains("--verify-shell"))
         {
             try
             {
@@ -72,16 +72,19 @@ public partial class App : Microsoft.UI.Xaml.Application
     private static void ConfigureServices(CoffeeShopClientConfiguration configuration)
     {
         IsApiMode = configuration.IsApiMode;
-        var registrations = new ServiceCollection().AddCoffeeShopApiClient(configuration.ApiBaseAddress);
-        if (!configuration.IsApiMode)
-            registrations.AddCoffeeShopDirectClient(configuration.ConnectionString ?? string.Empty);
-        if (!Environment.GetCommandLineArgs().Contains("--verify-shell"))
+        var registrations = new ServiceCollection();
+        if (configuration.IsApiMode)
         {
+            registrations.AddCoffeeShopApiClient(configuration.ApiBaseAddress);
             registrations.AddSingleton(provider => new PosWorkspace(provider.GetRequiredService<IServiceScopeFactory>(),
                 provider.GetRequiredService<CustomerOrderContext>(), provider.GetRequiredService<PosOperatorSession>(),
                 provider.GetRequiredService<ApiPosSource>()));
             registrations.AddSingleton(provider => new OperationsWorkspace(provider.GetRequiredService<IServiceScopeFactory>(),
                 provider.GetRequiredService<PosOperatorSession>(), provider.GetRequiredService<ApiOperationsSource>()));
+        }
+        else
+        {
+            registrations.AddCoffeeShopDirectClient(configuration.ConnectionString ?? string.Empty);
         }
         var services = registrations.BuildServiceProvider();
 
