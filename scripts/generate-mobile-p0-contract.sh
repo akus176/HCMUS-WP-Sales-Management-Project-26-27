@@ -43,5 +43,7 @@ fi
 
 node -e 'const fs = require("node:fs"); const sort = value => Array.isArray(value) ? value.map(sort) : value && typeof value === "object" ? Object.fromEntries(Object.keys(value).sort().map(key => [key, sort(value[key])])) : value; const doc = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); fs.writeFileSync(process.argv[2], JSON.stringify(sort(doc), null, 2) + "\n");' \
   "$response_file" "$contract_dir/openapi.json"
-"$contract_dir/node_modules/.bin/openapi-typescript" "$contract_dir/openapi.json" \
-  --output "$contract_dir/schema.d.ts"
+(
+  cd "$contract_dir"
+  node node_modules/openapi-typescript/bin/cli.js openapi.json --output schema.d.ts
+)

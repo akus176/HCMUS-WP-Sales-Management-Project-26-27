@@ -25,8 +25,9 @@ public sealed partial class MainWindow : Window
     private bool checkingSession;
     private bool endingSession;
     private readonly PosOperatorSession staffSession;
-    private readonly StaffSessionManager sessionManager;
+    private readonly StaffSessionManager? sessionManager;
     private readonly bool verifyShell = Environment.GetCommandLineArgs().Contains("--verify-shell");
+    private bool UsePermissionNavigation => sessionManager is not null && !verifyShell;
 
     public MainWindow()
     {
@@ -37,8 +38,9 @@ public sealed partial class MainWindow : Window
         ClientModeText.Text = App.IsApiMode ? "WINUI · HTTP API" : "WINUI · DIRECT POSTGRESQL";
 #endif
         staffSession = App.Services.GetRequiredService<PosOperatorSession>();
-        sessionManager = App.Services.GetRequiredService<StaffSessionManager>();
-        sessionManager.SessionExpired += OnSessionExpired;
+        sessionManager = App.Services.GetService<StaffSessionManager>();
+        SignOutButton.Visibility = sessionManager is null ? Visibility.Collapsed : Visibility.Visible;
+        if (sessionManager is not null) sessionManager.SessionExpired += OnSessionExpired;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleDragRegion);
         AppWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
@@ -57,7 +59,7 @@ public sealed partial class MainWindow : Window
         Closed += (_, _) =>
         {
             clock.Stop();
-            sessionManager.SessionExpired -= OnSessionExpired;
+            if (sessionManager is not null) sessionManager.SessionExpired -= OnSessionExpired;
         };
     }
     private static object Resource(string key) => Microsoft.UI.Xaml.Application.Current.Resources[key];
@@ -73,9 +75,9 @@ public sealed partial class MainWindow : Window
     private void InitializeNavigation()
     {
         string? group = null;
-        var destinations = verifyShell
-            ? ServiceConsoleNavigation.PrimaryDestinations
-            : ServiceConsoleNavigation.ForPermissions(staffSession.Permissions);
+        var destinations = UsePermissionNavigation
+            ? ServiceConsoleNavigation.ForPermissions(staffSession.Permissions)
+            : ServiceConsoleNavigation.PrimaryDestinations;
         foreach (var destination in destinations)
         {
             if (group != destination.Group)
@@ -181,9 +183,9 @@ public sealed partial class MainWindow : Window
     public void NavigateTo(string tag)
     {
         if (!connection.IsConnected) return;
-        var route = verifyShell
-            ? ServiceConsoleNavigation.Resolve(tag)
-            : ServiceConsoleNavigation.Resolve(tag, staffSession.Permissions);
+        var route = UsePermissionNavigation
+            ? ServiceConsoleNavigation.Resolve(tag, staffSession.Permissions)
+            : ServiceConsoleNavigation.Resolve(tag);
         selecting = true;
         Nav.SelectedItem = Nav.MenuItems.OfType<NavigationViewItem>().Single(item => Equals(item.Tag, route.Destination.Tag));
         selecting = false;
@@ -193,13 +195,15 @@ public sealed partial class MainWindow : Window
     {
         if (!selecting && args.SelectedItem is NavigationViewItem { Tag: string tag })
         {
-            var route = verifyShell ? ServiceConsoleNavigation.Resolve(tag) : ServiceConsoleNavigation.Resolve(tag, staffSession.Permissions);
+            var route = UsePermissionNavigation
+                ? ServiceConsoleNavigation.Resolve(tag, staffSession.Permissions)
+                : ServiceConsoleNavigation.Resolve(tag);
             ShowRoute(route, tag == "stock-room");
         }
     }
     private async void OnSignOut(object sender, RoutedEventArgs e)
     {
-        if (endingSession) return;
+        if (sessionManager is null || endingSession) return;
         endingSession = true;
         try { await sessionManager.LogoutAsync(); }
         catch (ApiException) { /* Local credentials are cleared even when the API is offline. */ }
@@ -208,7 +212,7 @@ public sealed partial class MainWindow : Window
     }
     private async Task CheckSessionAsync()
     {
-        if (verifyShell || checkingSession || endingSession) return;
+        if (sessionManager is null || verifyShell || checkingSession || endingSession) return;
         checkingSession = true;
         try { await sessionManager.GetValidAccessTokenAsync(); }
         catch (ApiException) { /* A temporary network failure is not session revocation. */ }

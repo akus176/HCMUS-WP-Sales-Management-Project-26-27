@@ -17,7 +17,7 @@
                 </StackPanel>
                 <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                     <TextBlock x:Name="ClockText" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="13" Foreground="{StaticResource ConsoleOnFieldBrush}" VerticalAlignment="Center" />
-                    <Button Content="SIGN OUT" Click="OnSignOut" AutomationProperties.Name="Sign out" />
+                    <Button x:Name="SignOutButton" Content="SIGN OUT" Click="OnSignOut" AutomationProperties.Name="Sign out" />
                 </StackPanel>
             </Grid>
         </Border>

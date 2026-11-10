@@ -35,7 +35,7 @@ public partial class App : Microsoft.UI.Xaml.Application
         }
         var configuration = CoffeeShopClientConfiguration.Load();
         ConfigureServices(configuration);
-        if (!Environment.GetCommandLineArgs().Contains("--verify-shell"))
+        if (configuration.IsApiMode && !Environment.GetCommandLineArgs().Contains("--verify-shell"))
         {
             try
             {
