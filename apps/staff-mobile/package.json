@@ -57,6 +57,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest --runInBand",
+    "test:accessibility": "jest --runInBand tests/accessibility.test.tsx",
+    "test:e2e:suite": "pwsh -NoProfile -File scripts/verify-android-suite.ps1",
     "test:unit": "jest --runInBand tests/session.test.ts tests/secure-storage.test.ts tests/environment.test.ts",
     "test:components": "jest --runInBand tests/router.test.tsx tests/login.test.tsx tests/navigation.test.tsx",
     "test:live": "jest --runInBand --testMatch **/tests/live-session.integration.ts",

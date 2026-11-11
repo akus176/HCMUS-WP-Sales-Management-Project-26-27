@@ -1,0 +1,44 @@
+appId: com.coffeeshop.staffmobile
+name: Offline stock writes stay disabled and are not replayed
+---
+- runFlow: common/login.yaml
+- tapOn: Open Inventory
+- scrollUntilVisible:
+    element: Search ingredients
+    direction: DOWN
+- tapOn: Search ingredients
+- inputText: ${MAESTRO_OFFLINE_INGREDIENT}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Record adjustment for ${MAESTRO_OFFLINE_INGREDIENT}
+    direction: DOWN
+- tapOn: Record adjustment for ${MAESTRO_OFFLINE_INGREDIENT}
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- tapOn: Quantity change
+- inputText: '2'
+- hideKeyboard
+- scrollUntilVisible:
+    element: Adjustment reason
+    direction: DOWN
+- tapOn: Adjustment reason
+- inputText: Must never be saved
+- hideKeyboard
+- setAirplaneMode: enabled
+- extendedWaitUntil:
+    visible: 'Offline.*'
+    timeout: 30000
+- assertVisible: 'Offline.*'
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- assertVisible:
+    text: Save adjustment
+    enabled: false
+- setAirplaneMode: disabled
+- extendedWaitUntil:
+    visible: 'Online.*'
+    timeout: 30000
+- assertVisible: 'Online.*'
+- assertNotVisible: 'Adjustment saved by the server.*'

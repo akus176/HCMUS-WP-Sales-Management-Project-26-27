@@ -170,6 +170,7 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
       <TextInput
         accessibilityLabel="Search staff accounts"
         autoCapitalize="none"
+        autoCorrect={false}
         onChangeText={setSearch}
         placeholder="Search name, username, or email"
         placeholderTextColor={mobileTokens.color.disabledText}

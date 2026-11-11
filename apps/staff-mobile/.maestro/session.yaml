@@ -9,6 +9,7 @@ name: Staff session login, restore, and logout
 - tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
+- hideKeyboard
 - tapOn: Password
 - inputText: deliberately-invalid-test-password
 - hideKeyboard
@@ -19,16 +20,19 @@ name: Staff session login, restore, and logout
 - hideKeyboard
 - tapOn: Sign in
 - extendedWaitUntil:
-    visible: Signed in
+    visible: Staff home
     timeout: 30000
 - assertVisible: ${MAESTRO_STAFF_NAME}
 - takeScreenshot: .maestro/results/session-signed-in
 - stopApp
 - launchApp
 - extendedWaitUntil:
-    visible: Signed in
+    visible: Staff home
     timeout: 30000
 - assertVisible: ${MAESTRO_STAFF_NAME}
+- scrollUntilVisible:
+    element: Sign out
+    direction: DOWN
 - tapOn: Sign out
 - assertVisible: Staff mobile
 - assertNotVisible: ${MAESTRO_STAFF_NAME}

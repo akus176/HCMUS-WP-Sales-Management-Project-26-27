@@ -6,6 +6,10 @@ operational workflows and the permission-aware module shell belong to later issu
 
 ## Install and check
 
+For the complete native workflow suite, P0 accessibility matrix, synthetic API
+setup, device notifications, release and rollback gates, use the
+[#186 contributor runbook](../../docs/mobile-quality-and-release.md).
+
 Use **Node 26.5.0** and **npm 11.17.0** (also recorded in `.nvmrc` and
 `package.json`). With nvm-windows, run `nvm install 26.5.0` and `nvm use 26.5.0`.
 From the repository root:

@@ -1,0 +1,22 @@
+appId: com.coffeeshop.staffmobile
+---
+- runFlow: a11y186-login.yaml
+- scrollUntilVisible:
+    element: Open Approvals
+    direction: DOWN
+- tapOn: Open Approvals
+- scrollUntilVisible:
+    element: Review order ${MAESTRO_AUDIT_APPROVAL_ORDER} discount
+    direction: DOWN
+- takeScreenshot: approval-inbox
+- tapOn: Review order ${MAESTRO_AUDIT_APPROVAL_ORDER} discount
+- scrollUntilVisible:
+    element: Current order total.*
+    direction: DOWN
+- takeScreenshot: approval-detail
+- scrollUntilVisible:
+    element: Reject discount
+    direction: DOWN
+- assertVisible: Approve discount
+- assertVisible: Reject discount
+- takeScreenshot: approval-actions

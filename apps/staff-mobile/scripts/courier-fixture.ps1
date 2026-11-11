@@ -19,7 +19,8 @@ if ($Action -eq 'Seed') {
     $suffix = [guid]::NewGuid().ToString('N').Substring(0, 8)
     $category = Send 'categories' @{ name = "Courier E2E $suffix"; displayOrder = 0 }
     $item = Send 'menu-items' @{ categoryId = $category.id; name = "Courier test $suffix"; initialVariants = @(@{ sizeName = 'Regular'; price = 5 }) }
-    $courier = @(Invoke-RestMethod -Uri "$base/delivery-staff/options" -Headers $headers) | Where-Object { $_.fullName -eq $env:COFFEESHOP_MOBILE_TEST_COURIER_NAME }
+    $options = Invoke-RestMethod -Uri "$base/delivery-staff/options" -Headers $headers
+    $courier = @($options | Where-Object { $_.fullName -eq $env:COFFEESHOP_MOBILE_TEST_COURIER_NAME })
     if (@($courier).Count -ne 1) { throw 'Exactly one synthetic eligible courier must match the supplied name.' }
     function New-Assignment {
         $id = [guid]::NewGuid().ToString()
@@ -40,7 +41,7 @@ if ($Action -eq 'Seed') {
     Write-Output "Set MAESTRO_DELIVERED_ORDER=$($delivered.orderNumber) and MAESTRO_FAILED_ORDER=$($failed.orderNumber)."
 } else {
     $fixture = Get-Content -LiteralPath $FixturePath -Raw | ConvertFrom-Json
-    $orders = @(Invoke-RestMethod -Uri "$base/orders" -Headers $headers)
+    $orders = Invoke-RestMethod -Uri "$base/orders" -Headers $headers
     foreach ($expected in @(@($fixture.deliveredId, 'delivered'), @($fixture.failedId, 'failed'))) {
         $order = $orders | Where-Object { $_.id -eq $expected[0] }
         if (!$order -or $order.deliveryStatus -ne $expected[1] -or $order.assignedStaffId -ne $fixture.courierId) { throw "Unexpected delivery state for $($expected[0])." }

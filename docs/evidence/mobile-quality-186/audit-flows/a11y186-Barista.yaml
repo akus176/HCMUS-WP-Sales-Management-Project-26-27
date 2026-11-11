@@ -1,0 +1,23 @@
+appId: com.coffeeshop.staffmobile
+---
+- runFlow: a11y186-login.yaml
+- takeScreenshot: home
+- scrollUntilVisible:
+    element: Open Preparation
+    direction: DOWN
+- takeScreenshot: home-action
+- tapOn: Open Preparation
+- scrollUntilVisible:
+    element: All active
+    direction: DOWN
+- takeScreenshot: preparation-queue
+- openLink: coffeeshop-staff:///notifications/urgent-order/${MAESTRO_AUDIT_ORDER_ID}
+- scrollUntilVisible:
+    element: 'Status: Confirmed'
+    direction: DOWN
+- takeScreenshot: preparation-detail
+- scrollUntilVisible:
+    element: Start preparing
+    direction: DOWN
+- assertVisible: Start preparing
+- takeScreenshot: preparation-action

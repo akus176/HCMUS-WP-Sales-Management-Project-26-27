@@ -1,4 +1,5 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ShellButton, ShellFeedback } from '../shell/controls';
 import { useConnectivity } from './connectivity';
@@ -19,7 +20,7 @@ export function ConnectivityBanner() {
     status === 'offline' ? 'Check connection' : 'Refresh data';
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       <ShellFeedback kind={kind} label={message} />
       <ShellButton
         label={actionLabel}
@@ -29,7 +30,7 @@ export function ConnectivityBanner() {
         variant="secondary"
         onPress={() => void refreshConnection()}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

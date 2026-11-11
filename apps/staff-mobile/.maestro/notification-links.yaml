@@ -1,0 +1,20 @@
+appId: com.coffeeshop.staffmobile
+name: Notification link reauthorizes a recipient with no approval permission
+---
+- runFlow: common/login.yaml
+- assertVisible: Open Preparation
+- assertNotVisible: Open Approvals
+- openLink: coffeeshop-staff:///notifications/approval/${MAESTRO_DISCOUNT_ID}
+- extendedWaitUntil:
+    visible: Access unavailable. Your current permissions do not allow this module.
+    timeout: 30000
+- assertNotVisible: Discount review
+- tapOn: Back to staff home
+- scrollUntilVisible:
+    element: Sign out
+    direction: DOWN
+- tapOn: Sign out
+- assertVisible: Staff mobile
+- openLink: coffeeshop-staff:///notifications/approval/${MAESTRO_DISCOUNT_ID}
+- assertVisible: Staff mobile
+- assertNotVisible: Discount review

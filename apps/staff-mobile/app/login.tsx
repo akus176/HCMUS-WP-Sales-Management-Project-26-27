@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ApiError, NetworkError } from '../src/api/errors';
@@ -34,66 +41,72 @@ export default function LoginScreen() {
   }
   return (
     <SafeAreaView style={styles.page}>
-      <View style={styles.content}>
-        <Text accessibilityRole="header" style={styles.title}>
-          Staff sign-in
-        </Text>
-        {!client ? (
-          <Text accessibilityRole="alert">
-            Sign-in is not configured. Contact your administrator.
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.content}>
+          <Text accessibilityRole="header" style={styles.title}>
+            Staff sign-in
           </Text>
-        ) : (
-          <>
-            <TextInput
-              accessibilityLabel="Username"
-              placeholder="Username"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="username"
-              maxLength={50}
-              style={styles.input}
-              editable={!busy}
-              value={username}
-              onChangeText={setUsername}
-            />
-            <TextInput
-              accessibilityLabel="Password"
-              placeholder="Password"
-              secureTextEntry
-              autoComplete="current-password"
-              maxLength={1024}
-              style={styles.input}
-              editable={!busy}
-              value={password}
-              onChangeText={setPassword}
-              onSubmitEditing={() => {
-                void submit();
-              }}
-            />
-            {!!error && <Text accessibilityRole="alert">{error}</Text>}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Sign in"
-              accessibilityState={{ disabled: busy, busy }}
-              disabled={busy}
-              style={styles.button}
-              onPress={() => {
-                void submit();
-              }}
-            >
-              <Text style={styles.buttonText}>
-                {busy ? 'Signing in…' : 'Sign in'}
-              </Text>
-            </Pressable>
-          </>
-        )}
-      </View>
+          {!client ? (
+            <Text accessibilityRole="alert">
+              Sign-in is not configured. Contact your administrator.
+            </Text>
+          ) : (
+            <>
+              <TextInput
+                accessibilityLabel="Username"
+                placeholder="Username"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="username"
+                maxLength={50}
+                style={styles.input}
+                editable={!busy}
+                value={username}
+                onChangeText={setUsername}
+              />
+              <TextInput
+                accessibilityLabel="Password"
+                placeholder="Password"
+                secureTextEntry
+                autoComplete="current-password"
+                maxLength={1024}
+                style={styles.input}
+                editable={!busy}
+                value={password}
+                onChangeText={setPassword}
+                onSubmitEditing={() => {
+                  void submit();
+                }}
+              />
+              {!!error && <Text accessibilityRole="alert">{error}</Text>}
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Sign in"
+                accessibilityState={{ disabled: busy, busy }}
+                disabled={busy}
+                style={styles.button}
+                onPress={() => {
+                  void submit();
+                }}
+              >
+                <Text style={styles.buttonText}>
+                  {busy ? 'Signing in…' : 'Sign in'}
+                </Text>
+              </Pressable>
+            </>
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#fff9ed' },
+  scroll: { flexGrow: 1 },
   content: {
     flex: 1,
     justifyContent: 'center',

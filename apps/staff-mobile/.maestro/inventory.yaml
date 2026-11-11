@@ -1,0 +1,61 @@
+appId: com.coffeeshop.staffmobile
+name: Low stock, required adjustment reason, receipt posting and history
+---
+- runFlow: common/login.yaml
+- tapOn: Open Inventory
+- scrollUntilVisible:
+    element: Search ingredients
+    direction: DOWN
+- tapOn: Search ingredients
+- inputText: ${MAESTRO_INGREDIENT}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Record adjustment for ${MAESTRO_INGREDIENT}
+    direction: DOWN
+- assertVisible: 'Low stock.*'
+- tapOn: Record adjustment for ${MAESTRO_INGREDIENT}
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- tapOn: Quantity change
+- inputText: '2'
+- hideKeyboard
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- assertVisible:
+    text: Save adjustment
+    enabled: false
+- tapOn: Adjustment reason
+- inputText: Quality physical count
+- hideKeyboard
+- tapOn: Save adjustment
+- scrollUntilVisible:
+    element: 'Adjustment saved by the server. New balance: 3 l.'
+    direction: UP
+- assertVisible: 'Adjustment saved by the server. New balance: 3 l.'
+- scrollUntilVisible:
+    element: Show movement history for ${MAESTRO_INGREDIENT}
+    direction: UP
+- tapOn: Show movement history for ${MAESTRO_INGREDIENT}
+- scrollUntilVisible:
+    element: 'adjustment: 2 l · Quality physical count'
+    direction: DOWN
+- assertVisible: 'adjustment: 2 l · Quality physical count'
+- scrollUntilVisible:
+    element: Purchase receipts
+    direction: UP
+- tapOn: Purchase receipts
+- scrollUntilVisible:
+    element: Review receipt ${MAESTRO_RECEIPT}
+    direction: DOWN
+- tapOn: Review receipt ${MAESTRO_RECEIPT}
+- scrollUntilVisible:
+    element: Post receipt ${MAESTRO_RECEIPT}
+    direction: DOWN
+- tapOn: Post receipt ${MAESTRO_RECEIPT}
+- scrollUntilVisible:
+    element: 'Status: posted'
+    direction: UP
+- assertVisible: 'Status: posted'
+- assertNotVisible: Post receipt ${MAESTRO_RECEIPT}
