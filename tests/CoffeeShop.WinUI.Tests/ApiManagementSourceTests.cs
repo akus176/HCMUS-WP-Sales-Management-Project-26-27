@@ -132,6 +132,95 @@ public sealed class ApiManagementSourceTests
         Assert.Contains("requestId", string.Join("", requestBodies), StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public async Task InventorySource_PostsReceiptAndAdjustmentOnceThenReadsAuthoritativeBalanceAndHistory()
+    {
+        var ingredientId = Guid.NewGuid();
+        var supplierId = Guid.NewGuid();
+        var receiptId = Guid.NewGuid();
+        var receiptLineId = Guid.NewGuid();
+        var actorId = Guid.NewGuid();
+        var requests = new List<(string Method, string Path, string? Token, string Body)>();
+        var receiptPosted = false;
+        var balance = 2m;
+        using var client = CreateClient(async request =>
+        {
+            var body = request.Content is null ? "" : await request.Content.ReadAsStringAsync();
+            requests.Add((request.Method.Method, request.RequestUri!.PathAndQuery,
+                request.Headers.Authorization?.Parameter, body));
+            var receipt = new ReceiptResponse(receiptId, supplierId, "RCPT-200", receiptPosted ? "posted" : "draft",
+                receiptPosted ? DateTimeOffset.UtcNow : null,
+                [new(receiptLineId, ingredientId, 4m, 3m)], DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
+            return request.RequestUri.AbsolutePath switch
+            {
+                "/api/v1/ingredients" when request.Method == HttpMethod.Get => Json(new PageResponse<IngredientBalanceResponse>(
+                    [new(ingredientId, "Whole milk", "ml", balance, 5m, true)], 1, 200, 1)),
+                "/api/v1/purchase-receipts" when request.Method == HttpMethod.Post => Json(new ReceiptResponse(
+                    receiptId, supplierId, "RCPT-200", "draft", null, [], DateTimeOffset.UtcNow, DateTimeOffset.UtcNow)),
+                "/api/v1/purchase-receipts" when request.Method == HttpMethod.Get => Json(new[] { receipt }),
+                var path when path == $"/api/v1/purchase-receipts/{receiptId}/lines" => Json(receipt),
+                var path when path == $"/api/v1/purchase-receipts/{receiptId}/post" => MarkReceiptPosted(),
+                var path when path == $"/api/v1/ingredients/{ingredientId}/adjustments" => Json(RecordAdjustment()),
+                "/api/v1/stock-movements" => Json(new[]
+                {
+                    new StockMovementResponse(Guid.NewGuid(), ingredientId, "adjustment", 1m, actorId,
+                        "Cycle count correction", DateTimeOffset.UtcNow, null, null),
+                    new StockMovementResponse(Guid.NewGuid(), ingredientId, "receipt", 4m, actorId,
+                        "Receipt RCPT-200", DateTimeOffset.UtcNow, receiptId, null),
+                }),
+                var path when path == $"/api/v1/ingredients/{ingredientId}/movements" => Json(new[]
+                {
+                    new StockMovementResponse(Guid.NewGuid(), ingredientId, "adjustment", 1m, actorId,
+                        "Cycle count correction", DateTimeOffset.UtcNow, null, null),
+                    new StockMovementResponse(Guid.NewGuid(), ingredientId, "receipt", 4m, actorId,
+                        "Receipt RCPT-200", DateTimeOffset.UtcNow, receiptId, null),
+                }),
+                _ => throw new InvalidOperationException($"Unexpected route {request.RequestUri.AbsolutePath}"),
+            };
+
+            HttpResponseMessage MarkReceiptPosted()
+            {
+                receiptPosted = true;
+                balance += 4m;
+                return new(HttpStatusCode.NoContent);
+            }
+
+            StockAdjustmentResponse RecordAdjustment()
+            {
+                balance += 1m;
+                return new(ingredientId, balance);
+            }
+        });
+        var source = new ApiInventorySource(new AuthenticatedApiClient(client, CreateSession()));
+
+        var lowStockBefore = await source.ListIngredientsAsync(includeInactive: false);
+        var draft = await source.CreateReceiptAsync(new(supplierId), "RCPT-200");
+        await source.AddReceiptLineAsync(draft.Id, new(ingredientId), 4m, 3m);
+        await source.PostReceiptAsync(draft.Id);
+        var postedReceipt = Assert.Single(await source.ListReceiptsAsync());
+        await source.AdjustAsync(new(ingredientId), 1m, "Cycle count correction");
+        var authoritativeBalance = Assert.Single(await source.ListIngredientsAsync());
+        var movements = await source.ListMovementsAsync(new(ingredientId));
+
+        var lowStockIngredient = Assert.Single(lowStockBefore);
+        Assert.Equal(2m, lowStockIngredient.AvailableQuantity);
+        Assert.True(lowStockIngredient.AvailableQuantity <= lowStockIngredient.ReorderThreshold);
+        Assert.Equal(PurchaseReceiptStatus.Posted, postedReceipt.Status);
+        Assert.Equal(4m, Assert.Single(postedReceipt.Lines).Quantity);
+        Assert.Equal(7m, authoritativeBalance.AvailableQuantity);
+        Assert.True(authoritativeBalance.AvailableQuantity > authoritativeBalance.ReorderThreshold);
+        Assert.Equal(2, movements.Count);
+        Assert.Contains(movements, movement => movement.Type == StockMovementType.Receipt
+            && movement.PurchaseReceiptId == new EntityId(receiptId));
+        Assert.Contains(movements, movement => movement.Type == StockMovementType.Adjustment
+            && movement.Reason == "Cycle count correction" && movement.ActorId == new EntityId(actorId));
+        Assert.Contains("\"reason\":\"Cycle count correction\"", Assert.Single(requests,
+            request => request.Path.EndsWith("/adjustments", StringComparison.Ordinal)).Body);
+        Assert.Equal(1, requests.Count(request => request.Method == "POST" && request.Path.EndsWith("/post", StringComparison.Ordinal)));
+        Assert.Contains(requests, request => request.Path == "/api/v1/ingredients?page=1&pageSize=200&isActive=true");
+        Assert.All(requests, request => Assert.Equal("fixture-access", request.Token));
+    }
+
     private static StaffSessionManager CreateSession()
     {
         var manager = new StaffSessionManager(new Identity(), new Store());
