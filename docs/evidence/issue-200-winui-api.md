@@ -20,13 +20,19 @@ The issue-specific checks use synthetic API responses and an in-memory HTTP hand
 | Courier assignment/detail reads and start, complete, and failure transition routes | `ApiOperationsSourceTests.CourierLoadsAssignmentsAndSendsEligibleTransitionsOnce` |
 | Forbidden and conflicting transition responses | `ApiOperationsSourceTests.DeliveryTransitionPreservesUnauthorizedAndConflictResponses` |
 
-Current local result: .NET SDK 10.0.401 on Debian 13; **139 passed, 0 failed, 0 skipped**. The test suite does not run the WinUI window.
+Current automated result on the Windows host: .NET SDK 10.0.401; **140 passed, 0 failed, 0 skipped**. The additional test checks that the login window uses the light console theme and shared console background brush. The suite does not run the WinUI window.
 
-## Runtime evidence still required
+## Windows build and launch evidence
 
-The available runner is Debian 13. A Release build was attempted with `dotnet build src/CoffeeShop.WinUI/CoffeeShop.WinUI.csproj --configuration Release --no-restore -p:EnableWindowsTargeting=true`; it stops when the WinUI XAML target invokes Windows-only `XamlCompiler.exe` and receives `Exec format error`. No Windows build or native WinUI launch, shared API/PostgreSQL seed, synthetic account, UI screenshot, or network trace was available in this run. Release project inspection confirms `COFFEESHOP_API_ONLY` is defined and the Release project-reference graph contains only Application and Contracts; it excludes the PostgreSQL project. Therefore this PR does not claim the issue's end-to-end acceptance is complete.
+The focused Release verification script `scripts/verify-winui-api-release.ps1` completed with 0 warnings and 0 errors. Its Release dependency scan confirms the client references Application and Contracts and excludes PostgreSQL/EF persistence. The Windows client launched against the local API at `http://127.0.0.1:54906/api/v1/`. The sign-in window initially rendered poorly under the host's dark system theme; the root window now explicitly requests the light theme and uses `ConsoleGroundBrush`, with a focused regression test. A blank sign-in screenshot is saved at [`issue-200-winui-runtime/signin.jpg`](issue-200-winui-runtime/signin.jpg).
 
-On a clean Windows host, use the repository [Windows quickstart](../../README.md#start-the-api-and-winui-on-windows) with a disposable Compose database and synthetic accounts. Record the Windows commit/build, API URL and health response, seed identity, and account permission bundles without including passwords, tokens, private addresses, or customer data. Then:
+The isolated `pr208verify` Compose database was confirmed empty of users, orders, and deliveries before running the repository midterm seed. Synthetic `issue200_manager` and `issue200_courier` accounts were provisioned with the manager inventory/assignment permissions and courier delivery-update permission. Passwords and tokens are intentionally excluded from this note. The API readiness endpoint returned HTTP 200.
+
+## Live acceptance evidence still required
+
+The earlier Debian 13 runner could not compile the WinUI XAML target because it invokes Windows-only `XamlCompiler.exe` and receives `Exec format error`. Windows build, native launch, isolated API/PostgreSQL seed, synthetic accounts, and sign-in screenshot are now available. The inventory and delivery interactions, API request trace, and confirmation of no WinUI-to-PostgreSQL connection are still pending; this PR does not yet claim the issue's end-to-end acceptance is complete.
+
+Continue in the running Windows client against the isolated Compose database and synthetic accounts. Record the Windows build, API URL and health response, seed identity, and account permission bundles without including passwords, tokens, private addresses, or customer data. Then:
 
 1. Sign in with inventory permissions. Search for an ingredient; verify an active low-stock item is shown at or below its reorder threshold.
 2. Create a receipt, add a line, post it once, then reload balances and movement history. Confirm the balance changed once and the receipt movement is present.
