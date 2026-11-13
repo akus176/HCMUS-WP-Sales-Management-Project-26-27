@@ -34,6 +34,7 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <None Include="..\..\src\CoffeeShop.WinUI\LoginWindow.xaml" Link="Xaml\LoginWindow.xaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\src\CoffeeShop.WinUI\Pages\StockRoomPage.xaml" Link="Xaml\StockRoomPage.xaml" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\src\CoffeeShop.WinUI\Theme\*.xaml" Link="Xaml\Theme\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
