@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="82.471" timestamp="2026-11-14T15:19:15">
+    <testcase id="A reasoned adjustment updates balance and visible movement history" name="A reasoned adjustment updates balance and visible movement history" classname="A reasoned adjustment updates balance and visible movement history" file=".maestro\inventory-focused\adjustment-success.yaml" time="82.453" timestamp="2026-11-14T15:19:15" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="12.549" timestamp="2026-11-14T15:26:36">
+    <testcase id="Explicit retry after a lost adjustment response reuses the original operation" name="Explicit retry after a lost adjustment response reuses the original operation" classname="Explicit retry after a lost adjustment response reuses the original operation" file=".maestro\inventory-focused\adjustment-retry.yaml" time="12.538" timestamp="2026-11-14T15:26:36" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

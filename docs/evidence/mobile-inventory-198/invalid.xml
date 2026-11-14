@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="79.623" timestamp="2026-11-14T15:20:47">
+    <testcase id="Missing reason prevents submission and invalid stock is rejected by the API" name="Missing reason prevents submission and invalid stock is rejected by the API" classname="Missing reason prevents submission and invalid stock is rejected by the API" file=".maestro\inventory-focused\invalid.yaml" time="79.608" timestamp="2026-11-14T15:20:47" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

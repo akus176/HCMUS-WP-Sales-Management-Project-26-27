@@ -1,0 +1,15 @@
+appId: com.coffeeshop.staffmobile
+name: Explicit retry after a lost adjustment response reuses the original operation
+---
+- scrollUntilVisible:
+    element: Refresh inventory
+    direction: UP
+- tapOn: Refresh inventory
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- tapOn: Save adjustment
+- scrollUntilVisible:
+    element: 'Adjustment saved by the server. New balance: 3 l.'
+    direction: UP
+- assertVisible: 'Adjustment saved by the server. New balance: 3 l.'

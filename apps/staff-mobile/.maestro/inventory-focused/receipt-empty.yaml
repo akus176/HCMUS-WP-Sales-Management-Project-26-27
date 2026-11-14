@@ -1,0 +1,9 @@
+appId: com.coffeeshop.staffmobile
+name: A prepared receipt without lines cannot be posted
+---
+- runFlow: receipt-open.yaml
+- scrollUntilVisible:
+    element: This receipt has no lines and cannot be posted.
+    direction: DOWN
+- assertVisible: This receipt has no lines and cannot be posted.
+- assertNotVisible: Post receipt ${MAESTRO_RECEIPT}

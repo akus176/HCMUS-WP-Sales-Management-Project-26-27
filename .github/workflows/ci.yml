@@ -31,6 +31,8 @@ jobs:
         run: npm run format:check
       - name: Run mobile tests
         run: npm test -- --ci --json --outputFile=mobile-test-results.json
+      - name: Run inventory forwarding-harness regressions
+        run: npm run test:inventory-harness
       - name: Publish mobile test results
         if: always()
         uses: actions/upload-artifact@v4

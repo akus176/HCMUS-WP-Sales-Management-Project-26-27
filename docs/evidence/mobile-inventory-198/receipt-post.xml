@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="80.543" timestamp="2026-11-14T15:28:19">
+    <testcase id="Review and post a prepared receipt once" name="Review and post a prepared receipt once" classname="Review and post a prepared receipt once" file=".maestro\inventory-focused\receipt-post.yaml" time="80.527" timestamp="2026-11-14T15:28:19" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

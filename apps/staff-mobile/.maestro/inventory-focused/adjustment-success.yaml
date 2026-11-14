@@ -1,0 +1,17 @@
+appId: com.coffeeshop.staffmobile
+name: A reasoned adjustment updates balance and visible movement history
+---
+- runFlow: adjustment-form.yaml
+- tapOn: Save adjustment
+- scrollUntilVisible:
+    element: 'Adjustment saved by the server. New balance: 3 l.'
+    direction: UP
+- assertVisible: 'Adjustment saved by the server. New balance: 3 l.'
+- scrollUntilVisible:
+    element: Show movement history for ${MAESTRO_INGREDIENT}
+    direction: UP
+- tapOn: Show movement history for ${MAESTRO_INGREDIENT}
+- scrollUntilVisible:
+    element: 'adjustment: 2 l.*Issue198 count'
+    direction: DOWN
+- assertVisible: 'adjustment: 2 l.*Issue198 count'

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="8.541" timestamp="2026-11-14T15:32:23">
+    <testcase id="Refresh resolves a lost post response without resubmitting" name="Refresh resolves a lost post response without resubmitting" classname="Refresh resolves a lost post response without resubmitting" file=".maestro\inventory-focused\receipt-refresh.yaml" time="8.532" timestamp="2026-11-14T15:32:23" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

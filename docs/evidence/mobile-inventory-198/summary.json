@@ -1,0 +1,566 @@
+{
+  "issue": 198,
+  "runId": "13402d30",
+  "expected": 17,
+  "passed": 17,
+  "failedOrMissing": 0,
+  "serverVerificationPassed": true,
+  "cases": [
+    {
+      "name": "login",
+      "passed": true,
+      "status": "passed",
+      "state": {}
+    },
+    {
+      "name": "browse",
+      "passed": true,
+      "status": "passed",
+      "state": {}
+    },
+    {
+      "name": "refresh-before",
+      "passed": true,
+      "status": "passed",
+      "state": {}
+    },
+    {
+      "name": "refresh-after",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 2,
+        "movements": [
+          {
+            "id": "1da0d286-1be6-4839-8428-3fc5b9d80bba",
+            "ingredientId": "6e498d56-22b6-44d3-9f49-e0238e86ca76",
+            "type": "adjustment",
+            "quantityDelta": 1,
+            "actorId": "5c15e813-f98b-449f-9fb1-fb07bff7a725",
+            "reason": "Refresh fixture",
+            "occurredAt": "2026-11-14T08:18:51.365939+00:00",
+            "purchaseReceiptId": null,
+            "orderId": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "adjustment",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 3,
+        "movements": [
+          {
+            "id": "4a4ab7ee-fbb2-4575-9673-a5348bddac64",
+            "ingredientId": "52b8ac56-8ece-4c86-96b5-e85ba68f4476",
+            "type": "adjustment",
+            "quantityDelta": 2,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Issue198 count",
+            "occurredAt": "2026-11-14T08:20:27.578983+00:00",
+            "purchaseReceiptId": null,
+            "orderId": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "invalid",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 3,
+        "movements": [
+          {
+            "id": "4a4ab7ee-fbb2-4575-9673-a5348bddac64",
+            "ingredientId": "52b8ac56-8ece-4c86-96b5-e85ba68f4476",
+            "type": "adjustment",
+            "quantityDelta": 2,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Issue198 count",
+            "occurredAt": "2026-11-14T08:20:27.578983+00:00",
+            "purchaseReceiptId": null,
+            "orderId": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "forbidden",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 1,
+        "movements": []
+      }
+    },
+    {
+      "name": "adjustment-conflict",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 6,
+        "movements": [
+          {
+            "id": "9b43b31c-1878-4e47-9364-cc2260e53f38",
+            "ingredientId": "f07eaf79-96fd-4178-8a14-f4c1a5cb11bc",
+            "type": "adjustment",
+            "quantityDelta": 1,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Competing fixture",
+            "occurredAt": "2026-11-14T08:24:57.220866+00:00",
+            "purchaseReceiptId": null,
+            "orderId": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "adjustment-lost",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 3,
+        "movements": [
+          {
+            "id": "19c547a9-75a8-4ed0-b658-dd76659e1e37",
+            "ingredientId": "a773a945-5244-430d-830d-b25a83a7492a",
+            "type": "adjustment",
+            "quantityDelta": 2,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Issue198 count",
+            "occurredAt": "2026-11-14T08:26:22.724065+00:00",
+            "purchaseReceiptId": null,
+            "orderId": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "adjustment-retry",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 3,
+        "movements": [
+          {
+            "id": "19c547a9-75a8-4ed0-b658-dd76659e1e37",
+            "ingredientId": "a773a945-5244-430d-830d-b25a83a7492a",
+            "type": "adjustment",
+            "quantityDelta": 2,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Issue198 count",
+            "occurredAt": "2026-11-14T08:26:22.724065+00:00",
+            "purchaseReceiptId": null,
+            "orderId": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "receipt-empty",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 0,
+        "movements": [],
+        "receiptStatus": "draft",
+        "receiptId": "0096d52c-6307-43df-a25f-18caa0a30169"
+      }
+    },
+    {
+      "name": "receipt-post",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 4,
+        "movements": [
+          {
+            "id": "416d9ca1-b1b8-4b69-a6e5-f8eb3432b426",
+            "ingredientId": "429d016c-e896-413f-9527-0c5e85809ef4",
+            "type": "receipt",
+            "quantityDelta": 4,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Purchase receipt I198-13402d30-standard",
+            "occurredAt": "2026-11-14T08:29:29.380254+00:00",
+            "purchaseReceiptId": "5d2fe3cb-3c13-4b8f-897e-bc21ba21a9f7",
+            "orderId": null
+          }
+        ],
+        "receiptStatus": "posted",
+        "receiptId": "5d2fe3cb-3c13-4b8f-897e-bc21ba21a9f7"
+      }
+    },
+    {
+      "name": "receipt-conflict",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 4,
+        "movements": [
+          {
+            "id": "0a38b019-7e53-46b8-b869-10cdf9eac4f3",
+            "ingredientId": "291bb27a-6fa2-460e-b5b6-d19ceee5bc52",
+            "type": "receipt",
+            "quantityDelta": 4,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Purchase receipt I198-13402d30-competing",
+            "occurredAt": "2026-11-14T08:30:52.673284+00:00",
+            "purchaseReceiptId": "f10e01e8-6fa5-412b-8120-1a96aed54d2a",
+            "orderId": null
+          }
+        ],
+        "receiptStatus": "posted",
+        "receiptId": "f10e01e8-6fa5-412b-8120-1a96aed54d2a"
+      }
+    },
+    {
+      "name": "receipt-lost",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 4,
+        "movements": [
+          {
+            "id": "6818737b-485c-4db2-892f-c7e3d90d356c",
+            "ingredientId": "e2e802ca-8a9b-44e8-83fe-414852ddaa27",
+            "type": "receipt",
+            "quantityDelta": 4,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Purchase receipt I198-13402d30-recovery",
+            "occurredAt": "2026-11-14T08:32:08.972364+00:00",
+            "purchaseReceiptId": "7f4d7e9c-d79c-40fd-b7b6-7d05c2c0ec3a",
+            "orderId": null
+          }
+        ],
+        "receiptStatus": "posted",
+        "receiptId": "7f4d7e9c-d79c-40fd-b7b6-7d05c2c0ec3a"
+      }
+    },
+    {
+      "name": "receipt-refresh",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 4,
+        "movements": [
+          {
+            "id": "6818737b-485c-4db2-892f-c7e3d90d356c",
+            "ingredientId": "e2e802ca-8a9b-44e8-83fe-414852ddaa27",
+            "type": "receipt",
+            "quantityDelta": 4,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Purchase receipt I198-13402d30-recovery",
+            "occurredAt": "2026-11-14T08:32:08.972364+00:00",
+            "purchaseReceiptId": "7f4d7e9c-d79c-40fd-b7b6-7d05c2c0ec3a",
+            "orderId": null
+          }
+        ],
+        "receiptStatus": "posted",
+        "receiptId": "7f4d7e9c-d79c-40fd-b7b6-7d05c2c0ec3a"
+      }
+    },
+    {
+      "name": "receipt-retry-lost",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 4,
+        "movements": [
+          {
+            "id": "9ca735bd-d5e3-4730-a397-35d870c43807",
+            "ingredientId": "026d6c4c-0467-43da-867d-ea00873bdbc8",
+            "type": "receipt",
+            "quantityDelta": 4,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Purchase receipt I198-13402d30-retry",
+            "occurredAt": "2026-11-14T08:33:38.632809+00:00",
+            "purchaseReceiptId": "a51b58d0-08c3-485a-be25-d357faf08414",
+            "orderId": null
+          }
+        ],
+        "receiptStatus": "posted",
+        "receiptId": "a51b58d0-08c3-485a-be25-d357faf08414"
+      }
+    },
+    {
+      "name": "receipt-retry",
+      "passed": true,
+      "status": "passed",
+      "state": {
+        "balance": 4,
+        "movements": [
+          {
+            "id": "9ca735bd-d5e3-4730-a397-35d870c43807",
+            "ingredientId": "026d6c4c-0467-43da-867d-ea00873bdbc8",
+            "type": "receipt",
+            "quantityDelta": 4,
+            "actorId": "9d4feaea-0282-4e34-b027-7f0d81710c4d",
+            "reason": "Purchase receipt I198-13402d30-retry",
+            "occurredAt": "2026-11-14T08:33:38.632809+00:00",
+            "purchaseReceiptId": "a51b58d0-08c3-485a-be25-d357faf08414",
+            "orderId": null
+          }
+        ],
+        "receiptStatus": "posted",
+        "receiptId": "a51b58d0-08c3-485a-be25-d357faf08414"
+      }
+    }
+  ],
+  "device": {
+    "model": "SM-A155F",
+    "android": "16",
+    "apiLevel": "36",
+    "abi": "arm64-v8a",
+    "app": "com.coffeeshop.staffmobile",
+    "build": ["versionCode=1 minSdk=24 targetSdk=36", "versionName=0.1.0"]
+  },
+  "appCommit": "3043e2dc2b18dd6db11a5e2cc722f4ea81f6d902",
+  "apiCommit": "3043e2dc2b18dd6db11a5e2cc722f4ea81f6d902",
+  "harnessCommit": "ae4d6a75a11c92454fa1f8b557836293263d8e7d",
+  "environment": "Disposable PostgreSQL 18; shared ASP.NET Core API; local HTTP forwarding listener; synthetic accounts",
+  "apkSha256": "4d20f33f0dfdddde66fe64aecb03eff4918d5ebc94b5d1d2896853b0c0eaa213",
+  "seed": {
+    "prefix": "I198 13402d30",
+    "milk": {
+      "ingredientId": "52b8ac56-8ece-4c86-96b5-e85ba68f4476",
+      "name": "I198 13402d30 milk",
+      "baseUnit": "l",
+      "availableQuantity": 1,
+      "reorderThreshold": 3,
+      "isActive": true
+    },
+    "boundary": {
+      "ingredientId": "dd877c58-7ceb-4ef9-96bd-9e3d553f5d69",
+      "name": "I198 13402d30 boundary",
+      "baseUnit": "l",
+      "availableQuantity": 3,
+      "reorderThreshold": 3,
+      "isActive": true
+    },
+    "normal": {
+      "ingredientId": "5f8cd279-fa03-457b-818f-fe26d85bdb7f",
+      "name": "I198 13402d30 normal",
+      "baseUnit": "l",
+      "availableQuantity": 10,
+      "reorderThreshold": 3,
+      "isActive": true
+    },
+    "refresh": {
+      "ingredientId": "6e498d56-22b6-44d3-9f49-e0238e86ca76",
+      "name": "I198 13402d30 refresh",
+      "baseUnit": "l",
+      "availableQuantity": 1,
+      "reorderThreshold": 3,
+      "isActive": true
+    },
+    "conflict": {
+      "ingredientId": "f07eaf79-96fd-4178-8a14-f4c1a5cb11bc",
+      "name": "I198 13402d30 conflict",
+      "baseUnit": "l",
+      "availableQuantity": 5,
+      "reorderThreshold": 3,
+      "isActive": true
+    },
+    "forbidden": {
+      "ingredientId": "2db2a583-aaf4-4ec6-95f6-f109a2270299",
+      "name": "I198 13402d30 forbidden",
+      "baseUnit": "l",
+      "availableQuantity": 1,
+      "reorderThreshold": 3,
+      "isActive": true
+    },
+    "lost": {
+      "ingredientId": "a773a945-5244-430d-830d-b25a83a7492a",
+      "name": "I198 13402d30 lost",
+      "baseUnit": "l",
+      "availableQuantity": 1,
+      "reorderThreshold": 3,
+      "isActive": true
+    },
+    "receipts": {
+      "empty": {
+        "stock": {
+          "ingredientId": "cfea16a6-5b17-47f9-9012-057be7c423cc",
+          "name": "I198 13402d30 empty",
+          "baseUnit": "l",
+          "availableQuantity": 0,
+          "reorderThreshold": 3,
+          "isActive": true
+        },
+        "record": {
+          "id": "0096d52c-6307-43df-a25f-18caa0a30169",
+          "supplierId": "2bd63373-7384-4f94-8103-8c611cdaae85",
+          "receiptNumber": "I198-13402d30-empty",
+          "status": "draft",
+          "postedAt": null,
+          "lines": [],
+          "createdAt": "2026-11-14T08:14:26.4190062+00:00",
+          "updatedAt": "2026-11-14T08:14:26.4190062+00:00"
+        }
+      },
+      "standard": {
+        "stock": {
+          "ingredientId": "429d016c-e896-413f-9527-0c5e85809ef4",
+          "name": "I198 13402d30 standard",
+          "baseUnit": "l",
+          "availableQuantity": 0,
+          "reorderThreshold": 3,
+          "isActive": true
+        },
+        "record": {
+          "id": "5d2fe3cb-3c13-4b8f-897e-bc21ba21a9f7",
+          "supplierId": "2bd63373-7384-4f94-8103-8c611cdaae85",
+          "receiptNumber": "I198-13402d30-standard",
+          "status": "draft",
+          "postedAt": null,
+          "lines": [],
+          "createdAt": "2026-11-14T08:14:26.4493666+00:00",
+          "updatedAt": "2026-11-14T08:14:26.4493666+00:00"
+        }
+      },
+      "competing": {
+        "stock": {
+          "ingredientId": "291bb27a-6fa2-460e-b5b6-d19ceee5bc52",
+          "name": "I198 13402d30 competing",
+          "baseUnit": "l",
+          "availableQuantity": 0,
+          "reorderThreshold": 3,
+          "isActive": true
+        },
+        "record": {
+          "id": "f10e01e8-6fa5-412b-8120-1a96aed54d2a",
+          "supplierId": "2bd63373-7384-4f94-8103-8c611cdaae85",
+          "receiptNumber": "I198-13402d30-competing",
+          "status": "draft",
+          "postedAt": null,
+          "lines": [],
+          "createdAt": "2026-11-14T08:14:26.4955296+00:00",
+          "updatedAt": "2026-11-14T08:14:26.4955296+00:00"
+        }
+      },
+      "recovery": {
+        "stock": {
+          "ingredientId": "e2e802ca-8a9b-44e8-83fe-414852ddaa27",
+          "name": "I198 13402d30 recovery",
+          "baseUnit": "l",
+          "availableQuantity": 0,
+          "reorderThreshold": 3,
+          "isActive": true
+        },
+        "record": {
+          "id": "7f4d7e9c-d79c-40fd-b7b6-7d05c2c0ec3a",
+          "supplierId": "2bd63373-7384-4f94-8103-8c611cdaae85",
+          "receiptNumber": "I198-13402d30-recovery",
+          "status": "draft",
+          "postedAt": null,
+          "lines": [],
+          "createdAt": "2026-11-14T08:14:26.5424756+00:00",
+          "updatedAt": "2026-11-14T08:14:26.5424756+00:00"
+        }
+      },
+      "retry": {
+        "stock": {
+          "ingredientId": "026d6c4c-0467-43da-867d-ea00873bdbc8",
+          "name": "I198 13402d30 retry",
+          "baseUnit": "l",
+          "availableQuantity": 0,
+          "reorderThreshold": 3,
+          "isActive": true
+        },
+        "record": {
+          "id": "a51b58d0-08c3-485a-be25-d357faf08414",
+          "supplierId": "2bd63373-7384-4f94-8103-8c611cdaae85",
+          "receiptNumber": "I198-13402d30-retry",
+          "status": "draft",
+          "postedAt": null,
+          "lines": [],
+          "createdAt": "2026-11-14T08:14:26.5899366+00:00",
+          "updatedAt": "2026-11-14T08:14:26.5899366+00:00"
+        }
+      }
+    }
+  },
+  "exchanges": [
+    {
+      "method": "POST",
+      "path": "/api/v1/ingredients/52b8ac56-8ece-4c86-96b5-e85ba68f4476/adjustments",
+      "requestId": "4a4ab7ee-fbb2-4575-9673-a5348bddac64",
+      "bodyHash": "0f6fface5303aaa4a50539c257ac1dd8536a9693005ce720ba047d8b6c4584e1",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ingredients/52b8ac56-8ece-4c86-96b5-e85ba68f4476/adjustments",
+      "requestId": "71ac8545-1e5a-4761-86dc-d90b87fed230",
+      "bodyHash": "c8560f5dfcbe83040ffd89f3596e5407e8707e538568126efe4a10f5f5c0c21a",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ingredients/2db2a583-aaf4-4ec6-95f6-f109a2270299/adjustments",
+      "requestId": "2991d403-0175-4dd6-abe1-3533dc21caab",
+      "bodyHash": "fcc0474e3fb52a54b7931787cb9f368538772809bdd2d03f4dead44906306fbc",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ingredients/f07eaf79-96fd-4178-8a14-f4c1a5cb11bc/adjustments",
+      "requestId": "9b43b31c-1878-4e47-9364-cc2260e53f38",
+      "bodyHash": "d02114fcbdd239d0b92bfcc46fb679de6a8da296a29a2ecb39b29b4b99a1b1df",
+      "competingStatus": 200,
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ingredients/a773a945-5244-430d-830d-b25a83a7492a/adjustments",
+      "requestId": "19c547a9-75a8-4ed0-b658-dd76659e1e37",
+      "bodyHash": "13ca8481f242d7cee37d8b7075682cc14d058c7b36f4517de261e7c371517312",
+      "status": 200,
+      "responseDroppedAfterCommit": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/ingredients/a773a945-5244-430d-830d-b25a83a7492a/adjustments",
+      "requestId": "19c547a9-75a8-4ed0-b658-dd76659e1e37",
+      "bodyHash": "13ca8481f242d7cee37d8b7075682cc14d058c7b36f4517de261e7c371517312",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/purchase-receipts/5d2fe3cb-3c13-4b8f-897e-bc21ba21a9f7/post",
+      "status": 204
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/purchase-receipts/f10e01e8-6fa5-412b-8120-1a96aed54d2a/post",
+      "competingStatus": 204,
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/purchase-receipts/7f4d7e9c-d79c-40fd-b7b6-7d05c2c0ec3a/post",
+      "status": 204,
+      "responseDroppedAfterCommit": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/purchase-receipts/7f4d7e9c-d79c-40fd-b7b6-7d05c2c0ec3a/post",
+      "status": 409,
+      "responseDroppedAfterCommit": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/purchase-receipts/a51b58d0-08c3-485a-be25-d357faf08414/post",
+      "status": 204,
+      "responseDroppedAfterCommit": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/purchase-receipts/a51b58d0-08c3-485a-be25-d357faf08414/post",
+      "status": 409
+    }
+  ]
+}

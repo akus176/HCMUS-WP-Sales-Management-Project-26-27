@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="132.855" timestamp="2026-11-14T15:15:41">
+    <testcase id="Current search, threshold boundary, low-stock filtering and empty results" name="Current search, threshold boundary, low-stock filtering and empty results" classname="Current search, threshold boundary, low-stock filtering and empty results" file=".maestro\inventory-focused\browse.yaml" time="132.841" timestamp="2026-11-14T15:15:41" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

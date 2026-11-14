@@ -1,0 +1,11 @@
+appId: com.coffeeshop.staffmobile
+---
+- runFlow: open.yaml
+- scrollUntilVisible:
+    element: Purchase receipts
+    direction: UP
+- tapOn: Purchase receipts
+- scrollUntilVisible:
+    element: Review receipt ${MAESTRO_RECEIPT}
+    direction: DOWN
+- tapOn: Review receipt ${MAESTRO_RECEIPT}

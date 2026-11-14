@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="45.806" timestamp="2026-11-14T15:18:03">
+    <testcase id="Load refresh fixture before an independent API change" name="Load refresh fixture before an independent API change" classname="Load refresh fixture before an independent API change" file=".maestro\inventory-focused\refresh-before.yaml" time="45.796" timestamp="2026-11-14T15:18:03" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
