@@ -9,7 +9,9 @@ name: Current search, threshold boundary, low-stock filtering and empty results
 - scrollUntilVisible:
     element: Search ingredients
     direction: UP
-- tapOn: Search ingredients
+- tapOn:
+    text: Search ingredients
+    point: '95%,50%'
 - eraseText
 - inputText: ${MAESTRO_BOUNDARY}
 - hideKeyboard
@@ -20,7 +22,9 @@ name: Current search, threshold boundary, low-stock filtering and empty results
 - scrollUntilVisible:
     element: Search ingredients
     direction: UP
-- tapOn: Search ingredients
+- tapOn:
+    text: Search ingredients
+    point: '95%,50%'
 - eraseText
 - inputText: ${MAESTRO_NORMAL}
 - hideKeyboard
@@ -43,7 +47,9 @@ name: Current search, threshold boundary, low-stock filtering and empty results
 - scrollUntilVisible:
     element: Search ingredients
     direction: DOWN
-- tapOn: Search ingredients
+- tapOn:
+    text: Search ingredients
+    point: '95%,50%'
 - eraseText
 - inputText: no-such-ingredient-198
 - hideKeyboard
