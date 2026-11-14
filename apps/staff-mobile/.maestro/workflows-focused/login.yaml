@@ -7,9 +7,11 @@ appId: com.coffeeshop.staffmobile
     timeout: 60000
 - tapOn: Staff sign-in
 - tapOn: Username
+- eraseText
 - inputText: ${MAESTRO_STAFF_USERNAME}
 - hideKeyboard
 - tapOn: Password
+- eraseText
 - inputText: ${MAESTRO_STAFF_PASSWORD}
 - hideKeyboard
 - tapOn: Sign in
