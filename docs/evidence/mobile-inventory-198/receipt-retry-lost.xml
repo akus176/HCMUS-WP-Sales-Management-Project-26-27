@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="59.091" timestamp="2026-11-14T15:32:42">
+    <testcase id="Real receipt conflict or committed-but-lost response has safe feedback" name="Real receipt conflict or committed-but-lost response has safe feedback" classname="Real receipt conflict or committed-but-lost response has safe feedback" file=".maestro\inventory-focused\receipt-error.yaml" time="59.073" timestamp="2026-11-14T15:32:42" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

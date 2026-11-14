@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="56.147" timestamp="2026-11-14T15:14:34">
+    <testcase id="Sign in with the dedicated synthetic inventory account" name="Sign in with the dedicated synthetic inventory account" classname="Sign in with the dedicated synthetic inventory account" file=".maestro\inventory-focused\login.yaml" time="56.137" timestamp="2026-11-14T15:14:34" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

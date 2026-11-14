@@ -1,0 +1,15 @@
+{
+  "model": "SM-A155F",
+  "android": "16",
+  "display": "Physical size: 1080x2340",
+  "density": "Physical density: 450",
+  "fontScale": "1.0",
+  "captureMethod": "Unmodified adb exec-out screencap -p output",
+  "date": "2026-11-14",
+  "postgres": "postgres (PostgreSQL) 18.6 (Debian 18.6-1.pgdg13+2)",
+  "dotnetSdk": "10.0.401",
+  "node": "v26.5.0",
+  "npm": "11.17.0",
+  "maestro": "2.12.1",
+  "jdk": "Temurin 17.0.21+9"
+}

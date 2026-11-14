@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="12.079" timestamp="2026-11-14T15:33:51">
+    <testcase id="Deliberately repeating an ambiguous receipt post gets a conflict and one stock effect" name="Deliberately repeating an ambiguous receipt post gets a conflict and one stock effect" classname="Deliberately repeating an ambiguous receipt post gets a conflict and one stock effect" file=".maestro\inventory-focused\receipt-retry.yaml" time="12.068" timestamp="2026-11-14T15:33:51" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="70.549" timestamp="2026-11-14T15:26:58">
+    <testcase id="A prepared receipt without lines cannot be posted" name="A prepared receipt without lines cannot be posted" classname="A prepared receipt without lines cannot be posted" file=".maestro\inventory-focused\receipt-empty.yaml" time="70.536" timestamp="2026-11-14T15:26:58" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

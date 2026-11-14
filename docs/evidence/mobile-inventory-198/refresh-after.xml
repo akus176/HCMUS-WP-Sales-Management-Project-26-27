@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="6.183" timestamp="2026-11-14T15:18:59">
+    <testcase id="Manual refresh reads authoritative inventory after an external change" name="Manual refresh reads authoritative inventory after an external change" classname="Manual refresh reads authoritative inventory after an external change" file=".maestro\inventory-focused\refresh-after.yaml" time="6.172" timestamp="2026-11-14T15:18:59" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

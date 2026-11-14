@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="RF8X10ZS8LF" tests="1" failures="0" time="78.379" timestamp="2026-11-14T15:22:16">
+    <testcase id="Real API rejection or lost response never reports adjustment success" name="Real API rejection or lost response never reports adjustment success" classname="Real API rejection or lost response never reports adjustment success" file=".maestro\inventory-focused\adjustment-error.yaml" time="78.361" timestamp="2026-11-14T15:22:16" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
