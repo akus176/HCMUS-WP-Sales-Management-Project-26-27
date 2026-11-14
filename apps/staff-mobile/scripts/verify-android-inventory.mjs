@@ -223,10 +223,12 @@ async function snapshot(ingredient, receipt) {
     balance: Number(balance.availableQuantity),
     movements: movements.sort((a, b) => a.id.localeCompare(b.id)),
   };
-  if (receipt)
+  if (receipt) {
     state.receiptStatus = (
       await get(`/purchase-receipts/${receipt.id}`)
     ).status;
+    state.receiptId = receipt.id;
+  }
   return state;
 }
 function oneEffect(state, quantity, type, actor) {
@@ -234,6 +236,10 @@ function oneEffect(state, quantity, type, actor) {
   assert.equal(state.movements.length, 1);
   assert.equal(state.movements[0].type, type);
   assert.equal(state.movements[0].actorId, actor);
+  if (type === 'receipt') {
+    assert.equal(state.movements[0].purchaseReceiptId, state.receiptId);
+    assert.equal(state.receiptStatus, 'posted');
+  }
 }
 async function screenshot(name) {
   const bytes = await command(
@@ -247,6 +253,8 @@ async function screenshot(name) {
 const flowEnv = {};
 async function check(name, flow, variables = {}, verify = async () => ({})) {
   const item = summary.cases.find((candidate) => candidate.name === name);
+  item.status = 'running';
+  await save();
   console.log(`Running ${name}...`);
   const xmlPath = join(results, `${name}.xml`);
   try {
@@ -438,7 +446,11 @@ try {
     quantityDelta: 1,
     reason: 'Refresh fixture',
   });
-  await check('refresh-after', 'refresh-after', {}, () => snapshot(refresh));
+  await check('refresh-after', 'refresh-after', {}, async () => {
+    const state = await snapshot(refresh);
+    oneEffect(state, 2, 'adjustment', admin.user.id);
+    return state;
+  });
   await check('adjustment', 'adjustment-success', {}, async () => {
     const state = await snapshot(milk);
     oneEffect(state, 3, 'adjustment', inventory.user.id);

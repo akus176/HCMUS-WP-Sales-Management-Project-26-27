@@ -15,7 +15,7 @@ name: Sign in with the dedicated synthetic inventory account
 - hideKeyboard
 - tapOn: Sign in
 - tapOn:
-    text: Thoát
+    id: android:id/autofill_save_no
     optional: true
 - extendedWaitUntil:
     visible: Staff home

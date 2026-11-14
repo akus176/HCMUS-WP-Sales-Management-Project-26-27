@@ -15,3 +15,11 @@ name: Review and post a prepared receipt once
     direction: UP
 - assertVisible: 'Status: posted'
 - assertNotVisible: Post receipt ${MAESTRO_RECEIPT}
+- scrollUntilVisible:
+    element: Movement history
+    direction: UP
+- tapOn: Movement history
+- scrollUntilVisible:
+    element: Purchase receipt ${MAESTRO_RECEIPT}
+    direction: DOWN
+- assertVisible: Purchase receipt ${MAESTRO_RECEIPT}
