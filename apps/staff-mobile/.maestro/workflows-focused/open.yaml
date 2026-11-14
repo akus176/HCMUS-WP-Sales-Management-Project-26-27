@@ -1,0 +1,7 @@
+appId: com.coffeeshop.staffmobile
+---
+- openLink: coffeeshop-staff:///notifications/${KIND}/${RECORD_ID}
+- scrollUntilVisible:
+    element: ${EXPECTED}
+    direction: DOWN
+    timeout: 30000

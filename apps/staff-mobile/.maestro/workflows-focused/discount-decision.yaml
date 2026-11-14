@@ -1,0 +1,12 @@
+appId: com.coffeeshop.staffmobile
+---
+- scrollUntilVisible:
+    element: ${ACTION}
+    direction: DOWN
+- tapOn: ${ACTION}
+- scrollUntilVisible:
+    element: ${EXPECTED}
+    direction: UP
+- assertVisible: ${EXPECTED}
+- assertNotVisible: Approve discount
+- assertNotVisible: Reject discount

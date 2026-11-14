@@ -1,0 +1,11 @@
+appId: com.coffeeshop.staffmobile
+---
+- openLink: coffeeshop-staff:///modules/delivery
+- extendedWaitUntil:
+    visible: Active deliveries
+    timeout: 30000
+- scrollUntilVisible:
+    element: Open delivery ${OWN_ORDER}
+    direction: DOWN
+- assertNotVisible: Open delivery ${OTHER_ORDER}
+- assertNotVisible: ${PRIVATE_LABEL}

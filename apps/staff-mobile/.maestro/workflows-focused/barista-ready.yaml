@@ -1,0 +1,15 @@
+appId: com.coffeeshop.staffmobile
+---
+- scrollUntilVisible:
+    element: Mark ready
+    direction: DOWN
+- tapOn: Mark ready
+- scrollUntilVisible:
+    element: Confirm ready
+    direction: DOWN
+- tapOn: Confirm ready
+- scrollUntilVisible:
+    element: Ticket is Ready. Confirmed by the service.
+    direction: UP
+- assertVisible: Ticket is Ready. Confirmed by the service.
+- assertNotVisible: Confirm ready

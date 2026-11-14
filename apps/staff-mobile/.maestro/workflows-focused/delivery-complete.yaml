@@ -1,0 +1,12 @@
+appId: com.coffeeshop.staffmobile
+---
+- scrollUntilVisible:
+    element: Mark delivered
+    direction: DOWN
+- tapOn: Mark delivered
+- scrollUntilVisible:
+    element: Delivery delivered. Confirmed by the service.
+    direction: UP
+- assertVisible: Delivery delivered. Confirmed by the service.
+- assertNotVisible: ${PRIVATE_LABEL}
+- assertNotVisible: Mark delivered

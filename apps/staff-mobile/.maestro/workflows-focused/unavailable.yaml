@@ -1,0 +1,9 @@
+appId: com.coffeeshop.staffmobile
+---
+- openLink: coffeeshop-staff:///notifications/${KIND}/${RECORD_ID}
+- extendedWaitUntil:
+    visible: ${EXPECTED}
+    timeout: 30000
+- assertVisible: ${EXPECTED}
+- assertNotVisible: ${FORBIDDEN_ACTION}
+- assertNotVisible: ${PRIVATE_LABEL}
