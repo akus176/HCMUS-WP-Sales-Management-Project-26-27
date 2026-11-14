@@ -141,6 +141,10 @@ export function DiscountApprovals({
     onError: (error) => {
       setDecisionResult(undefined);
       setActionError(errorMessage(error, true));
+      // A refetch after a conflict may have removed this request. Do not keep
+      // offering actions through the snapshot captured before submission.
+      if (error instanceof ApiError && [404, 409].includes(error.status))
+        setSelected(undefined);
       if (error instanceof ApiError && error.status === 403) {
         setApiForbidden(true);
         queryClient.removeQueries({ queryKey });
@@ -201,10 +205,14 @@ export function DiscountApprovals({
             label={errorMessage(pendingQuery.error)}
           />
         ) : !discount && !decisionResult ? (
-          <ShellFeedback
-            kind="info"
-            label="This discount is no longer pending. Refresh the inbox to review current requests."
-          />
+          <>
+            {actionError && <ShellFeedback kind="error" label={actionError} />}
+            <ShellFeedback
+              kind="info"
+              label="This discount is no longer pending. Refresh the inbox to review current requests."
+            />
+            {refreshButton}
+          </>
         ) : (
           <>
             {discount && (

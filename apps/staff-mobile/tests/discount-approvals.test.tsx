@@ -230,6 +230,36 @@ test('hides cached approval details when the server denies access', async () => 
   expect(view.queryByText('Order ORD-156')).toBeNull();
 });
 
+test('removes stale decision actions after the conflict refetch resolves the request', async () => {
+  const get = jest
+    .fn()
+    .mockResolvedValueOnce({ data: page })
+    .mockResolvedValue({ data: { ...page, items: [], totalCount: 0 } });
+  const post = jest.fn(async () => {
+    throw new ApiError(409);
+  });
+  mockClient({ get, post });
+  const view = await setup(
+    createNetworkSource(onlineState),
+    <ShellPage>
+      <DiscountApprovals user={manager} discountId={discount.discountId} />
+    </ShellPage>,
+  );
+  await view.findByText('Reason: Service recovery');
+  await fireEvent.press(view.getByRole('button', { name: 'Approve discount' }));
+  expect(
+    await view.findByText(/This discount is no longer pending/),
+  ).toBeVisible();
+  expect(view.getByText(/changed before your decision/)).toBeVisible();
+  expect(view.queryByRole('button', { name: 'Approve discount' })).toBeNull();
+  expect(view.queryByRole('button', { name: 'Reject discount' })).toBeNull();
+  expect(view.queryByText('Reason: Service recovery')).toBeNull();
+  expect(
+    view.getByRole('button', { name: 'Refresh pending approvals' }),
+  ).toBeVisible();
+  expect(post).toHaveBeenCalledTimes(1);
+});
+
 test('shows cached requests offline but disables decisions and sends no write', async () => {
   const post = jest.fn(async () => ({ data: approved }));
   const { get } = mockClient({ post });
