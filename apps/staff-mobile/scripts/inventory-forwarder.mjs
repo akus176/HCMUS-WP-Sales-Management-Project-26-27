@@ -41,7 +41,9 @@ export function createInventoryForwarder(origin) {
         pending?.method === req.method && pending.path === path
           ? pending
           : undefined;
-      if (fault) pending = undefined; // Consume before awaiting; fault exactly once.
+      // Android may replay an empty POST after socket loss. Keep a receipt loss
+      // window armed until the native unconfirmed-result message is observed.
+      if (fault && fault.mode !== 'drop-window') pending = undefined;
       if (path.endsWith('/adjustments')) {
         entry.requestId = JSON.parse(body).requestId;
         entry.bodyHash = createHash('sha256').update(body).digest('hex');
@@ -61,19 +63,25 @@ export function createInventoryForwarder(origin) {
         entry.competingStatus = first.response.status;
       }
       await fault?.before?.();
-      if (fault) fault.beforeRejectedOrLost = await fault.observe();
+      if (fault && fault.beforeRejectedOrLost === undefined)
+        fault.beforeRejectedOrLost = await fault.observe();
       const { response, bytes } = await send();
       entry.status = response.status;
       if (fault) {
         fault.used = true;
-        fault.status = response.status;
-        if (fault.mode === 'drop') {
+        fault.status ??= response.status;
+        if (fault.mode === 'drop' || fault.mode === 'drop-window') {
           assert.ok(
-            response.ok,
-            'Only a successful, fully consumed response may be dropped.',
+            response.ok ||
+              (fault.mode === 'drop-window' &&
+                fault.afterCommit &&
+                response.status === 409),
+            'Loss requires a committed success or a replay conflict after that commit.',
           );
           // The upstream commit and response have finished. Do not abort its request.
-          fault.afterCommit = await fault.observe();
+          const committed = await fault.observe();
+          if (fault.afterCommit) assert.deepEqual(committed, fault.afterCommit);
+          else fault.afterCommit = committed;
           entry.responseDroppedAfterCommit = true;
           exchanges.push(entry);
           res.destroy();
@@ -142,7 +150,9 @@ export function createInventoryForwarder(origin) {
         undefined,
         'Previous test fault was not exercised.',
       );
-      assert.ok(['drop', 'compete', 'before'].includes(fault.mode));
+      assert.ok(
+        ['drop', 'drop-window', 'compete', 'before'].includes(fault.mode),
+      );
       assert.equal(fault.method, 'POST');
       assert.match(
         fault.path,
@@ -150,6 +160,15 @@ export function createInventoryForwarder(origin) {
       );
       pending = fault;
       return fault;
+    },
+    disarm(fault) {
+      assert.equal(
+        pending,
+        fault,
+        'Only the active loss window may be closed.',
+      );
+      assert.ok(fault.used, 'The receipt loss window was not exercised.');
+      pending = undefined;
     },
     async close() {
       for (const socket of sockets) socket.destroy();

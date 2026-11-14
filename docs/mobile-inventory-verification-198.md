@@ -49,8 +49,8 @@ Configure these values in ignored `.env.inventory.local` under
 
 Configure Metro with the same public profile and **forwarding listener URL**
 on port 5233; restart it after changing configuration. For a physical phone,
-the forwarding listener binds only the supplied LAN interface. The upstream API
-remains loopback-only for the harness. This configuration uses the normal
+the forwarding listener binds only the supplied LAN interface. The harness
+contacts the upstream API through loopback. This configuration uses the normal
 development cleartext policy; it does not change release networking rules.
 ADB reverse for port 8081 keeps Metro reachable over USB.
 
@@ -91,6 +91,12 @@ The forwarding listener does not fabricate business responses. A conflict is
 created by committing a competing request to the real API before forwarding
 the original one. For a lost-response case it consumes a successful upstream
 response, verifies committed state, and only then drops the downstream socket.
+Android can automatically replay an empty receipt POST after socket loss. The
+receipt loss window also drops those real replay responses, asserting that
+committed state stays identical, until the native unconfirmed-result message
+has been observed. The runner then closes the window before the explicit
+refresh or deliberate retry. A replay 409 is accepted for dropping only after
+a confirmed upstream commit; no business error response is fabricated.
 The relevant behavior is commit-then-response-loss, rather than disconnecting
 before submission. A fault must be consumed and return the expected upstream
 status before its case can pass.

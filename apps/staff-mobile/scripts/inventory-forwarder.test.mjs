@@ -95,3 +95,50 @@ test('an unexercised fault cannot silently be replaced by a later case', async (
   proxy.arm(fault);
   assert.throws(() => proxy.arm(fault), /not exercised/);
 });
+
+test('receipt response-loss window covers transport replay before deliberate recovery', async (t) => {
+  let posts = 0;
+  const upstream = createServer(async (req, res) => {
+    for await (const chunk of req) void chunk;
+    posts++;
+    res.writeHead(posts === 1 ? 204 : 409);
+    res.end();
+  });
+  await new Promise((resolve) => upstream.listen(0, '127.0.0.1', resolve));
+  const proxy = createInventoryForwarder(
+    `http://127.0.0.1:${upstream.address().port}`,
+  );
+  await new Promise((resolve) => proxy.server.listen(0, '127.0.0.1', resolve));
+  t.after(async () => {
+    await proxy.close();
+    await new Promise((resolve) => upstream.close(resolve));
+  });
+  const receiptPath =
+    '/api/v1/purchase-receipts/00000000-0000-4000-8000-000000000198/post';
+  const send = () =>
+    fetch(`http://127.0.0.1:${proxy.server.address().port}${receiptPath}`, {
+      method: 'POST',
+    });
+  const fault = proxy.arm({
+    mode: 'drop-window',
+    method: 'POST',
+    path: receiptPath,
+    observe: () => ({ movements: posts ? 1 : 0 }),
+  });
+  await assert.rejects(send());
+  await assert.rejects(send());
+  assert.deepEqual(fault.afterCommit, { movements: 1 });
+  assert.equal(fault.status, 204);
+  proxy.disarm(fault);
+  assert.equal((await send()).status, 409);
+  assert.deepEqual(
+    proxy.exchanges.map((entry) => entry.status),
+    [204, 409, 409],
+  );
+  assert.ok(
+    proxy.exchanges
+      .slice(0, 2)
+      .every((entry) => entry.responseDroppedAfterCommit),
+  );
+  assert.equal(proxy.exchanges[2].responseDroppedAfterCommit, undefined);
+});

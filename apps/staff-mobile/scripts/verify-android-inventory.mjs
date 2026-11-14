@@ -19,13 +19,20 @@ assert.equal(
   '1',
   'Use only a disposable database.',
 );
-const api = new URL(required('COFFEESHOP_INVENTORY_API_URL'));
+const api = new URL(
+  parseMobileEnvironment('test', required('COFFEESHOP_INVENTORY_API_URL'))
+    .apiBaseUrl,
+);
 assert.ok(
   api.protocol === 'http:' && ['localhost', '127.0.0.1'].includes(api.hostname),
 );
 assert.equal(api.pathname, '/api/v1');
-const deviceUrl = new URL(required('EXPO_PUBLIC_API_BASE_URL'));
-parseMobileEnvironment(required('EXPO_PUBLIC_APP_ENV'), deviceUrl.href);
+const deviceUrl = new URL(
+  parseMobileEnvironment(
+    required('EXPO_PUBLIC_APP_ENV'),
+    required('EXPO_PUBLIC_API_BASE_URL'),
+  ).apiBaseUrl,
+);
 assert.equal(
   process.env.EXPO_PUBLIC_APP_ENV,
   'device',
@@ -324,8 +331,7 @@ try {
     abi: 'ro.product.cpu.abi',
   }))
     summary.device[key] = await android('shell', 'getprop', property);
-  summary.appCommit =
-    process.env.COFFEESHOP_INVENTORY_APP_COMMIT || 'unspecified';
+  summary.appCommit = required('COFFEESHOP_INVENTORY_APP_COMMIT');
   summary.apiCommit = required('COFFEESHOP_INVENTORY_API_COMMIT');
   summary.harnessCommit = await command('git', ['rev-parse', 'HEAD']);
   summary.environment =
@@ -588,7 +594,7 @@ try {
   );
   async function loseReceipt(name, fixture) {
     const fault = proxy.arm({
-      mode: 'drop',
+      mode: 'drop-window',
       method: 'POST',
       path: `/api/v1/purchase-receipts/${fixture.record.id}/post`,
       observe: () => snapshot(fixture.stock, fixture.record),
@@ -607,6 +613,7 @@ try {
         return fault.afterCommit;
       },
     );
+    proxy.disarm(fault);
     return fault;
   }
   const lostReceipt = await loseReceipt('receipt-lost', recovery);
@@ -631,10 +638,14 @@ try {
       const attempts = proxy.exchanges.filter(
         (entry) => entry.path === retriedReceipt.path,
       );
-      assert.deepEqual(
-        attempts.map((entry) => entry.status),
-        [204, 409],
+      assert.equal(attempts[0].status, 204);
+      assert.ok(attempts.slice(1).every((entry) => entry.status === 409));
+      assert.ok(
+        attempts
+          .slice(0, -1)
+          .every((entry) => entry.responseDroppedAfterCommit),
       );
+      assert.equal(attempts.at(-1).responseDroppedAfterCommit, undefined);
       return state;
     },
   );
@@ -642,6 +653,12 @@ try {
     !proxy.exchanges.some((entry) => entry.proxyError),
     'A proxy failure occurred.',
   );
+  assert.equal(
+    summary.passed,
+    summary.expected,
+    'Focused native cases are missing.',
+  );
+  assert.equal(summary.failedOrMissing, 0);
   summary.serverVerificationPassed = true;
   console.log(
     `PASS ${summary.passed}/${summary.expected} focused native cases and independent API verification.`,
