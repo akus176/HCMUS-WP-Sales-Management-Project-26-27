@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" tests="1" failures="0" time="26.332" timestamp="2026-11-14T17:49:09">
+    <testcase id="delivery-fail" name="delivery-fail" classname="delivery-fail" file=".maestro\workflows-focused\delivery-fail.yaml" time="26.321" timestamp="2026-11-14T17:49:09" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

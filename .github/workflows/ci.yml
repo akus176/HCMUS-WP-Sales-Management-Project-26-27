@@ -57,7 +57,7 @@ jobs:
     env:
       EXPO_PUBLIC_APP_ENV: emulator
       EXPO_PUBLIC_API_BASE_URL: http://10.0.2.2:5232/api/v1
-      CI: "1"
+      CI: '1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -68,7 +68,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
       - uses: android-actions/setup-android@v3
         with:
           packages: platform-tools
@@ -182,7 +182,7 @@ jobs:
           dotnet-version: 10.0.x
       - uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: '24'
       - name: Build API for deterministic OpenAPI export
         run: dotnet build src/CoffeeShop.Api --configuration Release
       - name: Install pinned contract generator

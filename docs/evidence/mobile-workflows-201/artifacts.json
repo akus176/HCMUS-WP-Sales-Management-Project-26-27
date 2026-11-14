@@ -1,0 +1,266 @@
+[
+  {
+    "file": "barista-conflict-1-open.xml",
+    "sha256": "1d66fa200352a05a19f77222518a24d3521f5f3a598aa59ec9ff48d89b1a5a7e"
+  },
+  {
+    "file": "barista-conflict-2-barista-start.xml",
+    "sha256": "328105cb0cdf93e0595510898843a348ca4de60d8b8113314090a4a3f2db787a"
+  },
+  {
+    "file": "barista-conflict.png",
+    "sha256": "7d48d1e1288aca4b07c49a8c1e8d9adcf95f86d08571c6ae7d50b1a4467d6806"
+  },
+  {
+    "file": "barista-forbidden-1-open.xml",
+    "sha256": "548b3725189534e994216f2f947e363b164eb58137afa94ce9c2a233c80513e9"
+  },
+  {
+    "file": "barista-forbidden-2-barista-start.xml",
+    "sha256": "f4ef4348f23a486ccbdf23c597005e33edfd9ce15777e4fca3cd83174d5c9f63"
+  },
+  {
+    "file": "barista-forbidden.png",
+    "sha256": "847fb7b9db5bb37e52755e02ae42c40ea047104e7dbe8cc11d20b4427e5154d8"
+  },
+  {
+    "file": "barista-offline-1-open.xml",
+    "sha256": "fda3536284914db49d2b8fb1ccc66111f81e61dadddd5f2ecaec48dd84bea2ad"
+  },
+  {
+    "file": "barista-offline-2-offline.xml",
+    "sha256": "0911b601a7ef59632631c58bf8bdd707b6c55d62d69d0351ee62bc77fd4892c4"
+  },
+  {
+    "file": "barista-offline-3-reconnected.xml",
+    "sha256": "56eb980ec10e1d7dfcc90fc11e766a6268ba0e08b5b4eb2b65fa72732e300d20"
+  },
+  {
+    "file": "barista-offline-disabled.png",
+    "sha256": "3bca1557b316a96c151e31abfafd295d69826bd026d1f07cdec7fb8a959c85fe"
+  },
+  {
+    "file": "barista-offline.png",
+    "sha256": "8cecb5cfb4e1e0a4aedfe9b40997a2b5560adb400e92601a9b4883f011e4e545"
+  },
+  {
+    "file": "barista-progression-1-login.xml",
+    "sha256": "05dabded3d572835a36ecbf9528207c63d0928eb8f88ff875809b2d40e1f7af5"
+  },
+  {
+    "file": "barista-progression-2-open.xml",
+    "sha256": "055ce500575b86843a98d7b5f853f232a9c08e54e2d45e68b0e70c7ea9cbb4d6"
+  },
+  {
+    "file": "barista-progression-3-barista-start.xml",
+    "sha256": "a0534cca485d7c599de357c3ad3195e6d4255f79f7d118d8724f28657c4eb0a9"
+  },
+  {
+    "file": "barista-progression-4-barista-ready.xml",
+    "sha256": "f4481c8f7d0dec7f029df67095bb4456691294dc80c1384bf81fcee0f004f817"
+  },
+  {
+    "file": "barista-progression.png",
+    "sha256": "982330433375b754c1c6b309726f782d030081516f2c71e68961bd79e070d1aa"
+  },
+  {
+    "file": "barista-stale-1-unavailable.xml",
+    "sha256": "aa3abe9d523775df6e0f6e7d1b52112102e51e59b55f2c81477594765c5e52c6"
+  },
+  {
+    "file": "barista-stale.png",
+    "sha256": "b95c53ea4da0e7b9238cfc701bbbf1125c7a1a2d63553fadc20b5cf136b689a8"
+  },
+  {
+    "file": "courier-conflict-1-open.xml",
+    "sha256": "f86a0d6734d7a91e026c0a049f9d2f1304a7f6ca5c81092b7dbc2e6987d2f57d"
+  },
+  {
+    "file": "courier-conflict-2-delivery-start.xml",
+    "sha256": "2297e3811062406d6f6ef6ca6056b2880281f98ee1fc18d405ecb592b28aacb0"
+  },
+  {
+    "file": "courier-conflict.png",
+    "sha256": "7eecfc0d70f1dc645e2884cec8347ee26ca4d5ac1d3cc5fc2af7e85fe4c1534e"
+  },
+  {
+    "file": "courier-delivered-1-open.xml",
+    "sha256": "25e22fd74ebaf6e535de2634b78b763c8dc37e9600cc71be7cca8f0e70aed6b2"
+  },
+  {
+    "file": "courier-delivered-2-delivery-start.xml",
+    "sha256": "f7d1fb51d1ace6911c432efbb6e1871db9bad87f532cdee991ebff39f1d660b5"
+  },
+  {
+    "file": "courier-delivered-3-delivery-complete.xml",
+    "sha256": "fc9dddd15e96a9ea03208038251e075dfc9096051eafafd34b61e8633b360006"
+  },
+  {
+    "file": "courier-delivered.png",
+    "sha256": "5ecb5fd63d8b557cfb4127cb47ea3a0558a857f766cf775b7a39d8db7b65a594"
+  },
+  {
+    "file": "courier-failed-1-open.xml",
+    "sha256": "3315d30701270c6518c096e60a483d8946bcc05a10e96aa19aaa0e48edd8952d"
+  },
+  {
+    "file": "courier-failed-2-delivery-start.xml",
+    "sha256": "f0f686876cde54025d04bf23f5a36c14c2f8704e665a1af811619f35f630cb95"
+  },
+  {
+    "file": "courier-failed-3-delivery-fail.xml",
+    "sha256": "2821327129b9761851dfeb1564f2a8c6b33ce04e0baedc81d91511ae0c00a4f6"
+  },
+  {
+    "file": "courier-failed.png",
+    "sha256": "bd16ebdbab730802f62d1a03e2510fdbaca09a43c85e66e9b5f0a8603ecbd6ed"
+  },
+  {
+    "file": "courier-forbidden-1-open.xml",
+    "sha256": "272ecc2639cd6b125b50e1cd55c3eaaebc315dc112cd8e38977180787b8aac1a"
+  },
+  {
+    "file": "courier-forbidden-2-delivery-start.xml",
+    "sha256": "734927f740c95df60b7c1229f22daf5c82615578a1ce50489475f6206f4a163d"
+  },
+  {
+    "file": "courier-forbidden.png",
+    "sha256": "d515469f917398cdc3db466619f192baf09d3647c5abbe0443e7dcc24319ba66"
+  },
+  {
+    "file": "courier-offline-1-open.xml",
+    "sha256": "f586ce54b1cc27895a9ae99d9da68d18dae8f05359170b5968edb2e1bdc62dab"
+  },
+  {
+    "file": "courier-offline-2-offline.xml",
+    "sha256": "16177307a84ca59f92971b49f8a431051ee7926ebb4c2f2d07147132dc92cad9"
+  },
+  {
+    "file": "courier-offline-3-reconnected.xml",
+    "sha256": "f87ebf2f0cb6c4d2ae83c3ba99a62ad56ca5c1cda957e49a743fb56098341d93"
+  },
+  {
+    "file": "courier-offline-disabled.png",
+    "sha256": "82831a55751a8771c7f24bf33f96a9df63ee4b181d779c43954d64675ccf9a66"
+  },
+  {
+    "file": "courier-offline.png",
+    "sha256": "67a79245e7e9665efa19bf73888c7aeb8bc9ae1fabddd3e8a4240d432125ca0a"
+  },
+  {
+    "file": "courier-other-detail-1-unavailable.xml",
+    "sha256": "b86d69c482822a05d374c66d93655e8b70ebfcabacc24c38b27a836d238ab986"
+  },
+  {
+    "file": "courier-other-detail.png",
+    "sha256": "52e16cf261e4693b2d5ad609d73a7ec45da1406d2c89b33c2b7dac8d2c928bb0"
+  },
+  {
+    "file": "courier-own-list-1-login.xml",
+    "sha256": "ee6184aa7a44a528b213a68de4b8082d70626cdfe5d30161f390b808c1ad6d84"
+  },
+  {
+    "file": "courier-own-list-2-delivery-list.xml",
+    "sha256": "a9d4def0de6d772cdb40525fe83911f9ce8ebb09b1b4491a1d64f9db00340828"
+  },
+  {
+    "file": "courier-own-list.png",
+    "sha256": "a7570764e1a0ccb7dbc94890ea0b24487537cc505e1c6bd82705ddc2d870df4a"
+  },
+  {
+    "file": "courier-stale-1-unavailable.xml",
+    "sha256": "915cfe5d5ebc7152551138de80efa4385b5eb8d5b78064ce19ef4c58356c3c80"
+  },
+  {
+    "file": "courier-stale.png",
+    "sha256": "af480f348a1c0f0353c99bced448594cd99d7649d03b139e9ad218c0763846b1"
+  },
+  {
+    "file": "discount-approve-1-login.xml",
+    "sha256": "a13f7e9faf9bdc9859036dcbfbd2c32bd400bf77ad0b7bd9c4afce1d1c838478"
+  },
+  {
+    "file": "discount-approve-2-open.xml",
+    "sha256": "d5367f6024b6e01e02a79bbe02172ff07c4599d463a8630678237ffc95055a3f"
+  },
+  {
+    "file": "discount-approve-3-discount-decision.xml",
+    "sha256": "be4f77242e6f70d3cc644eba76e215e3e8573984663432a7945d104d0ef9244e"
+  },
+  {
+    "file": "discount-approve.png",
+    "sha256": "0fe4a8a09f0fe726a813e0d763140ed2d6c05565b6dae3563e27b38e5bdf0af4"
+  },
+  {
+    "file": "discount-conflict-1-open.xml",
+    "sha256": "177b8e28f94e8714608efaba41e559052e047cf383c5bfae0b671b60b090fe6e"
+  },
+  {
+    "file": "discount-conflict-2-discount-decision.xml",
+    "sha256": "4d8b3aa17745a4af2df3e293559ae4f63111f9c8d9928a563420f71e0e8311c7"
+  },
+  {
+    "file": "discount-conflict.png",
+    "sha256": "c4abe4ce5b72189dec3cb7e8e982fd72cd7f0b6423d41bb25ed44fb38e8986e9"
+  },
+  {
+    "file": "discount-forbidden-1-open.xml",
+    "sha256": "e050d7148c4f56ce28555d2e047bd171acd79c415490ab309c71cec62d0bdb0d"
+  },
+  {
+    "file": "discount-forbidden-2-discount-denied.xml",
+    "sha256": "735af1626d578d819875d6e5d7257060c418e58fe8c1aab6d76f81d1d20153a0"
+  },
+  {
+    "file": "discount-forbidden.png",
+    "sha256": "acfbebf633f509d759e9445631c9404de73321b54d4236bd75889f6ada6e6d49"
+  },
+  {
+    "file": "discount-offline-1-open.xml",
+    "sha256": "935f7a80d3dbf91fe5cde4150a9c20a4924b94c8fc008c7140a8c888aaa4e672"
+  },
+  {
+    "file": "discount-offline-2-offline.xml",
+    "sha256": "d3ab775bdc5cc65d90493e557b5efe16ca9eef9af5d86311e2ec647b57152443"
+  },
+  {
+    "file": "discount-offline-3-reconnected.xml",
+    "sha256": "9a7297e5723af372331a84c92b8b3e35d313826b646499423a4a464e9ff5555e"
+  },
+  {
+    "file": "discount-offline-disabled.png",
+    "sha256": "b1c11d4a6da84de61b55087ca14ea91c0627dbb7ec87b1caa442edca2ca9ca3c"
+  },
+  {
+    "file": "discount-offline.png",
+    "sha256": "9d73abd39f854d84a86fd35bae3454cdb10d8b84c1ff32e4cb4c64a27c049afa"
+  },
+  {
+    "file": "discount-reject-1-open.xml",
+    "sha256": "659fceecc555e5805e50f27ca263f5fe26af738367ed886e20968b1e09c03e22"
+  },
+  {
+    "file": "discount-reject-2-discount-decision.xml",
+    "sha256": "4114b9bda51afb1b7677e16de962c45e4150becbf3e5da3483c8cf110b7b4df5"
+  },
+  {
+    "file": "discount-reject.png",
+    "sha256": "c7947f8d6ace478eaf210794a731e1994607ec763f1490b1d25b6bc6cf632ceb"
+  },
+  {
+    "file": "discount-stale-1-unavailable.xml",
+    "sha256": "b0234aafb8c921b4d14eb601e3587453bba48cc08c1a9b4ead74e56d8c7792bd"
+  },
+  {
+    "file": "discount-stale.png",
+    "sha256": "70b3310a4e2ded0a1ae2ae7f46adf0e23c5484c0403617b71c08c2f0d4aea162"
+  },
+  {
+    "file": "README.md",
+    "sha256": "4b60de7b28f87aff5d49495a91b510fa585ede868012101db05e8b5a24d3768e"
+  },
+  {
+    "file": "summary.json",
+    "sha256": "bbfdf3002a693a8c756e79f2e83bbc2e6eaae06dd46e30105f9c5d61f4e5239c"
+  }
+]
