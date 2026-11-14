@@ -1,0 +1,17 @@
+appId: com.coffeeshop.staffmobile
+name: Deliberately repeating an ambiguous receipt post gets a conflict and one stock effect
+---
+- scrollUntilVisible:
+    element: Post receipt ${MAESTRO_RECEIPT}
+    direction: DOWN
+- tapOn: Post receipt ${MAESTRO_RECEIPT}
+- scrollUntilVisible:
+    element: 'Status: posted'
+    direction: UP
+- assertVisible: 'Status: posted'
+- scrollUntilVisible:
+    element: The receipt changed or was already posted.*
+    direction: DOWN
+- assertVisible: The receipt changed or was already posted.*
+- assertNotVisible: Post receipt ${MAESTRO_RECEIPT}
+- assertNotVisible: Receipt .* was posted by the server.

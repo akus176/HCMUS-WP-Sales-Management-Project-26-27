@@ -59,6 +59,8 @@
     "test": "jest --runInBand",
     "test:accessibility": "jest --runInBand tests/accessibility.test.tsx",
     "test:e2e:suite": "pwsh -NoProfile -File scripts/verify-android-suite.ps1",
+    "test:inventory-harness": "node --test scripts/inventory-forwarder.test.mjs",
+    "test:e2e:inventory": "node --env-file-if-exists=.env.inventory.local scripts/verify-android-inventory.mjs",
     "test:unit": "jest --runInBand tests/session.test.ts tests/secure-storage.test.ts tests/environment.test.ts",
     "test:components": "jest --runInBand tests/router.test.tsx tests/login.test.tsx tests/navigation.test.tsx",
     "test:live": "jest --runInBand --testMatch **/tests/live-session.integration.ts",
@@ -74,6 +76,6 @@
     "test:e2e:cashier": "maestro test --format junit --output .maestro/results/cashier.xml .maestro/cashier.yaml",
     "pretest:e2e:manager-orders": "npm run pretest:e2e:android",
     "test:e2e:manager-orders": "maestro test --format junit --output .maestro/results/manager-orders.xml .maestro/manager-orders.yaml",
-    "check": "npm run type-check && npm run lint && npm run format:check && npm test"
+    "check": "npm run type-check && npm run lint && npm run format:check && npm test && npm run test:inventory-harness"
   }
 }

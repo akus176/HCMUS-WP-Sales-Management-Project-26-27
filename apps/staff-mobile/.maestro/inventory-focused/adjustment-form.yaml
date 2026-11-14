@@ -1,0 +1,22 @@
+appId: com.coffeeshop.staffmobile
+---
+- runFlow: open.yaml
+- scrollUntilVisible:
+    element: Record adjustment for ${MAESTRO_INGREDIENT}
+    direction: DOWN
+- tapOn: Record adjustment for ${MAESTRO_INGREDIENT}
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- tapOn: Quantity change
+- inputText: ${MAESTRO_DELTA}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Adjustment reason
+    direction: DOWN
+- tapOn: Adjustment reason
+- inputText: ${MAESTRO_REASON}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN

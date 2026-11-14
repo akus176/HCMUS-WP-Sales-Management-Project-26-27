@@ -1,0 +1,35 @@
+appId: com.coffeeshop.staffmobile
+name: Missing reason prevents submission and invalid stock is rejected by the API
+---
+- runFlow: open.yaml
+- scrollUntilVisible:
+    element: Record adjustment for ${MAESTRO_INGREDIENT}
+    direction: DOWN
+- tapOn: Record adjustment for ${MAESTRO_INGREDIENT}
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- tapOn: Quantity change
+- inputText: ${MAESTRO_DELTA}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- assertVisible:
+    text: Save adjustment
+    enabled: false
+- scrollUntilVisible:
+    element: Adjustment reason
+    direction: UP
+- tapOn: Adjustment reason
+- inputText: ${MAESTRO_REASON}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- tapOn: Save adjustment
+- scrollUntilVisible:
+    element: The server rejected this adjustment. No stock was changed.*
+    direction: UP
+- assertVisible: The server rejected this adjustment. No stock was changed.*
+- assertNotVisible: Adjustment saved by the server.*

@@ -1,0 +1,13 @@
+appId: com.coffeeshop.staffmobile
+name: Refresh resolves a lost post response without resubmitting
+---
+- scrollUntilVisible:
+    element: Refresh receipt status
+    direction: DOWN
+- tapOn: Refresh receipt status
+- scrollUntilVisible:
+    element: 'Status: posted'
+    direction: UP
+- assertVisible: 'Status: posted'
+- assertNotVisible: Post receipt ${MAESTRO_RECEIPT}
+- assertNotVisible: Receipt .* was posted by the server.

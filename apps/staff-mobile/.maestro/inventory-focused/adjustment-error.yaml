@@ -1,0 +1,10 @@
+appId: com.coffeeshop.staffmobile
+name: Real API rejection or lost response never reports adjustment success
+---
+- runFlow: adjustment-form.yaml
+- tapOn: Save adjustment
+- scrollUntilVisible:
+    element: ${MAESTRO_RESULT}
+    direction: UP
+- assertVisible: ${MAESTRO_RESULT}
+- assertNotVisible: Adjustment saved by the server.*

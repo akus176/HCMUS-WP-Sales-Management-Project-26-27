@@ -1,0 +1,8 @@
+appId: com.coffeeshop.staffmobile
+name: Load refresh fixture before an independent API change
+---
+- runFlow: open.yaml
+- scrollUntilVisible:
+    element: 'Balance: 1 l'
+    direction: DOWN
+- assertVisible: 'Balance: 1 l'

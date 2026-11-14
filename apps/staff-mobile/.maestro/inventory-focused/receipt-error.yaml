@@ -1,0 +1,13 @@
+appId: com.coffeeshop.staffmobile
+name: Real receipt conflict or committed-but-lost response has safe feedback
+---
+- runFlow: receipt-open.yaml
+- scrollUntilVisible:
+    element: Post receipt ${MAESTRO_RECEIPT}
+    direction: DOWN
+- tapOn: Post receipt ${MAESTRO_RECEIPT}
+- scrollUntilVisible:
+    element: ${MAESTRO_RESULT}
+    direction: UP
+- assertVisible: ${MAESTRO_RESULT}
+- assertNotVisible: Receipt .* was posted by the server.

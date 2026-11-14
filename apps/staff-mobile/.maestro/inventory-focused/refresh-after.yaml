@@ -1,0 +1,11 @@
+appId: com.coffeeshop.staffmobile
+name: Manual refresh reads authoritative inventory after an external change
+---
+- scrollUntilVisible:
+    element: Refresh inventory
+    direction: UP
+- tapOn: Refresh inventory
+- scrollUntilVisible:
+    element: 'Balance: 2 l'
+    direction: DOWN
+- assertVisible: 'Balance: 2 l'

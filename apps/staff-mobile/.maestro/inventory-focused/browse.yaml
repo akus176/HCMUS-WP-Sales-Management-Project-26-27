@@ -1,0 +1,53 @@
+appId: com.coffeeshop.staffmobile
+name: Current search, threshold boundary, low-stock filtering and empty results
+---
+- runFlow: open.yaml
+- scrollUntilVisible:
+    element: 'Balance: 1 l'
+    direction: DOWN
+- assertVisible: 'Low stock.*1 l / 3 l'
+- scrollUntilVisible:
+    element: Search ingredients
+    direction: UP
+- tapOn: Search ingredients
+- eraseText
+- inputText: ${MAESTRO_BOUNDARY}
+- hideKeyboard
+- scrollUntilVisible:
+    element: 'Low stock.*3 l / 3 l'
+    direction: DOWN
+- assertVisible: 'Low stock.*3 l / 3 l'
+- scrollUntilVisible:
+    element: Search ingredients
+    direction: UP
+- tapOn: Search ingredients
+- eraseText
+- inputText: ${MAESTRO_NORMAL}
+- hideKeyboard
+- scrollUntilVisible:
+    element: 'Balance: 10 l'
+    direction: DOWN
+- assertNotVisible: 'Low stock.*10 l / 3 l'
+- scrollUntilVisible:
+    element: Low stock
+    direction: UP
+- tapOn: Low stock
+- scrollUntilVisible:
+    element: No low-stock ingredients match.
+    direction: DOWN
+- assertVisible: No low-stock ingredients match.
+- scrollUntilVisible:
+    element: Ingredient balances
+    direction: UP
+- tapOn: Ingredient balances
+- scrollUntilVisible:
+    element: Search ingredients
+    direction: DOWN
+- tapOn: Search ingredients
+- eraseText
+- inputText: no-such-ingredient-198
+- hideKeyboard
+- scrollUntilVisible:
+    element: No ingredients match this search.
+    direction: DOWN
+- assertVisible: No ingredients match this search.

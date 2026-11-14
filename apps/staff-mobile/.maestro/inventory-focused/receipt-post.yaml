@@ -1,0 +1,17 @@
+appId: com.coffeeshop.staffmobile
+name: Review and post a prepared receipt once
+---
+- runFlow: receipt-open.yaml
+- scrollUntilVisible:
+    element: 'Receipt line.*4.*2 per unit'
+    direction: DOWN
+- assertVisible: 'Receipt line.*4.*2 per unit'
+- scrollUntilVisible:
+    element: Post receipt ${MAESTRO_RECEIPT}
+    direction: DOWN
+- tapOn: Post receipt ${MAESTRO_RECEIPT}
+- scrollUntilVisible:
+    element: 'Status: posted'
+    direction: UP
+- assertVisible: 'Status: posted'
+- assertNotVisible: Post receipt ${MAESTRO_RECEIPT}

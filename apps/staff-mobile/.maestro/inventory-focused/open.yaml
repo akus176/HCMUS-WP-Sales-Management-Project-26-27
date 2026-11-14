@@ -1,0 +1,14 @@
+appId: com.coffeeshop.staffmobile
+---
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: Staff home
+    timeout: 60000
+- tapOn: Open Inventory
+- scrollUntilVisible:
+    element: Search ingredients
+    direction: DOWN
+- tapOn: Search ingredients
+- inputText: ${MAESTRO_INGREDIENT}
+- hideKeyboard
