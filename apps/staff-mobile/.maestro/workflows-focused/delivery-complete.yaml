@@ -8,5 +8,5 @@ appId: com.coffeeshop.staffmobile
     element: Delivery delivered. Confirmed by the service.
     direction: UP
 - assertVisible: Delivery delivered. Confirmed by the service.
-- assertNotVisible: ${PRIVATE_LABEL}
+- assertNotVisible: ${MAESTRO_PRIVATE_LABEL}
 - assertNotVisible: Mark delivered

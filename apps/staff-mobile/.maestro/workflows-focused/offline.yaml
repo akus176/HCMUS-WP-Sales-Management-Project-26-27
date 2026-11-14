@@ -4,8 +4,8 @@ appId: com.coffeeshop.staffmobile
     visible: 'Offline.*'
     timeout: 30000
 - scrollUntilVisible:
-    element: ${ACTION}
+    element: ${MAESTRO_ACTION}
     direction: DOWN
 - assertVisible:
-    text: ${ACTION}
+    text: ${MAESTRO_ACTION}
     enabled: false

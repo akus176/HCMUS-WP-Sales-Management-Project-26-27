@@ -300,7 +300,12 @@ async function native(flow, variables = {}) {
     {
       env: {
         ...process.env,
-        ...variables,
+        ...Object.fromEntries(
+          Object.entries(variables).map(([key, value]) => [
+            `MAESTRO_${key}`,
+            value,
+          ]),
+        ),
         MAESTRO_STAFF_USERNAME: accounts[currentRole].username,
         MAESTRO_STAFF_PASSWORD: accounts[currentRole].password,
         MAESTRO_CLI_NO_ANALYTICS: '1',
@@ -710,13 +715,18 @@ try {
   );
   const privateLabel = `Address: Synthetic I201 ${runId} address`;
   await check('courier-own-list', 'DeliveryStaff', async () => {
+    const list = await request('/courier/assignments?pageSize=100', {
+      role: 'DeliveryStaff',
+    });
+    const index = list.items.findIndex(
+      (o) => o.orderId === seed['courier-delivered'].id,
+    );
+    assert.ok(index >= 0);
     await native('delivery-list', {
+      PAGE_SKIP: String(Math.floor(index / 10)),
       OWN_ORDER: seed['courier-delivered'].orderNumber,
       OTHER_ORDER: seed['courier-other'].orderNumber,
       PRIVATE_LABEL: privateLabel,
-    });
-    const list = await request('/courier/assignments?pageSize=100', {
-      role: 'DeliveryStaff',
     });
     assert.ok(
       list.items.some((o) => o.orderId === seed['courier-delivered'].id),

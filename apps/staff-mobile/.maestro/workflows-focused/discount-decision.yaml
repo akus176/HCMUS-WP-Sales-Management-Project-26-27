@@ -1,12 +1,12 @@
 appId: com.coffeeshop.staffmobile
 ---
 - scrollUntilVisible:
-    element: ${ACTION}
+    element: ${MAESTRO_ACTION}
     direction: DOWN
-- tapOn: ${ACTION}
+- tapOn: ${MAESTRO_ACTION}
 - scrollUntilVisible:
-    element: ${EXPECTED}
+    element: ${MAESTRO_EXPECTED}
     direction: UP
-- assertVisible: ${EXPECTED}
+- assertVisible: ${MAESTRO_EXPECTED}
 - assertNotVisible: Approve discount
 - assertNotVisible: Reject discount

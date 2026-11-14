@@ -10,4 +10,4 @@ appId: com.coffeeshop.staffmobile
 - assertVisible: Access changed
 - assertNotVisible: Approve discount
 - assertNotVisible: Reject discount
-- assertNotVisible: ${PRIVATE_LABEL}
+- assertNotVisible: ${MAESTRO_PRIVATE_LABEL}

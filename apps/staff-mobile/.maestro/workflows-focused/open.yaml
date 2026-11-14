@@ -1,7 +1,7 @@
 appId: com.coffeeshop.staffmobile
 ---
-- openLink: coffeeshop-staff:///notifications/${KIND}/${RECORD_ID}
+- openLink: coffeeshop-staff:///notifications/${MAESTRO_KIND}/${MAESTRO_RECORD_ID}
 - scrollUntilVisible:
-    element: ${EXPECTED}
+    element: ${MAESTRO_EXPECTED}
     direction: DOWN
     timeout: 30000

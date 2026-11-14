@@ -19,5 +19,5 @@ appId: com.coffeeshop.staffmobile
     element: Delivery failed. Confirmed by the service.
     direction: UP
 - assertVisible: Delivery failed. Confirmed by the service.
-- assertNotVisible: ${PRIVATE_LABEL}
+- assertNotVisible: ${MAESTRO_PRIVATE_LABEL}
 - assertNotVisible: Mark failed
