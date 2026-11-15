@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using CoffeeShop.Application.Customers;
 using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Inventory;
