@@ -82,7 +82,8 @@ COFFEESHOP_CONCURRENCY_ITERATIONS=5 \
 ```
 
 The existing integration tests create isolated databases. The runner repeats all
-tests named `Concurrent` in the Infrastructure and API suites, rejects missing
+tests named `Concurrent` and the named cross-order restoration, cancelled
+replacement and stale-ingredient lock cases in the Infrastructure and API suites, rejects missing
 or skipped results, and requires the original confirmation, table occupancy,
 cancellation/restoration, loyalty reversal and refresh-reuse cases in every
 iteration. It does not alter the existing test assertions. CI repeats three

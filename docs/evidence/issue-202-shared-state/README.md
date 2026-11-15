@@ -22,7 +22,7 @@ The local cold-image download was interrupted after CI supplied the completed cl
 
 | Check | Exact result | Evidence |
 | --- | --- | --- |
-| Windows repeated concurrency | **5 complete rounds × 18 tests = 90 passed**, zero failures/skips | [Per-round names and counts](windows-concurrency.json) |
+| Windows repeated concurrency | **5 complete rounds × 23 tests = 115 passed**, zero failures/skips | [Per-round names and counts](windows-concurrency.json) |
 | Complete Windows API suite against real PostgreSQL | **65 passed**, zero failures/skips | [Test names and totals](windows-api-suite.json) |
 | Unchanged Postman collection against Docker API | **9 requests, 9 assertions, zero failures** | [Sanitized results](collection.json) |
 | Invalid-credential negative control | All 9 requests executed; 3 assertions failed as expected; runner returned failure and the enclosing verification accepted that expected rejection | [Negative control](negative-control.json) |
@@ -30,7 +30,7 @@ The local cold-image download was interrupted after CI supplied the completed cl
 | Locked npm dependencies | `npm audit` reported zero findings | Pinned `tests/api/package-lock.json` |
 | OpenSpec | Both `build-coffee-shop-management-system` and `add-staff-mobile-app` passed strict validation | Commands below |
 
-The 15 Infrastructure and 3 API concurrency cases include all five mapped risk areas: order-confirmation retries/stock effects; competing table occupancy; cancellation/restoration retries; append-only loyalty reversal; and refresh-token reuse/family revocation. Additional catalog, discount, stock-adjustment and payment races also run. The runner rejects skipped/empty suites and requires the original confirmation, table, cancellation/restoration, loyalty and refresh cases in every round.
+The 20 Infrastructure and 3 API concurrency cases include all five mapped risk areas: order-confirmation retries/stock effects; competing table occupancy; cancellation/restoration retries; append-only loyalty reversal; and refresh-token reuse/family revocation. Additional catalog, discount, stock-adjustment and payment races also run. The selection explicitly includes parallel restoration and catalog lock/wait cases whose names do not contain `Concurrent`. The runner rejects skipped/empty suites and requires the original confirmation, table, cancellation/restoration, loyalty and refresh cases plus those lock/wait cases in every round.
 
 The 65-case API run includes the six-role permission matrix, account/role changes, credential-safe administration responses, ownership/privacy checks, authenticated inventory and receipt operations, payment retry, cancellation, delivery and actor persistence. These are real ASP.NET integration pipelines backed by isolated PostgreSQL databases. They are not Android UI execution or native WinUI HTTP tracing.
 
@@ -80,12 +80,17 @@ COFFEESHOP_CONCURRENCY_ITERATIONS=5 \
 The recorded Windows run executed this equivalent selection five times, sequentially, using the physical checkout and its own Docker PostgreSQL server. It parsed every TRX, rejected missing/failed/skipped cases, and ran the same required-case validator used by `verify-concurrency.sh`:
 
 ```powershell
-dotnet test tests/CoffeeShop.Infrastructure.Tests/CoffeeShop.Infrastructure.Tests.csproj --configuration Release --filter 'FullyQualifiedName~Concurrent' --logger 'trx;LogFileName=Infrastructure.trx' --results-directory TestResults/concurrency/<round>
-dotnet test tests/CoffeeShop.Api.Tests/CoffeeShop.Api.Tests.csproj --configuration Release --filter 'FullyQualifiedName~Concurrent' --logger 'trx;LogFileName=Api.trx' --results-directory TestResults/concurrency/<round>
+$filter = 'FullyQualifiedName~Concurrent|FullyQualifiedName~Cancel_DifferentOrdersSharingIngredients|FullyQualifiedName~CancelledReplacement_StopsWhileWaitingForParentLock|FullyQualifiedName~RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation'
+foreach ($round in 1..5) {
+    foreach ($suite in @('Infrastructure', 'Api')) {
+        dotnet test "tests/CoffeeShop.$suite.Tests/CoffeeShop.$suite.Tests.csproj" --configuration Release --filter $filter --logger "trx;LogFileName=$suite.trx" --results-directory "TestResults/concurrency/$round"
+        if ($LASTEXITCODE -ne 0) { throw 'Concurrency verification failed.' }
+    }
+}
 dotnet test tests/CoffeeShop.Api.Tests/CoffeeShop.Api.Tests.csproj --configuration Release --no-build --no-restore --logger 'trx;LogFileName=api-all.trx'
 ```
 
-Later rounds reused the built binaries with `--no-build --no-restore`. Run these from the physical Windows checkout; do not paste `<round>` literally. The Bash runner manages round numbers automatically. CI repeats three complete rounds on Linux and preserves their TRX and summary artifacts.
+The recorded runs reused the built binaries with `--no-build --no-restore`; the commands above also support an unbuilt checkout. Run them from the physical Windows checkout. The Bash runner manages round numbers and complete-result validation automatically. CI repeats three complete rounds on Linux and preserves their TRX and summary artifacts. The full 65-case API suite was recorded separately on the same unchanged business/test source.
 
 ```text
 openspec validate build-coffee-shop-management-system --strict

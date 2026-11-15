@@ -12,13 +12,14 @@ results_dir="${COFFEESHOP_CONCURRENCY_RESULTS:-$PWD/TestResults/concurrency}"
 mkdir -p "$results_dir"
 results_dir="$(cd "$results_dir" && pwd)"
 printf '{"passed":false,"state":"not_complete"}\n' > "$results_dir/summary.json"
+filter='FullyQualifiedName~Concurrent|FullyQualifiedName~Cancel_DifferentOrdersSharingIngredients|FullyQualifiedName~CancelledReplacement_StopsWhileWaitingForParentLock|FullyQualifiedName~RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation'
 
 for iteration in $(seq 1 "$iterations"); do
     for suite in Infrastructure Api; do
         build_args=()
         if (( iteration > 1 )); then build_args+=(--no-build --no-restore); fi
         dotnet test "tests/CoffeeShop.$suite.Tests/CoffeeShop.$suite.Tests.csproj" \
-            --configuration Release "${build_args[@]}" --filter 'FullyQualifiedName~Concurrent' \
+            --configuration Release "${build_args[@]}" --filter "$filter" \
             --logger "trx;LogFileName=$suite.trx" --results-directory "$results_dir/$iteration"
     done
 done
@@ -38,6 +39,9 @@ required = {
     'Restore_ConcurrentRetriesAndLaterCancellation_DoNotRestoreTwice',
     'ConcurrentCancellationReversals_ApplyAppendOnlyReversalOnce',
     'ConcurrentRefresh_OnlyOneSucceedsAndReuseInvalidatesSuccessor',
+    'Cancel_DifferentOrdersSharingIngredients_RestoresBothWithoutLostUpdates',
+    'CancelledReplacement_StopsWhileWaitingForParentLock',
+    'RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation',
 }
 ns = {'t': 'http://microsoft.com/schemas/VisualStudio/TeamTest/2010'}
 runs = []
@@ -55,7 +59,7 @@ for iteration in range(1, iterations + 1):
         tests = [case.attrib['testName'] for case in cases]
         names.update(tests)
         runs.append({'iteration': iteration, 'suite': suite, 'passed': total, 'failed': 0, 'skipped': 0, 'tests': tests})
-    missing = [name for name in required if not any(test.endswith(name) for test in names)]
+    missing = [name for name in required if not any(test.split('(', 1)[0].endswith(name) for test in names)]
     if missing:
         raise SystemExit(f'Required concurrency coverage missing in run {iteration}: {missing}')
 
