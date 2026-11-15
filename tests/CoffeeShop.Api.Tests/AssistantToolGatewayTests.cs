@@ -1,5 +1,4 @@
 using System.Text.Json;
-using CoffeeShop.Api;
 using CoffeeShop.Application.Common.Security;
 using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;

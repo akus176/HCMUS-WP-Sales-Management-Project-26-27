@@ -1,3 +1,5 @@
+using System.Text.Json;
+using CoffeeShop.Contracts;
 using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -101,6 +103,7 @@ public sealed partial class ReportsPage : Page
     }
 
     private readonly ReportsWorkspace model;
+    private readonly ApiAssistantSource? assistant;
     private bool showRefreshFeedback;
     public sealed record SellerChartRow(BestSellerViewRow Row, long Maximum)
     {
@@ -118,6 +121,16 @@ public sealed partial class ReportsPage : Page
         model = App.IsApiMode
             ? new ReportsWorkspace(App.Services.GetRequiredService<ApiReportsSource>())
             : new ReportsWorkspace(App.Services.GetRequiredService<IServiceScopeFactory>());
+        if (App.IsApiMode)
+        {
+            var session = App.Services.GetRequiredService<StaffSessionManager>().CurrentUser;
+            if (session is not null && session.Permissions.Contains("assistant.ask") &&
+                (session.Roles.Contains("Manager") || session.Roles.Contains("Admin")))
+            {
+                assistant = App.Services.GetRequiredService<ApiAssistantSource>();
+                AssistantPanel.Visibility = Visibility.Visible;
+            }
+        }
         model.PropertyChanged += (_, _) => Render();
         var today = DateTimeOffset.Now;
         FirstDate.Date = new DateTimeOffset(today.Year, today.Month, 1, 0, 0, 0, today.Offset);
@@ -167,6 +180,7 @@ public sealed partial class ReportsPage : Page
         Status.Apply(model.Feedback);
         if (!showRefreshFeedback && !model.Feedback.IsError) Status.IsOpen = false;
         PeriodLabel.Text = ReportPresentation.PeriodLabel(model.FirstDate, model.LastDate);
+        AssistantPeriod.Text = $"Report period: {ReportPresentation.PeriodLabel(model.FirstDate, model.LastDate)} · {TimeZoneInfo.Local.Id}. Low stock uses current balances.";
         PeriodButton.Content = $"{model.FirstDate:dd MMM} – {model.LastDate:dd MMM}";
         ToolTipService.SetToolTip(PeriodButton, $"{ReportPresentation.PeriodLabel(model.FirstDate, model.LastDate)} · {TimeZoneInfo.Local.DisplayName}");
         var revenue = model.Revenue.Value;
@@ -337,6 +351,46 @@ public sealed partial class ReportsPage : Page
     private static Brush PaymentBrush(string method) => ResourceBrush(method switch { "cash" => "ConsoleAccentBrush", "card" => "ConsoleFieldBrush", _ => "ConsoleMutedInkBrush" });
     private static string? SelectedTag(ComboBox comboBox) => (comboBox.SelectedItem as ComboBoxItem)?.Tag as string;
     private void OnOpenStockRoom(object sender, RoutedEventArgs args) => (((App)Microsoft.UI.Xaml.Application.Current).Window as MainWindow)?.NavigateTo("lowstock");
+    private async void OnAskAssistant(object sender, RoutedEventArgs args)
+    {
+        if (assistant is null) return;
+        var question = AssistantQuestionBox.Text?.Trim();
+        if (string.IsNullOrWhiteSpace(question))
+        {
+            AssistantFeedback.Severity = InfoBarSeverity.Error;
+            AssistantFeedback.Message = "Enter a reporting question.";
+            AssistantFeedback.IsOpen = true;
+            return;
+        }
+        AssistantAskButton.IsEnabled = false;
+        AssistantFeedback.IsOpen = false;
+        AssistantAnswer.Text = "";
+        AssistantContext.Text = "";
+        try
+        {
+            var response = await assistant.AskAsync(new AssistantAskRequest(question,
+                model.FirstDate, model.LastDate, TimeZoneInfo.Local.Id));
+            AssistantAnswer.Text = response.Answer;
+            AssistantContext.Text = response.ToolsInvoked.Count == 0
+                ? "No report tool was called."
+                : string.Join("\n\n", response.ToolsInvoked.Select(tool =>
+                    $"Tool: {tool.Tool} · Outcome: {tool.Outcome}\n" +
+                    JsonSerializer.Serialize(tool.Metrics, new JsonSerializerOptions { WriteIndented = true })));
+        }
+        catch (ApiException exception)
+        {
+            AssistantFeedback.Severity = InfoBarSeverity.Error;
+            AssistantFeedback.Message = exception.Message;
+            AssistantFeedback.IsOpen = true;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        {
+            AssistantFeedback.Severity = InfoBarSeverity.Error;
+            AssistantFeedback.Message = "The assistant is unavailable. Check the API connection and try again.";
+            AssistantFeedback.IsOpen = true;
+        }
+        finally { AssistantAskButton.IsEnabled = true; }
+    }
     private void OnPageSizeChanged(object sender, SizeChangedEventArgs args)
     {
         if (RightColumn is null) return;

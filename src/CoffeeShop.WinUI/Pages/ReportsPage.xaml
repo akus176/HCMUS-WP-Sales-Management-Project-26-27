@@ -137,6 +137,20 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+                <Border x:Name="AssistantPanel" Style="{StaticResource ReportPanel}" Padding="18,16" Visibility="Collapsed" AutomationProperties.Name="Manager reporting assistant">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="ASK THE REPORTS" Style="{StaticResource ReportHeading}" />
+                        <TextBlock Text="Ask about revenue, best sellers, order channels, or current low stock. Reports are read only." FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" TextWrapping="Wrap" />
+                        <TextBlock x:Name="AssistantPeriod" FontSize="12" FontWeight="SemiBold" />
+                        <TextBox x:Name="AssistantQuestionBox" PlaceholderText="Which products sold best in this period?" MaxLength="2000" MinHeight="48" AutomationProperties.Name="Question for manager assistant" />
+                        <Button x:Name="AssistantAskButton" Content="Ask assistant" Click="OnAskAssistant" Style="{StaticResource ReportPrimary}" HorizontalAlignment="Left" />
+                        <InfoBar x:Name="AssistantFeedback" IsOpen="False" IsClosable="False" />
+                        <TextBlock x:Name="AssistantAnswer" TextWrapping="Wrap" FontSize="15" LineHeight="23" AutomationProperties.Name="Assistant answer" />
+                        <Expander Header="Report tool context" IsExpanded="True">
+                            <TextBlock x:Name="AssistantContext" TextWrapping="Wrap" FontSize="12" FontFamily="Consolas" AutomationProperties.Name="Report tool result context" />
+                        </Expander>
+                    </StackPanel>
+                </Border>
                 <Grid x:Name="Dashboard" ColumnSpacing="24" RowSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition x:Name="LeftColumn" Width="1.15*" />

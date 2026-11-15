@@ -87,6 +87,7 @@ public sealed partial class ManagerAssistantService(
         var clean = SecretPattern().Replace(question, "$1[REDACTED]");
         clean = BearerPattern().Replace(clean, "Bearer [REDACTED]");
         clean = KeyPattern().Replace(clean, "[REDACTED]");
+        clean = JwtPattern().Replace(clean, "[REDACTED]");
         return clean.Length > 2000 ? clean[..2000] : clean;
     }
 
@@ -117,12 +118,14 @@ public sealed partial class ManagerAssistantService(
     private static Result<AssistantAskResponse> Fail(string code, string message) =>
         Result<AssistantAskResponse>.Failure(Error.Validation(code, message));
 
-    [GeneratedRegex(@"\b(create|update|delete|remove|approve|cancel|change|modify|edit|place|refund|assign|adjust|mark|set|add|save)\b", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\b(create|update|delete|remove|approve|cancel|change|modify|edit|place|refund|assign|adjust|mark|set|add|save|reset|transfer|deactivate|reactivate|pay|complete|confirm|fulfill|receive)\b", RegexOptions.IgnoreCase)]
     private static partial Regex MutationRequest();
-    [GeneratedRegex(@"\b((?:password|passwd|api[_ -]?key|secret|token)\s*[:=]\s*)\S+", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\b((?:password|passwd|api[_ -]?key|secret|token)\s*(?::|=|is)\s*)\S+", RegexOptions.IgnoreCase)]
     private static partial Regex SecretPattern();
     [GeneratedRegex(@"Bearer\s+\S+", RegexOptions.IgnoreCase)]
     private static partial Regex BearerPattern();
     [GeneratedRegex(@"\bsk-[A-Za-z0-9_-]{8,}\b")]
     private static partial Regex KeyPattern();
+    [GeneratedRegex(@"\beyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b")]
+    private static partial Regex JwtPattern();
 }

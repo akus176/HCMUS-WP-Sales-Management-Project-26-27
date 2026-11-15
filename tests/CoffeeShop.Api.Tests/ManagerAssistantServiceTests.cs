@@ -1,4 +1,3 @@
-using CoffeeShop.Api;
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Common.Security;
 using CoffeeShop.Contracts;
@@ -60,12 +59,13 @@ public sealed class ManagerAssistantServiceTests
     {
         await using var db = Database();
         var service = Create(db, new StubGateway(null));
-        await service.AskAsync(Request("Weather? token=abc123 password=hunter2 Bearer xyz123 sk-abcdefgh"));
+        await service.AskAsync(Request("Weather? token=abc123 password=hunter2 Bearer xyz123 sk-abcdefgh eyJabc.eyJdef.signature"));
         var question = (await db.AiInteractionAudits.SingleAsync()).Question;
         Assert.DoesNotContain("abc123", question);
         Assert.DoesNotContain("hunter2", question);
         Assert.DoesNotContain("xyz123", question);
         Assert.DoesNotContain("sk-abcdefgh", question);
+        Assert.DoesNotContain("eyJabc.eyJdef.signature", question);
         Assert.Contains("[REDACTED]", question);
     }
 
