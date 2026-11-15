@@ -7,12 +7,18 @@ using CoffeeShop.Application.Reporting;
 using CoffeeShop.Contracts;
 
 /// <summary>Single allowlist boundary between provider-selected tools and report queries.</summary>
+public interface IAssistantToolGateway
+{
+    Task<Result<AssistantToolResult>> InvokeAsync(string tool, AssistantToolInput input,
+        CancellationToken cancellationToken = default);
+}
+
 public sealed class AssistantToolGateway(
     ICurrentUser user,
     RevenueReportQueryHandler revenue,
     BestSellerReportQueryHandler bestSellers,
     OrderChannelReportQueryHandler channels,
-    IInventoryRepository inventory)
+    IInventoryRepository inventory) : IAssistantToolGateway
 {
     public async Task<Result<AssistantToolResult>> InvokeAsync(
         string tool, AssistantToolInput input, CancellationToken cancellationToken = default)

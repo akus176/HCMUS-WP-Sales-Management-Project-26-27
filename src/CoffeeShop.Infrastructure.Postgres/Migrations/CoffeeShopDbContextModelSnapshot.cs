@@ -1017,6 +1017,49 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                     b.ToTable("suppliers", "inventory");
                 });
 
+            modelBuilder.Entity("CoffeeShop.Domain.Reporting.AiInteractionAudit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<long>("DurationMs")
+                        .HasColumnType("bigint")
+                        .HasColumnName("duration_ms");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("outcome");
+
+                    b.Property<string>("Question")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("question");
+
+                    b.Property<string>("Tools")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("tools");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "OccurredAt");
+
+                    b.ToTable("ai_interaction_audits", "reporting");
+                });
+
             modelBuilder.Entity("CoffeeShop.Domain.Sales.Delivery", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1923,6 +1966,15 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                     b.HasOne("CoffeeShop.Domain.Inventory.Ingredient", null)
                         .WithMany()
                         .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CoffeeShop.Domain.Reporting.AiInteractionAudit", b =>
+                {
+                    b.HasOne("CoffeeShop.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
