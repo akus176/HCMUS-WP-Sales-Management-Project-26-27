@@ -156,12 +156,18 @@ jobs:
         run: dotnet test tests/CoffeeShop.Infrastructure.Tests --configuration Release --logger "trx;LogFileName=postgres.trx" --results-directory TestResults
       - name: API integration tests against PostgreSQL
         run: dotnet test tests/CoffeeShop.Api.Tests --configuration Release --logger "trx;LogFileName=api-postgres.trx" --results-directory TestResults
+      - name: Repeat concurrency tests without skips
+        env:
+          COFFEESHOP_CONCURRENCY_ITERATIONS: '3'
+        run: bash scripts/verify-concurrency.sh
       - name: Preserve PostgreSQL test evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: postgres-test-results
-          path: TestResults/*.trx
+          path: |
+            TestResults/*.trx
+            TestResults/concurrency/
       - name: Summarize PostgreSQL coverage
         if: always()
         shell: bash
@@ -195,4 +201,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Verify clean Docker Compose startup, migrations, and demo seed
+        env:
+          COFFEESHOP_API_COLLECTION_RESULTS: ${{ runner.temp }}/api-collection
         run: bash scripts/verify-compose.sh
+      - name: Preserve sanitized API collection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-collection-results
+          path: ${{ runner.temp }}/api-collection/*.json
+          if-no-files-found: error

@@ -65,3 +65,50 @@ compose exec -T api dotnet CoffeeShop.Api.dll --seed-staff-roles
 roles="$(query 'SELECT count(*) FROM identity.roles')"
 test "$roles" = 6
 printf 'Staff role bundles: %s\n' "$roles"
+
+# Use generated synthetic credentials without putting their values in process
+# arguments or reports. Postman CLI executes the committed collection unchanged.
+export COFFEESHOP_COLLECTION_API_HOST=http://api:8080
+export COFFEESHOP_COLLECTION_MANAGER_USERNAME=collection_manager
+export COFFEESHOP_COLLECTION_CASHIER_USERNAME=collection_cashier
+export COFFEESHOP_COLLECTION_MANAGER_PASSWORD="$(openssl rand -hex 24)"
+export COFFEESHOP_COLLECTION_CASHIER_PASSWORD="$(openssl rand -hex 24)"
+for role in Manager Cashier; do
+    export ProvisionStaff__Username ProvisionStaff__Password ProvisionStaff__Email ProvisionStaff__FullName ProvisionStaff__Roles
+    if [[ "$role" == Manager ]]; then
+        ProvisionStaff__Username="$COFFEESHOP_COLLECTION_MANAGER_USERNAME"
+        ProvisionStaff__Password="$COFFEESHOP_COLLECTION_MANAGER_PASSWORD"
+    else
+        ProvisionStaff__Username="$COFFEESHOP_COLLECTION_CASHIER_USERNAME"
+        ProvisionStaff__Password="$COFFEESHOP_COLLECTION_CASHIER_PASSWORD"
+    fi
+    ProvisionStaff__Email="$ProvisionStaff__Username@example.test"
+    ProvisionStaff__FullName="Collection $role"
+    ProvisionStaff__Roles="$role"
+    compose exec -T -e ProvisionStaff__Username -e ProvisionStaff__Password -e ProvisionStaff__Email \
+        -e ProvisionStaff__FullName -e ProvisionStaff__Roles api dotnet CoffeeShop.Api.dll --provision-staff
+done
+unset ProvisionStaff__Username ProvisionStaff__Password ProvisionStaff__Email ProvisionStaff__FullName ProvisionStaff__Roles
+
+results_dir="${COFFEESHOP_API_COLLECTION_RESULTS:-$(mktemp -d)}"
+mkdir -p "$results_dir"
+results_dir="$(cd "$results_dir" && pwd)"
+docker run --rm --network "${project}_default" \
+    --mount "type=bind,source=$PWD/tests/api,target=/source,readonly" \
+    --mount "type=bind,source=$results_dir,target=/results" \
+    -e COFFEESHOP_COLLECTION_API_HOST -e COFFEESHOP_COLLECTION_MANAGER_USERNAME \
+    -e COFFEESHOP_COLLECTION_MANAGER_PASSWORD -e COFFEESHOP_COLLECTION_CASHIER_USERNAME \
+    -e COFFEESHOP_COLLECTION_CASHIER_PASSWORD node:24-bookworm-slim sh -ec '
+        mkdir /tmp/collection
+        cp /source/*.json /source/*.mjs /tmp/collection/
+        cd /tmp/collection
+        npm ci --no-fund --no-audit --silent
+        npm test
+        node run-collection.mjs /results/collection.json
+        if COFFEESHOP_COLLECTION_MANAGER_PASSWORD=intentionally-invalid node run-collection.mjs /results/negative-control.json; then
+            printf "FAIL: invalid credentials unexpectedly passed.\n"
+            exit 1
+        fi
+        printf "PASS: deliberately invalid credentials fail the collection.\n"
+    '
+printf 'Sanitized collection evidence: %s\n' "$results_dir"
