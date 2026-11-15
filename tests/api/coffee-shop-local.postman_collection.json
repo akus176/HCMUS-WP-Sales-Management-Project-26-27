@@ -1,0 +1,95 @@
+{
+  "info": {
+    "_postman_id": "f3e6b901-0d3e-44d1-95e6-1902b0b4c87f",
+    "name": "Coffee Shop API local regression",
+    "description": "Read-only health/catalog checks and validation/authorization failures for the disposable local Docker API. Credentials are supplied only by the selected local environment.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "apiHost", "value": "http://127.0.0.1:5232" },
+    { "key": "managerToken", "value": "" },
+    { "key": "cashierToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 Health",
+      "item": [
+        {
+          "name": "Liveness",
+          "request": { "method": "GET", "header": [], "url": "{{apiHost}}/health" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('API liveness is healthy', function () {", "    pm.response.to.have.status(200);", "    pm.expect(pm.response.text()).to.equal('Healthy');", "});"] } }]
+        },
+        {
+          "name": "Readiness",
+          "request": { "method": "GET", "header": [], "url": "{{apiHost}}/health/ready" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('API and PostgreSQL are ready', function () {", "    pm.response.to.have.status(200);", "    pm.expect(pm.response.text()).to.equal('Healthy');", "});"] } }]
+        }
+      ]
+    },
+    {
+      "name": "02 Authentication and authorization",
+      "item": [
+        {
+          "name": "Anonymous catalog request is rejected",
+          "request": { "method": "GET", "header": [], "url": "{{apiRoot}}/categories" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Protected catalog rejects anonymous requests', function () {", "    pm.response.to.have.status(401);", "});"] } }]
+        },
+        {
+          "name": "Manager login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{managerUsername}}\",\n  \"password\": \"{{managerPassword}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{apiRoot}}/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Manager credentials issue a session', function () {", "    pm.response.to.have.status(200);", "    const body = pm.response.json();", "    pm.expect(body.accessToken).to.be.a('string').and.not.empty;", "    pm.collectionVariables.set('managerToken', body.accessToken);", "});"] } }]
+        },
+        {
+          "name": "Cashier login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"{{cashierUsername}}\",\n  \"password\": \"{{cashierPassword}}\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{apiRoot}}/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Cashier credentials issue a session', function () {", "    pm.response.to.have.status(200);", "    const body = pm.response.json();", "    pm.expect(body.accessToken).to.be.a('string').and.not.empty;", "    pm.collectionVariables.set('cashierToken', body.accessToken);", "});"] } }]
+        },
+        {
+          "name": "Manager can read categories",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{managerToken}}" }], "url": "{{apiRoot}}/categories?limit=20" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Manager can read the category collection', function () {", "    pm.response.to.have.status(200);", "    pm.expect(pm.response.json()).to.be.an('array');", "});"] } }]
+        },
+        {
+          "name": "Cashier cannot create a category",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{cashierToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Denied by API collection\",\n  \"displayOrder\": 0\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{apiRoot}}/categories"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Server rejects category writes without menu.manage', function () {", "    pm.response.to.have.status(403);", "});"] } }]
+        }
+      ]
+    },
+    {
+      "name": "03 Validation and not-found errors",
+      "item": [
+        {
+          "name": "Manager cannot create a blank category",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{managerToken}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \" \",\n  \"displayOrder\": 0\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{apiRoot}}/categories"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Invalid category input returns a validation error', function () {", "    pm.response.to.have.status(400);", "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/problem+json');", "});"] } }]
+        },
+        {
+          "name": "Unknown API route returns not found",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{managerToken}}" }], "url": "{{apiRoot}}/collection-route-that-does-not-exist" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('Unknown API routes return not found', function () {", "    pm.response.to.have.status(404);", "});"] } }]
+        }
+      ]
+    }
+  ]
+}

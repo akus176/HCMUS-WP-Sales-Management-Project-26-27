@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
+using CoffeeShop.Application.Customers;
 using CoffeeShop.Contracts;
+using CoffeeShop.Domain.Common;
 using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,6 +56,79 @@ public sealed class PosApiTests
         Assert.Equal(user.Id, model.Session.Id!.Value);
         Assert.All(calls, call => Assert.Equal("fixture-access", call.Bearer));
         Assert.Contains(calls, call => call.Method == "POST" && call.Path.EndsWith("/confirm"));
+    }
+
+    [Fact]
+    public async Task PosApiSource_UsesAuthenticatedHttpForAllOrderChannelsDiscountAndLoyalty()
+    {
+        var categoryId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        var variantId = Guid.NewGuid();
+        var tableId = Guid.NewGuid();
+        var discountId = Guid.NewGuid();
+        var calls = new List<(string Method, string Path, string? Bearer, string Body)>();
+        var submittedOrders = new List<CreateOrderRequest>();
+        var identity = new Identity(new StaffSession(Guid.NewGuid(), "Test cashier", [], ["orders.create", "orders.confirm", "discounts.request", "loyalty.redeem"]));
+        var session = new StaffSessionManager(identity, new Store());
+        await session.LoginAsync("fixture", "fixture");
+        using var http = new HttpClient(new Handler(async request =>
+        {
+            var path = request.RequestUri!.AbsolutePath;
+            var body = request.Content is null ? string.Empty : await request.Content.ReadAsStringAsync();
+            calls.Add((request.Method.Method, request.RequestUri.PathAndQuery, request.Headers.Authorization?.Parameter, body));
+            object response = path switch
+            {
+                "/api/v1/menu-items" => new[] { new MenuItemResponse(itemId, categoryId, "Drinks", "Tea", null, true,
+                    [new(variantId, "Small", 5m, true)], []) },
+                "/api/v1/categories" => new[] { new CategoryResponse(categoryId, "Drinks", 0, true) },
+                "/api/v1/pos/tables" => new[] { new PosTableResponse(tableId, "T1", 4, false, null) },
+                "/api/v1/orders" when request.Method == HttpMethod.Post => CreateDraft((await request.Content!.ReadFromJsonAsync<CreateOrderRequest>())!),
+                var route when route.EndsWith("/confirm", StringComparison.Ordinal) => Confirmed(Guid.Parse(route.Split('/')[4])),
+                var route when route.EndsWith("/discounts", StringComparison.Ordinal) =>
+                    new DiscountDecisionResponse(discountId, "pending", null, 0m, 5m),
+                var route when route.EndsWith("/loyalty/redeem", StringComparison.Ordinal) =>
+                    new LoyaltyOperationResponse(Guid.NewGuid(), 5, 1m, false),
+                _ => throw new InvalidOperationException($"Unexpected route {path}"),
+            };
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(response) };
+
+            OrderResponse CreateDraft(CreateOrderRequest draft)
+            {
+                submittedOrders.Add(draft);
+                return new(draft.OrderId, "POS-1", draft.Channel!, "draft", draft.Customer?.CustomerId,
+                    draft.TableId, draft.TableId is null ? null : "T1", 5m, 0m, 5m, [], []);
+            }
+
+            OrderResponse Confirmed(Guid id) => new(id, "POS-1", submittedOrders.Single(order => order.OrderId == id).Channel!,
+                "confirmed", null, null, null, 5m, 0m, 5m, [], []);
+        }))
+        { BaseAddress = new Uri("https://example.test/api/v1/") };
+        var source = new ApiPosSource(new AuthenticatedApiClient(http, session), session);
+
+        Assert.Single(await source.MenuAsync(string.Empty));
+        Assert.Single(await source.CategoriesAsync());
+        Assert.Single((await source.OptionsAsync()).Tables);
+        foreach (var channel in new[] { "dine_in", "takeaway", "delivery" })
+        {
+            var customer = channel == "delivery"
+                ? new CustomerOrderSelectionRequest(IsDelivery: true, RecipientName: "Test Recipient", ContactNumber: "5550101", AddressLine: "1 Test St")
+                : new CustomerOrderSelectionRequest();
+            var order = await source.CreateAsync(EntityId.New(), channel,
+                channel == "dine_in" ? new EntityId(tableId) : null, customer,
+                [new(new(itemId), new(variantId), 1, [])]);
+            var confirmed = await source.ConfirmAsync(order.Id, order.Total);
+            Assert.Equal("confirmed", confirmed.Status);
+        }
+        await source.RequestDiscountAsync(new(submittedOrders[0].OrderId), new(discountId), "fixed", 1m, "Service recovery");
+        await source.RedeemAsync(new(submittedOrders[1].OrderId), 5);
+
+        Assert.Equal(new[] { "dine_in", "takeaway", "delivery" }, submittedOrders.Select(order => order.Channel));
+        Assert.Equal(tableId, submittedOrders[0].TableId);
+        Assert.Null(submittedOrders[1].TableId);
+        Assert.Equal("1 Test St", submittedOrders[2].Customer!.AddressLine);
+        Assert.Contains(calls, call => call.Method == "POST" && call.Path.EndsWith("/discounts", StringComparison.Ordinal));
+        Assert.Contains(calls, call => call.Method == "POST" && call.Path.EndsWith("/loyalty/redeem", StringComparison.Ordinal));
+        Assert.All(calls, call => Assert.Equal("fixture-access", call.Bearer));
     }
 
     private static OrderResponse Draft(Guid id, string status) => new(id, "POS-1", "takeaway", status,

@@ -53,6 +53,76 @@ public sealed class ApiOperationsSourceTests
     }
 
     [Fact]
+    public async Task Manager_UsesApiForTableBoardPaymentDiscountCancellationAndBaristaTransitions()
+    {
+        var orderId = Guid.NewGuid();
+        var staffId = Guid.NewGuid();
+        var tableId = Guid.NewGuid();
+        var requests = new List<(string Method, string Path, string? Token)>();
+        using var http = CreateClient(request =>
+        {
+            requests.Add((request.Method.Method, request.RequestUri!.PathAndQuery, request.Headers.Authorization?.Parameter));
+            return request.RequestUri.AbsolutePath switch
+            {
+                "/api/v1/orders" => Json(new[] { new OperationalOrderResponse(orderId, "D-104", "dine_in",
+                    "confirmed", 24m, 0m, "T1", null, null, [Guid.NewGuid()]) }),
+                "/api/v1/pos/tables" => Json(new[] { new PosTableResponse(tableId, "T1", 4, true, orderId) }),
+                "/api/v1/delivery-staff/options" => Json(new[] { new DeliveryStaffResponse(staffId, "Courier One") }),
+                _ => new(HttpStatusCode.NoContent),
+            };
+        });
+        var session = CreateSession(Guid.NewGuid(), "orders.create", "orders.confirm", "orders.fulfill",
+            "payments.record", "discounts.request", "discounts.approve", "orders.cancel", "delivery.assign");
+        var source = new ApiOperationsSource(new AuthenticatedApiClient(http, session), session);
+        var discountId = Guid.NewGuid();
+        var paymentId = Guid.NewGuid();
+
+        var snapshot = await source.LoadAsync();
+        await source.MoveAsync(new(orderId), "preparing");
+        await source.MoveAsync(new(orderId), "ready");
+        await source.RecordPaymentAsync(new(paymentId), new(orderId), "cash", 24m, "drawer-7");
+        await source.DecideDiscountAsync(new(discountId), approve: true);
+        await source.CancelAsync(new(orderId), "Customer changed their mind");
+
+        Assert.Equal(tableId, Assert.Single(snapshot.Tables).Id.Value);
+        Assert.Equal(staffId, Assert.Single(snapshot.DeliveryStaff).Id.Value);
+        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/orders");
+        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/pos/tables");
+        Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/preparing");
+        Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/ready");
+        Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/payments");
+        Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/discounts/{discountId}/approve");
+        Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/cancel");
+        Assert.All(requests, request => Assert.Equal("fixture-access", request.Token));
+    }
+
+    [Fact]
+    public async Task Barista_LoadsFulfillmentBoardAndSendsStateMovesThroughHttp()
+    {
+        var orderId = Guid.NewGuid();
+        var requests = new List<(string Method, string Path, string? Token)>();
+        using var http = CreateClient(request =>
+        {
+            requests.Add((request.Method.Method, request.RequestUri!.PathAndQuery, request.Headers.Authorization?.Parameter));
+            return request.RequestUri.AbsolutePath == "/api/v1/operations/orders"
+                ? Json(new[] { new OperationalOrderResponse(orderId, "T-105", "takeaway", "confirmed", 18m, 0m, null, null, null, []) })
+                : new(HttpStatusCode.NoContent);
+        });
+        var session = CreateSession(Guid.NewGuid(), "orders.fulfill");
+        var source = new ApiOperationsSource(new AuthenticatedApiClient(http, session), session);
+
+        var snapshot = await source.LoadAsync();
+        await source.MoveAsync(new(orderId), "preparing");
+        await source.MoveAsync(new(orderId), "ready");
+
+        Assert.Equal("confirmed", Assert.Single(snapshot.Orders).Status);
+        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/operations/orders");
+        Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/preparing");
+        Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/ready");
+        Assert.All(requests, request => Assert.Equal("fixture-access", request.Token));
+    }
+
+    [Fact]
     public async Task CourierLoadsAssignmentsAndSendsEligibleTransitionsOnce()
     {
         var orderId = Guid.NewGuid();
