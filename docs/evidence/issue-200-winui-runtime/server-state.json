@@ -1,0 +1,103 @@
+{
+  "stock": [
+    {
+      "id": "fd7cce2d-6686-4fa9-846f-7f2a990d84f3",
+      "name": "I200 Verification Beans",
+      "available_quantity": 105.0,
+      "reorder_threshold": 100.0
+    }
+  ],
+  "movements": [
+    {
+      "id": "d68afda5-cf06-4b92-87d8-bec09c039dc2",
+      "quantity_delta": 100.0,
+      "actor_id": "b4c1fef0-c5fc-4ed0-bee6-c78830e68b7a",
+      "reason": "I200 fixture opening balance",
+      "purchase_receipt_id": null
+    },
+    {
+      "id": "be5e949b-746f-40ee-95b8-20c1b9dd22ac",
+      "quantity_delta": -5.0,
+      "actor_id": "b4c1fef0-c5fc-4ed0-bee6-c78830e68b7a",
+      "reason": "I200 native count correction",
+      "purchase_receipt_id": null
+    },
+    {
+      "id": "ce7bebba-8b4e-4b77-b209-72605a3700e0",
+      "quantity_delta": 10.0,
+      "actor_id": "b4c1fef0-c5fc-4ed0-bee6-c78830e68b7a",
+      "reason": "Purchase receipt I200-RECEIPT-001",
+      "purchase_receipt_id": "b610b8ae-3f1b-4a27-a17f-a574c92a44ef"
+    }
+  ],
+  "deliveries": [
+    {
+      "order_id": "39a26056-d0e6-4453-ad22-5894017402d5",
+      "status": "out_for_delivery",
+      "assigned_staff_id": "7b388cf6-7d05-4b5d-8fc1-b069c9fd6531",
+      "failure_reason": null
+    },
+    {
+      "order_id": "c8955c3c-bdea-44a4-b1ba-8a9aea910ca6",
+      "status": "failed",
+      "assigned_staff_id": "7b388cf6-7d05-4b5d-8fc1-b069c9fd6531",
+      "failure_reason": "I200 recipient unavailable"
+    },
+    {
+      "order_id": "ffb9dbc4-8fe8-4d20-a730-062f5a55ebcf",
+      "status": "delivered",
+      "assigned_staff_id": "7b388cf6-7d05-4b5d-8fc1-b069c9fd6531",
+      "failure_reason": null
+    }
+  ],
+  "history": [
+    {
+      "order_id": "39a26056-d0e6-4453-ad22-5894017402d5",
+      "from_status": "unassigned",
+      "to_status": "assigned",
+      "actor_id": "b4c1fef0-c5fc-4ed0-bee6-c78830e68b7a"
+    },
+    {
+      "order_id": "39a26056-d0e6-4453-ad22-5894017402d5",
+      "from_status": "assigned",
+      "to_status": "out_for_delivery",
+      "actor_id": "7b388cf6-7d05-4b5d-8fc1-b069c9fd6531"
+    },
+    {
+      "order_id": "c8955c3c-bdea-44a4-b1ba-8a9aea910ca6",
+      "from_status": "unassigned",
+      "to_status": "assigned",
+      "actor_id": "b4c1fef0-c5fc-4ed0-bee6-c78830e68b7a"
+    },
+    {
+      "order_id": "c8955c3c-bdea-44a4-b1ba-8a9aea910ca6",
+      "from_status": "assigned",
+      "to_status": "out_for_delivery",
+      "actor_id": "7b388cf6-7d05-4b5d-8fc1-b069c9fd6531"
+    },
+    {
+      "order_id": "c8955c3c-bdea-44a4-b1ba-8a9aea910ca6",
+      "from_status": "out_for_delivery",
+      "to_status": "failed",
+      "actor_id": "7b388cf6-7d05-4b5d-8fc1-b069c9fd6531"
+    },
+    {
+      "order_id": "ffb9dbc4-8fe8-4d20-a730-062f5a55ebcf",
+      "from_status": "unassigned",
+      "to_status": "assigned",
+      "actor_id": "b4c1fef0-c5fc-4ed0-bee6-c78830e68b7a"
+    },
+    {
+      "order_id": "ffb9dbc4-8fe8-4d20-a730-062f5a55ebcf",
+      "from_status": "assigned",
+      "to_status": "out_for_delivery",
+      "actor_id": "7b388cf6-7d05-4b5d-8fc1-b069c9fd6531"
+    },
+    {
+      "order_id": "ffb9dbc4-8fe8-4d20-a730-062f5a55ebcf",
+      "from_status": "out_for_delivery",
+      "to_status": "delivered",
+      "actor_id": "7b388cf6-7d05-4b5d-8fc1-b069c9fd6531"
+    }
+  ]
+}

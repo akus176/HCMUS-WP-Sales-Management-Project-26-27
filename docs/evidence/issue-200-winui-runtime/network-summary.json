@@ -1,0 +1,17 @@
+{
+  "last": "2026-11-15T12:39:23.1954653Z",
+  "limitation": "Process-owned connection polling, not continuous packet capture.",
+  "remoteAddresses": [
+    "127.0.0.1"
+  ],
+  "postgresPort55400Observed": false,
+  "remotePorts": [
+    52300
+  ],
+  "observedConnectionRows": 244,
+  "pids": [
+    2392
+  ],
+  "first": "2026-11-15T12:17:09.8036484Z",
+  "samples": 1182
+}

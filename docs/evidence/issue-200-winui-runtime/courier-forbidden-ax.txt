@@ -1,0 +1,104 @@
+Window: "Corner Cafe · Service console", App: CoffeeShop.WinUI.exe.
+	0 window Corner Cafe · Service console Secondary Actions: Raise
+		1 pane Non Client Input Sink Window
+		2 pane AppWindow Custom Title Bar
+			3 button Minimize ID: Minimize
+			4 button Maximize ID: Maximize
+			5 button Close ID: Close
+		6 pane
+			7 pane
+				8 text Corner Cafe
+				9 text SERVICE CONSOLE
+				10 text LOCAL · CONNECTED ID: ConnectionStatusText
+				11 text 19:32 ID: ClockText
+				12 button Sign out ID: SignOutButton
+				13 custom ID: Nav
+					14 window Secondary Actions: Raise ID: PaneRoot
+						15 text Corner Cafe
+						16 text SERVICE CONSOLE
+						17 pane ID: MenuItemsScrollViewer
+							18 group ID: MenuItemsHost
+								19 text SERVICE
+								20 list item (selectable) Open Service board workspace
+									21 text II
+									22 text SERVICE BOARD
+						23 text WINUI · HTTP API ID: ClientModeText
+						24 pane ID: FooterItemsScrollViewer
+							25 group ID: FooterMenuItemsHost
+					26 text SERVICE ID: BreadcrumbGroup
+					27 text /
+					28 text SERVICE BOARD ID: BreadcrumbText
+					29 text SUN 15 NOV ID: DateText
+					30 pane
+						31 text ● SERVICE / LIVE FLOOR
+						32 text Service board
+						33 text 3 active tickets · Select a note to manage its order ID: SummaryText
+						34 combo box (disabled) Service board operator ID: OperatorBox
+						35 button Refresh service board ID: RefreshButton
+							36 text Refresh
+						37 button Open Counter
+							38 text Open Counter
+						115 status bar ID: Status
+							116 text Error icon ID: StandardIcon
+							117 text Authorization ID: Title
+							118 text The request could not be completed. ID: Message
+						39 text Confirmed
+						40 text 0 ID: ConfirmedCount
+						41 list Confirmed orders Description: Select a ticket for details. Use its action button or drag it to the next column. ID: ConfirmedList
+						42 text No tickets here ID: ConfirmedEmpty
+						43 text Preparing
+						44 text 0 ID: PreparingCount
+						45 list Preparing orders Description: Select a ticket for details. Use its action button or drag it to the next column. ID: PreparingList
+						46 text No tickets here ID: PreparingEmpty
+						47 text Ready
+						48 text 3 ID: ReadyCount
+						49 list Ready orders Description: Select a ticket for details. Use its action button or drag it to the next column. ID: ReadyList
+							119 list item (selectable) ServiceBoardCard { Order = OperationalOrder { Id = 39a26056-d0e6-4453-ad22-5894017402d5, OrderNumber = POS-39a26056d0e64453ad22589401, Channel = delivery, Status = ready, Total = 0, PaidAmount = 0, TableNumber = , DeliveryStatus = assigned, AssignedStaffId = , PendingDiscountIds = CoffeeShop.Domain.Common.EntityId[], OutstandingBalance = 0, CanStartPreparing = False, CanMarkReady = False, CanComplete = True, CanRecordPayment = True, CanCancel = True, CanAssignDelivery = False, CanStartDelivery = True, CanFinishDelivery = False }, Detail = PosOrderDetail { Id = 39a26056-d0e6-4453-ad22-5894017402d5, OrderNumber = POS-39a26056d0e64453ad22589401, Channel = delivery, Status = ready, CustomerId = , CustomerName = , TableId = , TableNumber = , RecipientName = I200 conflict, ContactNumber = 0000000000, AddressLine = Synthetic verification address, CustomerAddressId = , Subtotal = 0, DiscountTotal = 0, Total = 0, Lines = CoffeeShop.Application.Sales.PosLineSnapshot[], Discounts = CoffeeShop.Application.Sales.PosDiscountSummary[] }, IsSelected = False, CanInteract = False, ShowFinancials = False, Status = Ready, Number = POS-39a26056d0e64453ad22589401, ChannelLabel = Delivery, Headline = Walk-in, Items = Order details available on selection, Footer = Delivery, BalanceLabel = , NextStatus = completed, ActionLabel = Complete, ActionEnabled = False, ActionName = Complete: POS-39a26056d0e64453ad22589401, ActionHint = Choose an operator and wait for the board to finish loading. }
+								120 text POS-39a26056d0e64453ad22589401
+								121 text Delivery
+								122 text Walk-in
+								123 text Order details available on selection
+								124 text
+								125 button (disabled) Complete: POS-39a26056d0e64453ad22589401
+									126 text Complete
+							127 list item (selectable) ServiceBoardCard { Order = OperationalOrder { Id = c8955c3c-bdea-44a4-b1ba-8a9aea910ca6, OrderNumber = POS-c8955c3cbdea44a4b1ba8a9aea, Channel = delivery, Status = ready, Total = 0, PaidAmount = 0, TableNumber = , DeliveryStatus = assigned, AssignedStaffId = , PendingDiscountIds = CoffeeShop.Domain.Common.EntityId[], OutstandingBalance = 0, CanStartPreparing = False, CanMarkReady = False, CanComplete = True, CanRecordPayment = True, CanCancel = True, CanAssignDelivery = False, CanStartDelivery = True, CanFinishDelivery = False }, Detail = PosOrderDetail { Id = c8955c3c-bdea-44a4-b1ba-8a9aea910ca6, OrderNumber = POS-c8955c3cbdea44a4b1ba8a9aea, Channel = delivery, Status = ready, CustomerId = , CustomerName = , TableId = , TableNumber = , RecipientName = I200 fail, ContactNumber = 0000000000, AddressLine = Synthetic verification address, CustomerAddressId = , Subtotal = 0, DiscountTotal = 0, Total = 0, Lines = CoffeeShop.Application.Sales.PosLineSnapshot[], Discounts = CoffeeShop.Application.Sales.PosDiscountSummary[] }, IsSelected = True, CanInteract = False, ShowFinancials = False, Status = Ready, Number = POS-c8955c3cbdea44a4b1ba8a9aea, ChannelLabel = Delivery, Headline = Walk-in, Items = Order details available on selection, Footer = Selected, BalanceLabel = , NextStatus = completed, ActionLabel = Complete, ActionEnabled = False, ActionName = Complete: POS-c8955c3cbdea44a4b1ba8a9aea, ActionHint = Choose an operator and wait for the board to finish loading. }
+								128 text POS-c8955c3cbdea44a4b1ba8a9aea
+								129 text Delivery
+								130 text Walk-in
+								131 text Order details available on selection
+								132 text
+								133 button (disabled) Complete: POS-c8955c3cbdea44a4b1ba8a9aea
+									134 text Complete
+							135 list item (selectable) ServiceBoardCard { Order = OperationalOrder { Id = ffb9dbc4-8fe8-4d20-a730-062f5a55ebcf, OrderNumber = POS-ffb9dbc48fe84d20a730062f5a, Channel = delivery, Status = ready, Total = 0, PaidAmount = 0, TableNumber = , DeliveryStatus = assigned, AssignedStaffId = , PendingDiscountIds = CoffeeShop.Domain.Common.EntityId[], OutstandingBalance = 0, CanStartPreparing = False, CanMarkReady = False, CanComplete = True, CanRecordPayment = True, CanCancel = True, CanAssignDelivery = False, CanStartDelivery = True, CanFinishDelivery = False }, Detail = PosOrderDetail { Id = ffb9dbc4-8fe8-4d20-a730-062f5a55ebcf, OrderNumber = POS-ffb9dbc48fe84d20a730062f5a, Channel = delivery, Status = ready, CustomerId = , CustomerName = , TableId = , TableNumber = , RecipientName = I200 complete, ContactNumber = 0000000000, AddressLine = Synthetic verification address, CustomerAddressId = , Subtotal = 0, DiscountTotal = 0, Total = 0, Lines = CoffeeShop.Application.Sales.PosLineSnapshot[], Discounts = CoffeeShop.Application.Sales.PosDiscountSummary[] }, IsSelected = False, CanInteract = False, ShowFinancials = False, Status = Ready, Number = POS-ffb9dbc48fe84d20a730062f5a, ChannelLabel = Delivery, Headline = Walk-in, Items = Order details available on selection, Footer = Delivery, BalanceLabel = , NextStatus = completed, ActionLabel = Complete, ActionEnabled = False, ActionName = Complete: POS-ffb9dbc48fe84d20a730062f5a, ActionHint = Choose an operator and wait for the board to finish loading. }
+								136 text POS-ffb9dbc48fe84d20a730062f5a
+								137 text Delivery
+								138 text Walk-in
+								139 text Order details available on selection
+								140 text
+								141 button (disabled) Complete: POS-ffb9dbc48fe84d20a730062f5a
+									142 text Complete
+						74 pane ID: InspectorScroll
+							75 text TICKET POS-c8955c3cbdea44a4b1ba8a9aea ID: SelectedKicker
+							76 text Delivery ID: SelectedTitle
+							77 text Ready · Delivery ID: SelectedState
+							78 text Walk-in ID: SelectedCustomer
+							79 list Selected order lines ID: OrderLinesList
+							80 text Order total
+							81 text Payment received. This ticket is ready to complete. ID: ActionHint
+							82 button Delivery ID: DeliverySection
+								83 text Delivery
+								103 text Status: Assigned ID: DeliverySummary
+								104 text I200 fail 0000000000 Synthetic verification address ID: DeliveryAddress
+								105 button Start delivery ID: OutButton
+									106 text Start delivery
+						84 scroll bar (settable, float) Vertical Value: 352.7447204589844 ID: VerticalScrollBar
+							143 button Vertical Small Decrease ID: VerticalSmallDecrease
+							144 button Vertical Large Decrease ID: VerticalLargeDecrease
+							145 button Vertical Large Increase ID: VerticalLargeIncrease
+							146 button Vertical Small Increase ID: VerticalSmallIncrease
+		85 title bar (settable, string) Value: Corner Cafe · Service console
+			86 menu bar System ID: MenuBar
+				87 menu item System
+			88 button Minimize
+			89 button Maximize
+			90 button Close

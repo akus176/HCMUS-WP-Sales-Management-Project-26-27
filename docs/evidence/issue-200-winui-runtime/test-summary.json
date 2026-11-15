@@ -1,0 +1,15 @@
+{
+  "passed": 151,
+  "failed": 0,
+  "configuration": "Release",
+  "total": 151,
+  "sourceCommit": "74cad992b7fc99a71d79e793ee0bfcef0f322e00",
+  "reasonCases": [
+    "empty rejected",
+    "whitespace rejected",
+    "explicit reason accepted",
+    "255 characters accepted",
+    "256 characters rejected"
+  ],
+  "notExecuted": 0
+}

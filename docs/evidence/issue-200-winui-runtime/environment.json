@@ -1,0 +1,30 @@
+{
+  "target": "net10.0-windows10.0.19041.0/win-x64",
+  "winuiApi": "http://127.0.0.1:52300/api/v1",
+  "baseCommit": "fba422ea3ad45e6d7ee62342a5082dc6bd61ff97",
+  "postgres": "16.15",
+  "database": "disposable issue200, loopback:55400",
+  "os": "Microsoft Windows NT 10.0.26300.0",
+  "sdk": "10.0.404",
+  "configuration": "Release",
+  "clientSha256": "59CB0550CB5443BC0886FFF7F9DBE0612AB601809F3550F6AC3B102A1E45CB22",
+  "roles": {
+    "issue200_courier": [
+      "DeliveryStaff"
+    ],
+    "issue200_manager": [
+      "Manager"
+    ],
+    "issue200_cashier": [
+      "Cashier"
+    ]
+  },
+  "api": "http://127.0.0.1:52302/api/v1",
+  "sourceSha256": {
+    "src/CoffeeShop.WinUI/Pages/StockRoomPage.xaml": "986402AAC24C3ED2E312168F5966BFC2620F6E401F4330B155A2D2F387FDEC94",
+    "src/CoffeeShop.WinUI/ViewModels/StockRoomInteraction.cs": "942220C995B047AE5B11473547C16C4C2321AFCAEE4B5383DC03E11A33001369",
+    "src/CoffeeShop.WinUI/Pages/StockRoomPage.xaml.cs": "6BE3FDF143C06EBD0005EDC664F21BA49F2316320EEC667BFC5DD2DA98360492",
+    "tests/CoffeeShop.WinUI.Tests/StockRoomInteractionTests.cs": "CCD19A5624999EE14B68A7D353B58B403513B779DCEF092072D3C957B940D30F"
+  },
+  "sourceCommit": "74cad992b7fc99a71d79e793ee0bfcef0f322e00"
+}
