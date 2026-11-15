@@ -1,0 +1,11 @@
+{
+  "adjustmentDelta": -5.0,
+  "expectedBalance": 105,
+  "receiptMovementCount": 1,
+  "actorMatches": true,
+  "repeatPostStatus": 409,
+  "adjustmentCount": 1,
+  "receiptDelta": 10.0,
+  "authoritativeBalance": 105.0,
+  "managerCourierQueueStatus": 403
+}

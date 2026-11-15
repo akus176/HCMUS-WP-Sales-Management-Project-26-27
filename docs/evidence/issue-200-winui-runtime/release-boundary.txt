@@ -1,0 +1,3 @@
+PASS: WinUI Release output contains no PostgreSQL infrastructure, Npgsql, Entity Framework, or PostgreSQL connection-setting references.
+Manifest: <windows-checkout>\src\CoffeeShop.WinUI\bin\Release\net10.0-windows10.0.19041.0\win-x64\CoffeeShop.WinUI.deps.json
+Assembly: <windows-checkout>\src\CoffeeShop.WinUI\bin\Release\net10.0-windows10.0.19041.0\win-x64\CoffeeShop.WinUI.dll
