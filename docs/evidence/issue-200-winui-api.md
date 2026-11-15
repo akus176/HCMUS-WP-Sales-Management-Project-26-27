@@ -56,7 +56,7 @@ The [database audit snapshot](issue-200-winui-runtime/server-state.json) has exa
 
 Exactly ten native business POSTs were observed: adjustment 200; receipt post 204; two assignments 204; forbidden start 403; stale start 409; fail start/fail 204/204; complete start/complete 204/204. Successful writes are followed by authoritative GETs. No duplicate successful business POST was observed.
 
-[Process samples](issue-200-winui-runtime/winui-network.jsonl), with [summary](issue-200-winui-runtime/network-summary.json), contain **1,182 samples** of the rebuilt native process (PID 2392), 12:17:09–12:39:23 UTC. All 244 observed connection rows target **127.0.0.1:52300**; none target PostgreSQL port 55400. This is process-owned connection polling, not uninterrupted packet capture. The complementary Release dependency/assembly scan passed: no PostgreSQL infrastructure, Npgsql, EF persistence or PostgreSQL connection settings in client output.
+[Process samples](issue-200-winui-runtime/winui-network.jsonl), with [summary](issue-200-winui-runtime/network-summary.json), contain **1,182 samples** of the rebuilt native process (PID 2392), 12:17:09–12:39:23 UTC. All 244 observed connection rows target **127.0.0.1:52300**; none target PostgreSQL port 55400. This is process-owned connection polling, not uninterrupted packet capture. The complementary [Release dependency/assembly scan](issue-200-winui-runtime/release-boundary.txt) passed: no PostgreSQL infrastructure, Npgsql, EF persistence or PostgreSQL connection settings in client output.
 
 ## Reproduction
 
@@ -94,7 +94,7 @@ Use a physical Windows checkout and a fresh disposable database. All role fault 
 
 7. Independently GET the ingredient, movements, Manager orders and Courier queue through backend 52302. Repeat receipt posting and completion (409); check the cross-role denials (403). Query `inventory.stock_movements`, `sales.deliveries` and `sales.delivery_status_history` for fixture IDs and assert quantities, states, counts and actors above. Capture synthetic UI and sanitized request/connection fields.
 
-The observed run passed the listed build/tests, targeted formatting, OpenSpec strict validation and `git diff --check`. Runtime services and plaintext disposable login/configuration files are cleaned up after collection.
+The observed run passed the listed build/tests, targeted formatting, OpenSpec strict validation and `git diff --check`. The API, trace proxy and disposable PostgreSQL services were stopped after collection. Automatic approval review blocked deletion of the three temporary plaintext credential/configuration files; those remain outside the repository for manual local cleanup. No secret files were committed.
 
 ## Scope and review gate
 
