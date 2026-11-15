@@ -471,7 +471,7 @@ public sealed partial class StockRoomPage : Page
         if (selectedIngredientRow is { } selected) adjustmentDrafts.Remember(selected.Id, DeltaInputBox.Text, ReasonInputBox.Text);
         var ingredient = rawIngredients.FirstOrDefault(item => item.Id == selectedIngredientRow?.Id);
         var preview = StockAdjustmentPreview.Create(ingredient, DeltaInputBox.Text,
-            DrawerOperatorBox.SelectedItem is PosStaffOption || session.Operator is not null);
+            DrawerOperatorBox.SelectedItem is PosStaffOption || session.Operator is not null, ReasonInputBox.Text);
         RecordAdjustmentButton.IsEnabled = !isBusy && preview.CanSubmit;
         AdjustmentHintText.Text = preview.Hint;
         BeginAdjustmentButton.IsEnabled = !isBusy && selectedIngredientRow?.IsActive == true;
@@ -528,7 +528,11 @@ public sealed partial class StockRoomPage : Page
         }
 
         var reason = ReasonInputBox.Text?.Trim();
-        if (string.IsNullOrWhiteSpace(reason)) reason = "Manual stock adjustment";
+        if (string.IsNullOrWhiteSpace(reason) || reason.Length > 255)
+        {
+            ShowFeedback(WorkflowFeedback.Validation("reason", "Enter an adjustment reason of at most 255 characters."));
+            return;
+        }
 
         var op = App.IsApiMode ? staffOptions.FirstOrDefault(s => s.Id == session.Id)
             : DrawerOperatorBox.SelectedItem as PosStaffOption ?? session.Operator;

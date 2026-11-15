@@ -39,7 +39,7 @@ public sealed class StockAdjustmentDrafts
 
 public sealed record StockAdjustmentPreview(decimal? Balance, bool CanSubmit, string Hint)
 {
-    public static StockAdjustmentPreview Create(Ingredient? ingredient, string quantity, bool hasActor)
+    public static StockAdjustmentPreview Create(Ingredient? ingredient, string quantity, bool hasActor, string reason)
     {
         if (ingredient is null) return new(null, false, "Select an ingredient first.");
         if (!ingredient.IsActive) return new(null, false, "Inactive ingredients cannot be adjusted.");
@@ -50,6 +50,8 @@ public sealed record StockAdjustmentPreview(decimal? Balance, bool CanSubmit, st
         var balance = ingredient.AvailableQuantity + delta;
         if (balance < 0 || balance > MeasuredQuantity.MaximumValue) return new(balance, false, "The resulting balance must stay within the allowed stock range.");
         if (!hasActor) return new(balance, false, "Choose the staff operator for this movement.");
+        if (string.IsNullOrWhiteSpace(reason) || reason.Trim().Length > 255)
+            return new(balance, false, "Enter an adjustment reason of at most 255 characters.");
         return new(balance, true, "Ready to record. This movement will remain in the audit history.");
     }
 }

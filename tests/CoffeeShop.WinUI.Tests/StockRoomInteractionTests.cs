@@ -53,9 +53,33 @@ public sealed class StockRoomInteractionTests
     {
         var now = new UtcTimestamp(DateTimeOffset.UtcNow);
         var ingredient = new Ingredient(EntityId.New(), "Beans", "g", now, now, availableQuantity: 100);
-        var preview = StockAdjustmentPreview.Create(ingredient, quantity, actor);
+        var preview = StockAdjustmentPreview.Create(ingredient, quantity, actor, "Count correction");
         Assert.Equal(expected, preview.CanSubmit);
         Assert.False(string.IsNullOrWhiteSpace(preview.Hint));
         if (expected) Assert.Equal(95m, preview.Balance);
+    }
+
+    [Theory]
+    [InlineData("", false)]
+    [InlineData("   ", false)]
+    [InlineData("Count correction", true)]
+    public void Submission_RequiresAnExplicitAuditReason(string reason, bool expected)
+    {
+        var now = new UtcTimestamp(DateTimeOffset.UtcNow);
+        var ingredient = new Ingredient(EntityId.New(), "Beans", "g", now, now, availableQuantity: 100);
+        var preview = StockAdjustmentPreview.Create(ingredient, "-5", true, reason);
+        Assert.Equal(expected, preview.CanSubmit);
+        Assert.Equal(95m, preview.Balance);
+    }
+
+    [Theory]
+    [InlineData(255, true)]
+    [InlineData(256, false)]
+    public void Submission_EnforcesTheAuditReasonLength(int length, bool expected)
+    {
+        var now = new UtcTimestamp(DateTimeOffset.UtcNow);
+        var ingredient = new Ingredient(EntityId.New(), "Beans", "g", now, now, availableQuantity: 100);
+        var preview = StockAdjustmentPreview.Create(ingredient, "-5", true, new string('x', length));
+        Assert.Equal(expected, preview.CanSubmit);
     }
 }

@@ -982,10 +982,10 @@
                                                         <TextBlock Text="Reason" Style="{StaticResource StockFine}" FontSize="11" VerticalAlignment="Center" />
                                                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="7" VerticalAlignment="Center">
                                                             <Rectangle Width="14" Height="1" Fill="{StaticResource ConsoleRuleBrush}" VerticalAlignment="Center" />
-                                                            <TextBlock Text="OPTIONAL" Style="{StaticResource StockFine}" FontSize="8" CharacterSpacing="140" Foreground="{StaticResource ConsoleAccentTextBrush}" VerticalAlignment="Center" />
+                                                            <TextBlock Text="REQUIRED" Style="{StaticResource StockFine}" FontSize="8" CharacterSpacing="140" Foreground="{StaticResource ConsoleAccentTextBrush}" VerticalAlignment="Center" />
                                                         </StackPanel>
                                                     </Grid>
-                                                    <TextBox x:Name="ReasonInputBox" PlaceholderText="Why did the stock change?" AcceptsReturn="True" Height="48" MinHeight="48" TextWrapping="Wrap" Style="{StaticResource ConsoleFieldStyle}" FontSize="12" PlaceholderForeground="{StaticResource ConsoleMutedInkBrush}" AutomationProperties.Name="Adjustment reason (optional)" AutomationProperties.HelpText="Leave blank to record a manual stock adjustment." TextChanged="OnAdjustmentInputChanged" />
+                                                    <TextBox x:Name="ReasonInputBox" PlaceholderText="Why did the stock change?" AcceptsReturn="True" Height="48" MinHeight="48" MaxLength="255" TextWrapping="Wrap" Style="{StaticResource ConsoleFieldStyle}" FontSize="12" PlaceholderForeground="{StaticResource ConsoleMutedInkBrush}" AutomationProperties.Name="Adjustment reason (required)" AutomationProperties.HelpText="Enter the reason recorded in the stock movement history." TextChanged="OnAdjustmentInputChanged" />
                                                     <TextBlock Text="Recorded by" Style="{StaticResource StockFine}" Margin="0,8,0,2" FontSize="11" />
                                                     <Button x:Name="ActorButton" Style="{StaticResource StockActorField}" AutomationProperties.Name="Change adjustment staff operator" AutomationProperties.HelpText="Select the staff operator recorded on this stock movement">
                                                         <Button.Flyout>
@@ -999,7 +999,7 @@
                                                         <TextBlock x:Name="ActorDisplayText" Text="Choose staff operator · change" FontSize="11" TextTrimming="CharacterEllipsis" />
                                                     </Button>
                                                     <TextBlock x:Name="AuditActorNote" Text="This movement cannot be edited or deleted after saving." FontSize="10" TextWrapping="Wrap" Foreground="{StaticResource ConsoleMutedInkBrush}" Margin="0,3,0,0" />
-                                                    <TextBlock x:Name="AdjustmentHintText" Text="Enter a quantity change. A reason is optional but helps the audit trail." FontSize="11" Foreground="{StaticResource ConsoleMutedInkBrush}" TextWrapping="Wrap" Margin="0,8,0,6" AutomationProperties.LiveSetting="Polite" />
+                                                    <TextBlock x:Name="AdjustmentHintText" Text="Enter a quantity change and a reason for the audit trail." FontSize="11" Foreground="{StaticResource ConsoleMutedInkBrush}" TextWrapping="Wrap" Margin="0,8,0,6" AutomationProperties.LiveSetting="Polite" />
                                                 </StackPanel>
                                             </StackPanel>
                                             <Border Grid.Row="1" VerticalAlignment="Bottom" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Padding="0,8,0,0" Margin="0,24,0,0" x:Name="RecentHistoryPanel">
