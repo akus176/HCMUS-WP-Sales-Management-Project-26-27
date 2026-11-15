@@ -32,24 +32,26 @@ function requests(items) {
 // raw CLI summaries: authentication responses contain session credentials.
 export function evidence(summary, expectedRequests, runnerError = false) {
   const executions = summary?.run?.executions ?? [];
-  const failures = summary?.run?.failures?.length ?? 0;
-  const assertions = summary?.run?.stats?.assertions?.total ?? 0;
+  const tests = summary?.run?.summary?.tests;
+  const assertions = tests?.executed ?? 0;
+  const failures = (tests?.failed ?? 0) + executions.reduce((count, execution) => count + (execution.errors?.length ?? 0), 0);
   return {
-    passed: !runnerError && expectedRequests > 0 && failures === 0 && executions.length === expectedRequests && assertions > 0 &&
-      executions.every(execution => execution.response && execution.assertions?.length > 0 &&
-        execution.assertions.every(assertion => !assertion.error && !assertion.skipped)),
+    passed: !runnerError && !summary?.run?.runError && expectedRequests > 0 && failures === 0 &&
+      summary?.run?.summary?.executedRequests?.executed === expectedRequests &&
+      executions.length === expectedRequests && assertions > 0 && tests?.passed === assertions && tests?.skipped === 0 &&
+      executions.every(execution => execution.requestExecuted && execution.response && execution.tests?.length > 0 &&
+        execution.tests.every(test => test.status === 'passed')),
     expectedRequests,
     executedRequests: executions.length,
     assertions,
     failures,
     requests: executions.map(execution => ({
-      name: execution.item.name,
-      method: execution.request.method,
-      path: new URL(typeof execution.request.url === 'string' ? execution.request.url : execution.request.url.raw ??
-        `${execution.request.url.protocol}://${execution.request.url.host.join('.')}/${execution.request.url.path.join('/')}`).pathname,
+      name: execution.requestExecuted?.name ?? null,
+      method: execution.requestExecuted?.method ?? null,
+      path: execution.requestExecuted?.url ? `/${execution.requestExecuted.url.path.join('/')}` : null,
       status: execution.response?.code ?? null,
-      assertions: (execution.assertions ?? []).map(assertion => ({
-        name: assertion.assertion, passed: !assertion.error,
+      assertions: (execution.tests ?? []).map(test => ({
+        name: test.name, passed: test.status === 'passed',
       })),
     })),
   };

@@ -29,10 +29,11 @@ test('One host override updates both health and business URLs without editing pa
 test('Published evidence omits secrets even from failing responses and error messages', () => {
   const secret = 'never-export-this-session-secret';
   const summary = { environment: { password: secret }, run: {
-    stats: { assertions: { total: 1 } }, failures: [{ message: secret }],
-    executions: [{ item: { name: 'Manager login' },
-      request: { method: 'POST', url: `http://localhost/api/v1/auth/login?private=${secret}`, headers: { Authorization: secret } },
-      response: { code: 401, body: secret }, assertions: [{ assertion: 'Session required', error: { message: secret } }],
+    summary: { executedRequests: { executed: 1 }, tests: { executed: 1, failed: 1, passed: 0, skipped: 0 } },
+    executions: [{ requestExecuted: { name: 'Manager login', method: 'POST',
+      url: { path: ['api', 'v1', 'auth', 'login'], query: [{ key: 'private', value: secret }] }, headers: { Authorization: secret } },
+      response: { code: 401, body: secret }, tests: [{ name: 'Session required', status: 'failed', error: { message: secret } }],
+      errors: [{ message: secret }],
     }],
   } };
   const result = evidence(summary, 1);
@@ -45,6 +46,22 @@ test('Empty, incomplete and transport-failed runs cannot pass', () => {
   assert.equal(evidence(undefined, 9).passed, false);
   assert.equal(evidence({ run: { executions: [], failures: [], stats: { assertions: { total: 0 } } } }, 0).passed, false);
   assert.equal(evidence({ run: { executions: [], failures: [], stats: { assertions: { total: 1 } } } }, 1, true).passed, false);
+});
+
+test('A complete Postman CLI report passes, while skipped assertions cannot pass', () => {
+  const summary = { run: { summary: {
+    executedRequests: { executed: 1 }, tests: { executed: 1, failed: 0, passed: 1, skipped: 0 },
+  }, executions: [{ requestExecuted: { name: 'Health', method: 'GET', url: { path: ['health'] } },
+    response: { code: 200 }, tests: [{ name: 'Healthy', status: 'passed' }], errors: [],
+  }] } };
+  assert.equal(evidence(summary, 1).passed, true);
+  assert.equal(evidence(summary, 2).passed, false);
+  assert.equal(evidence(summary, 1, true).passed, false);
+  summary.run.executions[0].errors.push({ source: 'request' });
+  assert.equal(evidence(summary, 1).passed, false);
+  summary.run.executions[0].errors = [];
+  summary.run.summary.tests.skipped = 1;
+  assert.equal(evidence(summary, 1).passed, false);
 });
 
 test('A configuration failure replaces a previous passing result before making requests', async () => {
