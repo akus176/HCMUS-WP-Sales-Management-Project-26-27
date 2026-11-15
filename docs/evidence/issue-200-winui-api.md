@@ -49,3 +49,21 @@ The PR is ready for human code review; keep the issue and OpenSpec task checkbox
 5. Capture sanitized UI and request evidence showing business requests go to `/api/v1` over HTTP and no WinUI-to-PostgreSQL connection occurs. Preserve request method/path/status only; redact authorization headers, account details, and contact/address data.
 
 Keep OpenSpec tasks 11.3, 11.4, and 11.7, and issue #200, unchecked until the corresponding full task scopes and Windows runtime evidence are reviewed. Android and cross-client S5 behavior remain out of scope for this issue.
+
+## Follow-up verification on 2026-11-15
+
+On the task branch, the Ubuntu .NET 10 SDK run of
+`dotnet test tests/CoffeeShop.WinUI.Tests/CoffeeShop.WinUI.Tests.csproj --configuration Release`
+passed **146 tests, 0 failed, 0 skipped**. The added tests exercise authenticated
+HTTP routes for catalog and recipe lifecycle, suppliers and ingredients, customer
+profiles and saved addresses, dine-in/takeaway/delivery drafts, table reads,
+payments, discounts, loyalty redemption, order cancellation, barista transitions,
+and the existing inventory and delivery workflows.
+
+The Windows `scripts/verify-winui-api-release.ps1` run rebuilt Release with
+**0 warnings and 0 errors** and passed its dependency and connection-setting scan.
+The native Release client opened to the sign-in window. At that point the process
+had no open TCP connections; no sign-in or business workflow was exercised, so
+this is not evidence of authenticated API traffic or a complete runtime network
+trace. Keep tasks 11.3, 11.4, and 11.7 unchecked until the signed-in WinUI API
+workflow and sanitized request trace required above are captured and reviewed.
