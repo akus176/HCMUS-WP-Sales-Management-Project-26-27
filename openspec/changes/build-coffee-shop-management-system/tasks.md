@@ -85,7 +85,7 @@
 - [ ] 9.5 Expose customer, address, and loyalty endpoints; verify API tests cover optional customers and loyalty balance changes
 - [ ] 9.6 Expose order, table, payment, discount, preparation, cancellation, and delivery endpoints; verify API tests cover each channel and invalid state transitions
 - [ ] 9.7 Expose report endpoints with date-range validation and consistent metrics; verify API results match direct application-query integration tests
-- [ ] 9.8 Add an API test collection and local environment definition covering representative successful and failing requests; verify it runs against the Docker API without manual payload editing
+- [x] 9.8 Add an API test collection and local environment definition covering representative successful and failing requests; verify it runs against the Docker API without manual payload editing
 
 ## 10. Authentication and Authorization
 
