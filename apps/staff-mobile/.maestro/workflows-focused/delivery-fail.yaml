@@ -1,0 +1,23 @@
+appId: com.coffeeshop.staffmobile
+---
+- scrollUntilVisible:
+    element: Mark failed
+    direction: DOWN
+- tapOn: Mark failed
+- assertVisible: A failure reason is required.
+- scrollUntilVisible:
+    element: Failure reason
+    direction: DOWN
+- tapOn: Failure reason
+- inputText: Customer unavailable
+- hideKeyboard
+- scrollUntilVisible:
+    element: Mark failed
+    direction: DOWN
+- tapOn: Mark failed
+- scrollUntilVisible:
+    element: Delivery failed. Confirmed by the service.
+    direction: UP
+- assertVisible: Delivery failed. Confirmed by the service.
+- assertNotVisible: ${MAESTRO_PRIVATE_LABEL}
+- assertNotVisible: Mark failed

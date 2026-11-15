@@ -1,0 +1,10 @@
+appId: com.coffeeshop.staffmobile
+---
+- scrollUntilVisible:
+    element: Start delivery
+    direction: DOWN
+- tapOn: Start delivery
+- scrollUntilVisible:
+    element: ${MAESTRO_EXPECTED}
+    direction: UP
+- assertVisible: ${MAESTRO_EXPECTED}

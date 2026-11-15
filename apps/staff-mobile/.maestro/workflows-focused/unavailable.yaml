@@ -1,0 +1,9 @@
+appId: com.coffeeshop.staffmobile
+---
+- openLink: coffeeshop-staff:///notifications/${MAESTRO_KIND}/${MAESTRO_RECORD_ID}
+- extendedWaitUntil:
+    visible: ${MAESTRO_EXPECTED}
+    timeout: 30000
+- assertVisible: ${MAESTRO_EXPECTED}
+- assertNotVisible: ${MAESTRO_FORBIDDEN_ACTION}
+- assertNotVisible: ${MAESTRO_PRIVATE_LABEL}

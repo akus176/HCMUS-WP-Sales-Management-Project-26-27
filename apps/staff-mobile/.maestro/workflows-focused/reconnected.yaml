@@ -1,0 +1,13 @@
+appId: com.coffeeshop.staffmobile
+---
+- scrollUntilVisible:
+    element: 'Online.*'
+    direction: UP
+- extendedWaitUntil:
+    visible: 'Online.*'
+    timeout: 30000
+- scrollUntilVisible:
+    element: ${MAESTRO_EXPECTED}
+    direction: DOWN
+- assertVisible: ${MAESTRO_EXPECTED}
+- assertNotVisible: ${MAESTRO_SUCCESS_LABEL}

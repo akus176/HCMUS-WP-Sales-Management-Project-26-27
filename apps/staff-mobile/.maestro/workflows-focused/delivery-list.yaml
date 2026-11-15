@@ -1,0 +1,18 @@
+appId: com.coffeeshop.staffmobile
+---
+- openLink: coffeeshop-staff:///modules/delivery
+- extendedWaitUntil:
+    visible: Active deliveries
+    timeout: 30000
+- repeat:
+    times: ${MAESTRO_PAGE_SKIP}
+    commands:
+      - scrollUntilVisible:
+          element: Next page
+          direction: DOWN
+      - tapOn: Next page
+- scrollUntilVisible:
+    element: Open delivery ${MAESTRO_OWN_ORDER}
+    direction: DOWN
+- assertNotVisible: Open delivery ${MAESTRO_OTHER_ORDER}
+- assertNotVisible: ${MAESTRO_PRIVATE_LABEL}
