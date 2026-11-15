@@ -4,7 +4,12 @@ const affectedViews: Readonly<Record<string, readonly string[]>> = {
   order: ['preparation', 'sales', 'delivery', 'discount-approvals'],
   discount: ['discount-approvals', 'sales'],
   payment: ['sales'],
-  inventory: ['inventory'],
+  inventory: [
+    'inventory-balances',
+    'inventory-movements',
+    'purchase-receipts',
+    'purchase-receipt',
+  ],
   delivery: ['delivery', 'sales'],
   account: ['administration'],
 };
