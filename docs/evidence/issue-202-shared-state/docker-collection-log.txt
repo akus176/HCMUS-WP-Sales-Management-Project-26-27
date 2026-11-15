@@ -1,0 +1,10 @@
+2026-11-15T13:48:00.9134712Z Compose healthy; 11 database migrations applied.
+2026-11-15T13:48:02.6180637Z Demo seed run 1 (categories|products|sizes|recipes|ingredients|suppliers|receipts|customers|tables|orders): 5|20|40|40|9|3|2|12|8|24
+2026-11-15T13:48:04.2927518Z Demo seed run 2 (categories|products|sizes|recipes|ingredients|suppliers|receipts|customers|tables|orders): 5|20|40|40|9|3|2|12|8|24
+2026-11-15T13:48:05.9473743Z Staff role bundles: 6
+2026-11-15T13:48:20.4500371Z ℹ tests 5
+2026-11-15T13:48:20.4501023Z ℹ pass 5
+2026-11-15T13:48:20.4501279Z ℹ fail 0
+2026-11-15T13:48:22.9978801Z PASS: 9/9 requests, 9 assertions, 0 failures.
+2026-11-15T13:48:24.9685379Z FAIL: 9/9 requests, 9 assertions, 3 failures.
+2026-11-15T13:48:24.9728859Z PASS: deliberately invalid credentials fail the collection.

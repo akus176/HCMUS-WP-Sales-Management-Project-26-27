@@ -1,0 +1,15 @@
+{
+  "businessSource": "5683fd14a56ef6d5a816288d769a894e7833970b",
+  "docker": "29.5.3",
+  "priorPartialRunsExcluded": true,
+  "toolingSource": "f8f5b31",
+  "date": "2026-11-15",
+  "os": "Microsoft Windows NT 10.0.26300.0",
+  "testAssertionsChanged": false,
+  "sdk": "10.0.404",
+  "postgres": "18-alpine",
+  "nativeAndroidRun": false,
+  "postgresVersion": "18.7",
+  "postgresImageId": "sha256:b6972e1115a4ff8eba5d7f7d19184926d1e16d7d1136ae1e1a7ebf286da0f015",
+  "dockerCollectionExecution": "GitHub Actions 43720801852"
+}
