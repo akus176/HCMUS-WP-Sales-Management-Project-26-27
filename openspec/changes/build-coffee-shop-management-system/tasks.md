@@ -120,7 +120,7 @@
 
 - [ ] 13.1 Create Dockerfiles and Docker Compose services for PostgreSQL and the API with health checks, named volumes, and environment configuration; verify a clean `docker compose up` reaches healthy status
 - [ ] 13.2 Add automated migration and seed procedures for development and demo environments; verify rebuilding from empty volumes produces the expected schema and demo counts
-- [ ] 13.3 Add concurrent integration tests for order confirmation, table assignment, cancellation restoration, loyalty reversal, and refresh-token reuse; verify all race-condition tests pass repeatedly
+- [x] 13.3 Add concurrent integration tests for order confirmation, table assignment, cancellation restoration, loyalty reversal, and refresh-token reuse; verify all race-condition tests pass repeatedly
 - [ ] 13.4 Add regression coverage for menu deactivation, historical snapshots, invalid quantities, insufficient stock, payment balance, and authorization boundaries; verify the complete automated suite passes
 - [ ] 13.5 Run secret scanning, dependency auditing, formatting, build, migration, unit, integration, and API collection checks in CI; verify a clean pipeline succeeds and intentional violations fail it
 - [ ] 13.6 Write README documentation for architecture, prerequisites, setup, Docker services, migrations, demo accounts, roles, tests, and both milestone modes; verify a new contributor can follow it from a clean checkout

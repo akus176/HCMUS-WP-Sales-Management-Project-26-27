@@ -199,6 +199,28 @@ public sealed class CustomerLoyaltyPersistenceIntegrationTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task ConcurrentCancellationReversals_ApplyAppendOnlyReversalOnce()
+    {
+        await ConfigureSettingsAsync();
+        var customerId = await CreateCustomerAsync("0903334444");
+        var earnOrder = await InsertOrderAsync(customerId, "completed", total: 1000m, paid: 1000m);
+        await EarnAsync(earnOrder);
+        await MarkCancelledAsync(earnOrder);
+
+        var reversals = await Task.WhenAll(ReverseAsync(earnOrder), ReverseAsync(earnOrder));
+
+        Assert.Single(reversals, result => !result.AlreadyApplied);
+        Assert.Single(reversals, result => result.AlreadyApplied);
+        await using var verifyScope = services.CreateAsyncScope();
+        var context = verifyScope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        Assert.Equal(0, (await context.Customers.AsNoTracking().SingleAsync(item => item.Id == customerId)).LoyaltyPointsBalance);
+        var transactions = await context.LoyaltyTransactions.AsNoTracking().Where(item => item.OrderId == earnOrder).ToListAsync();
+        Assert.Single(transactions, item => item.Type == "earn");
+        Assert.Single(transactions, item => item.Type == "reverse_earn");
+        Assert.NotNull(Assert.Single(transactions, item => item.Type == "reverse_earn").ReversesTransactionId);
+    }
+
+    [PostgresFact]
     public async Task WinUICustomerWorkspace_ManagesProfilesAndRefreshesEarnedBalanceExactlyOnce()
     {
         await ConfigureSettingsAsync();
