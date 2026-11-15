@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using CoffeeShop.Application.Catalog;
+using CoffeeShop.Application.Customers;
 using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Inventory;
@@ -53,6 +55,60 @@ public sealed class ApiManagementSourceTests
     }
 
     [Fact]
+    public async Task CatalogWorkspaceSource_CompletesCategoryMenuVariantAddonAndRecipeWorkflowsOverHttp()
+    {
+        var categoryId = Guid.NewGuid();
+        var itemId = Guid.NewGuid();
+        var variantId = Guid.NewGuid();
+        var addonId = Guid.NewGuid();
+        var ingredientId = Guid.NewGuid();
+        var calls = new List<(string Method, string Path, string? Token)>();
+        using var client = CreateClient(request =>
+        {
+            calls.Add((request.Method.Method, request.RequestUri!.PathAndQuery, request.Headers.Authorization?.Parameter));
+            if (request.Method == HttpMethod.Post && request.RequestUri.AbsolutePath == "/api/v1/categories")
+                return Json(new CategoryResponse(categoryId, "Coffee", 0, true));
+            if (request.Method == HttpMethod.Post && request.RequestUri.AbsolutePath == "/api/v1/menu-items")
+                return Json(new MenuItemResponse(itemId, categoryId, "Coffee", "Latte", null, true, [], []));
+            if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/api/v1/categories")
+                return Json(Array.Empty<CategoryResponse>());
+            if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/api/v1/menu-items")
+                return Json(Array.Empty<MenuItemResponse>());
+            if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/api/v1/addons")
+                return Json(Array.Empty<AddonResponse>());
+            if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/api/v1/ingredients")
+                return Json(new PageResponse<IngredientBalanceResponse>([], 1, 200, 0));
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        });
+        var source = new ApiCatalogWorkspaceSource(new AuthenticatedApiClient(client, CreateSession()));
+
+        Assert.True((await source.SearchCategoriesAsync(new())).IsSuccess);
+        Assert.True((await source.SearchMenuItemsAsync(new())).IsSuccess);
+        Assert.True((await source.ListAddonsAsync()).IsSuccess);
+        Assert.True((await source.ListActiveRecipeIngredientsAsync()).IsSuccess);
+        Assert.True((await source.CreateCategoryAsync(new("Coffee", 1))).IsSuccess);
+        Assert.True((await source.UpdateCategoryAsync(new(new(categoryId), "Hot drinks"))).IsSuccess);
+        Assert.True((await source.DeactivateCategoryAsync(new(new(categoryId)))).IsSuccess);
+        Assert.True((await source.CreateMenuItemAsync(new(new(categoryId), "Latte", null, [new("Small", 4m)]))).IsSuccess);
+        Assert.True((await source.UpdateMenuItemAsync(new(new(itemId), new(categoryId), "Latte", "Milk coffee"))).IsSuccess);
+        Assert.True((await source.DeactivateMenuItemAsync(new(new(itemId)))).IsSuccess);
+        Assert.True((await source.CreateSizeVariantAsync(new(new(itemId), "Large", 6m))).IsSuccess);
+        Assert.True((await source.UpdateSizeVariantAsync(new(new(itemId), new(variantId), "Large", 6m))).IsSuccess);
+        Assert.True((await source.DeactivateSizeVariantAsync(new(new(variantId)))).IsSuccess);
+        Assert.True((await source.CreateAddonAsync(new("Extra shot", 1m))).IsSuccess);
+        Assert.True((await source.UpdateAddonAsync(new(new(addonId), "Double shot", 2m))).IsSuccess);
+        Assert.True((await source.DeactivateAddonAsync(new(new(addonId)))).IsSuccess);
+        Assert.True((await source.SetMenuItemAddonsAsync(new(new(itemId), [new(addonId)]))).IsSuccess);
+        Assert.True((await source.ReplaceRecipeAsync(new(new(variantId), [new(new(ingredientId), 20m, "g")]))).IsSuccess);
+
+        Assert.Contains(calls, call => call.Method == "GET" && call.Path.Contains("ingredients?isActive=true", StringComparison.Ordinal));
+        Assert.Contains(calls, call => call.Method == "PUT" && call.Path == $"/api/v1/recipes/{variantId}");
+        Assert.Contains(calls, call => call.Method == "PUT" && call.Path == $"/api/v1/menu-items/{itemId}/addons");
+        Assert.Equal(14, calls.Count(call => call.Method is "POST" or "PUT"));
+        Assert.All(calls, call => Assert.Equal("fixture-access", call.Token));
+    }
+
+    [Fact]
     public async Task CustomerWorkspaceSource_UsesCustomerAndAddressHttpRoutesAndMapsLoyaltyHistory()
     {
         var customerId = Guid.NewGuid();
@@ -82,6 +138,45 @@ public sealed class ApiManagementSourceTests
         Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/customers?search=Ada&limit=100&includeInactive=true");
         Assert.Contains(requests, request => request.Method == "PATCH" && request.Path == $"/api/v1/customers/{customerId}/addresses/{addressId}");
         Assert.All(requests, request => Assert.Equal("fixture-access", request.Token));
+    }
+
+    [Fact]
+    public async Task CustomerWorkspaceSource_ManagesProfileAndSavedDeliveryAddressOverHttp()
+    {
+        var customerId = Guid.NewGuid();
+        var addressId = Guid.NewGuid();
+        var calls = new List<(string Method, string Path, string? Token)>();
+        var detail = new CustomerDetailResponse(customerId, "Ada Lovelace", "5550101", "ada@example.test", true, 35,
+            DateTimeOffset.UtcNow, DateTimeOffset.UtcNow,
+            [new(addressId, "12 Example St", "Home", true, true)], []);
+        using var client = CreateClient(request =>
+        {
+            calls.Add((request.Method.Method, request.RequestUri!.PathAndQuery, request.Headers.Authorization?.Parameter));
+            if (request.Method == HttpMethod.Post && request.RequestUri.AbsolutePath == "/api/v1/customers") return Json(detail);
+            if (request.Method == HttpMethod.Post && request.RequestUri.AbsolutePath.EndsWith("/addresses", StringComparison.Ordinal))
+                return Json(new CustomerAddressResponse(addressId, "12 Example St", "Home", true, true));
+            if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == $"/api/v1/customers/{customerId}") return Json(detail);
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        });
+        var source = new ApiCustomerWorkspaceSource(new AuthenticatedApiClient(client, CreateSession()));
+
+        var created = await source.CreateAsync(new("Ada Lovelace", "5550101", "ada@example.test"));
+        Assert.True(created.IsSuccess);
+        Assert.Equal(new EntityId(customerId), created.Value);
+        Assert.True((await source.UpdateAsync(new(new(customerId), "Ada Lovelace", "5550101", "ada@example.test"))).IsSuccess);
+        Assert.True((await source.AddAddressAsync(new(new(customerId), "12 Example St", "Home", true))).IsSuccess);
+        Assert.True((await source.UpdateAddressAsync(new(new(customerId), new(addressId), "14 Example St", "Home", false))).IsSuccess);
+        Assert.True((await source.SetDefaultAddressAsync(new(new(customerId), new(addressId)))).IsSuccess);
+        Assert.True((await source.DeactivateAddressAsync(new(new(customerId), new(addressId)))).IsSuccess);
+        var selection = await source.PrepareOrderSelectionAsync(new(new(customerId), IsDelivery: true,
+            CustomerAddressId: new(addressId), RecipientName: "Ada", ContactNumber: "5550101"));
+        Assert.Equal("12 Example St", selection.Value.AddressLine);
+        Assert.True((await source.DeactivateAsync(new(new(customerId)))).IsSuccess);
+
+        Assert.Contains(calls, call => call.Method == "PATCH" && call.Path == $"/api/v1/customers/{customerId}");
+        Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/customers/{customerId}/addresses/{addressId}/default");
+        Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/customers/{customerId}/deactivate");
+        Assert.All(calls, call => Assert.Equal("fixture-access", call.Token));
     }
 
     [Fact]
@@ -219,6 +314,49 @@ public sealed class ApiManagementSourceTests
         Assert.Equal(1, requests.Count(request => request.Method == "POST" && request.Path.EndsWith("/post", StringComparison.Ordinal)));
         Assert.Contains(requests, request => request.Path == "/api/v1/ingredients?page=1&pageSize=200&isActive=true");
         Assert.All(requests, request => Assert.Equal("fixture-access", request.Token));
+    }
+
+    [Fact]
+    public async Task InventorySource_ManagesSupplierAndIngredientLifecycleThroughAuthenticatedHttp()
+    {
+        var supplierId = Guid.NewGuid();
+        var ingredientId = Guid.NewGuid();
+        var calls = new List<(string Method, string Path, string? Token)>();
+        using var client = CreateClient(request =>
+        {
+            calls.Add((request.Method.Method, request.RequestUri!.PathAndQuery, request.Headers.Authorization?.Parameter));
+            if (request.Method == HttpMethod.Post && request.RequestUri.AbsolutePath == "/api/v1/suppliers")
+                return Json(new SupplierResponse(supplierId, "North Farm", "5550199", null, "North district", true));
+            if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/api/v1/suppliers")
+                return Json(new[] { new SupplierResponse(supplierId, "North Farm", "5550199", null, "North district", true) });
+            if (request.Method == HttpMethod.Post && request.RequestUri.AbsolutePath == "/api/v1/ingredients")
+                return Json(new IngredientBalanceResponse(ingredientId, "Coffee beans", "g", 100m, 20m, true));
+            if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/api/v1/ingredients")
+                return Json(new PageResponse<IngredientBalanceResponse>(
+                    [new(ingredientId, "Coffee beans", "g", 100m, 25m, true)], 1, 200, 1));
+            return new HttpResponseMessage(HttpStatusCode.NoContent);
+        });
+        var source = new ApiInventorySource(new AuthenticatedApiClient(client, CreateSession()));
+
+        var supplier = await source.CreateSupplierAsync("North Farm", "5550199", null, "North district");
+        Assert.Equal(supplierId, supplier.Id.Value);
+        Assert.Equal(supplierId, (await source.FindSupplierAsync(new(supplierId)))!.Id.Value);
+        await source.UpdateSupplierAsync(new(supplierId), "North Farm Updated", "5550199", null, "North district");
+        await source.DeactivateSupplierAsync(new(supplierId));
+        await source.ActivateSupplierAsync(new(supplierId));
+        var ingredient = await source.CreateIngredientAsync("Coffee beans", "g", 100m, 20m);
+        Assert.Equal(ingredientId, ingredient.Id.Value);
+        await source.SetThresholdAsync(new(ingredientId), 25m);
+        await source.DeactivateIngredientAsync(new(ingredientId));
+        await source.ActivateIngredientAsync(new(ingredientId));
+        await source.ListIngredientsAsync(includeInactive: false);
+
+        Assert.Contains(calls, call => call.Method == "PUT" && call.Path == $"/api/v1/suppliers/{supplierId}");
+        Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/ingredients/{ingredientId}/threshold");
+        Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/suppliers/{supplierId}/deactivate");
+        Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/ingredients/{ingredientId}/activate");
+        Assert.Contains(calls, call => call.Method == "GET" && call.Path == "/api/v1/ingredients?page=1&pageSize=200&isActive=true");
+        Assert.All(calls, call => Assert.Equal("fixture-access", call.Token));
     }
 
     private static StaffSessionManager CreateSession()
