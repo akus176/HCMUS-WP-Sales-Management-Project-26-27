@@ -42,6 +42,22 @@ builder.Services.AddScoped<DiscountCommandHandler>();
 builder.Services.AddScoped<PosOrderHandler>();
 builder.Services.AddScoped<PaymentCommandHandler>();
 builder.Services.AddScoped<DeliveryCommandHandler>();
+builder.Services.AddScoped<AssistantToolGateway>();
+builder.Services.AddScoped<IAssistantToolGateway>(provider => provider.GetRequiredService<AssistantToolGateway>());
+builder.Services.AddScoped<ManagerAssistantService>();
+switch (builder.Configuration["Assistant:Provider"]?.ToLowerInvariant())
+{
+    case "openai":
+        builder.Services.AddHttpClient<IManagerAssistantProvider, OpenAiAssistantProvider>(client =>
+            client.Timeout = TimeSpan.FromSeconds(15));
+        break;
+    case "deterministic":
+        builder.Services.AddSingleton<IManagerAssistantProvider, DeterministicAssistantProvider>();
+        break;
+    default:
+        builder.Services.AddSingleton<IManagerAssistantProvider, UnavailableAssistantProvider>();
+        break;
+}
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi(options =>
 {
@@ -116,6 +132,7 @@ api.MapSalesEndpoints();
 api.MapDeliveryEndpoints();
 api.MapCustomerEndpoints();
 api.MapReportEndpoints();
+api.MapAssistantEndpoints();
 api.MapGet("/categories", async (
     CatalogQueryHandler handler, string? search, bool? isActive, int? limit, CancellationToken cancellationToken) =>
 {

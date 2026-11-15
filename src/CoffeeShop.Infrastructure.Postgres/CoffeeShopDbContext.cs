@@ -5,6 +5,7 @@ using CoffeeShop.Domain.Catalog;
 using CoffeeShop.Domain.Customers;
 using CoffeeShop.Domain.Identity;
 using CoffeeShop.Domain.Inventory;
+using CoffeeShop.Domain.Reporting;
 using CoffeeShop.Domain.Sales;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,6 +45,7 @@ public class CoffeeShopDbContext : DbContext, IUnitOfWork
     public DbSet<MobileDeviceRegistration> MobileDeviceRegistrations => Set<MobileDeviceRegistration>();
 
     public DbSet<SecurityAuditEvent> SecurityAuditEvents => Set<SecurityAuditEvent>();
+    public DbSet<AiInteractionAudit> AiInteractionAudits => Set<AiInteractionAudit>();
 
     // Customers
     public DbSet<Customer> Customers => Set<Customer>();

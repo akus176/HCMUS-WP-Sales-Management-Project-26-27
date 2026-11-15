@@ -66,6 +66,95 @@
         ],
         "type": "object"
       },
+      "AssistantAskRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "from": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "question": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "timeZone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "to": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "required": [
+          "question",
+          "from",
+          "to",
+          "timeZone"
+        ],
+        "type": "object"
+      },
+      "AssistantAskResponse": {
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "from": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "to": {
+            "format": "date",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "toolsInvoked": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantToolResult"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "answer",
+          "from",
+          "to",
+          "toolsInvoked"
+        ],
+        "type": "object"
+      },
+      "AssistantToolResult": {
+        "properties": {
+          "metrics": {},
+          "outcome": {
+            "type": "string"
+          },
+          "tool": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "outcome",
+          "metrics"
+        ],
+        "type": "object"
+      },
       "BestSellerReportResponse": {
         "properties": {
           "endUtcExclusive": {
@@ -3127,6 +3216,80 @@
               }
             },
             "description": "Conflict"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
+    "/api/v1/assistant/ask": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantAskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantAskResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         },
         "security": [
