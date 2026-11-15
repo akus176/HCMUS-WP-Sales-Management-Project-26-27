@@ -68,3 +68,46 @@ test('reconnect refetches active views even when no events were received', async
   unsubscribe();
   client.clear();
 });
+
+test('an inventory event refreshes each active inventory view for only the current staff member', async () => {
+  const client = new QueryClient();
+  const affectedKeys = [
+    ['inventory-balances', userId, 'balances', ''],
+    ['inventory-movements', userId, 'ingredient-1'],
+    ['purchase-receipts', userId],
+    ['purchase-receipt', userId, 'receipt-1'],
+  ];
+  const unaffectedKeys = [
+    ['sales', userId, 'orders'],
+    ['inventory-balances', 'different-staff', 'balances', ''],
+  ];
+  const observations = [...affectedKeys, ...unaffectedKeys].map((key) => {
+    client.setQueryData(key, 'old');
+    const queryFn = jest.fn(async () => 'new');
+    const observer = new QueryObserver(client, {
+      queryKey: key,
+      queryFn,
+      staleTime: Infinity,
+    });
+    return { key, queryFn, unsubscribe: observer.subscribe(() => undefined) };
+  });
+
+  const type = operationalEventType({
+    type: 'inventory',
+    id: 'opaque',
+    updatedAt: '2026-11-16T00:00:00Z',
+  });
+  await refreshOperationalQueries(client, userId, () => true, type);
+
+  for (const { key, queryFn } of observations.slice(0, affectedKeys.length)) {
+    expect(queryFn).toHaveBeenCalledTimes(1);
+    expect(client.getQueryData(key)).toBe('new');
+  }
+  for (const { key, queryFn } of observations.slice(affectedKeys.length)) {
+    expect(queryFn).not.toHaveBeenCalled();
+    expect(client.getQueryData(key)).toBe('old');
+    expect(client.getQueryState(key)?.isInvalidated).toBe(false);
+  }
+  observations.forEach(({ unsubscribe }) => unsubscribe());
+  client.clear();
+});
