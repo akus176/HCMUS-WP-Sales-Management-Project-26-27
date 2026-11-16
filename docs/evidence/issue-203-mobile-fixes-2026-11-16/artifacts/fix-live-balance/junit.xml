@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="2.412" timestamp="2026-11-16T14:50:13">
+    <testcase id="Fixed inventory event refreshes Android after a native WinUI change" name="Fixed inventory event refreshes Android after a native WinUI change" classname="Fixed inventory event refreshes Android after a native WinUI change" file="e2e-flows\fix-live-balance.yaml" time="2.396" timestamp="2026-11-16T14:50:13" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="3.856" timestamp="2026-11-16T14:52:21">
+    <testcase id="Fixed inventory event refreshes the active receipt detail automatically" name="Fixed inventory event refreshes the active receipt detail automatically" classname="Fixed inventory event refreshes the active receipt detail automatically" file="e2e-flows\fix-live-receipt.yaml" time="3.847" timestamp="2026-11-16T14:52:21" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

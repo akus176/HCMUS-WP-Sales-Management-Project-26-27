@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="5.147" timestamp="2026-11-16T15:01:12">
+    <testcase id="Submit the retained adjustment exactly once after real token renewal" name="Submit the retained adjustment exactly once after real token renewal" classname="Submit the retained adjustment exactly once after real token renewal" file="e2e-flows\fix-renewal-submit.yaml" time="5.128" timestamp="2026-11-16T15:01:12" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

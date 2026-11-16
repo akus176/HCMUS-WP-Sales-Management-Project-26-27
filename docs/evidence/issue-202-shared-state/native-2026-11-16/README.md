@@ -1,5 +1,7 @@
 # Shared WinUI/Android end-to-end run — 16 November 2026
 
+**Follow-up:** both discovered mobile defects were fixed and passed a [separate native verification](../../issue-203-mobile-fixes-2026-11-16/README.md), including automatic inventory/receipt updates and unsaved input across a real token renewal. The original failed results below are preserved unchanged.
+
 Issues: [#202](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/202), Android [#203](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/203). Implementation/evidence branch: draft [PR #214](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/214).
 
 **Overall acceptance: FAILED.** Both native clients ran against one fresh API/database. Manual shared-state reads, mutations in both directions, real 403/409 responses, offline protection, reconnect, transport-error feedback, deliberate retry, persisted actors and the Windows API-only boundary were exercised. **Automatic inventory refresh failed:** Windows saved 95 g, the server published an inventory event, and connected Android continued showing 100 g until a deliberate refresh. No application code was changed to obtain these results. Keep #202/#203, Mobile 6.4 and the parent shared-state gates open.

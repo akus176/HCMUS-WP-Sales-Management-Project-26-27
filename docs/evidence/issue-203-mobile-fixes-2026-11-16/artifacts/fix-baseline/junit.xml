@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="31.139" timestamp="2026-11-16T14:47:10">
+    <testcase id="Fixed Android runtime loads the shared 500 g fixture" name="Fixed Android runtime loads the shared 500 g fixture" classname="Fixed Android runtime loads the shared 500 g fixture" file="e2e-flows\fix-baseline.yaml" time="31.133" timestamp="2026-11-16T14:47:10" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
