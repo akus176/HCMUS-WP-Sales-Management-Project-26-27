@@ -1,0 +1,12 @@
+{
+  "name": "coffee-shop-api-regression",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test runner.test.mjs",
+    "verify": "node run-collection.mjs"
+  },
+  "engines": { "node": ">=20" },
+  "devDependencies": { "postman-cli": "1.90.0" }
+}

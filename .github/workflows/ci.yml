@@ -7,6 +7,49 @@ on:
   pull_request:
 
 jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan reachable history and verify credential rejection
+        run: bash scripts/verify-secrets.sh
+
+  dependencies:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/staff-mobile/.nvmrc
+      - name: Audit NuGet and npm dependencies
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path TestResults -Force | Out-Null
+          dotnet restore CoffeeShop.slnx -p:Configuration=Release
+          if ($LASTEXITCODE -ne 0) { throw 'Dependency restore failed.' }
+          dotnet list CoffeeShop.slnx package --vulnerable --include-transitive --format json > TestResults/nuget-audit.json
+          if ($LASTEXITCODE -ne 0) { throw 'NuGet audit failed.' }
+          foreach ($entry in @(@('mobile', 'apps/staff-mobile'), @('contract', 'contracts/mobile-p0'), @('collection', 'tests/api'))) {
+            npm audit --prefix $entry[1] --json > "TestResults/$($entry[0])-audit.json"
+            if ($LASTEXITCODE -gt 1) { throw 'npm audit could not run.' }
+          }
+          node scripts/check-dependency-audit.cjs --self-test
+          if ($LASTEXITCODE -ne 0) { throw 'Dependency gate self-test failed.' }
+          node scripts/check-dependency-audit.cjs TestResults/nuget-audit.json TestResults/mobile-audit.json TestResults/contract-audit.json TestResults/collection-audit.json
+          if ($LASTEXITCODE -ne 0) { throw 'Dependency policy failed.' }
+      - name: Preserve dependency audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-results
+          path: TestResults/*-audit.json
+          if-no-files-found: error
+
   mobile-quality:
     runs-on: ubuntu-latest
     defaults:
@@ -110,11 +153,10 @@ jobs:
           $projects = @(
             'tests/CoffeeShop.Domain.Tests/CoffeeShop.Domain.Tests.csproj',
             'tests/CoffeeShop.Application.Tests/CoffeeShop.Application.Tests.csproj',
-            'tests/CoffeeShop.WinUI.Tests/CoffeeShop.WinUI.Tests.csproj',
-            'tests/CoffeeShop.Api.Tests/CoffeeShop.Api.Tests.csproj'
+            'tests/CoffeeShop.WinUI.Tests/CoffeeShop.WinUI.Tests.csproj'
           )
           foreach ($project in $projects) {
-            dotnet test $project --no-build --configuration Release
+            dotnet test $project --no-build --configuration Release --logger "trx;LogFileName=$([IO.Path]::GetFileNameWithoutExtension($project)).trx" --results-directory TestResults
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
       - name: Summarize CI test split
@@ -124,10 +166,17 @@ jobs:
           @"
           ## Test execution split
 
-          - Windows job: Domain, Application, WinUI, and API suites. No PostgreSQL-dependent tests are selected here.
-          - PostgreSQL job: Infrastructure and complete midterm demonstration suites against the PostgreSQL service.
+          - Windows job: Domain, Application, and WinUI suites.
+          - PostgreSQL job: Infrastructure and the complete API suite against the PostgreSQL service, including AI HTTP regressions.
           - Do not interpret a single job as the complete test total. Use both job summaries and their TRX artifacts.
           "@ | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
+      - name: Preserve Windows test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-test-results
+          path: TestResults/*.trx
+          if-no-files-found: error
 
   catalog-postgres:
     runs-on: ubuntu-latest
@@ -194,5 +243,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/staff-mobile/.nvmrc
+          cache: npm
+          cache-dependency-path: tests/api/package-lock.json
+      - name: Install API collection runner and verify evidence sanitization
+        run: npm ci --prefix tests/api && npm test --prefix tests/api
       - name: Verify clean Docker Compose startup, migrations, and demo seed
         run: bash scripts/verify-compose.sh
+      - name: Preserve sanitized API collection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compose-api-collection-results
+          path: TestResults/api-collection*.json
+          if-no-files-found: error

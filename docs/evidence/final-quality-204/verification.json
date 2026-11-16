@@ -1,0 +1,105 @@
+{
+  "verifiedOn": "2026-11-16",
+  "baseCommit": "5683fd14a56ef6d5a816288d769a894e7833970b",
+  "checkout": "Initially clean managed worktree of latest main; focused #204 changes; hosted CI will run a clean PR checkout.",
+  "sdk": "10.0.404",
+  "build": {
+    "warnings": 0,
+    "errors": 0,
+    "passed": true,
+    "initialSdk11Build": "Failed with seven CsWinRT1032 errors; SDK selection fixed by global.json."
+  },
+  "tests": [
+    {
+      "suite": "api",
+      "total": 67,
+      "passed": 67,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "CoffeeShop.Application.Tests",
+      "total": 422,
+      "passed": 422,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "CoffeeShop.Domain.Tests",
+      "total": 413,
+      "passed": 413,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "CoffeeShop.WinUI.Tests",
+      "total": 151,
+      "passed": 151,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "infrastructure",
+      "total": 265,
+      "passed": 265,
+      "failed": 0,
+      "skipped": 0
+    }
+  ],
+  "totalPassed": 1318.0,
+  "format": {
+    "warning": "Workspace-load warning; no formatting violations.",
+    "passed": true
+  },
+  "releaseArtifactInspection": "passed",
+  "contractRegeneration": "passed, no drift",
+  "compose": {
+    "passed": true,
+    "migrations": 11,
+    "seedRuns": 2,
+    "warning": "Optional libgssapi_krb5.so.2 missing during provisioning; password authentication succeeds.",
+    "counts": {
+      "suppliers": 3,
+      "recipeRows": 40,
+      "categories": 5,
+      "products": 20,
+      "sizes": 40,
+      "ingredients": 9,
+      "orders": 24,
+      "receipts": 2,
+      "tables": 8,
+      "customers": 12
+    },
+    "cleanup": "Only the disposable project containers/network/volume removed.",
+    "health": "Healthy",
+    "readiness": "Healthy",
+    "staffRoles": 6
+  },
+  "security": {
+    "npm": {
+      "mobile": {
+        "moderate": 28,
+        "high": 0,
+        "critical": 0,
+        "low": 1
+      },
+      "contract": {
+        "total": 0
+      },
+      "collection": {
+        "total": 0
+      }
+    },
+    "gitleaksVersion": "8.24.3",
+    "findingsAfterExactReviewedIgnores": 0,
+    "nugetVulnerabilities": 0,
+    "historyCommitsScanned": 337,
+    "policy": "Reject all vulnerable NuGet packages and high/critical npm advisories; retain lower npm advisories and track remediation in #216.",
+    "syntheticCredentialRejected": true
+  },
+  "runtime": {
+    "externalProviderWinUI": "Unverified: #207 checked/closed conflicts with pending-demo statement in #212; no attached runtime evidence found.",
+    "nativeSetup": "Not run: automatic approval review rejected startup with blocked by policy."
+  },
+  "acceptance": "Open pending exact-head CI, runtime evidence and required reviewer approval."
+}
