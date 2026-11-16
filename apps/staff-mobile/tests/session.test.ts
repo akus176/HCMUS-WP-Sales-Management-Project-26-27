@@ -139,6 +139,47 @@ test('a rejected refresh clears credentials and protected data', async () => {
   expect(h.clearData).toHaveBeenCalledTimes(1);
 });
 
+test('rotation with unchanged staff details preserves the user snapshot identity', async () => {
+  const h = harness(async (request) => {
+    if (request.url.endsWith('/refresh')) return json(pair('b'));
+    return request.headers.get('Authorization') ===
+      `Bearer ${pair().accessToken}`
+      ? json({}, 401)
+      : json(user);
+  });
+  await h.client.login('staff', 'fixture-password');
+  const before = h.client.getSnapshot().user;
+  await h.client.api.GET('/api/v1/auth/me');
+  expect(h.saved()).toBe(pair('b').refreshToken);
+  expect(h.client.getSnapshot().user).toBe(before);
+  expect(h.clearData).toHaveBeenCalledTimes(1); // Login cleared the prior session.
+});
+
+test.each([
+  { ...user, permissions: [] },
+  { ...user, permissions: [...user.permissions, 'inventory.adjust'] },
+  { ...user, roles: ['Manager'] },
+  { ...user, fullName: 'Updated staff name' },
+  { ...user, id: '00000000-0000-0000-0000-000000000999' },
+])(
+  'rotation publishes changed staff details for permission revalidation: %j',
+  async (nextUser) => {
+    const h = harness(async (request) => {
+      if (request.url.endsWith('/refresh'))
+        return json({ ...pair('b'), user: nextUser });
+      return request.headers.get('Authorization') ===
+        `Bearer ${pair().accessToken}`
+        ? json({}, 401)
+        : json(nextUser);
+    });
+    await h.client.login('staff', 'fixture-password');
+    const before = h.client.getSnapshot().user;
+    await h.client.api.GET('/api/v1/auth/me');
+    expect(h.client.getSnapshot().user).not.toBe(before);
+    expect(h.client.getSnapshot().user).toEqual(nextUser);
+  },
+);
+
 test('a replayed read rejected with 401 clears the newly rotated session', async () => {
   const h = harness(async (request) =>
     request.url.endsWith('/refresh') ? json(pair('b')) : json({}, 401),

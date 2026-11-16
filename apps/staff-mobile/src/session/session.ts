@@ -25,6 +25,24 @@ export type RefreshStorage = {
   remove: () => Promise<void>;
 };
 
+function sameCodes(left: readonly string[], right: readonly string[]) {
+  if (!Array.isArray(left) || !Array.isArray(right)) return false;
+  const previous = new Set(left);
+  const next = new Set(right);
+  return (
+    previous.size === next.size && [...previous].every((code) => next.has(code))
+  );
+}
+
+function sameStaff(previous: StaffSession | null, next: StaffSession) {
+  return (
+    previous?.id === next.id &&
+    previous.fullName === next.fullName &&
+    sameCodes(previous.roles, next.roles) &&
+    sameCodes(previous.permissions, next.permissions)
+  );
+}
+
 export function apiOrigin(value: string | undefined) {
   try {
     const url = new URL(value ?? '');
@@ -123,7 +141,11 @@ export function createSessionClient(options: {
     if (generation !== epoch) throw cancelled();
     accessToken = pair.accessToken;
     accessExpiresAt = Date.parse(pair.expiresAt);
-    publish({ status: 'signedIn', user: pair.user });
+    // Routine token rotation must not remount authorized screens and discard
+    // unsaved input. Changed identity or grants still publish a new snapshot,
+    // so PermissionBoundary revalidates before showing protected content.
+    const user = sameStaff(state.user, pair.user) ? state.user! : pair.user;
+    publish({ status: 'signedIn', user });
   }
   function refresh() {
     const generation = epoch;

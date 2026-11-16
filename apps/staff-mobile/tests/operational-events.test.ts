@@ -8,6 +8,45 @@ import { deferred } from './helpers';
 
 const userId = 'current-staff';
 
+test.each([
+  ['inventory-balances', userId, 'balances', 'beans'],
+  ['inventory-balances', userId, 'low-stock', ''],
+  ['inventory-movements', userId, 'ingredient'],
+  ['inventory-movements', userId, 'all'],
+  ['purchase-receipts', userId],
+  ['purchase-receipt', userId, 'receipt'],
+])(
+  'inventory events refetch %j without accepting a late stale read',
+  async (...key) => {
+    const client = new QueryClient();
+    const otherUserKey = [key[0], 'different-staff', ...key.slice(2)];
+    const unrelatedKey = ['sales', userId, 'orders'];
+    client.setQueryData(key, { revision: 2 });
+    client.setQueryData(otherUserKey, 'another account');
+    client.setQueryData(unrelatedKey, 'unrelated view');
+    const stale = deferred<{ revision: number }>();
+    const queryFn = jest
+      .fn()
+      .mockReturnValueOnce(stale.promise)
+      .mockResolvedValue({ revision: 4 });
+    const observer = new QueryObserver(client, { queryKey: key, queryFn });
+    const unsubscribe = observer.subscribe(() => undefined);
+    try {
+      await refreshOperationalQueries(client, userId, () => true, 'inventory');
+      stale.resolve({ revision: 1 });
+      await stale.promise;
+      expect(queryFn).toHaveBeenCalledTimes(2);
+      expect(client.getQueryData(key)).toEqual({ revision: 4 });
+      expect(client.getQueryState(otherUserKey)?.isInvalidated).toBe(false);
+      expect(client.getQueryState(unrelatedKey)?.isInvalidated).toBe(false);
+    } finally {
+      stale.resolve({ revision: 1 });
+      unsubscribe();
+      client.clear();
+    }
+  },
+);
+
 test('an older identifier-only event refetches and cannot overwrite newer server data', async () => {
   const client = new QueryClient();
   const key = ['sales', userId, 'orders'];

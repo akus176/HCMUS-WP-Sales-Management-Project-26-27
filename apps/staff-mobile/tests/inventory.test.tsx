@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import {
   QueryClient,
   onlineManager,
@@ -14,6 +14,7 @@ import * as networkAdapter from '../src/connectivity/networkAdapter';
 import type { NetworkState } from '../src/connectivity/networkAdapter';
 import type { SessionClient, StaffSession } from '../src/session/session';
 import { SessionProvider } from '../src/session/context';
+import { refreshOperationalQueries } from '../src/realtime/operationalEvents';
 
 jest.mock('../src/connectivity/networkAdapter', () => ({
   addNetworkStateListener: jest.fn(),
@@ -98,7 +99,10 @@ function ClearQueriesOnUnmount() {
   return null;
 }
 
-async function setup(screenUser: StaffSession = user) {
+async function setup(
+  screenUser: StaffSession = user,
+  queriesReady?: (queries: QueryClient) => void,
+) {
   getNetworkStateAsync.mockResolvedValue(online);
   addNetworkStateListener.mockImplementation((callback) => {
     void callback;
@@ -110,6 +114,7 @@ async function setup(screenUser: StaffSession = user) {
       mutations: { retry: false, gcTime: 0 },
     },
   });
+  queriesReady?.(queryClient);
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <SessionProvider client={currentClient} queryClient={queryClient}>
@@ -141,6 +146,30 @@ test('loads current ingredient balances and marks items at their reorder thresho
     '/api/v1/ingredients',
     expect.objectContaining({ params: { query: { page: 1, pageSize: 100 } } }),
   );
+});
+
+test('an inventory event refreshes the actual workspace query without a manual action', async () => {
+  let availableQuantity = 100;
+  const get = jest.fn(async () => ({
+    data: {
+      items: [{ ...balance, availableQuantity }],
+      page: 1,
+      pageSize: 100,
+      totalCount: 1,
+    },
+  }));
+  const { post } = createClient(get as never);
+  let queries!: QueryClient;
+  const view = await setup(user, (current) => {
+    queries = current;
+  });
+  await view.findByText('Balance: 100 l');
+  availableQuantity = 95;
+  await act(async () =>
+    refreshOperationalQueries(queries, user.id, () => true, 'inventory'),
+  );
+  expect(await view.findByText('Balance: 95 l')).toBeVisible();
+  expect(post).not.toHaveBeenCalled();
 });
 
 test('loads the shared low-stock query and applies ingredient search', async () => {
