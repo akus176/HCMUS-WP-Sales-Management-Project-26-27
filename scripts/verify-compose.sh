@@ -65,3 +65,32 @@ compose exec -T api dotnet CoffeeShop.Api.dll --seed-staff-roles
 roles="$(query 'SELECT count(*) FROM identity.roles')"
 test "$roles" = 6
 printf 'Staff role bundles: %s\n' "$roles"
+
+# Provision disposable accounts without placing passwords in arguments or logs.
+export ProvisionStaff__Password
+ProvisionStaff__Password="$(openssl rand -hex 24)"
+for role in Manager Cashier; do
+    compose exec -T -e ProvisionStaff__Password \
+        -e "ProvisionStaff__Username=collection-$role" \
+        -e "ProvisionStaff__Email=collection-$role@example.test" \
+        -e "ProvisionStaff__FullName=Collection $role" \
+        -e "ProvisionStaff__Roles=$role" api dotnet CoffeeShop.Api.dll --provision-staff
+done
+export COFFEESHOP_COLLECTION_API_HOST="http://127.0.0.1:$api_port"
+export COFFEESHOP_COLLECTION_MANAGER_USERNAME=collection-Manager
+export COFFEESHOP_COLLECTION_CASHIER_USERNAME=collection-Cashier
+export COFFEESHOP_COLLECTION_MANAGER_PASSWORD="$ProvisionStaff__Password"
+export COFFEESHOP_COLLECTION_CASHIER_PASSWORD="$ProvisionStaff__Password"
+mkdir -p TestResults
+node tests/api/run-collection.mjs TestResults/api-collection.json
+# A deliberately wrong password must fail, while the second account still works.
+if COFFEESHOP_COLLECTION_MANAGER_PASSWORD=deliberately-invalid \
+    node tests/api/run-collection.mjs TestResults/api-collection-negative.json; then
+    echo 'Collection incorrectly accepted invalid credentials.' >&2
+    exit 1
+fi
+node -e 'const r = require("./TestResults/api-collection-negative.json");
+    if (r.passed || r.requests.find(x => x.name === "Manager login")?.status !== 401 ||
+        r.requests.find(x => x.name === "Cashier login")?.status !== 200) process.exit(1);'
+test "$(query 'SELECT count(*) FROM catalog.categories')" = 5
+echo 'API collection passed; invalid credentials rejected without catalog changes.'

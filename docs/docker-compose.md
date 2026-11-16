@@ -43,6 +43,14 @@ history. It verifies the exact demo counts on two seed runs and checks that staf
 role provisioning installs all six roles. It removes only the test project's
 containers and volume. CI runs the same command in the `compose-smoke` job.
 
+Install the pinned collection runner first with `npm ci --prefix tests/api`.
+The smoke check also provisions temporary Manager/Cashier accounts and runs the
+actual Postman collection without editing its payloads. A second run must reject
+an intentionally invalid manager password while the cashier still signs in.
+Only sanitized request/status/assertion results are retained in
+`TestResults/api-collection*.json`; raw responses and token-bearing runner reports
+are deleted. The catalog must still contain exactly five categories afterwards.
+
 The application container runs as an unprivileged user. The Compose startup
 script runs migrations before binding the HTTP port. A failed migration stops
 startup. The Compose stack runs one local API instance.

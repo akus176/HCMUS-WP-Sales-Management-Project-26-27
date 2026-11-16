@@ -1,0 +1,4 @@
+# Reviewed false positives: historical commit IDs and ordinary prose, never credentials.
+1590eea59eabbfe674b6f006afe4aaa25f1b412b:docs/evidence/mobile-workflows-201/summary.json:generic-api-key:1310
+105df6036ff86d5929c16006b9069fb849751b82:docs/evidence/mobile-inventory-198/summary.json:generic-api-key:321
+7e7abe3c83da0168d3cc26b5d9072206a50cf92e:docs/cancellation-rules.md:generic-api-key:62
