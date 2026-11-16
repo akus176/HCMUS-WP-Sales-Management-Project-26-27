@@ -1,0 +1,25 @@
+{
+  "receiptMovementCounts": [
+    {
+      "receiptId": "254f5d33-966c-4f5e-a852-887f41c66fa5",
+      "movements": 1
+    },
+    {
+      "receiptId": "bc125b67-05cc-482c-9036-8715ba0d789f",
+      "movements": 1
+    }
+  ],
+  "eventCount": 12,
+  "note": "The +99 test-script input error remains in the audited ledger; it is not treated as a nine-unit retry.",
+  "checks": {
+    "eventPayloadsApprovedFieldsOnly": true,
+    "androidMovementActorsCorrect": true,
+    "finalNineUnitActionOnce": true,
+    "movementCountIs8": true,
+    "balanceMatchesLedger": true,
+    "finalBalanceIs223": true,
+    "receiptsEachAddedOnce": true,
+    "windowsMovementActorsCorrect": true,
+    "cashierForbiddenNoProtectedData": true
+  }
+}

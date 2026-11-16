@@ -1,0 +1,11 @@
+appId: com.coffeeshop.staffmobile
+name: I202 deliberate Android refresh reads Windows balance
+---
+- scrollUntilVisible:
+    element: Refresh inventory
+    direction: UP
+- tapOn: Refresh inventory
+- scrollUntilVisible:
+    element: 'Balance: 95 g'
+    direction: DOWN
+- assertVisible: 'Balance: 95 g'

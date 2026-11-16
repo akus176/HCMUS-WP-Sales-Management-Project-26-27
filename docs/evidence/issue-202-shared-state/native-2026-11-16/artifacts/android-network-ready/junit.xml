@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="24.417" timestamp="2026-11-16T10:06:14">
+    <testcase id="I202 prepare a fresh network-failure adjustment" name="I202 prepare a fresh network-failure adjustment" classname="I202 prepare a fresh network-failure adjustment" file="e2e-flows\android-network-ready.yaml" time="24.398" timestamp="2026-11-16T10:06:14" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

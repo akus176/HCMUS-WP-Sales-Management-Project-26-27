@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="5.096" timestamp="2026-11-16T09:56:44">
+    <testcase id="I202 offline mode disables the prepared write" name="I202 offline mode disables the prepared write" classname="I202 offline mode disables the prepared write" file="e2e-flows\android-offline.yaml" time="5.076" timestamp="2026-11-16T09:56:44" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,10 @@
+{
+  "id": "bc125b67-05cc-482c-9036-8715ba0d789f",
+  "supplierId": "fca39185-811e-440c-b68f-87627a1b4a7c",
+  "receiptNumber": "I202-SHARED-002",
+  "status": "draft",
+  "postedAt": null,
+  "lines": [],
+  "createdAt": "2026-11-16T09:52:11.5330205+07:00",
+  "updatedAt": "2026-11-16T09:52:11.5330205+07:00"
+}

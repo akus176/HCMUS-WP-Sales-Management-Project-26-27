@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="1" time="26.573" timestamp="2026-11-16T09:52:19">
+    <testcase id="I202 Android loads a draft before Windows posts it" name="I202 Android loads a draft before Windows posts it" classname="I202 Android loads a draft before Windows posts it" file="e2e-flows\android-stale-receipt-prepare.yaml" time="26.555" timestamp="2026-11-16T09:52:19" status="ERROR">
+      <failure>No visible element found: "Review receipt I202-SHARED-002"</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

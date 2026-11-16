@@ -1,0 +1,39 @@
+appId: com.coffeeshop.staffmobile
+name: I202 renewed-session deliberate retry commits exactly nine units
+---
+- scrollUntilVisible:
+    element: Back to staff home
+    direction: UP
+- tapOn: Back to staff home
+- assertVisible: Staff home
+- tapOn: Open Inventory
+- scrollUntilVisible:
+    element: Record adjustment for I202 Shared Beans
+    direction: DOWN
+- tapOn: Record adjustment for I202 Shared Beans
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- tapOn: Quantity change
+- inputText: '9'
+- hideKeyboard
+- scrollUntilVisible:
+    element: Adjustment reason
+    direction: DOWN
+- tapOn: Adjustment reason
+- inputText: I202 verified final retry
+- hideKeyboard
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- assertVisible:
+    text: Save adjustment
+    enabled: true
+
+- assertVisible: '9'
+- assertVisible: I202 verified final retry
+- tapOn: Save adjustment
+- extendedWaitUntil:
+    visible: 'Adjustment saved by the server. New balance: 223 g.'
+    timeout: 30000
+- assertVisible: 'Adjustment saved by the server. New balance: 223 g.'

@@ -1,0 +1,203 @@
+{
+  "passed": 18,
+  "attempts": [
+    {
+      "name": "android-adjustment",
+      "passed": false,
+      "exitCode": 1,
+      "at": "2026-11-16T02:39:34.452Z",
+      "error": null
+    },
+    {
+      "name": "android-adjustment-confirmation",
+      "passed": false,
+      "exitCode": 1,
+      "at": "2026-11-16T02:47:21.986Z",
+      "error": null
+    },
+    {
+      "name": "android-adjustment-feedback",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T02:51:23.727Z",
+      "error": null
+    },
+    {
+      "name": "android-clean-network-form",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T03:16:38.829Z",
+      "error": null
+    },
+    {
+      "name": "android-deliberate-retry",
+      "passed": false,
+      "exitCode": 1,
+      "at": "2026-11-16T03:12:14Z",
+      "error": null
+    },
+    {
+      "name": "android-fault-form",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T02:56:05.435Z",
+      "error": null
+    },
+    {
+      "name": "android-final-retry",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T03:29:41.778Z",
+      "error": null
+    },
+    {
+      "name": "android-forbidden",
+      "passed": false,
+      "exitCode": 1,
+      "at": "2026-11-16T03:01:54.044Z",
+      "error": null
+    },
+    {
+      "name": "android-forbidden-ready",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T03:03:59.749Z",
+      "error": null
+    },
+    {
+      "name": "android-forbidden-response",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T03:04:44.475Z",
+      "error": null
+    },
+    {
+      "name": "android-network-failure",
+      "passed": false,
+      "exitCode": 1,
+      "at": "2026-11-16T03:07:57.858Z",
+      "error": null
+    },
+    {
+      "name": "android-network-feedback",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T03:19:36.634Z",
+      "error": null
+    },
+    {
+      "name": "android-network-ready",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T03:06:40.742Z",
+      "error": null
+    },
+    {
+      "name": "android-network-submit",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T03:17:23.171Z",
+      "error": null
+    },
+    {
+      "name": "android-offline",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T02:56:50.932Z",
+      "error": null
+    },
+    {
+      "name": "android-permission-form",
+      "passed": false,
+      "exitCode": 1,
+      "at": "2026-11-16T03:00:50.52Z",
+      "error": null
+    },
+    {
+      "name": "android-receipt-conflict",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T02:54:03.961Z",
+      "error": null
+    },
+    {
+      "name": "android-receipt-post",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T02:47:52.259Z",
+      "error": null
+    },
+    {
+      "name": "android-reconnect",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T02:57:50.416Z",
+      "error": null
+    },
+    {
+      "name": "android-retry-ready",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T03:10:49.685Z",
+      "error": null
+    },
+    {
+      "name": "android-stale-receipt-prepare",
+      "passed": false,
+      "exitCode": 1,
+      "at": "2026-11-16T02:52:47.318Z",
+      "error": null
+    },
+    {
+      "name": "android-stale-receipt-ready",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T02:53:30.504Z",
+      "error": null
+    },
+    {
+      "name": "android-verified-network-ready",
+      "passed": false,
+      "exitCode": 1,
+      "at": "2026-11-16T03:15:22.361Z",
+      "error": null
+    },
+    {
+      "name": "android-verified-retry",
+      "passed": false,
+      "exitCode": 1,
+      "at": "2026-11-16T03:27:11.618Z",
+      "error": null
+    },
+    {
+      "name": "baseline",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T02:36:00.854Z",
+      "error": null
+    },
+    {
+      "name": "login",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T02:34:59.066Z",
+      "error": null
+    },
+    {
+      "name": "windows-to-android-live",
+      "passed": false,
+      "exitCode": 1,
+      "at": "2026-11-16T02:37:46.649Z",
+      "error": null
+    },
+    {
+      "name": "windows-to-android-refresh",
+      "passed": true,
+      "exitCode": 0,
+      "at": "2026-11-16T02:38:24.324Z",
+      "error": null
+    }
+  ],
+  "failed": 10,
+  "total": 28
+}

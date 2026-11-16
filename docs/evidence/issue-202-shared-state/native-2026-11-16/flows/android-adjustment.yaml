@@ -1,0 +1,27 @@
+appId: com.coffeeshop.staffmobile
+name: I202 Android adjustment persists once for Windows to read
+---
+- scrollUntilVisible:
+    element: Record adjustment for I202 Shared Beans
+    direction: DOWN
+- tapOn: Record adjustment for I202 Shared Beans
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- tapOn: Quantity change
+- inputText: '2'
+- hideKeyboard
+- scrollUntilVisible:
+    element: Adjustment reason
+    direction: DOWN
+- tapOn: Adjustment reason
+- inputText: I202 Android shared count
+- hideKeyboard
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- tapOn: Save adjustment
+- scrollUntilVisible:
+    element: 'Adjustment saved by the server. New balance: 97 g.'
+    direction: UP
+- assertVisible: 'Adjustment saved by the server. New balance: 97 g.'

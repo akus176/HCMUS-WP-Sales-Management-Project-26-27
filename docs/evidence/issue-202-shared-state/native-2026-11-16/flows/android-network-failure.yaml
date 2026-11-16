@@ -1,0 +1,12 @@
+appId: com.coffeeshop.staffmobile
+name: I202 unavailable API transport gives no success and no queued write
+---
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- tapOn: Save adjustment
+- scrollUntilVisible:
+    element: 'The adjustment could not be confirmed. Refresh the balance, then retry with the same values.'
+    direction: UP
+- assertVisible: 'The adjustment could not be confirmed. Refresh the balance, then retry with the same values.'
+- assertNotVisible: 'Adjustment saved by the server.*'

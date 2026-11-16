@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="1" time="49.754" timestamp="2026-11-16T10:14:31">
+    <testcase id="I202 reset only the route form before retry verification" name="I202 reset only the route form before retry verification" classname="I202 reset only the route form before retry verification" file="e2e-flows\android-verified-network-ready.yaml" time="49.734" timestamp="2026-11-16T10:14:31" status="ERROR">
+      <failure>No visible element found: "Save adjustment"</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

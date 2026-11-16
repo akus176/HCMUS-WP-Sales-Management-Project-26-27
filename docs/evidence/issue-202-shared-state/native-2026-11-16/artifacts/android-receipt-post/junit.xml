@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="11.256" timestamp="2026-11-16T09:47:39">
+    <testcase id="I202 Android posts shared receipt once" name="I202 Android posts shared receipt once" classname="I202 Android posts shared receipt once" file="e2e-flows\android-receipt-post.yaml" time="11.235" timestamp="2026-11-16T09:47:39" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

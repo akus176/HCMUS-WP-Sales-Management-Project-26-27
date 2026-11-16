@@ -1,0 +1,209 @@
+Window: "Corner Cafe · Service console", App: CoffeeShop.WinUI.exe.
+	0 window Corner Cafe · Service console Secondary Actions: Raise
+		1 pane Non Client Input Sink Window
+		2 pane AppWindow Custom Title Bar
+			3 button Minimize ID: Minimize
+			4 button Maximize ID: Maximize
+			5 button Close ID: Close
+		6 pane
+			7 pane
+				8 text Corner Cafe
+				9 text SERVICE CONSOLE
+				10 text LOCAL · CONNECTED ID: ConnectionStatusText
+				11 text 09:46 ID: ClockText
+				12 button Sign out ID: SignOutButton
+				13 custom ID: Nav
+					14 window Secondary Actions: Raise ID: PaneRoot
+						15 text Corner Cafe
+						16 text SERVICE CONSOLE
+						17 pane ID: MenuItemsScrollViewer
+							18 group ID: MenuItemsHost
+								19 text SERVICE
+								20 list item (selectable) Open Counter workspace
+									21 text I
+									22 text COUNTER
+								23 list item (selectable) Open Service board workspace
+									24 text II
+									25 text SERVICE BOARD
+								26 text MANAGE
+								27 list item (selectable) Open Menu workspace
+									28 text III
+									29 text MENU
+								30 list item (selectable) Open Stock room workspace
+									31 text IV
+									32 text STOCK ROOM
+								33 list item (selectable) Open Customers workspace
+									34 text V
+									35 text CUSTOMERS
+								36 text INSIGHTS
+								37 list item (selectable) Open Reports workspace
+									38 text VI
+									39 text REPORTS
+							40 scroll bar (settable, float) Vertical Value: 0 ID: VerticalScrollBar
+						41 text WINUI · HTTP API ID: ClientModeText
+						42 pane ID: FooterItemsScrollViewer
+							43 group ID: FooterMenuItemsHost
+					44 text MANAGE ID: BreadcrumbGroup
+					45 text /
+					46 text STOCK ROOM ID: BreadcrumbText
+					47 text MON 16 NOV ID: DateText
+					107 pane ID: PageScroll
+						108 text Stock room
+						109 text 1 ingredients · 1 low on stock · 1 draft receipts ID: SubtitleText
+						110 button Create new ingredient ID: NewIngredientButton
+							111 image
+							112 text New ingredient
+						113 button Receive delivery and create receipt ID: ReceiveDeliveryButton
+							114 text Receive delivery
+						115 pane
+							116 button Inventory tab ID: TabBalances
+								275 text Inventory
+								276 text 1
+							118 button Receipts section ID: TabReceipts
+								277 text Receipts
+								278 text 1
+							120 button Suppliers section ID: TabSuppliers
+								279 text Suppliers
+								280 text 1
+							122 button History tab ID: TabMovements
+								281 text History
+						124 text Updated 09:46 ID: SyncPillText
+						243 text field (edit) (settable, string) Filter ingredients ID: SearchBox
+						244 button Filter ingredients by unit ID: UnitFilterBox
+							245 text All units ▾
+						246 checkbox (check box) Low stock only (1) ID: LowStockOnlyCheck
+							247 text Low stock only (1)
+						248 text 1 items ID: BalancesCountText
+						249 button Sort ingredients by name ID: SortIngredientButton
+							250 text INGREDIENT
+							251 text ↕ ID: SortIngredientIndicator
+						252 button Sort ingredients by quantity on hand ID: SortOnHandButton
+							253 text ON HAND
+							254 text ↕ ID: SortOnHandIndicator
+						255 button Sort ingredients by reorder threshold ID: SortReorderButton
+							256 text REORDER AT
+							257 text ↕ ID: SortReorderIndicator
+						258 button Sort ingredients by stock status, sorted ascending ID: SortStatusButton
+							259 text STATUS
+							260 text ↑ ID: SortStatusIndicator
+						261 list Ingredients table ID: IngredientsListView
+							282 list item (selectable) I202 Shared Beans. 97 g on hand. Reorder at 100 g. Low stock. +2 g · adjustment at 09:39 · Staff.
+								283 group I202 Shared Beans. 97 g on hand. Reorder at 100 g. Low stock. +2 g · adjustment at 09:39 · Staff.
+									284 text I202 Shared Beans
+									285 text Unit: g
+									286 text 97 g
+									287 text 100 g
+									288 text LOW
+									289 button Adjust I202 Shared Beans
+										290 text Adjust
+						271 image
+						272 text 1 ingredients ID: FooterCountText
+						273 button Refresh stock room data ID: RefreshButton
+							274 image
+		93 title bar (settable, string) Value: Corner Cafe · Service console
+			94 menu bar System ID: MenuBar
+				95 menu item System
+			96 button Minimize
+			97 button Maximize
+			98 button Close
+
+Document text: ```
+Corner Cafe
+SERVICE CONSOLE
+SERVICE
+I
+COUNTER
+II
+SERVICE BOARD
+MANAGE
+III
+MENU
+IV
+STOCK ROOM
+V
+CUSTOMERS
+INSIGHTS
+VI
+REPORTS
+WINUI · HTTP API
+/
+MON 16 NOV
+Stock room
+1 ingredients · 1 low on stock · 1 draft receipts
+New ingredient
+Receive delivery
+Inventory
+1
+Receipts
+Suppliers
+History
+Updated 09:46
+Filter ingredients…
+All units ▾
+Low stock only (1)
+1 items
+INGREDIENT
+↕
+ON HAND
+REORDER AT
+STATUS
+↑
+I202 Shared Beans
+Unit: g
+97  g
+100  g
+LOW
+Adjust
+1 ingredients
+```
+
+Focused element: 243 text field (edit) (settable, string) Filter ingredients ID: SearchBox
+
+Document text:
+Corner Cafe
+SERVICE CONSOLE
+SERVICE
+I
+COUNTER
+II
+SERVICE BOARD
+MANAGE
+III
+MENU
+IV
+STOCK ROOM
+V
+CUSTOMERS
+INSIGHTS
+VI
+REPORTS
+WINUI · HTTP API
+/
+MON 16 NOV
+Stock room
+1 ingredients · 1 low on stock · 1 draft receipts
+New ingredient
+Receive delivery
+Inventory
+1
+Receipts
+Suppliers
+History
+Updated 09:46
+Filter ingredients…
+All units ▾
+Low stock only (1)
+1 items
+INGREDIENT
+↕
+ON HAND
+REORDER AT
+STATUS
+↑
+I202 Shared Beans
+Unit: g
+97  g
+100  g
+LOW
+Adjust
+1 ingredients

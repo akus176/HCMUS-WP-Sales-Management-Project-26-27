@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="6.554" timestamp="2026-11-16T09:57:42">
+    <testcase id="I202 reconnect refreshes external state without replaying nine-unit write" name="I202 reconnect refreshes external state without replaying nine-unit write" classname="I202 reconnect refreshes external state without replaying nine-unit write" file="e2e-flows\android-reconnect.yaml" time="6.536" timestamp="2026-11-16T09:57:42" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

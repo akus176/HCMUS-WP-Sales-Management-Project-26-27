@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="72.116" timestamp="2026-11-16T09:33:45">
+    <testcase id="I202 Android synthetic Manager signs in" name="I202 Android synthetic Manager signs in" classname="I202 Android synthetic Manager signs in" file="e2e-flows\login.yaml" time="72.095" timestamp="2026-11-16T09:33:45" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,15 @@
+appId: com.coffeeshop.staffmobile
+name: I202 Android reads the same initial inventory
+---
+- tapOn: Open Inventory
+- scrollUntilVisible:
+    element: Search ingredients
+    direction: DOWN
+- tapOn: Search ingredients
+- inputText: I202 Shared Beans
+- hideKeyboard
+- scrollUntilVisible:
+    element: 'Balance: 100 g'
+    direction: DOWN
+- assertVisible: 'Balance: 100 g'
+- assertVisible: 'Low stock.*100 g / 100 g'

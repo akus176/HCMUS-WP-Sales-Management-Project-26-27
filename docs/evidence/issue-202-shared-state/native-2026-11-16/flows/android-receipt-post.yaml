@@ -1,0 +1,20 @@
+appId: com.coffeeshop.staffmobile
+name: I202 Android posts shared receipt once
+---
+- scrollUntilVisible:
+    element: Purchase receipts
+    direction: UP
+- tapOn: Purchase receipts
+- scrollUntilVisible:
+    element: Review receipt I202-SHARED-001
+    direction: DOWN
+- tapOn: Review receipt I202-SHARED-001
+- scrollUntilVisible:
+    element: Post receipt I202-SHARED-001
+    direction: DOWN
+- tapOn: Post receipt I202-SHARED-001
+- extendedWaitUntil:
+    visible: Receipt I202-SHARED-001 was posted by the server.
+    timeout: 15000
+- assertVisible: 'Status: posted'
+- assertNotVisible: Post receipt I202-SHARED-001

@@ -1,0 +1,13 @@
+appId: com.coffeeshop.staffmobile
+name: I202 deliberate retry of the verified nine-unit form
+---
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- assertVisible: '9'
+- assertVisible: I202 deliberate retry only
+- tapOn: Save adjustment
+- extendedWaitUntil:
+    visible: 'Adjustment saved by the server. New balance: 223 g.'
+    timeout: 15000
+- assertVisible: 'Adjustment saved by the server. New balance: 223 g.'

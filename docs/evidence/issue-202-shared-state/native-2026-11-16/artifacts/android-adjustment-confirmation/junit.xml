@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="1" time="23.068" timestamp="2026-11-16T09:46:57">
+    <testcase id="I202 Android adjustment confirmation is visible" name="I202 Android adjustment confirmation is visible" classname="I202 Android adjustment confirmation is visible" file="e2e-flows\android-adjustment-confirmation.yaml" time="23.048" timestamp="2026-11-16T09:46:57" status="ERROR">
+      <failure>No visible element found: "Adjustment saved by the server. New balance: 97 g."</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

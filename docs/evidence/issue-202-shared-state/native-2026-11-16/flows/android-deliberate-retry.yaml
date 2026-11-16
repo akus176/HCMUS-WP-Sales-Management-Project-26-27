@@ -1,0 +1,11 @@
+appId: com.coffeeshop.staffmobile
+name: I202 deliberate retry succeeds once after transport recovery
+---
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- tapOn: Save adjustment
+- extendedWaitUntil:
+    visible: 'Adjustment saved by the server. New balance: 124 g.'
+    timeout: 15000
+- assertVisible: 'Adjustment saved by the server. New balance: 124 g.'

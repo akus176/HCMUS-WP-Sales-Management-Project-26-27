@@ -1,0 +1,10 @@
+appId: com.coffeeshop.staffmobile
+name: I202 transport failure preserves the verified form without a success claim
+---
+- extendedWaitUntil:
+    visible: 'The adjustment could not be confirmed. Refresh the balance, then retry with the same values.'
+    timeout: 120000
+- assertVisible: 'The adjustment could not be confirmed. Refresh the balance, then retry with the same values.'
+- assertVisible: '9'
+- assertVisible: I202 deliberate retry only
+- assertNotVisible: 'Adjustment saved by the server.*'

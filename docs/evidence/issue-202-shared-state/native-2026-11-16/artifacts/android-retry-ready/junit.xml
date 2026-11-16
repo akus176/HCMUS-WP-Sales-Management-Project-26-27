@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="26.924" timestamp="2026-11-16T10:10:21">
+    <testcase id="I202 deliberately reenter the unconfirmed write after refreshing" name="I202 deliberately reenter the unconfirmed write after refreshing" classname="I202 deliberately reenter the unconfirmed write after refreshing" file="e2e-flows\android-retry-ready.yaml" time="26.904" timestamp="2026-11-16T10:10:21" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

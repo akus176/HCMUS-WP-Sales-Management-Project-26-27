@@ -4,7 +4,7 @@ Issue: [#202](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27
 Implementation: [draft PR #214](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/214).
 Date: **15 November 2026**.
 
-The Windows/API checks below passed. **Simultaneous native WinUI/Android acceptance has not run**: the user confirmed that this environment has no Android test app. Keep #202/#203 and the remaining shared-state parent tasks open. No reviewer approval or release acceptance is claimed.
+The Windows/API checks below passed on 15 November. A [simultaneous native WinUI/Android run on 16 November](native-2026-11-16/README.md) now supplies same-database state, conflict, offline/reconnect, permission, retry, audit and network evidence. **Overall acceptance failed:** automatic Android inventory refresh remained stale after a native Windows change. The run also records session-renewal/input-retention observations, transport latency and corrected test-script errors. Keep #202/#203 and the remaining shared-state parent tasks open. No reviewer approval or release acceptance is claimed.
 
 ## Environment and source
 
@@ -110,7 +110,9 @@ OpenSpec validation used the physical Windows export because the Windows CLI's U
 
 No parent OpenSpec checkbox is changed by this evidence. The full mapped Windows 9.8/10.5/11.7/13.3 and Mobile 6.4 requirements retain their canonical issue states until the applicable full verification/review gate passes.
 
-## Android/shared-state handoff: still required
+## Original Android/shared-state handoff (15 November)
+
+The environment gap below was resolved by the 16 November installation and [native run](native-2026-11-16/README.md). Its actual results supersede the unavailable-app status; its failed automatic-refresh gate still requires a #203 fix and a new native verification run.
 
 The user initially preferred reusing an Android environment, then confirmed there is no Android test app in this environment. No existing development database was assumed to be a disposable Android seed. Once the #203 owner has a running app, agree one reachable API and one disposable PostgreSQL database before either side records acceptance.
 

@@ -1,0 +1,8 @@
+appId: com.coffeeshop.staffmobile
+name: I202 submit the verified nine-unit form during transport interruption
+---
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- tapOn: Save adjustment
+- waitForAnimationToEnd

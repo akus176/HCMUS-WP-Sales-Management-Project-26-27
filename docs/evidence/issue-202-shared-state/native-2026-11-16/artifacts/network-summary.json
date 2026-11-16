@@ -1,0 +1,15 @@
+{
+  "connectionObservations": 166,
+  "targets": [
+    {
+      "observations": 166,
+      "target": "127.0.0.1, 52300"
+    }
+  ],
+  "to": "2026-11-16T03:31:16.4891595Z",
+  "method": "Process-owned TCP polling, not uninterrupted packet capture.",
+  "samples": 2792,
+  "from": "2026-11-16T02:31:11.8613126Z",
+  "postgresConnections": 0,
+  "apiOnly": true
+}

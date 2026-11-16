@@ -1,0 +1,15 @@
+appId: com.coffeeshop.staffmobile
+name: I202 reconnect refreshes external state without replaying nine-unit write
+---
+- scrollUntilVisible:
+    element: 'Online.*'
+    direction: UP
+- extendedWaitUntil:
+    visible: 'Online.*'
+    timeout: 30000
+- tapOn: Refresh data
+- scrollUntilVisible:
+    element: 'Balance: 115 g'
+    direction: DOWN
+- assertVisible: 'Balance: 115 g'
+- assertNotVisible: 'Adjustment saved by the server.*'

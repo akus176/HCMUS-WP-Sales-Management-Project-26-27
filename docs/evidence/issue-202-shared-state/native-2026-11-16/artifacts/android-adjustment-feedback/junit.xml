@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="28.387" timestamp="2026-11-16T09:50:53">
+    <testcase id="I202 immediate Android adjustment success feedback" name="I202 immediate Android adjustment success feedback" classname="I202 immediate Android adjustment success feedback" file="e2e-flows\android-adjustment-feedback.yaml" time="28.369" timestamp="2026-11-16T09:50:53" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
