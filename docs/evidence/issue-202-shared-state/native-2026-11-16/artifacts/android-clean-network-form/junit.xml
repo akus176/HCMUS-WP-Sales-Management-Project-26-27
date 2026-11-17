@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="24.407" timestamp="2026-11-16T10:16:13">
+    <testcase id="I202 verified clean nine-unit transport form" name="I202 verified clean nine-unit transport form" classname="I202 verified clean nine-unit transport form" file="e2e-flows\android-clean-network-form.yaml" time="24.385" timestamp="2026-11-16T10:16:13" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,15 @@
+appId: com.coffeeshop.staffmobile
+name: Fixed Android opens a receipt before its live change
+---
+- scrollUntilVisible:
+    element: Purchase receipts
+    direction: UP
+- tapOn: Purchase receipts
+- scrollUntilVisible:
+    element: Review receipt ${MAESTRO_RECEIPT}
+    direction: DOWN
+- tapOn: Review receipt ${MAESTRO_RECEIPT}
+- scrollUntilVisible:
+    element: Post receipt ${MAESTRO_RECEIPT}
+    direction: DOWN
+- assertVisible: 'Status: draft'

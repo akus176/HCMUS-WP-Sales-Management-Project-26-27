@@ -26,12 +26,74 @@ The environment file contains blank credential fields only. Do not export or
 commit an environment after entering local passwords. The live-API Postman run
 is separate from the isolated PostgreSQL integration tests.
 
-## Automated local and CI run
+## Automated Docker verification
 
-The runner is shared with [#202](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/202).
-It uses pinned Postman CLI 1.90.0, with cloud reporting disabled, and rejects
-missing, incomplete, skipped or failed results. Node.js 20 or newer is required;
-the repository's mobile Node pin is used in CI.
+From a Linux checkout with Docker Compose, run:
+
+```sh
+npm ci --prefix tests/api
+bash scripts/verify-compose.sh
+```
+
+This starts an isolated PostgreSQL/API project with generated local credentials,
+checks health and migrations, applies the demo seed twice, provisions synthetic
+Manager/Cashier accounts, and executes the unchanged collection. The host runs the Postman CLI
+pinned in `package-lock.json`; Node.js follows `apps/staff-mobile/.nvmrc`. The run needs no payload editing or Postman
+account. It also verifies that intentionally invalid credentials make the runner
+fail. Its own temporary services and database volume are removed on exit.
+
+The command publishes only sanitized `TestResults/api-collection.json` and
+`TestResults/api-collection-negative.json`: request names/methods/paths/statuses, assertion names and
+outcomes, and aggregate counts. It never publishes tokens, credentials, headers,
+response bodies, query strings, raw CLI reports, or assertion error messages.
+CLI event reporting is disabled. Private environment/report files are created
+in an owned temporary directory and removed after the run. A configuration or
+execution failure cannot leave an earlier passing result behind.
+
+For an already running disposable API, set these variables **privately** in the
+local process environment:
+
+- `COFFEESHOP_COLLECTION_API_HOST`: API origin, such as `http://127.0.0.1:5232`.
+- `COFFEESHOP_COLLECTION_MANAGER_USERNAME` and `COFFEESHOP_COLLECTION_MANAGER_PASSWORD`.
+- `COFFEESHOP_COLLECTION_CASHIER_USERNAME` and `COFFEESHOP_COLLECTION_CASHIER_PASSWORD`.
+
+```sh
+npm ci --prefix tests/api
+npm test --prefix tests/api
+npm run verify --prefix tests/api -- /tmp/collection.json
+```
+
+One host setting derives both health and `/api/v1` addresses. Use a physical
+Windows checkout for npm scripts; Windows command shells cannot use a WSL UNC
+directory as their working directory. Credentials stay out of command-line
+arguments and tracked environment files.
+
+The CLI runs a local v2.1 collection with local JSON reporting; see the
+[official Postman CLI documentation](https://learning.postman.com/docs/postman-cli/postman-cli-collections/).
+
+## Repeated concurrency verification
+
+With `COFFEESHOP_TEST_POSTGRES` privately set to a disposable PostgreSQL admin
+connection, run:
+
+```sh
+COFFEESHOP_CONCURRENCY_ITERATIONS=5 \
+  COFFEESHOP_CONCURRENCY_RESULTS=/tmp/coffee-shop-concurrency \
+  bash scripts/verify-concurrency.sh
+```
+
+The existing integration tests create isolated databases. The runner repeats all
+tests named `Concurrent` and the named cross-order restoration, cancelled
+replacement and stale-ingredient lock cases in the Infrastructure and API suites, rejects missing
+or skipped results, and requires the original confirmation, table occupancy,
+cancellation/restoration, loyalty reversal and refresh-reuse cases in every
+iteration. It does not alter the existing test assertions. CI repeats three
+iterations and retains the TRX files plus sanitized summary.
+
+These automated results do not prove a native Windows/Android session. That
+shared-state evidence remains tracked in #202/#203.
+
+## Windows collection example
 
 ```powershell
 npm ci --prefix tests/api
@@ -50,9 +112,3 @@ try {
     Remove-Item Env:COFFEESHOP_COLLECTION_CASHIER_PASSWORD
 }
 ```
-
-The nine requests use temporary private environment/report files that are removed
-after execution. Published evidence contains only request names, methods, paths,
-statuses and assertion outcomes. Never publish raw CLI exports or environment
-files. `bash scripts/verify-compose.sh` performs provisioning, both positive and
-intentional invalid-password runs, and disposable-stack cleanup automatically.

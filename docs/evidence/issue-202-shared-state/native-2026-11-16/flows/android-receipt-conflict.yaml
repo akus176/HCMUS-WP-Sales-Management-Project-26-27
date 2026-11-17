@@ -1,0 +1,9 @@
+appId: com.coffeeshop.staffmobile
+name: I202 Android stale receipt rejects and reloads Windows state
+---
+- tapOn: Post receipt I202-SHARED-002
+- extendedWaitUntil:
+    visible: 'Receipt.*changed.*|Receipt.*already.*|.*Refresh.*receipt.*|Status: posted'
+    timeout: 15000
+- assertVisible: 'Status: posted'
+- assertNotVisible: Post receipt I202-SHARED-002

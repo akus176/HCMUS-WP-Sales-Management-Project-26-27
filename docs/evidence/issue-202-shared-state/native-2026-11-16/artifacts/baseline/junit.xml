@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="15.122" timestamp="2026-11-16T09:35:44">
+    <testcase id="I202 Android reads the same initial inventory" name="I202 Android reads the same initial inventory" classname="I202 Android reads the same initial inventory" file="e2e-flows\baseline.yaml" time="15.1" timestamp="2026-11-16T09:35:44" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

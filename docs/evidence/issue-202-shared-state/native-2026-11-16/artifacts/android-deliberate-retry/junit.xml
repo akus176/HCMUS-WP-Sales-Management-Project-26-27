@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="1" time="21.735" timestamp="2026-11-16T10:11:50">
+    <testcase id="I202 deliberate retry succeeds once after transport recovery" name="I202 deliberate retry succeeds once after transport recovery" classname="I202 deliberate retry succeeds once after transport recovery" file="e2e-flows\android-deliberate-retry.yaml" time="21.72" timestamp="2026-11-16T10:11:50" status="ERROR">
+      <failure>Assertion is false: "Adjustment saved by the server. New balance: 124 g." is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

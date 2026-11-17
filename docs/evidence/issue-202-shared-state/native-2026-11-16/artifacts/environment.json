@@ -1,0 +1,23 @@
+{
+  "seed": "empty migrated database; I202 Shared Beans 100 g; I202-SHARED-001 draft +10 g",
+  "winuiExeSha256": "57ffc3d571d57fdf8d5ab3c8cd5a5210bcac99bd6a9fc631a520b05b4b472f2a",
+  "androidProxy": "http://10.0.2.2:52301/api/v1",
+  "verificationHead": "c017bb7c6108822d7112e25f98f857c283c309c4",
+  "source": "5683fd14a56ef6d5a816288d769a894e7833970b",
+  "postgres": "fresh postgres:18-alpine, database issue202, loopback:55402",
+  "issue": 202,
+  "api": "http://127.0.0.1:52302/api/v1",
+  "androidCiRun": 43722362913,
+  "apkSha256": "03dc41ad6a555cf7bb55a29d4db703b49bf8b2e07c5024a08eeb4f097cb15529",
+  "roles": {
+    "windows": "issue202_windows / Manager",
+    "negative": "issue202_cashier / Cashier",
+    "android": "issue202_android / Manager",
+    "observer": "issue202_admin / Admin"
+  },
+  "startedAt": "2026-11-16T02:33:30.0065992Z",
+  "windowsProxy": "http://127.0.0.1:52300/api/v1",
+  "androidIssue": 203,
+  "apiDllSha256": "d51d4a85d8ab612409c0f0e735ca90ab6effb76b54bbf0b50221583299afa012",
+  "winuiDllSha256": "30c4a9649783d0cd3fc4f6aefcdf9c3e637d1af71b07cc440349aee5863f4dd7"
+}

@@ -1,0 +1,23 @@
+{
+  "ingredient": {
+    "ingredientId": "ec58b15e-d62e-43a4-a326-56380958ebcd",
+    "name": "I202 Shared Beans",
+    "baseUnit": "g",
+    "availableQuantity": 100,
+    "reorderThreshold": 100,
+    "isActive": true
+  },
+  "adminId": "712ecd19-63cc-4a65-995f-5cbd9d7b5c0c",
+  "api": "http://127.0.0.1:52302/api/v1",
+  "receipt": {
+    "id": "254f5d33-966c-4f5e-a852-887f41c66fa5",
+    "supplierId": "fca39185-811e-440c-b68f-87627a1b4a7c",
+    "receiptNumber": "I202-SHARED-001",
+    "status": "draft",
+    "postedAt": null,
+    "lines": [],
+    "createdAt": "2026-11-16T09:29:22.6552911+07:00",
+    "updatedAt": "2026-11-16T09:29:22.6552911+07:00"
+  },
+  "container": "coffeeshop-issue202-e2e-923ab71e"
+}

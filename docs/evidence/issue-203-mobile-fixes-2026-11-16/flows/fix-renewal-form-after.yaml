@@ -1,0 +1,8 @@
+appId: com.coffeeshop.staffmobile
+name: Unchanged real token renewal retains the unsaved inventory form
+---
+- assertVisible: '9'
+- assertVisible: I203 retained through token renewal
+- assertVisible:
+    text: Save adjustment
+    enabled: true

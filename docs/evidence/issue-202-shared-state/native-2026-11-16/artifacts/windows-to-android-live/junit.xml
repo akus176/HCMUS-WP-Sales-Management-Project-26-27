@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="1" time="17.067" timestamp="2026-11-16T09:37:28">
+    <testcase id="I202 WinUI committed inventory change refreshes Android live" name="I202 WinUI committed inventory change refreshes Android live" classname="I202 WinUI committed inventory change refreshes Android live" file="e2e-flows\windows-to-android-live.yaml" time="17.044" timestamp="2026-11-16T09:37:28" status="ERROR">
+      <failure>Assertion is false: "Balance: 95 g" is visible</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

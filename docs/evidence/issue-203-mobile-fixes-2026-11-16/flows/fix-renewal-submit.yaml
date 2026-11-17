@@ -1,0 +1,10 @@
+appId: com.coffeeshop.staffmobile
+name: Submit the retained adjustment exactly once after real token renewal
+---
+- assertVisible: '9'
+- assertVisible: I203 retained through token renewal
+- tapOn: Save adjustment
+- extendedWaitUntil:
+    visible: 'Adjustment saved by the server. New balance: 506 g.'
+    timeout: 30000
+- assertVisible: 'Adjustment saved by the server. New balance: 506 g.'

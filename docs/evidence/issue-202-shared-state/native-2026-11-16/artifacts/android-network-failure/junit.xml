@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="1" time="26.314" timestamp="2026-11-16T10:07:29">
+    <testcase id="I202 unavailable API transport gives no success and no queued write" name="I202 unavailable API transport gives no success and no queued write" classname="I202 unavailable API transport gives no success and no queued write" file="e2e-flows\android-network-failure.yaml" time="26.295" timestamp="2026-11-16T10:07:29" status="ERROR">
+      <failure>No visible element found: "The adjustment could not be confirmed. Refresh the balance, then retry with the same values."</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

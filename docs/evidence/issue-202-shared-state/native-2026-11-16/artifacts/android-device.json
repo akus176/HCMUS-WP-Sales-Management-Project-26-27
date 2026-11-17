@@ -1,0 +1,12 @@
+{
+  "api": "36",
+  "installedApkSha256": "03dc41ad6a555cf7bb55a29d4db703b49bf8b2e07c5024a08eeb4f097cb15529",
+  "serial": "emulator-5554",
+  "model": "sdk_gphone64_x86_64",
+  "package": [
+    "versionCode=1 minSdk=24 targetSdk=36",
+    "versionName=0.1.0"
+  ],
+  "abi": "x86_64",
+  "android": "16"
+}

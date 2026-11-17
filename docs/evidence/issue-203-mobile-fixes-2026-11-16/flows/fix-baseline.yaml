@@ -1,0 +1,18 @@
+appId: com.coffeeshop.staffmobile
+name: Fixed Android runtime loads the shared 500 g fixture
+---
+- launchApp
+- extendedWaitUntil:
+    visible: Staff home
+    timeout: 90000
+- tapOn: Open Inventory
+- scrollUntilVisible:
+    element: Search ingredients
+    direction: DOWN
+- tapOn: Search ingredients
+- inputText: ${MAESTRO_INGREDIENT}
+- hideKeyboard
+- scrollUntilVisible:
+    element: 'Balance: 500 g'
+    direction: DOWN
+- assertVisible: 'Balance: 500 g'

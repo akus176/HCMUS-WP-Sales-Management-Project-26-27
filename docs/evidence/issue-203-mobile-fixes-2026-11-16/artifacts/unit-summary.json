@@ -1,0 +1,33 @@
+{
+  "after": {
+    "failed": 0,
+    "suites": 27,
+    "tests": 235,
+    "passed": 235,
+    "pending": 0
+  },
+  "format": "passed",
+  "forwardingHarness": {
+    "failed": 0,
+    "tests": 7,
+    "passed": 7
+  },
+  "before": {
+    "failures": [
+      "rotation with unchanged staff details preserves the user snapshot identity",
+      "renewal preserves inventory form only while permissions remain valid (revoked=false)",
+      "inventory events refetch \"inventory-balances\" without accepting a late stale read",
+      "inventory events refetch \"inventory-balances\" without accepting a late stale read",
+      "inventory events refetch \"inventory-movements\" without accepting a late stale read",
+      "inventory events refetch \"inventory-movements\" without accepting a late stale read",
+      "inventory events refetch \"purchase-receipts\" without accepting a late stale read",
+      "inventory events refetch \"purchase-receipt\" without accepting a late stale read"
+    ],
+    "failed": 8,
+    "tests": 43,
+    "passed": 35
+  },
+  "fixCommit": "7f1162c6d9b5b971be59165cdc41a5cce1a30bd6",
+  "typecheck": "passed",
+  "lint": "passed"
+}

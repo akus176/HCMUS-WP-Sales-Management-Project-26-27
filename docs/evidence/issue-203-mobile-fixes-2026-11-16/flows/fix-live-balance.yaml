@@ -1,0 +1,7 @@
+appId: com.coffeeshop.staffmobile
+name: Fixed inventory event refreshes Android after a native WinUI change
+---
+- extendedWaitUntil:
+    visible: 'Balance: 495 g'
+    timeout: 15000
+- assertVisible: 'Balance: 495 g'

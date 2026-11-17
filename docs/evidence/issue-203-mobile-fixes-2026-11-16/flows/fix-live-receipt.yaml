@@ -1,0 +1,8 @@
+appId: com.coffeeshop.staffmobile
+name: Fixed inventory event refreshes the active receipt detail automatically
+---
+- extendedWaitUntil:
+    visible: 'Status: posted'
+    timeout: 15000
+- assertVisible: 'Status: posted'
+- assertNotVisible: Post receipt ${MAESTRO_RECEIPT}

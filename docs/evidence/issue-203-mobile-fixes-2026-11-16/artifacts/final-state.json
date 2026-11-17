@@ -1,0 +1,91 @@
+{
+  "balance": {
+    "ingredientId": "136f9a5b-e899-45f0-a0e9-91cd35018de2",
+    "name": "I203 Live Beans 7146c9",
+    "baseUnit": "g",
+    "availableQuantity": 506.0,
+    "reorderThreshold": 500.0,
+    "isActive": true
+  },
+  "receipt": {
+    "id": "b96739d5-37a4-45ad-b9dc-885b1a7ec5a0",
+    "supplierId": "fbe0953a-b43f-4e27-af0e-95fa429a5414",
+    "receiptNumber": "I203-LIVE-7146c9",
+    "status": "posted",
+    "postedAt": "2026-11-16T14:51:44.478894+07:00",
+    "lines": [
+      {
+        "id": "79c59b99-b0b5-4eb1-b9ed-95a66dc1bd74",
+        "ingredientId": "136f9a5b-e899-45f0-a0e9-91cd35018de2",
+        "quantity": 2.0,
+        "unitCost": 1.0
+      }
+    ],
+    "createdAt": "2026-11-16T14:47:03.216464+07:00",
+    "updatedAt": "2026-11-16T14:51:44.478894+07:00"
+  },
+  "cashierForbidden": {
+    "status": 403,
+    "protectedIngredientAbsent": true
+  },
+  "movementCount": 3,
+  "movements": [
+    {
+      "id": "ba13fe19-4d2e-4f47-8424-1326b74d959c",
+      "ingredientId": "136f9a5b-e899-45f0-a0e9-91cd35018de2",
+      "type": "adjustment",
+      "quantityDelta": 9.0,
+      "actorId": "b9d95580-a2f5-4706-8a0b-46c3406aef76",
+      "reason": "I203 retained through token renewal",
+      "occurredAt": "2026-11-16T15:01:15.361228+07:00",
+      "purchaseReceiptId": null,
+      "orderId": null
+    },
+    {
+      "id": "8a28fdef-5a83-4b83-a3c2-f8fa4cc43d76",
+      "ingredientId": "136f9a5b-e899-45f0-a0e9-91cd35018de2",
+      "type": "receipt",
+      "quantityDelta": 2.0,
+      "actorId": "5f174f6b-a4fe-4cf3-9ca4-7e132d60eb05",
+      "reason": "Purchase receipt I203-LIVE-7146c9",
+      "occurredAt": "2026-11-16T14:51:44.494197+07:00",
+      "purchaseReceiptId": "b96739d5-37a4-45ad-b9dc-885b1a7ec5a0",
+      "orderId": null
+    },
+    {
+      "id": "96cd1346-698c-477d-9b70-85a640cd4fe1",
+      "ingredientId": "136f9a5b-e899-45f0-a0e9-91cd35018de2",
+      "type": "adjustment",
+      "quantityDelta": -5.0,
+      "actorId": "5f174f6b-a4fe-4cf3-9ca4-7e132d60eb05",
+      "reason": "I203 native live refresh",
+      "occurredAt": "2026-11-16T14:49:49.209114+07:00",
+      "purchaseReceiptId": null,
+      "orderId": null
+    }
+  ],
+  "at": "2026-11-16T08:01:34.5926647Z",
+  "users": {
+    "cashier": {
+      "username": "issue202_cashier",
+      "roles": [
+        "Cashier"
+      ],
+      "id": "c36bc925-a9d4-4697-b155-ff1335978430"
+    },
+    "windows": {
+      "username": "issue202_windows",
+      "roles": [
+        "Manager"
+      ],
+      "id": "5f174f6b-a4fe-4cf3-9ca4-7e132d60eb05"
+    },
+    "android": {
+      "username": "issue202_android",
+      "roles": [
+        "Manager"
+      ],
+      "id": "b9d95580-a2f5-4706-8a0b-46c3406aef76"
+    }
+  }
+}

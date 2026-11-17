@@ -1,0 +1,34 @@
+appId: com.coffeeshop.staffmobile
+name: I202 reset only the route form before retry verification
+---
+- scrollUntilVisible:
+    element: Back to staff home
+    direction: UP
+- tapOn: Back to staff home
+- assertVisible: Staff home
+- tapOn: Open Inventory
+- scrollUntilVisible:
+    element: Record adjustment for I202 Shared Beans
+    direction: DOWN
+- tapOn: Record adjustment for I202 Shared Beans
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- tapOn: Quantity change
+- inputText: '9'
+- hideKeyboard
+- scrollUntilVisible:
+    element: Adjustment reason
+    direction: DOWN
+- tapOn: Adjustment reason
+- inputText: I202 verified nine unit retry
+- hideKeyboard
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- assertVisible:
+    text: '9'
+- assertVisible: I202 verified nine unit retry
+- assertVisible:
+    text: Save adjustment
+    enabled: true

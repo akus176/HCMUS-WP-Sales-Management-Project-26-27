@@ -1,0 +1,94 @@
+{
+  "database": "issue202",
+  "serverVersion": "18.7",
+  "ingredients": [
+    {
+      "id": "ec58b15e-d62e-43a4-a326-56380958ebcd",
+      "name": "I202 Shared Beans",
+      "availableQuantity": 115.0,
+      "reorderThreshold": 100.0
+    }
+  ],
+  "movements": [
+    {
+      "id": "a141df8c-d0c0-4bc8-844e-94f250b0402a",
+      "ingredientId": "ec58b15e-d62e-43a4-a326-56380958ebcd",
+      "type": 1,
+      "quantityDelta": -5.0,
+      "actorId": "5f174f6b-a4fe-4cf3-9ca4-7e132d60eb05",
+      "actorUsername": "issue202_windows",
+      "reason": "I202 Windows shared count",
+      "purchaseReceiptId": null,
+      "occurredAt": "2026-11-16T09:37:10.40261+07:00"
+    },
+    {
+      "id": "8c323e76-08ba-4933-996d-d57c1adb267f",
+      "ingredientId": "ec58b15e-d62e-43a4-a326-56380958ebcd",
+      "type": 1,
+      "quantityDelta": 2.0,
+      "actorId": "b9d95580-a2f5-4706-8a0b-46c3406aef76",
+      "actorUsername": "issue202_android",
+      "reason": "I202 Android shared count",
+      "purchaseReceiptId": null,
+      "occurredAt": "2026-11-16T09:39:09.285268+07:00"
+    },
+    {
+      "id": "588805a8-ca36-4168-a739-df6c9efdf1ed",
+      "ingredientId": "ec58b15e-d62e-43a4-a326-56380958ebcd",
+      "type": 0,
+      "quantityDelta": 10.0,
+      "actorId": "b9d95580-a2f5-4706-8a0b-46c3406aef76",
+      "actorUsername": "issue202_android",
+      "reason": "Purchase receipt I202-SHARED-001",
+      "purchaseReceiptId": "254f5d33-966c-4f5e-a852-887f41c66fa5",
+      "occurredAt": "2026-11-16T09:47:48.107871+07:00"
+    },
+    {
+      "id": "ba731bcd-6017-4c71-85d6-064f01183b56",
+      "ingredientId": "ec58b15e-d62e-43a4-a326-56380958ebcd",
+      "type": 1,
+      "quantityDelta": 1.0,
+      "actorId": "b9d95580-a2f5-4706-8a0b-46c3406aef76",
+      "actorUsername": "issue202_android",
+      "reason": "I202 immediate feedback verification",
+      "purchaseReceiptId": null,
+      "occurredAt": "2026-11-16T09:51:20.130053+07:00"
+    },
+    {
+      "id": "6377e1a3-4f34-499b-bbfc-cf96dd1a9458",
+      "ingredientId": "ec58b15e-d62e-43a4-a326-56380958ebcd",
+      "type": 0,
+      "quantityDelta": 4.0,
+      "actorId": "5f174f6b-a4fe-4cf3-9ca4-7e132d60eb05",
+      "actorUsername": "issue202_windows",
+      "reason": "Purchase receipt I202-SHARED-002",
+      "purchaseReceiptId": "bc125b67-05cc-482c-9036-8715ba0d789f",
+      "occurredAt": "2026-11-16T09:53:43.529485+07:00"
+    },
+    {
+      "id": "465a586c-3fc1-4c56-9605-642c9feaf595",
+      "ingredientId": "ec58b15e-d62e-43a4-a326-56380958ebcd",
+      "type": 1,
+      "quantityDelta": 3.0,
+      "actorId": "712ecd19-63cc-4a65-995f-5cbd9d7b5c0c",
+      "actorUsername": "issue202_admin",
+      "reason": "I202 authoritative change while Android offline",
+      "purchaseReceiptId": null,
+      "occurredAt": "2026-11-16T09:57:32.522743+07:00"
+    }
+  ],
+  "receipts": [
+    {
+      "id": "254f5d33-966c-4f5e-a852-887f41c66fa5",
+      "number": "I202-SHARED-001",
+      "status": 1,
+      "postedAt": "2026-11-16T09:47:48.098595+07:00"
+    },
+    {
+      "id": "bc125b67-05cc-482c-9036-8715ba0d789f",
+      "number": "I202-SHARED-002",
+      "status": 1,
+      "postedAt": "2026-11-16T09:53:43.527027+07:00"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+appId: com.coffeeshop.staffmobile
+name: I202 Android adjustment confirmation is visible
+---
+- scrollUntilVisible:
+    element: 'Adjustment saved by the server. New balance: 97 g.'
+    direction: DOWN
+- assertVisible: 'Adjustment saved by the server. New balance: 97 g.'

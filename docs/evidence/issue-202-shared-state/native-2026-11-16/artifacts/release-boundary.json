@@ -1,0 +1,5 @@
+{
+  "finding": "No PostgreSQL infrastructure, Npgsql, Entity Framework or PostgreSQL connection-setting references in Release output.",
+  "command": "scripts/verify-winui-api-release.ps1 -SkipBuild",
+  "passed": true
+}

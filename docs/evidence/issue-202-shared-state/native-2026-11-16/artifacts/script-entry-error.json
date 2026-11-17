@@ -1,0 +1,9 @@
+{
+  "balanceBefore": 115,
+  "balanceAfter": 214,
+  "followup": "Preserve the movement and verify exact input before the next transport/retry check.",
+  "actualDelta": 99,
+  "cause": "Test script appended input to retained form values.",
+  "hiddenOrReverted": false,
+  "expectedDelta": 9
+}

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="67.969" timestamp="2026-11-16T10:18:27">
+    <testcase id="I202 transport failure preserves the verified form without a success claim" name="I202 transport failure preserves the verified form without a success claim" classname="I202 transport failure preserves the verified form without a success claim" file="e2e-flows\android-network-feedback.yaml" time="67.955" timestamp="2026-11-16T10:18:27" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

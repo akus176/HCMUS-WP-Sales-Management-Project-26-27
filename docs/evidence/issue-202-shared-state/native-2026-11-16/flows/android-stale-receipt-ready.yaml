@@ -1,0 +1,13 @@
+appId: com.coffeeshop.staffmobile
+name: I202 Android holds the second draft receipt
+---
+- tapOn: Back to receipt list
+- scrollUntilVisible:
+    element: Review receipt I202-SHARED-002
+    direction: DOWN
+- tapOn: Review receipt I202-SHARED-002
+- scrollUntilVisible:
+    element: Post receipt I202-SHARED-002
+    direction: DOWN
+- assertVisible: 'Status: draft'
+- assertVisible: Post receipt I202-SHARED-002

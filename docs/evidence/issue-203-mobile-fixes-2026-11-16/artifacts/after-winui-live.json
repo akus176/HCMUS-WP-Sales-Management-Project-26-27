@@ -1,0 +1,24 @@
+{
+  "movements": [
+    {
+      "id": "96cd1346-698c-477d-9b70-85a640cd4fe1",
+      "ingredientId": "136f9a5b-e899-45f0-a0e9-91cd35018de2",
+      "type": "adjustment",
+      "quantityDelta": -5.0,
+      "actorId": "5f174f6b-a4fe-4cf3-9ca4-7e132d60eb05",
+      "reason": "I203 native live refresh",
+      "occurredAt": "2026-11-16T14:49:49.209114+07:00",
+      "purchaseReceiptId": null,
+      "orderId": null
+    }
+  ],
+  "at": "2026-11-16T07:50:17.5476044Z",
+  "balance": {
+    "ingredientId": "136f9a5b-e899-45f0-a0e9-91cd35018de2",
+    "name": "I203 Live Beans 7146c9",
+    "baseUnit": "g",
+    "availableQuantity": 495.0,
+    "reorderThreshold": 500.0,
+    "isActive": true
+  }
+}

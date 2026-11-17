@@ -1,0 +1,212 @@
+{
+  "passed": true,
+  "iterations": 5,
+  "totalPassed": 115,
+  "runs": [
+    {
+      "iteration": 1,
+      "suite": "Infrastructure",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_DifferentOrdersSharingIngredients_RestoresBothWithoutLostUpdates",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Restore_ConcurrentRetriesAndLaterCancellation_DoNotRestoreTwice",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.CancelledReplacement_StopsWhileWaitingForParentLock(recipe: False)",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_ConcurrentRequestsFromIndependentContexts_ApplyEffectsOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(changeUnit: False)",
+        "CoffeeShop.Infrastructure.Tests.DiscountPersistenceIntegrationTests.ConcurrentApprovals_CannotReduceTotalBelowZero",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: False, initiallyEmpty: True)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: True, initiallyEmpty: False)",
+        "CoffeeShop.Infrastructure.Tests.OrderConfirmationIntegrationTests.Confirm_ConcurrentOrdersForSameTable_OnlyOneOrderOccupiesAndConsumes",
+        "CoffeeShop.Infrastructure.Tests.PaymentPersistenceIntegrationTests.ConcurrentDuplicateRetry_RecordsBalanceOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.CancelledReplacement_StopsWhileWaitingForParentLock(recipe: True)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(changeUnit: True)",
+        "CoffeeShop.Infrastructure.Tests.DiscountPersistenceIntegrationTests.ConcurrentApprovalRetries_ApplyDiscountOnlyOnce",
+        "CoffeeShop.Infrastructure.Tests.PosWorkspaceIntegrationTests.ConcurrentTableAssignment_ShowsConflict_AndReloadsCurrentState",
+        "CoffeeShop.Infrastructure.Tests.OrderConfirmationIntegrationTests.Confirm_ConcurrentRetries_ApplyOrderEffectsOnce",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_HoldsOrderLock_ConcurrentDeliveryReloadsAndRejectsCancelledOrder",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: True, initiallyEmpty: True)",
+        "CoffeeShop.Infrastructure.Tests.CustomerLoyaltyPersistenceIntegrationTests.ConcurrentCancellationReversals_ApplyAppendOnlyReversalOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: False, initiallyEmpty: False)",
+        "CoffeeShop.Infrastructure.Tests.CustomerLoyaltyPersistenceIntegrationTests.ConcurrentRedemptionRetries_SerializeAndApplyBalanceOnce"
+      ]
+    },
+    {
+      "iteration": 1,
+      "suite": "Api",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.MobileCashier182_ConcurrentRetriesPersistOnePaymentAndRefreshSharedBalance",
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentStockAdjustmentRetries_CommitOnceAndRejectCrossIngredientReuse",
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentRefresh_OnlyOneSucceedsAndReuseInvalidatesSuccessor"
+      ]
+    },
+    {
+      "iteration": 2,
+      "suite": "Infrastructure",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.CancelledReplacement_StopsWhileWaitingForParentLock(recipe: False)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(changeUnit: False)",
+        "CoffeeShop.Infrastructure.Tests.DiscountPersistenceIntegrationTests.ConcurrentApprovals_CannotReduceTotalBelowZero",
+        "CoffeeShop.Infrastructure.Tests.PosWorkspaceIntegrationTests.ConcurrentTableAssignment_ShowsConflict_AndReloadsCurrentState",
+        "CoffeeShop.Infrastructure.Tests.CustomerLoyaltyPersistenceIntegrationTests.ConcurrentRedemptionRetries_SerializeAndApplyBalanceOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.CancelledReplacement_StopsWhileWaitingForParentLock(recipe: True)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(changeUnit: True)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: False, initiallyEmpty: True)",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_HoldsOrderLock_ConcurrentDeliveryReloadsAndRejectsCancelledOrder",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Restore_ConcurrentRetriesAndLaterCancellation_DoNotRestoreTwice",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: True, initiallyEmpty: False)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: True, initiallyEmpty: True)",
+        "CoffeeShop.Infrastructure.Tests.DiscountPersistenceIntegrationTests.ConcurrentApprovalRetries_ApplyDiscountOnlyOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: False, initiallyEmpty: False)",
+        "CoffeeShop.Infrastructure.Tests.OrderConfirmationIntegrationTests.Confirm_ConcurrentRetries_ApplyOrderEffectsOnce",
+        "CoffeeShop.Infrastructure.Tests.CustomerLoyaltyPersistenceIntegrationTests.ConcurrentCancellationReversals_ApplyAppendOnlyReversalOnce",
+        "CoffeeShop.Infrastructure.Tests.OrderConfirmationIntegrationTests.Confirm_ConcurrentOrdersForSameTable_OnlyOneOrderOccupiesAndConsumes",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_DifferentOrdersSharingIngredients_RestoresBothWithoutLostUpdates",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_ConcurrentRequestsFromIndependentContexts_ApplyEffectsOnce",
+        "CoffeeShop.Infrastructure.Tests.PaymentPersistenceIntegrationTests.ConcurrentDuplicateRetry_RecordsBalanceOnce"
+      ]
+    },
+    {
+      "iteration": 2,
+      "suite": "Api",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentStockAdjustmentRetries_CommitOnceAndRejectCrossIngredientReuse",
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentRefresh_OnlyOneSucceedsAndReuseInvalidatesSuccessor",
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.MobileCashier182_ConcurrentRetriesPersistOnePaymentAndRefreshSharedBalance"
+      ]
+    },
+    {
+      "iteration": 3,
+      "suite": "Infrastructure",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "CoffeeShop.Infrastructure.Tests.DiscountPersistenceIntegrationTests.ConcurrentApprovalRetries_ApplyDiscountOnlyOnce",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_HoldsOrderLock_ConcurrentDeliveryReloadsAndRejectsCancelledOrder",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.CancelledReplacement_StopsWhileWaitingForParentLock(recipe: True)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: True, initiallyEmpty: False)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.CancelledReplacement_StopsWhileWaitingForParentLock(recipe: False)",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Restore_ConcurrentRetriesAndLaterCancellation_DoNotRestoreTwice",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_ConcurrentRequestsFromIndependentContexts_ApplyEffectsOnce",
+        "CoffeeShop.Infrastructure.Tests.DiscountPersistenceIntegrationTests.ConcurrentApprovals_CannotReduceTotalBelowZero",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: True, initiallyEmpty: True)",
+        "CoffeeShop.Infrastructure.Tests.CustomerLoyaltyPersistenceIntegrationTests.ConcurrentCancellationReversals_ApplyAppendOnlyReversalOnce",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_DifferentOrdersSharingIngredients_RestoresBothWithoutLostUpdates",
+        "CoffeeShop.Infrastructure.Tests.PosWorkspaceIntegrationTests.ConcurrentTableAssignment_ShowsConflict_AndReloadsCurrentState",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(changeUnit: True)",
+        "CoffeeShop.Infrastructure.Tests.OrderConfirmationIntegrationTests.Confirm_ConcurrentOrdersForSameTable_OnlyOneOrderOccupiesAndConsumes",
+        "CoffeeShop.Infrastructure.Tests.OrderConfirmationIntegrationTests.Confirm_ConcurrentRetries_ApplyOrderEffectsOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: False, initiallyEmpty: False)",
+        "CoffeeShop.Infrastructure.Tests.PaymentPersistenceIntegrationTests.ConcurrentDuplicateRetry_RecordsBalanceOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: False, initiallyEmpty: True)",
+        "CoffeeShop.Infrastructure.Tests.CustomerLoyaltyPersistenceIntegrationTests.ConcurrentRedemptionRetries_SerializeAndApplyBalanceOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(changeUnit: False)"
+      ]
+    },
+    {
+      "iteration": 3,
+      "suite": "Api",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentRefresh_OnlyOneSucceedsAndReuseInvalidatesSuccessor",
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentStockAdjustmentRetries_CommitOnceAndRejectCrossIngredientReuse",
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.MobileCashier182_ConcurrentRetriesPersistOnePaymentAndRefreshSharedBalance"
+      ]
+    },
+    {
+      "iteration": 4,
+      "suite": "Infrastructure",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "CoffeeShop.Infrastructure.Tests.OrderConfirmationIntegrationTests.Confirm_ConcurrentRetries_ApplyOrderEffectsOnce",
+        "CoffeeShop.Infrastructure.Tests.CustomerLoyaltyPersistenceIntegrationTests.ConcurrentCancellationReversals_ApplyAppendOnlyReversalOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: False, initiallyEmpty: False)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.CancelledReplacement_StopsWhileWaitingForParentLock(recipe: False)",
+        "CoffeeShop.Infrastructure.Tests.OrderConfirmationIntegrationTests.Confirm_ConcurrentOrdersForSameTable_OnlyOneOrderOccupiesAndConsumes",
+        "CoffeeShop.Infrastructure.Tests.DiscountPersistenceIntegrationTests.ConcurrentApprovalRetries_ApplyDiscountOnlyOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.CancelledReplacement_StopsWhileWaitingForParentLock(recipe: True)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: True, initiallyEmpty: True)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: True, initiallyEmpty: False)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(changeUnit: True)",
+        "CoffeeShop.Infrastructure.Tests.CustomerLoyaltyPersistenceIntegrationTests.ConcurrentRedemptionRetries_SerializeAndApplyBalanceOnce",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_HoldsOrderLock_ConcurrentDeliveryReloadsAndRejectsCancelledOrder",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: False, initiallyEmpty: True)",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_DifferentOrdersSharingIngredients_RestoresBothWithoutLostUpdates",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_ConcurrentRequestsFromIndependentContexts_ApplyEffectsOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(changeUnit: False)",
+        "CoffeeShop.Infrastructure.Tests.PaymentPersistenceIntegrationTests.ConcurrentDuplicateRetry_RecordsBalanceOnce",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Restore_ConcurrentRetriesAndLaterCancellation_DoNotRestoreTwice",
+        "CoffeeShop.Infrastructure.Tests.PosWorkspaceIntegrationTests.ConcurrentTableAssignment_ShowsConflict_AndReloadsCurrentState",
+        "CoffeeShop.Infrastructure.Tests.DiscountPersistenceIntegrationTests.ConcurrentApprovals_CannotReduceTotalBelowZero"
+      ]
+    },
+    {
+      "iteration": 4,
+      "suite": "Api",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentStockAdjustmentRetries_CommitOnceAndRejectCrossIngredientReuse",
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentRefresh_OnlyOneSucceedsAndReuseInvalidatesSuccessor",
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.MobileCashier182_ConcurrentRetriesPersistOnePaymentAndRefreshSharedBalance"
+      ]
+    },
+    {
+      "iteration": 5,
+      "suite": "Infrastructure",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.CancelledReplacement_StopsWhileWaitingForParentLock(recipe: True)",
+        "CoffeeShop.Infrastructure.Tests.CustomerLoyaltyPersistenceIntegrationTests.ConcurrentRedemptionRetries_SerializeAndApplyBalanceOnce",
+        "CoffeeShop.Infrastructure.Tests.OrderConfirmationIntegrationTests.Confirm_ConcurrentOrdersForSameTable_OnlyOneOrderOccupiesAndConsumes",
+        "CoffeeShop.Infrastructure.Tests.PaymentPersistenceIntegrationTests.ConcurrentDuplicateRetry_RecordsBalanceOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(changeUnit: True)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.CancelledReplacement_StopsWhileWaitingForParentLock(recipe: False)",
+        "CoffeeShop.Infrastructure.Tests.CustomerLoyaltyPersistenceIntegrationTests.ConcurrentCancellationReversals_ApplyAppendOnlyReversalOnce",
+        "CoffeeShop.Infrastructure.Tests.OrderConfirmationIntegrationTests.Confirm_ConcurrentRetries_ApplyOrderEffectsOnce",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Restore_ConcurrentRetriesAndLaterCancellation_DoNotRestoreTwice",
+        "CoffeeShop.Infrastructure.Tests.DiscountPersistenceIntegrationTests.ConcurrentApprovalRetries_ApplyDiscountOnlyOnce",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: True, initiallyEmpty: True)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: False, initiallyEmpty: False)",
+        "CoffeeShop.Infrastructure.Tests.PosWorkspaceIntegrationTests.ConcurrentTableAssignment_ShowsConflict_AndReloadsCurrentState",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: False, initiallyEmpty: True)",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_ConcurrentRequestsFromIndependentContexts_ApplyEffectsOnce",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_HoldsOrderLock_ConcurrentDeliveryReloadsAndRejectsCancelledOrder",
+        "CoffeeShop.Infrastructure.Tests.DiscountPersistenceIntegrationTests.ConcurrentApprovals_CannotReduceTotalBelowZero",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.ConcurrentReplacements_SerializeBeforeReadingTheExistingSet(recipe: True, initiallyEmpty: False)",
+        "CoffeeShop.Infrastructure.Tests.CatalogPersistenceIntegrationTests.RecipeReplacement_WaitsForIngredientUpdateAndRejectsStaleValidation(changeUnit: False)",
+        "CoffeeShop.Infrastructure.Tests.OrderCancellationIntegrationTests.Cancel_DifferentOrdersSharingIngredients_RestoresBothWithoutLostUpdates"
+      ]
+    },
+    {
+      "iteration": 5,
+      "suite": "Api",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentStockAdjustmentRetries_CommitOnceAndRejectCrossIngredientReuse",
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.ConcurrentRefresh_OnlyOneSucceedsAndReuseInvalidatesSuccessor",
+        "CoffeeShop.Api.Tests.StaffIdentityHttpTests.MobileCashier182_ConcurrentRetriesPersistOnePaymentAndRefreshSharedBalance"
+      ]
+    }
+  ]
+}

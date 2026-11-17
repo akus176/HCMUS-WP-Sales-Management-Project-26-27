@@ -1,0 +1,31 @@
+appId: com.coffeeshop.staffmobile
+name: Prepare unsaved input before a real token rotation
+---
+- scrollUntilVisible:
+    element: Ingredient balances
+    direction: UP
+- tapOn: Ingredient balances
+- scrollUntilVisible:
+    element: Record adjustment for ${MAESTRO_INGREDIENT}
+    direction: DOWN
+- tapOn: Record adjustment for ${MAESTRO_INGREDIENT}
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- tapOn: Quantity change
+- inputText: '9'
+- hideKeyboard
+- scrollUntilVisible:
+    element: Adjustment reason
+    direction: DOWN
+- tapOn: Adjustment reason
+- inputText: I203 retained through token renewal
+- hideKeyboard
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- assertVisible: '9'
+- assertVisible: I203 retained through token renewal
+- assertVisible:
+    text: Save adjustment
+    enabled: true

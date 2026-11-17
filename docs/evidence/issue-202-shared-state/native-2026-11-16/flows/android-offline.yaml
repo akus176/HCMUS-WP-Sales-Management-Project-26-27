@@ -1,0 +1,17 @@
+appId: com.coffeeshop.staffmobile
+name: I202 offline mode disables the prepared write
+---
+- scrollUntilVisible:
+    element: 'Offline.*'
+    direction: UP
+- extendedWaitUntil:
+    visible: 'Offline.*'
+    timeout: 30000
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- assertVisible:
+    text: Save adjustment
+    enabled: false
+- tapOn: Save adjustment
+- assertNotVisible: 'Adjustment saved by the server.*'

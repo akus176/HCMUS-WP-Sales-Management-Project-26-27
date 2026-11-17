@@ -1,0 +1,9 @@
+appId: com.coffeeshop.staffmobile
+name: I202 revoked permission rejects stale native adjustment safely
+---
+- tapOn: Save adjustment
+- scrollUntilVisible:
+    element: 'The server denied this adjustment. No stock was changed; refresh your permissions.'
+    direction: UP
+- assertVisible: 'The server denied this adjustment. No stock was changed; refresh your permissions.'
+- assertNotVisible: 'Adjustment saved by the server.*'

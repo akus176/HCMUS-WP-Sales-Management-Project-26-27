@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="2.117" timestamp="2026-11-16T15:00:12">
+    <testcase id="Unchanged real token renewal retains the unsaved inventory form" name="Unchanged real token renewal retains the unsaved inventory form" classname="Unchanged real token renewal retains the unsaved inventory form" file="e2e-flows\fix-renewal-form-after.yaml" time="2.104" timestamp="2026-11-16T15:00:12" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

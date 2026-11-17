@@ -1,0 +1,34 @@
+10:14:31.928 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+10:14:31.937 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+10:14:31.941 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+10:14:31.942 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+10:14:31.942 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Scrolling UP until "Back to staff home" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled RUNNING
+10:14:34.293 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Scrolling UP until "Back to staff home" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled COMPLETED
+10:14:34.293 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Back to staff home" RUNNING
+10:14:37.170 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Back to staff home" COMPLETED
+10:14:37.171 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Staff home" is visible RUNNING
+10:14:37.262 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Staff home" is visible COMPLETED
+10:14:37.263 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Open Inventory" RUNNING
+10:14:39.989 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Open Inventory" COMPLETED
+10:14:39.989 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Scrolling DOWN until "Record adjustment for I202 Shared Beans" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled RUNNING
+10:14:40.113 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Scrolling DOWN until "Record adjustment for I202 Shared Beans" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled COMPLETED
+10:14:40.113 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Record adjustment for I202 Shared Beans" RUNNING
+10:14:42.509 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Record adjustment for I202 Shared Beans" COMPLETED
+10:14:42.509 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Scrolling DOWN until "Quantity change" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled RUNNING
+10:14:44.654 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Scrolling DOWN until "Quantity change" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled COMPLETED
+10:14:44.654 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Quantity change" RUNNING
+10:14:48.668 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Quantity change" COMPLETED
+10:14:48.668 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Input text 9 RUNNING
+10:14:49.519 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Input text 9 COMPLETED
+10:14:49.520 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Hide Keyboard RUNNING
+10:14:50.730 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Hide Keyboard COMPLETED
+10:14:50.730 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Scrolling DOWN until "Adjustment reason" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled RUNNING
+10:14:50.874 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Scrolling DOWN until "Adjustment reason" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled COMPLETED
+10:14:50.874 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Adjustment reason" RUNNING
+10:14:53.642 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Adjustment reason" COMPLETED
+10:14:53.642 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Input text I202 verified nine unit retry RUNNING
+10:14:58.489 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Input text I202 verified nine unit retry COMPLETED
+10:14:58.489 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Hide Keyboard RUNNING
+10:14:59.542 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Hide Keyboard COMPLETED
+10:14:59.543 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Scrolling DOWN until "Save adjustment" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled RUNNING
+10:15:20.287 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Scrolling DOWN until "Save adjustment" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled FAILED

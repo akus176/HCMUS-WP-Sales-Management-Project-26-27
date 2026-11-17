@@ -1,0 +1,16 @@
+appId: com.coffeeshop.staffmobile
+name: I202 Android loads a draft before Windows posts it
+---
+- scrollUntilVisible:
+    element: Purchase receipts
+    direction: UP
+- tapOn: Purchase receipts
+- scrollUntilVisible:
+    element: Review receipt I202-SHARED-002
+    direction: DOWN
+- tapOn: Review receipt I202-SHARED-002
+- scrollUntilVisible:
+    element: Post receipt I202-SHARED-002
+    direction: DOWN
+- assertVisible: 'Status: draft'
+- assertVisible: Post receipt I202-SHARED-002

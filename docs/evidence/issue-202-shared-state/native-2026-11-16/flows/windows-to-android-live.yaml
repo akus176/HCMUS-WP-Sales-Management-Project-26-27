@@ -1,0 +1,7 @@
+appId: com.coffeeshop.staffmobile
+name: I202 WinUI committed inventory change refreshes Android live
+---
+- extendedWaitUntil:
+    visible: 'Balance: 95 g'
+    timeout: 15000
+- assertVisible: 'Balance: 95 g'

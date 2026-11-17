@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="25.28" timestamp="2026-11-16T10:03:32">
+    <testcase id="I202 fresh prepared forbidden write" name="I202 fresh prepared forbidden write" classname="I202 fresh prepared forbidden write" file="e2e-flows\android-forbidden-ready.yaml" time="25.258" timestamp="2026-11-16T10:03:32" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,235 @@
+Window: "Corner Cafe · Service console", App: CoffeeShop.WinUI.exe.
+	0 window Corner Cafe · Service console Secondary Actions: Raise
+		1 pane Non Client Input Sink Window
+		2 pane AppWindow Custom Title Bar
+			3 button Minimize ID: Minimize
+			4 button Maximize ID: Maximize
+			5 button Close ID: Close
+		6 pane
+			7 pane
+				8 text Corner Cafe
+				9 text SERVICE CONSOLE
+				10 text LOCAL · CONNECTED ID: ConnectionStatusText
+				11 text 14:50 ID: ClockText
+				12 button Sign out ID: SignOutButton
+				13 custom ID: Nav
+					14 window Secondary Actions: Raise ID: PaneRoot
+						15 text Corner Cafe
+						16 text SERVICE CONSOLE
+						17 pane ID: MenuItemsScrollViewer
+							18 group ID: MenuItemsHost
+								19 text SERVICE
+								20 list item (selectable) Open Counter workspace
+									21 text I
+									22 text COUNTER
+								23 list item (selectable) Open Service board workspace
+									24 text II
+									25 text SERVICE BOARD
+								26 text MANAGE
+								27 list item (selectable) Open Menu workspace
+									28 text III
+									29 text MENU
+								30 list item (selectable) Open Stock room workspace
+									31 text IV
+									32 text STOCK ROOM
+								33 list item (selectable) Open Customers workspace
+									34 text V
+									35 text CUSTOMERS
+								36 text INSIGHTS
+								37 list item (selectable) Open Reports workspace
+									38 text VI
+									39 text REPORTS
+							40 scroll bar (settable, float) Vertical Value: 0 ID: VerticalScrollBar
+						41 text WINUI · HTTP API ID: ClientModeText
+						42 pane ID: FooterItemsScrollViewer
+							43 group ID: FooterMenuItemsHost
+					44 text MANAGE ID: BreadcrumbGroup
+					45 text /
+					46 text STOCK ROOM ID: BreadcrumbText
+					47 text MON 16 NOV ID: DateText
+					100 pane ID: PageScroll
+						101 text Stock room
+						102 text 2 ingredients · 1 low on stock · 1 draft receipts ID: SubtitleText
+						103 button Create new ingredient ID: NewIngredientButton
+							104 image
+							105 text New ingredient
+						106 button Receive delivery and create receipt ID: ReceiveDeliveryButton
+							107 text Receive delivery
+						108 pane
+							109 button Inventory tab ID: TabBalances
+								227 text Inventory
+								228 text 2
+							111 button Receipts section ID: TabReceipts
+								229 text Receipts
+								230 text 3
+							113 button Suppliers section ID: TabSuppliers
+								231 text Suppliers
+								232 text 2
+							115 button History tab ID: TabMovements
+								233 text History
+						117 text Updated 14:49 ID: SyncPillText
+						234 text Done: Stock adjustment of -5 g recorded. ID: StatusMessageText
+						235 button Dismiss status message ID: StatusDismissButton
+							236 text ×
+						237 text field (edit) (settable, string) Filter ingredients ID: SearchBox
+						238 button Filter ingredients by unit ID: UnitFilterBox
+							239 text All units ▾
+						240 checkbox (check box) Low stock only (1) ID: LowStockOnlyCheck
+							241 text Low stock only (1)
+						242 text 2 items ID: BalancesCountText
+						243 button Sort ingredients by name ID: SortIngredientButton
+							244 text INGREDIENT
+							245 text ↕ ID: SortIngredientIndicator
+						246 button Sort ingredients by quantity on hand ID: SortOnHandButton
+							247 text ON HAND
+							248 text ↕ ID: SortOnHandIndicator
+						249 button Sort ingredients by reorder threshold ID: SortReorderButton
+							250 text REORDER AT
+							251 text ↕ ID: SortReorderIndicator
+						252 button Sort ingredients by stock status, sorted ascending ID: SortStatusButton
+							253 text STATUS
+							254 text ↑ ID: SortStatusIndicator
+						255 list Ingredients table ID: IngredientsListView
+							256 list item (selectable) I203 Live Beans 7146c9. 495 g on hand. Reorder at 500 g. Low stock. -5 g · adjustment at 14:49 · Issue202 Windows.
+								257 group I203 Live Beans 7146c9. 495 g on hand. Reorder at 500 g. Low stock. -5 g · adjustment at 14:49 · Issue202 Windows.
+									258 text I203 Live Beans 7146c9
+									259 text Unit: g
+									260 text 495 g
+									261 text 500 g
+									262 text LOW
+									263 button Adjust I203 Live Beans 7146c9
+										264 text Adjust
+							265 list item (selectable) I202 Shared Beans. 223 g on hand. Reorder at 100 g. Stock OK. +9 g · adjustment at 10:29 · Staff.
+								266 group I202 Shared Beans. 223 g on hand. Reorder at 100 g. Stock OK. +9 g · adjustment at 10:29 · Staff.
+									267 text I202 Shared Beans
+									268 text Unit: g
+									269 text 223 g
+									270 text 100 g
+									271 text ✓ OK
+									272 button Adjust I202 Shared Beans
+										273 text Adjust
+						274 image
+						275 text 2 ingredients ID: FooterCountText
+						276 button Refresh stock room data ID: RefreshButton
+							277 image
+		89 title bar (settable, string) Value: Corner Cafe · Service console
+			90 menu bar System ID: MenuBar
+				95 menu item System
+			92 button Minimize
+			93 button Maximize
+			94 button Close
+
+Document text: ```
+Corner Cafe
+SERVICE CONSOLE
+SERVICE
+I
+COUNTER
+II
+SERVICE BOARD
+MANAGE
+III
+MENU
+IV
+STOCK ROOM
+V
+CUSTOMERS
+INSIGHTS
+VI
+REPORTS
+WINUI · HTTP API
+/
+MON 16 NOV
+Stock room
+2 ingredients · 1 low on stock · 1 draft receipts
+New ingredient
+Receive delivery
+Inventory
+2
+Receipts
+3
+Suppliers
+History
+Updated 14:49
+Done: Stock adjustment of -5 g recorded.
+×
+Filter ingredients…
+All units ▾
+Low stock only (1)
+2 items
+INGREDIENT
+↕
+ON HAND
+REORDER AT
+STATUS
+↑
+I203 Live Beans 7146c9
+Unit: g
+495  g
+500  g
+LOW
+Adjust
+I202 Shared Beans
+223  g
+100  g
+✓ OK
+2 ingredients
+```
+
+Focused element: 237 text field (edit) (settable, string) Filter ingredients ID: SearchBox
+
+Document text:
+Corner Cafe
+SERVICE CONSOLE
+SERVICE
+I
+COUNTER
+II
+SERVICE BOARD
+MANAGE
+III
+MENU
+IV
+STOCK ROOM
+V
+CUSTOMERS
+INSIGHTS
+VI
+REPORTS
+WINUI · HTTP API
+/
+MON 16 NOV
+Stock room
+2 ingredients · 1 low on stock · 1 draft receipts
+New ingredient
+Receive delivery
+Inventory
+2
+Receipts
+3
+Suppliers
+History
+Updated 14:49
+Done: Stock adjustment of -5 g recorded.
+×
+Filter ingredients…
+All units ▾
+Low stock only (1)
+2 items
+INGREDIENT
+↕
+ON HAND
+REORDER AT
+STATUS
+↑
+I203 Live Beans 7146c9
+Unit: g
+495  g
+500  g
+LOW
+Adjust
+I202 Shared Beans
+223  g
+100  g
+✓ OK
+2 ingredients

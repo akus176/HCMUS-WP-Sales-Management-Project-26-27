@@ -1,0 +1,117 @@
+{
+  "passed": true,
+  "expectedRequests": 9,
+  "executedRequests": 9,
+  "assertions": 9,
+  "failures": 0,
+  "requests": [
+    {
+      "name": "Liveness",
+      "method": "GET",
+      "path": "/health",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "API liveness is healthy",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Readiness",
+      "method": "GET",
+      "path": "/health/ready",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "API and PostgreSQL are ready",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Anonymous catalog request is rejected",
+      "method": "GET",
+      "path": "/api/v1/categories",
+      "status": 401,
+      "assertions": [
+        {
+          "name": "Protected catalog rejects anonymous requests",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Manager login",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Manager credentials issue a session",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Cashier login",
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Cashier credentials issue a session",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Manager can read categories",
+      "method": "GET",
+      "path": "/api/v1/categories",
+      "status": 200,
+      "assertions": [
+        {
+          "name": "Manager can read the category collection",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Cashier cannot create a category",
+      "method": "POST",
+      "path": "/api/v1/categories",
+      "status": 403,
+      "assertions": [
+        {
+          "name": "Server rejects category writes without menu.manage",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Manager cannot create a blank category",
+      "method": "POST",
+      "path": "/api/v1/categories",
+      "status": 400,
+      "assertions": [
+        {
+          "name": "Invalid category input returns a validation error",
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "Unknown API route returns not found",
+      "method": "GET",
+      "path": "/api/v1/collection-route-that-does-not-exist",
+      "status": 404,
+      "assertions": [
+        {
+          "name": "Unknown API routes return not found",
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+appId: com.coffeeshop.staffmobile
+name: I202 deliberately reenter the unconfirmed write after refreshing
+---
+- scrollUntilVisible:
+    element: Ingredient balances
+    direction: UP
+- tapOn: Ingredient balances
+- scrollUntilVisible:
+    element: Refresh inventory
+    direction: DOWN
+- tapOn: Refresh inventory
+- scrollUntilVisible:
+    element: Record adjustment for I202 Shared Beans
+    direction: DOWN
+- tapOn: Record adjustment for I202 Shared Beans
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- tapOn: Quantity change
+- inputText: '9'
+- hideKeyboard
+- scrollUntilVisible:
+    element: Adjustment reason
+    direction: DOWN
+- tapOn: Adjustment reason
+- inputText: I202 deliberate retry only
+- hideKeyboard
+- scrollUntilVisible:
+    element: Save adjustment
+    direction: DOWN
+- assertVisible:
+    text: Save adjustment
+    enabled: true

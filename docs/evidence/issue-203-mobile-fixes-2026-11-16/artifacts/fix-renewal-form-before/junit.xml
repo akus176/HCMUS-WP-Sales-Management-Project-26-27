@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="30.442" timestamp="2026-11-16T14:52:34">
+    <testcase id="Prepare unsaved input before a real token rotation" name="Prepare unsaved input before a real token rotation" classname="Prepare unsaved input before a real token rotation" file="e2e-flows\fix-renewal-form-before.yaml" time="30.427" timestamp="2026-11-16T14:52:34" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

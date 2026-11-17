@@ -1,0 +1,226 @@
+Window: "Corner Cafe · Service console", App: CoffeeShop.WinUI.exe.
+	0 window Corner Cafe · Service console Secondary Actions: Raise
+		1 pane Non Client Input Sink Window
+		2 pane AppWindow Custom Title Bar
+			3 button Minimize ID: Minimize
+			4 button Maximize ID: Maximize
+			5 button Close ID: Close
+		6 pane
+			7 pane
+				8 text Corner Cafe
+				9 text SERVICE CONSOLE
+				10 text LOCAL · CONNECTED ID: ConnectionStatusText
+				11 text 09:55 ID: ClockText
+				12 button Sign out ID: SignOutButton
+				13 custom ID: Nav
+					14 window Secondary Actions: Raise ID: PaneRoot
+						15 text Corner Cafe
+						16 text SERVICE CONSOLE
+						17 pane ID: MenuItemsScrollViewer
+							18 group ID: MenuItemsHost
+								19 text SERVICE
+								20 list item (selectable) Open Counter workspace
+									21 text I
+									22 text COUNTER
+								23 list item (selectable) Open Service board workspace
+									24 text II
+									25 text SERVICE BOARD
+								26 text MANAGE
+								27 list item (selectable) Open Menu workspace
+									28 text III
+									29 text MENU
+								30 list item (selectable) Open Stock room workspace
+									31 text IV
+									32 text STOCK ROOM
+								33 list item (selectable) Open Customers workspace
+									34 text V
+									35 text CUSTOMERS
+								36 text INSIGHTS
+								37 list item (selectable) Open Reports workspace
+									38 text VI
+									39 text REPORTS
+							40 scroll bar (settable, float) Vertical Value: 0 ID: VerticalScrollBar
+						41 text WINUI · HTTP API ID: ClientModeText
+						42 pane ID: FooterItemsScrollViewer
+							43 group ID: FooterMenuItemsHost
+					44 text MANAGE ID: BreadcrumbGroup
+					45 text /
+					46 text STOCK ROOM ID: BreadcrumbText
+					47 text MON 16 NOV ID: DateText
+					107 pane ID: PageScroll
+						108 text Stock room
+						109 text 1 ingredients · 0 low on stock · 0 draft receipts ID: SubtitleText
+						113 button Receive delivery and create receipt ID: ReceiveDeliveryButton
+							114 text Receive delivery
+						115 pane
+							116 button Inventory tab ID: TabBalances
+								529 text Inventory
+								530 text 1
+							118 button Receipts section ID: TabReceipts
+								531 text Receipts
+								532 text 2
+							120 button Suppliers section ID: TabSuppliers
+								533 text Suppliers
+								534 text 1
+							122 button History tab ID: TabMovements
+								535 text History
+						124 text Updated 09:53 ID: SyncPillText
+						536 text Done: Purchase receipt #I202-SHARED-002 posted and inventory added. ID: StatusMessageText
+						537 button Dismiss status message ID: StatusDismissButton
+							538 text ×
+						482 text Purchase receipts
+						483 list Purchase receipts list ID: ReceiptsListView
+							539 list item (selectable) Receipt #I202-SHARED-002, I202 Synthetic Supplier, Posted, 16 Nov 2026 · 09:52, 1 item, 8.00
+								540 text Receipt #I202-SHARED-002
+								541 text I202 Synthetic Supplier
+								542 text ·
+								543 text 16 Nov 2026 · 09:52
+								544 text 8.00
+								545 text Posted
+							546 list item (selectable) Receipt #I202-SHARED-001, I202 Synthetic Supplier, Posted, 16 Nov 2026 · 09:29, 1 item, 20.00
+								547 text Receipt #I202-SHARED-001
+								548 text I202 Synthetic Supplier
+								549 text ·
+								550 text 16 Nov 2026 · 09:29
+								551 text 20.00
+								552 text Posted
+						502 pane
+							503 text RECEIPT
+							504 text I202-SHARED-002
+							505 text Posted
+							506 text I202 Synthetic Supplier
+							507 text 0000000000
+							508 text CREATED
+							509 text 16 Nov 2026 · 09:52
+							510 text POSTED
+							511 text 16 Nov 2026 · 09:53
+							512 text LINE ITEMS
+							513 text 1 item
+							553 text I202 Shared Beans
+							554 text 4 g × 2.00
+							555 text 8.00
+							517 text TOTAL VALUE
+							518 text 8.00
+							519 text Posted receipts are immutable; corrections are recorded as new movements.
+						524 scroll bar (settable, float) Vertical Value: 0 ID: VerticalScrollBar
+		93 title bar (settable, string) Value: Corner Cafe · Service console
+			94 menu bar System ID: MenuBar
+				95 menu item System
+			96 button Minimize
+			97 button Maximize
+			98 button Close
+
+Document text: ```
+Corner Cafe
+SERVICE CONSOLE
+SERVICE
+I
+COUNTER
+II
+SERVICE BOARD
+MANAGE
+III
+MENU
+IV
+STOCK ROOM
+V
+CUSTOMERS
+INSIGHTS
+VI
+REPORTS
+WINUI · HTTP API
+/
+MON 16 NOV
+Stock room
+1 ingredients · 0 low on stock · 0 draft receipts
+Receive delivery
+Inventory
+1
+Receipts
+2
+Suppliers
+History
+Updated 09:53
+Done: Purchase receipt #I202-SHARED-002 posted and inventory added.
+×
+Purchase receipts
+Receipt #I202-SHARED-002
+I202 Synthetic Supplier
+·
+16 Nov 2026 · 09:52
+8.00
+Posted
+Receipt #I202-SHARED-001
+16 Nov 2026 · 09:29
+20.00
+RECEIPT
+I202-SHARED-002
+0000000000
+CREATED
+POSTED
+16 Nov 2026 · 09:53
+LINE ITEMS
+1 item
+I202 Shared Beans
+4 g × 2.00
+TOTAL VALUE
+Posted receipts are immutable; corrections are recorded as new movements.
+```
+
+Focused element: 7 pane
+
+Document text:
+Corner Cafe
+SERVICE CONSOLE
+SERVICE
+I
+COUNTER
+II
+SERVICE BOARD
+MANAGE
+III
+MENU
+IV
+STOCK ROOM
+V
+CUSTOMERS
+INSIGHTS
+VI
+REPORTS
+WINUI · HTTP API
+/
+MON 16 NOV
+Stock room
+1 ingredients · 0 low on stock · 0 draft receipts
+Receive delivery
+Inventory
+1
+Receipts
+2
+Suppliers
+History
+Updated 09:53
+Done: Purchase receipt #I202-SHARED-002 posted and inventory added.
+×
+Purchase receipts
+Receipt #I202-SHARED-002
+I202 Synthetic Supplier
+·
+16 Nov 2026 · 09:52
+8.00
+Posted
+Receipt #I202-SHARED-001
+16 Nov 2026 · 09:29
+20.00
+RECEIPT
+I202-SHARED-002
+0000000000
+CREATED
+POSTED
+16 Nov 2026 · 09:53
+LINE ITEMS
+1 item
+I202 Shared Beans
+4 g × 2.00
+TOTAL VALUE
+Posted receipts are immutable; corrections are recorded as new movements.
