@@ -87,6 +87,52 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task Assistant204_EnforcesHttpPermissionsAndPersistsOnlyRedactedReadOnlyOutcomes()
+    {
+        await using var assistantHost = host!.WithWebHostBuilder(builder => builder.UseSetting("Assistant:Provider", "deterministic"));
+        using var client = assistantHost.CreateClient();
+        var request = new AssistantAskRequest("Show revenue", new(2026, 11, 1), new(2026, 11, 15), "UTC");
+        using var anonymous = await client.PostAsJsonAsync("/api/v1/assistant/ask", request);
+        Assert.Equal(HttpStatusCode.Unauthorized, anonymous.StatusCode);
+        client.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(client)).AccessToken);
+        using var forbidden = await client.PostAsJsonAsync("/api/v1/assistant/ask", request);
+        Assert.Equal(HttpStatusCode.Forbidden, forbidden.StatusCode);
+        Assert.DoesNotContain("toolsInvoked", await forbidden.Content.ReadAsStringAsync());
+
+        var manager = await LoginAsync(client, "Manager");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", manager.AccessToken);
+        using var response = await client.PostAsJsonAsync("/api/v1/assistant/ask", request);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
+        var answer = (await response.Content.ReadFromJsonAsync<AssistantAskResponse>())!;
+        Assert.Equal(request.From, answer.From);
+        Assert.Equal(request.To, answer.To);
+        Assert.Contains("No matching revenue data", answer.Answer);
+        Assert.Equal(AssistantTools.Revenue, Assert.Single(answer.ToolsInvoked).Tool);
+
+        using var invalid = await client.PostAsJsonAsync("/api/v1/assistant/ask", request with { To = new(2026, 10, 1) });
+        Assert.Equal(HttpStatusCode.BadRequest, invalid.StatusCode);
+        using var refusal = await client.PostAsJsonAsync("/api/v1/assistant/ask", request with { Question = "Cancel the last order" });
+        Assert.Empty((await refusal.Content.ReadFromJsonAsync<AssistantAskResponse>())!.ToolsInvoked);
+        using var unsupported = await client.PostAsJsonAsync("/api/v1/assistant/ask", request with { Question = "Weather? token=synthetic-private-value" });
+        Assert.Empty((await unsupported.Content.ReadFromJsonAsync<AssistantAskResponse>())!.ToolsInvoked);
+
+        await using var db = Database();
+        var audits = await db.AiInteractionAudits.ToArrayAsync();
+        Assert.Equal(4, audits.Length);
+        Assert.All(audits, audit => Assert.Equal(new EntityId(manager.User.Id), audit.UserId));
+        Assert.Contains(audits, audit => audit.Outcome == "refused");
+        Assert.Contains(audits, audit => audit.Outcome == "unsupported" && audit.Question.Contains("[REDACTED]"));
+        Assert.All(audits, audit =>
+        {
+            Assert.DoesNotContain("synthetic-private-value", audit.Question);
+            Assert.DoesNotContain(manager.AccessToken, audit.Question);
+        });
+        Assert.Empty(await db.Orders.ToArrayAsync());
+        Assert.Empty(await db.StockMovements.ToArrayAsync());
+    }
+
+    [PostgresFact]
     public async Task MobileDevices_RequireAuthenticationAndEnforceOwnershipRotationAndRevocation()
     {
         using var owner = host!.CreateClient();

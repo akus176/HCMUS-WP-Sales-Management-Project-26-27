@@ -55,6 +55,24 @@ public sealed class ManagerAssistantServiceTests
     }
 
     [Fact]
+    public async Task NonemptyAnswerUsesOnlyReturnedRevenueAndReportingPeriod()
+    {
+        await using var db = Database();
+        var report = new RevenueReportResponse(new(2026, 11, 1), new(2026, 11, 15), "UTC",
+            DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, 123m, 7, [], []);
+        var gateway = new StubGateway(new AssistantToolResult(AssistantTools.Revenue, "success", report));
+
+        var result = await Create(db, gateway).AskAsync(Request("Show revenue"));
+
+        Assert.True(result.IsSuccess);
+        Assert.Contains("From 2026-11-01 through 2026-11-15", result.Value.Answer);
+        Assert.Contains($"{report.Revenue:N2} from {report.OrderCount} orders", result.Value.Answer);
+        Assert.Same(report, Assert.Single(result.Value.ToolsInvoked).Metrics);
+        Assert.Equal(1, gateway.Calls);
+        Assert.Equal("revenue:success", (await db.AiInteractionAudits.SingleAsync()).Tools);
+    }
+
+    [Fact]
     public async Task AuditRedactsCredentialsInQuestion()
     {
         await using var db = Database();

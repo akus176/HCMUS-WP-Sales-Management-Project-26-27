@@ -31,18 +31,19 @@ is separate from the isolated PostgreSQL integration tests.
 From a Linux checkout with Docker Compose, run:
 
 ```sh
-COFFEESHOP_API_COLLECTION_RESULTS=/tmp/coffee-shop-api-results bash scripts/verify-compose.sh
+npm ci --prefix tests/api
+bash scripts/verify-compose.sh
 ```
 
 This starts an isolated PostgreSQL/API project with generated local credentials,
 checks health and migrations, applies the demo seed twice, provisions synthetic
-Manager/Cashier accounts, and executes the unchanged collection. The Postman CLI
-is pinned in `package-lock.json`. The run needs no payload editing or Postman
+Manager/Cashier accounts, and executes the unchanged collection. The host runs the Postman CLI
+pinned in `package-lock.json`; Node.js follows `apps/staff-mobile/.nvmrc`. The run needs no payload editing or Postman
 account. It also verifies that intentionally invalid credentials make the runner
 fail. Its own temporary services and database volume are removed on exit.
 
-The command publishes only sanitized `collection.json` and
-`negative-control.json`: request names/methods/paths/statuses, assertion names and
+The command publishes only sanitized `TestResults/api-collection.json` and
+`TestResults/api-collection-negative.json`: request names/methods/paths/statuses, assertion names and
 outcomes, and aggregate counts. It never publishes tokens, credentials, headers,
 response bodies, query strings, raw CLI reports, or assertion error messages.
 CLI event reporting is disabled. Private environment/report files are created
@@ -91,3 +92,23 @@ iterations and retains the TRX files plus sanitized summary.
 
 These automated results do not prove a native Windows/Android session. That
 shared-state evidence remains tracked in #202/#203.
+
+## Windows collection example
+
+```powershell
+npm ci --prefix tests/api
+npm test --prefix tests/api
+$env:COFFEESHOP_COLLECTION_API_HOST = 'http://127.0.0.1:5232'
+$env:COFFEESHOP_COLLECTION_MANAGER_USERNAME = 'local-manager'
+$env:COFFEESHOP_COLLECTION_CASHIER_USERNAME = 'local-cashier'
+$env:COFFEESHOP_COLLECTION_MANAGER_PASSWORD = Read-Host 'Manager password' -MaskInput
+$env:COFFEESHOP_COLLECTION_CASHIER_PASSWORD = Read-Host 'Cashier password' -MaskInput
+try {
+    New-Item -ItemType Directory -Path TestResults -Force | Out-Null
+    node tests/api/run-collection.mjs TestResults/api-collection.json
+    if ($LASTEXITCODE -ne 0) { throw 'API collection failed.' }
+} finally {
+    Remove-Item Env:COFFEESHOP_COLLECTION_MANAGER_PASSWORD
+    Remove-Item Env:COFFEESHOP_COLLECTION_CASHIER_PASSWORD
+}
+```

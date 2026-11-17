@@ -270,6 +270,50 @@ public sealed class OrderConfirmationIntegrationTests : IAsyncLifetime
         Assert.Equal(82m, (await verified.Ingredients.SingleAsync(item => item.Id == first.IngredientId)).AvailableQuantity);
     }
 
+    [PostgresFact]
+    public async Task Confirm_ExactStockBoundary_ConsumesToZeroWithoutOverdraft()
+    {
+        var seed = await SeedAsync(ingredientStock: 36m, recipeQuantity: 18m, lineQuantity: 2);
+
+        Assert.True((await Handler().ConfirmAsync(new(seed.OrderId, seed.ActorId))).IsSuccess);
+
+        await using var scope = services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        Assert.Equal(0m, (await db.Ingredients.SingleAsync(item => item.Id == seed.IngredientId)).AvailableQuantity);
+        Assert.Equal(-36m, (await db.StockMovements.SingleAsync(movement => movement.OrderId == seed.OrderId)).QuantityDelta);
+    }
+
+    [PostgresFact]
+    public async Task ConfirmedHistory_RetainsNamesAndPricesAfterCatalogEditAndDeactivation()
+    {
+        var seed = await SeedAsync(ingredientStock: 100m, recipeQuantity: 18m, lineQuantity: 2);
+        Assert.True((await Handler().ConfirmAsync(new(seed.OrderId, seed.ActorId))).IsSuccess);
+        await using (var scope = services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+            var variant = await db.SizeVariants.SingleAsync(item => item.Id == seed.SizeVariantId);
+            var item = await db.MenuItems.SingleAsync(item => item.Id == variant.MenuItemId);
+            var category = await db.Categories.SingleAsync(category => category.Id == item.CategoryId);
+            item.Update("Retired latte", null, category, Timestamp);
+            variant.Update("Renamed size", new Money(99_000m));
+            item.Deactivate(Timestamp);
+            await db.SaveChangesAsync();
+            Assert.Throws<ArgumentException>(() => new OrderLine(EntityId.New(), item, variant, 1));
+        }
+
+        await using var verify = services.CreateAsyncScope();
+        var fresh = verify.ServiceProvider.GetRequiredService<CoffeeShopDbContext>();
+        var order = await fresh.Orders.Include(order => order.Lines).SingleAsync(order => order.Id == seed.OrderId);
+        var line = Assert.Single(order.Lines);
+        Assert.Equal("Latte", line.ItemNameSnapshot);
+        Assert.Equal("Large", line.SizeNameSnapshot);
+        Assert.Equal(45_000m, line.UnitPriceSnapshot.Amount);
+        Assert.Equal(90_000m, line.LineTotal.Amount);
+        Assert.Equal(90_000m, order.Total.Amount);
+        Assert.Equal(OrderStatus.Confirmed, order.Status);
+        Assert.Single(await fresh.StockMovements.Where(movement => movement.OrderId == seed.OrderId).ToArrayAsync());
+    }
+
     private OrderConfirmationCommandHandler Handler()
     {
         var scope = services.CreateScope();

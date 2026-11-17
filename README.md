@@ -1,10 +1,10 @@
 # Coffee Shop
 
-WinUI 3 desktop client and ASP.NET Core API for a coffee-shop management system. The midterm client supports direct PostgreSQL workflows for catalog, customers, inventory, orders, fulfillment, and reports. The final API architecture remains in progress. The behavior and milestone plan are in `openspec/changes/build-coffee-shop-management-system/`; the client theme is in `docs/luxury-theme.md`.
+WinUI 3 desktop client and ASP.NET Core API for a coffee-shop management system. The final Release client and Android staff app use the same authenticated API and PostgreSQL database. The midterm Debug client supports direct PostgreSQL workflows. The behavior and milestone plan are in `openspec/changes/build-coffee-shop-management-system/`; the client theme is in `docs/luxury-theme.md`. The [final quality report](docs/final-quality-report.md) records current verification and remaining delivery gates.
 
 ## Prerequisites
 
-- Windows 10 1809 or later, x64, and the .NET 10 SDK. Visual Studio with Windows App SDK tooling is optional for the commands below.
+- Windows 10 1809 or later, x64, and the .NET 10 SDK. `global.json` selects the latest installed stable .NET 10 feature band, even when .NET 11 is installed. Visual Studio with Windows App SDK tooling is optional for the commands below.
 - PowerShell 7.4 or later for local setup.
 - Docker Desktop with its Linux engine running and the `docker compose` plugin available. Compose supplies PostgreSQL 18 and the API. Install `psql` separately if you use the direct PostgreSQL instructions.
 
@@ -70,13 +70,30 @@ Close WinUI and run `docker compose down` to stop the services and keep the data
 ## Build and test
 
 ```powershell
-dotnet restore CoffeeShop.slnx
-dotnet build CoffeeShop.slnx
-dotnet test CoffeeShop.slnx
-dotnet run --project src/CoffeeShop.Api
+dotnet restore CoffeeShop.slnx -p:Configuration=Release
+dotnet build CoffeeShop.slnx -c Release --no-restore
+dotnet format CoffeeShop.slnx --verify-no-changes --no-restore
+./scripts/verify-winui-api-release.ps1 -SkipBuild
 ```
 
 The API foundation and its current routes are documented in [the shared API foundation guide](docs/api-foundation.md). Use the Compose setup above for a configured backend. `dotnet run --project src/CoffeeShop.Api` requires its own connection and JWT environment settings when running outside Compose.
+
+Run all five test projects against a disposable PostgreSQL administrator connection. Tests create and remove their own databases; never point them at a shared or production server. Without `COFFEESHOP_TEST_POSTGRES`, database tests skip and do not establish a passing final regression.
+
+```powershell
+$env:COFFEESHOP_TEST_POSTGRES = Read-Host 'Disposable PostgreSQL administrator connection' -MaskInput
+try {
+    foreach ($project in @('Domain', 'Application', 'WinUI', 'Infrastructure', 'Api')) {
+        dotnet test "tests/CoffeeShop.$project.Tests" -c Release --no-build `
+            --logger "trx;LogFileName=$project.trx" --results-directory TestResults
+        if ($LASTEXITCODE -ne 0) { throw "$project tests failed." }
+    }
+} finally { Remove-Item Env:COFFEESHOP_TEST_POSTGRES }
+```
+
+With Node.js from `apps/staff-mobile/.nvmrc` installed, run `npm ci --prefix tests/api` and `npm test --prefix tests/api` for the API collection runner. [Collection instructions](tests/api/README.md) describe private environment variables and sanitized results. `bash scripts/verify-compose.sh` provisions its own accounts and runs the collection automatically against a new Docker volume, including an intentional invalid-password check. It also verifies health, migrations, exact seed counts and repeated seeding, then removes only that disposable Compose project. Git Bash is suitable on Windows.
+
+CI additionally scans reachable Git history with checksum-verified Gitleaks, audits all NuGet dependencies and all three npm lockfiles, checks contract drift, and builds Android. Dependency policy rejects every known NuGet vulnerability and high/critical npm advisories; lower npm advisories remain visible in retained reports and owned follow-up work. The [quality report](docs/final-quality-report.md) lists observed advisories and evidence. Synthetic credential, vulnerable-report and invalid-login checks prove the gates reject intentional violations.
 
 ## Midterm direct PostgreSQL mode
 
@@ -94,7 +111,7 @@ The environment variable takes precedence. Keep this user-local file out of sour
 
 ```powershell
 $env:COFFEESHOP_CLIENT_MODE = 'direct'
-dotnet run --project src/CoffeeShop.WinUI -c Release -r win-x64 -p:WindowsAppSDKSelfContained=true
+dotnet run --project src/CoffeeShop.WinUI -c Debug -r win-x64 -p:WindowsAppSDKSelfContained=true
 ```
 
 ## Project boundaries
@@ -107,11 +124,11 @@ The current client uses six workspaces: Counter, Service board, Menu, Stock room
 | `CoffeeShop.Application`             | Use cases and abstractions; references Domain only                    |
 | `CoffeeShop.Contracts`               | API request/response contracts; independent of persistence            |
 | `CoffeeShop.Infrastructure.Postgres` | EF Core/Npgsql persistence and schema migrations                      |
-| `CoffeeShop.WinUI`                   | Desktop presentation with API and midterm direct modes                 |
+| `CoffeeShop.WinUI`                   | API-only Release client; Debug also supports midterm direct mode       |
 | `CoffeeShop.Api`                     | HTTP services, staff authentication, and server-side authorization    |
 | `tests/*`                            | Unit, PostgreSQL integration, API, and WinUI presentation tests       |
 
-In API mode WinUI calls the shared HTTP services, which own authorization and persistence. The current WinUI project still includes the midterm direct composition for local use. The [canonical implementation checklist](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/26) tracks the remaining final delivery work.
+In API mode WinUI calls shared HTTP services, which own authorization and persistence. Release excludes the PostgreSQL reference, direct composition and database configuration; `verify-winui-api-release.ps1` checks the artifact. Debug retains the midterm direct composition. The [canonical implementation checklist](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/26) tracks remaining delivery gates. The [read-only manager assistant](docs/ai-manager-assistant.md) uses permission-checked reporting tools; an external provider requires private API-process configuration and separate runtime evidence.
 
 ### Catalog lifecycle (T3.1)
 
