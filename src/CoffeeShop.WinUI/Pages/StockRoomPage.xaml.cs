@@ -1162,13 +1162,13 @@ public sealed partial class StockRoomPage : Page
             Text = label,
             FontSize = 11,
             CharacterSpacing = 20,
-            FontFamily = (FontFamily)XamlApp.Current.Resources["ConsoleSansFont"]
+            FontFamily = new FontFamily("Segoe UI")
         });
         if (count is { } value) content.Children.Add(new TextBlock
         {
             Text = value.ToString(),
             FontSize = 13,
-            FontFamily = (FontFamily)XamlApp.Current.Resources["ConsoleSerifFont"]
+            FontFamily = new FontFamily("Segoe UI")
         });
         tab.Content = content;
     }

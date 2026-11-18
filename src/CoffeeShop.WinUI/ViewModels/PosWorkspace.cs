@@ -34,6 +34,7 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
     public EntityId? TableId { get; set; }
     public CustomerOrderSelectionRequest Customer { get; set; } = new();
     public string CustomerLabel { get; private set; } = "Walk-in";
+    public CustomerDetail? CustomerProfile { get; private set; }
     public PosOperatorSession Session => session;
     public EntityId TicketId { get; private set; } = EntityId.New();
     public IReadOnlyList<MenuItemSummary> Menu { get; private set; } = [];
@@ -93,6 +94,33 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
         if (!CanEdit) return;
         Customer = customerContext.Request with { AddressLine = customerContext.Selection.AddressLine ?? customerContext.Request.AddressLine };
         CustomerLabel = customerContext.Selection.CustomerName ?? "Walk-in";
+        CustomerProfile = null;
+        if (Customer.IsDelivery) Channel = "delivery";
+        else if (Channel == "delivery") Channel = "takeaway";
+        Notify();
+    }
+
+    public void SelectCustomer(CustomerDetail customer)
+    {
+        if (!CanEdit) return;
+        if (!customer.IsActive)
+        {
+            ShowValidation("Choose an active customer for this ticket.");
+            return;
+        }
+        var address = customer.Addresses.FirstOrDefault(address => address.IsActive && address.IsDefault);
+        Customer = new(customer.Id, Channel == "delivery", address?.Id, customer.FullName, customer.Phone, address?.AddressLine);
+        CustomerLabel = customer.FullName;
+        CustomerProfile = customer;
+        Error = null;
+        Message = $"{customer.FullName} attached. Points are earned when the paid order is completed.";
+        Notify();
+    }
+
+    public void RefreshCustomerProfile(CustomerDetail customer)
+    {
+        if ((Order is null ? Customer.CustomerId : Order.CustomerId) != customer.Id) return;
+        CustomerProfile = customer;
         Notify();
     }
 
@@ -101,6 +129,8 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
         if (!CanEdit) return;
         Customer = new();
         CustomerLabel = "Walk-in";
+        CustomerProfile = null;
+        customerContext.Clear();
         Notify();
     }
 
@@ -247,6 +277,8 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
         TableId = null;
         Customer = new();
         CustomerLabel = "Walk-in";
+        CustomerProfile = null;
+        customerContext.Clear();
         Error = null;
         Message = "New ticket. Any previously saved ticket remains in the database; use its identifier to reopen it.";
         Notify();

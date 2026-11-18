@@ -265,7 +265,6 @@ public sealed partial class CustomersPage : Page
             DetailHeading.Text = customer is null
                 ? "Select a customer"
                 : customer.FullName;
-            ProfileInitials.Text = customer is null ? "" : InitialsFor(customer.FullName);
             ContactDetails.Text = customer is null ? "Choose a profile from the directory to view its details."
                 : string.Join("\n", new[] { customer.Phone, customer.Email, customer.IsActive ? null : "Inactive profile" }.Where(value => !string.IsNullOrWhiteSpace(value)));
             BalanceText.Text = customer is null ? "—" : $"{customer.LoyaltyPointsBalance:N0} points";
@@ -280,6 +279,9 @@ public sealed partial class CustomersPage : Page
             HistoryEmpty.Visibility = customer is not null && model.History.TotalCount == 0 ? Visibility.Visible : Visibility.Collapsed;
             HistoryPageText.Text = customer is null || model.History.TotalCount == 0 ? ""
                 : $"Transactions {model.History.Offset + 1}–{model.History.Offset + model.History.Items.Count} of {model.History.TotalCount}";
+            HistoryPageText.Visibility = customer is not null && model.History.TotalCount > 0 ? Visibility.Visible : Visibility.Collapsed;
+            HistoryPagination.Visibility = customer is not null && model.History.TotalCount > model.History.Limit
+                ? Visibility.Visible : Visibility.Collapsed;
             PreviousButton.IsEnabled = model.CanPrevious;
             NextButton.IsEnabled = model.CanNext;
             OrdersList.ItemsSource = customer?.RecentOrders.Select(order => new RecentOrderRow(order)).ToArray();
@@ -341,12 +343,10 @@ public sealed partial class CustomersPage : Page
         Grid.SetColumn(HistoryPanel, wide && ActualWidth >= 1200 ? 1 : 0);
         Grid.SetRow(HistoryPanel, wide && ActualWidth >= 1200 ? 0 : 1);
         var headerInline = ActualWidth >= 720;
-        HeaderOrnament.Visibility = ActualWidth >= 1000 ? Visibility.Visible : Visibility.Collapsed;
-        Header.ColumnDefinitions[1].Width = new GridLength(ActualWidth >= 1000 ? 116 : 0);
-        Header.ColumnDefinitions[2].Width = headerInline ? GridLength.Auto : new GridLength(0);
+        Header.ColumnDefinitions[1].Width = headerInline ? GridLength.Auto : new GridLength(0);
         Header.ColumnSpacing = headerInline ? 18 : 0;
-        Grid.SetColumn(HeaderActions, headerInline ? 2 : 0);
-        Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 3);
+        Grid.SetColumn(HeaderActions, headerInline ? 1 : 0);
+        Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 2);
         Grid.SetRow(HeaderActions, headerInline ? 0 : 1);
         CustomerTitle.FontSize = headerInline ? 52 : 40;
     }
@@ -442,10 +442,12 @@ public sealed partial class CustomersPage : Page
     private async void OnPreviousHistory(object sender, RoutedEventArgs args) => await model.PreviousHistoryAsync();
     private async void OnNextHistory(object sender, RoutedEventArgs args) => await model.NextHistoryAsync();
 
-    private void OnWalkIn(object sender, RoutedEventArgs args)
+    private async void OnWalkIn(object sender, RoutedEventArgs args)
     {
+        if (!await PrepareCounterAsync()) return;
         model.ContinueAsWalkIn();
         RestoreOrderForm();
+        NavigateToCounter();
     }
 
     private void OnOrderOptionsChanged(object sender, RoutedEventArgs args)
@@ -516,13 +518,42 @@ public sealed partial class CustomersPage : Page
         }
 
         var delivery = DeliveryOrder.IsChecked == true;
-        await model.SetOrderSelectionAsync(new(
+        if (!await PrepareCounterAsync()) return;
+        if (await model.SetOrderSelectionAsync(new(
             attach ? model.SelectedCustomer!.Id : null,
             delivery,
             delivery ? (AddressChoice.SelectedItem as AddressOption)?.Id : null,
             delivery ? RecipientName.Text : null,
             delivery ? ContactNumber.Text : null,
-            delivery ? OrderAddress.Text : null));
+            delivery ? OrderAddress.Text : null))) NavigateToCounter();
+    }
+
+    private async Task<bool> PrepareCounterAsync()
+    {
+        var counter = App.Services.GetRequiredService<PosWorkspace>();
+        if (counter.IsBusy || counter.RequiresReload)
+        {
+            model.ShowValidation("Return to Counter and refresh its current ticket before changing the customer.");
+            return false;
+        }
+        if (counter.Order is null) return true;
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Start a new ticket at Counter?",
+            Content = "The current ticket has already been saved. Start a new ticket for this customer; the saved order will remain in Service board.",
+            PrimaryButtonText = "Start new ticket",
+            CloseButtonText = "Keep current ticket",
+            DefaultButton = ContentDialogButton.Close
+        };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return false;
+        counter.NewTicket();
+        return counter.CanEdit;
+    }
+
+    private static void NavigateToCounter()
+    {
+        if (((App)Microsoft.UI.Xaml.Application.Current).Window is MainWindow main) main.NavigateTo("counter");
     }
 
     private Task ConfirmAsync(string title, string explanation, Func<Task<bool>> action) =>

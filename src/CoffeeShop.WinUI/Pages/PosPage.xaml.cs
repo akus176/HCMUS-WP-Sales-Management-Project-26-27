@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using CoffeeShop.Application.Catalog;
+using CoffeeShop.Application.Customers;
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Text;
@@ -118,8 +120,11 @@ public sealed partial class PosPage : Page
     private bool rendering;
     private EntityId? selectedMenuId;
     private bool customizationOpen;
-    private bool awaitingCustomerSelection;
-    private CoffeeShop.Application.Customers.CustomerOrderSelectionRequest? customerSelectionBeforeNavigation;
+    private CustomerOrderSelectionRequest? lastCustomerRequest;
+    private CancellationTokenSource? customerSearchCancellation;
+    private bool pageLoaded;
+    private bool selectingCustomer;
+    private EntityId? renderedCustomerId;
     private bool ticketCaptureActive;
     private PosStaffOption? captureOperator;
     private EntityId? selectedSavedAddressId;
@@ -190,25 +195,37 @@ public sealed partial class PosPage : Page
 
     private async void OnLoaded(object sender, RoutedEventArgs args)
     {
+        pageLoaded = true;
         model.PropertyChanged += OnModelChanged;
         await model.LoadAsync();
-        if (awaitingCustomerSelection)
+        if (!pageLoaded) return;
+        var request = App.Services.GetRequiredService<CustomerOrderContext>().Request;
+        var customerChanged = !ReferenceEquals(lastCustomerRequest, request);
+        if (customerChanged && model.CanEdit)
         {
-            awaitingCustomerSelection = false;
-            if (!ReferenceEquals(customerSelectionBeforeNavigation, App.Services.GetRequiredService<CustomerOrderContext>().Request))
-            {
-                model.UseCustomerSelection();
-                RestoreCustomer();
-            }
+            model.UseCustomerSelection();
+            RestoreCustomer();
         }
+        lastCustomerRequest = request;
+        await RefreshCustomerProfileAsync();
+        if (customerChanged && pageLoaded)
+            DispatcherQueue.TryEnqueue(() => { if (pageLoaded) TicketBodyScroll.ChangeView(null, 0, null, true); });
     }
 
-    private void OnUnloaded(object sender, RoutedEventArgs args) => model.PropertyChanged -= OnModelChanged;
+    private void OnUnloaded(object sender, RoutedEventArgs args)
+    {
+        pageLoaded = false;
+        customerSearchCancellation?.Cancel();
+        CustomerSearchBox.IsSuggestionListOpen = false;
+        if (model.CanEdit) CaptureForm();
+        model.PropertyChanged -= OnModelChanged;
+    }
     private void OnModelChanged(object? sender, PropertyChangedEventArgs args) => Render();
     private async void OnReload(object sender, RoutedEventArgs args)
     {
         ClearMenuSelection();
         await model.LoadAsync();
+        await RefreshCustomerProfileAsync();
     }
     private async void OnSearch(object sender, RoutedEventArgs args)
     {
@@ -273,7 +290,6 @@ public sealed partial class PosPage : Page
         if (sender is not RadioButton { IsChecked: true, Tag: string channel } || model.Channel == channel) return;
         CaptureForm();
         model.Channel = channel;
-        CustomerOptionsPanel.Visibility = Visibility.Collapsed;
         Render();
     }
 
@@ -304,9 +320,6 @@ public sealed partial class PosPage : Page
         UpdateTicketHeading();
     }
 
-    private void OnToggleCustomerOptions(object sender, RoutedEventArgs args) =>
-        CustomerOptionsPanel.Visibility = CustomerOptionsPanel.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-
     private void OnToggleMoreOptions(object sender, RoutedEventArgs args) =>
         MoreOptionsPanel.Visibility = MoreOptionsPanel.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
@@ -323,12 +336,134 @@ public sealed partial class PosPage : Page
         SavedAddressText.Visibility = useSaved ? Visibility.Visible : Visibility.Collapsed;
     }
 
-    private void OnChooseCustomer(object sender, RoutedEventArgs args)
+    private void SetCustomerSearchHint(string? message)
     {
-        CaptureForm();
-        customerSelectionBeforeNavigation = App.Services.GetRequiredService<CustomerOrderContext>().Request;
-        awaitingCustomerSelection = true;
-        if (((App)Microsoft.UI.Xaml.Application.Current).Window is MainWindow main) main.NavigateTo("customers");
+        CustomerSearchHint.Text = message ?? "";
+        CustomerSearchHint.Visibility = string.IsNullOrEmpty(message) ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void OnCustomerSearchFocusChanged(object sender, RoutedEventArgs args)
+    {
+        if (XamlRoot is null) return;
+        var insideSearch = false;
+        for (var current = Microsoft.UI.Xaml.Input.FocusManager.GetFocusedElement(XamlRoot) as DependencyObject;
+            current is not null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current != CustomerSearchFrame) continue;
+            insideSearch = true;
+            break;
+        }
+        CustomerSearchFrame.BorderBrush = (Brush)Microsoft.UI.Xaml.Application.Current.Resources[
+            insideSearch ? "ConsoleAccentTextBrush" : "ConsoleRuleBrush"];
+    }
+
+    private void OnCustomerSearchTapped(object sender, TappedRoutedEventArgs args)
+    {
+        if (model.CanEdit && !selectingCustomer) CustomerSearchBox.Focus(FocusState.Pointer);
+    }
+
+    private async void OnCustomerSearchChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput || !pageLoaded || !model.CanEdit || selectingCustomer) return;
+        customerSearchCancellation?.Cancel();
+        var cancellation = customerSearchCancellation = new CancellationTokenSource();
+        sender.ItemsSource = null;
+        var query = sender.Text.Trim();
+        if (query.Length == 0 && model.Customer.CustomerId is not null)
+        {
+            OnWalkIn(this, new RoutedEventArgs());
+            return;
+        }
+        if (query.Length < 2)
+        {
+            SetCustomerSearchHint(query.Length == 0 ? null : "Type at least 2 characters to search.");
+            sender.IsSuggestionListOpen = false;
+            return;
+        }
+        SetCustomerSearchHint("Searching customers…");
+        try
+        {
+            await Task.Delay(250, cancellation.Token);
+            var result = await App.Services.GetRequiredService<ICustomerWorkspaceSource>().SearchAsync(new(query, false, 8));
+            if (cancellation.IsCancellationRequested || !pageLoaded || !model.CanEdit) return;
+            if (!result.IsSuccess)
+            {
+                SetCustomerSearchHint("Could not search customers. Try again or continue without a customer.");
+                return;
+            }
+            var matches = result.Value.Where(customer => customer.IsActive).ToArray();
+            sender.ItemsSource = matches;
+            sender.IsSuggestionListOpen = matches.Length > 0;
+            SetCustomerSearchHint(matches.Length == 0
+                ? "No matches. Try another name or phone, or continue without a customer."
+                : null);
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception)
+        {
+            if (!cancellation.IsCancellationRequested && pageLoaded)
+                SetCustomerSearchHint("Could not search customers. Check the connection and try again.");
+        }
+    }
+
+    private void OnCustomerSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is CustomerSummary customer) sender.Text = customer.FullName;
+    }
+
+    private async void OnCustomerQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (args.ChosenSuggestion is not CustomerSummary customer)
+        {
+            SetCustomerSearchHint("Choose a matching profile from the suggestions.");
+            sender.IsSuggestionListOpen = sender.ItemsSource is IEnumerable<CustomerSummary> matches && matches.Any();
+            return;
+        }
+        if (!model.CanEdit || selectingCustomer) return;
+        customerSearchCancellation?.Cancel();
+        var ticketId = model.TicketId;
+        selectingCustomer = true;
+        SetCustomerSearchHint("Loading customer…");
+        Render();
+        try
+        {
+            var result = await App.Services.GetRequiredService<ICustomerWorkspaceSource>().GetDetailAsync(customer.Id);
+            if (!pageLoaded || ticketId != model.TicketId || !model.CanEdit) return;
+            if (!result.IsSuccess || !result.Value.IsActive)
+            {
+                SetCustomerSearchHint("This profile is unavailable. Choose another customer.");
+                return;
+            }
+            CaptureForm();
+            model.SelectCustomer(result.Value);
+            RestoreCustomer();
+            SetCustomerSearchHint(null);
+            sender.Text = result.Value.FullName;
+            sender.ItemsSource = null;
+            CustomerSearchBox.IsSuggestionListOpen = false;
+        }
+        catch (Exception)
+        {
+            if (pageLoaded) SetCustomerSearchHint("Could not load this customer. Check the connection and try again.");
+        }
+        finally
+        {
+            selectingCustomer = false;
+            if (pageLoaded) Render();
+        }
+    }
+
+    private async Task RefreshCustomerProfileAsync()
+    {
+        var id = model.Order is null ? model.Customer.CustomerId : model.Order.CustomerId;
+        if (id is null) return;
+        var ticketId = model.TicketId;
+        try
+        {
+            var result = await App.Services.GetRequiredService<ICustomerWorkspaceSource>().GetDetailAsync(id);
+            if (pageLoaded && ticketId == model.TicketId && result.IsSuccess) model.RefreshCustomerProfile(result.Value);
+        }
+        catch (Exception) { /* The saved ticket remains usable if balance lookup is unavailable. */ }
     }
 
     private void OnTableChanged(object sender, SelectionChangedEventArgs args)
@@ -349,8 +484,14 @@ public sealed partial class PosPage : Page
 
     private void OnWalkIn(object sender, RoutedEventArgs args)
     {
+        customerSearchCancellation?.Cancel();
         model.WalkIn();
+        lastCustomerRequest = App.Services.GetRequiredService<CustomerOrderContext>().Request;
+        CustomerSearchBox.Text = "";
+        CustomerSearchBox.ItemsSource = null;
+        SetCustomerSearchHint(null);
         RestoreCustomer();
+        CustomerSearchBox.Focus(FocusState.Keyboard);
     }
 
     private void OnDrinkChanged(object sender, SelectionChangedEventArgs args)
@@ -446,7 +587,7 @@ public sealed partial class PosPage : Page
 
     private async void OnSaveDraft(object sender, RoutedEventArgs args)
     {
-        if (!model.CanEdit || model.Cart.Count == 0) return;
+        if (!model.CanEdit || selectingCustomer || model.Cart.Count == 0) return;
         if (model.Session.Operator is null)
         {
             OperatorBox.Focus(FocusState.Keyboard);
@@ -467,7 +608,6 @@ public sealed partial class PosPage : Page
             || model.Customer.CustomerAddressId is null && string.IsNullOrWhiteSpace(AddressBox.Text)))
         {
             model.ShowValidation("Add a delivery recipient, contact number, and address before saving.");
-            CustomerOptionsPanel.Visibility = Visibility.Visible;
             RecipientBox.Focus(FocusState.Keyboard);
             RecipientBox.StartBringIntoView();
             return;
@@ -489,13 +629,25 @@ public sealed partial class PosPage : Page
 
     private async void OnRequestDiscount(object sender, RoutedEventArgs args)
     {
+        if (!model.CanConfirm) return;
+        DiscountFeedback.IsOpen = false;
         if (!CatalogNumberInput.TryParse(DiscountValueBox.Text, out var value))
         {
-            model.ShowValidation("Enter a decimal discount value using your local decimal separator, without grouping separators.");
+            DiscountFeedback.Message = "Enter a decimal value using your local decimal separator, without grouping separators.";
+            DiscountFeedback.IsOpen = true;
+            DiscountValueBox.Focus(FocusState.Keyboard);
             return;
         }
 
         await model.RequestDiscountAsync((string)((ComboBoxItem)DiscountTypeBox.SelectedItem).Tag, value, DiscountReasonBox.Text);
+        DiscountFeedback.Message = model.Error?.Description ?? "";
+        DiscountFeedback.IsOpen = model.Error is not null;
+        if (model.Error is null)
+        {
+            DiscountFlyout.Hide();
+            DiscountValueBox.Text = "";
+            DiscountReasonBox.Text = "";
+        }
     }
 
     private async void OnConfirm(object sender, RoutedEventArgs args)
@@ -525,16 +677,29 @@ public sealed partial class PosPage : Page
 
     private async void OnRedeemLoyalty(object sender, RoutedEventArgs args)
     {
+        if (!model.CanConfirm || model.Order?.CustomerId is null) return;
+        LoyaltyFeedback.IsOpen = false;
         if (!int.TryParse(LoyaltyPointsBox.Text, out var points) || points <= 0)
         {
-            model.ShowValidation("Enter a positive whole number of loyalty points.");
+            LoyaltyFeedback.Message = "Enter a positive whole number of points.";
+            LoyaltyFeedback.IsOpen = true;
+            LoyaltyPointsBox.Focus(FocusState.Keyboard);
             return;
         }
         await model.RedeemLoyaltyAsync(points);
+        LoyaltyFeedback.Message = model.Error?.Description ?? "";
+        LoyaltyFeedback.IsOpen = model.Error is not null;
+        if (model.Error is null)
+        {
+            LoyaltyFlyout.Hide();
+            LoyaltyPointsBox.Text = "";
+            await RefreshCustomerProfileAsync();
+        }
     }
 
     private async void OnNewTicket(object sender, RoutedEventArgs args)
     {
+        if (selectingCustomer) return;
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
@@ -546,10 +711,18 @@ public sealed partial class PosPage : Page
         };
         if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
         model.NewTicket();
+        customerSearchCancellation?.Cancel();
+        lastCustomerRequest = App.Services.GetRequiredService<CustomerOrderContext>().Request;
+        CustomerSearchBox.Text = "";
+        CustomerSearchBox.ItemsSource = null;
+        LoyaltyPointsBox.Text = DiscountValueBox.Text = DiscountReasonBox.Text = "";
+        LoyaltyFeedback.IsOpen = DiscountFeedback.IsOpen = false;
+        LoyaltyFlyout.Hide();
+        DiscountFlyout.Hide();
         ClearMenuSelection();
-        CustomerOptionsPanel.Visibility = Visibility.Collapsed;
         MoreOptionsPanel.Visibility = Visibility.Collapsed;
         RestoreForm();
+        TicketBodyScroll.ChangeView(null, 0, null, true);
     }
     private void OnServiceBoard(object sender, RoutedEventArgs args)
     {
@@ -563,6 +736,7 @@ public sealed partial class PosPage : Page
 
     private async void OnOpen(object sender, RoutedEventArgs args)
     {
+        if (selectingCustomer) return;
         if (!Guid.TryParse(OpenIdBox.Text, out var id) || id == Guid.Empty)
         {
             model.ShowValidation("Enter the full order ID shown on a saved ticket.");
@@ -570,6 +744,7 @@ public sealed partial class PosPage : Page
         }
 
         await model.OpenAsync(new EntityId(id));
+        await RefreshCustomerProfileAsync();
     }
 
     private void RestoreForm()
@@ -583,6 +758,7 @@ public sealed partial class PosPage : Page
 
     private void RestoreCustomer()
     {
+        SetCustomerSearchHint(null);
         selectedSavedAddressId = model.Customer.CustomerAddressId;
         selectedSavedAddressLine = model.Customer.AddressLine;
         SetCustomerSummary(model.CustomerLabel, model.Customer.CustomerId is not null);
@@ -599,8 +775,22 @@ public sealed partial class PosPage : Page
 
     private void SetCustomerSummary(string name, bool selected)
     {
-        CustomerText.Text = name;
-        CustomerMetaText.Text = selected ? "Customer attached to this ticket" : "No customer attached";
+        CustomerText.Text = selected ? name : "";
+        CustomerText.Visibility = selected && model.Order is not null ? Visibility.Visible : Visibility.Collapsed;
+        CustomerOptionsPanel.Visibility = model.Order is null ? Visibility.Visible : Visibility.Collapsed;
+        CustomerMetaText.Visibility = selected ? Visibility.Visible : Visibility.Collapsed;
+        CustomerRow.Visibility = selected || model.Order is null ? Visibility.Visible : Visibility.Collapsed;
+        var id = model.Order is null ? model.Customer.CustomerId : model.Order.CustomerId;
+        if (renderedCustomerId != id)
+        {
+            CustomerSearchBox.Text = selected ? name : "";
+            renderedCustomerId = id;
+        }
+        CustomerMetaText.Text = selected
+            ? model.CustomerProfile is { } profile && profile.Id == id
+                ? $"{profile.Phone} · {profile.LoyaltyPointsBalance} points"
+                : "Profile attached · balance unavailable"
+            : "";
     }
 
     private void Render()
@@ -621,9 +811,7 @@ public sealed partial class PosPage : Page
         DineInTab.IsEnabled = model.CanEdit;
         TakeawayTab.IsEnabled = model.CanEdit;
         DeliveryTab.IsEnabled = model.CanEdit;
-        CustomerOptionsButton.IsEnabled = model.CanEdit;
-        WalkInButton.Visibility = model.Customer.CustomerId is not null ? Visibility.Visible : Visibility.Collapsed;
-        CustomerOptionsPanel.IsEnabled = model.CanEdit;
+        CustomerOptionsPanel.IsEnabled = model.CanEdit && !selectingCustomer;
         TableBox.IsEnabled = model.CanEdit;
         MenuGrid.IsEnabled = model.CanEdit;
         OperatorBox.IsEnabled = !model.IsBusy;
@@ -684,22 +872,46 @@ public sealed partial class PosPage : Page
         ServiceBoardButton.Visibility = model.Order is { Status: CoffeeShop.Domain.Sales.OrderStatus.Confirmed or CoffeeShop.Domain.Sales.OrderStatus.Preparing or CoffeeShop.Domain.Sales.OrderStatus.Ready }
             ? Visibility.Visible : Visibility.Collapsed;
         DiscountPanel.IsEnabled = model.CanConfirm;
-        NewButton.IsEnabled = !model.IsBusy && !model.RequiresReload;
-        OpenButton.IsEnabled = !model.IsBusy;
-        SaveButton.IsEnabled = model.CanEdit && model.Cart.Count > 0;
+        DiscountPanel.Visibility = model.Order?.Status == CoffeeShop.Domain.Sales.OrderStatus.Draft ? Visibility.Visible : Visibility.Collapsed;
+        var loyaltySavings = model.Order is { } priced ? Math.Max(0, priced.Subtotal - priced.DiscountTotal - priced.Total) : 0;
+        LoyaltyPanel.IsEnabled = model.CanConfirm && model.Order?.CustomerId is not null && loyaltySavings == 0;
+        LoyaltyPanel.Visibility = model.Order is { Status: CoffeeShop.Domain.Sales.OrderStatus.Draft, CustomerId: not null } && loyaltySavings == 0
+            ? Visibility.Visible : Visibility.Collapsed;
+        LoyaltyButton.IsEnabled = DiscountButton.IsEnabled = !model.IsBusy && !selectingCustomer;
+        var customerId = model.Order is null ? model.Customer.CustomerId : model.Order.CustomerId;
+        var balance = model.CustomerProfile is { } profile && profile.Id == customerId
+            ? $"Available balance: {profile.LoyaltyPointsBalance} points." : "The available balance will be checked when you apply points.";
+        LoyaltyHintText.Text = customerId is null ? "Choose a customer before saving the draft to redeem their points."
+            : model.Order is null ? $"{balance} Save the draft to redeem points."
+            : loyaltySavings > 0 ? "Points have already been applied to this ticket. Review the loyalty savings in the total."
+            : !model.CanConfirm ? "Points can be redeemed here while the ticket is a saved draft."
+            : balance;
+        DiscountHintText.Text = model.Order is null ? "Save the draft first, then request a discount before confirming."
+            : !model.CanConfirm ? "Discounts can be requested here while the ticket is a saved draft."
+            : "Enter the value and reason for manager approval.";
+        AdjustmentsHintText.Text = model.Order is null ? "Save the draft to apply points or request a discount."
+            : model.Order.Discounts.Any(discount => discount.Status == "pending") ? "Discount awaiting approval. Refresh after manager approval."
+            : model.CanConfirm ? "Apply points or request a discount before confirming."
+            : "Saved ticket details are read-only.";
+        NewButton.IsEnabled = !model.IsBusy && !model.RequiresReload && !selectingCustomer;
+        OpenButton.IsEnabled = !model.IsBusy && !selectingCustomer;
+        SaveButton.IsEnabled = model.CanEdit && !selectingCustomer && model.Cart.Count > 0;
         TicketKickerText.Text = model.Order?.OrderNumber ?? "CURRENT TICKET";
         TicketStatusText.Text = model.Order?.Status.ToUpperInvariant() ?? "NEW";
         TicketIdText.Text = $"Order ID: {model.TicketId}";
         if (model.Order is { } opened)
         {
             SetCustomerSummary(opened.CustomerName ?? "Walk-in", opened.CustomerId is not null);
-            CustomerOptionsPanel.Visibility = Visibility.Collapsed;
         }
         else SetCustomerSummary(model.CustomerLabel, model.Customer.CustomerId is not null);
         UpdateChannel();
         var estimatedSubtotal = model.Cart.Sum(line => (line.Size.Price + line.Addons.Sum(addon => addon.Price)) * line.Quantity);
         SubtotalText.Text = (model.Order?.Subtotal ?? estimatedSubtotal).ToString("0.00");
+        TotalsBreakdown.Visibility = itemCount > 0 ? Visibility.Visible : Visibility.Collapsed;
         DiscountTotalText.Text = model.Order is { DiscountTotal: > 0 } discounted ? $"−{discounted.DiscountTotal:0.00}" : "0.00";
+        DiscountTotalRow.Visibility = model.Order is { DiscountTotal: > 0 } ? Visibility.Visible : Visibility.Collapsed;
+        LoyaltySavingsText.Text = loyaltySavings > 0 ? $"−{loyaltySavings:0.00}" : "0.00";
+        LoyaltySavingsRow.Visibility = loyaltySavings > 0 ? Visibility.Visible : Visibility.Collapsed;
         TicketTotalLabel.Text = model.Order is null ? "Estimated total" : "Payable total";
         TotalHintText.Text = model.Order is null ? "Save to review the final total" : "Saved order total";
         TicketStepText.Text = model.RequiresReload ? "Refresh this ticket before continuing."
@@ -856,7 +1068,6 @@ public sealed partial class PosPage : Page
             TakeawayTab.IsChecked = true;
             DeliveryTab.IsChecked = true;
             var retained = RecipientBox.Text == "Delivery verification" && ContactBox.Text == "0900000000" && AddressBox.Text == "Test-only address";
-            CustomerOptionsPanel.Visibility = Visibility.Collapsed;
             var deliveryIndependent = DeliveryPanel.Visibility == Visibility.Visible;
             var before = model.Channel;
             DeliveryTab.IsChecked = true;

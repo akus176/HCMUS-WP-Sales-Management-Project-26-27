@@ -1,4 +1,5 @@
 using CoffeeShop.Application.Catalog;
+using CoffeeShop.Application.Customers;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +8,83 @@ namespace CoffeeShop.WinUI.Tests;
 
 public sealed class PosWorkspaceTests
 {
+    [Fact]
+    public void SelectingCustomer_PreservesItemsAndChannel_AndUsesOnlyAnActiveDefaultAddress()
+    {
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new(), new()) { Channel = "delivery" };
+        var size = new SizeVariantSummary(EntityId.New(), "Small", 25m, true);
+        var item = new MenuItemSummary(EntityId.New(), EntityId.New(), "Coffee", "Latte", null, true, [size], []);
+        model.AddLine(item, size, 2, []);
+        var line = Assert.Single(model.Cart);
+        var address = new CustomerAddressSummary(EntityId.New(), "2 Demo Street", "Home", true, true);
+        var customer = Customer() with { Addresses = [new(EntityId.New(), "Old address", "Old", true, false), address] };
+
+        model.SelectCustomer(customer);
+
+        Assert.Equal(line, Assert.Single(model.Cart));
+        Assert.Equal("delivery", model.Channel);
+        Assert.Equal(customer.Id, model.Customer.CustomerId);
+        Assert.Equal(customer.Phone, model.Customer.ContactNumber);
+        Assert.Equal(customer.FullName, model.CustomerLabel);
+        Assert.Equal(address.Id, model.Customer.CustomerAddressId);
+        Assert.Equal(address.AddressLine, model.Customer.AddressLine);
+        Assert.Equal(120, model.CustomerProfile!.LoyaltyPointsBalance);
+
+        model.SelectCustomer(Customer());
+        Assert.Null(model.Customer.CustomerAddressId);
+        Assert.Null(model.Customer.AddressLine);
+        Assert.Equal(line, Assert.Single(model.Cart));
+    }
+
+    [Fact]
+    public async Task UnavailableCustomer_AndUncertainTicket_KeepExistingSelection()
+    {
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new(), new());
+        var current = Customer();
+        model.SelectCustomer(current);
+        model.SelectCustomer(Customer() with { IsActive = false });
+        Assert.Equal(current.Id, model.Customer.CustomerId);
+        Assert.NotNull(model.Error);
+
+        await model.LoadAsync(); // Missing services simulate a ticket requiring reload.
+        Assert.True(model.RequiresReload);
+        model.SelectCustomer(Customer());
+        Assert.Equal(current.Id, model.Customer.CustomerId);
+        model.RefreshCustomerProfile(Customer());
+        Assert.Equal(current.Id, model.CustomerProfile!.Id);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void WalkInAndNewTicket_ClearSharedSelection_SoNavigationCannotRestoreAnOldCustomer(bool newTicket)
+    {
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var context = new CustomerOrderContext();
+        var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), context, new());
+        var customer = Customer();
+        context.Set(new(customer.Id, true, RecipientName: customer.FullName, ContactNumber: customer.Phone),
+            new(customer.Id, customer.FullName, null, "2 Demo Street"));
+        model.UseCustomerSelection();
+        Assert.Equal("delivery", model.Channel);
+        model.RefreshCustomerProfile(customer);
+
+        if (newTicket) model.NewTicket();
+        else model.WalkIn();
+        model.UseCustomerSelection();
+
+        Assert.Null(context.Request.CustomerId);
+        Assert.Null(model.Customer.CustomerId);
+        Assert.Null(model.CustomerProfile);
+        Assert.Equal("Walk-in", model.CustomerLabel);
+        Assert.Equal("takeaway", model.Channel);
+    }
+
+    private static CustomerDetail Customer() => new(EntityId.New(), "Binh Tran", "+84090080002", null, true, 120,
+        DateTimeOffset.UtcNow, DateTimeOffset.UtcNow, [], []);
+
     [Fact]
     public void IdenticalItems_HaveIndependentIdentity_AndStaleReferencesTargetTheSameLine()
     {
