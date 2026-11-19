@@ -141,7 +141,9 @@ test('authorized account views are safe and deactivation requires confirmation',
     'at-risk',
   );
   await fireEvent.press(
-    await screen.findByRole('button', { name: 'View details for At Risk Staff' }),
+    await screen.findByRole('button', {
+      name: 'View details for At Risk Staff',
+    }),
   );
   await screen.findByRole('header', { name: 'Account details' });
   expect(screen.queryByLabelText('Search staff accounts')).toBeNull();

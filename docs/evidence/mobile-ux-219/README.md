@@ -92,6 +92,26 @@ issues will be recorded here as they become available. Reviewer: @longtoZ;
 approval is outstanding. The issue remains open until all acceptance evidence
 and approval exist.
 
+## Automated verification (current implementation)
+
+Toolchain: Node 26.5.0, npm 11.17.0; downloaded Node executable checked against
+the official distribution SHA-256 manifest. Existing dependency pins were retained.
+
+| Command (repository root) | Result |
+| --- | --- |
+| `npm run check --prefix apps/staff-mobile` | PASS: TypeScript, ESLint (zero warnings), Prettier, 28 suites / 327 tests, 4 inventory and 3 workflow harness checks; no skipped tests |
+| `npm run check --prefix contracts/mobile-p0` | PASS: deterministic OpenAPI/TypeScript regeneration, zero drift, contract TypeScript checks |
+| `npm run smoke:android --prefix apps/staff-mobile` | PASS: 1362 modules, Android Hermes bundle and both font assets exported |
+| `dotnet build src/CoffeeShop.Api -c Release --nologo` | PASS: zero warnings/errors; used only to prepare the disposable native-audit API |
+
+The accessibility suite covers 26 scenes across four dimension/font-scale profiles
+(104 cases): the original ten P0 scenes plus Counter search/filter/payment/review,
+manager cancellation/assignment review, low stock, receipts/detail, movement
+history, accounts/detail/security events, low-stock notifications and forbidden
+access. It includes the real shared connection presentation. These assertions
+check labels, selected states, target styles, scalable text and scroll containers;
+they do not measure native geometry, keyboard reachability or TalkBack behavior.
+
 Confirmed-write feedback now appears before post-write reads settle. While those
 reads are pending, all mutation controls share a guard. Failed invalidated reads
 keep writes guarded across mutation components until authoritative refresh or

@@ -163,7 +163,7 @@ export function OrdersScreen({
                 (!['cancelled', 'completed'].includes(current.status) ||
                   pendingPayments.has(current.id)) && (
                   <OrderPayment
-                    key={current.id}
+                    key={`order-heading:${current.id}`}
                     orderId={current.id}
                     pendingPayments={pendingPayments}
                     balance={Math.max(
