@@ -5,6 +5,7 @@ using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Application.Tests.Testing;
 using CoffeeShop.Domain.Catalog;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.Domain.Inventory;
 
 public sealed class CatalogCommandHandlerTests
 {
@@ -64,6 +65,37 @@ public sealed class CatalogCommandHandlerTests
         Assert.Equal(1, context.TransactionManager.ExecutionCount);
         Assert.Equal(1, context.TransactionManager.CommittedCount);
         Assert.Equal(1, context.UnitOfWork.SaveChangesCallCount);
+    }
+
+    [Fact]
+    public async Task CreateMenuItem_WithInitialRecipes_ValidatesRecipesBeforeSavingItemOrSizes()
+    {
+        var context = CreateContext();
+        var category = AddCategory(context.Repository);
+        var ingredient = new Ingredient(EntityId.New(), "Milk", "ml", new(Now), new(Now));
+        context.Repository.Ingredients.Add(ingredient.Id, ingredient);
+        var small = new CreateSizeVariantInput("Small", 30000m, [new(ingredient.Id, 120m, "ml")]);
+        var large = new CreateSizeVariantInput("Large", 45000m, [new(ingredient.Id, 200m, "g")]);
+
+        var invalid = await context.Handler.CreateMenuItemAsync(new(category.Id, "Latte", null, [small, large]));
+        AssertError(invalid, ErrorType.Validation, "catalog.recipe_invalid");
+        Assert.Empty(context.Repository.MenuItems);
+        Assert.Empty(context.Repository.SizeVariants);
+        Assert.Empty(context.Repository.Recipes);
+        Assert.Equal(0, context.UnitOfWork.SaveChangesCallCount);
+
+        var result = await context.Handler.CreateMenuItemAsync(new(category.Id, "Latte", null,
+            [small, large with { Recipe = [new(ingredient.Id, 200m, "ml")] }]));
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, context.Repository.Recipes.Count);
+        Assert.Equal(1, context.TransactionManager.CommittedCount);
+        Assert.Equal(1, context.UnitOfWork.SaveChangesCallCount);
+        foreach (var variant in context.Repository.SizeVariants.Values)
+        {
+            var line = Assert.Single(context.Repository.Recipes[variant.Id]);
+            Assert.Equal(ingredient.Id, line.IngredientId);
+            Assert.Equal(variant.SizeName == "Small" ? 120m : 200m, line.Quantity);
+        }
     }
 
     [Fact]

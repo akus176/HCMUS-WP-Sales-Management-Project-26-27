@@ -8,7 +8,7 @@ public sealed record UpdateCategoryCommand(EntityId CategoryId, string Name);
 
 public sealed record DeactivateCategoryCommand(EntityId CategoryId);
 
-public sealed record CreateSizeVariantInput(string SizeName, decimal? Price);
+public sealed record CreateSizeVariantInput(string SizeName, decimal? Price, IReadOnlyCollection<RecipeLineInput>? Recipe = null);
 
 public sealed record CreateMenuItemCommand(
     EntityId CategoryId,

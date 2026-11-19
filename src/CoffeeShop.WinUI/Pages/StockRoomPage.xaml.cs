@@ -23,7 +23,6 @@ public sealed partial class StockRoomPage : Page
     private List<PosStaffOption> staffOptions = [];
     private List<PurchaseReceipt> rawReceipts = [];
     private Dictionary<EntityId, string> supplierNames = [];
-    private Dictionary<EntityId, string> activeSupplierNames = [];
     private Dictionary<EntityId, Supplier> supplierDirectory = [];
     private List<StockMovement> allMovements = [];
     private List<HistoryFilterOption> historyFilters = [];
@@ -40,7 +39,6 @@ public sealed partial class StockRoomPage : Page
     private bool isAdjusting;
     private bool restoringDraft;
     private bool selectingIngredient;
-    private bool hasLoaded;
     private readonly StockAdjustmentDrafts adjustmentDrafts = new();
     private int selectedUnitIndex;
     private string sortColumn = "status";
@@ -72,7 +70,7 @@ public sealed partial class StockRoomPage : Page
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         ConfigureLayout(ActualWidth, ActualHeight);
-        if (!hasLoaded) await RefreshDataAsync();
+        await RefreshDataAsync();
         UpdateActiveTabVisuals();
         SwitchSectionView();
     }
@@ -123,7 +121,6 @@ public sealed partial class StockRoomPage : Page
 
             supplierDirectory = suppliers.ToDictionary(supplier => supplier.Id);
             supplierNames = suppliers.ToDictionary(s => s.Id, s => s.Name);
-            activeSupplierNames = suppliers.Where(s => s.IsActive).ToDictionary(s => s.Id, s => s.Name);
 
             ReceiptsEmptyText.Visibility = rawReceipts.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             var receiptCounts = rawReceipts
@@ -213,8 +210,6 @@ public sealed partial class StockRoomPage : Page
 
             ApplyIngredientFilters();
             SelectIngredient(selectedIngredientRow);
-            hasLoaded = true;
-
             ShowFeedback(savedMessage is null
                 ? WorkflowFeedback.Ready("Stock room data refreshed.")
                 : WorkflowFeedback.Success(savedMessage));
@@ -605,43 +600,60 @@ public sealed partial class StockRoomPage : Page
 
     private async void OnReceiveDeliveryClick(object sender, RoutedEventArgs e)
     {
-        if (activeSupplierNames.Count == 0)
+        var suppliers = supplierDirectory.Values.Where(supplier => supplier.IsActive).OrderBy(supplier => supplier.Name).ToArray();
+        if (suppliers.Length == 0)
         {
             SelectSection("suppliers");
             ShowFeedback(WorkflowFeedback.Validation("supplier", "Add an active supplier before receiving a delivery."));
             return;
         }
-        var activeSuppliers = activeSupplierNames.Values.OrderBy(n => n).ToList();
-        var dialog = new NewReceiptDialog(activeSuppliers);
-        dialog.XamlRoot = XamlRoot;
-        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
-
-        var supplierEntry = activeSupplierNames.FirstOrDefault(kvp => kvp.Value == dialog.SupplierName);
-        if (supplierEntry.Key is null)
+        var ingredients = rawIngredients.Where(ingredient => ingredient.IsActive).OrderBy(ingredient => ingredient.Name).ToArray();
+        if (ingredients.Length == 0)
         {
-            ShowFeedback(WorkflowFeedback.Validation("supplier", "Select an active supplier."));
+            SelectSection("ingredients");
+            ShowFeedback(WorkflowFeedback.Validation("ingredient", "Create an ingredient before receiving a delivery."));
             return;
         }
+
+        PurchaseReceipt? received = null;
+        var dialog = new NewReceiptDialog(suppliers, ingredients, async (supplierId, number, lines) =>
+        {
+            try
+            {
+                if (App.IsApiMode)
+                {
+                    received = await App.Services.GetRequiredService<ApiInventorySource>().ReceiveDeliveryAsync(supplierId, number, lines);
+                }
+                else
+                {
+                    var actor = session.Operator ?? staffOptions.FirstOrDefault();
+                    if (actor is null) return "Choose an active staff operator before receiving a delivery.";
+                    using var scope = App.Services.CreateScope();
+                    var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>()
+                        .ReceiveDeliveryAsync(new(supplierId, number, lines, actor.Id));
+                    if (result.IsFailure) return result.Error!.Description;
+                    received = result.Value;
+                }
+                return null;
+            }
+            catch (ApiException exception) when (exception.Kind is ApiErrorKind.Validation or ApiErrorKind.Conflict
+                or ApiErrorKind.NotFound or ApiErrorKind.Forbidden or ApiErrorKind.BusinessRule)
+            {
+                return exception.Detail;
+            }
+            catch (Exception)
+            {
+                return "Could not verify the delivery. Check the connection and retry with the same receipt number.";
+            }
+        }) { XamlRoot = XamlRoot };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary || received is null) return;
 
         SetBusy(true);
         try
         {
-            if (App.IsApiMode)
-            {
-                await App.Services.GetRequiredService<ApiInventorySource>().CreateReceiptAsync(supplierEntry.Key, dialog.ReceiptNumber);
-            }
-            else
-            {
-                using var scope = App.Services.CreateScope();
-                var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>()
-                    .CreateDraftReceiptAsync(new(supplierEntry.Key, dialog.ReceiptNumber));
-                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
-            }
-            SelectSection("receipts");
-            await ReloadStockDataAsync($"Draft receipt #{dialog.ReceiptNumber} created.");
+            selectedReceiptId = received.Id;
+            await ReloadStockDataAsync($"Receipt #{received.ReceiptNumber} posted. Stock balances are up to date.");
         }
-        catch (ApiException exception) { ShowApiFailure("create purchase receipt", exception); }
-        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create draft receipt", "Verify database connection.")); }
         finally { SetBusy(false); }
     }
 

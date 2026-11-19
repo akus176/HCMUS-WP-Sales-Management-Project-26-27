@@ -573,7 +573,7 @@
                                 <RowDefinition Height="24" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <Grid x:Name="TableHeader" Background="{StaticResource ConsolePanelBrush}" Padding="10,0,22,0" ColumnSpacing="9" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                            <Grid x:Name="TableHeader" Background="{StaticResource ConsolePanelBrush}" Padding="10,0,34,0" ColumnSpacing="9" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="1.5*" />
                                     <ColumnDefinition Width="70" />
@@ -613,7 +613,7 @@
                                     </StackPanel>
                                 </Button>
                             </Grid>
-                            <ListView x:Name="IngredientsListView" IsItemClickEnabled="True" ItemClick="OnIngredientClick" Grid.Row="1" MaxHeight="416" ScrollViewer.VerticalScrollBarVisibility="Auto" ItemContainerStyle="{StaticResource StockListItem}" ItemTemplate="{StaticResource StockWideRow}" SelectionMode="Single" SelectionChanged="OnIngredientSelectionChanged" AutomationProperties.Name="Ingredients table" Padding="0,0,12,0">
+                            <ListView x:Name="IngredientsListView" IsItemClickEnabled="True" ItemClick="OnIngredientClick" Grid.Row="1" MaxHeight="416" ScrollViewer.VerticalScrollBarVisibility="Auto" ItemContainerStyle="{StaticResource StockListItem}" ItemTemplate="{StaticResource StockWideRow}" SelectionMode="Single" SelectionChanged="OnIngredientSelectionChanged" AutomationProperties.Name="Ingredients table" Padding="0,0,24,0">
                                 <ListView.Resources>
                                     <Style TargetType="ScrollBar">
                                         <Setter Property="Width" Value="8" />
@@ -900,7 +900,7 @@
                                 <Grid Width="12" Margin="0,13,1,13" HorizontalAlignment="Right" Visibility="Collapsed" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw">
                                     <controls:ConceptPattern />
                                 </Grid>
-                                <Grid Padding="20,18,20,20">
+                                <Grid Padding="20,18,8,20">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="*" />
                                         <RowDefinition Height="Auto" />
@@ -919,7 +919,7 @@
                                             <SolidColorBrush x:Key="ScrollBarTrackStroke" Color="Transparent" />
                                             <SolidColorBrush x:Key="ScrollBarButtonBackground" Color="Transparent" />
                                         </ScrollViewer.Resources>
-                                        <Grid x:Name="DrawerContent" MinHeight="{Binding ViewportHeight, ElementName=DrawerScrollViewer}">
+                                        <Grid x:Name="DrawerContent" MinHeight="{Binding ViewportHeight, ElementName=DrawerScrollViewer}" Margin="0,0,12,0">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="*" />
@@ -1046,7 +1046,7 @@
                                             </Border>
                                         </Grid>
                                     </ScrollViewer>
-                                    <Grid x:Name="AdjustmentActions" Grid.Row="1" ColumnSpacing="8" Margin="0,12,0,0" Padding="0,12,0,0" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Visibility="Collapsed">
+                                    <Grid x:Name="AdjustmentActions" Grid.Row="1" ColumnSpacing="8" Margin="0,12,12,0" Padding="0,12,0,0" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Visibility="Collapsed">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />

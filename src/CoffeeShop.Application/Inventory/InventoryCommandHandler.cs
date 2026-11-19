@@ -177,6 +177,64 @@ public sealed class InventoryCommandHandler
         return Result<EntityId>.Success(added.Value.Id);
     }
 
+    public async Task<Result<PurchaseReceipt>> ReceiveDeliveryAsync(
+        ReceiveDeliveryCommand command, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(command);
+        var number = command.ReceiptNumber.Trim();
+        if (number.Length is 0 or > 50 || command.Lines.Count == 0)
+        {
+            return Result<PurchaseReceipt>.Failure(Error.Validation("inventory.invalid_delivery",
+                "Enter a receipt number of up to 50 characters and at least one ingredient."));
+        }
+
+        return await transactionManager.ExecuteInTransactionAsync(async () =>
+        {
+            var existing = await repository.LoadReceiptForReceivingAsync(number, cancellationToken);
+            if (existing is not null)
+            {
+                var savedLines = existing.Lines.Select(line => new ReceiveDeliveryLine(line.IngredientId, line.Quantity, line.UnitCost.Amount));
+                if (existing.Status == PurchaseReceiptStatus.Posted && existing.SupplierId == command.SupplierId
+                    && SortDeliveryLines(savedLines).SequenceEqual(SortDeliveryLines(command.Lines)))
+                {
+                    return Result<PurchaseReceipt>.Success(existing);
+                }
+
+                return Result<PurchaseReceipt>.Failure(Error.Conflict("inventory.receipt_number_in_use",
+                    "This receipt number is already in use. Check Receipts or enter a different number."));
+            }
+
+            var supplier = await repository.FindSupplierAsync(command.SupplierId, cancellationToken);
+            if (supplier is not { IsActive: true })
+            {
+                return Result<PurchaseReceipt>.Failure(Error.Validation("inventory.supplier_unavailable", "Choose an active supplier."));
+            }
+
+            var receivedAt = clock.UtcNow;
+            var receipt = new PurchaseReceipt(EntityId.New(), supplier.Id, number, receivedAt, receivedAt);
+            foreach (var line in command.Lines)
+            {
+                if (line.UnitCost < 0 || line.UnitCost > Money.MaximumAmount || decimal.Round(line.UnitCost, 2) != line.UnitCost)
+                {
+                    return Result<PurchaseReceipt>.Failure(Error.Validation("inventory.invalid_unit_cost",
+                        "Enter a valid non-negative unit cost with up to two decimal places."));
+                }
+                var added = PurchaseReceiptLifecycle.AddLine(receipt, EntityId.New(), line.IngredientId,
+                    line.Quantity, new Money(line.UnitCost), receivedAt);
+                if (added.IsFailure) return Result<PurchaseReceipt>.Failure(added.Error!);
+            }
+
+            var posted = await ApplyReceiptAsync(receipt, command.ActorId, receivedAt, cancellationToken);
+            if (posted.IsFailure) return Result<PurchaseReceipt>.Failure(posted.Error!);
+            repository.AddReceipt(receipt);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            return Result<PurchaseReceipt>.Success(receipt);
+        }, cancellationToken);
+    }
+
+    private static IEnumerable<ReceiveDeliveryLine> SortDeliveryLines(IEnumerable<ReceiveDeliveryLine> lines) =>
+        lines.OrderBy(line => line.IngredientId.Value).ThenBy(line => line.Quantity).ThenBy(line => line.UnitCost);
+
     public async Task<Result> RemoveReceiptLineAsync(
         RemoveReceiptLineCommand command,
         CancellationToken cancellationToken = default)
@@ -232,39 +290,33 @@ public sealed class InventoryCommandHandler
     {
         ArgumentNullException.ThrowIfNull(command);
 
-        var receipt = await repository.FindReceiptWithLinesAsync(command.ReceiptId, cancellationToken);
-        if (receipt is null)
-        {
-            return Result.Failure(ReceiptNotFound(command.ReceiptId));
-        }
-
         return await transactionManager.ExecuteInTransactionAsync(async () =>
         {
-            var posted = PurchaseReceiptLifecycle.PostReceipt(
-                receipt,
-                id => repository.FindIngredientAsync(id, cancellationToken).GetAwaiter().GetResult(),
-                clock.UtcNow);
-            if (posted.IsFailure)
-            {
-                return Result.Failure(posted.Error!);
-            }
+            var receipt = await repository.LoadReceiptForPostingAsync(command.ReceiptId, cancellationToken);
+            if (receipt is null) return Result.Failure(ReceiptNotFound(command.ReceiptId));
 
-            foreach (var line in receipt.Lines)
-            {
-                repository.AddStockMovement(new StockMovement(
-                    EntityId.New(),
-                    line.IngredientId,
-                    StockMovementType.Receipt,
-                    line.Quantity,
-                    command.ActorId,
-                    $"Purchase receipt {receipt.ReceiptNumber}",
-                    clock.UtcNow,
-                    purchaseReceiptId: receipt.Id));
-            }
-
+            var posted = await ApplyReceiptAsync(receipt, command.ActorId, clock.UtcNow, cancellationToken);
+            if (posted.IsFailure) return posted;
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }, cancellationToken);
+    }
+
+    private async Task<Result> ApplyReceiptAsync(PurchaseReceipt receipt, EntityId actorId, UtcTimestamp receivedAt,
+        CancellationToken cancellationToken)
+    {
+        var ids = receipt.Lines.Select(line => line.IngredientId).Distinct().ToArray();
+        var ingredients = await repository.LoadIngredientsForStockUpdateAsync(ids, cancellationToken);
+        var byId = ingredients.ToDictionary(ingredient => ingredient.Id);
+        var posted = PurchaseReceiptLifecycle.PostReceipt(receipt, id => byId.GetValueOrDefault(id), receivedAt);
+        if (posted.IsFailure) return Result.Failure(posted.Error!);
+
+        foreach (var line in receipt.Lines)
+        {
+            repository.AddStockMovement(new StockMovement(EntityId.New(), line.IngredientId, StockMovementType.Receipt,
+                line.Quantity, actorId, $"Purchase receipt {receipt.ReceiptNumber}", receivedAt, purchaseReceiptId: receipt.Id));
+        }
+        return Result.Success();
     }
 
     public async Task<Result> RecordStockAdjustmentAsync(
@@ -407,7 +459,7 @@ public sealed class InventoryCommandHandler
             }
 
             var pending = quantities.Where(line => line.Quantity > 0).ToArray();
-            var ingredients = (await repository.LoadIngredientsForRestorationAsync(
+            var ingredients = (await repository.LoadIngredientsForStockUpdateAsync(
                 pending.Select(line => line.IngredientId).ToArray(), cancellationToken)).ToDictionary(ingredient => ingredient.Id);
             foreach (var line in pending)
             {

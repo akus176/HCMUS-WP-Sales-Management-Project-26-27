@@ -13,7 +13,7 @@ namespace CoffeeShop.WinUI.Pages;
 
 public sealed partial class CustomersPage : Page
 {
-    internal object VerificationState() => new { search = SearchBox.Text, selected = model.SelectedCustomer?.Id, profile = UseSelectedProfile.IsChecked, delivery = DeliveryOrder.IsChecked, recipient = RecipientName.Text, contact = ContactNumber.Text, address = OrderAddress.Text };
+    internal object VerificationState() => new { search = SearchBox.Text, selected = model.SelectedCustomer?.Id };
 
     internal async Task<object> PrepareVerificationAsync()
     {
@@ -25,11 +25,11 @@ public sealed partial class CustomersPage : Page
 
     internal object VerificationLayout() => new
     {
-        threeColumns = Grid.GetColumn(DetailScroll) == 1 && Grid.GetColumn(OrderScroll) == 2,
+        threeColumns = Grid.GetColumn(DetailScroll) == 1 && Grid.GetColumn(RecentOrdersScroll) == 2,
         contentFits = CustomerLayout.ActualWidth <= ActualWidth - 47,
         directoryFits = DirectoryPanel.ActualWidth <= ActualWidth - 47,
         detailFits = DetailScroll.ActualWidth <= ActualWidth - 47,
-        orderFits = OrderScroll.ActualWidth <= ActualWidth - 47,
+        orderFits = RecentOrdersScroll.ActualWidth <= ActualWidth - 47,
         independentScrolling = WorkspaceContent.VerticalScrollMode == ScrollMode.Disabled,
         listHeight = CustomersList.ActualHeight
     };
@@ -56,24 +56,6 @@ public sealed partial class CustomersPage : Page
             directoryScroll.ChangeView(null, 0, null, true);
         }
 
-        var wasDelivery = DeliveryOrder.IsChecked;
-        var recipient = RecipientName.Text;
-        var contact = ContactNumber.Text;
-        var address = OrderAddress.Text;
-        DeliveryOrder.IsChecked = true;
-        RecipientName.Text = "Unsaved delivery draft";
-        OrderAddress.Text = "Unsaved order-only address";
-        await resize(600);
-        var compactDraftPreserved = RecipientName.Text == "Unsaved delivery draft" && OrderAddress.Text == "Unsaved order-only address";
-        await resize(1440);
-        var deliveryFieldsWork = DeliveryFields.Visibility == Visibility.Visible && compactDraftPreserved
-            && RecipientName.Text == "Unsaved delivery draft" && OrderAddress.Text == "Unsaved order-only address";
-        await PresentationVerification.CaptureAsync(this, "native-customers-delivery.png");
-        DeliveryOrder.IsChecked = wasDelivery;
-        RecipientName.Text = recipient;
-        ContactNumber.Text = contact;
-        OrderAddress.Text = address;
-
         object editor = new { skipped = "No active customer available" };
         if (model.SelectedCustomer is { IsActive: true } customer)
         {
@@ -93,13 +75,12 @@ public sealed partial class CustomersPage : Page
             try { await EditCustomerAsync(customer); }
             finally { editorVerification = null; }
         }
-        return new { emptySearchWorks, searchRecovers, independentDirectoryScroll, deliveryFieldsWork, editor };
+        return new { emptySearchWorks, searchRecovers, independentDirectoryScroll, editor };
     }
 
     private readonly CustomerWorkspace model;
     private bool rendering;
     private bool ready;
-    private EntityId? renderedCustomerId;
     private Func<ContentDialog, StackPanel, Task>? editorVerification;
     public sealed record CustomerRow(CustomerSummary Customer)
     {
@@ -147,11 +128,9 @@ public sealed partial class CustomersPage : Page
     {
         InitializeComponent();
         model = App.Services.GetRequiredService<CustomerWorkspace>();
-        renderedCustomerId = model.SelectedCustomer?.Id;
         SearchBox.Text = model.Search;
         IncludeInactive.IsChecked = model.IncludeInactive;
         ready = true;
-        RestoreOrderForm();
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
     }
@@ -285,36 +264,13 @@ public sealed partial class CustomersPage : Page
             PreviousButton.IsEnabled = model.CanPrevious;
             NextButton.IsEnabled = model.CanNext;
             OrdersList.ItemsSource = customer?.RecentOrders.Select(order => new RecentOrderRow(order)).ToArray();
-            OrdersEmpty.Visibility = customer is not null && customer.RecentOrders.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-            UseSelectedProfile.IsEnabled = model.CanEdit;
-            UseSelectedProfile.Content = "Use this customer profile";
-            ToolTipService.SetToolTip(UseSelectedProfile, customer?.FullName ?? "Select an active customer in the directory first.");
-            SelectForOrderButton.IsEnabled = !model.RequiresReload;
-
-            if (!model.IsBusy)
-            {
-                if (customer?.IsActive != true)
-                {
-                    UseSelectedProfile.IsChecked = false;
-                }
-
-                if (renderedCustomerId != customer?.Id)
-                {
-                    renderedCustomerId = customer?.Id;
-                    UseSelectedProfile.IsChecked = customer?.IsActive == true;
-                    RecipientName.Text = customer?.FullName ?? "";
-                    ContactNumber.Text = customer?.Phone ?? "";
-                }
-
-                UpdateAddressChoices();
-            }
+            OrdersEmpty.Text = customer is null ? "Select a customer to see recent orders." : "No recent orders.";
+            OrdersEmpty.Visibility = customer is null || customer.RecentOrders.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
         finally
         {
             rendering = false;
         }
-
-        UpdateOrderOptions();
     }
 
     private void OnPageSizeChanged(object sender, SizeChangedEventArgs args)
@@ -329,16 +285,16 @@ public sealed partial class CustomersPage : Page
         DirectoryPanel.Height = wide ? height : Math.Min(420, Math.Max(260, height * .7));
         DirectoryPanel.BorderThickness = wide ? new Thickness(0, 0, 1, 0) : new Thickness(0, 0, 0, 1);
         DirectoryPanel.Padding = wide ? new Thickness(0, 0, 12, 0) : new Thickness(0, 0, 0, 12);
-        DetailScroll.MaxHeight = OrderScroll.MaxHeight = wide ? height : double.PositiveInfinity;
+        DetailScroll.MaxHeight = RecentOrdersScroll.MaxHeight = wide ? height : double.PositiveInfinity;
         ListColumn.Width = wide ? new GridLength(280) : new GridLength(1, GridUnitType.Star);
         DetailColumn.Width = wide ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
-        OrderColumn.Width = new GridLength(wide ? 282 : 0);
+        RecentOrdersColumn.Width = new GridLength(wide ? 282 : 0);
         CustomerLayout.ColumnSpacing = wide ? 18 : 0;
         CustomerLayout.RowSpacing = wide ? 0 : 18;
         Grid.SetColumn(DetailScroll, wide ? 1 : 0);
         Grid.SetRow(DetailScroll, wide ? 0 : 1);
-        Grid.SetColumn(OrderScroll, wide ? 2 : 0);
-        Grid.SetRow(OrderScroll, wide ? 0 : 2);
+        Grid.SetColumn(RecentOrdersScroll, wide ? 2 : 0);
+        Grid.SetRow(RecentOrdersScroll, wide ? 0 : 2);
         HistoryColumn.Width = wide && ActualWidth >= 1200 ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
         Grid.SetColumn(HistoryPanel, wide && ActualWidth >= 1200 ? 1 : 0);
         Grid.SetRow(HistoryPanel, wide && ActualWidth >= 1200 ? 0 : 1);
@@ -442,120 +398,6 @@ public sealed partial class CustomersPage : Page
     private async void OnPreviousHistory(object sender, RoutedEventArgs args) => await model.PreviousHistoryAsync();
     private async void OnNextHistory(object sender, RoutedEventArgs args) => await model.NextHistoryAsync();
 
-    private async void OnWalkIn(object sender, RoutedEventArgs args)
-    {
-        if (!await PrepareCounterAsync()) return;
-        model.ContinueAsWalkIn();
-        RestoreOrderForm();
-        NavigateToCounter();
-    }
-
-    private void OnOrderOptionsChanged(object sender, RoutedEventArgs args)
-    {
-        if (ready && !rendering)
-        {
-            UpdateAddressChoices();
-            UpdateOrderOptions();
-        }
-    }
-
-    private void OnAddressChoiceChanged(object sender, SelectionChangedEventArgs args)
-    {
-        if (ready && !rendering)
-        {
-            UpdateOrderOptions();
-        }
-    }
-
-    private void UpdateAddressChoices()
-    {
-        var selectedAddress = (AddressChoice.SelectedItem as AddressOption)?.Id;
-        var options = new List<AddressOption> { new(null, "Order-only address") };
-        if (UseSelectedProfile.IsChecked == true && model.SelectedCustomer is { IsActive: true } customer)
-        {
-            options.AddRange(customer.Addresses.Where(item => item.IsActive).Select(item =>
-                new AddressOption(item.Id, $"{item.Label ?? "Address"}{(item.IsDefault ? " (default)" : "")}: {item.AddressLine}")));
-        }
-
-        AddressChoice.ItemsSource = options;
-        AddressChoice.SelectedItem = options.FirstOrDefault(item => item.Id == selectedAddress) ?? options[0];
-    }
-
-    private void UpdateOrderOptions()
-    {
-        DeliveryFields.Visibility = DeliveryOrder.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
-        OrderAddress.IsEnabled = (AddressChoice.SelectedItem as AddressOption)?.Id is null;
-        OrderSummary.Text = UseSelectedProfile.IsChecked == true && model.SelectedCustomer is { IsActive: true } customer
-            ? $"Order for {customer.FullName.Split(' ')[0]}" : "Walk-in order";
-    }
-
-    private void RestoreOrderForm()
-    {
-        rendering = true;
-        var request = model.OrderRequest;
-        UseSelectedProfile.IsChecked = request.CustomerId is not null;
-        DeliveryOrder.IsChecked = request.IsDelivery;
-        RecipientName.Text = request.RecipientName ?? "";
-        ContactNumber.Text = request.ContactNumber ?? "";
-        OrderAddress.Text = request.AddressLine ?? "";
-        UpdateAddressChoices();
-        if (AddressChoice.ItemsSource is IEnumerable<AddressOption> options)
-        {
-            AddressChoice.SelectedItem = options.FirstOrDefault(item => item.Id == request.CustomerAddressId) ?? options.First();
-        }
-
-        rendering = false;
-        UpdateOrderOptions();
-    }
-
-    private async void OnSelectForOrder(object sender, RoutedEventArgs args)
-    {
-        var attach = UseSelectedProfile.IsChecked == true;
-        if (attach && model.SelectedCustomer is not { IsActive: true })
-        {
-            model.ShowValidation("Select an active customer, or uncheck profile attachment to continue as a walk-in.");
-            return;
-        }
-
-        var delivery = DeliveryOrder.IsChecked == true;
-        if (!await PrepareCounterAsync()) return;
-        if (await model.SetOrderSelectionAsync(new(
-            attach ? model.SelectedCustomer!.Id : null,
-            delivery,
-            delivery ? (AddressChoice.SelectedItem as AddressOption)?.Id : null,
-            delivery ? RecipientName.Text : null,
-            delivery ? ContactNumber.Text : null,
-            delivery ? OrderAddress.Text : null))) NavigateToCounter();
-    }
-
-    private async Task<bool> PrepareCounterAsync()
-    {
-        var counter = App.Services.GetRequiredService<PosWorkspace>();
-        if (counter.IsBusy || counter.RequiresReload)
-        {
-            model.ShowValidation("Return to Counter and refresh its current ticket before changing the customer.");
-            return false;
-        }
-        if (counter.Order is null) return true;
-        var dialog = new ContentDialog
-        {
-            XamlRoot = XamlRoot,
-            Title = "Start a new ticket at Counter?",
-            Content = "The current ticket has already been saved. Start a new ticket for this customer; the saved order will remain in Service board.",
-            PrimaryButtonText = "Start new ticket",
-            CloseButtonText = "Keep current ticket",
-            DefaultButton = ContentDialogButton.Close
-        };
-        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return false;
-        counter.NewTicket();
-        return counter.CanEdit;
-    }
-
-    private static void NavigateToCounter()
-    {
-        if (((App)Microsoft.UI.Xaml.Application.Current).Window is MainWindow main) main.NavigateTo("counter");
-    }
-
     private Task ConfirmAsync(string title, string explanation, Func<Task<bool>> action) =>
         ShowEditorAsync(title, Form(new TextBlock { Text = explanation, TextWrapping = TextWrapping.Wrap }), action, "Deactivate");
 
@@ -643,6 +485,4 @@ public sealed partial class CustomersPage : Page
 
         return panel;
     }
-
-    private sealed record AddressOption(EntityId? Id, string DisplayName);
 }

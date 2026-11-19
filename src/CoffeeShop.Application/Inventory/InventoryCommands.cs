@@ -20,6 +20,11 @@ public sealed record ActivateIngredientCommand(EntityId IngredientId);
 
 public sealed record CreateDraftReceiptCommand(EntityId SupplierId, string ReceiptNumber);
 
+public sealed record ReceiveDeliveryLine(EntityId IngredientId, decimal Quantity, decimal UnitCost);
+
+public sealed record ReceiveDeliveryCommand(
+    EntityId SupplierId, string ReceiptNumber, IReadOnlyList<ReceiveDeliveryLine> Lines, EntityId ActorId);
+
 public sealed record AddReceiptLineCommand(EntityId ReceiptId, EntityId IngredientId, decimal Quantity, decimal UnitCost);
 
 public sealed record RemoveReceiptLineCommand(EntityId ReceiptId, EntityId LineId);

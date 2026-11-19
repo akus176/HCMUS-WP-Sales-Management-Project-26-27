@@ -130,7 +130,7 @@
             <StackPanel Spacing="3">
                 <TextBlock x:Name="ProfileCount" Text="MANAGE / CUSTOMER NOTEBOOK" Style="{StaticResource CustomerLabel}" />
                 <TextBlock Text="Customers" Style="{StaticResource ConsolePageTitleStyle}" x:Name="CustomerTitle" FontSize="52" />
-                <TextBlock Text="Familiar faces, saved addresses, loyalty, and the next order in one place." />
+                <TextBlock Text="Manage customer profiles, saved addresses, loyalty, and order history." />
             </StackPanel>
             <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
                 <Button x:Name="ReloadButton" Content="Refresh" Click="OnReload" />
@@ -146,7 +146,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="ListColumn" Width="280" />
                     <ColumnDefinition x:Name="DetailColumn" Width="*" />
-                    <ColumnDefinition x:Name="OrderColumn" Width="282" />
+                    <ColumnDefinition x:Name="RecentOrdersColumn" Width="282" />
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -323,49 +323,28 @@
                         </Grid>
                     </StackPanel>
                 </ScrollViewer>
-                <ScrollViewer x:Name="OrderScroll" Grid.Column="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                    <StackPanel x:Name="OrderPanel" Spacing="16" Margin="0,0,24,0">
-                        <Border RequestedTheme="Dark" Background="{StaticResource ConsoleFieldBrush}" Padding="16" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,2,0,0">
-                            <StackPanel Spacing="6">
-                                <TextBlock Text="ORDER AT COUNTER" Style="{StaticResource CustomerLabel}" Foreground="{StaticResource ConsoleOnFieldMutedBrush}" />
-                                <TextBlock x:Name="OrderSummary" Text="Walk-in — no profile required." FontFamily="{StaticResource ConsoleSerifFont}" FontSize="25" Foreground="{StaticResource ConsoleOnFieldBrush}" AutomationProperties.LiveSetting="Polite" />
-                                <TextBlock Text="Send this customer to Counter, then add items to their ticket. Add delivery details when needed." FontSize="13" Foreground="{StaticResource ConsoleOnFieldMutedBrush}" TextWrapping="Wrap" />
-                                <StackPanel Spacing="4">
-                                    <CheckBox x:Name="UseSelectedProfile" Content="Use the selected profile" Foreground="{StaticResource ConsoleOnFieldBrush}" Checked="OnOrderOptionsChanged" Unchecked="OnOrderOptionsChanged" />
-                                    <CheckBox x:Name="DeliveryOrder" Content="Delivery order" Foreground="{StaticResource ConsoleOnFieldBrush}" Checked="OnOrderOptionsChanged" Unchecked="OnOrderOptionsChanged" />
-                                    <StackPanel x:Name="DeliveryFields" RequestedTheme="Light" Spacing="12" Visibility="Collapsed" Background="{StaticResource ConsoleGroundBrush}" Padding="12">
-                                        <TextBox x:Name="RecipientName" Header="Recipient name" MaxLength="120" />
-                                        <TextBox x:Name="ContactNumber" Header="Contact number" MaxLength="30" />
-                                        <ComboBox x:Name="AddressChoice" Header="Delivery address" DisplayMemberPath="DisplayName" SelectionChanged="OnAddressChoiceChanged" MinHeight="44" HorizontalAlignment="Stretch" FontSize="14" />
-                                        <TextBox x:Name="OrderAddress" Header="Order-only address" PlaceholderText="Used for this order without saving to a profile" MaxLength="500" AcceptsReturn="True" TextWrapping="Wrap" />
-                                    </StackPanel>
-                                    <Button x:Name="SelectForOrderButton" Content="Continue to Counter" Click="OnSelectForOrder" Background="{StaticResource ConsoleGroundBrush}" HorizontalAlignment="Stretch" />
-                                    <Button Content="Walk-in at Counter" Click="OnWalkIn" Foreground="{StaticResource ConsoleOnFieldBrush}" Style="{StaticResource CustomerLink}" HorizontalAlignment="Stretch" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-                        <StackPanel Spacing="8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
-                            <TextBlock Text="Recent orders" Style="{StaticResource CustomerHeading}" />
-                            <TextBlock x:Name="OrdersEmpty" Text="No recent orders." />
-                            <ListView x:Name="OrdersList" SelectionMode="None" MaxHeight="280" ContainerContentChanging="OnContainerContentChanging" AutomationProperties.Name="Recent customer orders" Padding="0,0,24,0">
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Padding="0,10" ColumnSpacing="8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Spacing="3">
-                                                <TextBlock Text="{Binding OrderNumber}" FontWeight="SemiBold" />
-                                                <TextBlock Text="{Binding StatusDisplay}" FontSize="12" />
-                                                <TextBlock Text="{Binding DateDisplay}" FontSize="12" />
-                                            </StackPanel>
-                                            <TextBlock Grid.Column="1" Text="{Binding TotalDisplay}" Style="{StaticResource ConsoleNumberStyle}" FontSize="21" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-                        </StackPanel>
+                <ScrollViewer x:Name="RecentOrdersScroll" Grid.Column="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="8" Margin="0,8,24,0">
+                        <TextBlock Text="Recent orders" Style="{StaticResource CustomerHeading}" AutomationProperties.HeadingLevel="Level2" />
+                        <TextBlock x:Name="OrdersEmpty" Foreground="{StaticResource ConsoleMutedInkBrush}" TextWrapping="Wrap" />
+                        <ListView x:Name="OrdersList" SelectionMode="None" MaxHeight="280" ContainerContentChanging="OnContainerContentChanging" AutomationProperties.Name="Recent customer orders" Padding="0,0,24,0">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Padding="0,10" ColumnSpacing="8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Spacing="3">
+                                            <TextBlock Text="{Binding OrderNumber}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding StatusDisplay}" FontSize="12" />
+                                            <TextBlock Text="{Binding DateDisplay}" FontSize="12" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding TotalDisplay}" Style="{StaticResource ConsoleNumberStyle}" FontSize="21" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
                     </StackPanel>
                 </ScrollViewer>
             </Grid>

@@ -57,7 +57,9 @@ try {
 }
 ```
 
-Launch the Release client, sign in as `local-manager`, and open **Menu** to see the sample data if you loaded it. The client uses the API URL with `/api/v1/` and a trailing slash. The [staff identity guide](docs/staff-identity.md) explains the six roles and how to provision accounts with different permissions.
+From a checkout on a Windows drive, you can start the Compose services and build and open WinUI with `./scripts/run-winui.ps1`. For an existing configured Windows preview that contains both the Release client and API builds, pass its root with `-PreviewRoot` to reuse those builds and their database configuration.
+
+To launch the Release client directly, run the commands below. Sign in as `local-manager` and open **Menu** to see the sample data if you loaded it. The client uses the API URL with `/api/v1/` and a trailing slash. The [staff identity guide](docs/staff-identity.md) explains the six roles and how to provision accounts with different permissions.
 
 ```powershell
 $env:COFFEESHOP_CLIENT_MODE = 'api'

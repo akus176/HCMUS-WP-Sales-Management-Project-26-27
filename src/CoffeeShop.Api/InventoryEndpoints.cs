@@ -5,6 +5,8 @@ using CoffeeShop.Application.Common.Security;
 using CoffeeShop.Application.Inventory;
 using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Inventory;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 public static class InventoryEndpoints
 {
@@ -148,6 +150,26 @@ public static class InventoryEndpoints
             if (result.IsFailure) return ApiErrorResults.From(result.Error!);
             return Results.Json(ToReceipt((await repository.FindReceiptWithLinesAsync(result.Value, ct))!), statusCode: 201);
         }).Produces<ReceiptResponse>(201).ProducesProblem(400).ProducesProblem(404);
+        receipts.MapPost("/receive", async (ReceiveDeliveryRequest request, InventoryCommandHandler handler,
+            ICurrentUser user, CancellationToken ct) =>
+        {
+            if (request.SupplierId == Guid.Empty || request.Lines?.Any(line => line is null || line.IngredientId == Guid.Empty) == true)
+                return InvalidId();
+
+            var lines = request.Lines?.Select(line => new ReceiveDeliveryLine(new(line.IngredientId), line.Quantity, line.UnitCost)).ToArray() ?? [];
+            try
+            {
+                var result = await handler.ReceiveDeliveryAsync(new(
+                    new(request.SupplierId), request.ReceiptNumber ?? string.Empty, lines, user.GetRequiredId()), ct);
+                return result.IsSuccess ? Results.Ok(ToReceipt(result.Value)) : ApiErrorResults.From(result.Error!);
+            }
+            catch (DbUpdateException exception) when (exception.InnerException is PostgresException
+                { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "IX_purchase_receipts_receipt_number" })
+            {
+                return ApiErrorResults.From(Error.Conflict("inventory.receipt_number_in_use",
+                    "This receipt number is already in use. Check Receipts or enter a different number."));
+            }
+        }).Produces<ReceiptResponse>().ProducesProblem(400).ProducesProblem(404).ProducesProblem(409);
         receipts.MapPost("/{id:guid}/lines", async (Guid id, ReceiptLineRequest request, InventoryCommandHandler handler,
             IInventoryRepository repository, CancellationToken ct) =>
         {

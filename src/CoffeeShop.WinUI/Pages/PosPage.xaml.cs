@@ -127,8 +127,7 @@ public sealed partial class PosPage : Page
     private EntityId? renderedCustomerId;
     private bool ticketCaptureActive;
     private PosStaffOption? captureOperator;
-    private EntityId? selectedSavedAddressId;
-    private string? selectedSavedAddressLine;
+    private sealed record DeliveryAddressOption(EntityId? Id, string DisplayName, string? AddressLine);
     private IReadOnlyList<MenuItemSummary>? renderedMenu;
     private IReadOnlyList<CategorySummary>? renderedCategories;
     private EntityId? renderedCategoryId;
@@ -328,12 +327,38 @@ public sealed partial class PosPage : Page
         TicketHeading.Text = model.Order is null ? "Your order" : "Order summary";
     }
 
-    private void OnAddressModeChanged(object sender, RoutedEventArgs args)
+    private void OnDeliveryAddressChanged(object sender, SelectionChangedEventArgs args)
     {
-        if (AddressBox is null) return;
-        var useSaved = SavedAddressCheck.IsChecked == true;
-        AddressBox.Visibility = useSaved ? Visibility.Collapsed : Visibility.Visible;
-        SavedAddressText.Visibility = useSaved ? Visibility.Visible : Visibility.Collapsed;
+        if (AddressBox is not null) UpdateDeliveryAddressDisplay();
+    }
+
+    private void UpdateDeliveryAddressDisplay()
+    {
+        var selected = DeliveryAddressChoice.SelectedItem as DeliveryAddressOption;
+        AddressBox.Visibility = selected?.Id is null ? Visibility.Visible : Visibility.Collapsed;
+        SavedAddressText.Text = selected?.AddressLine ?? "";
+        SavedAddressText.Visibility = string.IsNullOrWhiteSpace(selected?.AddressLine) ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void SetDeliveryAddressChoices(EntityId? selectedId)
+    {
+        var options = new List<DeliveryAddressOption>();
+        if (model.CustomerProfile is { IsActive: true } profile && profile.Id == model.Customer.CustomerId)
+        {
+            options.AddRange(profile.Addresses.Where(address => address.IsActive).OrderByDescending(address => address.IsDefault)
+                .Select(address => new DeliveryAddressOption(address.Id,
+                    $"{address.Label ?? address.AddressLine}{(address.IsDefault ? " (default)" : "")}", address.AddressLine)));
+        }
+        else if (model.CustomerProfile is null && selectedId is not null)
+        {
+            options.Add(new DeliveryAddressOption(selectedId, "Saved address", model.Customer.AddressLine));
+        }
+
+        DeliveryAddressChoice.Visibility = options.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        options.Add(new DeliveryAddressOption(null, "Enter a different address", null));
+        DeliveryAddressChoice.ItemsSource = options;
+        DeliveryAddressChoice.SelectedItem = options.FirstOrDefault(option => option.Id == selectedId) ?? options[^1];
+        UpdateDeliveryAddressDisplay();
     }
 
     private void SetCustomerSearchHint(string? message)
@@ -461,7 +486,12 @@ public sealed partial class PosPage : Page
         try
         {
             var result = await App.Services.GetRequiredService<ICustomerWorkspaceSource>().GetDetailAsync(id);
-            if (pageLoaded && ticketId == model.TicketId && result.IsSuccess) model.RefreshCustomerProfile(result.Value);
+            if (!pageLoaded || ticketId != model.TicketId || !result.IsSuccess) return;
+            model.RefreshCustomerProfile(result.Value);
+            if (model.Order is null && model.Customer.CustomerId == id)
+            {
+                SetDeliveryAddressChoices((DeliveryAddressChoice.SelectedItem as DeliveryAddressOption)?.Id);
+            }
         }
         catch (Exception) { /* The saved ticket remains usable if balance lookup is unavailable. */ }
     }
@@ -618,12 +648,13 @@ public sealed partial class PosPage : Page
     private void CaptureForm()
     {
         model.TableId = (TableBox.SelectedItem as PosTableOption)?.Id;
+        var address = DeliveryAddressChoice.SelectedItem as DeliveryAddressOption;
         model.Customer = model.Customer with
         {
             RecipientName = RecipientBox.Text,
             ContactNumber = ContactBox.Text,
-            CustomerAddressId = SavedAddressCheck.IsChecked == true ? selectedSavedAddressId : null,
-            AddressLine = SavedAddressCheck.IsChecked == true ? selectedSavedAddressLine : AddressBox.Text
+            CustomerAddressId = address?.Id,
+            AddressLine = address?.Id is null ? AddressBox.Text : address.AddressLine
         };
     }
 
@@ -759,18 +790,11 @@ public sealed partial class PosPage : Page
     private void RestoreCustomer()
     {
         SetCustomerSearchHint(null);
-        selectedSavedAddressId = model.Customer.CustomerAddressId;
-        selectedSavedAddressLine = model.Customer.AddressLine;
         SetCustomerSummary(model.CustomerLabel, model.Customer.CustomerId is not null);
         RecipientBox.Text = model.Customer.RecipientName ?? "";
         ContactBox.Text = model.Customer.ContactNumber ?? "";
-        AddressBox.Text = selectedSavedAddressId is null ? model.Customer.AddressLine ?? "" : "";
-        SavedAddressCheck.IsChecked = model.Customer.CustomerAddressId is not null;
-        SavedAddressCheck.IsEnabled = model.Customer.CustomerAddressId is not null;
-        SavedAddressCheck.Visibility = selectedSavedAddressId is null ? Visibility.Collapsed : Visibility.Visible;
-        OnAddressModeChanged(this, new RoutedEventArgs());
-        SavedAddressText.Text = model.Customer.CustomerAddressId is null ? "No saved address attached. Enter an order-only address."
-            : $"Saved address: {model.Customer.AddressLine ?? "Resolved again when saved"}";
+        AddressBox.Text = model.Customer.CustomerAddressId is null ? model.Customer.AddressLine ?? "" : "";
+        SetDeliveryAddressChoices(model.Customer.CustomerAddressId);
     }
 
     private void SetCustomerSummary(string name, bool selected)

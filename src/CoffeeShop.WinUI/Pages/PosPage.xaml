@@ -424,7 +424,7 @@
                                                     <TextBox x:Name="RecipientBox" Header="Recipient (required)" AutomationProperties.Name="Delivery recipient" MaxLength="120" FontSize="13" MinHeight="40" />
                                                     <TextBox x:Name="ContactBox" Grid.Column="1" Header="Phone (required)" AutomationProperties.Name="Contact number" MaxLength="30" InputScope="TelephoneNumber" FontSize="13" MinHeight="40" />
                                                 </Grid>
-                                                <CheckBox x:Name="SavedAddressCheck" Content="Use saved address" MinHeight="36" Checked="OnAddressModeChanged" Unchecked="OnAddressModeChanged" />
+                                                <ComboBox x:Name="DeliveryAddressChoice" Header="Delivery address" DisplayMemberPath="DisplayName" SelectionChanged="OnDeliveryAddressChanged" HorizontalAlignment="Stretch" MinHeight="40" FontSize="13" Visibility="Collapsed" />
                                                 <TextBlock x:Name="SavedAddressText" Foreground="{StaticResource ConsoleMutedInkBrush}" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed" />
                                                 <TextBox x:Name="AddressBox" Header="Address (required)" AutomationProperties.Name="Order-only delivery address" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="72" FontSize="13" />
                                             </StackPanel>

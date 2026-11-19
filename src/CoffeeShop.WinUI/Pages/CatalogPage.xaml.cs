@@ -5,6 +5,7 @@ using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -437,6 +438,8 @@ public sealed partial class CatalogPage : Page
         var size = TextField("Initial size name", "Regular");
         var price = TextField("Initial size price");
         var fields = new Grid { ColumnSpacing = 16, RowSpacing = 13, MinWidth = 280 };
+        (StackPanel Fields, Func<IReadOnlyCollection<RecipeLineInput>?> Read)? recipe =
+            item is null ? RecipeEditor([], "Ingredients for the initial size (optional)") : null;
         fields.ColumnDefinitions.Add(new ColumnDefinition());
         fields.ColumnDefinitions.Add(new ColumnDefinition());
         fields.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -447,7 +450,7 @@ public sealed partial class CatalogPage : Page
         fields.Children.Add(category);
         Grid.SetRow(description, 1);
         Grid.SetColumnSpan(description, 2);
-        description.Height = 112;
+        description.Height = item is null ? 84 : 112;
         fields.Children.Add(description);
         if (item is null)
         {
@@ -456,6 +459,10 @@ public sealed partial class CatalogPage : Page
             Grid.SetColumn(price, 1);
             fields.Children.Add(size);
             fields.Children.Add(price);
+            fields.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            Grid.SetRow(recipe!.Value.Fields, 3);
+            Grid.SetColumnSpan(recipe.Value.Fields, 2);
+            fields.Children.Add(recipe.Value.Fields);
         }
 
         return ShowEditorAsync(item is null ? "New drink" : $"Edit {item.Name}", fields, async () =>
@@ -466,11 +473,18 @@ public sealed partial class CatalogPage : Page
                 return false;
             }
 
-            return await model.SaveAsync(async (commands, _) => item is null
-                ? await commands.CreateMenuItemAsync(new CreateMenuItemCommand(selected.Id, name.Text, description.Text,
-                    [new CreateSizeVariantInput(size.Text, CatalogNumberInput.Price(price.Text))]))
-                : await commands.UpdateMenuItemAsync(new UpdateMenuItemCommand(item.Id, selected.Id, name.Text, description.Text)),
-                "Drink saved. Select it to manage sizes, compatibility, and recipes.");
+            if (item is not null)
+            {
+                return await model.SaveAsync((commands, _) =>
+                    commands.UpdateMenuItemAsync(new UpdateMenuItemCommand(item.Id, selected.Id, name.Text, description.Text)), "Drink saved.");
+            }
+
+            var ingredients = recipe!.Value.Read();
+            if (ingredients is null) return false;
+            return await model.SaveAsync((commands, _) =>
+                commands.CreateMenuItemAsync(new CreateMenuItemCommand(selected.Id, name.Text, description.Text,
+                    [new CreateSizeVariantInput(size.Text, CatalogNumberInput.Price(price.Text), ingredients)])),
+                ingredients.Count == 0 ? "Drink saved." : "Drink and initial size recipe saved.");
         }, "Save drink", wide: true);
     }
 
@@ -560,67 +574,110 @@ public sealed partial class CatalogPage : Page
     private async void OnRecipe(object sender, RoutedEventArgs args)
     {
         var variant = (SizeVariantDetail)((FrameworkElement)sender).Tag;
-        var fields = Form(new TextBlock { Text = "Quantities are per one drink of this size. Use compatible units (g/kg, ml/l, pcs). Changes replace this size's recipe atomically.", TextWrapping = TextWrapping.Wrap });
+        var (fields, read) = RecipeEditor(variant.Recipe, "Ingredients");
+        await ShowEditorAsync($"{model.SelectedItem!.Name} / {variant.SizeName} recipe", fields, async () =>
+        {
+            var inputs = read();
+            if (inputs is null) return false;
+            return await model.SaveAsync((commands, _) => commands.ReplaceRecipeAsync(new ReplaceRecipeCommand(variant.Id, inputs)), "Recipe saved.");
+        }, wide: true);
+    }
+
+    private (StackPanel Fields, Func<IReadOnlyCollection<RecipeLineInput>?> Read) RecipeEditor(
+        IReadOnlyList<RecipeLineDetail> existingLines, string heading)
+    {
+        var fields = new StackPanel { Spacing = 8, Margin = new Thickness(0, 5, 0, 0) };
+        fields.Children.Add(new TextBlock
+        {
+            Text = heading, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            TextWrapping = TextWrapping.Wrap
+        });
+        fields.Children.Add(new TextBlock
+        {
+            Text = model.Ingredients.Count == 0 ? "Add ingredients in Stock room to use them in recipes."
+                : "Enter the amount used for one serving. Stock is deducted when the order is confirmed.",
+            TextWrapping = TextWrapping.Wrap
+        });
+        var rows = new StackPanel { Spacing = 10 };
+        fields.Children.Add(rows);
         var lines = new List<(ComboBox Ingredient, TextBox Quantity, TextBox Unit)>();
 
-        void AddLine(RecipeLineDetail? existing = null)
+        Grid AddLine(RecipeLineDetail? existing = null)
         {
             var options = model.Ingredients.ToList();
             if (existing is not null && options.All(option => option.Id != existing.IngredientId))
             {
-                options.Add(new RecipeIngredientOption(existing.IngredientId, $"{existing.IngredientName} (unavailable - replace)", existing.Unit));
+                options.Add(new RecipeIngredientOption(existing.IngredientId, $"{existing.IngredientName} (unavailable)", existing.Unit));
             }
 
-            var ingredient = new ComboBox { Header = "Ingredient", DisplayMemberPath = "Name", ItemsSource = options, MinHeight = 48 };
+            var ingredient = new ComboBox
+            {
+                Header = "Ingredient", PlaceholderText = "Choose an ingredient", DisplayMemberPath = nameof(RecipeIngredientOption.Name),
+                ItemsSource = options, MinHeight = 48, HorizontalAlignment = HorizontalAlignment.Stretch
+            };
             ingredient.SelectedItem = options.FirstOrDefault(option => option.Id == existing?.IngredientId);
             var quantity = TextField("Quantity", existing?.Quantity.ToString("0.###"));
             var unit = TextField("Unit", existing?.Unit);
             ingredient.SelectionChanged += (_, _) =>
             {
-                if (ingredient.SelectedItem is RecipeIngredientOption option)
-                {
-                    unit.Text = option.BaseUnit;
-                }
+                if (ingredient.SelectedItem is RecipeIngredientOption option) unit.Text = option.BaseUnit;
             };
-            var remove = new Button { Content = "Remove this ingredient", MinHeight = 48 };
-            var row = Form(ingredient, quantity, unit, remove);
-            row.Margin = new Thickness(0, 8, 0, 8);
+            var remove = new Button
+            {
+                Content = "×", MinWidth = 44, MinHeight = 48, VerticalAlignment = VerticalAlignment.Bottom,
+                Style = (Style)Resources["MenuButton"]
+            };
+            AutomationProperties.SetName(remove, "Remove ingredient line");
+            var row = new Grid { ColumnSpacing = 8 };
+            row.ColumnDefinitions.Add(new ColumnDefinition());
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(82) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(60) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            Grid.SetColumn(quantity, 1);
+            Grid.SetColumn(unit, 2);
+            Grid.SetColumn(remove, 3);
+            row.Children.Add(ingredient);
+            row.Children.Add(quantity);
+            row.Children.Add(unit);
+            row.Children.Add(remove);
+
             var entry = (ingredient, quantity, unit);
             lines.Add(entry);
-            remove.Click += (_, _) => { lines.Remove(entry); fields.Children.Remove(row); };
-            fields.Children.Add(row);
+            remove.Click += (_, _) => { lines.Remove(entry); rows.Children.Remove(row); };
+            rows.Children.Add(row);
+            return row;
         }
 
-        foreach (var line in variant.Recipe)
+        foreach (var line in existingLines) AddLine(line);
+
+        var add = new Button
         {
-            AddLine(line);
-        }
-
-        if (model.Ingredients.Count == 0)
-        {
-            fields.Children.Add(new TextBlock { Text = "No active ingredients. Add or activate ingredients in Inventory, then reload this catalog.", TextWrapping = TextWrapping.Wrap });
-        }
-
-        var add = new Button { Content = "Add ingredient line", MinHeight = 48 };
-        add.Click += (_, _) => AddLine();
+            Content = "Add ingredient", MinHeight = 44, IsEnabled = model.Ingredients.Count > 0,
+            Style = (Style)Resources["MenuButton"]
+        };
+        add.Click += (_, _) => AddLine().StartBringIntoView();
         fields.Children.Add(add);
-        await ShowEditorAsync($"{model.SelectedItem!.Name} / {variant.SizeName} recipe", fields, async () =>
+
+        IReadOnlyCollection<RecipeLineInput>? Read()
         {
             var inputs = new List<RecipeLineInput>();
             for (var index = 0; index < lines.Count; index++)
             {
                 var line = lines[index];
-                if (line.Ingredient.SelectedItem is not RecipeIngredientOption option || !CatalogNumberInput.TryParse(line.Quantity.Text, out var quantity))
+                if (line.Ingredient.SelectedItem is not RecipeIngredientOption option
+                    || !CatalogNumberInput.TryParse(line.Quantity.Text, out var quantity) || quantity <= 0
+                    || string.IsNullOrWhiteSpace(line.Unit.Text))
                 {
-                    model.ShowValidation($"Line {index + 1}: select an ingredient and enter a decimal quantity.");
-                    return false;
+                    model.ShowValidation($"Ingredient line {index + 1} needs an ingredient, a positive quantity, and a unit.");
+                    return null;
                 }
 
                 inputs.Add(new RecipeLineInput(option.Id, quantity, line.Unit.Text));
             }
+            return inputs;
+        }
 
-            return await model.SaveAsync((commands, _) => commands.ReplaceRecipeAsync(new ReplaceRecipeCommand(variant.Id, inputs)), "Recipe saved.");
-        });
+        return (fields, Read);
     }
 
     private Task ConfirmAsync(string title, string explanation, Func<ICatalogWorkspaceSource, ICatalogWorkspaceSource, Task<Result>> action) =>
@@ -667,6 +724,7 @@ public sealed partial class CatalogPage : Page
                 {
                     error.Message = model.Message;
                     error.IsOpen = true;
+                    error.StartBringIntoView();
                 }
             }
             finally

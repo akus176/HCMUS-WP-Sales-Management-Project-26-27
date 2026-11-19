@@ -74,7 +74,7 @@ public class PostgresAdapterTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => cancellation.LoadOrderForCancellationAsync(EntityId.New()));
         await Assert.ThrowsAsync<InvalidOperationException>(() => cancellation.LoadTableForCancellationAsync(EntityId.New()));
         await Assert.ThrowsAsync<InvalidOperationException>(() => inventory.LockOrderForRestorationAsync(EntityId.New()));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => inventory.LoadIngredientsForRestorationAsync([]));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => inventory.LoadIngredientsForStockUpdateAsync([]));
         await Assert.ThrowsAsync<InvalidOperationException>(() => delivery.LoadOrderForUpdateAsync(EntityId.New()));
         Assert.Empty(context.ChangeTracker.Entries());
     }

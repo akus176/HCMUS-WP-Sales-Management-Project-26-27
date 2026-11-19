@@ -4,10 +4,14 @@ using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Automation.Peers;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
 using Windows.Foundation;
+using Windows.System;
 
 namespace CoffeeShop.WinUI.Pages;
 
@@ -105,6 +109,7 @@ public sealed partial class ReportsPage : Page
     private readonly ReportsWorkspace model;
     private readonly ApiAssistantSource? assistant;
     private bool showRefreshFeedback;
+    private bool askingAssistant;
     public sealed record SellerChartRow(BestSellerViewRow Row, long Maximum)
     {
         public string Rank => Row.Rank.ToString("00");
@@ -128,7 +133,7 @@ public sealed partial class ReportsPage : Page
                 (session.Roles.Contains("Manager") || session.Roles.Contains("Admin")))
             {
                 assistant = App.Services.GetRequiredService<ApiAssistantSource>();
-                AssistantPanel.Visibility = Visibility.Visible;
+                AssistantLauncherButton.Visibility = Visibility.Visible;
             }
         }
         model.PropertyChanged += (_, _) => Render();
@@ -180,7 +185,9 @@ public sealed partial class ReportsPage : Page
         Status.Apply(model.Feedback);
         if (!showRefreshFeedback && !model.Feedback.IsError) Status.IsOpen = false;
         PeriodLabel.Text = ReportPresentation.PeriodLabel(model.FirstDate, model.LastDate);
-        AssistantPeriod.Text = $"Report period: {ReportPresentation.PeriodLabel(model.FirstDate, model.LastDate)} · {TimeZoneInfo.Local.Id}. Low stock uses current balances.";
+        AssistantPeriod.Text = model.FirstDate == default ? "Choose report dates" : $"{model.FirstDate:dd MMM yyyy} – {model.LastDate:dd MMM yyyy}";
+        AssistantDatesButton.IsEnabled = !model.IsBusy;
+        UpdateAssistantAction();
         PeriodButton.Content = $"{model.FirstDate:dd MMM} – {model.LastDate:dd MMM}";
         ToolTipService.SetToolTip(PeriodButton, $"{ReportPresentation.PeriodLabel(model.FirstDate, model.LastDate)} · {TimeZoneInfo.Local.DisplayName}");
         var revenue = model.Revenue.Value;
@@ -351,66 +358,228 @@ public sealed partial class ReportsPage : Page
     private static Brush PaymentBrush(string method) => ResourceBrush(method switch { "cash" => "ConsoleAccentBrush", "card" => "ConsoleFieldBrush", _ => "ConsoleMutedInkBrush" });
     private static string? SelectedTag(ComboBox comboBox) => (comboBox.SelectedItem as ComboBoxItem)?.Tag as string;
     private void OnOpenStockRoom(object sender, RoutedEventArgs args) => (((App)Microsoft.UI.Xaml.Application.Current).Window as MainWindow)?.NavigateTo("lowstock");
-    private async void OnAskAssistant(object sender, RoutedEventArgs args)
+
+    private void OnShowAssistant(object sender, RoutedEventArgs args) => SetAssistantVisibility(true);
+    private void OnHideAssistant(object sender, RoutedEventArgs args) => SetAssistantVisibility(false);
+
+    private void OnAssistantPanelKeyDown(object sender, KeyRoutedEventArgs args)
+    {
+        if (args.Key != VirtualKey.Escape) return;
+        args.Handled = true;
+        SetAssistantVisibility(false);
+    }
+
+    private void SetAssistantVisibility(bool open, bool restoreFocus = true)
     {
         if (assistant is null) return;
-        var question = AssistantQuestionBox.Text?.Trim();
-        if (string.IsNullOrWhiteSpace(question))
+        AssistantPanel.Visibility = open ? Visibility.Visible : Visibility.Collapsed;
+        AssistantLauncherButton.Visibility = open ? Visibility.Collapsed : Visibility.Visible;
+        if (open)
         {
-            AssistantFeedback.Severity = InfoBarSeverity.Error;
-            AssistantFeedback.Message = "Enter a reporting question.";
-            AssistantFeedback.IsOpen = true;
-            return;
+            AssistantQuestionBox.Focus(FocusState.Programmatic);
+            if (AssistantMessages.Children.Count > 0) ScrollToLatestAssistantMessage();
         }
-        AssistantAskButton.IsEnabled = false;
-        AssistantFeedback.IsOpen = false;
-        AssistantAnswer.Text = "";
-        AssistantContext.Text = "";
+        else if (restoreFocus) AssistantLauncherButton.Focus(FocusState.Programmatic);
+    }
+
+    private void OnReportsGettingFocus(UIElement sender, GettingFocusEventArgs args)
+    {
+        if (AssistantPanel?.Visibility == Visibility.Visible && args.InputDevice == FocusInputDeviceKind.Keyboard)
+            SetAssistantVisibility(false, restoreFocus: false);
+    }
+
+    private void OnAssistantOverlaySizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        // Size the overlay to the viewport. Its canvas contributes no desired size to the dashboard.
+        var size = args.NewSize;
+        AssistantOverlay.Width = size.Width;
+        AssistantOverlay.Height = size.Height;
+        AssistantLauncherButton.Width = Math.Min(276, size.Width);
+        AssistantPanel.Width = Math.Min(420, size.Width);
+        AssistantPanel.Height = Math.Min(560, size.Height);
+    }
+
+    private void OnAssistantDates(object sender, RoutedEventArgs args)
+    {
+        if (!model.IsBusy && sender is Button button) PeriodFlyout.ShowAt(button);
+    }
+
+    private void OnAssistantPrompt(object sender, RoutedEventArgs args)
+    {
+        if (sender is not Button { Content: TextBlock { Text: string question } } button) return;
+        var focus = button.FocusState == FocusState.Keyboard ? FocusState.Keyboard : FocusState.Programmatic;
+        AssistantQuestionBox.Text = question;
+        AssistantQuestionBox.Focus(focus);
+        AssistantQuestionBox.SelectionStart = question.Length;
+    }
+
+    private void OnAssistantQuestionChanged(object sender, TextChangedEventArgs args) => UpdateAssistantAction();
+
+    private async void OnAssistantQuestionKeyDown(object sender, KeyRoutedEventArgs args)
+    {
+        if (args.Key == VirtualKey.Enter && AssistantAskButton.IsEnabled)
+        {
+            args.Handled = true;
+            await AskAssistantAsync();
+        }
+    }
+
+    private async void OnAskAssistant(object sender, RoutedEventArgs args) => await AskAssistantAsync();
+
+    private void UpdateAssistantAction()
+    {
+        if (AssistantAskButton is null || model is null) return;
+        AssistantAskButton.IsEnabled = assistant is not null && !askingAssistant && !model.IsBusy &&
+            model.FirstDate != default && !string.IsNullOrWhiteSpace(AssistantQuestionBox.Text);
+    }
+
+    private async Task AskAssistantAsync()
+    {
+        if (assistant is null || !AssistantAskButton.IsEnabled) return;
+        var question = AssistantQuestionBox.Text.Trim();
+        var request = new AssistantAskRequest(question, model.FirstDate, model.LastDate, TimeZoneInfo.Local.Id);
+        askingAssistant = true;
+        AssistantExamples.IsExpanded = false;
+        AddAssistantMessage(question, fromUser: true);
+        AssistantQuestionBox.Text = "";
+        AssistantQuestionBox.Focus(FocusState.Programmatic);
+        AssistantProgress.Visibility = Visibility.Visible;
+        AssistantSpinner.IsActive = true;
+        ScrollToLatestAssistantMessage();
         try
         {
-            var response = await assistant.AskAsync(new AssistantAskRequest(question,
-                model.FirstDate, model.LastDate, TimeZoneInfo.Local.Id));
-            AssistantAnswer.Text = response.Answer;
-            AssistantContext.Text = response.ToolsInvoked.Count == 0
-                ? "No report tool was called."
-                : string.Join("\n\n", response.ToolsInvoked.Select(tool =>
-                    $"Tool: {tool.Tool} · Outcome: {tool.Outcome}\n" +
-                    JsonSerializer.Serialize(tool.Metrics, new JsonSerializerOptions { WriteIndented = true })));
+            var response = await assistant.AskAsync(request);
+            var sources = response.ToolsInvoked.Select(tool => AssistantSourceName(tool.Tool)).Distinct();
+            var source = response.ToolsInvoked.Count > 0 ? $"Reports used · {string.Join(", ", sources)}" : null;
+            var datedReports = response.ToolsInvoked.Where(tool => tool.Tool != AssistantTools.LowStock).ToArray();
+            var followUp = datedReports.Length > 0 && datedReports.All(IsEmptyPeriodReport)
+                ? "Use Change dates to try a wider or earlier period."
+                : null;
+            AddAssistantMessage(response.Answer, source: source, followUp: followUp);
         }
         catch (ApiException exception)
         {
-            AssistantFeedback.Severity = InfoBarSeverity.Error;
-            AssistantFeedback.Message = exception.Message;
-            AssistantFeedback.IsOpen = true;
+            ShowAssistantError(question, exception.Kind switch
+            {
+                ApiErrorKind.Network => "Check your connection and try again.",
+                ApiErrorKind.Unauthorized => "Your session has expired. Sign in again and retry.",
+                ApiErrorKind.Forbidden => "Your account does not have access to the reporting assistant.",
+                ApiErrorKind.Validation => "Check your question and report dates, then try again.",
+                _ => "The reporting assistant is temporarily unavailable. Try again in a moment.",
+            });
         }
-        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+        catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or JsonException)
         {
-            AssistantFeedback.Severity = InfoBarSeverity.Error;
-            AssistantFeedback.Message = "The assistant is unavailable. Check the API connection and try again.";
-            AssistantFeedback.IsOpen = true;
+            ShowAssistantError(question, "The reporting assistant couldn't finish the request. Try again in a moment.");
         }
-        finally { AssistantAskButton.IsEnabled = true; }
+        finally
+        {
+            AssistantProgress.Visibility = Visibility.Collapsed;
+            AssistantSpinner.IsActive = false;
+            askingAssistant = false;
+            UpdateAssistantAction();
+            ScrollToLatestAssistantMessage();
+        }
     }
-    private void OnPageSizeChanged(object sender, SizeChangedEventArgs args)
+
+    private void ShowAssistantError(string question, string message)
+    {
+        AddAssistantMessage(message, isError: true);
+        if (string.IsNullOrWhiteSpace(AssistantQuestionBox.Text)) AssistantQuestionBox.Text = question;
+    }
+
+    private void AddAssistantMessage(string message, bool fromUser = false, string? source = null,
+        string? followUp = null, bool isError = false)
+    {
+        var ink = ResourceBrush(fromUser ? "ConsoleOnFieldBrush" : "ConsoleInkBrush");
+        var bubble = new StackPanel { Spacing = 5 };
+        var senderLabel = fromUser ? "You" : isError ? "Couldn't get an answer" : "Assistant";
+        bubble.Children.Add(new TextBlock
+        {
+            Text = senderLabel,
+            FontSize = 12,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Foreground = ResourceBrush(fromUser ? "ConsoleOnFieldMutedBrush" : "ConsoleMutedInkBrush"),
+        });
+        var body = new TextBlock { FontSize = 14, Foreground = ink, TextWrapping = TextWrapping.Wrap, IsTextSelectionEnabled = true };
+        if (!fromUser) AutomationProperties.SetLiveSetting(body, AutomationLiveSetting.Polite);
+        bubble.Children.Add(body);
+        if (followUp is not null) bubble.Children.Add(AssistantMessageDetail(followUp));
+        if (source is not null) bubble.Children.Add(AssistantMessageDetail(source));
+
+        AssistantMessages.Children.Add(new Border
+        {
+            Padding = new Thickness(12, 9, 12, 10),
+            Margin = fromUser ? new Thickness(36, 0, 0, 0) : new Thickness(0, 0, 24, 0),
+            CornerRadius = new CornerRadius(6),
+            HorizontalAlignment = fromUser ? HorizontalAlignment.Right : HorizontalAlignment.Left,
+            Background = ResourceBrush(fromUser ? "ConsoleFieldBrush" : "ConsoleRaisedGroundBrush"),
+            Child = bubble,
+        });
+        body.Text = message;
+    }
+
+    private static TextBlock AssistantMessageDetail(string text) => new()
+    {
+        Text = text,
+        FontSize = 12,
+        Foreground = ResourceBrush("ConsoleMutedInkBrush"),
+        TextWrapping = TextWrapping.Wrap,
+    };
+
+    private void ScrollToLatestAssistantMessage()
+    {
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+        {
+            if (XamlRoot is null || AssistantPanel.Visibility != Visibility.Visible) return;
+            AssistantTranscriptScroll.UpdateLayout();
+            AssistantTranscriptScroll.ChangeView(null, AssistantTranscriptScroll.ScrollableHeight, null, true);
+        });
+    }
+
+    private static string AssistantSourceName(string tool) => tool switch
+    {
+        AssistantTools.Revenue => "Revenue report",
+        AssistantTools.BestSellers => "Best sellers report",
+        AssistantTools.Channels => "Order channels report",
+        AssistantTools.LowStock => "Current low-stock report",
+        _ => "Reports",
+    };
+
+    private static bool IsEmptyPeriodReport(AssistantToolResult result)
+    {
+        if (result.Metrics is not JsonElement { ValueKind: JsonValueKind.Object } metrics) return false;
+        return result.Tool switch
+        {
+            AssistantTools.BestSellers => metrics.TryGetProperty("items", out var items) &&
+                items.ValueKind == JsonValueKind.Array && items.GetArrayLength() == 0,
+            AssistantTools.Revenue or AssistantTools.Channels => metrics.TryGetProperty("orderCount", out var count) &&
+                count.ValueKind == JsonValueKind.Number && count.TryGetInt32(out var orders) && orders == 0,
+            _ => false,
+        };
+    }
+
+    private void OnReportsHeaderSizeChanged(object sender, SizeChangedEventArgs args)
     {
         if (RightColumn is null) return;
-        var wide = ActualWidth >= 900;
+        var reportWidth = args.NewSize.Width + 48;
+        var wide = reportWidth >= 900;
         RightColumn.Width = wide ? new GridLength(.85, GridUnitType.Star) : new GridLength(0);
         Grid.SetColumn(BestPanel, wide ? 1 : 0);
         Grid.SetRow(BestPanel, wide ? 0 : 1);
         Grid.SetRow(ChannelPanel, wide ? 1 : 2);
         Grid.SetColumn(StockPanel, wide ? 1 : 0);
         Grid.SetRow(StockPanel, wide ? 1 : 3);
-        var fourKpis = ActualWidth >= 800;
+        var fourKpis = reportWidth >= 800;
         Kpis.ColumnDefinitions[2].Width = Kpis.ColumnDefinitions[3].Width = fourKpis ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
         Grid.SetColumn(AverageKpi, fourKpis ? 2 : 0);
         Grid.SetColumn(StockKpi, fourKpis ? 3 : 1);
         Grid.SetRow(AverageKpi, fourKpis ? 0 : 1);
         Grid.SetRow(StockKpi, fourKpis ? 0 : 1);
         Dashboard.ColumnSpacing = wide ? 24 : 0;
-        var headerInline = ActualWidth >= 720;
-        HeaderOrnament.Visibility = ActualWidth >= 1000 ? Visibility.Visible : Visibility.Collapsed;
-        Header.ColumnDefinitions[1].Width = new GridLength(ActualWidth >= 1000 ? 116 : 0);
+        var headerInline = reportWidth >= 720;
+        HeaderOrnament.Visibility = reportWidth >= 1000 ? Visibility.Visible : Visibility.Collapsed;
+        Header.ColumnDefinitions[1].Width = new GridLength(reportWidth >= 1000 ? 116 : 0);
         Header.ColumnDefinitions[2].Width = headerInline ? GridLength.Auto : new GridLength(0);
         Header.ColumnSpacing = headerInline ? 18 : 0;
         Grid.SetColumn(HeaderActions, headerInline ? 2 : 0);

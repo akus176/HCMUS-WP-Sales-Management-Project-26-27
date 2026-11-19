@@ -1,4 +1,4 @@
-<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:controls="using:CoffeeShop.WinUI.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="CoffeeShop.WinUI.Pages.ReportsPage" FontFamily="{StaticResource ConsoleSansFont}" Foreground="{StaticResource ConsoleInkBrush}" Background="{StaticResource ConsoleGroundBrush}" RequestedTheme="Light" SizeChanged="OnPageSizeChanged">
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:controls="using:CoffeeShop.WinUI.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="CoffeeShop.WinUI.Pages.ReportsPage" FontFamily="{StaticResource ConsoleSansFont}" Foreground="{StaticResource ConsoleInkBrush}" Background="{StaticResource ConsoleGroundBrush}" RequestedTheme="Light">
     <Page.Resources>
         <Style x:Key="ReportText" TargetType="TextBlock" BasedOn="{StaticResource ConsoleBodyStyle}">
             <Setter Property="FontSize" Value="14" />
@@ -32,6 +32,18 @@
         <Style x:Key="ReportPanel" TargetType="Border" BasedOn="{StaticResource WorkspacePanel}">
             <Setter Property="Padding" Value="0,12,0,16" />
         </Style>
+        <Style x:Key="AssistantPromptButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource ConsoleGroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ConsolePanelLineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{StaticResource ConsoleInkBrush}" />
+            <Setter Property="FontFamily" Value="{StaticResource ConsoleSansFont}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="10,8" />
+        </Style>
         <Style x:Key="ReportListItem" TargetType="ListViewItem" BasedOn="{StaticResource WorkspaceListItem}">
             <Setter Property="Padding" Value="0" />
             <Setter Property="MinHeight" Value="44" />
@@ -57,7 +69,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid x:Name="Header" Padding="0,0,0,16" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1" ColumnSpacing="18" RowSpacing="10">
+        <Grid x:Name="Header" SizeChanged="OnReportsHeaderSizeChanged" GettingFocus="OnReportsGettingFocus" Padding="0,0,0,16" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1" ColumnSpacing="18" RowSpacing="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="116" />
@@ -95,7 +107,7 @@
             <ProgressBar x:Name="LoadingIndicator" IsIndeterminate="True" Visibility="Collapsed" AutomationProperties.Name="Loading reports" />
             <InfoBar x:Name="Status" IsOpen="False" IsClosable="True" />
         </StackPanel>
-        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" x:Name="ReportScroll">
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" x:Name="ReportScroll" GettingFocus="OnReportsGettingFocus">
             <StackPanel Spacing="16" Margin="0,0,24,0">
                 <Grid x:Name="Kpis" ColumnSpacing="1" RowSpacing="1" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,1">
                     <Grid.ColumnDefinitions>
@@ -137,20 +149,6 @@
                         </StackPanel>
                     </Border>
                 </Grid>
-                <Border x:Name="AssistantPanel" Style="{StaticResource ReportPanel}" Padding="18,16" Visibility="Collapsed" AutomationProperties.Name="Manager reporting assistant">
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="ASK THE REPORTS" Style="{StaticResource ReportHeading}" />
-                        <TextBlock Text="Ask about revenue, best sellers, order channels, or current low stock. Reports are read only." FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" TextWrapping="Wrap" />
-                        <TextBlock x:Name="AssistantPeriod" FontSize="12" FontWeight="SemiBold" />
-                        <TextBox x:Name="AssistantQuestionBox" PlaceholderText="Which products sold best in this period?" MaxLength="2000" MinHeight="48" AutomationProperties.Name="Question for manager assistant" />
-                        <Button x:Name="AssistantAskButton" Content="Ask assistant" Click="OnAskAssistant" Style="{StaticResource ReportPrimary}" HorizontalAlignment="Left" />
-                        <InfoBar x:Name="AssistantFeedback" IsOpen="False" IsClosable="False" />
-                        <TextBlock x:Name="AssistantAnswer" TextWrapping="Wrap" FontSize="15" LineHeight="23" AutomationProperties.Name="Assistant answer" />
-                        <Expander Header="Report tool context" IsExpanded="True">
-                            <TextBlock x:Name="AssistantContext" TextWrapping="Wrap" FontSize="12" FontFamily="Consolas" AutomationProperties.Name="Report tool result context" />
-                        </Expander>
-                    </StackPanel>
-                </Border>
                 <Grid x:Name="Dashboard" ColumnSpacing="24" RowSpacing="12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition x:Name="LeftColumn" Width="1.15*" />
@@ -358,5 +356,87 @@
                 </Grid>
             </StackPanel>
         </ScrollViewer>
+        <Canvas Grid.RowSpan="3" Canvas.ZIndex="1" SizeChanged="OnAssistantOverlaySizeChanged">
+            <Grid x:Name="AssistantOverlay">
+                <Button x:Name="AssistantLauncherButton" Style="{StaticResource AssistantPromptButton}" Width="276" Height="48" HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom" Click="OnShowAssistant" Visibility="Collapsed" AutomationProperties.Name="Open reporting assistant chat">
+                    <Grid ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <SymbolIcon Symbol="Message" AutomationProperties.AccessibilityView="Raw" />
+                        <TextBlock Grid.Column="1" Text="Ask assistant" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <FontIcon Grid.Column="2" Glyph="&#xE70E;" FontSize="12" AutomationProperties.AccessibilityView="Raw" />
+                    </Grid>
+                </Button>
+                <Border x:Name="AssistantPanel" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Collapsed" KeyDown="OnAssistantPanelKeyDown"
+                        Background="{StaticResource ConsoleGroundBrush}" BorderBrush="{StaticResource ConsolePanelLineBrush}" BorderThickness="1" CornerRadius="6"
+                        AutomationProperties.Name="Reporting assistant chat">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Background="{StaticResource ConsoleRaisedGroundBrush}" Padding="14,4" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Reporting assistant" Style="{StaticResource ReportHeading}" FontSize="22" VerticalAlignment="Center" AutomationProperties.HeadingLevel="Level2" />
+                                <Button Grid.Column="1" Click="OnHideAssistant" Style="{StaticResource ReportLink}" ToolTipService.ToolTip="Minimize chat (Esc)" AutomationProperties.Name="Minimize assistant chat">
+                                    <FontIcon Glyph="&#xE921;" FontSize="14" AutomationProperties.AccessibilityView="Raw" />
+                                </Button>
+                            </Grid>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="AssistantPeriod" Text="Loading report dates…" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" VerticalAlignment="Center" />
+                                <Button x:Name="AssistantDatesButton" Grid.Column="1" Content="Change dates" Click="OnAssistantDates" Style="{StaticResource ReportLink}" />
+                            </Grid>
+                        </StackPanel>
+                        <ScrollViewer x:Name="AssistantTranscriptScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollMode="Disabled" AutomationProperties.Name="Conversation">
+                            <StackPanel Padding="16" Spacing="12">
+                                <Expander x:Name="AssistantExamples" Header="Suggested questions" IsExpanded="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                                    <StackPanel Spacing="6">
+                                        <Button Style="{StaticResource AssistantPromptButton}" Click="OnAssistantPrompt">
+                                            <TextBlock Text="How did revenue, order count, and average order value change compared with the previous period?" TextWrapping="Wrap" />
+                                        </Button>
+                                        <Button Style="{StaticResource AssistantPromptButton}" Click="OnAssistantPrompt">
+                                            <TextBlock Text="Which channel brought in the most revenue, and which three products generated the most revenue overall?" TextWrapping="Wrap" />
+                                        </Button>
+                                        <Button Style="{StaticResource AssistantPromptButton}" Click="OnAssistantPrompt">
+                                            <TextBlock Text="Which day had the highest revenue, and how was revenue split across payment methods?" TextWrapping="Wrap" />
+                                        </Button>
+                                        <Button Style="{StaticResource AssistantPromptButton}" Click="OnAssistantPrompt">
+                                            <TextBlock Text="Give me a four-week plan to grow the café using our sales and stock reports." TextWrapping="Wrap" />
+                                        </Button>
+                                    </StackPanel>
+                                </Expander>
+                                <StackPanel x:Name="AssistantMessages" Spacing="12" />
+                                <StackPanel x:Name="AssistantProgress" Orientation="Horizontal" Spacing="8" Visibility="Collapsed">
+                                    <ProgressRing x:Name="AssistantSpinner" Width="16" Height="16" IsActive="False" AutomationProperties.AccessibilityView="Raw" />
+                                    <TextBlock Text="Looking up reports…" FontSize="13" Foreground="{StaticResource ConsoleMutedInkBrush}" AutomationProperties.LiveSetting="Polite" />
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                        <Grid Grid.Row="2" Background="{StaticResource ConsoleRaisedGroundBrush}" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" Padding="12" ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="AssistantQuestionBox" PlaceholderText="Ask a reporting question" MaxLength="2000" MinWidth="0" MinHeight="44" FontFamily="{StaticResource ConsoleSansFont}" FontSize="14"
+                                     TextChanged="OnAssistantQuestionChanged" KeyDown="OnAssistantQuestionKeyDown" AutomationProperties.Name="Your message" />
+                            <Button x:Name="AssistantAskButton" Grid.Column="1" Content="Send" Click="OnAskAssistant" Style="{StaticResource ReportPrimary}" MinHeight="44" VerticalAlignment="Stretch" IsEnabled="False" AutomationProperties.Name="Send message" />
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Canvas>
     </Grid>
 </Page>
