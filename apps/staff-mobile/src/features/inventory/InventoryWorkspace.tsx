@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { randomUUID } from 'expo-crypto';
 
@@ -17,6 +17,8 @@ import {
   ShellFeedback,
   ShellHeading,
   ShellText,
+  ShellInput,
+  ShellSelection,
 } from '../../shell/controls';
 import { mobileTokens } from '../../shell/designTokens';
 
@@ -327,8 +329,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
   return (
     <>
       <ShellHeading>Inventory</ShellHeading>
-      <ShellText>Balances and changes from the shared shop API.</ShellText>
-      <View style={styles.tabs}>
+      <ShellSelection>
         {sections
           .filter(({ id }) => availableSections.includes(id))
           .map(({ id, title }) => (
@@ -340,10 +341,11 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
               onPress={() => setSection(id)}
             />
           ))}
-      </View>
+      </ShellSelection>
       {selectedSection === 'balances' || selectedSection === 'low-stock' ? (
         <>
-          <TextInput
+          <ShellInput
+            label="Search ingredients"
             accessibilityLabel="Search ingredients"
             placeholder="Search ingredients"
             placeholderTextColor={mobileTokens.color.disabledText}
@@ -420,7 +422,8 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                       <ShellText>
                         Stock adjustment for {ingredient.name}
                       </ShellText>
-                      <TextInput
+                      <ShellInput
+                        label="Quantity change"
                         accessibilityLabel="Quantity change"
                         keyboardType="decimal-pad"
                         placeholder="Quantity change"
@@ -429,7 +432,8 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                         onChangeText={setQuantityDelta}
                         style={styles.search}
                       />
-                      <TextInput
+                      <ShellInput
+                        label="Adjustment reason (required)"
                         accessibilityLabel="Adjustment reason"
                         placeholder="Reason for adjustment"
                         placeholderTextColor={mobileTokens.color.disabledText}
@@ -499,7 +503,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                 />
               ) : receiptDetailQuery.data ? (
                 <View style={styles.card}>
-                  <ShellHeading>
+                  <ShellHeading level="section">
                     Receipt {receiptDetailQuery.data.receiptNumber}
                   </ShellHeading>
                   <ShellText>
@@ -653,7 +657,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
       )}
       {movementIngredient && selectedSection !== 'receipts' && (
         <View style={styles.card}>
-          <ShellHeading>
+          <ShellHeading level="section">
             Movement history · {movementIngredient.name}
           </ShellHeading>
           {movementQuery.isPending ? (

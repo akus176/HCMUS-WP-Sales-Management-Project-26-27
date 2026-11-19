@@ -170,10 +170,17 @@ test('searches server orders by number/table, filters fulfillment and opens occu
   await view.findByText('Table T-182 · 2 seats · Occupied');
   await fireEvent.changeText(view.getByLabelText('Search orders'), 't-182');
   expect(view.getByRole('button', { name: 'Open order ORD-182' })).toBeTruthy();
+  expect(view.queryByRole('button', { name: 'Show ready orders' })).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Filter orders: All', expanded: false }),
+  );
   await fireEvent.press(
     view.getByRole('button', { name: 'Show ready orders' }),
   );
   await view.findByText('No orders match this search.');
+  expect(
+    view.getByRole('button', { name: 'Filter orders: Ready', expanded: false }),
+  ).toBeVisible();
   await fireEvent.press(
     view.getByRole('button', { name: 'Open table T-182 order' }),
   );

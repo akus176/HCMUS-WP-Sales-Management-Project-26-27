@@ -9,6 +9,7 @@ import {
   ShellFeedback,
   ShellHeading,
   ShellText,
+  ShellSelection,
 } from '../../shell/controls';
 
 const pageSize = 10;
@@ -39,10 +40,7 @@ export function DeliveryScreen() {
   return (
     <>
       <ShellHeading>Deliveries</ShellHeading>
-      <ShellText>
-        Your assigned deliveries. Refresh to see the current state.
-      </ShellText>
-      <View style={styles.group}>
+      <ShellSelection>
         {(['active', 'completed'] as const).map((choice) => (
           <ShellButton
             key={choice}
@@ -57,7 +55,7 @@ export function DeliveryScreen() {
             }}
           />
         ))}
-      </View>
+      </ShellSelection>
       {assignments.isPending && (
         <ShellFeedback kind="loading" label="Loading deliveries…" />
       )}

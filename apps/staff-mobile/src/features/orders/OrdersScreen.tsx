@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TextInput, View } from 'react-native';
+import { View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { ApiError } from '../../api/errors';
@@ -11,6 +11,9 @@ import {
   ShellFeedback,
   ShellHeading,
   ShellText,
+  ShellInput,
+  ShellSelection,
+  usePageNavigation,
 } from '../../shell/controls';
 import { OrderPayment, type PendingPayments } from './OrderPayment';
 import { ManagerOrderActions } from './ManagerOrderActions';
@@ -28,6 +31,8 @@ export function OrdersScreen({
   const { canMutate } = useConnectivity();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const navigation = usePageNavigation();
   const [selected, setSelected] = useState<string | null>(null);
   const [accessLost, setAccessLost] = useState(false);
   const [pendingPayments] = useState<PendingPayments>(() => new Map());
@@ -117,7 +122,10 @@ export function OrdersScreen({
           <ShellButton
             label="Back to order search"
             variant="secondary"
-            onPress={() => setSelected(null)}
+            onPress={() => {
+              setSelected(null);
+              navigation.returnToList();
+            }}
           />
           {detail.isPending && (
             <ShellFeedback kind="loading" label="Loading order…" />
@@ -134,7 +142,9 @@ export function OrdersScreen({
           )}
           {order && current && (
             <>
-              <ShellHeading>Order {current.orderNumber}</ShellHeading>
+              <ShellHeading key={current.id} level="section" focusOnMount>
+                Order {current.orderNumber}
+              </ShellHeading>
               <ShellText>{`Status: ${current.status} · ${current.channel}${current.tableNumber ? ` · Table ${current.tableNumber}` : ''}`}</ShellText>
               <ShellText>{`Fulfillment: ${order.deliveryStatus ?? current.status}${order.assignedStaffId ? ` · Assigned staff: ${order.assignedStaffId}` : ''}`}</ShellText>
               <ShellText>{`Total: ${money(current.total)} · Paid: ${money(order.paidAmount)} · Balance: ${money(Math.max(0, Number(current.total) - Number(order.paidAmount)))}`}</ShellText>
@@ -184,31 +194,46 @@ export function OrdersScreen({
         </>
       ) : (
         <>
-          <ShellText>Search by order number or table</ShellText>
-          <TextInput
+          <ShellInput
+            label="Search by order number or table"
             accessibilityLabel="Search orders"
             value={search}
             onChangeText={setSearch}
+            autoCorrect={false}
+            autoCapitalize="none"
             style={orderStyles.input}
           />
-          {[
-            'all',
-            'draft',
-            'confirmed',
-            'preparing',
-            'ready',
-            'completed',
-            'cancelled',
-            ...(manager ? ['ready_delivery'] : []),
-          ].map((value) => (
-            <ShellButton
-              key={value}
-              label={`Show ${value === 'ready_delivery' ? 'ready unassigned deliveries' : value} orders`}
-              selected={filter === value}
-              variant="secondary"
-              onPress={() => setFilter(value)}
-            />
-          ))}
+          <ShellButton
+            label={`Filter orders: ${filter === 'ready_delivery' ? 'Ready unassigned deliveries' : filter[0]!.toUpperCase() + filter.slice(1)}`}
+            expanded={filtersExpanded}
+            variant="secondary"
+            onPress={() => setFiltersExpanded(!filtersExpanded)}
+          />
+          {filtersExpanded && (
+            <ShellSelection>
+              {[
+                'all',
+                'draft',
+                'confirmed',
+                'preparing',
+                'ready',
+                'completed',
+                'cancelled',
+                ...(manager ? ['ready_delivery'] : []),
+              ].map((value) => (
+                <ShellButton
+                  key={value}
+                  label={`Show ${value === 'ready_delivery' ? 'ready unassigned deliveries' : value} orders`}
+                  selected={filter === value}
+                  variant="secondary"
+                  onPress={() => {
+                    setFilter(value);
+                    setFiltersExpanded(false);
+                  }}
+                />
+              ))}
+            </ShellSelection>
+          )}
           {orders.isPending && (
             <ShellFeedback kind="loading" label="Loading orders…" />
           )}
@@ -231,7 +256,11 @@ export function OrdersScreen({
                   <ShellText>{`Fulfillment: ${row.deliveryStatus ?? row.status} · Paid: ${money(row.paidAmount)} · Balance: ${money(Math.max(0, Number(row.total) - Number(row.paidAmount)))}`}</ShellText>
                   <ShellButton
                     label={`Open order ${row.orderNumber}`}
-                    onPress={() => setSelected(row.id)}
+                    focusKey={`order:${row.id}`}
+                    onPress={() => {
+                      navigation.openDetail(`order:${row.id}`);
+                      setSelected(row.id);
+                    }}
                   />
                 </View>
               ))}
@@ -239,7 +268,7 @@ export function OrdersScreen({
           )}
           {!manager && (
             <>
-              <ShellHeading>Table occupancy</ShellHeading>
+              <ShellHeading level="section">Table occupancy</ShellHeading>
               {tables.isPending && (
                 <ShellFeedback kind="loading" label="Loading tables…" />
               )}
@@ -263,7 +292,11 @@ export function OrdersScreen({
                         <ShellButton
                           label={`Open table ${table.tableNumber} order`}
                           variant="secondary"
-                          onPress={() => setSelected(table.activeOrderId)}
+                          focusKey={`table:${table.id}`}
+                          onPress={() => {
+                            navigation.openDetail(`table:${table.id}`);
+                            setSelected(table.activeOrderId);
+                          }}
                         />
                       )}
                     </View>

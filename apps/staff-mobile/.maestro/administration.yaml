@@ -21,6 +21,10 @@ name: Account details, deactivation and security event filters
     direction: DOWN
 - assertVisible: Account details
 - scrollUntilVisible:
+    element: Close account details
+    direction: DOWN
+- tapOn: Close account details
+- scrollUntilVisible:
     element: Deactivate ${MAESTRO_TARGET_NAME}
     direction: UP
 - tapOn: Deactivate ${MAESTRO_TARGET_NAME}
@@ -31,6 +35,10 @@ name: Account details, deactivation and security event filters
     element: '${MAESTRO_TARGET_NAME} is now inactive. Their active sessions were revoked.'
     direction: DOWN
 - assertVisible: '${MAESTRO_TARGET_NAME} is now inactive. Their active sessions were revoked.'
+- scrollUntilVisible:
+    element: Security events
+    direction: UP
+- tapOn: Security events
 - scrollUntilVisible:
     element: Account changes
     direction: DOWN

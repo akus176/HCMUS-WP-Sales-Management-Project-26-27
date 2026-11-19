@@ -154,7 +154,13 @@ export function ShellInput({
 }) {
   return (
     <View style={styles.field}>
-      <ShellText>{label}</ShellText>
+      <Text
+        accessible={false}
+        importantForAccessibility="no"
+        style={styles.text}
+      >
+        {label}
+      </Text>
       <TextInput
         {...props}
         accessibilityLabel={accessibilityLabel ?? label}

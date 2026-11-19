@@ -1,7 +1,7 @@
 # Staff mobile usability audit (#219)
 
-OpenSpec change: `polish-staff-mobile-ux`. Baseline source: `git rev-parse HEAD`
-before the first implementation commit. This is a fresh source audit on 2026-11-19;
+OpenSpec change: `polish-staff-mobile-ux`. Baseline source:
+`5c9ed019398099cc59e3a007b6cf82a71208d25f`. This is a fresh source audit on 2026-11-19;
 historical screenshots are identified separately and are not a new native run.
 
 ## Screen and role inventory
@@ -79,7 +79,15 @@ native geometry/focus verification.
 
 ## Implementation and results
 
-Implementation, exact automated commands/results, native evidence and remaining
+Shared-shell step (`03b3f7e`): TypeScript and ESLint pass; seven focused suites
+pass 34/34 cases. Workflow step: Counter's status disclosure retains all filters,
+account details replace the list with an explicit return path, Accounts and
+Security events have separate selected views, and forms share visible labels.
+Six affected workflow/accessibility suites passed 75/75 cases before the added
+deactivation-error regression. Native selectors were updated for the account
+detail return and security-event section.
+
+Further exact automated commands/results, native evidence and remaining
 issues will be recorded here as they become available. Reviewer: @longtoZ;
 approval is outstanding. The issue remains open until all acceptance evidence
 and approval exist.

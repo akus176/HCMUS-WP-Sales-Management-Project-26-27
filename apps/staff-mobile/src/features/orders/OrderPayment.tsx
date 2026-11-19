@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import { TextInput } from 'react-native';
 import { randomUUID } from 'expo-crypto';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -12,6 +11,7 @@ import {
   ShellFeedback,
   ShellHeading,
   ShellText,
+  ShellInput,
 } from '../../shell/controls';
 import { orderStyles, money } from './presentation';
 
@@ -125,7 +125,7 @@ export function OrderPayment({
 
   return (
     <>
-      <ShellHeading>Record payment</ShellHeading>
+      <ShellHeading level="section">Record payment</ShellHeading>
       {mutation.data && (
         <ShellFeedback
           kind="info"
@@ -166,8 +166,8 @@ export function OrderPayment({
       ) : (
         balance > 0 && (
           <>
-            <ShellText>Amount</ShellText>
-            <TextInput
+            <ShellInput
+              label="Amount"
               accessibilityLabel="Payment amount"
               keyboardType="decimal-pad"
               value={amount}
@@ -185,10 +185,8 @@ export function OrderPayment({
                 onPress={() => setMethod(value)}
               />
             ))}
-            <ShellText>
-              Payment reference (required for card or e-wallet)
-            </ShellText>
-            <TextInput
+            <ShellInput
+              label="Payment reference (required for card or e-wallet)"
               accessibilityLabel="Payment reference"
               value={reference}
               onChangeText={setReference}
