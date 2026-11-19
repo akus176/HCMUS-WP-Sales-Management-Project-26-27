@@ -61,6 +61,7 @@ native geometry/focus verification.
 | UX06 | High | Complete a write while a subsequent active query remains unresolved | Shared mutation helper awaits every active refresh before the screen success callback; source-confirmed, needs deferred-read regression. |
 | UX07 | High | Lose the response to a discount decision after submission | Network-error copy says the decision was not sent, although the outcome is unknown; source-confirmed. |
 | UX08 | Medium | Inspect root banner and ShellPage safe-area consumers | Both apply top insets; needs native geometry check after single ownership is implemented. |
+| UX09 | Medium | Fail the home permission check or launch with invalid configuration at enlarged text | Home permission feedback had no scroll container; configuration feedback used default platform colors. Both now use scrollable, themed fallback layouts. |
 
 ## Verification matrix and baseline limits
 
@@ -87,10 +88,9 @@ Six affected workflow/accessibility suites passed 75/75 cases before the added
 deactivation-error regression. Native selectors were updated for the account
 detail return and security-event section.
 
-Further exact automated commands/results, native evidence and remaining
-issues will be recorded here as they become available. Reviewer: @longtoZ;
-approval is outstanding. The issue remains open until all acceptance evidence
-and approval exist.
+Reviewer: @longtoZ; approval is outstanding. The issue remains open until all
+acceptance evidence and approval exist. Native verification was explicitly left
+pending at the user's request on 2026-11-19; see the remaining work below.
 
 ## Automated verification (current implementation)
 
@@ -99,7 +99,7 @@ the official distribution SHA-256 manifest. Existing dependency pins were retain
 
 | Command (repository root) | Result |
 | --- | --- |
-| `npm run check --prefix apps/staff-mobile` | PASS: TypeScript, ESLint (zero warnings), Prettier, 28 suites / 327 tests, 4 inventory and 3 workflow harness checks; no skipped tests |
+| `npm run check --prefix apps/staff-mobile` | PASS: TypeScript, ESLint (zero warnings), Prettier, 28 suites / 328 tests, 4 inventory and 3 workflow harness checks; no skipped tests |
 | `npm run check --prefix contracts/mobile-p0` | PASS: deterministic OpenAPI/TypeScript regeneration, zero drift, contract TypeScript checks |
 | `npm run smoke:android --prefix apps/staff-mobile` | PASS: 1362 modules, Android Hermes bundle and both font assets exported |
 | `dotnet build src/CoffeeShop.Api -c Release --nologo` | PASS: zero warnings/errors; used only to prepare the disposable native-audit API |
@@ -121,3 +121,59 @@ longer claims the command was not sent. No transport retry or timeout policy was
 changed. Deferred-read success/failure and sibling-mutation tests, unknown discount
 outcome, uncertain-payment and token-renewal regressions pass: 46/46 cases in four
 focused suites, with TypeScript and ESLint passing.
+
+Home access loading/error states now remain inside the same scrollable page as
+home content, without nesting a second page. The configuration fallback has its
+own safe area, scroll container and explicit paper/error colors before fonts and
+session providers initialize. Regression checks preserve both recovery actions,
+configuration privacy and existing session/navigation behavior.
+
+## Guidance applied
+
+The [UI/UX Pro Max React Native guidance](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill/blob/main/src/ui-ux-pro-max/data/stacks/react-native.csv)
+was consulted on 2026-11-19 alongside the issue's Android-specific 48dp requirement.
+The implementation uses Pressable, explicit selected/expanded/disabled semantics,
+stable record keys, scalable wrapping text, safe-area ownership and keyboard
+avoidance. Framework details were checked against [React Native accessibility](https://reactnative.dev/docs/accessibilityinfo)
+and [safe-area edges](https://rnsac.appandflow.com/docs/api/safe-area-view).
+No library upgrade, font replacement or new native dependency was introduced.
+
+## Native attempt and remaining acceptance
+
+The task API was built and run on loopback port 52319 against the dedicated
+`mobile-ux-219-postgres` container (PostgreSQL 18, loopback 55419), with seven
+synthetic role accounts and fresh barista/order/discount/inventory/receipt/delivery
+fixtures seeded through existing scripts. API readiness returned 200. This is
+environment preparation, not proof of Android workflow completion.
+
+The existing SDK drive lacked installation space. A separate temporary SDK and
+API 36 x86_64 Google APIs image were installed; emulator data moved to a dedicated
+task directory on D:. WHPX acceleration was available. Headless software/host
+graphics attempts reached ADB intermittently, but did not yield a completed,
+usable boot or a successful app installation. No fresh native screenshot, native
+JUnit pass, TalkBack result or native before/after comparison is claimed.
+Historical screenshots remain identified as historical. The user selected
+**Leave native verification pending**. Task-owned emulator, Metro, API and database
+processes were stopped afterwards; no existing shop database was used.
+
+To finish acceptance with a working emulator or connected Android device:
+
+1. Follow [the contributor runbook](../../mobile-quality-and-release.md) using
+   a fresh disposable fixture. Match the native dependency versions to the app.
+2. Capture baseline JavaScript from `5c9ed019398099cc59e3a007b6cf82a71208d25f`
+   and the implemented revision under identical data/layout conditions. Prioritize
+   Preparation, Counter filters, sign-in and account list/detail/error feedback.
+3. Run the affected Maestro workflows, including the updated administration
+   flow; retain sanitized JUnit and independent API outcome verification.
+4. Exercise every inventory entry on 360×800dp and 800×1280dp layouts at 100% and
+   200% text under light/dark Android system appearance. The app remains light-only.
+5. Verify TalkBack labels, selection/expansion, detail-entry and return focus;
+   keyboard-visible payment/cancellation/adjustment/failure forms; measured targets,
+   spacing and safe areas. Native behavior must not be inferred from Jest styles.
+6. Record the device, source revisions, exact commands, before/after images and
+   any remaining issues, then obtain @longtoZ's review decision.
+
+Long account/event/order lists still use scrollable mapped content. Virtualization
+was not introduced without a measured runtime performance problem; no list
+performance claim is made. Dark-palette work is intentionally outside this change.
+The native checks and named approval remain unchecked in canonical issue #219.

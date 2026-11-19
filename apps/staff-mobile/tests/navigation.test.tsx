@@ -89,3 +89,35 @@ test('terminal refresh rejection removes a protected screen and retained navigat
   expect(screen.queryByText('Test Staff')).toBeNull();
   expect(router.canGoBack()).toBe(false);
 });
+
+test('home access failure keeps retry and sign-out inside the scrollable page', async () => {
+  const h = harness(async () => json({}, 500));
+  function Layout() {
+    return (
+      <SessionProvider client={h.client}>
+        <SessionRoutes />
+      </SessionProvider>
+    );
+  }
+  await renderRouter(
+    {
+      _layout: Layout,
+      index: StarterScreen,
+      login: LoginScreen,
+      session: SessionScreen,
+    },
+    { initialUrl: '/' },
+  );
+  await waitFor(() => expect(h.client.getSnapshot().status).toBe('signedOut'));
+  await act(async () => {
+    await h.client.login('staff', 'fixture-password');
+  });
+  await screen.findByText('Unable to verify access. Reconnect and try again.');
+  expect(
+    screen.getByRole('button', { name: 'Retry access check' }),
+  ).toBeEnabled();
+  expect(screen.getByRole('button', { name: 'Sign out' })).toBeEnabled();
+  expect(
+    screen.container.queryAll((node) => node.type === 'RCTScrollView').length,
+  ).toBeGreaterThan(0);
+});

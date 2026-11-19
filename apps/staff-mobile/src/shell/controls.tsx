@@ -164,6 +164,7 @@ export function ShellInput({
       <TextInput
         {...props}
         accessibilityLabel={accessibilityLabel ?? label}
+        accessibilityHint={props.accessibilityHint ?? hint}
         placeholderTextColor={mobileTokens.color.disabledText}
         style={[
           styles.input,
