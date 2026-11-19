@@ -22,8 +22,11 @@ import {
 } from '../src/connectivity/connectivity';
 import * as networkAdapter from '../src/connectivity/networkAdapter';
 import type { NetworkState } from '../src/connectivity/networkAdapter';
-import { ShellButton } from '../src/shell/controls';
-import { ConnectivityBanner } from '../src/connectivity/ConnectivityBanner';
+import { ShellButton, ShellPage } from '../src/shell/controls';
+import {
+  ConnectivityBanner,
+  ConnectivityPresentation,
+} from '../src/connectivity/ConnectivityBanner';
 
 jest.mock('../src/connectivity/networkAdapter', () => ({
   addNetworkStateListener: jest.fn(),
@@ -121,9 +124,7 @@ test('reports offline status and exposes a manual connection check', async () =>
     wrapper: wrapperFor(client),
   });
 
-  expect(
-    await view.findByText(/Offline\. Cached data is read-only/),
-  ).toBeVisible();
+  expect(await view.findByText(/Offline.*read-only/)).toBeVisible();
   expect(onlineManager.isOnline()).toBe(false);
   expect(
     screen.getByRole('button', { name: 'Check connection' }),
@@ -342,6 +343,30 @@ test('blocks mutations during reconnect and never replays them when refresh fini
   });
   expect(await screen.findByText('online')).toBeVisible();
   expect(mutationFn).not.toHaveBeenCalled();
+});
+
+test('connection guidance lives in the page and can be disclosed without claiming service health', async () => {
+  getNetworkStateAsync.mockResolvedValueOnce(onlineState);
+  await render(
+    <ConnectivityPresentation>
+      <ShellPage>
+        <Text>Working content</Text>
+      </ShellPage>
+    </ConnectivityPresentation>,
+    { wrapper: wrapperFor(makeClient()) },
+  );
+  await screen.findByText('Online ▾');
+  expect(screen.queryByText(/Refresh a workspace/)).toBeNull();
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Connection details', expanded: false }),
+  );
+  expect(
+    screen.getByText(/Network connected. Refresh a workspace/),
+  ).toBeVisible();
+  expect(
+    screen.getByRole('button', { name: 'Connection details', expanded: true }),
+  ).toHaveStyle({ minHeight: 48, minWidth: 48 });
+  expect(screen.getByText('Working content')).toBeVisible();
 });
 
 test('a stale reconnect cannot restore online status after a newer disconnect', async () => {

@@ -34,9 +34,7 @@ export function StaffHome({
     <ShellPage>
       <ShellHeading>Staff home</ShellHeading>
       <ShellText>{user.fullName}</ShellText>
-      <ShellText>
-        Choose a module. Access is checked again when you open it.
-      </ShellText>
+      <ShellText>Choose your workspace.</ShellText>
       {!modules.length && (
         <ShellText>
           No mobile modules are available for your permissions.
@@ -56,6 +54,7 @@ export function StaffHome({
       ))}
       <ShellButton
         label="Sign out"
+        variant="secondary"
         onPress={() => {
           void client
             ?.logout()

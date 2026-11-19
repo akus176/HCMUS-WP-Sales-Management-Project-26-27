@@ -7,6 +7,7 @@ import {
   ShellButton,
   ShellHeading,
   ShellPage,
+  ShellPageHeader,
   ShellText,
 } from '../../src/shell/controls';
 import { findModule, permittedActions } from '../../src/shell/permissions';
@@ -24,9 +25,9 @@ export default function ModuleScreen() {
   const access = useRouteAccess();
   return (
     <ShellPage>
-      <ShellButton
-        label="Back to staff home"
-        onPress={() => router.replace('/session')}
+      <ShellPageHeader
+        backLabel="Back to staff home"
+        onBack={() => router.replace('/session')}
       />
       <PermissionBoundary moduleId={moduleId} {...access}>
         {(user) =>
