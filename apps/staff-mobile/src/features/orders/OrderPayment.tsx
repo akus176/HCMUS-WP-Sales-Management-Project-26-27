@@ -12,6 +12,7 @@ import {
   ShellHeading,
   ShellText,
   ShellInput,
+  ShellMutationFeedback,
 } from '../../shell/controls';
 import { orderStyles, money } from './presentation';
 
@@ -126,6 +127,7 @@ export function OrderPayment({
   return (
     <>
       <ShellHeading level="section">Record payment</ShellHeading>
+      <ShellMutationFeedback mutation={mutation} />
       {mutation.data && (
         <ShellFeedback
           kind="info"

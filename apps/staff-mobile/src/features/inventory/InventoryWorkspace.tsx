@@ -19,6 +19,7 @@ import {
   ShellText,
   ShellInput,
   ShellSelection,
+  ShellMutationFeedback,
 } from '../../shell/controls';
 import { mobileTokens } from '../../shell/designTokens';
 
@@ -329,6 +330,13 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
   return (
     <>
       <ShellHeading>Inventory</ShellHeading>
+      <ShellMutationFeedback
+        mutation={{
+          isRefreshing:
+            adjustmentMutation.isRefreshing || receiptMutation.isRefreshing,
+          refreshError: adjustmentMutation.refreshError,
+        }}
+      />
       <ShellSelection>
         {sections
           .filter(({ id }) => availableSections.includes(id))
@@ -456,7 +464,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                         loading={adjustmentMutation.isPending}
                         loadingLabel="Saving adjustment…"
                         disabled={
-                          status !== 'online' ||
+                          adjustmentMutation.isWriteDisabled ||
                           !quantityDelta.trim() ||
                           !Number.isFinite(Number(quantityDelta)) ||
                           Number(quantityDelta) === 0 ||
@@ -551,7 +559,8 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                         loading={receiptMutation.isPending}
                         loadingLabel="Posting receipt…"
                         disabled={
-                          status !== 'online' || receiptMutation.isPending
+                          receiptMutation.isWriteDisabled ||
+                          receiptMutation.isPending
                         }
                         onPress={() => {
                           setReceiptFailure(undefined);

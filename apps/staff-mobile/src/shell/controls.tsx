@@ -182,6 +182,21 @@ export function ShellSelection({ children }: { children: ReactNode }) {
   return <View style={styles.selection}>{children}</View>;
 }
 
+export function ShellMutationFeedback({
+  mutation,
+}: {
+  mutation: { isRefreshing: boolean; refreshError: string | null };
+}) {
+  return mutation.refreshError ? (
+    <ShellFeedback kind="warning" label={mutation.refreshError} />
+  ) : mutation.isRefreshing ? (
+    <ShellFeedback
+      kind="loading"
+      label="Change saved. Refreshing current data…"
+    />
+  ) : null;
+}
+
 export type ShellFeedbackKind =
   'loading' | 'empty' | 'error' | 'warning' | 'info' | 'success';
 

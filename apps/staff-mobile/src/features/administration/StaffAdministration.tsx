@@ -18,6 +18,7 @@ import {
   ShellInput,
   ShellSelection,
   usePageNavigation,
+  ShellMutationFeedback,
 } from '../../shell/controls';
 import { mobileTokens } from '../../shell/designTokens';
 
@@ -173,6 +174,7 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
   return (
     <>
       <ShellHeading>Staff administration</ShellHeading>
+      <ShellMutationFeedback mutation={deactivation} />
       <ShellSelection>
         <ShellButton
           label="Staff accounts"
@@ -255,7 +257,9 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
                 {account.isActive && (
                   <ShellButton
                     label={`Deactivate ${account.fullName}`}
-                    disabled={!canMutate || deactivation.isPending}
+                    disabled={
+                      deactivation.isWriteDisabled || deactivation.isPending
+                    }
                     loading={deactivation.isPending}
                     loadingLabel="Deactivating account…"
                     variant="secondary"

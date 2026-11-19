@@ -13,6 +13,7 @@ import {
   ShellHeading,
   ShellText,
   ShellInput,
+  ShellMutationFeedback,
 } from '../../shell/controls';
 
 export function DeliveryDetail({ orderId }: { orderId: string }) {
@@ -138,6 +139,7 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
         onPress={() => router.replace('/modules/delivery')}
       />
       <ShellHeading>Delivery details</ShellHeading>
+      <ShellMutationFeedback mutation={mutation} />
       {notice && <ShellFeedback kind="info" label={notice} />}
       {mutation.error && (
         <ShellFeedback

@@ -10,6 +10,7 @@ import {
   ShellFeedback,
   ShellHeading,
   ShellInput,
+  ShellMutationFeedback,
 } from '../../shell/controls';
 import { orderStyles } from './presentation';
 
@@ -113,6 +114,7 @@ export function ManagerOrderActions({
 
   return (
     <>
+      <ShellMutationFeedback mutation={mutation} />
       {mutation.data && (
         <ShellFeedback
           kind="info"

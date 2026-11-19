@@ -6,10 +6,10 @@ import {
 } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import type { components } from '../src/api/schema';
-import { ApiError } from '../src/api/errors';
+import { ApiError, NetworkError } from '../src/api/errors';
 import { router } from 'expo-router';
 import { ConnectivityProvider } from '../src/connectivity/connectivity';
-import { ConnectivityBanner } from '../src/connectivity/ConnectivityBanner';
+import { ConnectivityPresentation } from '../src/connectivity/ConnectivityBanner';
 import * as networkAdapter from '../src/connectivity/networkAdapter';
 import type { NetworkState } from '../src/connectivity/networkAdapter';
 import type { SessionClient, StaffSession } from '../src/session/session';
@@ -116,8 +116,7 @@ async function setup(
       <SessionProvider client={currentClient} queryClient={queryClient}>
         <ConnectivityProvider>
           <ClearQueriesOnUnmount />
-          <ConnectivityBanner />
-          {children}
+          <ConnectivityPresentation>{children}</ConnectivityPresentation>
         </ConnectivityProvider>
       </SessionProvider>
     );
@@ -214,6 +213,31 @@ test('explains a decision conflict and refreshes without claiming success', asyn
   expect(view.getByText('Reason: Service recovery')).toBeVisible();
   expect(view.queryByText(/Approved by the server/)).toBeNull();
   await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+});
+
+test('a lost decision response is unconfirmed and is never automatically replayed', async () => {
+  const post = jest.fn(async () => {
+    throw new NetworkError();
+  });
+  mockClient({ post });
+  const view = await setup(
+    createNetworkSource(onlineState),
+    <ShellPage>
+      <DiscountApprovals user={manager} discountId={discount.discountId} />
+    </ShellPage>,
+  );
+  await view.findByText('Reason: Service recovery');
+  await fireEvent.press(view.getByRole('button', { name: 'Approve discount' }));
+  expect(
+    await view.findByRole('alert', { name: /decision could not be confirmed/ }),
+  ).toBeVisible();
+  expect(view.queryByText(/decision was not sent/)).toBeNull();
+  expect(view.queryByText(/Approved by the server/)).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Refresh pending approvals' }),
+  );
+  await view.findByText('Reason: Service recovery');
+  expect(post).toHaveBeenCalledTimes(1);
 });
 
 test('hides cached approval details when the server denies access', async () => {

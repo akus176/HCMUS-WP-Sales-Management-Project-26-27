@@ -91,3 +91,13 @@ Further exact automated commands/results, native evidence and remaining
 issues will be recorded here as they become available. Reviewer: @longtoZ;
 approval is outstanding. The issue remains open until all acceptance evidence
 and approval exist.
+
+Confirmed-write feedback now appears before post-write reads settle. While those
+reads are pending, all mutation controls share a guard. Failed invalidated reads
+keep writes guarded across mutation components until authoritative refresh or
+session-cache cleanup; manual refresh also retries the retained failed queries.
+The original server confirmation is retained. Unknown discount response copy no
+longer claims the command was not sent. No transport retry or timeout policy was
+changed. Deferred-read success/failure and sibling-mutation tests, unknown discount
+outcome, uncertain-payment and token-renewal regressions pass: 46/46 cases in four
+focused suites, with TypeScript and ESLint passing.
