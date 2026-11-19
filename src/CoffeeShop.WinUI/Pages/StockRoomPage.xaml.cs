@@ -645,7 +645,8 @@ public sealed partial class StockRoomPage : Page
             {
                 return "Could not verify the delivery. Check the connection and retry with the same receipt number.";
             }
-        }) { XamlRoot = XamlRoot };
+        })
+        { XamlRoot = XamlRoot };
         if (await dialog.ShowAsync() != ContentDialogResult.Primary || received is null) return;
 
         SetBusy(true);

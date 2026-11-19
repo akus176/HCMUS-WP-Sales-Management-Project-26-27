@@ -49,8 +49,11 @@ public sealed partial class NewReceiptDialog : ContentDialog
         root.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         var ingredient = new ComboBox
         {
-            Header = "Ingredient", PlaceholderText = "Choose ingredient", ItemsSource = ingredients,
-            DisplayMemberPath = nameof(Ingredient.Name), HorizontalAlignment = HorizontalAlignment.Stretch
+            Header = "Ingredient",
+            PlaceholderText = "Choose ingredient",
+            ItemsSource = ingredients,
+            DisplayMemberPath = nameof(Ingredient.Name),
+            HorizontalAlignment = HorizontalAlignment.Stretch
         };
         var quantity = new TextBox { Header = "Quantity", PlaceholderText = "0" };
         var cost = new TextBox { Header = "Unit cost", PlaceholderText = "0" };

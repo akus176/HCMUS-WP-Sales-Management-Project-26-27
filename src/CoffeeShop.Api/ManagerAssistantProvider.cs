@@ -45,7 +45,11 @@ public sealed class DeterministicAssistantProvider : IManagerAssistantProvider
             var ranking = Regex.Match(question, @"\b(?:top|which)\s+(?<count>\d{1,2}|one|two|three|four|five)\b");
             var limit = ranking.Groups["count"].Value switch
             {
-                "one" => 1, "two" => 2, "three" => 3, "four" => 4, "five" => 5,
+                "one" => 1,
+                "two" => 2,
+                "three" => 3,
+                "four" => 4,
+                "five" => 5,
                 var count when int.TryParse(count, out var number) && number is >= 1 and <= 50 => number,
                 _ => (int?)null,
             };

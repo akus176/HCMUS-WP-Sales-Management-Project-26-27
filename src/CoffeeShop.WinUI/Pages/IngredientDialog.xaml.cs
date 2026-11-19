@@ -1,5 +1,5 @@
-using CoffeeShop.Domain.Inventory;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.Domain.Inventory;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 

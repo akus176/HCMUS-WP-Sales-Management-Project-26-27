@@ -164,7 +164,7 @@ public static class InventoryEndpoints
                 return result.IsSuccess ? Results.Ok(ToReceipt(result.Value)) : ApiErrorResults.From(result.Error!);
             }
             catch (DbUpdateException exception) when (exception.InnerException is PostgresException
-                { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "IX_purchase_receipts_receipt_number" })
+            { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "IX_purchase_receipts_receipt_number" })
             {
                 return ApiErrorResults.From(Error.Conflict("inventory.receipt_number_in_use",
                     "This receipt number is already in use. Check Receipts or enter a different number."));

@@ -1,5 +1,5 @@
-using CoffeeShop.Contracts;
 using CoffeeShop.Application.Inventory;
+using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Inventory;
 

@@ -589,7 +589,8 @@ public sealed partial class CatalogPage : Page
         var fields = new StackPanel { Spacing = 8, Margin = new Thickness(0, 5, 0, 0) };
         fields.Children.Add(new TextBlock
         {
-            Text = heading, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            Text = heading,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
             TextWrapping = TextWrapping.Wrap
         });
         fields.Children.Add(new TextBlock
@@ -612,8 +613,12 @@ public sealed partial class CatalogPage : Page
 
             var ingredient = new ComboBox
             {
-                Header = "Ingredient", PlaceholderText = "Choose an ingredient", DisplayMemberPath = nameof(RecipeIngredientOption.Name),
-                ItemsSource = options, MinHeight = 48, HorizontalAlignment = HorizontalAlignment.Stretch
+                Header = "Ingredient",
+                PlaceholderText = "Choose an ingredient",
+                DisplayMemberPath = nameof(RecipeIngredientOption.Name),
+                ItemsSource = options,
+                MinHeight = 48,
+                HorizontalAlignment = HorizontalAlignment.Stretch
             };
             ingredient.SelectedItem = options.FirstOrDefault(option => option.Id == existing?.IngredientId);
             var quantity = TextField("Quantity", existing?.Quantity.ToString("0.###"));
@@ -624,7 +629,10 @@ public sealed partial class CatalogPage : Page
             };
             var remove = new Button
             {
-                Content = "×", MinWidth = 44, MinHeight = 48, VerticalAlignment = VerticalAlignment.Bottom,
+                Content = "×",
+                MinWidth = 44,
+                MinHeight = 48,
+                VerticalAlignment = VerticalAlignment.Bottom,
                 Style = (Style)Resources["MenuButton"]
             };
             AutomationProperties.SetName(remove, "Remove ingredient line");
@@ -652,7 +660,9 @@ public sealed partial class CatalogPage : Page
 
         var add = new Button
         {
-            Content = "Add ingredient", MinHeight = 44, IsEnabled = model.Ingredients.Count > 0,
+            Content = "Add ingredient",
+            MinHeight = 44,
+            IsEnabled = model.Ingredients.Count > 0,
             Style = (Style)Resources["MenuButton"]
         };
         add.Click += (_, _) => AddLine().StartBringIntoView();
