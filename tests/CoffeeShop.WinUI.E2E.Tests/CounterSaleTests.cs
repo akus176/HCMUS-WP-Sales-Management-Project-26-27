@@ -82,9 +82,10 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
             var customerInput = WaitFor("Counter customer search input",
                 () => suggestBox.FindFirstDescendant(cf => cf.ByControlType(ControlType.Edit)));
             TypeText(customerInput, customer.Phone);
-            var suggestion = WaitFor($"customer suggestion for {customer.FullName}", () =>
+            WaitFor($"customer suggestion for {customer.FullName}", () =>
                 FindName(main, customer.FullName) ?? FindName(automation.GetDesktop(), customer.FullName));
-            suggestion.Click();
+            Keyboard.Press(VirtualKeyShort.DOWN);
+            Keyboard.Press(VirtualKeyShort.ENTER);
             WaitFor("attached customer name", () => customerInput.AsTextBox().Text == customer.FullName ? customerInput : null);
             ClickRow(main, "MenuGrid", Drink);
             PressNamed(main, "Add to ticket");
@@ -177,12 +178,13 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
             foreach (var window in app.GetAllTopLevelWindows(automation))
             {
                 output.WriteLine($"Window: {window.Name} ({window.BoundingRectangle})");
-                foreach (var element in window.FindAllDescendants().Where(element => !element.IsOffscreen).Take(180))
+                foreach (var element in window.FindAllDescendants().Take(200))
                 {
-                    var label = element.ControlType == ControlType.Edit ? "" : element.Properties.Name.ValueOrDefault;
+                    var kind = element.Properties.ControlType.ValueOrDefault;
+                    var label = kind == ControlType.Edit ? "" : element.Properties.Name.ValueOrDefault;
                     var id = element.Properties.AutomationId.ValueOrDefault;
                     if (!string.IsNullOrEmpty(label) || !string.IsNullOrEmpty(id))
-                        output.WriteLine($"{element.ControlType} {id} '{label}'");
+                        output.WriteLine($"{kind} {id} '{label}'");
                 }
             }
         }
@@ -243,8 +245,11 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
     private static void ClickRow(AutomationElement window, string listId, string startsWith)
     {
         var list = WaitFor(listId, () => FindId(window, listId) ?? (listId == "DrinksList" ? FindName(window, "Drinks and recipes") : null));
-        WaitFor($"{startsWith} in {listId}", () => list.FindAllDescendants(cf => cf.ByControlType(ControlType.ListItem))
-            .FirstOrDefault(row => row.Properties.Name.ValueOrDefault?.StartsWith(startsWith, StringComparison.Ordinal) == true)).Click();
+        var item = WaitFor($"{startsWith} in {listId}", () => list.FindAllDescendants(cf => cf.ByControlType(ControlType.ListItem))
+            .FirstOrDefault(row => row.IsEnabled
+                && row.Properties.Name.ValueOrDefault?.StartsWith(startsWith, StringComparison.Ordinal) == true));
+        if (item.Patterns.Invoke.PatternOrDefault is { } invoke) invoke.Invoke();
+        else item.Patterns.SelectionItem.Pattern.Select();
     }
 
     private static void Press(AutomationElement root, string automationId) =>
