@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import { TextInput } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { ApiError } from '../../api/errors';
@@ -10,7 +9,8 @@ import {
   ShellButton,
   ShellFeedback,
   ShellHeading,
-  ShellText,
+  ShellInput,
+  ShellMutationFeedback,
 } from '../../shell/controls';
 import { orderStyles } from './presentation';
 
@@ -114,6 +114,7 @@ export function ManagerOrderActions({
 
   return (
     <>
+      <ShellMutationFeedback mutation={mutation} />
       {mutation.data && (
         <ShellFeedback
           kind="info"
@@ -168,11 +169,11 @@ export function ManagerOrderActions({
         <>
           {canCancel && (
             <>
-              <ShellHeading>Authorize cancellation</ShellHeading>
-              <ShellText>
-                Cancellation reason (required, at most 255 characters)
-              </ShellText>
-              <TextInput
+              <ShellHeading level="section">
+                Authorize cancellation
+              </ShellHeading>
+              <ShellInput
+                label="Cancellation reason (required, at most 255 characters)"
                 accessibilityLabel="Cancellation reason"
                 value={reason}
                 onChangeText={setReason}
@@ -198,7 +199,7 @@ export function ManagerOrderActions({
           )}
           {canAssign && (
             <>
-              <ShellHeading>Assign ready delivery</ShellHeading>
+              <ShellHeading level="section">Assign ready delivery</ShellHeading>
               {staff.isPending && (
                 <ShellFeedback
                   kind="loading"

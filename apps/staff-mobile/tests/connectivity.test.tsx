@@ -22,8 +22,15 @@ import {
 } from '../src/connectivity/connectivity';
 import * as networkAdapter from '../src/connectivity/networkAdapter';
 import type { NetworkState } from '../src/connectivity/networkAdapter';
-import { ShellButton } from '../src/shell/controls';
-import { ConnectivityBanner } from '../src/connectivity/ConnectivityBanner';
+import {
+  ShellButton,
+  ShellPage,
+  ShellMutationFeedback,
+} from '../src/shell/controls';
+import {
+  ConnectivityBanner,
+  ConnectivityPresentation,
+} from '../src/connectivity/ConnectivityBanner';
 
 jest.mock('../src/connectivity/networkAdapter', () => ({
   addNetworkStateListener: jest.fn(),
@@ -121,9 +128,7 @@ test('reports offline status and exposes a manual connection check', async () =>
     wrapper: wrapperFor(client),
   });
 
-  expect(
-    await view.findByText(/Offline\. Cached data is read-only/),
-  ).toBeVisible();
+  expect(await view.findByText(/Offline.*read-only/)).toBeVisible();
   expect(onlineManager.isOnline()).toBe(false);
   expect(
     screen.getByRole('button', { name: 'Check connection' }),
@@ -343,6 +348,146 @@ test('blocks mutations during reconnect and never replays them when refresh fini
   expect(await screen.findByText('online')).toBeVisible();
   expect(mutationFn).not.toHaveBeenCalled();
 });
+
+test('connection guidance lives in the page and can be disclosed without claiming service health', async () => {
+  getNetworkStateAsync.mockResolvedValueOnce(onlineState);
+  await render(
+    <ConnectivityPresentation>
+      <ShellPage>
+        <Text>Working content</Text>
+      </ShellPage>
+    </ConnectivityPresentation>,
+    { wrapper: wrapperFor(makeClient()) },
+  );
+  await screen.findByText('Online ▾');
+  expect(screen.queryByText(/Refresh a workspace/)).toBeNull();
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Connection details', expanded: false }),
+  );
+  expect(
+    screen.getByText(/Network connected. Refresh a workspace/),
+  ).toBeVisible();
+  expect(
+    screen.getByRole('button', { name: 'Connection details', expanded: true }),
+  ).toHaveStyle({ minHeight: 48, minWidth: 48 });
+  expect(screen.getByText('Working content')).toBeVisible();
+});
+
+test.each([false, true])(
+  'confirms a write before refresh settles and guards failed refresh (fails=%s)',
+  async (fails) => {
+    getNetworkStateAsync.mockResolvedValueOnce(onlineState);
+    const client = makeClient();
+    let resolveRead!: (value: string) => void;
+    let rejectRead!: (error: Error) => void;
+    const pending = new Promise<string>((resolve, reject) => {
+      resolveRead = resolve;
+      rejectRead = reject;
+    });
+    const read = jest
+      .fn()
+      .mockResolvedValueOnce('before')
+      .mockImplementationOnce(() => pending)
+      .mockResolvedValue('after');
+    const write = jest.fn(async () => 'server confirmation');
+    const confirmed = jest.fn();
+    function OtherWriter() {
+      const mutation = useSafeMutation({ mutationFn: write });
+      return (
+        <ShellButton
+          label="Another change"
+          disabled={mutation.isWriteDisabled}
+          onPress={() => mutation.mutate()}
+        />
+      );
+    }
+    function Probe() {
+      const query = useQuery({
+        queryKey: ['confirmation-refresh'],
+        queryFn: read,
+      });
+      const mutation = useSafeMutation({
+        mutationFn: write,
+        onSuccess: confirmed,
+      });
+      return (
+        <>
+          <Text>{query.data}</Text>
+          <Text>{mutation.data}</Text>
+          <ShellMutationFeedback mutation={mutation} />
+          <OtherWriter />
+          <ShellButton
+            label="Confirm write"
+            disabled={mutation.isPending || mutation.isWriteDisabled}
+            onPress={() => mutation.mutate()}
+          />
+          <ShellButton
+            label="Refresh snapshot"
+            onPress={() => {
+              void client.invalidateQueries({
+                queryKey: ['confirmation-refresh'],
+              });
+            }}
+          />
+        </>
+      );
+    }
+    await render(<Probe />, { wrapper: wrapperFor(client) });
+    await screen.findByText('before');
+    await fireEvent.press(
+      screen.getByRole('button', { name: 'Confirm write' }),
+    );
+    await screen.findByText('server confirmation');
+    expect(confirmed).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByRole('button', { name: 'Confirm write' }),
+    ).toBeDisabled();
+    await screen.findByText('Change saved. Refreshing current data…');
+    expect(
+      screen.getByRole('button', { name: 'Another change' }),
+    ).toBeDisabled();
+    await act(async () => {
+      if (fails) rejectRead(new Error('Read unavailable'));
+      else resolveRead('after');
+    });
+    if (fails) {
+      await screen.findByText(
+        /change was saved, but current data could not be refreshed/,
+      );
+      expect(screen.getByText('server confirmation')).toBeVisible();
+      expect(
+        screen.getByRole('button', { name: 'Another change' }),
+      ).toBeDisabled();
+      expect(
+        screen.getByRole('button', { name: 'Confirm write' }),
+      ).toBeDisabled();
+      await fireEvent.press(
+        screen.getByRole('button', { name: 'Confirm write' }),
+      );
+      expect(write).toHaveBeenCalledTimes(1);
+      await fireEvent.press(
+        screen.getByRole('button', { name: 'Refresh snapshot' }),
+      );
+    }
+    await screen.findByText('after');
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Another change' }),
+      ).toBeEnabled(),
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Confirm write' }),
+      ).toBeEnabled(),
+    );
+    expect(
+      screen.queryByText(
+        /change was saved, but current data could not be refreshed/,
+      ),
+    ).toBeNull();
+    expect(write).toHaveBeenCalledTimes(1);
+  },
+);
 
 test('a stale reconnect cannot restore online status after a newer disconnect', async () => {
   const client = makeClient();

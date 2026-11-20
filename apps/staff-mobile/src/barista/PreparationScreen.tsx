@@ -10,6 +10,8 @@ import {
   ShellFeedback,
   ShellHeading,
   ShellText,
+  ShellSelection,
+  ShellMutationFeedback,
 } from '../shell/controls';
 
 const pageSize = 10;
@@ -108,6 +110,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
   return (
     <>
       <ShellHeading>Preparation</ShellHeading>
+      <ShellMutationFeedback mutation={mutation} />
       {forbidden ? (
         <ShellFeedback
           kind="error"
@@ -158,7 +161,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                 label="Refresh ticket"
                 variant="secondary"
                 loading={detail.isFetching}
-                disabled={busy || mutation.isWriteDisabled}
+                disabled={busy || !mutation.canMutate}
                 onPress={() => {
                   setIntent(null);
                   void detail.refetch();
@@ -246,11 +249,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
             </>
           ) : (
             <>
-              <ShellText>
-                Confirmed and preparing tickets. Refresh for current service
-                state.
-              </ShellText>
-              <View style={styles.line}>
+              <ShellSelection>
                 {(
                   ['confirmed,preparing', 'confirmed', 'preparing'] as const
                 ).map((value) => (
@@ -272,7 +271,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                     }}
                   />
                 ))}
-              </View>
+              </ShellSelection>
               {queue.isPending && (
                 <ShellFeedback
                   kind="loading"
@@ -286,7 +285,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                 label="Refresh queue"
                 variant="secondary"
                 loading={queue.isFetching}
-                disabled={mutation.isWriteDisabled}
+                disabled={!mutation.canMutate}
                 onPress={() => void queue.refetch()}
               />
               {!queue.isError && queue.data && (

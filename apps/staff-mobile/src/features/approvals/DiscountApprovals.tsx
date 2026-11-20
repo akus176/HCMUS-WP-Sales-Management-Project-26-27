@@ -17,6 +17,7 @@ import {
   ShellFeedback,
   ShellHeading,
   ShellText,
+  ShellMutationFeedback,
 } from '../../shell/controls';
 import { mobileTokens } from '../../shell/designTokens';
 
@@ -41,7 +42,9 @@ function errorMessage(error: unknown, action = false) {
       : 'Pending approvals could not be loaded. Try refreshing the inbox.';
   }
   if (error instanceof NetworkError)
-    return 'The decision was not sent. Reconnect and try again; no write was queued.';
+    return action
+      ? 'The decision could not be confirmed. Refresh the inbox to check its current state before trying again; no write was queued.'
+      : 'Pending approvals could not be loaded. Reconnect and try again.';
   return action
     ? 'The decision could not be confirmed. Refresh before trying again.'
     : 'Pending approvals could not be loaded. Reconnect and try again.';
@@ -192,6 +195,7 @@ export function DiscountApprovals({
           onPress={() => router.back()}
         />
         <ShellHeading>Discount review</ShellHeading>
+        <ShellMutationFeedback mutation={decisionMutation} />
         {status !== 'online' && !pendingQuery.data ? (
           <ShellFeedback
             kind="warning"
@@ -247,7 +251,10 @@ export function DiscountApprovals({
                   label="Approve discount"
                   loading={decisionMutation.isPending}
                   loadingLabel="Submitting decision…"
-                  disabled={!canMutate || decisionMutation.isPending}
+                  disabled={
+                    decisionMutation.isWriteDisabled ||
+                    decisionMutation.isPending
+                  }
                   onPress={() => {
                     setActionError(undefined);
                     setSelected(discount);
@@ -262,7 +269,10 @@ export function DiscountApprovals({
                   variant="secondary"
                   loading={decisionMutation.isPending}
                   loadingLabel="Submitting decision…"
-                  disabled={!canMutate || decisionMutation.isPending}
+                  disabled={
+                    decisionMutation.isWriteDisabled ||
+                    decisionMutation.isPending
+                  }
                   onPress={() => {
                     setActionError(undefined);
                     setSelected(discount);
@@ -284,6 +294,7 @@ export function DiscountApprovals({
   return (
     <>
       <ShellHeading>Manager approvals</ShellHeading>
+      <ShellMutationFeedback mutation={decisionMutation} />
       <ShellText>
         Review pending discount requests from the shared API.
       </ShellText>

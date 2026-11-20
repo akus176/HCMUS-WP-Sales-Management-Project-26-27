@@ -2,13 +2,16 @@ import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { KeyboardAvoidingView, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ConfigurationGate } from '../src/config/ConfigurationGate';
-import { ConnectivityBanner } from '../src/connectivity/ConnectivityBanner';
+import { ConnectivityPresentation } from '../src/connectivity/ConnectivityBanner';
 import { ConnectivityProvider } from '../src/connectivity/connectivity';
 import { MobileNotifications } from '../src/notifications/MobileNotifications';
 import { OperationalUpdates } from '../src/realtime/OperationalUpdates';
 import { SessionProvider, useSession } from '../src/session/context';
+import { ShellPage } from '../src/shell/controls';
+import { mobileTokens } from '../src/shell/designTokens';
 
 export default function RootLayout() {
   return (
@@ -25,7 +28,12 @@ export function SessionRoutes() {
   return (
     <ConnectivityProvider>
       <OperationalUpdates />
-      <SessionNavigation state={state} />
+      <SafeAreaView
+        edges={['top', 'left', 'right']}
+        style={{ flex: 1, backgroundColor: mobileTokens.color.background }}
+      >
+        <SessionNavigation state={state} />
+      </SafeAreaView>
     </ConnectivityProvider>
   );
 }
@@ -43,37 +51,40 @@ function SessionNavigation({
     return (
       <>
         <StatusBar style="dark" />
-        <ConnectivityBanner />
-        <Text accessibilityRole="text">Loading interface…</Text>
+        <ShellPage>
+          <Text accessibilityRole="text">Loading interface…</Text>
+        </ShellPage>
       </>
     );
   if (state.status === 'restoring')
     return (
       <>
         <StatusBar style="dark" />
-        <ConnectivityBanner />
-        <Text accessibilityRole="alert">Restoring session…</Text>
+        <ShellPage>
+          <Text accessibilityRole="alert">Restoring session…</Text>
+        </ShellPage>
       </>
     );
   return (
     <KeyboardAvoidingView behavior="height" style={{ flex: 1 }}>
       <StatusBar style="dark" />
-      <ConnectivityBanner />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Protected guard={!state.user}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="login" />
-        </Stack.Protected>
-        <Stack.Protected guard={!!state.user}>
-          <Stack.Screen name="session" />
-          <Stack.Screen name="modules/[module]" />
-          <Stack.Screen name="modules/delivery/[orderId]" />
-          <Stack.Screen name="modules/approvals/[discountId]" />
-          <Stack.Screen name="modules/approvals/operations" />
-          <Stack.Screen name="notifications/[kind]/[recordId]" />
-        </Stack.Protected>
-      </Stack>
-      <MobileNotifications />
+      <ConnectivityPresentation>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Protected guard={!state.user}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="login" />
+          </Stack.Protected>
+          <Stack.Protected guard={!!state.user}>
+            <Stack.Screen name="session" />
+            <Stack.Screen name="modules/[module]" />
+            <Stack.Screen name="modules/delivery/[orderId]" />
+            <Stack.Screen name="modules/approvals/[discountId]" />
+            <Stack.Screen name="modules/approvals/operations" />
+            <Stack.Screen name="notifications/[kind]/[recordId]" />
+          </Stack.Protected>
+        </Stack>
+        <MobileNotifications />
+      </ConnectivityPresentation>
     </KeyboardAvoidingView>
   );
 }

@@ -132,19 +132,36 @@ test('authorized account views are safe and deactivation requires confirmation',
   );
   await screen.findByRole('header', { name: 'Staff administration' });
   await screen.findByText('At Risk Staff');
-  await screen.findByText('login failed');
+  expect(screen.queryByText('login failed')).toBeNull();
   expect(
     screen.queryByRole('button', { name: /create account|edit roles/i }),
   ).toBeNull();
+  await fireEvent.changeText(
+    screen.getByLabelText('Search staff accounts'),
+    'at-risk',
+  );
   await fireEvent.press(
-    screen.getByRole('button', { name: 'View details for At Risk Staff' }),
+    await screen.findByRole('button', {
+      name: 'View details for At Risk Staff',
+    }),
   );
   await screen.findByRole('header', { name: 'Account details' });
+  expect(screen.queryByLabelText('Search staff accounts')).toBeNull();
   expect(
     h.fetcher.mock.calls.some(([request]) =>
       request.url.includes(`/api/v1/users/${account.id}`),
     ),
   ).toBe(true);
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Close account details' }),
+  );
+  expect(screen.getByLabelText('Search staff accounts').props.value).toBe(
+    'at-risk',
+  );
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Security events' }),
+  );
+  await screen.findByText('login failed');
   await fireEvent.press(
     screen.getByRole('button', { name: 'Sign-in failures' }),
   );
@@ -157,6 +174,7 @@ test('authorized account views are safe and deactivation requires confirmation',
       ),
     ).toBe(true),
   );
+  await fireEvent.press(screen.getByRole('button', { name: 'Staff accounts' }));
   await fireEvent.changeText(
     screen.getByLabelText('Search staff accounts'),
     'at-risk',
@@ -188,6 +206,47 @@ test('authorized account views are safe and deactivation requires confirmation',
   ).toBe(true);
   expect(screen.queryByText(/metadata|refresh token|password/i)).toBeNull();
   alert.mockRestore();
+});
+
+test('a rejected deactivation is an error beside the account and never a success', async () => {
+  const h = harness(async (request) => {
+    if (request.url.endsWith('/auth/me')) return json(admin);
+    if (request.url.endsWith('/deactivate'))
+      return json({ title: 'Final administrator' }, 409);
+    if (request.url.includes('/api/v1/users')) return json([account]);
+    if (request.url.includes('/api/v1/security-events')) return json([]);
+    return json(admin);
+  });
+  const alert = jest
+    .spyOn(Alert, 'alert')
+    .mockImplementation((_title, _message, buttons) => {
+      buttons?.find((button) => button.text === 'Deactivate')?.onPress?.();
+    });
+  try {
+    await renderRouter(
+      {
+        _layout: () => <Layout client={h.client} />,
+        index: StarterScreen,
+        login: LoginScreen,
+        session: SessionScreen,
+        'modules/[module]': ModuleScreen,
+      },
+      { initialUrl: '/' },
+    );
+    await act(async () => h.client.login('admin', 'fixture-password'));
+    await fireEvent.press(
+      await screen.findByRole('button', { name: 'Open Administration' }),
+    );
+    await fireEvent.press(
+      await screen.findByRole('button', { name: 'Deactivate At Risk Staff' }),
+    );
+    expect(
+      await screen.findByRole('alert', { name: /final active administrator/ }),
+    ).toBeVisible();
+    expect(screen.queryByText(/now inactive/)).toBeNull();
+  } finally {
+    alert.mockRestore();
+  }
 });
 
 test('API-forbidden account and event reads expose no previously rendered data', async () => {

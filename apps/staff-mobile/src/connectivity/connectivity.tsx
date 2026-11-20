@@ -38,6 +38,9 @@ type ConnectivityContextValue = {
   canMutate: boolean;
   isWriteDisabled: boolean;
   refreshConnection: () => Promise<void>;
+  refreshError: string | null;
+  beginWriteRefresh: () => void;
+  endWriteRefresh: () => void;
 };
 
 const ConnectivityContext = createContext<ConnectivityContextValue | null>(
@@ -50,6 +53,44 @@ function networkIsOnline(state: NetworkState) {
 
 export function ConnectivityProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
+  const [pendingRefreshes, setPendingRefreshes] = useState(0);
+  const [refreshFailures, setRefreshFailures] = useState<string[]>([]);
+  const failedHashes = useRef<string[]>([]);
+  useEffect(() => {
+    const cache = queryClient.getQueryCache();
+    return cache.subscribe(() => {
+      setRefreshFailures((current) => {
+        const remaining = current.filter((hash) => {
+          const query = cache.get(hash);
+          return (
+            query &&
+            (query.state.isInvalidated || query.state.status === 'error')
+          );
+        });
+        failedHashes.current = remaining;
+        return remaining.length === current.length ? current : remaining;
+      });
+    });
+  }, [queryClient]);
+  const beginWriteRefresh = useCallback(
+    () => setPendingRefreshes((count) => count + 1),
+    [],
+  );
+  const endWriteRefresh = useCallback(() => {
+    const failures = queryClient
+      .getQueryCache()
+      .findAll({ type: 'active' })
+      .filter(
+        (query) => query.state.isInvalidated && query.state.status === 'error',
+      )
+      .map((query) => query.queryHash);
+    setRefreshFailures((current) => {
+      const next = [...new Set([...current, ...failures])];
+      failedHashes.current = next;
+      return next;
+    });
+    setPendingRefreshes((count) => Math.max(0, count - 1));
+  }, [queryClient]);
   const [status, setStatus] = useState<ConnectivityStatus>(() => {
     // Prevent queries from racing ahead of the first native network snapshot.
     onlineManager.setOnline(false);
@@ -90,11 +131,17 @@ export function ConnectivityProvider({ children }: { children: ReactNode }) {
     try {
       const network = await getNetworkStateAsync();
       await applyNetworkState(network, true);
+      if (networkIsOnline(network) && failedHashes.current.length) {
+        await queryClient.refetchQueries({
+          predicate: (query) => failedHashes.current.includes(query.queryHash),
+          type: 'all',
+        });
+      }
     } catch {
       onlineManager.setOnline(false);
       updateStatus('offline');
     }
-  }, [applyNetworkState, updateStatus]);
+  }, [applyNetworkState, queryClient, updateStatus]);
 
   useEffect(() => {
     mounted.current = true;
@@ -123,8 +170,14 @@ export function ConnectivityProvider({ children }: { children: ReactNode }) {
       value={{
         status,
         canMutate,
-        isWriteDisabled: !canMutate,
+        isWriteDisabled:
+          !canMutate || pendingRefreshes > 0 || refreshFailures.length > 0,
         refreshConnection,
+        refreshError: refreshFailures.length
+          ? 'The change was saved, but current data could not be refreshed. Refresh before making another change.'
+          : null,
+        beginWriteRefresh,
+        endWriteRefresh,
       }}
     >
       {children}
@@ -154,22 +207,41 @@ type SafeMutationOptions<TData, TVariables> = Omit<
 export function useSafeMutation<TData = unknown, TVariables = void>(
   options: SafeMutationOptions<TData, TVariables>,
 ) {
-  const { status, canMutate, isWriteDisabled, refreshConnection } =
-    useConnectivity();
+  const {
+    status,
+    canMutate,
+    isWriteDisabled,
+    refreshConnection,
+    refreshError,
+    beginWriteRefresh,
+    endWriteRefresh,
+  } = useConnectivity();
   const queryClient = useQueryClient();
   const { mutationFn, onSuccess, onError, ...rest } = options;
+  const [confirmed, setConfirmed] = useState<{ data: TData } | null>(null);
   const mutation = useMutation<TData, Error, TVariables, unknown>({
     ...rest,
     mutationFn: async (variables) => {
       if (!canMutate || !onlineManager.isOnline())
         throw new OfflineWriteError();
+      if (isWriteDisabled)
+        throw new Error('Refresh current data before making another change.');
+      setConfirmed(null);
       return mutationFn(variables);
     },
     networkMode: 'always',
     retry: false,
     onSuccess: async (data, variables) => {
-      await queryClient.invalidateQueries({ type: 'active' });
-      await onSuccess?.(data, variables);
+      // The write is already confirmed. A subsequent slow/failed read must not
+      // hide that confirmation or be mistaken for an unsuccessful submission.
+      setConfirmed({ data });
+      beginWriteRefresh();
+      try {
+        await onSuccess?.(data, variables);
+        await queryClient.invalidateQueries({ type: 'active' });
+      } finally {
+        endWriteRefresh();
+      }
     },
     onError: async (error, variables) => {
       // A conflict means the cached revision lost authority; fetch the latest
@@ -181,6 +253,13 @@ export function useSafeMutation<TData = unknown, TVariables = void>(
   });
   return {
     ...mutation,
+    data: confirmed ? confirmed.data : mutation.data,
+    reset: () => {
+      setConfirmed(null);
+      mutation.reset();
+    },
+    isRefreshing: confirmed !== null && mutation.isPending,
+    refreshError,
     status,
     canMutate,
     isWriteDisabled,

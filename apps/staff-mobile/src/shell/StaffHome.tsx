@@ -14,7 +14,8 @@ import { permittedModules } from './permissions';
 
 export function StaffHome({
   user: verifiedUser,
-}: { user?: StaffSession } = {}) {
+  embedded = false,
+}: { user?: StaffSession; embedded?: boolean } = {}) {
   const { client, state } = useSession();
   if (state.status === 'restoring')
     return (
@@ -30,13 +31,11 @@ export function StaffHome({
       </ShellPage>
     );
   const modules = permittedModules(user.permissions);
-  return (
-    <ShellPage>
+  const content = (
+    <>
       <ShellHeading>Staff home</ShellHeading>
       <ShellText>{user.fullName}</ShellText>
-      <ShellText>
-        Choose a module. Access is checked again when you open it.
-      </ShellText>
+      <ShellText>Choose your workspace.</ShellText>
       {!modules.length && (
         <ShellText>
           No mobile modules are available for your permissions.
@@ -56,6 +55,7 @@ export function StaffHome({
       ))}
       <ShellButton
         label="Sign out"
+        variant="secondary"
         onPress={() => {
           void client
             ?.logout()
@@ -66,6 +66,7 @@ export function StaffHome({
             );
         }}
       />
-    </ShellPage>
+    </>
   );
+  return embedded ? content : <ShellPage>{content}</ShellPage>;
 }

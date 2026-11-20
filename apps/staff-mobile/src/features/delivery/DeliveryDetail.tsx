@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { Linking, StyleSheet, TextInput } from 'react-native';
+import { Linking, StyleSheet } from 'react-native';
 
 import { ApiError } from '../../api/errors';
 import { useSafeMutation } from '../../connectivity/connectivity';
@@ -12,6 +12,8 @@ import {
   ShellFeedback,
   ShellHeading,
   ShellText,
+  ShellInput,
+  ShellMutationFeedback,
 } from '../../shell/controls';
 
 export function DeliveryDetail({ orderId }: { orderId: string }) {
@@ -137,6 +139,7 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
         onPress={() => router.replace('/modules/delivery')}
       />
       <ShellHeading>Delivery details</ShellHeading>
+      <ShellMutationFeedback mutation={mutation} />
       {notice && <ShellFeedback kind="info" label={notice} />}
       {mutation.error && (
         <ShellFeedback
@@ -216,8 +219,8 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
                 }
                 onPress={() => void submit('complete')}
               />
-              <ShellText>Reason for failed delivery</ShellText>
-              <TextInput
+              <ShellInput
+                label="Reason for failed delivery"
                 accessibilityLabel="Failure reason"
                 value={reason}
                 style={styles.input}

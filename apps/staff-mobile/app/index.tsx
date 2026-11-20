@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ShellPage } from '../src/shell/controls';
 import { Link } from 'expo-router';
 
 export default function StarterScreen() {
   return (
-    <SafeAreaView style={styles.page}>
+    <ShellPage>
       <View style={styles.content}>
         <Text style={styles.eyebrow}>COFFEE SHOP</Text>
         <Text accessibilityRole="header" style={styles.title}>
@@ -18,7 +18,7 @@ export default function StarterScreen() {
           Staff sign-in
         </Link>
       </View>
-    </SafeAreaView>
+    </ShellPage>
   );
 }
 
@@ -35,6 +35,11 @@ const styles = StyleSheet.create({
   },
   eyebrow: { color: '#6d4936', fontSize: 14, letterSpacing: 2 },
   title: { color: '#302820', fontSize: 36, fontWeight: '700' },
-  description: { color: '#302820', fontSize: 20 },
+  description: {
+    color: '#302820',
+    fontSize: 20,
+    minHeight: 48,
+    paddingVertical: 8,
+  },
   note: { color: '#5e5248', fontSize: 16 },
 });
