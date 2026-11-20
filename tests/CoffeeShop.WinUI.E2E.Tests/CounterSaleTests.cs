@@ -376,6 +376,12 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
         input.Focus();
         Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_A);
         Keyboard.Type(text);
+        if (!input.Properties.IsPassword.ValueOrDefault)
+        {
+            var box = input.AsTextBox();
+            WaitFor($"text entry in {input.Properties.Name.ValueOrDefault}", () =>
+                box.Text == text ? box : null);
+        }
     }
 
     private static void ClickRow(AutomationElement window, string listId, string startsWith)
