@@ -37,9 +37,7 @@ public sealed partial class CounterSaleTests(ITestOutputHelper output)
         var loyalty = await ReadAsync<LoyaltySettingsResponse>(api, "loyalty-settings");
         var expectedPoints = (int)decimal.Floor(size.Price * loyalty.EarnPointsPerCurrencyUnit);
         Assert.True(expectedPoints > 0);
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        var firstDay = new DateOnly(today.Year, today.Month, 1);
-        var revenuePath = $"reports/revenue?from={firstDay:yyyy-MM-dd}&to={today:yyyy-MM-dd}&timeZone={Escape(TimeZoneInfo.Local.Id)}";
+        var revenuePath = $"reports/revenue?{CurrentPeriodQuery()}";
         var revenueBefore = await ReadAsync<RevenueReportResponse>(api, revenuePath);
         var activeOrdersBefore = (await ReadAsync<OperationalOrderResponse[]>(api, "operations/orders"))
             .Select(order => order.Id).ToHashSet();
@@ -64,15 +62,7 @@ public sealed partial class CounterSaleTests(ITestOutputHelper output)
             output.WriteLine("Attaching the customer and confirming a takeaway order from Counter.");
             Navigate(main, "Counter");
             Search(main, Drink);
-            var suggestBox = Find(main, "CustomerSearchBox");
-            var customerInput = WaitFor("Counter customer search input",
-                () => suggestBox.FindFirstDescendant(cf => cf.ByControlType(ControlType.Edit)));
-            TypeText(customerInput, customer.Phone);
-            WaitFor($"customer suggestion for {customer.FullName}", () =>
-                FindName(main, customer.FullName) ?? FindName(automation.GetDesktop(), customer.FullName));
-            Keyboard.Press(VirtualKeyShort.DOWN);
-            Keyboard.Press(VirtualKeyShort.ENTER);
-            WaitFor("attached customer name", () => customerInput.AsTextBox().Text == customer.FullName ? customerInput : null);
+            AttachCustomer(main, automation, customer);
             ClickRow(main, "MenuGrid", Drink);
             PressNamed(main, "Add to ticket");
             Find(main, "TakeawayTab").Patterns.SelectionItem.Pattern.Select();
@@ -355,6 +345,19 @@ public sealed partial class CounterSaleTests(ITestOutputHelper output)
         Navigate(window, "Customers");
         Search(window, customer.Phone);
         ClickRow(window, "CustomersList", customer.FullName);
+    }
+
+    private static void AttachCustomer(Window window, UIA3Automation automation, CustomerResponse customer)
+    {
+        var suggestBox = Find(window, "CustomerSearchBox");
+        var input = WaitFor("Counter customer search input",
+            () => suggestBox.FindFirstDescendant(cf => cf.ByControlType(ControlType.Edit)));
+        TypeText(input, customer.Phone);
+        WaitFor($"customer suggestion for {customer.FullName}", () =>
+            FindName(window, customer.FullName) ?? FindName(automation.GetDesktop(), customer.FullName));
+        Keyboard.Press(VirtualKeyShort.DOWN);
+        Keyboard.Press(VirtualKeyShort.ENTER);
+        WaitFor("attached customer name", () => input.AsTextBox().Text == customer.FullName ? input : null);
     }
 
     private static void Navigate(Window window, string workspace)

@@ -98,8 +98,8 @@ public sealed partial class CounterSaleTests
             WaitFor("received balance in the inventory table", () =>
                 FindRow(main, "IngredientsListView", $"{ingredientName}. {quantity:#,0.###} ml on hand."));
 
-            Find(main, "TabReceipts").Focus();
-            Keyboard.Press(VirtualKeyShort.SPACE);
+            ExpectText(main, "StatusMessageText", $"Done: Receipt #{receiptNumber} posted. Stock balances are up to date.");
+            Find(main, "TabReceipts").Click();
             ExpectName(Find(main, "ReceiptsListView"), receiptNumber);
             var suppliers = await ReadAsync<SupplierResponse[]>(api, "suppliers");
             var supplier = Assert.Single(suppliers, item => item.Name == supplierName);
@@ -120,10 +120,11 @@ public sealed partial class CounterSaleTests
     }
 
     [Fact]
-    public async Task CancellingConfirmedTicketRestoresStockAndKeepsRevenueUnchanged()
+    public async Task CancellingConfirmedTicketRestoresStockAndRedeemedPoints()
     {
         const string reason = "Guest cancelled before preparation.";
-        await RunWorkspaceAsync(async (main, _, api) =>
+        const int points = 2;
+        await RunWorkspaceAsync(async (main, automation, api) =>
         {
             var product = Assert.Single(await ReadAsync<MenuItemResponse[]>(api, $"menu-items?search={Escape(Drink)}"),
                 item => item.Name == Drink);
@@ -134,9 +135,14 @@ public sealed partial class CounterSaleTests
             var stock = await ReadAsync<IngredientBalanceResponse>(api, inventoryPath);
             var revenuePath = $"reports/revenue?{CurrentPeriodQuery()}";
             var revenueBefore = await ReadAsync<RevenueReportResponse>(api, revenuePath);
+            var customer = Assert.Single(await ReadAsync<CustomerResponse[]>(api, $"customers?search={Escape(CustomerPhone)}"),
+                profile => profile.Phone == CustomerPhone);
+            var customerPath = $"customers/{customer.Id}";
+            var loyalty = await ReadAsync<LoyaltySettingsResponse>(api, "loyalty-settings");
 
             Navigate(main, "Counter");
             Search(main, Drink);
+            AttachCustomer(main, automation, customer);
             ClickRow(main, "MenuGrid", Drink);
             PressNamed(main, "Add to ticket");
             Find(main, "TakeawayTab").Patterns.SelectionItem.Pattern.Select();
@@ -144,6 +150,13 @@ public sealed partial class CounterSaleTests
             var number = WaitFor("saved ticket number", () =>
                 FindId(main, "TicketKickerText") is { Name: var ticket } && ticket.StartsWith("POS-", StringComparison.Ordinal)
                     ? ticket : null);
+            Press(main, "LoyaltyButton");
+            TypeText(Find(main, "LoyaltyPointsBox"), points.ToString());
+            PressNamed(main, "Apply points");
+            var payable = variant.Price - points * loyalty.RedeemValuePerPoint;
+            ExpectText(main, "TicketTotalText", payable.ToString("0.00"));
+            Assert.Equal(customer.LoyaltyPointsBalance - points,
+                (await ReadAsync<CustomerDetailResponse>(api, customerPath)).LoyaltyPointsBalance);
             Press(main, "ConfirmButton");
             PressNamed(main, "Confirm order", excludeId: "ConfirmButton");
             ExpectText(main, "SelectedKicker", $"TICKET {number}");
@@ -163,7 +176,12 @@ public sealed partial class CounterSaleTests
             var movements = await ReadAsync<StockMovementResponse[]>(api, $"{inventoryPath}/movements");
             var adjustments = movements.Where(movement => movement.OrderId == ticket.Id).Select(movement => movement.QuantityDelta).Order().ToArray();
             Assert.Equal(new[] { -ingredient.Quantity, ingredient.Quantity }, adjustments);
+            var loyaltyHistory = await ReadAsync<LoyaltyHistoryResponse>(api, $"{customerPath}/loyalty-transactions");
+            var pointsByOrder = loyaltyHistory.Items.Where(entry => entry.OrderId == ticket.Id).Select(entry => entry.Points).Order().ToArray();
+            Assert.Equal(new[] { -points, points }, pointsByOrder);
             ExpectStock(main, stock, stock.AvailableQuantity);
+            OpenCustomer(main, customer);
+            ExpectText(main, "BalanceText", $"{customer.LoyaltyPointsBalance:N0} points");
             ExpectRevenue(main, revenueBefore.Revenue, revenueBefore.OrderCount);
         });
     }
@@ -186,6 +204,9 @@ public sealed partial class CounterSaleTests
             ExpectText(main, "RevenueOrderCount", report.OrderCount.ToString("N0"));
             var cash = report.ByPaymentMethod.FirstOrDefault(method => method.PaymentMethod == "cash");
             if (cash is not null) ExpectText(main, "PaymentOrderCount", cash.OrderCount.ToString("N0"));
+            var channels = await ReadAsync<ChannelReportResponse>(api, $"reports/channels?{CurrentPeriodQuery()}");
+            var takeaway = Assert.Single(channels.ByChannel, row => row.Channel == "takeaway");
+            WaitFor("takeaway order count in the breakdown", () => FindName(main, $"{takeaway.OrderCount} orders"));
             Press(main, "FiltersButton");
             Press(main, "ResetFiltersButton");
             Keyboard.Press(VirtualKeyShort.ESCAPE);
