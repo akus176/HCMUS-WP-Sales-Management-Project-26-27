@@ -100,7 +100,7 @@ public sealed partial class CounterSaleTests
 
             ExpectText(main, "StatusMessageText", $"Done: Receipt #{receiptNumber} posted. Stock balances are up to date.");
             Find(main, "TabReceipts").Click();
-            ExpectName(Find(main, "ReceiptsListView"), receiptNumber);
+            ExpectName(Find(main, "ReceiptsListView"), $"Receipt #{receiptNumber}");
             var suppliers = await ReadAsync<SupplierResponse[]>(api, "suppliers");
             var supplier = Assert.Single(suppliers, item => item.Name == supplierName);
             var receipts = await ReadAsync<ReceiptResponse[]>(api, "purchase-receipts");
