@@ -70,7 +70,7 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
             ClickRow(main, "DrinksList", Drink);
             ExpectText(main, "RecipeSummary", $"{ingredient.Quantity:0.###} {ingredient.Unit} · {stockBefore.Name}");
             ExpectName(Find(main, "VariantsList"), size.Price.ToString("0.00"));
-            ExpectStock(main, stockBefore.Name, stockBefore.AvailableQuantity);
+            ExpectStock(main, stockBefore, stockBefore.AvailableQuantity);
             OpenCustomer(main, customer);
             ExpectText(main, "BalanceText", $"{customer.LoyaltyPointsBalance:N0} points");
             ExpectRevenue(main, revenueBefore.Revenue, revenueBefore.OrderCount);
@@ -135,7 +135,7 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
             Assert.DoesNotContain(await ReadAsync<OperationalOrderResponse[]>(api, "operations/orders"), order => order.Id == created.Id);
 
             output.WriteLine("Reconciling stock, customer loyalty and recognized revenue after completion.");
-            ExpectStock(main, stockBefore.Name, stockBefore.AvailableQuantity - ingredient.Quantity);
+            ExpectStock(main, stockBefore, stockBefore.AvailableQuantity - ingredient.Quantity);
             var stockMovements = await ReadAsync<StockMovementResponse[]>(api, $"{inventoryPath}/movements");
             var used = Assert.Single(stockMovements, movement => movement.OrderId == created.Id);
             Assert.Equal(-ingredient.Quantity, used.QuantityDelta);
@@ -201,13 +201,11 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
         ExpectText(window, "RevenueOrderCount", count.ToString("N0"));
     }
 
-    private static void ExpectStock(Window window, string ingredient, decimal balance)
+    private static void ExpectStock(Window window, IngredientBalanceResponse ingredient, decimal balance)
     {
         Navigate(window, "Stock room");
-        TypeText(Find(window, "SearchBox"), ingredient);
-        ClickRow(window, "IngredientsListView", ingredient);
-        ExpectText(window, "DrawerIngredientTitle", ingredient);
-        ExpectText(window, "DrawerBalanceValue", balance.ToString("#,0.###"));
+        var expected = $"{ingredient.Name}. {balance:#,0.###} {ingredient.BaseUnit} on hand.";
+        WaitFor(expected, () => FindRow(window, "IngredientsListView", expected));
     }
 
     private static void OpenCustomer(Window window, CustomerResponse customer)
@@ -237,6 +235,7 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
 
     private static void TypeText(AutomationElement input, string text)
     {
+        WaitFor("enabled text input", () => input.IsEnabled ? input : null);
         input.Focus();
         Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_A);
         Keyboard.Type(text);
@@ -244,13 +243,15 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
 
     private static void ClickRow(AutomationElement window, string listId, string startsWith)
     {
-        var list = WaitFor(listId, () => FindId(window, listId) ?? (listId == "DrinksList" ? FindName(window, "Drinks and recipes") : null));
-        var item = WaitFor($"{startsWith} in {listId}", () => list.FindAllDescendants(cf => cf.ByControlType(ControlType.ListItem))
-            .FirstOrDefault(row => row.IsEnabled
-                && row.Properties.Name.ValueOrDefault?.StartsWith(startsWith, StringComparison.Ordinal) == true));
+        var item = WaitFor($"{startsWith} in {listId}", () => FindRow(window, listId, startsWith));
         if (item.Patterns.Invoke.PatternOrDefault is { } invoke) invoke.Invoke();
         else item.Patterns.SelectionItem.Pattern.Select();
     }
+
+    private static AutomationElement? FindRow(AutomationElement window, string listId, string startsWith) =>
+        FindId(window, listId)?.FindAllDescendants(cf => cf.ByControlType(ControlType.ListItem))
+            .FirstOrDefault(row => row.IsEnabled
+                && row.Properties.Name.ValueOrDefault?.StartsWith(startsWith, StringComparison.Ordinal) == true);
 
     private static void Press(AutomationElement root, string automationId) =>
         WaitFor($"enabled {automationId}", () => FindId(root, automationId) is { IsEnabled: true } button
