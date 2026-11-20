@@ -83,11 +83,46 @@ docker compose run --rm --volume 'C:/CafePhotos:/uploads:ro' --entrypoint aws st
 Clients may cache photos for up to five minutes. The design reference pages also
 load their photographs from the local storage endpoint.
 
-Run `bash scripts/verify-menu-photo-storage.sh` for a disposable storage check.
-It creates temporary text objects outside the repository, checks downloaded bytes,
-rejects anonymous listing, uploads and deletion, and verifies replacement
-preservation and persistence after container recreation. It removes only its own
-test containers, volume, and temporary files.
+Run `python scripts/verify-menu-photo-import.py` for the complete storage check
+(`python3` in WSL/Linux). It restores all 27 pictures into a disposable volume,
+checks downloaded bytes, rejects anonymous listing, uploads and deletion, and
+verifies replacement preservation and persistence after container recreation.
+It removes only its own test containers, volume, and temporary files.
+
+## Development and migrations
+
+For the full .NET regression, set a disposable PostgreSQL administrator connection
+in a separate PowerShell session. Database tests create and remove their own
+databases; without this setting they skip.
+
+```powershell
+$env:COFFEESHOP_TEST_POSTGRES = Read-Host 'Disposable PostgreSQL administrator connection' -MaskInput
+try {
+    foreach ($project in @('Domain', 'Application', 'WinUI', 'Infrastructure', 'Api')) {
+        dotnet test "tests/CoffeeShop.$project.Tests" -c Release
+        if ($LASTEXITCODE -ne 0) { throw "$project tests failed." }
+    }
+} finally { Remove-Item Env:COFFEESHOP_TEST_POSTGRES }
+```
+
+For EF Core commands outside Compose, set `ConnectionStrings__CoffeeShop` in the
+process environment; EF does not load Compose's `.env`. Use an administrator
+connection to the development database. Rebase on `main` before adding a migration.
+
+```powershell
+dotnet tool restore
+dotnet ef migrations add <MigrationName> `
+  --project src/CoffeeShop.Infrastructure.Postgres `
+  --startup-project src/CoffeeShop.Infrastructure.Postgres `
+  --output-dir Migrations
+dotnet ef database update `
+  --project src/CoffeeShop.Infrastructure.Postgres `
+  --startup-project src/CoffeeShop.Infrastructure.Postgres
+```
+
+Verify migrations against a newly created empty database, then rerun the update to
+confirm no migrations remain pending. The standard Compose startup applies
+committed migrations automatically.
 
 ## Automated clean-start check
 

@@ -45,9 +45,11 @@ The source manifest and photographer credits are checked into the repository;
 picture files are not.
 
 Run `python3 scripts/verify-menu-photo-import.py` to check this workflow against
-a new disposable storage volume. It verifies all menu and design-page references,
-downloads every photo, and checks that the bytes survive container recreation.
-The check removes only its own temporary services, volume, and credentials file.
+a new disposable storage volume. It verifies menu and design-page references,
+downloads every photo, checks anonymous access restrictions, and verifies that
+replacement objects and picture bytes survive initialization and container
+recreation. The check removes only its own temporary services, volume, and
+credentials file.
 
 Rebuild and relaunch WinUI to pick up the expanded photo mappings. Refresh the
 Counter or Menu workspace to see the database additions. Accented `Café Latte`
