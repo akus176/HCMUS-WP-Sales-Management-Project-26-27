@@ -1,14 +1,25 @@
 -- Corner Cafe Windows walkthrough data. Apply after EF migrations and staff-role seeding.
--- Requires an empty, dedicated corner_cafe_windows_demo database. All people and contact details are fictional.
+-- Requires an empty demo database. Use -v demo_database=NAME to explicitly select a different empty database.
+-- All people and contact details are fictional.
 \set ON_ERROR_STOP on
+\if :{?demo_database}
+\else
+\set demo_database corner_cafe_windows_demo
+\endif
 BEGIN;
+
+SELECT set_config('coffeeshop.demo_seed_database', :'demo_database', true);
 
 DO $$
 BEGIN
-    IF current_database() <> 'corner_cafe_windows_demo' THEN
-        RAISE EXCEPTION 'This seed is reserved for the corner_cafe_windows_demo database.';
+    IF current_database() <> current_setting('coffeeshop.demo_seed_database') THEN
+        RAISE EXCEPTION 'This seed must run against the explicitly selected demo database.';
     END IF;
-    IF EXISTS (SELECT 1 FROM catalog.menu_items) OR EXISTS (SELECT 1 FROM sales.orders) THEN
+    IF EXISTS (SELECT 1 FROM catalog.categories) OR EXISTS (SELECT 1 FROM catalog.menu_items)
+        OR EXISTS (SELECT 1 FROM catalog.addons) OR EXISTS (SELECT 1 FROM sales.tables)
+        OR EXISTS (SELECT 1 FROM sales.orders) OR EXISTS (SELECT 1 FROM customers.customers)
+        OR EXISTS (SELECT 1 FROM customers.loyalty_settings) OR EXISTS (SELECT 1 FROM inventory.ingredients)
+        OR EXISTS (SELECT 1 FROM inventory.suppliers) OR EXISTS (SELECT 1 FROM inventory.purchase_receipts) THEN
         RAISE EXCEPTION 'The demo database already contains data.';
     END IF;
     IF NOT EXISTS (SELECT 1 FROM identity.roles WHERE code = 'DeliveryStaff') THEN
