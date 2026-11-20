@@ -1,6 +1,46 @@
 name: coffeeshop
 
 services:
+  storage:
+    image: rustfs/rustfs:1.0.5
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?Set STORAGE_ACCESS_KEY in .env}
+      RUSTFS_SECRET_KEY: ${STORAGE_SECRET_KEY:?Set STORAGE_SECRET_KEY in .env}
+      RUSTFS_ADDRESS: "0.0.0.0:9000"
+      RUSTFS_CONSOLE_ADDRESS: "0.0.0.0:9001"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_OBS_LOGGER_LEVEL: warn
+    command: ["/data"]
+    ports:
+      - "127.0.0.1:${STORAGE_PORT:-9000}:9000"
+      - "127.0.0.1:${STORAGE_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - menu_photos:/data
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:9000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 15s
+
+  storage-init:
+    image: amazon/aws-cli:2.32.0
+    depends_on:
+      storage:
+        condition: service_healthy
+    environment:
+      AWS_ACCESS_KEY_ID: ${STORAGE_ACCESS_KEY:?Set STORAGE_ACCESS_KEY in .env}
+      AWS_SECRET_ACCESS_KEY: ${STORAGE_SECRET_KEY:?Set STORAGE_SECRET_KEY in .env}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+      AWS_PAGER: ""
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+    volumes:
+      - ./scripts/storage:/bootstrap:ro
+    entrypoint: ["/bin/sh", "/bootstrap/init-menu-storage.sh"]
+
   postgres:
     image: postgres:18-alpine
     restart: unless-stopped
@@ -32,18 +72,44 @@ services:
       Jwt__Issuer: ${Jwt__Issuer:?Set Jwt__Issuer in .env}
       Jwt__Audience: ${Jwt__Audience:?Set Jwt__Audience in .env}
       Jwt__SigningKey: ${Jwt__SigningKey:?Set Jwt__SigningKey in .env}
+      Assistant__Provider: "${Assistant__Provider:-none}"
+      Assistant__Endpoint: "${Assistant__Endpoint:-https://api.openai.com/v1/chat/completions}"
+      Assistant__Model: "${Assistant__Model:-}"
+      Assistant__ApiKey: "${Assistant__ApiKey:-}"
       ASPNETCORE_ENVIRONMENT: Production
     ports:
       - "127.0.0.1:${API_PORT:-5232}:8080"
     depends_on:
       postgres:
         condition: service_healthy
+      storage-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "bash", "/app/healthcheck.sh"]
       interval: 10s
       timeout: 5s
       retries: 6
       start_period: 10s
+
+  menu-enrichment:
+    profiles: [enrichment]
+    image: postgres:18-alpine
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGDATABASE: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      PGUSER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - type: bind
+        source: ./scripts/postgres/enrich-menu.sql
+        target: /demo/enrich-menu.sql
+        read_only: true
+        bind:
+          create_host_path: false
+    entrypoint: ["psql", "-X", "-v", "ON_ERROR_STOP=1", "-f", "/demo/enrich-menu.sql"]
 
   demo-data:
     profiles: [demo]
@@ -67,3 +133,4 @@ services:
 
 volumes:
   postgres_data:
+  menu_photos:
