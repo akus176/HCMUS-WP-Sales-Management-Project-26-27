@@ -179,9 +179,10 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
                 output.WriteLine($"Window: {window.Name} ({window.BoundingRectangle})");
                 foreach (var element in window.FindAllDescendants().Where(element => !element.IsOffscreen).Take(180))
                 {
-                    var label = element.ControlType == ControlType.Edit ? "" : element.Name;
-                    if (!string.IsNullOrEmpty(label) || !string.IsNullOrEmpty(element.AutomationId))
-                        output.WriteLine($"{element.ControlType} {element.AutomationId} '{label}'");
+                    var label = element.ControlType == ControlType.Edit ? "" : element.Properties.Name.ValueOrDefault;
+                    var id = element.Properties.AutomationId.ValueOrDefault;
+                    if (!string.IsNullOrEmpty(label) || !string.IsNullOrEmpty(id))
+                        output.WriteLine($"{element.ControlType} {id} '{label}'");
                 }
             }
         }
@@ -214,8 +215,17 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
         ClickRow(window, "CustomersList", customer.FullName);
     }
 
-    private static void Navigate(Window window, string workspace) =>
-        WaitFor($"Open {workspace} workspace", () => FindName(window, $"Open {workspace} workspace")).Click();
+    private static void Navigate(Window window, string workspace)
+    {
+        var name = $"Open {workspace} workspace";
+        if (FindName(window, name) is not { IsOffscreen: false }
+            && FindId(window, "MenuToggle") is { IsOffscreen: false } toggle)
+            toggle.AsButton().Invoke();
+        var item = WaitFor(name, () => FindName(window, name) is { IsEnabled: true, IsOffscreen: false } target ? target : null);
+        if (item.Patterns.SelectionItem.PatternOrDefault is { } selection) selection.Select();
+        else item.Click();
+        ExpectText(window, "BreadcrumbText", workspace.ToUpperInvariant());
+    }
 
     private static void Search(Window window, string query)
     {
@@ -225,26 +235,27 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
 
     private static void TypeText(AutomationElement input, string text)
     {
-        input.Click();
+        input.Focus();
         Keyboard.TypeSimultaneously(VirtualKeyShort.CONTROL, VirtualKeyShort.KEY_A);
         Keyboard.Type(text);
     }
 
     private static void ClickRow(AutomationElement window, string listId, string startsWith)
     {
-        var list = Find(window, listId);
+        var list = WaitFor(listId, () => FindId(window, listId) ?? (listId == "DrinksList" ? FindName(window, "Drinks and recipes") : null));
         WaitFor($"{startsWith} in {listId}", () => list.FindAllDescendants(cf => cf.ByControlType(ControlType.ListItem))
-            .FirstOrDefault(row => row.Name.StartsWith(startsWith, StringComparison.Ordinal))).Click();
+            .FirstOrDefault(row => row.Properties.Name.ValueOrDefault?.StartsWith(startsWith, StringComparison.Ordinal) == true)).Click();
     }
 
     private static void Press(AutomationElement root, string automationId) =>
-        WaitFor($"enabled {automationId}", () => FindId(root, automationId) is { IsEnabled: true, IsOffscreen: false } button
+        WaitFor($"enabled {automationId}", () => FindId(root, automationId) is { IsEnabled: true } button
             ? button : null).AsButton().Invoke();
 
     private static void PressNamed(AutomationElement root, string name, string? excludeId = null) =>
         WaitFor($"enabled {name} button", () =>
             root.FindAllDescendants(cf => cf.ByName(name).And(cf.ByControlType(ControlType.Button)))
-                .FirstOrDefault(button => button.AutomationId != excludeId && button.IsEnabled && !button.IsOffscreen))
+                .FirstOrDefault(button => (excludeId is null || button.Properties.AutomationId.ValueOrDefault != excludeId)
+                    && button.IsEnabled && !button.IsOffscreen))
             .AsButton().Invoke();
 
     private static void ExpectText(AutomationElement root, string id, string expected)
@@ -253,7 +264,7 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
         WaitFor($"{id} to show '{expected}'", () =>
         {
             var element = FindId(root, id);
-            actual = element?.Name;
+            actual = element?.Properties.Name.ValueOrDefault;
             return actual == expected ? element : null;
         }, () => $" Last value: '{actual}'.");
     }
