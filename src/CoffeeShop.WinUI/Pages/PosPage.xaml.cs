@@ -30,35 +30,6 @@ public sealed record CounterSavedLine(PosLineSnapshot Line)
 
 public sealed record CounterMenuCard(MenuItemSummary Item)
 {
-    private static readonly Dictionary<string, string> Photos = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["Americano"] = "espresso",
-        ["Cappuccino"] = "cappuccino",
-        ["Flat White"] = "flat-white",
-        ["Espresso Tonic"] = "iced-coffee",
-        ["Cold Brew"] = "cold-brew",
-        ["Vietnamese Iced Coffee"] = "iced-coffee",
-        ["Matcha Latte"] = "matcha",
-        ["Chai Latte"] = "chai",
-        ["Peach Iced Tea"] = "iced-tea",
-        ["Butter Croissant"] = "croissant",
-        ["Almond Croissant"] = "croissant",
-        ["Banana Bread"] = "banana-bread",
-        ["House Espresso"] = "espresso",
-        ["Cafe Latte"] = "latte",
-        ["Vanilla Latte"] = "latte",
-        ["Caramel Macchiato"] = "latte",
-        ["Mocha"] = "cappuccino",
-        ["Coconut Cold Brew"] = "cold-brew",
-        ["Peach Green Tea"] = "iced-tea",
-        ["Jasmine Milk Tea"] = "chai",
-        ["Strawberry Frappe"] = "iced-coffee",
-        ["Chocolate Frappe"] = "iced-coffee",
-        ["Mango Smoothie"] = "iced-tea",
-        ["Blueberry Muffin"] = "bakery",
-        ["Pumpkin Spice Latte"] = "latte",
-        ["Honey Oat Latte"] = "latte"
-    };
     public string Name =>
         Item.Name;
 
@@ -68,15 +39,7 @@ public sealed record CounterMenuCard(MenuItemSummary Item)
     public string Price =>
         $"from {Item.SizeVariants.Where(size => size.IsActive).Min(size => size.Price):0.00}";
 
-    public BitmapImage Photo
-    {
-        get
-        {
-            var name = Item.Name.StartsWith("Midterm ", StringComparison.OrdinalIgnoreCase)
-                ? Item.Name[8..] : Item.Name;
-            return new BitmapImage(new Uri($"ms-appx:///Assets/Photos/{(Photos.TryGetValue(name, out var file) ? file : "cafe-bar")}.jpg"));
-        }
-    }
+    public BitmapImage Photo => new(MenuPhotoSource.ForItem(Item.Name));
 }
 
 public sealed partial class PosPage : Page

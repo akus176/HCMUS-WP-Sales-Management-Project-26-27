@@ -6,7 +6,7 @@ WinUI 3 desktop client and ASP.NET Core API for a coffee-shop management system.
 
 - Windows 10 1809 or later, x64, and the .NET 10 SDK. `global.json` selects the latest installed stable .NET 10 feature band, even when .NET 11 is installed. Visual Studio with Windows App SDK tooling is optional for the commands below.
 - PowerShell 7.4 or later for local setup.
-- Docker Desktop with its Linux engine running and the `docker compose` plugin available. Compose supplies PostgreSQL 18 and the API. Install `psql` separately if you use the direct PostgreSQL instructions.
+- Docker Desktop with its Linux engine running and the `docker compose` plugin available. Compose supplies PostgreSQL 18, the API, and local RustFS photo storage. Install `psql` separately if you use the direct PostgreSQL instructions.
 
 ## Start the API and WinUI on Windows
 
@@ -20,6 +20,8 @@ if (-not (Test-Path -LiteralPath .env)) {
         'replace-with-local-password', [Security.Cryptography.RandomNumberGenerator]::GetHexString(48)
     ).Replace(
         'replace-with-a-long-random-local-key', [Security.Cryptography.RandomNumberGenerator]::GetHexString(64)
+    ).Replace(
+        'replace-with-local-storage-password', [Security.Cryptography.RandomNumberGenerator]::GetHexString(48)
     )
     Set-Content -LiteralPath .env -Value $settings -Encoding utf8NoBOM
     Remove-Variable settings
@@ -32,7 +34,17 @@ Invoke-RestMethod http://127.0.0.1:5232/health
 Invoke-RestMethod http://127.0.0.1:5232/health/ready
 ```
 
-Check for `healthy` on both services and `Healthy` from both HTTP requests. The API applies committed EF Core migrations on startup. The PostgreSQL named volume retains data across restarts. Keep `.env` out of commits and GitHub attachments. A team copy belongs only in the private channel restricted to the five project members.
+Check for `healthy` on the API, PostgreSQL, and storage services, and `Healthy` from both API HTTP requests. The `storage-init` service exits successfully after ensuring the menu image bucket and read policy exist. Pictures live only in storage. After startup, run `python3 scripts/storage/import-unsplash-photos.py` from WSL/Linux to download all 27 seed pictures from Unsplash into a fresh bucket. The API applies committed EF Core migrations on startup. Named volumes retain the database and stored photos across restarts. Keep `.env` out of commits and GitHub attachments. A team copy belongs only in the private channel restricted to the five project members.
+
+Drink pictures are served from the local `menu-images` bucket, for example
+[latte.jpg](http://127.0.0.1:9000/menu-images/latte.jpg). Manage pictures in the
+[storage console](http://127.0.0.1:9001) using `STORAGE_ACCESS_KEY` and
+`STORAGE_SECRET_KEY` from `.env`. Existing checkouts must add these settings before
+starting Compose. See [photo storage](docs/docker-compose.md#menu-photo-storage)
+for configuration and upload commands.
+
+The [menu enrichment guide](docs/menu-enrichment.md) expands the Windows demo to
+28 items and imports matching Unsplash photographs directly into storage.
 
 For a fresh disposable demo database, load the sample catalog, stock, customers, and sales after both services are healthy. The seed replaces its sample rows on rerun, so use it before making demo changes. See the [Compose guide](docs/docker-compose.md#demo-dataset) for counts and the clean-volume check.
 
@@ -67,7 +79,7 @@ $env:COFFEESHOP_API_BASE_URL = 'http://127.0.0.1:5232/api/v1/'
 dotnet run --project src/CoffeeShop.WinUI -c Release -r win-x64 -p:WindowsAppSDKSelfContained=true
 ```
 
-Close WinUI and run `docker compose down` to stop the services and keep the database. Use `docker compose down --volumes` only to delete your disposable database and start again. For port conflicts, unhealthy services, or sign-in issues, see [Compose troubleshooting](docs/docker-compose.md#troubleshooting).
+Close WinUI and run `docker compose down` to stop the services and keep the database and photos. Use `docker compose down --volumes` only to delete your disposable database and photo storage and start again. For port conflicts, unhealthy services, or sign-in issues, see [Compose troubleshooting](docs/docker-compose.md#troubleshooting).
 
 ## Build and test
 

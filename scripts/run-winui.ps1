@@ -60,7 +60,7 @@ else {
 
     Push-Location -LiteralPath $repositoryRoot
     try {
-        Write-Host 'Starting the API and database with Docker Compose…'
+        Write-Host 'Starting the API, database, and photo storage with Docker Compose…'
         docker compose up --build --detach --wait --wait-timeout 180 api
         if ($LASTEXITCODE -ne 0) { throw 'Docker Compose could not start the API. Check Docker Desktop and run docker compose ps.' }
         $publishedAddress = docker compose port api 8080
@@ -68,6 +68,11 @@ else {
             throw 'Could not determine the API port from Docker Compose.'
         }
         $apiUrl = "http://$publishedAddress"
+        $photoAddress = docker compose port storage 9000
+        if ($LASTEXITCODE -ne 0 -or $photoAddress -notmatch '^127\.0\.0\.1:\d+$') {
+            throw 'Could not determine the photo storage port from Docker Compose.'
+        }
+        $env:COFFEESHOP_MENU_PHOTOS_BASE_URL = "http://$photoAddress/menu-images/"
 
         dotnet build src/CoffeeShop.WinUI -c Release -r win-x64 -p:WindowsAppSDKSelfContained=true
         if ($LASTEXITCODE -ne 0) { throw 'The WinUI build failed.' }
