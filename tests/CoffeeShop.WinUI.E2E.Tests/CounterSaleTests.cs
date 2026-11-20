@@ -37,8 +37,8 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
         Assert.Equal(18m, ingredient.Quantity);
         var inventoryPath = $"ingredients/{ingredient.IngredientId}";
         var stockBefore = await ReadAsync<IngredientBalanceResponse>(api, inventoryPath);
-        var customer = Assert.Single((await ReadAsync<PageResponse<CustomerResponse>>(api,
-            $"customers?search={Escape(CustomerPhone)}")).Items);
+        var customer = Assert.Single(await ReadAsync<CustomerResponse[]>(api, $"customers?search={Escape(CustomerPhone)}"),
+            profile => profile.Phone == CustomerPhone);
         var loyalty = await ReadAsync<LoyaltySettingsResponse>(api, "loyalty-settings");
         var expectedPoints = (int)decimal.Floor(size.Price * loyalty.EarnPointsPerCurrencyUnit);
         Assert.True(expectedPoints > 0);
@@ -144,7 +144,9 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
                 Find(main, "OrdersList").FindAllDescendants().FirstOrDefault(element =>
                     element.Name.StartsWith($"{confirmed.OrderNumber}, completed,", StringComparison.OrdinalIgnoreCase)));
             Assert.Contains(size.Price.ToString("N2"), orderRow.Name, StringComparison.Ordinal);
-            ExpectName(Find(main, "HistoryList"), $"Order {created.Id.ToString()[..8].ToUpperInvariant()}");
+            WaitFor("customer ledger entry linked to the order", () =>
+                Find(main, "HistoryList").FindAllDescendants().FirstOrDefault(element =>
+                    element.Name.Contains($"order {created.Id}", StringComparison.OrdinalIgnoreCase)));
             var history = await ReadAsync<LoyaltyHistoryResponse>(api, $"customers/{customer.Id}/loyalty-transactions");
             var earned = Assert.Single(history.Items, entry => entry.OrderId == created.Id);
             Assert.Equal(expectedPoints, earned.Points);
