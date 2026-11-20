@@ -29,7 +29,8 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
         var token = await signIn.Content.ReadFromJsonAsync<TokenResponse>();
         api.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token!.AccessToken);
 
-        var menu = Assert.Single(await ReadAsync<MenuItemResponse[]>(api, $"menu-items?search={Escape(Drink)}"));
+        var menu = Assert.Single(await ReadAsync<MenuItemResponse[]>(api, $"menu-items?search={Escape(Drink)}"),
+            item => item.Name == Drink);
         var size = Assert.Single(menu.SizeVariants);
         var recipe = await ReadAsync<RecipeResponse>(api, $"recipes/{size.Id}");
         var ingredient = Assert.Single(recipe.Lines);
@@ -90,12 +91,16 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
             Find(main, "TakeawayTab").Patterns.SelectionItem.Pattern.Select();
             ExpectText(main, "TicketTotalText", size.Price.ToString("0.00"));
             Press(main, "SaveButton");
+            var ticketNumber = WaitFor("saved ticket number", () =>
+                FindId(main, "TicketKickerText") is { Name: var number }
+                && number.StartsWith("POS-", StringComparison.Ordinal) ? number : null);
+            ExpectText(main, "CustomerText", customer.FullName);
+            ExpectText(main, "TicketTotalText", size.Price.ToString("0.00"));
             Press(main, "ConfirmButton");
             PressNamed(main, "Confirm order", excludeId: "ConfirmButton");
 
             output.WriteLine("Checking the same customer, drink and total on Service board, then fulfilling the ticket.");
-            WaitFor("confirmed ticket on Service board", () => FindId(main, "SelectedKicker") is { Name: var label } kicker
-                && label.StartsWith("TICKET POS-", StringComparison.Ordinal) ? kicker : null);
+            ExpectText(main, "SelectedKicker", $"TICKET {ticketNumber}");
             var created = Assert.Single(await ReadAsync<OperationalOrderResponse[]>(api, "operations/orders"),
                 order => !activeOrdersBefore.Contains(order.Id));
             var orderPath = $"orders/{created.Id}";
@@ -108,7 +113,7 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
             Assert.Equal(size.SizeName, line.SizeName);
             Assert.Equal(1, line.Quantity);
             Assert.Equal(size.Price, confirmed.Total);
-            ExpectText(main, "SelectedKicker", $"TICKET {confirmed.OrderNumber}");
+            Assert.Equal(ticketNumber, confirmed.OrderNumber);
             ExpectText(main, "SelectedCustomer", customer.FullName);
             ExpectText(main, "TotalText", size.Price.ToString("0.00"));
             ExpectName(Find(main, "OrderLinesList"), Drink);
@@ -150,9 +155,37 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
             Assert.Equal(revenueBefore.Revenue + size.Price, revenueAfter.Revenue);
             Assert.Equal(revenueBefore.OrderCount + 1, revenueAfter.OrderCount);
         }
+        catch
+        {
+            WriteDesktopDiagnostics(app, automation);
+            throw;
+        }
         finally
         {
             if (!app.HasExited) app.Kill();
+        }
+    }
+
+    private void WriteDesktopDiagnostics(Application app, UIA3Automation automation)
+    {
+        try
+        {
+            using var runner = Process.GetCurrentProcess();
+            output.WriteLine($"Runner session {runner.SessionId}, interactive: {Environment.UserInteractive}, app exited: {app.HasExited}.");
+            foreach (var window in app.GetAllTopLevelWindows(automation))
+            {
+                output.WriteLine($"Window: {window.Name} ({window.BoundingRectangle})");
+                foreach (var element in window.FindAllDescendants().Where(element => !element.IsOffscreen).Take(180))
+                {
+                    var label = element.ControlType == ControlType.Edit ? "" : element.Name;
+                    if (!string.IsNullOrEmpty(label) || !string.IsNullOrEmpty(element.AutomationId))
+                        output.WriteLine($"{element.ControlType} {element.AutomationId} '{label}'");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            output.WriteLine($"Desktop diagnostics unavailable: {ex.Message}");
         }
     }
 
