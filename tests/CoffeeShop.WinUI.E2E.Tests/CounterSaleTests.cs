@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Runtime.InteropServices;
 using CoffeeShop.Contracts;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
@@ -13,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace CoffeeShop.WinUI.E2E.Tests;
 
-public sealed class CounterSaleTests(ITestOutputHelper output)
+public sealed partial class CounterSaleTests(ITestOutputHelper output)
 {
     private const string Drink = "House Espresso";
     private const string CustomerPhone = "+84000000001";
@@ -277,10 +278,14 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
 
     private static void SelectOption(Window window, UIA3Automation automation, string field, string choice)
     {
-        var combo = NamedControl(window, field, ControlType.ComboBox);
+        SelectOption(window, automation, NamedControl(window, field, ControlType.ComboBox), choice);
+    }
+
+    private static void SelectOption(Window window, UIA3Automation automation, AutomationElement combo, string choice)
+    {
         var dropdown = combo.Patterns.ExpandCollapse.Pattern;
         dropdown.Expand();
-        var option = WaitFor($"{choice} in {field}", () =>
+        var option = WaitFor($"{choice} in {combo.Properties.Name.ValueOrDefault}", () =>
             window.FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem)))
             ?? automation.GetDesktop().FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem))));
         option.Patterns.SelectionItem.Pattern.Select();
@@ -386,15 +391,15 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
 
     private static void ClickRow(AutomationElement window, string listId, string startsWith)
     {
-        var item = WaitFor($"{startsWith} in {listId}", () => FindRow(window, listId, startsWith));
+        var item = WaitFor($"{startsWith} in {listId}", () =>
+            FindRow(window, listId, startsWith) is { IsEnabled: true } row ? row : null);
         if (item.Patterns.Invoke.PatternOrDefault is { } invoke) invoke.Invoke();
         else item.Patterns.SelectionItem.Pattern.Select();
     }
 
     private static AutomationElement? FindRow(AutomationElement window, string listId, string startsWith) =>
         FindId(window, listId)?.FindAllDescendants(cf => cf.ByControlType(ControlType.ListItem))
-            .FirstOrDefault(row => row.IsEnabled
-                && row.Properties.Name.ValueOrDefault?.StartsWith(startsWith, StringComparison.Ordinal) == true);
+            .FirstOrDefault(row => row.Properties.Name.ValueOrDefault?.StartsWith(startsWith, StringComparison.Ordinal) == true);
 
     private static void Press(AutomationElement root, string automationId) =>
         WaitFor($"enabled {automationId}", () => FindId(root, automationId) is { IsEnabled: true } button
@@ -433,12 +438,21 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
     private static T WaitFor<T>(string description, Func<T?> find, Func<string>? details = null) where T : class
     {
         var timer = Stopwatch.StartNew();
+        COMException? unavailableElement = null;
         do
         {
-            if (find() is { } result) return result;
+            try
+            {
+                if (find() is { } result) return result;
+            }
+            catch (COMException exception) when (exception.HResult == unchecked((int)0x80040201))
+            {
+                // WinUI can replace a virtualized row between discovery and reading its properties.
+                unavailableElement = exception;
+            }
             Thread.Sleep(150);
         } while (timer.Elapsed < TimeSpan.FromSeconds(25));
-        throw new TimeoutException($"Timed out waiting for {description}.{details?.Invoke()}");
+        throw new TimeoutException($"Timed out waiting for {description}.{details?.Invoke()}", unavailableElement);
     }
 
     private static async Task<T> ReadAsync<T>(HttpClient client, string path) =>
