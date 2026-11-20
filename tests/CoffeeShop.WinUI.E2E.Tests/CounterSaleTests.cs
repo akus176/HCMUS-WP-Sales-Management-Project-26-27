@@ -129,8 +129,8 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
             Press(main, "PayButton");
             ExpectText(main, "BalanceText", $"Paid {size.Price:0.00} · Due {0m:0.00}");
             Press(main, "CompleteButton");
-            WaitFor("completed ticket removed from the active board", () =>
-                FindId(main, "SelectedKicker") is { } kicker && kicker.Name != $"TICKET {confirmed.OrderNumber}" ? kicker : null);
+            ExpectText(main, "SelectedState", "Completed · Takeaway");
+            ExpectText(main, "SummaryText", $"{activeOrdersBefore.Count} active tickets · Select a note to manage its order");
             Assert.Equal("completed", (await ReadAsync<OrderResponse>(api, orderPath)).Status);
             Assert.DoesNotContain(await ReadAsync<OperationalOrderResponse[]>(api, "operations/orders"), order => order.Id == created.Id);
 
@@ -142,12 +142,12 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
             OpenCustomer(main, customer);
             ExpectText(main, "BalanceText", $"{customer.LoyaltyPointsBalance + expectedPoints:N0} points");
             var orderRow = WaitFor("completed order in customer history", () =>
-                Find(main, "OrdersList").FindAllDescendants().FirstOrDefault(element =>
-                    element.Name.StartsWith($"{confirmed.OrderNumber}, completed,", StringComparison.OrdinalIgnoreCase)));
-            Assert.Contains(size.Price.ToString("N2"), orderRow.Name, StringComparison.Ordinal);
+                FindRow(main, "OrdersList", $"{confirmed.OrderNumber}, completed,"));
+            Assert.EndsWith($"total {size.Price:N2}", orderRow.Name, StringComparison.Ordinal);
             WaitFor("customer ledger entry linked to the order", () =>
-                Find(main, "HistoryList").FindAllDescendants().FirstOrDefault(element =>
-                    element.Name.Contains($"order {created.Id}", StringComparison.OrdinalIgnoreCase)));
+                FindId(main, "HistoryList")?.FindAllDescendants(cf => cf.ByControlType(ControlType.ListItem))
+                    .FirstOrDefault(element => element.Properties.Name.ValueOrDefault?.Contains(
+                        $"order {created.Id}", StringComparison.OrdinalIgnoreCase) == true));
             var history = await ReadAsync<LoyaltyHistoryResponse>(api, $"customers/{customer.Id}/loyalty-transactions");
             var earned = Assert.Single(history.Items, entry => entry.OrderId == created.Id);
             Assert.Equal(expectedPoints, earned.Points);
