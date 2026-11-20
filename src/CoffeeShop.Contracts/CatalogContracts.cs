@@ -9,7 +9,7 @@ public sealed record PageResponse<T>(IReadOnlyList<T> Items, int Page, int PageS
 
 public sealed record PageQuery(int Page = 1, int PageSize = 20);
 
-public sealed record SizeVariantRequest(string? SizeName, decimal? Price);
+public sealed record SizeVariantRequest(string? SizeName, decimal? Price, IReadOnlyList<RecipeLineRequest>? Recipe = null);
 public sealed record MenuItemRequest(Guid CategoryId, string? Name, string? Description,
     IReadOnlyList<SizeVariantRequest>? InitialVariants = null);
 public sealed record AddonRequest(string? Name, decimal? Price);

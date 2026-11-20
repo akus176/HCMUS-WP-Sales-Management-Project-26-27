@@ -61,6 +61,12 @@ public static class PurchaseReceiptLifecycle
                     $"Ingredient '{line.IngredientId}' referenced by the receipt was not found."));
             }
 
+            if (!ingredient.IsActive)
+            {
+                return Result<IReadOnlyCollection<Ingredient>>.Failure(Error.Conflict(
+                    "inventory.ingredient_inactive", $"'{ingredient.Name}' is inactive and cannot receive stock."));
+            }
+
             if (!ingredient.CanAcceptUnit(ingredient.BaseUnit))
             {
                 return Result<IReadOnlyCollection<Ingredient>>.Failure(Error.Validation(
@@ -70,6 +76,16 @@ public static class PurchaseReceiptLifecycle
             }
 
             resolved.Add((line, ingredient));
+        }
+
+        foreach (var group in resolved.GroupBy(pair => pair.Ingredient.Id))
+        {
+            var ingredient = group.First().Ingredient;
+            if (ingredient.AvailableQuantity + group.Sum(pair => pair.Line.Quantity) > MeasuredQuantity.MaximumValue)
+            {
+                return Result<IReadOnlyCollection<Ingredient>>.Failure(Error.Validation(
+                    "inventory.balance_limit", $"This delivery would exceed the maximum balance for '{ingredient.Name}'."));
+            }
         }
 
         var postResult = Execute(() => receipt.Post(postedAt));

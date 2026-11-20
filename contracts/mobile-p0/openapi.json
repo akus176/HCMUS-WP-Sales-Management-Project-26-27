@@ -2334,6 +2334,35 @@
         ],
         "type": "object"
       },
+      "ReceiveDeliveryRequest": {
+        "properties": {
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/ReceiptLineRequest"
+            },
+            "type": [
+              "null",
+              "array"
+            ]
+          },
+          "receiptNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "supplierId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "supplierId",
+          "receiptNumber",
+          "lines"
+        ],
+        "type": "object"
+      },
       "RecipeLineRequest": {
         "properties": {
           "ingredientId": {
@@ -2687,6 +2716,15 @@
               "null",
               "number",
               "string"
+            ]
+          },
+          "recipe": {
+            "items": {
+              "$ref": "#/components/schemas/RecipeLineRequest"
+            },
+            "type": [
+              "null",
+              "array"
             ]
           },
           "sizeName": {
@@ -6004,7 +6042,61 @@
           }
         ],
         "tags": [
-          "CoffeeShop.Api"
+          "CatalogEndpoints"
+        ]
+      }
+    },
+    "/api/v1/menu-items/with-recipe": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MenuItemRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuItemResponse"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CatalogEndpoints"
         ]
       }
     },
@@ -7591,6 +7683,70 @@
         ]
       }
     },
+    "/api/v1/purchase-receipts/receive": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceiveDeliveryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptResponse"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Conflict"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "tags": [
+          "CoffeeShop.Api"
+        ]
+      }
+    },
     "/api/v1/purchase-receipts/{id}": {
       "get": {
         "parameters": [
@@ -8884,6 +9040,9 @@
   "tags": [
     {
       "name": "CoffeeShop.Api"
+    },
+    {
+      "name": "CatalogEndpoints"
     }
   ]
 }

@@ -8,14 +8,18 @@
         <TextBox x:Name="NameBox"
                 Header="Name"
                 PlaceholderText="e.g. Coffee beans"/>
-        <TextBox x:Name="UnitBox"
-                Header="Base unit"
-                PlaceholderText="g, kg, ml, l, pcs"/>
+        <ComboBox x:Name="UnitBox" Header="Stock unit" PlaceholderText="Choose a unit" HorizontalAlignment="Stretch" SelectionChanged="OnUnitChanged">
+            <ComboBoxItem Content="Grams (g)" Tag="g" />
+            <ComboBoxItem Content="Kilograms (kg)" Tag="kg" />
+            <ComboBoxItem Content="Milliliters (ml)" Tag="ml" />
+            <ComboBoxItem Content="Liters (l)" Tag="l" />
+            <ComboBoxItem Content="Pieces (pcs)" Tag="pcs" />
+        </ComboBox>
         <TextBox x:Name="BalanceBox"
-                Header="Initial balance"
-                PlaceholderText="0"/>
+                Header="Starting stock"
+                Text="0"/>
         <TextBox x:Name="ThresholdBox"
-                Header="Reorder threshold"
-                PlaceholderText="0"/>
+                Header="Low-stock threshold"
+                Text="0"/>
     </StackPanel>
 </ContentDialog>

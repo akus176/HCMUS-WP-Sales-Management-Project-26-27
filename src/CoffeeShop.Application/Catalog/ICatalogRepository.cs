@@ -31,6 +31,8 @@ public interface ICatalogRepository
 
     void AddSizeVariant(SizeVariant sizeVariant);
 
+    void AddRecipeIngredients(IReadOnlyCollection<RecipeIngredient> recipe);
+
     void AddAddon(Addon addon);
 
     Task ReplaceCompatibleAddonsAsync(

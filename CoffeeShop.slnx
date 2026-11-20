@@ -13,5 +13,6 @@
     <Project Path="tests/CoffeeShop.Domain.Tests/CoffeeShop.Domain.Tests.csproj" />
     <Project Path="tests/CoffeeShop.Infrastructure.Tests/CoffeeShop.Infrastructure.Tests.csproj" />
     <Project Path="tests/CoffeeShop.WinUI.Tests/CoffeeShop.WinUI.Tests.csproj" />
+    <Project Path="tests/CoffeeShop.WinUI.E2E.Tests/CoffeeShop.WinUI.E2E.Tests.csproj" />
   </Folder>
 </Solution>

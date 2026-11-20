@@ -19,7 +19,7 @@ internal static class WinUIApiServiceCollectionExtensions
         services.AddSingleton<StaffSessionManager>();
         services.AddSingleton<AuthenticatedApiClient>();
         services.AddSingleton<ApiReportsSource>();
-        services.AddSingleton<ApiAssistantSource>();
+        services.AddSingleton(provider => new ApiAssistantSource(apiBaseAddress, provider.GetRequiredService<StaffSessionManager>()));
         services.AddSingleton<ApiPosSource>();
         services.AddSingleton<ApiOperationsSource>();
         services.AddSingleton<ApiInventorySource>();

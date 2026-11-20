@@ -17,6 +17,10 @@ public interface IInventoryRepository
 
     Task<PurchaseReceipt?> FindReceiptWithLinesAsync(EntityId id, CancellationToken cancellationToken = default);
 
+    Task<PurchaseReceipt?> LoadReceiptForReceivingAsync(string receiptNumber, CancellationToken cancellationToken = default);
+
+    Task<PurchaseReceipt?> LoadReceiptForPostingAsync(EntityId id, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<Ingredient>> ListIngredientsAsync(CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<Supplier>> ListSuppliersAsync(CancellationToken cancellationToken = default);
@@ -29,7 +33,7 @@ public interface IInventoryRepository
 
     Task<bool> HasOrderRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<Ingredient>> LoadIngredientsForRestorationAsync(
+    Task<IReadOnlyList<Ingredient>> LoadIngredientsForStockUpdateAsync(
         IReadOnlyCollection<EntityId> ingredientIds, CancellationToken cancellationToken = default);
 
     void AddOrderRestoration(OrderInventoryRestoration restoration);

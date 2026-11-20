@@ -24,17 +24,25 @@ public static class CatalogEndpoints
             var result = await handler.GetMenuItemDetailAsync(new(id), ct);
             return result.IsSuccess ? Results.Ok(ToItem(result.Value)) : ApiErrorResults.From(result.Error!);
         }).Produces<MenuItemResponse>().ProducesProblem(404);
-        items.MapPost("/", async (MenuItemRequest request, CatalogCommandHandler command,
-            CatalogQueryHandler query, CancellationToken ct) =>
+        async Task<IResult> CreateItem(MenuItemRequest request, CatalogCommandHandler command,
+            CatalogQueryHandler query, CancellationToken ct)
         {
-            if (request.CategoryId == Guid.Empty) return InvalidId();
+            if (request.CategoryId == Guid.Empty || request.InitialVariants?.Any(variant =>
+                variant?.Recipe?.Any(line => line is not null && line.IngredientId == Guid.Empty) == true) == true)
+                return InvalidId();
             var result = await command.CreateMenuItemAsync(new(new(request.CategoryId), request.Name ?? string.Empty,
-                request.Description, (request.InitialVariants ?? []).Select(variant =>
-                    new CreateSizeVariantInput(variant.SizeName ?? string.Empty, variant.Price)).ToArray()), ct);
+                request.Description, (request.InitialVariants ?? []).Select(variant => variant is null ? null! :
+                    new CreateSizeVariantInput(variant.SizeName ?? string.Empty, variant.Price, variant.Recipe?
+                        .Select(line => line is null ? null! : new RecipeLineInput(new(line.IngredientId), line.Quantity, line.Unit ?? string.Empty))
+                        .ToArray())).ToArray()), ct);
             if (result.IsFailure) return ApiErrorResults.From(result.Error!);
             var detail = await query.GetMenuItemDetailAsync(result.Value, ct);
             return Results.Json(ToItem(detail.Value), statusCode: 201);
-        }).RequireAuthorization("menu.manage").Produces<MenuItemResponse>(201).ProducesProblem(400).ProducesProblem(404);
+        }
+        items.MapPost("/", CreateItem).RequireAuthorization("menu.manage")
+            .Produces<MenuItemResponse>(201).ProducesProblem(400).ProducesProblem(404);
+        items.MapPost("/with-recipe", CreateItem).RequireAuthorization("menu.manage")
+            .Produces<MenuItemResponse>(201).ProducesProblem(400).ProducesProblem(404);
         items.MapPut("/{id:guid}", async (Guid id, MenuItemRequest request, CatalogCommandHandler handler, CancellationToken ct) =>
         {
             if (id == Guid.Empty || request.CategoryId == Guid.Empty) return InvalidId();

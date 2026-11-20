@@ -127,6 +127,44 @@ public sealed class ReceiptPostingIntegrationTests : IAsyncLifetime
         Assert.Equal(10m, ingredient.AvailableQuantity);
     }
 
+    [Fact]
+    public async Task ReceiveDelivery_PostsAllLinesOnce_AndRejectsIncompleteOrConflictingDeliveries()
+    {
+        if (!databaseAvailable) { return; }
+
+        var handler = CreateHandler();
+        var ingredientId = await SeedIngredientAsync(handler, availableQuantity: 10m);
+        var supplierId = (await handler.CreateSupplierAsync(new("Bean Roasters", "0901234567"))).Value;
+        var command = new ReceiveDeliveryCommand(supplierId, "DELIVERY-001",
+            [new(ingredientId, 5m, 30m), new(ingredientId, 3m, 28m)], EntityId.New());
+
+        var invalid = await handler.ReceiveDeliveryAsync(command with
+        {
+            Lines = [command.Lines[0], new(EntityId.New(), 3m, 28m)]
+        });
+        Assert.True(invalid.IsFailure);
+        await using (var scope = serviceProvider!.CreateAsyncScope())
+        {
+            var repository = scope.ServiceProvider.GetRequiredService<IInventoryRepository>();
+            Assert.Empty(await repository.ListReceiptsAsync());
+            Assert.Equal(10m, (await repository.FindIngredientAsync(ingredientId))!.AvailableQuantity);
+        }
+
+        var posts = await Task.WhenAll(
+            handler.ReceiveDeliveryAsync(command),
+            CreateHandler().ReceiveDeliveryAsync(command with { Lines = command.Lines.Reverse().ToArray() }));
+        Assert.All(posts, post => Assert.True(post.IsSuccess));
+        var receiptId = posts[0].Value.Id;
+        Assert.Equal(receiptId, posts[1].Value.Id);
+
+        var conflict = await CreateHandler().ReceiveDeliveryAsync(command with { Lines = [command.Lines[0]] });
+        Assert.Equal(ErrorType.Conflict, conflict.Error!.Type);
+        var (receipt, ingredient) = await LoadReceiptAndIngredientAsync(ingredientId, receiptId);
+        Assert.Equal(PurchaseReceiptStatus.Posted, receipt.Status);
+        Assert.Equal(18m, ingredient.AvailableQuantity);
+        Assert.Equal(2, (await LoadMovementsAsync(receiptId)).Count);
+    }
+
     private async Task<EntityId> SeedIngredientAsync(InventoryCommandHandler handler, decimal availableQuantity)
     {
         var ingredient = new Ingredient(
