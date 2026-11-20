@@ -21,13 +21,7 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
     [Fact]
     public async Task CompletedSaleUpdatesAllSixWorkspaces()
     {
-        using var api = new HttpClient { BaseAddress = new Uri(Required("COFFEESHOP_API_BASE_URL")) };
-        var username = Required("COFFEESHOP_E2E_USERNAME");
-        var password = Required("COFFEESHOP_E2E_PASSWORD");
-        using var signIn = await api.PostAsJsonAsync("auth/login", new LoginRequest(username, password));
-        signIn.EnsureSuccessStatusCode();
-        var token = await signIn.Content.ReadFromJsonAsync<TokenResponse>();
-        api.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token!.AccessToken);
+        using var api = await SignInToApiAsync();
 
         var menu = Assert.Single(await ReadAsync<MenuItemResponse[]>(api, $"menu-items?search={Escape(Drink)}"),
             item => item.Name == Drink);
@@ -49,20 +43,11 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
         var activeOrdersBefore = (await ReadAsync<OperationalOrderResponse[]>(api, "operations/orders"))
             .Select(order => order.Id).ToHashSet();
 
-        var exe = Required("COFFEESHOP_E2E_EXE");
-        using var app = Application.Launch(new ProcessStartInfo(exe) { WorkingDirectory = Path.GetDirectoryName(exe)! });
+        using var app = LaunchApp();
         using var automation = new UIA3Automation();
         try
         {
-            output.WriteLine("Signing into the Windows app.");
-            var login = WaitFor("sign-in window", () =>
-                app.GetAllTopLevelWindows(automation).FirstOrDefault(window => FindId(window, "UsernameBox") is not null));
-            TypeText(Find(login, "UsernameBox"), username);
-            TypeText(Find(login, "PasswordBox"), password);
-            Press(login, "SignInButton");
-            var main = WaitFor("service console after sign-in", () =>
-                app.GetAllTopLevelWindows(automation).FirstOrDefault(window => FindId(window, "SignOutButton") is not null));
-            main.Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Maximized);
+            var main = OpenConsole(app, automation);
 
             output.WriteLine("Checking the menu recipe, stock, loyalty and reports before the sale.");
             Navigate(main, "Menu");
@@ -166,6 +151,158 @@ public sealed class CounterSaleTests(ITestOutputHelper output)
         finally
         {
             if (!app.HasExited) app.Kill();
+        }
+    }
+
+    [Fact]
+    public async Task CreatedMenuItemPersistsItsRecipeAndAppearsInCounter()
+    {
+        const string name = "E2E Citrus Espresso";
+        const string description = "Espresso with a bright citrus finish.";
+        const string category = "Espresso Bar";
+        const string sizeName = "Small";
+        const string ingredientName = "House blend Arabica beans";
+        const decimal price = 53000m;
+        const decimal quantity = 18.5m;
+
+        using var api = await SignInToApiAsync();
+        var inventory = await ReadAsync<PageResponse<IngredientBalanceResponse>>(api, $"ingredients?search={Escape(ingredientName)}");
+        var ingredient = Assert.Single(inventory.Items, row => row.Name == ingredientName);
+        var searchPath = $"menu-items?search={Escape(name)}";
+        Assert.DoesNotContain(await ReadAsync<MenuItemResponse[]>(api, searchPath), item => item.Name == name);
+
+        using var app = LaunchApp();
+        using var automation = new UIA3Automation();
+        try
+        {
+            var main = OpenConsole(app, automation);
+            output.WriteLine("Entering an item, initial size, price and recipe in New item.");
+            Navigate(main, "Menu");
+            Press(main, "NewButton");
+            TypeText(NamedControl(main, "Drink name", ControlType.Edit), name);
+            TypeText(NamedControl(main, "Description (optional)", ControlType.Edit), description);
+            SelectOption(main, automation, "Active category", category);
+            TypeText(NamedControl(main, "Initial size name", ControlType.Edit), sizeName);
+            TypeText(NamedControl(main, "Initial size price", ControlType.Edit), price.ToString("0.00"));
+            PressNamed(main, "Add ingredient");
+            SelectOption(main, automation, "Ingredient", ingredientName);
+            var unit = NamedControl(main, "Unit", ControlType.Edit);
+            Assert.Equal(ingredient.BaseUnit, unit.AsTextBox().Text);
+
+            var quantityInput = NamedControl(main, "Quantity", ControlType.Edit);
+            TypeText(quantityInput, "0");
+            PressNamed(main, "Save drink");
+            const string validation = "Ingredient line 1 needs an ingredient, a positive quantity, and a unit.";
+            WaitFor("zero quantity validation", () => FindName(main, validation));
+            Assert.DoesNotContain(await ReadAsync<MenuItemResponse[]>(api, searchPath), item => item.Name == name);
+
+            output.WriteLine("Saving the corrected recipe and reopening the item in Menu.");
+            TypeText(quantityInput, quantity.ToString("0.###"));
+            PressNamed(main, "Save drink");
+            WaitFor("the Create Item dialog to close", () =>
+                FindName(main, "Save drink") is null ? main : null);
+            Search(main, name);
+            ClickRow(main, "DrinksList", name);
+            ExpectText(main, "DetailHeading", name);
+            ExpectText(main, "RecipeSummary", $"{quantity:0.###} {ingredient.BaseUnit} · {ingredientName}");
+            var sizes = Find(main, "VariantsList");
+            ExpectName(sizes, sizeName);
+            ExpectName(sizes, price.ToString("0.00"));
+
+            var created = Assert.Single(await ReadAsync<MenuItemResponse[]>(api, searchPath), item => item.Name == name);
+            Assert.True(created.IsActive);
+            Assert.Equal(category, created.CategoryName);
+            Assert.Equal(description, created.Description);
+            var size = Assert.Single(created.SizeVariants);
+            Assert.True(size.IsActive);
+            Assert.Equal(sizeName, size.SizeName);
+            Assert.Equal(price, size.Price);
+            var recipe = await ReadAsync<RecipeResponse>(api, $"recipes/{size.Id}");
+            Assert.Equal(created.Id, recipe.MenuItemId);
+            var line = Assert.Single(recipe.Lines);
+            Assert.Equal(ingredient.IngredientId, line.IngredientId);
+            Assert.Equal(quantity, line.Quantity);
+            Assert.Equal(ingredient.BaseUnit, line.Unit);
+
+            output.WriteLine("Checking the newly created item can be added to a Counter ticket at the saved price.");
+            Navigate(main, "Counter");
+            Search(main, name);
+            ClickRow(main, "MenuGrid", name);
+            var sizeInput = Find(main, "SizeBox");
+            Assert.Equal(sizeName, sizeInput.AsComboBox().SelectedItem?.Name);
+            PressNamed(main, "Add to ticket");
+            ExpectName(Find(main, "CartList"), name);
+            ExpectText(main, "TicketTotalText", price.ToString("0.00"));
+            var stockAfter = await ReadAsync<IngredientBalanceResponse>(api, $"ingredients/{ingredient.IngredientId}");
+            Assert.Equal(ingredient.AvailableQuantity, stockAfter.AvailableQuantity);
+        }
+        catch
+        {
+            WriteDesktopDiagnostics(app, automation);
+            throw;
+        }
+        finally
+        {
+            if (!app.HasExited) app.Kill();
+        }
+    }
+
+    private static Application LaunchApp()
+    {
+        var exe = Required("COFFEESHOP_E2E_EXE");
+        return Application.Launch(new ProcessStartInfo(exe) { WorkingDirectory = Path.GetDirectoryName(exe)! });
+    }
+
+    private Window OpenConsole(Application app, UIA3Automation automation)
+    {
+        Window? FindWindow(string id) =>
+            app.GetAllTopLevelWindows(automation).FirstOrDefault(window => FindId(window, id) is not null);
+
+        var window = WaitFor("sign-in window or restored service console", () =>
+            FindWindow("SignOutButton") ?? FindWindow("UsernameBox"));
+        if (FindId(window, "UsernameBox") is not null)
+        {
+            output.WriteLine("Signing into the Windows app.");
+            TypeText(Find(window, "UsernameBox"), Required("COFFEESHOP_E2E_USERNAME"));
+            TypeText(Find(window, "PasswordBox"), Required("COFFEESHOP_E2E_PASSWORD"));
+            Press(window, "SignInButton");
+        }
+        var main = WaitFor("service console after sign-in", () => FindWindow("SignOutButton"));
+        main.Patterns.Window.Pattern.SetWindowVisualState(WindowVisualState.Maximized);
+        return main;
+    }
+
+    private static AutomationElement NamedControl(AutomationElement root, string name, ControlType type) =>
+        WaitFor(name, () => root.FindFirstDescendant(cf => cf.ByName(name).And(cf.ByControlType(type))));
+
+    private static void SelectOption(Window window, UIA3Automation automation, string field, string choice)
+    {
+        var combo = NamedControl(window, field, ControlType.ComboBox);
+        var dropdown = combo.Patterns.ExpandCollapse.Pattern;
+        dropdown.Expand();
+        var option = WaitFor($"{choice} in {field}", () =>
+            window.FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem)))
+            ?? automation.GetDesktop().FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem))));
+        option.Patterns.SelectionItem.Pattern.Select();
+        if (dropdown.ExpandCollapseState.Value == ExpandCollapseState.Expanded) dropdown.Collapse();
+    }
+
+    private static async Task<HttpClient> SignInToApiAsync()
+    {
+        var api = new HttpClient { BaseAddress = new Uri(Required("COFFEESHOP_API_BASE_URL")) };
+        try
+        {
+            using var signIn = await api.PostAsJsonAsync("auth/login", new LoginRequest(
+                Required("COFFEESHOP_E2E_USERNAME"), Required("COFFEESHOP_E2E_PASSWORD")));
+            signIn.EnsureSuccessStatusCode();
+            var token = await signIn.Content.ReadFromJsonAsync<TokenResponse>();
+            api.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token!.AccessToken);
+            return api;
+        }
+        catch
+        {
+            api.Dispose();
+            throw;
         }
     }
 

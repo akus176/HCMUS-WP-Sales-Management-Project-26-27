@@ -68,7 +68,7 @@ try {
         } while (-not $ready -and -not $api.HasExited -and [DateTime]::UtcNow -lt $deadline)
         if (-not $ready) { throw 'The API did not become ready. See the API logs in the CI artifact.' }
 
-        dotnet test (Join-Path $repository 'tests/CoffeeShop.WinUI.E2E.Tests') --no-build -c Release --logger 'trx;LogFileName=counter-sale.trx' --logger 'console;verbosity=normal' --results-directory $results
+        dotnet test (Join-Path $repository 'tests/CoffeeShop.WinUI.E2E.Tests') --no-build -c Release --logger 'trx;LogFileName=windows-e2e.trx' --logger 'console;verbosity=normal' --results-directory $results
     }
     finally {
         if (-not $api.HasExited) { Stop-Process -InputObject $api }

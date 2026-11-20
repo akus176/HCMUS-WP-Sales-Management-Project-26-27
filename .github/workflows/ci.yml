@@ -195,7 +195,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           dotnet build tests/CoffeeShop.WinUI.E2E.Tests -c Release
           exit $LASTEXITCODE
-      - name: Verify a sale across all six Windows workspaces
+      - name: Verify item creation and sale consistency in Windows
         shell: pwsh
         run: ./scripts/test-winui-e2e.ps1
       - name: Preserve Windows E2E evidence
