@@ -106,6 +106,26 @@ public sealed class CatalogHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task UnsupportedCatalogMethod_ReturnsMethodErrorWithoutChangingCategories()
+    {
+        using var client = host!.CreateClient();
+        client.DefaultRequestHeaders.Add("X-Test-User", "manager");
+        var name = $"Method guard {Guid.NewGuid():N}";
+        using var created = await client.PostAsJsonAsync("/api/v1/categories", new { name, displayOrder = 0 });
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+
+        using var wrongMethod = await client.DeleteAsync("/api/v1/categories");
+        Assert.Equal(HttpStatusCode.MethodNotAllowed, wrongMethod.StatusCode);
+        Assert.Equal("application/problem+json", wrongMethod.Content.Headers.ContentType?.MediaType);
+        using var problem = JsonDocument.Parse(await wrongMethod.Content.ReadAsStringAsync());
+        Assert.Equal(405, problem.RootElement.GetProperty("status").GetInt32());
+
+        var categories = await client.GetFromJsonAsync<CategoryResponse[]>(
+            $"/api/v1/categories?search={Uri.EscapeDataString(name)}");
+        Assert.Contains(categories!, category => category.Name == name && category.IsActive);
+    }
+
+    [PostgresFact]
     public async Task CategoryWrites_RequireAuthenticationAndPermission()
     {
         using var client = host!.CreateClient();
