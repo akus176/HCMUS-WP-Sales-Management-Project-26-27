@@ -155,6 +155,7 @@ public sealed partial class CatalogPage : Page
         public string Name => Item.Name;
         public string CategoryName => $"{Item.CategoryName} · {Item.SizeVariants.Count(size => size.IsActive)} sizes";
         public string StateDisplay => Item.IsActive ? "Active" : "Inactive";
+        public Visibility InactiveVisibility => Item.IsActive ? Visibility.Collapsed : Visibility.Visible;
         public string PriceDisplay => Item.SizeVariants.Where(size => size.IsActive).ToArray() is { Length: > 0 } sizes
             ? $"from {sizes.Min(size => size.Price):0.00}" : "No active sizes";
         public BitmapImage Photo => new CounterMenuCard(Item).Photo;
@@ -225,8 +226,6 @@ public sealed partial class CatalogPage : Page
             ReloadButton.IsEnabled = NewButton.IsEnabled = !model.IsBusy;
             Status.Apply(model.Feedback);
             if (model.Feedback.Kind == WorkflowFeedbackKind.Ready) Status.IsOpen = false;
-            CatalogCount.Text = "MANAGE / MENU";
-            CatalogHealth.Text = $"{model.Items.Count(item => item.IsActive)} active items\n{model.Items.Count(item => !item.IsActive)} inactive in results";
             DrinksTab.IsEnabled = CategoriesTab.IsEnabled = AddonsTab.IsEnabled = IncludeInactive.IsEnabled = !model.IsBusy;
             if (!ReferenceEquals(renderedCategories, model.Categories))
             {
@@ -362,9 +361,9 @@ public sealed partial class CatalogPage : Page
         var wide = ActualWidth >= 1000 && ActualHeight >= 600;
         var hasDetails = activeTab == "drinks";
         var stackedDetails = hasDetails && !wide;
-        var showCategoryRail = wide && activeTab == "drinks";
+        var showCategoryRail = wide && hasDetails;
         CategoryRail.Visibility = showCategoryRail ? Visibility.Visible : Visibility.Collapsed;
-        CompactCategoryFilter.Visibility = !wide && activeTab == "drinks" ? Visibility.Visible : Visibility.Collapsed;
+        CompactCategoryFilter.Visibility = !wide && hasDetails ? Visibility.Visible : Visibility.Collapsed;
         RailColumn.Width = new GridLength(showCategoryRail ? 155 : 0);
         DetailHost.Visibility = hasDetails ? Visibility.Visible : Visibility.Collapsed;
         DetailColumn.Width = new GridLength(wide && hasDetails ? 330 : 0);
@@ -374,21 +373,17 @@ public sealed partial class CatalogPage : Page
         WorkspaceTabs.RowSpacing = stackedDetails ? 12 : 0;
         Grid.SetColumn(DetailHost, wide ? 2 : 1);
         Grid.SetRow(DetailHost, wide ? 0 : 1);
-        var headerInline = ActualWidth >= 680;
-        HeaderOrnament.Visibility = ActualWidth >= 1000 ? Visibility.Visible : Visibility.Collapsed;
-        Header.ColumnDefinitions[1].Width = new GridLength(ActualWidth >= 1000 ? 116 : 0);
-        Header.ColumnDefinitions[2].Width = headerInline ? GridLength.Auto : new GridLength(0);
+        var headerInline = ActualWidth >= 520;
+        Header.ColumnDefinitions[1].Width = headerInline ? GridLength.Auto : new GridLength(0);
         Header.ColumnSpacing = headerInline ? 18 : 0;
-        Grid.SetColumn(HeaderActions, headerInline ? 2 : 0);
-        Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 3);
+        Grid.SetColumn(HeaderActions, headerInline ? 1 : 0);
+        Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 2);
         Grid.SetRow(HeaderActions, headerInline ? 0 : 1);
-        MenuTitle.FontSize = headerInline ? 52 : 40;
+        MenuTitle.FontSize = headerInline ? 42 : 34;
         Grid.SetColumn(IncludeInactive, ActualWidth >= 520 ? 1 : 0);
         Grid.SetRow(IncludeInactive, ActualWidth >= 520 ? 0 : 1);
         var catalogWidth = Math.Max(240, ActualWidth - 48 - (wide ? 366 + (showCategoryRail ? 155 : 0) : 0));
-        var height = WorkspaceContent.ActualHeight;
-        CategoryOrnament.Visibility = CategoryPattern.Visibility = height >= 650 ? Visibility.Visible : Visibility.Collapsed;
-        CategoryFilter.MaxHeight = Math.Max(88, height - 160);
+        CategoryFilter.MaxHeight = Math.Max(88, WorkspaceContent.ActualHeight - 128);
         var columns = catalogWidth >= 560 ? 2 : 1;
         if (DrinksList.ItemsPanelRoot is not ItemsWrapGrid drinkWrap) return;
         drinkWrap.ItemWidth = Math.Max(240, (catalogWidth - 4) / columns);
@@ -702,7 +697,7 @@ public sealed partial class CatalogPage : Page
         var content = Form(error, progress, editor);
         var dialog = new ContentDialog
         {
-            Title = new TextBlock { Text = title, FontFamily = (FontFamily)ResourcesLookup("ConsoleSerifFont"), FontSize = 32, TextWrapping = TextWrapping.Wrap },
+            Title = new TextBlock { Text = title, FontFamily = (FontFamily)ResourcesLookup("ConsoleSansMediumFont"), FontSize = 24, TextWrapping = TextWrapping.Wrap },
             Style = (Style)Resources["MenuDialog"],
             PrimaryButtonText = button,
             CloseButtonText = "Cancel",

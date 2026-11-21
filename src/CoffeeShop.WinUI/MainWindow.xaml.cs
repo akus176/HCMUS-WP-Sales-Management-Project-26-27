@@ -292,9 +292,9 @@ public sealed partial class MainWindow : Window
         };
         Nav.IsPaneOpen = next == ServiceConsoleLayoutMode.Expanded;
         BrandCopy.Visibility = SidebarFooter.Visibility = next == ServiceConsoleLayoutMode.Expanded ? Visibility.Visible : Visibility.Collapsed;
-        TitleCaption.Visibility = DateText.Visibility = next == ServiceConsoleLayoutMode.Compact ? Visibility.Collapsed : Visibility.Visible;
+        DateText.Visibility = next == ServiceConsoleLayoutMode.Compact ? Visibility.Collapsed : Visibility.Visible;
         MenuToggle.Visibility = next == ServiceConsoleLayoutMode.Expanded ? Visibility.Collapsed : Visibility.Visible;
         RefreshNavigationItems();
-        DatabaseFailurePanel.Margin = new Thickness(next == ServiceConsoleLayoutMode.Expanded ? 248 : 20, 76, 20, 20);
+        DatabaseFailurePanel.Margin = new Thickness(next == ServiceConsoleLayoutMode.Expanded ? 248 : 20, 60, 20, 20);
     }
 }

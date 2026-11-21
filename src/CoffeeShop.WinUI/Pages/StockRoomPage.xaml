@@ -15,6 +15,8 @@
         <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#D5CAB8" />
         <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="#B69355" />
         <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="#B69355" />
+        <SolidColorBrush x:Key="IngredientSelectionBrush" Color="#D6E3EB" />
+        <SolidColorBrush x:Key="IngredientSelectionEdgeBrush" Color="#37576A" />
         <Style x:Key="StockPrimary" TargetType="Button" BasedOn="{StaticResource ConsolePrimaryButtonStyle}">
             <Setter Property="FontFamily" Value="Segoe UI" />
             <Setter Property="FontSize" Value="11" />
@@ -279,6 +281,9 @@
         <Style x:Key="StockListItem" TargetType="ListViewItem">
             <Setter Property="MinHeight" Value="0" />
             <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{StaticResource ConsoleAccentBrush}" />
+            <Setter Property="BorderThickness" Value="2,0,0,0" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="UseSystemFocusVisuals" Value="True" />
             <Setter Property="FocusVisualPrimaryBrush" Value="{StaticResource ConsoleAccentTextBrush}" />
@@ -318,17 +323,29 @@
                                     </VisualState>
                                 </VisualStateGroup>
                             </VisualStateManager.VisualStateGroups>
+                            <Border x:Name="Selection" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Opacity="0" IsHitTestVisible="False" />
                             <Border x:Name="Hover" Background="{StaticResource ConsolePanelBrush}" Opacity="0" />
                             <ContentPresenter Content="{TemplateBinding Content}" DataContext="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalContentAlignment="Stretch" />
-                            <Border x:Name="Selection" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="2,0,0,0" Opacity="0" IsHitTestVisible="False" />
                         </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="StockIngredientListItem" TargetType="ListViewItem" BasedOn="{StaticResource StockListItem}">
+            <Setter Property="Background" Value="{StaticResource IngredientSelectionBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource IngredientSelectionEdgeBrush}" />
+            <Setter Property="BorderThickness" Value="3,0,0,0" />
+        </Style>
+        <DataTemplate x:Key="StockStatusBadge">
+            <Grid VerticalAlignment="Center">
+                <Border Background="{StaticResource ConsoleConfirmedBrush}" Opacity="{Binding LowStockMarkerOpacity}" IsHitTestVisible="False" />
+                <Border Style="{StaticResource StockStamp}">
+                    <TextBlock Text="{Binding ShortStatus}" Style="{StaticResource StockFine}" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                </Border>
+            </Grid>
+        </DataTemplate>
         <DataTemplate x:Key="StockWideRow">
             <Grid Height="52" AutomationProperties.Name="{Binding RowAccessibilityName}">
-                <Border Width="2" Background="{StaticResource ConsoleAccentBrush}" HorizontalAlignment="Left" Opacity="{Binding LowStockMarkerOpacity}" />
                 <Grid Padding="10,0,10,0" ColumnSpacing="9">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1.5*" />
@@ -350,9 +367,7 @@
                         <Run FontFamily="Segoe UI" Text="{Binding ThresholdNumber}" />
                         <Run Text="{Binding UnitSuffix}" FontFamily="Segoe UI" FontSize="9" />
                     </TextBlock>
-                    <Border Grid.Column="3" Style="{StaticResource StockStamp}">
-                        <TextBlock FontFamily="Segoe UI" Text="{Binding ShortStatus}" Style="{StaticResource StockFine}" Foreground="{StaticResource ConsoleAccentTextBrush}" />
-                    </Border>
+                    <ContentPresenter Grid.Column="3" Content="{Binding}" ContentTemplate="{StaticResource StockStatusBadge}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" />
                     <StackPanel Grid.Column="4" VerticalAlignment="Center" ToolTipService.ToolTip="{Binding LastMovementTooltip}">
                         <TextBlock FontFamily="Segoe UI" Text="{Binding LastMovementDisplay}" FontSize="10" Foreground="{StaticResource ConsoleMutedInkBrush}" TextTrimming="CharacterEllipsis" />
                         <TextBlock FontFamily="Segoe UI" Text="{Binding LastMovementMeta}" FontSize="10" Foreground="{StaticResource ConsoleMutedInkBrush}" TextTrimming="CharacterEllipsis" />
@@ -364,7 +379,6 @@
         </DataTemplate>
         <DataTemplate x:Key="StockCompactRow">
             <Grid Height="52" AutomationProperties.Name="{Binding RowAccessibilityName}">
-                <Border Width="2" Background="{StaticResource ConsoleAccentBrush}" HorizontalAlignment="Left" Opacity="{Binding LowStockMarkerOpacity}" />
                 <Grid Padding="10,0,10,0" ColumnSpacing="9">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -386,9 +400,7 @@
                         <Run FontFamily="Segoe UI" Text="{Binding ThresholdNumber}" />
                         <Run Text="{Binding UnitSuffix}" FontFamily="Segoe UI" FontSize="9" />
                     </TextBlock>
-                    <Border Grid.Column="3" Style="{StaticResource StockStamp}">
-                        <TextBlock FontFamily="Segoe UI" Text="{Binding ShortStatus}" Style="{StaticResource StockFine}" Foreground="{StaticResource ConsoleAccentTextBrush}" />
-                    </Border>
+                    <ContentPresenter Grid.Column="3" Content="{Binding}" ContentTemplate="{StaticResource StockStatusBadge}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center" />
                     <StackPanel Grid.Column="4" VerticalAlignment="Center" Visibility="Collapsed">
                         <TextBlock FontFamily="Segoe UI" Text="{Binding LastMovementDisplay}" FontSize="10" Foreground="{StaticResource ConsoleMutedInkBrush}" TextTrimming="CharacterEllipsis" />
                         <TextBlock FontFamily="Segoe UI" Text="{Binding LastMovementMeta}" FontSize="10" Foreground="{StaticResource ConsoleMutedInkBrush}" TextTrimming="CharacterEllipsis" />
@@ -403,7 +415,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="96" />
                     <ColumnDefinition Width="180" />
-                    <ColumnDefinition Width="80" />
+                    <ColumnDefinition Width="116" />
                     <ColumnDefinition Width="70" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="150" />
@@ -411,7 +423,8 @@
                 <TextBlock FontFamily="Segoe UI" Text="{Binding TimeDisplay}" Style="{StaticResource ConsoleLabelStyle}" VerticalAlignment="Center" ToolTipService.ToolTip="{Binding FullTimeDisplay}" />
                 <TextBlock Grid.Column="1" Text="{Binding IngredientName}" FontFamily="Segoe UI" FontSize="14" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding IngredientName}" />
                 <Border Grid.Column="2" Style="{StaticResource ConsoleStampStyle}" VerticalAlignment="Center">
-                    <TextBlock FontFamily="Segoe UI" Text="{Binding TypeDisplay}" Style="{StaticResource ConsoleLabelStyle}" />
+                    <TextBlock Text="{Binding TypeDisplay}" FontFamily="Segoe UI" FontSize="11" Foreground="{StaticResource ConsoleMutedInkBrush}"
+                               TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding TypeDisplay}" />
                 </Border>
                 <TextBlock Grid.Column="3" Text="{Binding DeltaDisplay}" FontFamily="Segoe UI" FontWeight="Bold" FontSize="12" Foreground="{Binding DeltaBrush}" VerticalAlignment="Center" />
                 <TextBlock FontFamily="Segoe UI" Grid.Column="4" Text="{Binding ReasonDisplay}" Style="{StaticResource ConsoleBodyStyle}" VerticalAlignment="Center" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding ReasonDisplay}" />
@@ -436,33 +449,27 @@
         </DataTemplate>
     </Page.Resources>
     <ScrollViewer x:Name="PageScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-        <Grid x:Name="RootGrid" Padding="32,24,32,22">
+        <Grid x:Name="RootGrid" Padding="{StaticResource ConsolePagePadding}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="98" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="56" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Grid x:Name="HeaderGrid" Margin="0,0,0,16" ColumnSpacing="24">
+            <Grid x:Name="HeaderGrid" Margin="0,0,0,10" ColumnSpacing="18" RowSpacing="8">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="100" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" Spacing="8" Height="12" Visibility="Collapsed">
-                        <Ellipse Width="5" Height="5" Fill="{StaticResource ConsoleAccentBrush}" VerticalAlignment="Center" />
-                        <TextBlock FontFamily="Segoe UI" x:Name="EyebrowText" Text="MANAGE  /  INVENTORY" Style="{StaticResource ConsoleLabelStyle}" />
-                    </StackPanel>
-                    <TextBlock FontFamily="Segoe UI" Text="Stock room" Style="{StaticResource ConsolePageTitleStyle}" Height="54" Margin="0,0,0,5" FontSize="44" />
+                <StackPanel Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="Stock room" Style="{StaticResource ConsolePageTitleStyle}" AutomationProperties.HeadingLevel="Level1" />
                     <TextBlock FontFamily="Segoe UI" x:Name="SubtitleText" Style="{StaticResource ConsoleBodyStyle}" Text="Inventory, replenishment, and movements." FontSize="12" />
                 </StackPanel>
-                <Image x:Name="HeaderOrnament" Grid.Column="1" Source="ms-appx:///Assets/Ornaments/stock-room.svg" Width="84" Height="70" VerticalAlignment="Bottom" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" Opacity="0.55" />
-                <StackPanel x:Name="HeaderActions" Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Bottom">
+                <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                     <Button x:Name="NewIngredientButton" Style="{StaticResource StockButton}" Click="OnNewIngredientClick" AutomationProperties.Name="Create new ingredient">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Image Source="ms-appx:///Assets/Icons/i-plus.svg" Width="12" Height="12" />
@@ -513,7 +520,7 @@
                     <Button x:Name="StatusDismissButton" Grid.Column="1" Content="×" Style="{StaticResource StockPlainIcon}" Click="OnDismissStatus" AutomationProperties.Name="Dismiss status message" />
                 </Grid>
             </Border>
-            <Grid x:Name="ContentSplitGrid" Grid.Row="3" ColumnSpacing="24" Margin="0,12,0,0">
+            <Grid x:Name="ContentSplitGrid" Grid.Row="3" ColumnSpacing="24" Margin="0,8,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="360" />
@@ -613,7 +620,7 @@
                                     </StackPanel>
                                 </Button>
                             </Grid>
-                            <ListView x:Name="IngredientsListView" IsItemClickEnabled="True" ItemClick="OnIngredientClick" Grid.Row="1" MaxHeight="416" ScrollViewer.VerticalScrollBarVisibility="Auto" ItemContainerStyle="{StaticResource StockListItem}" ItemTemplate="{StaticResource StockWideRow}" SelectionMode="Single" SelectionChanged="OnIngredientSelectionChanged" AutomationProperties.Name="Ingredients table" Padding="0,0,24,0">
+                            <ListView x:Name="IngredientsListView" IsItemClickEnabled="True" ItemClick="OnIngredientClick" Grid.Row="1" MaxHeight="416" ScrollViewer.VerticalScrollBarVisibility="Auto" ItemContainerStyle="{StaticResource StockIngredientListItem}" ItemTemplate="{StaticResource StockWideRow}" SelectionMode="Single" SelectionChanged="OnIngredientSelectionChanged" AutomationProperties.Name="Ingredients table" Padding="0,0,24,0">
                                 <ListView.Resources>
                                     <Style TargetType="ScrollBar">
                                         <Setter Property="Width" Value="8" />
@@ -852,7 +859,7 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="96" />
                                         <ColumnDefinition Width="180" />
-                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="116" />
                                         <ColumnDefinition Width="70" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="150" />

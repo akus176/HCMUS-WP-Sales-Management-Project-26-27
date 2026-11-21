@@ -1,5 +1,12 @@
-<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:controls="using:CoffeeShop.WinUI.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="CoffeeShop.WinUI.Pages.CatalogPage" FontFamily="{StaticResource ConsoleSansFont}" Foreground="{StaticResource ConsoleInkBrush}" Background="{StaticResource ConsoleGroundBrush}" RequestedTheme="Light" SizeChanged="OnPageSizeChanged">
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="CoffeeShop.WinUI.Pages.CatalogPage" FontFamily="{StaticResource ConsoleSansFont}" Foreground="{StaticResource ConsoleInkBrush}" Background="{StaticResource ConsoleGroundBrush}" RequestedTheme="Light" SizeChanged="OnPageSizeChanged">
     <Page.Resources>
+        <SolidColorBrush x:Key="MenuPhotoMatteBrush" Color="#FBF7EF" />
+        <Style x:Key="MenuPrice" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource ConsoleSansMediumFont}" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
+            <Setter Property="Foreground" Value="{StaticResource ConsoleInkBrush}" />
+        </Style>
         <Style x:Key="MenuListItem" TargetType="ListViewItem" BasedOn="{StaticResource WorkspaceListItem}">
             <Setter Property="Padding" Value="0" />
             <Setter Property="MinHeight" Value="44" />
@@ -10,7 +17,8 @@
             <Setter Property="CharacterSpacing" Value="60" />
         </Style>
         <Style x:Key="MenuHeading" TargetType="TextBlock" BasedOn="{StaticResource ConsoleSectionTitleStyle}">
-            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontFamily" Value="{StaticResource ConsoleSansMediumFont}" />
+            <Setter Property="FontSize" Value="17" />
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
         <Style x:Key="MenuText" TargetType="TextBlock" BasedOn="{StaticResource ConsoleBodyStyle}">
@@ -51,7 +59,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Medium" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTipService.ToolTip="{Binding Name}" />
-                    <TextBlock Grid.Column="1" Text="{Binding PriceDisplay}" Visibility="{Binding PriceVisibility}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="20" VerticalAlignment="Center" MinWidth="48" TextAlignment="Right" />
+                    <TextBlock Grid.Column="1" Text="{Binding PriceDisplay}" Visibility="{Binding PriceVisibility}" Style="{StaticResource MenuPrice}" VerticalAlignment="Center" MinWidth="48" TextAlignment="Right" />
                     <Border Grid.Column="2" Background="{StaticResource ConsoleRaisedGroundBrush}" CornerRadius="3" Padding="8,3" VerticalAlignment="Center" MinWidth="64">
                         <TextBlock Text="{Binding StateDisplay}" FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}" TextAlignment="Center" />
                     </Border>
@@ -120,33 +128,27 @@
             </Setter>
         </Style>
     </Page.Resources>
-    <Grid Padding="24,18,24,24" RowSpacing="0">
+    <Grid Padding="{StaticResource ConsolePagePadding}" RowSpacing="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid x:Name="Header" Padding="0,0,0,16" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1" ColumnSpacing="18" RowSpacing="12">
+        <Grid x:Name="Header" Padding="0,0,0,10" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" ColumnSpacing="18" RowSpacing="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="116" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <StackPanel Spacing="3">
-                <TextBlock x:Name="CatalogCount" Text="MANAGE / CATALOG" Style="{StaticResource MenuLabel}" />
-                <TextBlock x:Name="MenuTitle" Text="Menu" Style="{StaticResource ConsolePageTitleStyle}" FontSize="52" />
-                <TextBlock Text="One catalogue for every drink, size, recipe, and topping." />
-            </StackPanel>
-            <StackPanel x:Name="HeaderActions" Grid.Column="2" Spacing="8" Orientation="Horizontal" VerticalAlignment="Bottom">
+            <TextBlock x:Name="MenuTitle" Text="Menu" Style="{StaticResource ConsolePageTitleStyle}" AutomationProperties.HeadingLevel="Level1" VerticalAlignment="Center" />
+            <StackPanel x:Name="HeaderActions" Grid.Column="1" Spacing="8" Orientation="Horizontal" VerticalAlignment="Center">
                 <Button x:Name="ReloadButton" Content="Refresh" Click="OnReload" />
                 <Button x:Name="NewButton" Content="+ New item" Style="{StaticResource MenuPrimary}" Click="OnNewRecord" />
             </StackPanel>
-            <Image x:Name="HeaderOrnament" Grid.Column="1" Source="ms-appx:///Assets/Ornaments/menu.svg" Height="78" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
         </Grid>
         <StackPanel Grid.Row="1" Spacing="4">
             <ProgressBar x:Name="LoadingBar" IsIndeterminate="True" Visibility="Collapsed" AutomationProperties.Name="Loading menu" />
@@ -168,8 +170,8 @@
             </StackPanel>
             <CheckBox x:Name="IncludeInactive" Grid.Column="1" Content="Show inactive" FontSize="13" MinHeight="44" Checked="OnInactiveChanged" Unchecked="OnInactiveChanged" VerticalAlignment="Center" VerticalContentAlignment="Center" />
         </Grid>
-        <ContentControl x:Name="WorkspaceContent" Grid.Row="3" Margin="0,6,0,0" SizeChanged="OnPageSizeChanged" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsTabStop="False">
-            <Grid x:Name="WorkspaceTabs" ColumnSpacing="24" RowSpacing="18">
+        <ContentControl x:Name="WorkspaceContent" Grid.Row="3" Margin="0,4,0,0" SizeChanged="OnPageSizeChanged" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" IsTabStop="False">
+            <Grid x:Name="WorkspaceTabs" ColumnSpacing="24" RowSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="RailColumn" Width="155" />
                     <ColumnDefinition x:Name="ListColumn" Width="*" />
@@ -179,15 +181,12 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="0" />
                 </Grid.RowDefinitions>
-                <StackPanel x:Name="CategoryRail" Spacing="10" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,1,0" Padding="0,12,12,0">
+                <StackPanel x:Name="CategoryRail" Spacing="8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,1,0" Padding="0,8,12,0">
                     <TextBlock Text="CATEGORIES" Style="{StaticResource MenuLabel}" />
                     <ListView x:Name="CategoryFilter" SelectionChanged="OnCategoryFilter" DisplayMemberPath="Name" MaxHeight="340" AutomationProperties.Name="Filter drinks by category" />
                     <Button Content="+ Add a category" Click="OnNewCategory" Style="{StaticResource MenuLink}" />
-                    <Image Source="ms-appx:///Assets/Ornaments/stock-room.svg" Height="88" Margin="0,12" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" x:Name="CategoryOrnament" />
-                    <controls:ConceptPattern Height="12" x:Name="CategoryPattern" />
-                    <TextBlock x:Name="CatalogHealth" TextWrapping="Wrap" />
                 </StackPanel>
-                <Grid x:Name="RecordsPanel" Grid.Column="1" RowSpacing="8">
+                <Grid x:Name="RecordsPanel" Grid.Column="1" RowSpacing="6">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -233,20 +232,20 @@
                         </GridView.ItemContainerStyle>
                         <GridView.ItemTemplate>
                             <DataTemplate>
-                                <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" Padding="8" Background="{StaticResource ConsoleRaisedGroundBrush}" CornerRadius="4">
+                                <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" Padding="8" Background="{StaticResource MenuPhotoMatteBrush}" CornerRadius="4">
                                     <Grid ColumnSpacing="12">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="96" />
+                                            <ColumnDefinition Width="104" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="96" Height="96" Background="{StaticResource ConsolePanelBrush}" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" VerticalAlignment="Center">
-                                            <Image Source="{Binding Photo}" Stretch="UniformToFill" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
+                                        <Border Width="104" Height="104" Padding="4" Background="{StaticResource ConsoleGroundBrush}" VerticalAlignment="Center">
+                                            <Image Source="{Binding Photo}" Width="96" Height="96" Stretch="UniformToFill" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
                                         </Border>
-                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Name}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="20" MaxLines="2" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
+                                        <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" FontFamily="{StaticResource ConsoleSansMediumFont}" FontSize="16" LineHeight="20" MaxLines="2" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Name}" />
                                             <TextBlock Text="{Binding CategoryName}" FontSize="12" MaxLines="1" TextTrimming="CharacterEllipsis" Foreground="{StaticResource ConsoleMutedInkBrush}" />
-                                            <TextBlock Text="{Binding PriceDisplay}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="19" Foreground="{StaticResource ConsoleAccentTextBrush}" />
-                                            <TextBlock Text="{Binding StateDisplay}" FontSize="11" Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                                            <TextBlock Text="{Binding PriceDisplay}" Style="{StaticResource MenuPrice}" />
+                                            <TextBlock Text="Inactive" Visibility="{Binding InactiveVisibility}" FontSize="11" Foreground="{StaticResource ConsoleAccentTextBrush}" />
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -278,11 +277,11 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <Border x:Name="DetailArt" Width="72" Height="72" Background="{StaticResource ConsolePanelBrush}" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="1" Padding="0">
+                                    <Border x:Name="DetailArt" Width="72" Height="72" Background="{StaticResource MenuPhotoMatteBrush}" Padding="4">
                                         <Image IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" Stretch="UniformToFill" x:Name="DetailPhoto" />
                                     </Border>
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-                                        <TextBlock x:Name="DetailHeading" Text="Select a drink" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="27" Foreground="{StaticResource ConsoleOnFieldBrush}" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="DetailHeading" Text="Select a drink" FontFamily="{StaticResource ConsoleSansMediumFont}" FontSize="20" Foreground="{StaticResource ConsoleOnFieldBrush}" TextWrapping="Wrap" />
                                         <TextBlock x:Name="DetailMeta" FontSize="13" Foreground="{StaticResource ConsoleOnFieldMutedBrush}" />
                                     </StackPanel>
                                 </Grid>
@@ -317,7 +316,7 @@
                                                             <ColumnDefinition Width="48" />
                                                         </Grid.ColumnDefinitions>
                                                         <TextBlock Text="{Binding SizeName}" VerticalAlignment="Center" />
-                                                        <TextBlock Grid.Column="1" Text="{Binding PriceDisplay}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="20" VerticalAlignment="Center" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding PriceDisplay}" Style="{StaticResource MenuPrice}" VerticalAlignment="Center" />
                                                         <Button Grid.Column="2" Content="More" Style="{StaticResource MenuLink}" AutomationProperties.Name="{Binding ActionName}" FontSize="12">
                                                             <Button.Flyout>
                                                                 <MenuFlyout>

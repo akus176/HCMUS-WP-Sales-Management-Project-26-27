@@ -112,13 +112,13 @@
             </Setter>
         </Style>
     </Page.Resources>
-    <Grid Padding="24,18,24,24" RowSpacing="8">
+    <Grid Padding="{StaticResource ConsolePagePadding}" RowSpacing="6">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid x:Name="Header" Padding="0,0,0,16" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1" ColumnSpacing="18" RowSpacing="10">
+        <Grid x:Name="Header" Padding="0,0,0,10" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" ColumnSpacing="18" RowSpacing="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -127,12 +127,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <StackPanel Spacing="3">
-                <TextBlock x:Name="ProfileCount" Text="MANAGE / CUSTOMER NOTEBOOK" Style="{StaticResource CustomerLabel}" />
-                <TextBlock Text="Customers" Style="{StaticResource ConsolePageTitleStyle}" x:Name="CustomerTitle" FontSize="52" />
-                <TextBlock Text="Manage customer profiles, saved addresses, loyalty, and order history." />
-            </StackPanel>
-            <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom">
+            <TextBlock Text="Customers" Style="{StaticResource ConsolePageTitleStyle}" x:Name="CustomerTitle" AutomationProperties.HeadingLevel="Level1" VerticalAlignment="Center" />
+            <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                 <Button x:Name="ReloadButton" Content="Refresh" Click="OnReload" />
                 <Button x:Name="NewCustomerButton" Content="+ New customer" Style="{StaticResource CustomerPrimary}" Click="OnNewCustomer" />
             </StackPanel>
@@ -142,7 +138,7 @@
             <InfoBar x:Name="Status" IsOpen="False" IsClosable="True" />
         </StackPanel>
         <ScrollViewer x:Name="WorkspaceContent" Grid.Row="2" HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled" SizeChanged="OnPageSizeChanged">
-            <Grid x:Name="CustomerLayout" ColumnSpacing="18" RowSpacing="18">
+            <Grid x:Name="CustomerLayout" ColumnSpacing="18" RowSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="ListColumn" Width="280" />
                     <ColumnDefinition x:Name="DetailColumn" Width="*" />
@@ -327,7 +323,7 @@
                     <StackPanel Spacing="8" Margin="0,8,24,0">
                         <TextBlock Text="Recent orders" Style="{StaticResource CustomerHeading}" AutomationProperties.HeadingLevel="Level2" />
                         <TextBlock x:Name="OrdersEmpty" Foreground="{StaticResource ConsoleMutedInkBrush}" TextWrapping="Wrap" />
-                        <ListView x:Name="OrdersList" SelectionMode="None" MaxHeight="280" ContainerContentChanging="OnContainerContentChanging" AutomationProperties.Name="Recent customer orders" Padding="0,0,24,0">
+                        <ListView x:Name="OrdersList" SelectionMode="None" MaxHeight="360" ContainerContentChanging="OnContainerContentChanging" AutomationProperties.Name="Recent customer orders" Padding="0,0,24,0">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Padding="0,10" ColumnSpacing="8" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">

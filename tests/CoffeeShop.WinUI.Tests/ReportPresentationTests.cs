@@ -19,16 +19,42 @@ public sealed class ReportPresentationTests
             [new(new(2026, 10, 1), 75.50m, 2), new(new(2026, 10, 2), 50m, 1)],
             [new("cash", 75.50m, 2), new("card", 50m, 1)]);
 
-        var days = ReportPresentation.RevenueDays(report);
+        var days = ReportPresentation.RevenuePeriods(report, RevenueGrouping.Day);
         var cash = ReportPresentation.RevenuePayments(report, "cash");
 
         Assert.Collection(days,
-            row => Assert.Equal("01 Oct", row.DateDisplay),
+            row => Assert.Equal("01 Oct", row.ChartLabel),
             row => Assert.Equal("50.00", row.RevenueDisplay));
         var payment = Assert.Single(cash);
         Assert.Equal("cash", payment.PaymentMethod);
         Assert.Equal("75.50", payment.RevenueDisplay);
         Assert.Empty(ReportPresentation.RevenuePayments(report, "e_wallet"));
+    }
+
+    [Fact]
+    public void RevenueView_GroupsByCalendarMonthAndYearWithoutDoubleCountingOrders()
+    {
+        var report = new RevenueReport(
+            new(2025, 12, 30), new(2026, 12, 2), "UTC", DateTimeOffset.MinValue, DateTimeOffset.MaxValue,
+            190.50m, 2,
+            [
+                new(new(2025, 12, 30), 50m, 1),
+                new(new(2025, 12, 31), 25.50m, 1),
+                new(new(2026, 1, 1), 15m, 1),
+                new(new(2026, 12, 2), 100m, 1)
+            ],
+            []);
+
+        var months = ReportPresentation.RevenuePeriods(report, RevenueGrouping.Month);
+        var years = ReportPresentation.RevenuePeriods(report, RevenueGrouping.Year);
+
+        Assert.Equal([new DateOnly(2025, 12, 1), new DateOnly(2026, 1, 1), new DateOnly(2026, 12, 1)], months.Select(row => row.Date));
+        Assert.Equal([75.50m, 15m, 100m], months.Select(row => row.Revenue));
+        Assert.Equal([new DateOnly(2025, 1, 1), new DateOnly(2026, 1, 1)], years.Select(row => row.Date));
+        Assert.Equal([75.50m, 115m], years.Select(row => row.Revenue));
+        Assert.All(months.Concat(years), row => Assert.Null(row.OrderCount));
+        Assert.Equal(report.Revenue, months.Sum(row => row.Revenue));
+        Assert.Equal(report.Revenue, years.Sum(row => row.Revenue));
     }
 
     [Fact]
