@@ -36,10 +36,20 @@ public sealed record CounterMenuCard(MenuItemSummary Item)
     public string Category =>
         Item.CategoryName.ToUpperInvariant();
 
-    public string Price =>
-        $"from {Item.SizeVariants.Where(size => size.IsActive).Min(size => size.Price):0.00}";
+    public string Price { get; } = FormatPrice(Item);
 
     public BitmapImage Photo => new(MenuPhotoSource.ForItem(Item.Name));
+
+    private static string FormatPrice(MenuItemSummary item)
+    {
+        var prices = item.SizeVariants.Where(size => size.IsActive).Select(size => size.Price).Distinct().ToArray();
+        return prices.Length switch
+        {
+            0 => "Unavailable",
+            1 => prices[0].ToString("0.00"),
+            _ => $"From {prices.Min():0.00}",
+        };
+    }
 }
 
 public sealed partial class PosPage : Page
@@ -100,7 +110,8 @@ public sealed partial class PosPage : Page
         if (PageLayout is null) return;
         // Use the workspace's available width, after the navigation rail.
         var wide = args.NewSize.Width >= 980 && args.NewSize.Height >= 640;
-        PageLayout.Padding = new Thickness(args.NewSize.Width < 640 ? 16 : 24, 12, args.NewSize.Width < 640 ? 16 : 24, 16);
+        var padding = (Thickness)Microsoft.UI.Xaml.Application.Current.Resources["ConsolePagePadding"];
+        PageLayout.Padding = args.NewSize.Width < 640 ? new Thickness(16, padding.Top, 16, padding.Bottom) : padding;
         PageScroll.VerticalScrollBarVisibility = wide ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
         WorkspaceRow.Height = wide ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
         MenuRow.Height = wide ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
@@ -224,6 +235,26 @@ public sealed partial class PosPage : Page
             container?.Focus(FocusState.Keyboard);
         }
     }
+    private void OnCustomizationOpened(ContentDialog sender, ContentDialogOpenedEventArgs args)
+    {
+        // The native dialog gives the default action its own style after opening.
+        var primary = PresentationVerification.Elements(sender).OfType<Button>().FirstOrDefault(button => button.Name == "PrimaryButton");
+        if (primary is null) return;
+        var resources = Microsoft.UI.Xaml.Application.Current.Resources;
+        var field = (Brush)resources["ConsoleFieldBrush"];
+        primary.Background = field;
+        primary.BorderBrush = field;
+        primary.Foreground = (Brush)resources["ConsoleOnFieldBrush"];
+        primary.CornerRadius = new CornerRadius(0);
+        primary.MinHeight = (double)resources["ConsoleTouchTarget"];
+        primary.Padding = new Thickness(12, 0, 12, 0);
+        primary.FontFamily = (FontFamily)resources["ConsoleSansFont"];
+        primary.FontSize = 13;
+        primary.CharacterSpacing = 0;
+        primary.Resources["AccentButtonBackgroundPointerOver"] = resources["ConsoleFieldDeepBrush"];
+        primary.Resources["AccentButtonBackgroundPressed"] = resources["ConsoleFieldDeepBrush"];
+    }
+
     private void OnCustomizationAdd(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var previousCount = model.Cart.Count;

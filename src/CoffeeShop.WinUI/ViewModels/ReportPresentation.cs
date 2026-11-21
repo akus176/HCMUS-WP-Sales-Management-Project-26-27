@@ -45,8 +45,19 @@ public static class ReportPresentation
             .Select(row => new RevenuePaymentRow(row.PaymentMethod, row.Revenue, row.OrderCount))
             .ToArray();
 
-    public static IReadOnlyList<RevenueDayRow> RevenueDays(RevenueReport report) =>
-        report.Daily.Select(row => new RevenueDayRow(row.Date, row.Revenue, row.OrderCount)).ToArray();
+    public static IReadOnlyList<RevenuePeriodRow> RevenuePeriods(RevenueReport report, RevenueGrouping grouping)
+    {
+        if (grouping == RevenueGrouping.Day)
+            return report.Daily.Select(row => new RevenuePeriodRow(row.Date, row.Revenue, grouping, row.OrderCount)).ToArray();
+
+        // Revenue is additive across payment dates. Distinct order counts are not,
+        // because a split payment can recognize the same order on multiple days.
+        return report.Daily
+            .GroupBy(row => new DateOnly(row.Date.Year, grouping == RevenueGrouping.Month ? row.Date.Month : 1, 1))
+            .OrderBy(period => period.Key)
+            .Select(period => new RevenuePeriodRow(period.Key, period.Sum(row => row.Revenue), grouping, null))
+            .ToArray();
+    }
 
     public static IReadOnlyList<BestSellerViewRow> BestSellers(BestSellerReport report) =>
         report.Items.Select(row => new BestSellerViewRow(
@@ -76,10 +87,21 @@ public sealed record RevenuePaymentRow(string PaymentMethod, decimal Revenue, in
     public string RevenueDisplay => Revenue.ToString("0.00");
 }
 
-public sealed record RevenueDayRow(DateOnly Date, decimal Revenue, int OrderCount)
+public enum RevenueGrouping { Day, Month, Year }
+
+public sealed record RevenuePeriodRow(DateOnly Date, decimal Revenue, RevenueGrouping Grouping, int? OrderCount)
 {
-    public string DateDisplay => Date.ToString("dd MMM");
-    public string RevenueDisplay => Revenue.ToString("0.00");
+    public string ChartLabel => Grouping switch
+    {
+        RevenueGrouping.Month => Date.ToString("MMM yyyy"),
+        RevenueGrouping.Year => Date.ToString("yyyy"),
+        _ => Date.ToString("dd MMM"),
+    };
+    public string PeriodLabel => Grouping == RevenueGrouping.Day ? Date.ToString("dd MMM yyyy") : ChartLabel;
+    public string TableLabel => OrderCount is { } count
+        ? $"{PeriodLabel} · {count:N0} {(count == 1 ? "order" : "orders")}"
+        : PeriodLabel;
+    public string RevenueDisplay => Revenue.ToString("N2");
 }
 
 public sealed record BestSellerViewRow(int Rank, string ItemName, string? SizeName, long Quantity, decimal Revenue)

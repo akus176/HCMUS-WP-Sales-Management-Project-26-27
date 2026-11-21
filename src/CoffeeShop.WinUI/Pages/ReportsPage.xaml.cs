@@ -33,9 +33,10 @@ public sealed partial class ReportsPage : Page
         summaryFits = Kpis.ActualWidth <= ActualWidth - 47,
         dashboardFits = Dashboard.ActualWidth <= ActualWidth - 47,
         revenueFits = RevenuePanel.ActualWidth <= ActualWidth - 47,
+        revenueControlsFit = RevenueControls.ActualWidth <= RevenueHeader.ActualWidth + 1,
         paymentsFit = ChannelPanel.ActualWidth <= ActualWidth - 47,
-        chartDays = RevenueChart.ColumnDefinitions.Count,
-        expectedDays = model.Revenue.Value?.Daily.Count
+        chartColumns = RevenueChart.ColumnDefinitions.Count,
+        tableRows = RevenuePeriodsList.Items.Count
     };
 
     internal async Task<object> VerifyReportInteractionsAsync()
@@ -51,6 +52,8 @@ public sealed partial class ReportsPage : Page
         ReportScroll.ChangeView(null, ReportScroll.ScrollableHeight, null, true);
         await Task.Delay(250);
         await PresentationVerification.CaptureAsync(this, "native-reports-breakdowns.png");
+        FiltersButton.StartBringIntoView();
+        await Task.Delay(250);
         FiltersFlyout.ShowAt(FiltersButton);
         await Task.Delay(250);
         await CaptureFlyoutAsync(FiltersFlyout, "native-reports-filters.png");
@@ -58,15 +61,24 @@ public sealed partial class ReportsPage : Page
         OnResetFilters(this, new RoutedEventArgs());
         var resetWorks = PaymentFilter.SelectedIndex == 0 && ChannelFilter.SelectedIndex == 0 && !ResetFiltersButton.IsEnabled;
         ReportScroll.ChangeView(null, 0, null, true);
-        var dailyDetailsWork = false;
-        if (DailyDetailsButton.Flyout is Flyout details)
+        RevenueTableOption.IsChecked = true;
+        UpdateLayout();
+        var revenueTableWorks = RevenuePeriodsList.Items.Count == model.Revenue.Value?.Daily.Count
+            && RevenueGraph.Visibility == Visibility.Collapsed;
+        await PresentationVerification.CaptureAsync(this, "native-reports-revenue-table.png");
+        var groupedRevenueWorks = true;
+        foreach (var groupingOption in new[] { RevenueMonthOption, RevenueYearOption })
         {
-            details.ShowAt(DailyDetailsButton);
-            await Task.Delay(250);
-            dailyDetailsWork = RevenueDaysList.Items.Count == model.Revenue.Value?.Daily.Count;
-            await CaptureFlyoutAsync(details, "native-reports-daily-details.png");
-            details.Hide();
+            RevenueTableOption.IsChecked = true;
+            groupingOption.IsChecked = true;
+            var rowCount = RevenuePeriodsList.Items.Count;
+            groupedRevenueWorks &= RevenuePeriodsList.Items.OfType<RevenuePeriodRow>().Sum(row => row.Revenue) == revenue
+                && RevenueTable.Visibility == (rowCount > 0 ? Visibility.Visible : Visibility.Collapsed);
+            RevenueChartOption.IsChecked = true;
+            groupedRevenueWorks &= RevenueChart.ColumnDefinitions.Count == rowCount && RevenueTable.Visibility == Visibility.Collapsed
+                && (rowCount == 0 || RevenueAxis.Children.Count >= 2);
         }
+        RevenueDayOption.IsChecked = true;
 
         PeriodFlyout.ShowAt(PeriodButton);
         await Task.Delay(250);
@@ -82,7 +94,7 @@ public sealed partial class ReportsPage : Page
         var future = last.AddYears(5);
         FirstDate.Date = LastDate.Date = AtLocalDate(future);
         await ApplyPeriodAsync();
-        var emptyPeriodWorks = model.Revenue.Value is { OrderCount: 0 } && RevenueEmpty.Visibility == Visibility.Visible && RevenueChartScroll.Visibility == Visibility.Collapsed;
+        var emptyPeriodWorks = model.Revenue.Value is { OrderCount: 0 } && RevenueEmpty.Visibility == Visibility.Visible && RevenueGraph.Visibility == Visibility.Collapsed;
         var stockIndependentOfPeriod = model.LowStock.Value?.Count == stock;
         await PresentationVerification.CaptureAsync(this, "native-reports-empty.png");
         FirstDate.Date = AtLocalDate(first);
@@ -91,7 +103,7 @@ public sealed partial class ReportsPage : Page
         showRefreshFeedback = false;
         Render();
         ReportScroll.ChangeView(null, 0, null, true);
-        return new { filtersWork, resetWorks, dailyDetailsWork, invalidRejected, refreshKeepsAppliedPeriod, emptyPeriodWorks, stockIndependentOfPeriod };
+        return new { filtersWork, resetWorks, revenueTableWorks, groupedRevenueWorks, invalidRejected, refreshKeepsAppliedPeriod, emptyPeriodWorks, stockIndependentOfPeriod };
     }
 
     private static async Task CaptureFlyoutAsync(Flyout flyout, string fileName)
@@ -194,8 +206,6 @@ public sealed partial class ReportsPage : Page
         RevenueTotal.Text = revenue?.Revenue.ToString("N2") ?? "—";
         RevenueOrderCount.Text = revenue?.OrderCount.ToString("N0") ?? "—";
         AverageTicket.Text = revenue is null ? "—" : (revenue.OrderCount == 0 ? 0 : revenue.Revenue / revenue.OrderCount).ToString("N2");
-        RevenueDaysList.ItemsSource = revenue is null ? null : ReportPresentation.RevenueDays(revenue);
-        RevenueSummary.Text = revenue is null ? "" : $"{revenue.Daily.Count} active days · {revenue.OrderCount} recognized orders";
         StockCount.Text = model.LowStock.Value?.Count.ToString() ?? "—";
         SetRegionMessage(RevenueError, model.Revenue.Error?.Description);
         SetRegionMessage(BestSellersError, model.BestSellers.Error?.Description);
@@ -210,7 +220,7 @@ public sealed partial class ReportsPage : Page
         ApplyPaymentFilter();
         ApplyChannelFilter();
         UpdateFilterSummary();
-        RenderChart();
+        RenderRevenueView();
     }
 
     private static void SetRegionMessage(TextBlock target, string? message)
@@ -219,73 +229,157 @@ public sealed partial class ReportsPage : Page
         target.Visibility = message is null ? Visibility.Collapsed : Visibility.Visible;
     }
 
-    private void RenderChart()
+    private RevenueGrouping SelectedRevenueGrouping => RevenueMonthOption.IsChecked == true ? RevenueGrouping.Month
+        : RevenueYearOption.IsChecked == true ? RevenueGrouping.Year : RevenueGrouping.Day;
+
+    private void OnRevenueViewChanged(object sender, RoutedEventArgs args)
     {
+        if (model is null) return;
+        if (sender is RadioButton { GroupName: "RevenueGrouping" })
+            RevenueChartScroll.ChangeView(0, null, null, true);
+        RenderRevenueView();
+    }
+
+    private void OnRevenueHeaderSizeChanged(object sender, SizeChangedEventArgs args)
+    {
+        if (RevenueViewSegments is null) return;
+        var inline = args.NewSize.Width >= 450;
+        RevenueHeader.ColumnDefinitions[1].Width = inline ? GridLength.Auto : new GridLength(0);
+        RevenueHeader.ColumnSpacing = inline ? 12 : 0;
+        RevenueHeader.RowSpacing = inline ? 0 : 8;
+        Grid.SetColumn(RevenueControls, inline ? 1 : 0);
+        Grid.SetRow(RevenueControls, inline ? 0 : 1);
+        RevenueControls.HorizontalAlignment = inline ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+
+        var stackControls = args.NewSize.Width < 280;
+        RevenueControls.ColumnSpacing = stackControls ? 0 : 8;
+        RevenueControls.RowSpacing = stackControls ? 6 : 0;
+        Grid.SetColumn(RevenueViewSegments, stackControls ? 0 : 1);
+        Grid.SetRow(RevenueViewSegments, stackControls ? 1 : 0);
+    }
+
+    private void RenderRevenueView()
+    {
+        var report = model.Revenue.Value;
+        var grouping = SelectedRevenueGrouping;
+        var periods = report is null ? [] : ReportPresentation.RevenuePeriods(report, grouping);
+        var showTable = periods.Count > 0 && RevenueTableOption.IsChecked == true;
+        var showChart = periods.Count > 0 && !showTable;
+        RevenueTable.Visibility = showTable ? Visibility.Visible : Visibility.Collapsed;
+        RevenuePeriodsList.ItemsSource = showTable ? periods : null;
+        RevenueGraph.Visibility = showChart ? Visibility.Visible : Visibility.Collapsed;
+        RevenueSummaryPanel.Visibility = periods.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        var unit = grouping.ToString().ToLowerInvariant();
+        RevenueSummary.Text = report is null ? "" :
+            $"{periods.Count:N0} active {unit}{(periods.Count == 1 ? "" : "s")} · {report.OrderCount:N0} recognized orders in period";
+        RenderChart(showChart ? periods : []);
+    }
+
+    private void RenderChart(IReadOnlyList<RevenuePeriodRow> periods)
+    {
+        RevenueAxis.Children.Clear();
         RevenueChart.Children.Clear();
         RevenueChart.ColumnDefinitions.Clear();
         RevenueChart.MinWidth = 0;
+        RevenueChart.Width = double.NaN;
         RevenueChartHint.Visibility = Visibility.Collapsed;
-        var days = model.Revenue.Value?.Daily;
-        RevenueChartScroll.Visibility = days is { Count: > 0 } ? Visibility.Visible : Visibility.Collapsed;
-        DailyDetailsButton.IsEnabled = days is { Count: > 0 };
-        if (days is null || days.Count == 0) return;
-        RevenueChart.MinWidth = days.Count * 72;
-        const double plotHeight = 142;
-        var maximum = Math.Max(0, days.Max(day => day.Revenue));
-        var minimum = Math.Min(0, days.Min(day => day.Revenue));
-        var range = maximum - minimum;
-        var zeroPosition = range == 0 ? plotHeight : (double)(maximum / range) * plotHeight;
-        for (var i = 0; i <= 4; i++)
+        if (periods.Count == 0) return;
+        var columnWidth = Math.Max(64, periods.Max(row => row.ChartLabel.Length) * 7 + 12);
+        RevenueChart.MinWidth = periods.Count * columnWidth;
+        const double plotTop = 12;
+        const double plotHeight = 154;
+        var minimum = Math.Min(0, (double)periods.Min(row => row.Revenue));
+        var maximum = Math.Max(0, (double)periods.Max(row => row.Revenue));
+        var tickStep = RevenueTickStep(maximum > minimum ? (maximum - minimum) / 4 : 1);
+        var scaleMin = Math.Floor(minimum / tickStep) * tickStep;
+        var scaleMax = Math.Ceiling(maximum / tickStep) * tickStep;
+        var range = Math.Max(tickStep, scaleMax - scaleMin);
+        var tickCount = (int)Math.Round(range / tickStep);
+        var zeroPosition = (scaleMin + range) / range * plotHeight;
+        for (var i = 0; i <= tickCount; i++)
         {
-            var rule = new Border { Height = 1, Background = ResourceBrush("ConsoleRuleBrush"), Opacity = .65, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 26 + plotHeight / 4 * i, 0, 0) };
-            Grid.SetColumnSpan(rule, days.Count);
+            var tickPosition = plotTop + plotHeight * i / tickCount;
+            var rule = new Border { Height = 1, Background = ResourceBrush("ConsoleRuleBrush"), Opacity = .65, VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, tickPosition, 0, 0) };
+            Grid.SetColumnSpan(rule, periods.Count);
             RevenueChart.Children.Add(rule);
+            RevenueAxis.Children.Add(new TextBlock
+            {
+                Text = FormatRevenueAxis(scaleMin + (tickCount - i) * tickStep),
+                FontSize = 11,
+                Foreground = ResourceBrush("ConsoleMutedInkBrush"),
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, tickPosition - 8, 0, 0),
+            });
         }
-        var baseline = new Border { Height = 1, Background = ResourceBrush("ConsoleAccentBrush"), VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, 26 + zeroPosition, 0, 0) };
-        Grid.SetColumnSpan(baseline, days.Count);
+        var baseline = new Border { Height = 1, Background = ResourceBrush("ConsoleAccentBrush"), VerticalAlignment = VerticalAlignment.Top, Margin = new Thickness(0, plotTop + zeroPosition, 0, 0) };
+        Grid.SetColumnSpan(baseline, periods.Count);
         RevenueChart.Children.Add(baseline);
-        foreach (var day in days)
+        foreach (var row in periods)
         {
             RevenueChart.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             var column = new Grid { Margin = new Thickness(4, 0, 4, 0) };
-            column.RowDefinitions.Add(new RowDefinition { Height = new GridLength(26) });
+            column.RowDefinitions.Add(new RowDefinition { Height = new GridLength(plotTop) });
             column.RowDefinitions.Add(new RowDefinition { Height = new GridLength(plotHeight) });
             column.RowDefinitions.Add(new RowDefinition { Height = new GridLength(32) });
-            var value = new TextBlock { Text = day.Revenue.ToString("N2"), FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-            var barHeight = range == 0 ? 0 : (double)(Math.Abs(day.Revenue) / range) * plotHeight;
+            var barHeight = (double)Math.Abs(row.Revenue) / range * plotHeight;
             var plot = new Grid();
             var bar = new Border
             {
                 Height = barHeight,
                 MaxWidth = 34,
                 VerticalAlignment = VerticalAlignment.Top,
-                Margin = new Thickness(0, day.Revenue >= 0 ? Math.Max(0, zeroPosition - barHeight) : zeroPosition, 0, 0),
-                Background = ResourceBrush(day.Revenue >= 0 ? "ConsoleFieldBrush" : "ConsoleMutedInkBrush"),
+                Margin = new Thickness(0, row.Revenue >= 0 ? Math.Max(0, zeroPosition - barHeight) : zeroPosition, 0, 0),
+                Background = ResourceBrush(row.Revenue >= 0 ? "ConsoleFieldBrush" : "ConsoleMutedInkBrush"),
                 BorderBrush = ResourceBrush("ConsoleAccentBrush"),
                 BorderThickness = new Thickness(0, barHeight > 0 ? Math.Min(3, barHeight) : 0, 0, 0)
             };
             plot.Children.Add(bar);
             Grid.SetRow(plot, 1);
-            var date = new TextBlock { Text = day.Date.ToString("dd MMM"), FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+            var date = new TextBlock { Text = row.ChartLabel, FontSize = 12, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
             Grid.SetRow(date, 2);
-            column.Children.Add(value);
             column.Children.Add(plot);
             column.Children.Add(date);
-            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(column, $"{day.Date:dd MMM yyyy}: revenue {day.Revenue:N2}, {day.OrderCount} orders");
-            ToolTipService.SetToolTip(column, $"{day.Date:dd MMM}: {day.Revenue:N2} · {day.OrderCount} orders");
+            AutomationProperties.SetName(column, $"{row.TableLabel} · Revenue {row.RevenueDisplay}");
+            ToolTipService.SetToolTip(column, $"{row.TableLabel} · Revenue {row.RevenueDisplay}");
             Grid.SetColumn(column, RevenueChart.ColumnDefinitions.Count - 1);
             RevenueChart.Children.Add(column);
         }
         UpdateChartHint();
     }
 
+    private static double RevenueTickStep(double target)
+    {
+        var magnitude = Math.Pow(10, Math.Floor(Math.Log10(target)));
+        var factor = (target / magnitude) switch
+        {
+            <= 1 => 1,
+            <= 2 => 2,
+            <= 5 => 5,
+            _ => 10,
+        };
+        return factor * magnitude;
+    }
+
+    private static string FormatRevenueAxis(double value) => Math.Abs(value) switch
+    {
+        >= 1_000_000_000_000 => $"{value / 1_000_000_000_000:0.#}T",
+        >= 1_000_000_000 => $"{value / 1_000_000_000:0.#}B",
+        >= 1_000_000 => $"{value / 1_000_000:0.#}M",
+        >= 1_000 => $"{value / 1_000:0.#}K",
+        _ => $"{value:0.##}",
+    };
+
     private void OnChartSizeChanged(object sender, SizeChangedEventArgs args) => UpdateChartHint();
     private void UpdateChartHint()
     {
         if (RevenueChartHint is null) return;
-        var days = RevenueChart.ColumnDefinitions.Count;
-        RevenueChartHint.Text = $"Scroll horizontally to see all {days} days.";
-        RevenueChartHint.Visibility = days > 0 && RevenueChart.MinWidth > RevenueChartScroll.ActualWidth + 1 ? Visibility.Visible : Visibility.Collapsed;
+        var columns = RevenueChart.ColumnDefinitions.Count;
+        var viewportWidth = RevenueChartScroll.ActualWidth;
+        if (columns > 0) RevenueChart.Width = Math.Max(RevenueChart.MinWidth, viewportWidth);
+        var unit = SelectedRevenueGrouping.ToString().ToLowerInvariant();
+        RevenueChartHint.Text = columns == 1 ? $"Scroll horizontally to see the full {unit}." : $"Scroll horizontally to see all {columns:N0} {unit}s.";
+        RevenueChartHint.Visibility = columns > 0 && RevenueChart.MinWidth > viewportWidth + 1 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void OnPaymentFilterChanged(object sender, SelectionChangedEventArgs args) { if (model is not null) { ApplyPaymentFilter(); UpdateFilterSummary(); } }
@@ -577,14 +671,12 @@ public sealed partial class ReportsPage : Page
         Grid.SetRow(AverageKpi, fourKpis ? 0 : 1);
         Grid.SetRow(StockKpi, fourKpis ? 0 : 1);
         Dashboard.ColumnSpacing = wide ? 24 : 0;
-        var headerInline = reportWidth >= 720;
-        HeaderOrnament.Visibility = reportWidth >= 1000 ? Visibility.Visible : Visibility.Collapsed;
-        Header.ColumnDefinitions[1].Width = new GridLength(reportWidth >= 1000 ? 116 : 0);
-        Header.ColumnDefinitions[2].Width = headerInline ? GridLength.Auto : new GridLength(0);
+        var headerInline = reportWidth >= 600;
+        Header.ColumnDefinitions[1].Width = headerInline ? GridLength.Auto : new GridLength(0);
         Header.ColumnSpacing = headerInline ? 18 : 0;
-        Grid.SetColumn(HeaderActions, headerInline ? 2 : 0);
-        Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 3);
+        Grid.SetColumn(HeaderActions, headerInline ? 1 : 0);
+        Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 2);
         Grid.SetRow(HeaderActions, headerInline ? 0 : 1);
-        ReportsTitle.FontSize = headerInline ? 52 : 40;
+        ReportsTitle.FontSize = headerInline ? 42 : 34;
     }
 }

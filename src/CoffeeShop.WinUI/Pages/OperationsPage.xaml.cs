@@ -100,11 +100,13 @@ public sealed partial class OperationsPage : Page
         if (BoardLayout is null || ActualWidth <= 0) return;
         var sideInspector = ActualWidth >= 1160 && ActualHeight >= 560;
         BoardLayout.ColumnSpacing = sideInspector ? 24 : 0;
+        BoardLayout.RowSpacing = sideInspector ? 0 : 12;
         RailColumn.Width = new GridLength(sideInspector ? 320 : 0);
         Grid.SetColumn(InspectorScroll, sideInspector ? 1 : 0);
         Grid.SetRow(InspectorScroll, sideInspector ? 0 : 1);
         var columns = ActualWidth - 48 - (sideInspector ? 344 : 0) >= 720;
         NotesLayout.ColumnSpacing = columns ? 16 : 0;
+        NotesLayout.RowSpacing = columns ? 0 : 12;
         PreparingColumn.Width = ReadyColumn.Width = columns ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
         Grid.SetColumn(PreparingPanel, columns ? 1 : 0);
         Grid.SetRow(PreparingPanel, columns ? 0 : 1);
@@ -116,10 +118,10 @@ public sealed partial class OperationsPage : Page
         Grid.SetColumn(HeaderActions, headerInline ? 1 : 0);
         Grid.SetRow(HeaderActions, headerInline ? 0 : 1);
         HeaderActions.Orientation = ActualWidth >= 560 ? Orientation.Horizontal : Orientation.Vertical;
-        var height = Math.Max(320, ActualHeight - HeaderLayout.ActualHeight - 110 - (Status.IsOpen ? Status.ActualHeight : 0));
+        var height = Math.Max(320, ActualHeight - HeaderLayout.ActualHeight - 70 - (Status.IsOpen ? Status.ActualHeight : 0));
         InspectorScroll.MaxHeight = sideInspector ? height : double.PositiveInfinity;
         foreach (var list in new[] { ConfirmedList, PreparingList, ReadyList })
-            list.MaxHeight = sideInspector ? Math.Max(220, height - 82) : double.PositiveInfinity;
+            list.MaxHeight = sideInspector ? Math.Max(220, height - 64) : double.PositiveInfinity;
     }
 
     private void OnShowPayment(object sender, RoutedEventArgs args)

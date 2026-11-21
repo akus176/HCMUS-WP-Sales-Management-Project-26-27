@@ -230,7 +230,6 @@ public sealed partial class CustomersPage : Page
             NewCustomerButton.IsEnabled = !model.IsBusy && !model.RequiresReload;
             Status.Apply(model.Feedback);
             if (model.Feedback.Kind == WorkflowFeedbackKind.Ready) Status.IsOpen = false;
-            ProfileCount.Text = "MANAGE / CUSTOMERS";
             ResultsCount.Text = model.Customers.Count == 100 ? "100+ matches" : $"{model.Customers.Count} profiles";
             EmptyState.Visibility = model.IsEmpty ? Visibility.Visible : Visibility.Collapsed;
             var customer = model.SelectedCustomer;
@@ -282,7 +281,7 @@ public sealed partial class CustomersPage : Page
         WorkspaceContent.VerticalScrollBarVisibility = wide ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
         CustomerLayout.Height = wide ? height : double.NaN;
         CustomerLayout.RowDefinitions[0].Height = wide ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
-        DirectoryPanel.Height = wide ? height : Math.Min(420, Math.Max(260, height * .7));
+        DirectoryPanel.Height = wide ? height : Math.Clamp(height * .7, 260, 480);
         DirectoryPanel.BorderThickness = wide ? new Thickness(0, 0, 1, 0) : new Thickness(0, 0, 0, 1);
         DirectoryPanel.Padding = wide ? new Thickness(0, 0, 12, 0) : new Thickness(0, 0, 0, 12);
         DetailScroll.MaxHeight = RecentOrdersScroll.MaxHeight = wide ? height : double.PositiveInfinity;
@@ -290,21 +289,22 @@ public sealed partial class CustomersPage : Page
         DetailColumn.Width = wide ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
         RecentOrdersColumn.Width = new GridLength(wide ? 282 : 0);
         CustomerLayout.ColumnSpacing = wide ? 18 : 0;
-        CustomerLayout.RowSpacing = wide ? 0 : 18;
+        CustomerLayout.RowSpacing = wide ? 0 : 16;
         Grid.SetColumn(DetailScroll, wide ? 1 : 0);
         Grid.SetRow(DetailScroll, wide ? 0 : 1);
         Grid.SetColumn(RecentOrdersScroll, wide ? 2 : 0);
         Grid.SetRow(RecentOrdersScroll, wide ? 0 : 2);
-        HistoryColumn.Width = wide && ActualWidth >= 1200 ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
-        Grid.SetColumn(HistoryPanel, wide && ActualWidth >= 1200 ? 1 : 0);
-        Grid.SetRow(HistoryPanel, wide && ActualWidth >= 1200 ? 0 : 1);
-        var headerInline = ActualWidth >= 720;
+        var historyAtSide = wide && ActualWidth >= 1200;
+        HistoryColumn.Width = historyAtSide ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+        Grid.SetColumn(HistoryPanel, historyAtSide ? 1 : 0);
+        Grid.SetRow(HistoryPanel, historyAtSide ? 0 : 1);
+        var headerInline = ActualWidth >= 560;
         Header.ColumnDefinitions[1].Width = headerInline ? GridLength.Auto : new GridLength(0);
         Header.ColumnSpacing = headerInline ? 18 : 0;
         Grid.SetColumn(HeaderActions, headerInline ? 1 : 0);
         Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 2);
         Grid.SetRow(HeaderActions, headerInline ? 0 : 1);
-        CustomerTitle.FontSize = headerInline ? 52 : 40;
+        CustomerTitle.FontSize = headerInline ? 42 : 34;
     }
 
     private string StatusMessage() => model.Error is { Details.Count: > 0 } error

@@ -200,13 +200,6 @@ public sealed partial class StockRoomPage : Page
 
             SubtitleText.Text = $"{rawIngredients.Count} ingredients · {lowCount} low on stock · {rawReceipts.Count(r => r.Status == PurchaseReceiptStatus.Draft)} draft receipts";
             SyncPillText.Text = $"Updated {DateTime.Now:HH:mm}";
-            var lastMovement = movementsByIngredient.Values.SelectMany(items => items).MaxBy(m => m.OccurredAt.Value);
-            if (lastMovement is not null)
-            {
-                var age = DateTimeOffset.UtcNow - lastMovement.OccurredAt.Value;
-                var elapsed = age.TotalDays >= 1 ? $"{(int)age.TotalDays}D" : $"{Math.Max(0, (int)age.TotalMinutes)} MIN";
-                EyebrowText.Text = $"MANAGE  /  INVENTORY  /  LAST MOVEMENT {elapsed} AGO";
-            }
 
             ApplyIngredientFilters();
             SelectIngredient(selectedIngredientRow);
@@ -1005,20 +998,18 @@ public sealed partial class StockRoomPage : Page
         compactLayout = width < 1180 || height < 520;
         // Keep the footer and filter reset reachable on short desktop windows,
         // but let taller windows show more of the ledger.
-        IngredientsListView.MaxHeight = compactLayout ? 416 : Math.Max(104, height - 392);
+        IngredientsListView.MaxHeight = Math.Max(compactLayout ? 416 : 104, height - 350);
         ContentSplitGrid.ColumnSpacing = compactLayout || !drawerOpen ? 0 : 24;
         RootGrid.Height = compactLayout ? double.NaN : height;
-        RootGrid.Padding = new Thickness(compactLayout ? 16 : 32, 24, compactLayout ? 16 : 32, 22);
-        RootGrid.RowDefinitions[0].Height = compactLayout ? GridLength.Auto : new GridLength(98);
+        var padding = (Thickness)XamlApp.Current.Resources["ConsolePagePadding"];
+        RootGrid.Padding = compactLayout ? new Thickness(16, padding.Top, 16, padding.Bottom) : padding;
         RootGrid.RowDefinitions[3].Height = compactLayout ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
         ContentSplitGrid.RowDefinitions[0].Height = compactLayout ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
-        HeaderOrnament.Visibility = compactLayout ? Visibility.Collapsed : Visibility.Visible;
-        Grid.SetRow(HeaderActions, compactLayout ? 1 : 0);
-        Grid.SetColumn(HeaderActions, compactLayout ? 0 : 2);
-        Grid.SetColumnSpan(HeaderActions, compactLayout ? 3 : 1);
-        HeaderActions.Margin = new Thickness(0, compactLayout ? 12 : 0, 0, 0);
-        HeaderGrid.ColumnDefinitions[1].Width = new GridLength(compactLayout ? 0 : 100);
-        HeaderGrid.RowDefinitions[0].Height = compactLayout ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
+        var headerInline = width >= 640;
+        Grid.SetRow(HeaderActions, headerInline ? 0 : 1);
+        Grid.SetColumn(HeaderActions, headerInline ? 1 : 0);
+        Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 2);
+        HeaderGrid.ColumnDefinitions[1].Width = headerInline ? GridLength.Auto : new GridLength(0);
         var wrapFilters = width < 520;
         FilterToolbar.ColumnDefinitions[0].Width = wrapFilters
             ? new GridLength(1, GridUnitType.Star)
@@ -1351,7 +1342,14 @@ public sealed record MovementPresentationRow(StockMovement Movement, string Ingr
 {
     public string TimeDisplay => IngredientRow.FormatWhen(Movement.OccurredAt.Value.ToLocalTime());
     public string FullTimeDisplay => Movement.OccurredAt.Value.ToLocalTime().ToString("g");
-    public string TypeDisplay => Movement.Type.ToString();
+    public string TypeDisplay => Movement.Type switch
+    {
+        StockMovementType.Receipt => "Receipt",
+        StockMovementType.Adjustment => "Adjustment",
+        StockMovementType.OrderConsumption => "Used in order",
+        StockMovementType.Restoration => "Restored stock",
+        _ => Movement.Type.ToString(),
+    };
     public string DeltaDisplay => $"{Movement.QuantityDelta:+#,0.###;-#,0.###;0} {Unit}".TrimEnd();
     public string ReasonDisplay => Movement.Reason;
     public string ActorDisplay => ActorName ?? Movement.ActorId.ToString();

@@ -61,7 +61,7 @@
                           VerticalContentAlignment="Center"
                           IsTabStop="False">
                 <StackPanel Spacing="24" VerticalAlignment="Center">
-                    <TextBlock Text="Corner Cafe" FontFamily="{StaticResource ConsoleSansMediumFont}" FontSize="20" Foreground="{ThemeResource SignInInkBrush}" />
+                    <TextBlock Text="Corner Cafe" Style="{StaticResource ConsoleWordmarkStyle}" FontSize="20" Foreground="{ThemeResource SignInInkBrush}" />
                     <Border BorderBrush="{ThemeResource SignInRuleBrush}" BorderThickness="0,1,0,0" Padding="0,24,0,0">
                         <StackPanel Spacing="8">
                             <TextBlock Text="Staff sign in" FontFamily="{StaticResource ConsoleSansMediumFont}" FontSize="32" TextWrapping="Wrap" Foreground="{ThemeResource SignInInkBrush}" AutomationProperties.HeadingLevel="Level1" />
