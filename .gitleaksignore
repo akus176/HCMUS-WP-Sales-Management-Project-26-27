@@ -5,3 +5,12 @@
 # #214 evidence: public business-source commit ID and recorded API DLL SHA-256.
 1071c24c1e60fd1ca27a2d91ea8756185c6ade84:docs/evidence/issue-202-shared-state/README.md:generic-api-key:11
 77c7531c4a0ce47daa50c4b0e2e70f3a94a34674:docs/evidence/issue-202-shared-state/native-2026-11-16/artifacts/environment.json:generic-api-key:21
+# #219 reference evidence: reviewed public backend Git revisions, never credentials.
+b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:6
+b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:23
+b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:40
+b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:57
+b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:74
+b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:91
+b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:108
+b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:125
