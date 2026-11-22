@@ -2,15 +2,23 @@
     x:Class="CoffeeShop.WinUI.Pages.NewReceiptDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    PrimaryButtonClick="OnPrimaryClick">
-    <StackPanel Spacing="12"
-            MinWidth="360">
-        <ComboBox x:Name="SupplierBox"
-                Header="Supplier"
-                PlaceholderText="Select a supplier"
-                MinWidth="240"/>
-        <TextBox x:Name="ReceiptNumberBox"
-                Header="Receipt number"
-                PlaceholderText="e.g. PR-2026-001"/>
+    PrimaryButtonClick="OnPrimaryClick"
+    Closing="OnClosing">
+    <StackPanel Spacing="12">
+        <TextBlock Text="Record what arrived to add it to stock and save the receipt." TextWrapping="Wrap" />
+        <Grid ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <ComboBox x:Name="SupplierBox" Header="Supplier" PlaceholderText="Select a supplier" HorizontalAlignment="Stretch" />
+            <TextBox x:Name="ReceiptNumberBox" Grid.Column="1" Header="Receipt number" PlaceholderText="e.g. PR-2026-001" MaxLength="50" />
+        </Grid>
+        <ScrollViewer x:Name="DeliveryLinesScroll" MaxHeight="260" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel x:Name="DeliveryLinesPanel" Spacing="10" Padding="0,0,16,0" />
+        </ScrollViewer>
+        <Button x:Name="AddLineButton" Content="Add ingredient line" Click="OnAddLine" />
+        <ProgressBar x:Name="ReceivingProgress" IsIndeterminate="True" Visibility="Collapsed" />
+        <InfoBar x:Name="DeliveryError" Severity="Error" IsClosable="False" />
     </StackPanel>
 </ContentDialog>

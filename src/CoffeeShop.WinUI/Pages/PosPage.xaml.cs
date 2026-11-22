@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using CoffeeShop.Application.Catalog;
+using CoffeeShop.Application.Customers;
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.WinUI.Services;
 using CoffeeShop.WinUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Text;
@@ -28,52 +30,25 @@ public sealed record CounterSavedLine(PosLineSnapshot Line)
 
 public sealed record CounterMenuCard(MenuItemSummary Item)
 {
-    private static readonly Dictionary<string, string> Photos = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["Americano"] = "espresso",
-        ["Cappuccino"] = "cappuccino",
-        ["Flat White"] = "flat-white",
-        ["Espresso Tonic"] = "iced-coffee",
-        ["Cold Brew"] = "cold-brew",
-        ["Vietnamese Iced Coffee"] = "iced-coffee",
-        ["Matcha Latte"] = "matcha",
-        ["Chai Latte"] = "chai",
-        ["Peach Iced Tea"] = "iced-tea",
-        ["Butter Croissant"] = "croissant",
-        ["Almond Croissant"] = "croissant",
-        ["Banana Bread"] = "banana-bread",
-        ["House Espresso"] = "espresso",
-        ["Cafe Latte"] = "latte",
-        ["Vanilla Latte"] = "latte",
-        ["Caramel Macchiato"] = "latte",
-        ["Mocha"] = "cappuccino",
-        ["Coconut Cold Brew"] = "cold-brew",
-        ["Peach Green Tea"] = "iced-tea",
-        ["Jasmine Milk Tea"] = "chai",
-        ["Strawberry Frappe"] = "iced-coffee",
-        ["Chocolate Frappe"] = "iced-coffee",
-        ["Mango Smoothie"] = "iced-tea",
-        ["Blueberry Muffin"] = "bakery",
-        ["Pumpkin Spice Latte"] = "latte",
-        ["Honey Oat Latte"] = "latte"
-    };
     public string Name =>
         Item.Name;
 
     public string Category =>
         Item.CategoryName.ToUpperInvariant();
 
-    public string Price =>
-        $"from {Item.SizeVariants.Where(size => size.IsActive).Min(size => size.Price):0.00}";
+    public string Price { get; } = FormatPrice(Item);
 
-    public BitmapImage Photo
+    public BitmapImage Photo => new(MenuPhotoSource.ForItem(Item.Name));
+
+    private static string FormatPrice(MenuItemSummary item)
     {
-        get
+        var prices = item.SizeVariants.Where(size => size.IsActive).Select(size => size.Price).Distinct().ToArray();
+        return prices.Length switch
         {
-            var name = Item.Name.StartsWith("Midterm ", StringComparison.OrdinalIgnoreCase)
-                ? Item.Name[8..] : Item.Name;
-            return new BitmapImage(new Uri($"ms-appx:///Assets/Photos/{(Photos.TryGetValue(name, out var file) ? file : "cafe-bar")}.jpg"));
-        }
+            0 => "Unavailable",
+            1 => prices[0].ToString("0.00"),
+            _ => $"From {prices.Min():0.00}",
+        };
     }
 }
 
@@ -118,12 +93,14 @@ public sealed partial class PosPage : Page
     private bool rendering;
     private EntityId? selectedMenuId;
     private bool customizationOpen;
-    private bool awaitingCustomerSelection;
-    private CoffeeShop.Application.Customers.CustomerOrderSelectionRequest? customerSelectionBeforeNavigation;
+    private CustomerOrderSelectionRequest? lastCustomerRequest;
+    private CancellationTokenSource? customerSearchCancellation;
+    private bool pageLoaded;
+    private bool selectingCustomer;
+    private EntityId? renderedCustomerId;
     private bool ticketCaptureActive;
     private PosStaffOption? captureOperator;
-    private EntityId? selectedSavedAddressId;
-    private string? selectedSavedAddressLine;
+    private sealed record DeliveryAddressOption(EntityId? Id, string DisplayName, string? AddressLine);
     private IReadOnlyList<MenuItemSummary>? renderedMenu;
     private IReadOnlyList<CategorySummary>? renderedCategories;
     private EntityId? renderedCategoryId;
@@ -133,7 +110,8 @@ public sealed partial class PosPage : Page
         if (PageLayout is null) return;
         // Use the workspace's available width, after the navigation rail.
         var wide = args.NewSize.Width >= 980 && args.NewSize.Height >= 640;
-        PageLayout.Padding = new Thickness(args.NewSize.Width < 640 ? 16 : 24, 12, args.NewSize.Width < 640 ? 16 : 24, 16);
+        var padding = (Thickness)Microsoft.UI.Xaml.Application.Current.Resources["ConsolePagePadding"];
+        PageLayout.Padding = args.NewSize.Width < 640 ? new Thickness(16, padding.Top, 16, padding.Bottom) : padding;
         PageScroll.VerticalScrollBarVisibility = wide ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
         WorkspaceRow.Height = wide ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
         MenuRow.Height = wide ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
@@ -190,25 +168,37 @@ public sealed partial class PosPage : Page
 
     private async void OnLoaded(object sender, RoutedEventArgs args)
     {
+        pageLoaded = true;
         model.PropertyChanged += OnModelChanged;
         await model.LoadAsync();
-        if (awaitingCustomerSelection)
+        if (!pageLoaded) return;
+        var request = App.Services.GetRequiredService<CustomerOrderContext>().Request;
+        var customerChanged = !ReferenceEquals(lastCustomerRequest, request);
+        if (customerChanged && model.CanEdit)
         {
-            awaitingCustomerSelection = false;
-            if (!ReferenceEquals(customerSelectionBeforeNavigation, App.Services.GetRequiredService<CustomerOrderContext>().Request))
-            {
-                model.UseCustomerSelection();
-                RestoreCustomer();
-            }
+            model.UseCustomerSelection();
+            RestoreCustomer();
         }
+        lastCustomerRequest = request;
+        await RefreshCustomerProfileAsync();
+        if (customerChanged && pageLoaded)
+            DispatcherQueue.TryEnqueue(() => { if (pageLoaded) TicketBodyScroll.ChangeView(null, 0, null, true); });
     }
 
-    private void OnUnloaded(object sender, RoutedEventArgs args) => model.PropertyChanged -= OnModelChanged;
+    private void OnUnloaded(object sender, RoutedEventArgs args)
+    {
+        pageLoaded = false;
+        customerSearchCancellation?.Cancel();
+        CustomerSearchBox.IsSuggestionListOpen = false;
+        if (model.CanEdit) CaptureForm();
+        model.PropertyChanged -= OnModelChanged;
+    }
     private void OnModelChanged(object? sender, PropertyChangedEventArgs args) => Render();
     private async void OnReload(object sender, RoutedEventArgs args)
     {
         ClearMenuSelection();
         await model.LoadAsync();
+        await RefreshCustomerProfileAsync();
     }
     private async void OnSearch(object sender, RoutedEventArgs args)
     {
@@ -245,6 +235,26 @@ public sealed partial class PosPage : Page
             container?.Focus(FocusState.Keyboard);
         }
     }
+    private void OnCustomizationOpened(ContentDialog sender, ContentDialogOpenedEventArgs args)
+    {
+        // The native dialog gives the default action its own style after opening.
+        var primary = PresentationVerification.Elements(sender).OfType<Button>().FirstOrDefault(button => button.Name == "PrimaryButton");
+        if (primary is null) return;
+        var resources = Microsoft.UI.Xaml.Application.Current.Resources;
+        var field = (Brush)resources["ConsoleFieldBrush"];
+        primary.Background = field;
+        primary.BorderBrush = field;
+        primary.Foreground = (Brush)resources["ConsoleOnFieldBrush"];
+        primary.CornerRadius = new CornerRadius(0);
+        primary.MinHeight = (double)resources["ConsoleTouchTarget"];
+        primary.Padding = new Thickness(12, 0, 12, 0);
+        primary.FontFamily = (FontFamily)resources["ConsoleSansFont"];
+        primary.FontSize = 13;
+        primary.CharacterSpacing = 0;
+        primary.Resources["AccentButtonBackgroundPointerOver"] = resources["ConsoleFieldDeepBrush"];
+        primary.Resources["AccentButtonBackgroundPressed"] = resources["ConsoleFieldDeepBrush"];
+    }
+
     private void OnCustomizationAdd(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var previousCount = model.Cart.Count;
@@ -273,7 +283,6 @@ public sealed partial class PosPage : Page
         if (sender is not RadioButton { IsChecked: true, Tag: string channel } || model.Channel == channel) return;
         CaptureForm();
         model.Channel = channel;
-        CustomerOptionsPanel.Visibility = Visibility.Collapsed;
         Render();
     }
 
@@ -304,9 +313,6 @@ public sealed partial class PosPage : Page
         UpdateTicketHeading();
     }
 
-    private void OnToggleCustomerOptions(object sender, RoutedEventArgs args) =>
-        CustomerOptionsPanel.Visibility = CustomerOptionsPanel.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-
     private void OnToggleMoreOptions(object sender, RoutedEventArgs args) =>
         MoreOptionsPanel.Visibility = MoreOptionsPanel.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
@@ -315,20 +321,173 @@ public sealed partial class PosPage : Page
         TicketHeading.Text = model.Order is null ? "Your order" : "Order summary";
     }
 
-    private void OnAddressModeChanged(object sender, RoutedEventArgs args)
+    private void OnDeliveryAddressChanged(object sender, SelectionChangedEventArgs args)
     {
-        if (AddressBox is null) return;
-        var useSaved = SavedAddressCheck.IsChecked == true;
-        AddressBox.Visibility = useSaved ? Visibility.Collapsed : Visibility.Visible;
-        SavedAddressText.Visibility = useSaved ? Visibility.Visible : Visibility.Collapsed;
+        if (AddressBox is not null) UpdateDeliveryAddressDisplay();
     }
 
-    private void OnChooseCustomer(object sender, RoutedEventArgs args)
+    private void UpdateDeliveryAddressDisplay()
     {
-        CaptureForm();
-        customerSelectionBeforeNavigation = App.Services.GetRequiredService<CustomerOrderContext>().Request;
-        awaitingCustomerSelection = true;
-        if (((App)Microsoft.UI.Xaml.Application.Current).Window is MainWindow main) main.NavigateTo("customers");
+        var selected = DeliveryAddressChoice.SelectedItem as DeliveryAddressOption;
+        AddressBox.Visibility = selected?.Id is null ? Visibility.Visible : Visibility.Collapsed;
+        SavedAddressText.Text = selected?.AddressLine ?? "";
+        SavedAddressText.Visibility = string.IsNullOrWhiteSpace(selected?.AddressLine) ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void SetDeliveryAddressChoices(EntityId? selectedId)
+    {
+        var options = new List<DeliveryAddressOption>();
+        if (model.CustomerProfile is { IsActive: true } profile && profile.Id == model.Customer.CustomerId)
+        {
+            options.AddRange(profile.Addresses.Where(address => address.IsActive).OrderByDescending(address => address.IsDefault)
+                .Select(address => new DeliveryAddressOption(address.Id,
+                    $"{address.Label ?? address.AddressLine}{(address.IsDefault ? " (default)" : "")}", address.AddressLine)));
+        }
+        else if (model.CustomerProfile is null && selectedId is not null)
+        {
+            options.Add(new DeliveryAddressOption(selectedId, "Saved address", model.Customer.AddressLine));
+        }
+
+        DeliveryAddressChoice.Visibility = options.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        options.Add(new DeliveryAddressOption(null, "Enter a different address", null));
+        DeliveryAddressChoice.ItemsSource = options;
+        DeliveryAddressChoice.SelectedItem = options.FirstOrDefault(option => option.Id == selectedId) ?? options[^1];
+        UpdateDeliveryAddressDisplay();
+    }
+
+    private void SetCustomerSearchHint(string? message)
+    {
+        CustomerSearchHint.Text = message ?? "";
+        CustomerSearchHint.Visibility = string.IsNullOrEmpty(message) ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private void OnCustomerSearchFocusChanged(object sender, RoutedEventArgs args)
+    {
+        if (XamlRoot is null) return;
+        var insideSearch = false;
+        for (var current = Microsoft.UI.Xaml.Input.FocusManager.GetFocusedElement(XamlRoot) as DependencyObject;
+            current is not null; current = VisualTreeHelper.GetParent(current))
+        {
+            if (current != CustomerSearchFrame) continue;
+            insideSearch = true;
+            break;
+        }
+        CustomerSearchFrame.BorderBrush = (Brush)Microsoft.UI.Xaml.Application.Current.Resources[
+            insideSearch ? "ConsoleAccentTextBrush" : "ConsoleRuleBrush"];
+    }
+
+    private void OnCustomerSearchTapped(object sender, TappedRoutedEventArgs args)
+    {
+        if (model.CanEdit && !selectingCustomer) CustomerSearchBox.Focus(FocusState.Pointer);
+    }
+
+    private async void OnCustomerSearchChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput || !pageLoaded || !model.CanEdit || selectingCustomer) return;
+        customerSearchCancellation?.Cancel();
+        var cancellation = customerSearchCancellation = new CancellationTokenSource();
+        sender.ItemsSource = null;
+        var query = sender.Text.Trim();
+        if (query.Length == 0 && model.Customer.CustomerId is not null)
+        {
+            OnWalkIn(this, new RoutedEventArgs());
+            return;
+        }
+        if (query.Length < 2)
+        {
+            SetCustomerSearchHint(query.Length == 0 ? null : "Type at least 2 characters to search.");
+            sender.IsSuggestionListOpen = false;
+            return;
+        }
+        SetCustomerSearchHint("Searching customers…");
+        try
+        {
+            await Task.Delay(250, cancellation.Token);
+            var result = await App.Services.GetRequiredService<ICustomerWorkspaceSource>().SearchAsync(new(query, false, 8));
+            if (cancellation.IsCancellationRequested || !pageLoaded || !model.CanEdit) return;
+            if (!result.IsSuccess)
+            {
+                SetCustomerSearchHint("Could not search customers. Try again or continue without a customer.");
+                return;
+            }
+            var matches = result.Value.Where(customer => customer.IsActive).ToArray();
+            sender.ItemsSource = matches;
+            sender.IsSuggestionListOpen = matches.Length > 0;
+            SetCustomerSearchHint(matches.Length == 0
+                ? "No matches. Try another name or phone, or continue without a customer."
+                : null);
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception)
+        {
+            if (!cancellation.IsCancellationRequested && pageLoaded)
+                SetCustomerSearchHint("Could not search customers. Check the connection and try again.");
+        }
+    }
+
+    private void OnCustomerSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is CustomerSummary customer) sender.Text = customer.FullName;
+    }
+
+    private async void OnCustomerQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (args.ChosenSuggestion is not CustomerSummary customer)
+        {
+            SetCustomerSearchHint("Choose a matching profile from the suggestions.");
+            sender.IsSuggestionListOpen = sender.ItemsSource is IEnumerable<CustomerSummary> matches && matches.Any();
+            return;
+        }
+        if (!model.CanEdit || selectingCustomer) return;
+        customerSearchCancellation?.Cancel();
+        var ticketId = model.TicketId;
+        selectingCustomer = true;
+        SetCustomerSearchHint("Loading customer…");
+        Render();
+        try
+        {
+            var result = await App.Services.GetRequiredService<ICustomerWorkspaceSource>().GetDetailAsync(customer.Id);
+            if (!pageLoaded || ticketId != model.TicketId || !model.CanEdit) return;
+            if (!result.IsSuccess || !result.Value.IsActive)
+            {
+                SetCustomerSearchHint("This profile is unavailable. Choose another customer.");
+                return;
+            }
+            CaptureForm();
+            model.SelectCustomer(result.Value);
+            RestoreCustomer();
+            SetCustomerSearchHint(null);
+            sender.Text = result.Value.FullName;
+            sender.ItemsSource = null;
+            CustomerSearchBox.IsSuggestionListOpen = false;
+        }
+        catch (Exception)
+        {
+            if (pageLoaded) SetCustomerSearchHint("Could not load this customer. Check the connection and try again.");
+        }
+        finally
+        {
+            selectingCustomer = false;
+            if (pageLoaded) Render();
+        }
+    }
+
+    private async Task RefreshCustomerProfileAsync()
+    {
+        var id = model.Order is null ? model.Customer.CustomerId : model.Order.CustomerId;
+        if (id is null) return;
+        var ticketId = model.TicketId;
+        try
+        {
+            var result = await App.Services.GetRequiredService<ICustomerWorkspaceSource>().GetDetailAsync(id);
+            if (!pageLoaded || ticketId != model.TicketId || !result.IsSuccess) return;
+            model.RefreshCustomerProfile(result.Value);
+            if (model.Order is null && model.Customer.CustomerId == id)
+            {
+                SetDeliveryAddressChoices((DeliveryAddressChoice.SelectedItem as DeliveryAddressOption)?.Id);
+            }
+        }
+        catch (Exception) { /* The saved ticket remains usable if balance lookup is unavailable. */ }
     }
 
     private void OnTableChanged(object sender, SelectionChangedEventArgs args)
@@ -349,8 +508,14 @@ public sealed partial class PosPage : Page
 
     private void OnWalkIn(object sender, RoutedEventArgs args)
     {
+        customerSearchCancellation?.Cancel();
         model.WalkIn();
+        lastCustomerRequest = App.Services.GetRequiredService<CustomerOrderContext>().Request;
+        CustomerSearchBox.Text = "";
+        CustomerSearchBox.ItemsSource = null;
+        SetCustomerSearchHint(null);
         RestoreCustomer();
+        CustomerSearchBox.Focus(FocusState.Keyboard);
     }
 
     private void OnDrinkChanged(object sender, SelectionChangedEventArgs args)
@@ -446,7 +611,7 @@ public sealed partial class PosPage : Page
 
     private async void OnSaveDraft(object sender, RoutedEventArgs args)
     {
-        if (!model.CanEdit || model.Cart.Count == 0) return;
+        if (!model.CanEdit || selectingCustomer || model.Cart.Count == 0) return;
         if (model.Session.Operator is null)
         {
             OperatorBox.Focus(FocusState.Keyboard);
@@ -467,7 +632,6 @@ public sealed partial class PosPage : Page
             || model.Customer.CustomerAddressId is null && string.IsNullOrWhiteSpace(AddressBox.Text)))
         {
             model.ShowValidation("Add a delivery recipient, contact number, and address before saving.");
-            CustomerOptionsPanel.Visibility = Visibility.Visible;
             RecipientBox.Focus(FocusState.Keyboard);
             RecipientBox.StartBringIntoView();
             return;
@@ -478,24 +642,37 @@ public sealed partial class PosPage : Page
     private void CaptureForm()
     {
         model.TableId = (TableBox.SelectedItem as PosTableOption)?.Id;
+        var address = DeliveryAddressChoice.SelectedItem as DeliveryAddressOption;
         model.Customer = model.Customer with
         {
             RecipientName = RecipientBox.Text,
             ContactNumber = ContactBox.Text,
-            CustomerAddressId = SavedAddressCheck.IsChecked == true ? selectedSavedAddressId : null,
-            AddressLine = SavedAddressCheck.IsChecked == true ? selectedSavedAddressLine : AddressBox.Text
+            CustomerAddressId = address?.Id,
+            AddressLine = address?.Id is null ? AddressBox.Text : address.AddressLine
         };
     }
 
     private async void OnRequestDiscount(object sender, RoutedEventArgs args)
     {
+        if (!model.CanConfirm) return;
+        DiscountFeedback.IsOpen = false;
         if (!CatalogNumberInput.TryParse(DiscountValueBox.Text, out var value))
         {
-            model.ShowValidation("Enter a decimal discount value using your local decimal separator, without grouping separators.");
+            DiscountFeedback.Message = "Enter a decimal value using your local decimal separator, without grouping separators.";
+            DiscountFeedback.IsOpen = true;
+            DiscountValueBox.Focus(FocusState.Keyboard);
             return;
         }
 
         await model.RequestDiscountAsync((string)((ComboBoxItem)DiscountTypeBox.SelectedItem).Tag, value, DiscountReasonBox.Text);
+        DiscountFeedback.Message = model.Error?.Description ?? "";
+        DiscountFeedback.IsOpen = model.Error is not null;
+        if (model.Error is null)
+        {
+            DiscountFlyout.Hide();
+            DiscountValueBox.Text = "";
+            DiscountReasonBox.Text = "";
+        }
     }
 
     private async void OnConfirm(object sender, RoutedEventArgs args)
@@ -525,16 +702,29 @@ public sealed partial class PosPage : Page
 
     private async void OnRedeemLoyalty(object sender, RoutedEventArgs args)
     {
+        if (!model.CanConfirm || model.Order?.CustomerId is null) return;
+        LoyaltyFeedback.IsOpen = false;
         if (!int.TryParse(LoyaltyPointsBox.Text, out var points) || points <= 0)
         {
-            model.ShowValidation("Enter a positive whole number of loyalty points.");
+            LoyaltyFeedback.Message = "Enter a positive whole number of points.";
+            LoyaltyFeedback.IsOpen = true;
+            LoyaltyPointsBox.Focus(FocusState.Keyboard);
             return;
         }
         await model.RedeemLoyaltyAsync(points);
+        LoyaltyFeedback.Message = model.Error?.Description ?? "";
+        LoyaltyFeedback.IsOpen = model.Error is not null;
+        if (model.Error is null)
+        {
+            LoyaltyFlyout.Hide();
+            LoyaltyPointsBox.Text = "";
+            await RefreshCustomerProfileAsync();
+        }
     }
 
     private async void OnNewTicket(object sender, RoutedEventArgs args)
     {
+        if (selectingCustomer) return;
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
@@ -546,10 +736,18 @@ public sealed partial class PosPage : Page
         };
         if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
         model.NewTicket();
+        customerSearchCancellation?.Cancel();
+        lastCustomerRequest = App.Services.GetRequiredService<CustomerOrderContext>().Request;
+        CustomerSearchBox.Text = "";
+        CustomerSearchBox.ItemsSource = null;
+        LoyaltyPointsBox.Text = DiscountValueBox.Text = DiscountReasonBox.Text = "";
+        LoyaltyFeedback.IsOpen = DiscountFeedback.IsOpen = false;
+        LoyaltyFlyout.Hide();
+        DiscountFlyout.Hide();
         ClearMenuSelection();
-        CustomerOptionsPanel.Visibility = Visibility.Collapsed;
         MoreOptionsPanel.Visibility = Visibility.Collapsed;
         RestoreForm();
+        TicketBodyScroll.ChangeView(null, 0, null, true);
     }
     private void OnServiceBoard(object sender, RoutedEventArgs args)
     {
@@ -563,6 +761,7 @@ public sealed partial class PosPage : Page
 
     private async void OnOpen(object sender, RoutedEventArgs args)
     {
+        if (selectingCustomer) return;
         if (!Guid.TryParse(OpenIdBox.Text, out var id) || id == Guid.Empty)
         {
             model.ShowValidation("Enter the full order ID shown on a saved ticket.");
@@ -570,6 +769,7 @@ public sealed partial class PosPage : Page
         }
 
         await model.OpenAsync(new EntityId(id));
+        await RefreshCustomerProfileAsync();
     }
 
     private void RestoreForm()
@@ -583,24 +783,32 @@ public sealed partial class PosPage : Page
 
     private void RestoreCustomer()
     {
-        selectedSavedAddressId = model.Customer.CustomerAddressId;
-        selectedSavedAddressLine = model.Customer.AddressLine;
+        SetCustomerSearchHint(null);
         SetCustomerSummary(model.CustomerLabel, model.Customer.CustomerId is not null);
         RecipientBox.Text = model.Customer.RecipientName ?? "";
         ContactBox.Text = model.Customer.ContactNumber ?? "";
-        AddressBox.Text = selectedSavedAddressId is null ? model.Customer.AddressLine ?? "" : "";
-        SavedAddressCheck.IsChecked = model.Customer.CustomerAddressId is not null;
-        SavedAddressCheck.IsEnabled = model.Customer.CustomerAddressId is not null;
-        SavedAddressCheck.Visibility = selectedSavedAddressId is null ? Visibility.Collapsed : Visibility.Visible;
-        OnAddressModeChanged(this, new RoutedEventArgs());
-        SavedAddressText.Text = model.Customer.CustomerAddressId is null ? "No saved address attached. Enter an order-only address."
-            : $"Saved address: {model.Customer.AddressLine ?? "Resolved again when saved"}";
+        AddressBox.Text = model.Customer.CustomerAddressId is null ? model.Customer.AddressLine ?? "" : "";
+        SetDeliveryAddressChoices(model.Customer.CustomerAddressId);
     }
 
     private void SetCustomerSummary(string name, bool selected)
     {
-        CustomerText.Text = name;
-        CustomerMetaText.Text = selected ? "Customer attached to this ticket" : "No customer attached";
+        CustomerText.Text = selected ? name : "";
+        CustomerText.Visibility = selected && model.Order is not null ? Visibility.Visible : Visibility.Collapsed;
+        CustomerOptionsPanel.Visibility = model.Order is null ? Visibility.Visible : Visibility.Collapsed;
+        CustomerMetaText.Visibility = selected ? Visibility.Visible : Visibility.Collapsed;
+        CustomerRow.Visibility = selected || model.Order is null ? Visibility.Visible : Visibility.Collapsed;
+        var id = model.Order is null ? model.Customer.CustomerId : model.Order.CustomerId;
+        if (renderedCustomerId != id)
+        {
+            CustomerSearchBox.Text = selected ? name : "";
+            renderedCustomerId = id;
+        }
+        CustomerMetaText.Text = selected
+            ? model.CustomerProfile is { } profile && profile.Id == id
+                ? $"{profile.Phone} · {profile.LoyaltyPointsBalance} points"
+                : "Profile attached · balance unavailable"
+            : "";
     }
 
     private void Render()
@@ -621,9 +829,7 @@ public sealed partial class PosPage : Page
         DineInTab.IsEnabled = model.CanEdit;
         TakeawayTab.IsEnabled = model.CanEdit;
         DeliveryTab.IsEnabled = model.CanEdit;
-        CustomerOptionsButton.IsEnabled = model.CanEdit;
-        WalkInButton.Visibility = model.Customer.CustomerId is not null ? Visibility.Visible : Visibility.Collapsed;
-        CustomerOptionsPanel.IsEnabled = model.CanEdit;
+        CustomerOptionsPanel.IsEnabled = model.CanEdit && !selectingCustomer;
         TableBox.IsEnabled = model.CanEdit;
         MenuGrid.IsEnabled = model.CanEdit;
         OperatorBox.IsEnabled = !model.IsBusy;
@@ -684,22 +890,46 @@ public sealed partial class PosPage : Page
         ServiceBoardButton.Visibility = model.Order is { Status: CoffeeShop.Domain.Sales.OrderStatus.Confirmed or CoffeeShop.Domain.Sales.OrderStatus.Preparing or CoffeeShop.Domain.Sales.OrderStatus.Ready }
             ? Visibility.Visible : Visibility.Collapsed;
         DiscountPanel.IsEnabled = model.CanConfirm;
-        NewButton.IsEnabled = !model.IsBusy && !model.RequiresReload;
-        OpenButton.IsEnabled = !model.IsBusy;
-        SaveButton.IsEnabled = model.CanEdit && model.Cart.Count > 0;
+        DiscountPanel.Visibility = model.Order?.Status == CoffeeShop.Domain.Sales.OrderStatus.Draft ? Visibility.Visible : Visibility.Collapsed;
+        var loyaltySavings = model.Order is { } priced ? Math.Max(0, priced.Subtotal - priced.DiscountTotal - priced.Total) : 0;
+        LoyaltyPanel.IsEnabled = model.CanConfirm && model.Order?.CustomerId is not null && loyaltySavings == 0;
+        LoyaltyPanel.Visibility = model.Order is { Status: CoffeeShop.Domain.Sales.OrderStatus.Draft, CustomerId: not null } && loyaltySavings == 0
+            ? Visibility.Visible : Visibility.Collapsed;
+        LoyaltyButton.IsEnabled = DiscountButton.IsEnabled = !model.IsBusy && !selectingCustomer;
+        var customerId = model.Order is null ? model.Customer.CustomerId : model.Order.CustomerId;
+        var balance = model.CustomerProfile is { } profile && profile.Id == customerId
+            ? $"Available balance: {profile.LoyaltyPointsBalance} points." : "The available balance will be checked when you apply points.";
+        LoyaltyHintText.Text = customerId is null ? "Choose a customer before saving the draft to redeem their points."
+            : model.Order is null ? $"{balance} Save the draft to redeem points."
+            : loyaltySavings > 0 ? "Points have already been applied to this ticket. Review the loyalty savings in the total."
+            : !model.CanConfirm ? "Points can be redeemed here while the ticket is a saved draft."
+            : balance;
+        DiscountHintText.Text = model.Order is null ? "Save the draft first, then request a discount before confirming."
+            : !model.CanConfirm ? "Discounts can be requested here while the ticket is a saved draft."
+            : "Enter the value and reason for manager approval.";
+        AdjustmentsHintText.Text = model.Order is null ? "Save the draft to apply points or request a discount."
+            : model.Order.Discounts.Any(discount => discount.Status == "pending") ? "Discount awaiting approval. Refresh after manager approval."
+            : model.CanConfirm ? "Apply points or request a discount before confirming."
+            : "Saved ticket details are read-only.";
+        NewButton.IsEnabled = !model.IsBusy && !model.RequiresReload && !selectingCustomer;
+        OpenButton.IsEnabled = !model.IsBusy && !selectingCustomer;
+        SaveButton.IsEnabled = model.CanEdit && !selectingCustomer && model.Cart.Count > 0;
         TicketKickerText.Text = model.Order?.OrderNumber ?? "CURRENT TICKET";
         TicketStatusText.Text = model.Order?.Status.ToUpperInvariant() ?? "NEW";
         TicketIdText.Text = $"Order ID: {model.TicketId}";
         if (model.Order is { } opened)
         {
             SetCustomerSummary(opened.CustomerName ?? "Walk-in", opened.CustomerId is not null);
-            CustomerOptionsPanel.Visibility = Visibility.Collapsed;
         }
         else SetCustomerSummary(model.CustomerLabel, model.Customer.CustomerId is not null);
         UpdateChannel();
         var estimatedSubtotal = model.Cart.Sum(line => (line.Size.Price + line.Addons.Sum(addon => addon.Price)) * line.Quantity);
         SubtotalText.Text = (model.Order?.Subtotal ?? estimatedSubtotal).ToString("0.00");
+        TotalsBreakdown.Visibility = itemCount > 0 ? Visibility.Visible : Visibility.Collapsed;
         DiscountTotalText.Text = model.Order is { DiscountTotal: > 0 } discounted ? $"−{discounted.DiscountTotal:0.00}" : "0.00";
+        DiscountTotalRow.Visibility = model.Order is { DiscountTotal: > 0 } ? Visibility.Visible : Visibility.Collapsed;
+        LoyaltySavingsText.Text = loyaltySavings > 0 ? $"−{loyaltySavings:0.00}" : "0.00";
+        LoyaltySavingsRow.Visibility = loyaltySavings > 0 ? Visibility.Visible : Visibility.Collapsed;
         TicketTotalLabel.Text = model.Order is null ? "Estimated total" : "Payable total";
         TotalHintText.Text = model.Order is null ? "Save to review the final total" : "Saved order total";
         TicketStepText.Text = model.RequiresReload ? "Refresh this ticket before continuing."
@@ -856,7 +1086,6 @@ public sealed partial class PosPage : Page
             TakeawayTab.IsChecked = true;
             DeliveryTab.IsChecked = true;
             var retained = RecipientBox.Text == "Delivery verification" && ContactBox.Text == "0900000000" && AddressBox.Text == "Test-only address";
-            CustomerOptionsPanel.Visibility = Visibility.Collapsed;
             var deliveryIndependent = DeliveryPanel.Visibility == Visibility.Visible;
             var before = model.Channel;
             DeliveryTab.IsChecked = true;

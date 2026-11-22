@@ -1,4 +1,6 @@
+using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Inventory;
+using CoffeeShop.WinUI.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 
 namespace CoffeeShop.WinUI.Pages;
@@ -25,7 +27,7 @@ public sealed partial class IngredientDialog : ContentDialog
         {
             NameBox.Text = ingredient.Name;
             NameBox.IsEnabled = false; // name is identity-like; keep edits to numbers
-            UnitBox.Text = ingredient.BaseUnit;
+            UnitBox.SelectedItem = UnitBox.Items.Cast<ComboBoxItem>().FirstOrDefault(item => Equals(item.Tag, ingredient.BaseUnit));
             UnitBox.IsEnabled = false;
             BalanceBox.Text = ingredient.AvailableQuantity.ToString("0.###");
             BalanceBox.IsEnabled = false; // balance changes flow through receipts/adjustments
@@ -35,11 +37,20 @@ public sealed partial class IngredientDialog : ContentDialog
 
     public string IngredientName => NameBox.Text.Trim();
 
-    public string BaseUnit => UnitBox.Text.Trim().ToLowerInvariant();
+    public string BaseUnit => (UnitBox.SelectedItem as ComboBoxItem)?.Tag as string ?? string.Empty;
 
     public decimal AvailableQuantity { get; private set; }
 
     public decimal ReorderThreshold { get; private set; }
+
+    private void OnUnitChanged(object sender, SelectionChangedEventArgs args)
+    {
+        if (BalanceBox is null || ThresholdBox is null) return;
+        UnitBox.Header = "Stock unit";
+        var suffix = BaseUnit.Length > 0 ? $" ({BaseUnit})" : "";
+        BalanceBox.Header = "Starting stock" + suffix;
+        ThresholdBox.Header = "Low-stock threshold" + suffix;
+    }
 
     private void OnPrimaryClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
@@ -55,7 +66,7 @@ public sealed partial class IngredientDialog : ContentDialog
             if (string.IsNullOrWhiteSpace(BaseUnit))
             {
                 args.Cancel = true;
-                ShowFieldError(UnitBox, "Base unit is required (g, kg, ml, l, pcs).");
+                UnitBox.Header = "Choose a stock unit.";
                 return;
             }
 
@@ -90,7 +101,7 @@ public sealed partial class IngredientDialog : ContentDialog
     }
 
     private static bool TryParseDecimal(string text, out decimal value) =>
-        decimal.TryParse(text, System.Globalization.CultureInfo.InvariantCulture, out value);
+        CatalogNumberInput.TryParse(text, out value) && value <= MeasuredQuantity.MaximumValue && decimal.Round(value, 3) == value;
 
     private static void ShowFieldError(TextBox box, string message)
     {

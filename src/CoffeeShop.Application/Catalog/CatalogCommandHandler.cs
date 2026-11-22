@@ -121,6 +121,7 @@ public sealed class CatalogCommandHandler
         }
 
         var variants = new List<SizeVariant>();
+        var recipeInputs = new List<(int Index, IReadOnlyCollection<RecipeLineInput> Lines)>();
         foreach (var input in command.InitialVariants)
         {
             if (input is null)
@@ -142,21 +143,37 @@ public sealed class CatalogCommandHandler
                 return Result<EntityId>.Failure(createdVariant.Error!);
             }
 
+            if (input.Recipe is { Count: > 0 } lines) recipeInputs.Add((variants.Count, lines));
             variants.Add(createdVariant.Value);
         }
 
-        await transactionManager.ExecuteInTransactionAsync(async () =>
+        return await transactionManager.ExecuteInTransactionAsync(async () =>
         {
+            var recipes = new List<RecipeIngredient>();
+            if (recipeInputs.Count > 0)
+            {
+                var ingredientIds = recipeInputs.SelectMany(recipe => recipe.Lines)
+                    .Where(line => line is not null).Select(line => line.IngredientId).Distinct().ToArray();
+                var ingredients = (await repository.ListIngredientsForRecipeUpdateAsync(ingredientIds, cancellationToken))
+                    .ToDictionary(ingredient => ingredient.Id);
+                foreach (var (index, lines) in recipeInputs)
+                {
+                    var recipe = RecipeCommandHandler.BuildRecipe(variants[index], lines, ingredients, $"initialVariants[{index}].recipe");
+                    if (recipe.IsFailure) return Result<EntityId>.Failure(recipe.Error!);
+                    recipes.AddRange(recipe.Value);
+                }
+            }
+
             repository.AddMenuItem(createdItem.Value);
             foreach (var variant in variants)
             {
                 repository.AddSizeVariant(variant);
             }
+            if (recipes.Count > 0) repository.AddRecipeIngredients(recipes);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
+            return Result<EntityId>.Success(createdItem.Value.Id);
         }, cancellationToken);
-
-        return Result<EntityId>.Success(createdItem.Value.Id);
     }
 
     public async Task<Result> UpdateMenuItemAsync(

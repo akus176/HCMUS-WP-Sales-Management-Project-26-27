@@ -43,6 +43,26 @@ public sealed class InventoryRepository : IInventoryRepository, IStockMovementRe
             .Include(r => r.Lines)
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
 
+    public async Task<PurchaseReceipt?> LoadReceiptForReceivingAsync(string receiptNumber, CancellationToken cancellationToken = default)
+    {
+        RequireTransaction();
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT pg_advisory_xact_lock(143, hashtext({receiptNumber}))", cancellationToken);
+        return await context.PurchaseReceipts.Include(receipt => receipt.Lines)
+            .FirstOrDefaultAsync(receipt => receipt.ReceiptNumber == receiptNumber, cancellationToken);
+    }
+
+    public async Task<PurchaseReceipt?> LoadReceiptForPostingAsync(EntityId id, CancellationToken cancellationToken = default)
+    {
+        RequireTransaction();
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"SELECT id FROM inventory.purchase_receipts WHERE id = {id.Value} FOR UPDATE", cancellationToken);
+        var receipt = await FindReceiptWithLinesAsync(id, cancellationToken);
+        if (receipt is not null)
+            await context.Entry(receipt).ReloadAsync(cancellationToken);
+        return receipt;
+    }
+
     public async Task<IReadOnlyList<Ingredient>> ListIngredientsAsync(CancellationToken cancellationToken = default) =>
         await context.Ingredients.ToListAsync(cancellationToken);
 
@@ -89,7 +109,7 @@ public sealed class InventoryRepository : IInventoryRepository, IStockMovementRe
     public Task<bool> HasOrderRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default) =>
         context.OrderInventoryRestorations.AnyAsync(restoration => restoration.OrderId == orderId, cancellationToken);
 
-    public async Task<IReadOnlyList<Ingredient>> LoadIngredientsForRestorationAsync(
+    public async Task<IReadOnlyList<Ingredient>> LoadIngredientsForStockUpdateAsync(
         IReadOnlyCollection<EntityId> ingredientIds, CancellationToken cancellationToken = default)
     {
         RequireTransaction();

@@ -109,9 +109,15 @@ public sealed class ApiCatalogWorkspaceSource(AuthenticatedApiClient client) : I
         _ = await client.PostAsync<CreateCategoryRequest, CategoryResponse>("categories", new(command.Name, command.DisplayOrder)));
     public Task<Result> UpdateCategoryAsync(UpdateCategoryCommand command) => RunCommandAsync(() => client.PutAsync<CreateCategoryRequest, object>($"categories/{command.CategoryId.Value}", new(command.Name)));
     public Task<Result> DeactivateCategoryAsync(DeactivateCategoryCommand command) => RunCommandAsync(() => client.PostAsync<object, object>($"categories/{command.CategoryId.Value}/deactivate", new { }));
-    public async Task<Result> CreateMenuItemAsync(CreateMenuItemCommand command) => await RunCommandAsync(async () =>
-        _ = await client.PostAsync<MenuItemRequest, MenuItemResponse>("menu-items", new(command.CategoryId.Value, command.Name, command.Description,
-            command.InitialVariants.Select(variant => new SizeVariantRequest(variant.SizeName, variant.Price)).ToArray())));
+    public Task<Result> CreateMenuItemAsync(CreateMenuItemCommand command)
+    {
+        // Older servers accept item creation but ignore recipe fields.
+        var path = command.InitialVariants.Any(variant => variant.Recipe is { Count: > 0 }) ? "menu-items/with-recipe" : "menu-items";
+        var variants = command.InitialVariants.Select(variant => new SizeVariantRequest(variant.SizeName, variant.Price,
+            variant.Recipe?.Select(line => new RecipeLineRequest(line.IngredientId.Value, line.Quantity, line.Unit)).ToArray())).ToArray();
+        return RunCommandAsync(() => client.PostAsync<MenuItemRequest, MenuItemResponse>(path,
+            new(command.CategoryId.Value, command.Name, command.Description, variants)));
+    }
     public Task<Result> UpdateMenuItemAsync(UpdateMenuItemCommand command) => RunCommandAsync(() => client.PutAsync<MenuItemRequest, object>($"menu-items/{command.MenuItemId.Value}", new(command.CategoryId.Value, command.Name, command.Description)));
     public Task<Result> DeactivateMenuItemAsync(DeactivateMenuItemCommand command) => RunCommandAsync(() => client.PostAsync<object, object>($"menu-items/{command.MenuItemId.Value}/deactivate", new { }));
     public Task<Result> CreateSizeVariantAsync(CreateSizeVariantCommand command) => RunCommandAsync(() => client.PostAsync<SizeVariantRequest, object>($"menu-items/{command.MenuItemId.Value}/variants", new(command.SizeName, command.Price)));

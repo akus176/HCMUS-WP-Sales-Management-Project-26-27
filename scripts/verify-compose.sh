@@ -17,6 +17,8 @@ trap cleanup EXIT
     printf 'Jwt__Issuer=CoffeeShop.CI\nJwt__Audience=CoffeeShop.CI\n'
     printf 'Jwt__SigningKey=%s\n' "$(openssl rand -hex 48)"
     printf 'API_PORT=0\nPOSTGRES_PORT=0\n'
+    printf 'STORAGE_ACCESS_KEY=coffeeshop-ci\nSTORAGE_SECRET_KEY=%s\n' "$(openssl rand -hex 24)"
+    printf 'STORAGE_PORT=0\nSTORAGE_CONSOLE_PORT=0\n'
 } > "$env_file"
 
 compose() {
@@ -25,6 +27,13 @@ compose() {
 
 compose up --build --detach --wait --wait-timeout 180
 compose ps
+photo_port="$(compose port storage 9000)"
+# Anonymous storage access is limited to reading known objects.
+test "$(curl --silent --output /dev/null --write-out '%{http_code}' "http://$photo_port/menu-images")" = 403
+test "$(curl --silent --output /dev/null --write-out '%{http_code}' -X PUT --data 'denied' "http://$photo_port/menu-images/forbidden.jpg")" = 403
+test "$(curl --silent --output /dev/null --write-out '%{http_code}' -X DELETE "http://$photo_port/menu-images/latte.jpg")" = 403
+# Initialization also succeeds on an existing bucket without source pictures.
+compose run --rm storage-init
 api_port="$(compose port api 8080)"
 api_port="${api_port##*:}"
 test "$(curl --fail --silent --show-error "http://127.0.0.1:$api_port/health")" = Healthy

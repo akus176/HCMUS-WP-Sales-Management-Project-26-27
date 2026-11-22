@@ -1,3 +1,4 @@
+using CoffeeShop.Application.Inventory;
 using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Inventory;
@@ -48,6 +49,10 @@ public sealed class ApiInventorySource(AuthenticatedApiClient client)
 
     public async Task<PurchaseReceipt> CreateReceiptAsync(EntityId supplierId, string number) =>
         ToReceipt(await client.PostAsync<CreateReceiptRequest, ReceiptResponse>("purchase-receipts", new(supplierId.Value, number)));
+
+    public async Task<PurchaseReceipt> ReceiveDeliveryAsync(EntityId supplierId, string number, IReadOnlyList<ReceiveDeliveryLine> lines) =>
+        ToReceipt(await client.PostAsync<ReceiveDeliveryRequest, ReceiptResponse>("purchase-receipts/receive",
+            new(supplierId.Value, number, lines.Select(line => new ReceiptLineRequest(line.IngredientId.Value, line.Quantity, line.UnitCost)).ToArray())));
 
     public async Task<PurchaseReceipt> AddReceiptLineAsync(EntityId receiptId, EntityId ingredientId, decimal quantity, decimal unitCost) =>
         ToReceipt(await client.PostAsync<ReceiptLineRequest, ReceiptResponse>($"purchase-receipts/{receiptId.Value}/lines",

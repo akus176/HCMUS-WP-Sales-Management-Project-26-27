@@ -1,6 +1,7 @@
 using CoffeeShop.Application.Sales;
 using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.Domain.Sales;
 
 namespace CoffeeShop.WinUI.Services;
 
@@ -65,8 +66,11 @@ public sealed class ApiOperationsSource(AuthenticatedApiClient client, StaffSess
             "No operational access", "Your account cannot view service board orders.");
     }
 
-    public Task MoveAsync(EntityId id, string target) =>
-        client.PostAsync<object, object>($"orders/{id.Value}/{target}", new { });
+    public Task MoveAsync(EntityId id, string target)
+    {
+        var action = target == OrderStatus.Completed ? "complete" : target;
+        return client.PostAsync<object, object>($"orders/{id.Value}/{action}", new { });
+    }
 
     public Task RecordPaymentAsync(EntityId paymentId, EntityId orderId, string method, decimal amount, string? reference) =>
         client.PostAsync<RecordPaymentRequest, PaymentResponse>($"orders/{orderId.Value}/payments",

@@ -2,22 +2,19 @@
     <Grid x:Name="ShellRoot" Background="{StaticResource ConsoleGroundBrush}" RequestedTheme="Light" SizeChanged="OnShellSizeChanged">
         <Grid.RowDefinitions><RowDefinition Height="40" /><RowDefinition Height="*" /></Grid.RowDefinitions>
         <Border Background="{StaticResource ConsoleFieldBrush}" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="0,0,0,1">
-            <Grid x:Name="TitleDragRegion" Margin="18,0,156,0" ColumnSpacing="22">
-                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
-                    <Border Width="21" Height="21" BorderBrush="{StaticResource ConsoleFieldLineBrush}" BorderThickness="1"><Image Source="ms-appx:///Assets/IconsLight/i-counter.svg" Width="12" Height="12" AutomationProperties.AccessibilityView="Raw" /></Border>
-                    <TextBlock Text="Corner Cafe" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="17" Foreground="{StaticResource ConsoleOnFieldBrush}" VerticalAlignment="Center" />
-                </StackPanel>
-                <Border x:Name="TitleCaption" Grid.Column="1" BorderBrush="{StaticResource ConsoleFieldLineBrush}" BorderThickness="1,0,0,0" Padding="22,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="SERVICE CONSOLE" Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleOnFieldMutedBrush}" />
-                </Border>
-                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite">
+            <Grid x:Name="TitleDragRegion" Margin="18,0,156,0" ColumnSpacing="14">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <TextBlock Text="Corner Cafe" Style="{StaticResource ConsoleWordmarkStyle}" Foreground="{StaticResource ConsoleOnFieldBrush}" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite">
                     <Ellipse Width="5" Height="5" Fill="{StaticResource ConsoleAccentLightBrush}" VerticalAlignment="Center" />
                     <TextBlock x:Name="ConnectionStatusText" Text="CHECKING CONNECTION" Style="{StaticResource ConsoleLabelStyle}" CharacterSpacing="140" Foreground="{StaticResource ConsoleOnFieldMutedBrush}" />
                 </StackPanel>
-                <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                    <TextBlock x:Name="ClockText" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="13" Foreground="{StaticResource ConsoleOnFieldBrush}" VerticalAlignment="Center" />
-                    <Button x:Name="SignOutButton" Content="SIGN OUT" Click="OnSignOut" AutomationProperties.Name="Sign out" />
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock x:Name="ClockText" FontFamily="{StaticResource ConsoleSansFont}" FontSize="12" Foreground="{StaticResource ConsoleOnFieldBrush}" VerticalAlignment="Center" />
+                    <Button x:Name="SignOutButton" Content="Sign out" Click="OnSignOut" AutomationProperties.Name="Sign out"
+                            Background="Transparent" BorderBrush="{StaticResource ConsoleFieldLineBrush}" BorderThickness="1"
+                            Foreground="{StaticResource ConsoleOnFieldBrush}" FontFamily="{StaticResource ConsoleSansMediumFont}"
+                            FontSize="12" MinHeight="28" Padding="9,3" />
                 </StackPanel>
             </Grid>
         </Border>
@@ -44,25 +41,22 @@
             </NavigationView.Resources>
             <NavigationView.PaneHeader>
                 <Border x:Name="BrandHeader" Margin="18,22,18,-4" Padding="0,0,0,16" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
-                    <Grid ColumnSpacing="10"><Grid.ColumnDefinitions><ColumnDefinition Width="38" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                        <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1" Margin="-4" Padding="3"><Border Width="38" Height="38" BorderBrush="{StaticResource ConsoleAccentBrush}" BorderThickness="1"><Image Source="ms-appx:///Assets/Icons/i-counter.svg" Width="18" Height="18" AutomationProperties.AccessibilityView="Raw" /></Border></Border>
-                        <StackPanel x:Name="BrandCopy" Grid.Column="1" VerticalAlignment="Center" Spacing="4">
-                            <TextBlock Text="Corner Cafe" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="20" LineHeight="20" />
-                            <TextBlock Text="SERVICE CONSOLE" FontFamily="{StaticResource ConsoleSansFont}" FontSize="7" CharacterSpacing="200" />
-                        </StackPanel>
-                    </Grid>
+                    <StackPanel x:Name="BrandCopy" VerticalAlignment="Center">
+                        <TextBlock Text="Workspaces" FontFamily="{StaticResource ConsoleSansMediumFont}" FontSize="14" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                    </StackPanel>
                 </Border>
             </NavigationView.PaneHeader>
             <NavigationView.PaneFooter>
-                <StackPanel x:Name="SidebarFooter" Margin="18,0,18,18" Spacing="100">
-                    <Image Source="ms-appx:///Assets/Ornaments/coffee.svg" Width="164" Height="146" Opacity=".75" AutomationProperties.AccessibilityView="Raw" />
-                    <TextBlock x:Name="ClientModeText" FontFamily="{StaticResource ConsoleSansFont}" FontSize="7" CharacterSpacing="140" Foreground="{StaticResource ConsoleMutedInkBrush}" />
+                <StackPanel x:Name="SidebarFooter" Margin="18,0,18,18">
+                    <TextBlock x:Name="ClientModeText" FontFamily="{StaticResource ConsoleSansFont}" FontSize="11" TextWrapping="Wrap" Foreground="{StaticResource ConsoleMutedInkBrush}" />
                 </StackPanel>
             </NavigationView.PaneFooter>
-            <Grid><Grid.RowDefinitions><RowDefinition Height="52" /><RowDefinition Height="*" /></Grid.RowDefinitions>
-                <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" Padding="32,0">
+            <Grid><Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                <Border MinHeight="{StaticResource ConsoleTopbarHeight}" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" Padding="24,0">
                     <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                        <Button x:Name="MenuToggle" Content="☰" Margin="0,0,12,0" Style="{StaticResource ConsoleIconButtonStyle}" Visibility="Collapsed" Click="OnTogglePane" AutomationProperties.Name="Open workspaces" />
+                        <Button x:Name="MenuToggle" Margin="0,0,12,0" Style="{StaticResource ConsoleIconButtonStyle}" Visibility="Collapsed" Click="OnTogglePane" AutomationProperties.Name="Open workspaces" ToolTipService.ToolTip="Open workspaces">
+                            <FontIcon Glyph="&#xE700;" FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="20" AutomationProperties.AccessibilityView="Raw" />
+                        </Button>
                         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                             <TextBlock x:Name="BreadcrumbGroup" Style="{StaticResource ConsoleLabelStyle}" CharacterSpacing="140" />
                             <TextBlock Text="/" Style="{StaticResource ConsoleLabelStyle}" Foreground="{StaticResource ConsoleAccentBrush}" />
@@ -75,7 +69,7 @@
             </Grid>
         </NavigationView>
         <Rectangle x:Name="SidebarRule" Grid.Row="1" Width="1" HorizontalAlignment="Left" Margin="215,0,0,0" Fill="{StaticResource ConsoleAccentBrush}" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw" />
-        <Border x:Name="DatabaseFailurePanel" Grid.Row="1" Margin="248,76,32,24" VerticalAlignment="Top" Style="{StaticResource ConsoleWarningStyle}" Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive">
+        <Border x:Name="DatabaseFailurePanel" Grid.Row="1" Margin="248,60,32,24" VerticalAlignment="Top" Style="{StaticResource ConsoleWarningStyle}" Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive">
             <StackPanel Spacing="12"><TextBlock Text="Connection required" Style="{StaticResource ConsoleSectionTitleStyle}" /><TextBlock x:Name="DatabaseStatusText" Style="{StaticResource ConsoleBodyStyle}" /><Button x:Name="RetryDatabaseButton" Content="RETRY CONNECTION" Style="{StaticResource ConsolePrimaryButtonStyle}" Click="OnRetryDatabaseClick" /></StackPanel>
         </Border>
     </Grid>

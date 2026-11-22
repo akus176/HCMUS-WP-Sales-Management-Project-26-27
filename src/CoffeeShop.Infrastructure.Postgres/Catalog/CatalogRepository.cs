@@ -56,6 +56,8 @@ public sealed class CatalogRepository : ICatalogRepository
 
     public void AddSizeVariant(SizeVariant sizeVariant) => context.SizeVariants.Add(sizeVariant);
 
+    public void AddRecipeIngredients(IReadOnlyCollection<RecipeIngredient> recipe) => context.RecipeIngredients.AddRange(recipe);
+
     public void AddAddon(Addon addon) => context.Addons.Add(addon);
 
     public async Task ReplaceCompatibleAddonsAsync(
@@ -86,7 +88,7 @@ public sealed class CatalogRepository : ICatalogRepository
             $"SELECT 1 FROM catalog.size_variants WHERE id = {sizeVariantId.Value} FOR UPDATE", cancellationToken);
         var existing = await context.RecipeIngredients.Where(line => line.SizeVariantId == sizeVariantId).ToListAsync(cancellationToken);
         context.RecipeIngredients.RemoveRange(existing);
-        context.RecipeIngredients.AddRange(recipe);
+        AddRecipeIngredients(recipe);
     }
 
     private void RequireTransaction()

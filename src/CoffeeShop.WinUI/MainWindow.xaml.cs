@@ -9,7 +9,6 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace CoffeeShop.WinUI;
 
@@ -63,14 +62,14 @@ public sealed partial class MainWindow : Window
         };
     }
     private static object Resource(string key) => Microsoft.UI.Xaml.Application.Current.Resources[key];
-    private static string IconName(string tag) => tag switch
+    private static Symbol NavigationSymbol(string tag) => tag switch
     {
-        "counter" => "i-counter",
-        "service-board" => "i-board",
-        "menu" => "i-menu",
-        "stock-room" => "i-stock",
-        "customers" => "i-customers",
-        _ => "i-reports",
+        "counter" => Symbol.Shop,
+        "service-board" => Symbol.ViewAll,
+        "menu" => Symbol.Bullets,
+        "stock-room" => Symbol.Library,
+        "customers" => Symbol.People,
+        _ => Symbol.ShowResults,
     };
     private void InitializeNavigation()
     {
@@ -83,26 +82,31 @@ public sealed partial class MainWindow : Window
             if (group != destination.Group)
             {
                 group = destination.Group;
-                var header = new NavigationViewItemHeader { Content = group.ToUpperInvariant(), Style = (Style)Resource("ConsoleNavigationGroupStyle") };
+                var header = new NavigationViewItemHeader
+                {
+                    Content = group,
+                    Style = (Style)Resource("ConsoleNavigationGroupStyle"),
+                    FontSize = 11,
+                    CharacterSpacing = 0,
+                    Height = double.NaN,
+                    MinHeight = 28
+                };
                 if (Nav.MenuItems.Count == 0) header.Margin = new Thickness(18, 24, 18, 3);
                 Nav.MenuItems.Add(header);
             }
-            var item = new NavigationViewItem { Content = NavigationContent(destination), Tag = destination.Tag, Style = (Style)Resource("ConsoleNavigationItemStyle") };
+            var item = new NavigationViewItem
+            {
+                Content = destination.Label,
+                Icon = new SymbolIcon(NavigationSymbol(destination.Tag)),
+                Tag = destination.Tag,
+                Style = (Style)Resource("ConsoleNavigationItemStyle"),
+                FontSize = 14,
+                CharacterSpacing = 0
+            };
             AutomationProperties.SetName(item, $"Open {destination.Label} workspace");
             ToolTipService.SetToolTip(item, destination.Label);
             Nav.MenuItems.Add(item);
         }
-    }
-    private static StackPanel NavigationContent(ServiceConsoleDestination destination)
-    {
-        // Keep the approved inset inside the selected navigation surface.
-        var content = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Margin = new Thickness(4, 0, 4, 0) };
-        content.Children.Add(new TextBlock { Text = destination.Numeral, Width = 17, FontSize = 13, FontFamily = (Microsoft.UI.Xaml.Media.FontFamily)Resource("ConsoleSerifFont") });
-        var image = new Image { Width = 13, Height = 13, Source = new SvgImageSource(new Uri($"ms-appx:///Assets/Icons/{IconName(destination.Tag)}.svg")) };
-        AutomationProperties.SetAccessibilityView(image, Microsoft.UI.Xaml.Automation.Peers.AccessibilityView.Raw);
-        content.Children.Add(image);
-        content.Children.Add(new TextBlock { Text = destination.Label.ToUpperInvariant(), FontSize = 9, CharacterSpacing = 140, VerticalAlignment = VerticalAlignment.Center });
-        return content;
     }
     private void OnPaneChanged(NavigationView sender, object args) => RefreshNavigationItems();
     private void RefreshNavigationItems()
@@ -111,9 +115,6 @@ public sealed partial class MainWindow : Window
         var open = layout == ServiceConsoleLayoutMode.Expanded || Nav.IsPaneOpen;
         foreach (var item in Nav.MenuItems.OfType<NavigationViewItem>())
         {
-            var destination = ServiceConsoleNavigation.Resolve((string)item.Tag).Destination;
-            item.Icon = open ? null : new ImageIcon { Source = new SvgImageSource(new Uri($"ms-appx:///Assets/Icons/{IconName(destination.Tag)}.svg")) };
-            item.Content = open ? NavigationContent(destination) : destination.Label;
             item.Margin = new Thickness(open ? 18 : 8, 0, open ? 18 : 8, 0);
         }
         foreach (var header in Nav.MenuItems.OfType<NavigationViewItemHeader>()) header.Visibility = open ? Visibility.Visible : Visibility.Collapsed;
@@ -291,9 +292,9 @@ public sealed partial class MainWindow : Window
         };
         Nav.IsPaneOpen = next == ServiceConsoleLayoutMode.Expanded;
         BrandCopy.Visibility = SidebarFooter.Visibility = next == ServiceConsoleLayoutMode.Expanded ? Visibility.Visible : Visibility.Collapsed;
-        TitleCaption.Visibility = DateText.Visibility = next == ServiceConsoleLayoutMode.Compact ? Visibility.Collapsed : Visibility.Visible;
+        DateText.Visibility = next == ServiceConsoleLayoutMode.Compact ? Visibility.Collapsed : Visibility.Visible;
         MenuToggle.Visibility = next == ServiceConsoleLayoutMode.Expanded ? Visibility.Collapsed : Visibility.Visible;
         RefreshNavigationItems();
-        DatabaseFailurePanel.Margin = new Thickness(next == ServiceConsoleLayoutMode.Expanded ? 248 : 20, 76, 20, 20);
+        DatabaseFailurePanel.Margin = new Thickness(next == ServiceConsoleLayoutMode.Expanded ? 248 : 20, 60, 20, 20);
     }
 }

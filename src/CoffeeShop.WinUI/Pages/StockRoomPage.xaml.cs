@@ -23,7 +23,6 @@ public sealed partial class StockRoomPage : Page
     private List<PosStaffOption> staffOptions = [];
     private List<PurchaseReceipt> rawReceipts = [];
     private Dictionary<EntityId, string> supplierNames = [];
-    private Dictionary<EntityId, string> activeSupplierNames = [];
     private Dictionary<EntityId, Supplier> supplierDirectory = [];
     private List<StockMovement> allMovements = [];
     private List<HistoryFilterOption> historyFilters = [];
@@ -40,7 +39,6 @@ public sealed partial class StockRoomPage : Page
     private bool isAdjusting;
     private bool restoringDraft;
     private bool selectingIngredient;
-    private bool hasLoaded;
     private readonly StockAdjustmentDrafts adjustmentDrafts = new();
     private int selectedUnitIndex;
     private string sortColumn = "status";
@@ -72,7 +70,7 @@ public sealed partial class StockRoomPage : Page
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         ConfigureLayout(ActualWidth, ActualHeight);
-        if (!hasLoaded) await RefreshDataAsync();
+        await RefreshDataAsync();
         UpdateActiveTabVisuals();
         SwitchSectionView();
     }
@@ -123,7 +121,6 @@ public sealed partial class StockRoomPage : Page
 
             supplierDirectory = suppliers.ToDictionary(supplier => supplier.Id);
             supplierNames = suppliers.ToDictionary(s => s.Id, s => s.Name);
-            activeSupplierNames = suppliers.Where(s => s.IsActive).ToDictionary(s => s.Id, s => s.Name);
 
             ReceiptsEmptyText.Visibility = rawReceipts.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             var receiptCounts = rawReceipts
@@ -203,18 +200,9 @@ public sealed partial class StockRoomPage : Page
 
             SubtitleText.Text = $"{rawIngredients.Count} ingredients · {lowCount} low on stock · {rawReceipts.Count(r => r.Status == PurchaseReceiptStatus.Draft)} draft receipts";
             SyncPillText.Text = $"Updated {DateTime.Now:HH:mm}";
-            var lastMovement = movementsByIngredient.Values.SelectMany(items => items).MaxBy(m => m.OccurredAt.Value);
-            if (lastMovement is not null)
-            {
-                var age = DateTimeOffset.UtcNow - lastMovement.OccurredAt.Value;
-                var elapsed = age.TotalDays >= 1 ? $"{(int)age.TotalDays}D" : $"{Math.Max(0, (int)age.TotalMinutes)} MIN";
-                EyebrowText.Text = $"MANAGE  /  INVENTORY  /  LAST MOVEMENT {elapsed} AGO";
-            }
 
             ApplyIngredientFilters();
             SelectIngredient(selectedIngredientRow);
-            hasLoaded = true;
-
             ShowFeedback(savedMessage is null
                 ? WorkflowFeedback.Ready("Stock room data refreshed.")
                 : WorkflowFeedback.Success(savedMessage));
@@ -605,43 +593,61 @@ public sealed partial class StockRoomPage : Page
 
     private async void OnReceiveDeliveryClick(object sender, RoutedEventArgs e)
     {
-        if (activeSupplierNames.Count == 0)
+        var suppliers = supplierDirectory.Values.Where(supplier => supplier.IsActive).OrderBy(supplier => supplier.Name).ToArray();
+        if (suppliers.Length == 0)
         {
             SelectSection("suppliers");
             ShowFeedback(WorkflowFeedback.Validation("supplier", "Add an active supplier before receiving a delivery."));
             return;
         }
-        var activeSuppliers = activeSupplierNames.Values.OrderBy(n => n).ToList();
-        var dialog = new NewReceiptDialog(activeSuppliers);
-        dialog.XamlRoot = XamlRoot;
-        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
-
-        var supplierEntry = activeSupplierNames.FirstOrDefault(kvp => kvp.Value == dialog.SupplierName);
-        if (supplierEntry.Key is null)
+        var ingredients = rawIngredients.Where(ingredient => ingredient.IsActive).OrderBy(ingredient => ingredient.Name).ToArray();
+        if (ingredients.Length == 0)
         {
-            ShowFeedback(WorkflowFeedback.Validation("supplier", "Select an active supplier."));
+            SelectSection("ingredients");
+            ShowFeedback(WorkflowFeedback.Validation("ingredient", "Create an ingredient before receiving a delivery."));
             return;
         }
+
+        PurchaseReceipt? received = null;
+        var dialog = new NewReceiptDialog(suppliers, ingredients, async (supplierId, number, lines) =>
+        {
+            try
+            {
+                if (App.IsApiMode)
+                {
+                    received = await App.Services.GetRequiredService<ApiInventorySource>().ReceiveDeliveryAsync(supplierId, number, lines);
+                }
+                else
+                {
+                    var actor = session.Operator ?? staffOptions.FirstOrDefault();
+                    if (actor is null) return "Choose an active staff operator before receiving a delivery.";
+                    using var scope = App.Services.CreateScope();
+                    var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>()
+                        .ReceiveDeliveryAsync(new(supplierId, number, lines, actor.Id));
+                    if (result.IsFailure) return result.Error!.Description;
+                    received = result.Value;
+                }
+                return null;
+            }
+            catch (ApiException exception) when (exception.Kind is ApiErrorKind.Validation or ApiErrorKind.Conflict
+                or ApiErrorKind.NotFound or ApiErrorKind.Forbidden or ApiErrorKind.BusinessRule)
+            {
+                return exception.Detail;
+            }
+            catch (Exception)
+            {
+                return "Could not verify the delivery. Check the connection and retry with the same receipt number.";
+            }
+        })
+        { XamlRoot = XamlRoot };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary || received is null) return;
 
         SetBusy(true);
         try
         {
-            if (App.IsApiMode)
-            {
-                await App.Services.GetRequiredService<ApiInventorySource>().CreateReceiptAsync(supplierEntry.Key, dialog.ReceiptNumber);
-            }
-            else
-            {
-                using var scope = App.Services.CreateScope();
-                var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>()
-                    .CreateDraftReceiptAsync(new(supplierEntry.Key, dialog.ReceiptNumber));
-                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
-            }
-            SelectSection("receipts");
-            await ReloadStockDataAsync($"Draft receipt #{dialog.ReceiptNumber} created.");
+            selectedReceiptId = received.Id;
+            await ReloadStockDataAsync($"Receipt #{received.ReceiptNumber} posted. Stock balances are up to date.");
         }
-        catch (ApiException exception) { ShowApiFailure("create purchase receipt", exception); }
-        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create draft receipt", "Verify database connection.")); }
         finally { SetBusy(false); }
     }
 
@@ -992,20 +998,18 @@ public sealed partial class StockRoomPage : Page
         compactLayout = width < 1180 || height < 520;
         // Keep the footer and filter reset reachable on short desktop windows,
         // but let taller windows show more of the ledger.
-        IngredientsListView.MaxHeight = compactLayout ? 416 : Math.Max(104, height - 392);
+        IngredientsListView.MaxHeight = Math.Max(compactLayout ? 416 : 104, height - 350);
         ContentSplitGrid.ColumnSpacing = compactLayout || !drawerOpen ? 0 : 24;
         RootGrid.Height = compactLayout ? double.NaN : height;
-        RootGrid.Padding = new Thickness(compactLayout ? 16 : 32, 24, compactLayout ? 16 : 32, 22);
-        RootGrid.RowDefinitions[0].Height = compactLayout ? GridLength.Auto : new GridLength(98);
+        var padding = (Thickness)XamlApp.Current.Resources["ConsolePagePadding"];
+        RootGrid.Padding = compactLayout ? new Thickness(16, padding.Top, 16, padding.Bottom) : padding;
         RootGrid.RowDefinitions[3].Height = compactLayout ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
         ContentSplitGrid.RowDefinitions[0].Height = compactLayout ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
-        HeaderOrnament.Visibility = compactLayout ? Visibility.Collapsed : Visibility.Visible;
-        Grid.SetRow(HeaderActions, compactLayout ? 1 : 0);
-        Grid.SetColumn(HeaderActions, compactLayout ? 0 : 2);
-        Grid.SetColumnSpan(HeaderActions, compactLayout ? 3 : 1);
-        HeaderActions.Margin = new Thickness(0, compactLayout ? 12 : 0, 0, 0);
-        HeaderGrid.ColumnDefinitions[1].Width = new GridLength(compactLayout ? 0 : 100);
-        HeaderGrid.RowDefinitions[0].Height = compactLayout ? GridLength.Auto : new GridLength(1, GridUnitType.Star);
+        var headerInline = width >= 640;
+        Grid.SetRow(HeaderActions, headerInline ? 0 : 1);
+        Grid.SetColumn(HeaderActions, headerInline ? 1 : 0);
+        Grid.SetColumnSpan(HeaderActions, headerInline ? 1 : 2);
+        HeaderGrid.ColumnDefinitions[1].Width = headerInline ? GridLength.Auto : new GridLength(0);
         var wrapFilters = width < 520;
         FilterToolbar.ColumnDefinitions[0].Width = wrapFilters
             ? new GridLength(1, GridUnitType.Star)
@@ -1162,13 +1166,13 @@ public sealed partial class StockRoomPage : Page
             Text = label,
             FontSize = 11,
             CharacterSpacing = 20,
-            FontFamily = (FontFamily)XamlApp.Current.Resources["ConsoleSansFont"]
+            FontFamily = new FontFamily("Segoe UI")
         });
         if (count is { } value) content.Children.Add(new TextBlock
         {
             Text = value.ToString(),
             FontSize = 13,
-            FontFamily = (FontFamily)XamlApp.Current.Resources["ConsoleSerifFont"]
+            FontFamily = new FontFamily("Segoe UI")
         });
         tab.Content = content;
     }
@@ -1338,7 +1342,14 @@ public sealed record MovementPresentationRow(StockMovement Movement, string Ingr
 {
     public string TimeDisplay => IngredientRow.FormatWhen(Movement.OccurredAt.Value.ToLocalTime());
     public string FullTimeDisplay => Movement.OccurredAt.Value.ToLocalTime().ToString("g");
-    public string TypeDisplay => Movement.Type.ToString();
+    public string TypeDisplay => Movement.Type switch
+    {
+        StockMovementType.Receipt => "Receipt",
+        StockMovementType.Adjustment => "Adjustment",
+        StockMovementType.OrderConsumption => "Used in order",
+        StockMovementType.Restoration => "Restored stock",
+        _ => Movement.Type.ToString(),
+    };
     public string DeltaDisplay => $"{Movement.QuantityDelta:+#,0.###;-#,0.###;0} {Unit}".TrimEnd();
     public string ReasonDisplay => Movement.Reason;
     public string ActorDisplay => ActorName ?? Movement.ActorId.ToString();

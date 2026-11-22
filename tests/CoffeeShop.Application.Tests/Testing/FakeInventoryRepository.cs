@@ -21,7 +21,7 @@ public sealed class FakeInventoryRepository : IInventoryRepository
     public Task<bool> HasOrderRestorationAsync(EntityId orderId, CancellationToken cancellationToken = default) =>
         Task.FromResult(OrderRestorations.ContainsKey(orderId));
 
-    public Task<IReadOnlyList<Ingredient>> LoadIngredientsForRestorationAsync(
+    public Task<IReadOnlyList<Ingredient>> LoadIngredientsForStockUpdateAsync(
         IReadOnlyCollection<EntityId> ingredientIds, CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<Ingredient>>(Ingredients.Values.Where(ingredient => ingredientIds.Contains(ingredient.Id)).ToArray());
 
@@ -43,6 +43,12 @@ public sealed class FakeInventoryRepository : IInventoryRepository
 
     public Task<PurchaseReceipt?> FindReceiptWithLinesAsync(EntityId id, CancellationToken cancellationToken = default) =>
         Task.FromResult(Receipts.GetValueOrDefault(id));
+
+    public Task<PurchaseReceipt?> LoadReceiptForReceivingAsync(string receiptNumber, CancellationToken cancellationToken = default) =>
+        Task.FromResult(Receipts.Values.FirstOrDefault(receipt => receipt.ReceiptNumber == receiptNumber));
+
+    public Task<PurchaseReceipt?> LoadReceiptForPostingAsync(EntityId id, CancellationToken cancellationToken = default) =>
+        FindReceiptWithLinesAsync(id, cancellationToken);
 
     public Task<IReadOnlyList<Ingredient>> ListIngredientsAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult<IReadOnlyList<Ingredient>>(Ingredients.Values.ToList().AsReadOnly());

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using CoffeeShop.Contracts;
+using CoffeeShop.Domain.Sales;
 using CoffeeShop.WinUI.Services;
 
 namespace CoffeeShop.WinUI.Tests;
@@ -53,7 +54,7 @@ public sealed class ApiOperationsSourceTests
     }
 
     [Fact]
-    public async Task Manager_UsesApiForTableBoardPaymentDiscountCancellationAndBaristaTransitions()
+    public async Task Manager_UsesApiForTableBoardPaymentDiscountCancellationAndOrderTransitions()
     {
         var orderId = Guid.NewGuid();
         var staffId = Guid.NewGuid();
@@ -71,7 +72,7 @@ public sealed class ApiOperationsSourceTests
                 _ => new(HttpStatusCode.NoContent),
             };
         });
-        var session = CreateSession(Guid.NewGuid(), "orders.create", "orders.confirm", "orders.fulfill",
+        var session = CreateSession(Guid.NewGuid(), "orders.create", "orders.confirm", "orders.fulfill", "orders.complete",
             "payments.record", "discounts.request", "discounts.approve", "orders.cancel", "delivery.assign");
         var source = new ApiOperationsSource(new AuthenticatedApiClient(http, session), session);
         var discountId = Guid.NewGuid();
@@ -81,6 +82,7 @@ public sealed class ApiOperationsSourceTests
         await source.MoveAsync(new(orderId), "preparing");
         await source.MoveAsync(new(orderId), "ready");
         await source.RecordPaymentAsync(new(paymentId), new(orderId), "cash", 24m, "drawer-7");
+        await source.MoveAsync(new(orderId), OrderStatus.Completed);
         await source.DecideDiscountAsync(new(discountId), approve: true);
         await source.CancelAsync(new(orderId), "Customer changed their mind");
 
@@ -90,6 +92,7 @@ public sealed class ApiOperationsSourceTests
         Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/pos/tables");
         Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/preparing");
         Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/ready");
+        Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/complete");
         Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/payments");
         Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/discounts/{discountId}/approve");
         Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/cancel");

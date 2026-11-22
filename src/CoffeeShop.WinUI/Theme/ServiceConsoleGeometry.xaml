@@ -3,10 +3,10 @@
     <x:Double x:Key="ConsoleSidebarWidth">216</x:Double>
     <x:Double x:Key="ConsoleCompactSidebarWidth">64</x:Double>
     <x:Double x:Key="ConsoleTitlebarHeight">40</x:Double>
-    <x:Double x:Key="ConsoleTopbarHeight">52</x:Double>
+    <x:Double x:Key="ConsoleTopbarHeight">40</x:Double>
     <x:Double x:Key="ConsoleHairline">1</x:Double>
     <CornerRadius x:Key="ConsoleSquare">0</CornerRadius>
-    <Thickness x:Key="ConsolePagePadding">32,24,32,22</Thickness>
+    <Thickness x:Key="ConsolePagePadding">24,6,24,12</Thickness>
     <Thickness x:Key="ConsoleNarrowPadding">20</Thickness>
     <Thickness x:Key="ConsoleRuleThickness">0,0,0,1</Thickness>
     <Thickness x:Key="ConsoleFocusThickness">2</Thickness>

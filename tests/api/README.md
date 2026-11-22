@@ -2,8 +2,10 @@
 
 This Postman v2.1 collection checks API liveness/readiness, anonymous access,
 successful manager/cashier sign-in, catalog reads, forbidden writes, validation,
-and not-found responses. Its write requests are expected to fail with 400 or 403
-before changing data. Requests use environment variables and session tokens
+not-found responses, and an unsupported HTTP method (DELETE on categories).
+The existing category write probes fail with 400 or 403; the unsupported DELETE
+fails with 405. None changes catalog data.
+Requests use environment variables and session tokens
 captured by the collection scripts, so request bodies do not need per-run editing.
 
 ## Run against the local Docker API
@@ -21,6 +23,11 @@ captured by the collection scripts, so request bodies do not need per-run editin
 4. Run the complete collection in order. The login requests save access tokens
    as collection variables. The manager read and cashier forbidden-write checks
    use those tokens automatically.
+
+The unsupported DELETE must return HTTP 405 with an `application/problem+json`
+body whose `status` is 405. The Compose runner's post-collection count check confirms
+the catalog still has five categories. This distinguishes a registered path with
+the wrong method from the collection's separate unknown-path 404 case.
 
 The environment file contains blank credential fields only. Do not export or
 commit an environment after entering local passwords. The live-API Postman run

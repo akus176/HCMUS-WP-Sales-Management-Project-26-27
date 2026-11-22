@@ -49,7 +49,7 @@ switch (builder.Configuration["Assistant:Provider"]?.ToLowerInvariant())
 {
     case "openai":
         builder.Services.AddHttpClient<IManagerAssistantProvider, OpenAiAssistantProvider>(client =>
-            client.Timeout = TimeSpan.FromSeconds(15));
+            client.Timeout = TimeSpan.FromSeconds(25));
         break;
     case "deterministic":
         builder.Services.AddSingleton<IManagerAssistantProvider, DeterministicAssistantProvider>();

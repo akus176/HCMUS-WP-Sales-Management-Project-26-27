@@ -76,6 +76,12 @@ public sealed class FakeCatalogRepository : ICatalogRepository, ICatalogReadRepo
 
     public void AddSizeVariant(SizeVariant sizeVariant) => SizeVariants.Add(sizeVariant.Id, sizeVariant);
 
+    public void AddRecipeIngredients(IReadOnlyCollection<RecipeIngredient> recipe)
+    {
+        foreach (var lines in recipe.GroupBy(line => line.SizeVariantId))
+            Recipes.Add(lines.Key, lines.ToArray());
+    }
+
     public void AddAddon(Addon addon) => Addons.Add(addon.Id, addon);
 
     public Task ReplaceCompatibleAddonsAsync(

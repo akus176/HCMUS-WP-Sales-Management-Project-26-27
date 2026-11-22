@@ -4,6 +4,7 @@ using CoffeeShop.Application.Common.Persistence;
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Domain.Catalog;
 using CoffeeShop.Domain.Common;
+using CoffeeShop.Domain.Inventory;
 
 public sealed class RecipeCommandHandler
 {
@@ -44,79 +45,88 @@ public sealed class RecipeCommandHandler
                     "The selected size variant was not found."));
             }
 
-            var errors = new List<ErrorDetail>();
-            var recipe = new List<RecipeIngredient>();
-            var ingredientIds = new HashSet<EntityId>();
             var ingredients = (await repository.ListIngredientsForRecipeUpdateAsync(
-                command.Lines.Where(line => line is not null).Select(line => line!.IngredientId).Distinct().ToArray(),
+                command.Lines.Where(line => line is not null).Select(line => line.IngredientId).Distinct().ToArray(),
                 cancellationToken)).ToDictionary(ingredient => ingredient.Id);
+            var recipe = BuildRecipe(variant, command.Lines, ingredients);
+            if (recipe.IsFailure) return Result.Failure(recipe.Error!);
 
-            var index = 0;
-            foreach (var input in command.Lines)
-            {
-                var target = $"lines[{index}]";
-                if (input is null)
-                {
-                    errors.Add(new ErrorDetail(target, "Recipe line cannot be null."));
-                    index++;
-                    continue;
-                }
-
-                if (!ingredientIds.Add(input.IngredientId))
-                {
-                    errors.Add(new ErrorDetail(
-                        $"{target}.ingredientId",
-                        "An ingredient can appear only once in a size-specific recipe."));
-                    index++;
-                    continue;
-                }
-
-                var ingredient = ingredients.GetValueOrDefault(input.IngredientId);
-                if (ingredient is null)
-                {
-                    errors.Add(new ErrorDetail(
-                        $"{target}.ingredientId",
-                        $"Ingredient '{input.IngredientId}' was not found."));
-                    index++;
-                    continue;
-                }
-
-                try
-                {
-                    recipe.Add(new RecipeIngredient(
-                        EntityId.New(),
-                        variant,
-                        ingredient,
-                        input.Quantity,
-                        input.Unit));
-                }
-                catch (ArgumentException exception)
-                {
-                    var field = exception.ParamName switch
-                    {
-                        "ingredient" => "ingredientId",
-                        "quantity" => "quantity",
-                        "unit" => "unit",
-                        _ => "line"
-                    };
-                    errors.Add(new ErrorDetail($"{target}.{field}", exception.Message));
-                }
-
-                index++;
-            }
-
-            if (errors.Count > 0)
-            {
-                return Result.Failure(Error.Validation(
-                    "catalog.recipe_invalid",
-                    "The recipe contains one or more invalid ingredient lines.",
-                    errors));
-            }
-
-            await repository.ReplaceRecipeAsync(variant.Id, recipe, cancellationToken);
+            await repository.ReplaceRecipeAsync(variant.Id, recipe.Value, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }, cancellationToken);
+    }
+
+    internal static Result<IReadOnlyCollection<RecipeIngredient>> BuildRecipe(
+        SizeVariant variant, IReadOnlyCollection<RecipeLineInput> lines,
+        IReadOnlyDictionary<EntityId, Ingredient> ingredients, string linePath = "lines")
+    {
+        var errors = new List<ErrorDetail>();
+        var recipe = new List<RecipeIngredient>();
+        var ingredientIds = new HashSet<EntityId>();
+        var index = 0;
+        foreach (var input in lines)
+        {
+            var target = $"{linePath}[{index}]";
+            if (input is null)
+            {
+                errors.Add(new ErrorDetail(target, "Recipe line cannot be null."));
+                index++;
+                continue;
+            }
+
+            if (!ingredientIds.Add(input.IngredientId))
+            {
+                errors.Add(new ErrorDetail(
+                    $"{target}.ingredientId",
+                    "An ingredient can appear only once in a size-specific recipe."));
+                index++;
+                continue;
+            }
+
+            var ingredient = ingredients.GetValueOrDefault(input.IngredientId);
+            if (ingredient is null)
+            {
+                errors.Add(new ErrorDetail(
+                    $"{target}.ingredientId",
+                    $"Ingredient '{input.IngredientId}' was not found."));
+                index++;
+                continue;
+            }
+
+            try
+            {
+                recipe.Add(new RecipeIngredient(
+                    EntityId.New(),
+                    variant,
+                    ingredient,
+                    input.Quantity,
+                    input.Unit));
+            }
+            catch (ArgumentException exception)
+            {
+                var field = exception.ParamName switch
+                {
+                    "ingredient" => "ingredientId",
+                    "quantity" => "quantity",
+                    "unit" => "unit",
+                    _ => "line"
+                };
+                errors.Add(new ErrorDetail($"{target}.{field}", exception.Message));
+            }
+
+            index++;
+        }
+
+        if (errors.Count > 0)
+        {
+            return Result<IReadOnlyCollection<RecipeIngredient>>.Failure(Error.Validation(
+                "catalog.recipe_invalid",
+                "The recipe contains one or more invalid ingredient lines.",
+                errors));
+        }
+
+        return Result<IReadOnlyCollection<RecipeIngredient>>.Success(recipe);
     }
 }

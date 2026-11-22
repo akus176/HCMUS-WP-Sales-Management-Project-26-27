@@ -2,11 +2,15 @@
     <FontFamily x:Key="ConsoleSerifFont">ms-appx:///Assets/Fonts/EBGaramond-Regular.ttf#EB Garamond</FontFamily>
     <FontFamily x:Key="ConsoleSansFont">ms-appx:///Assets/Fonts/InstrumentSans-Regular.ttf#Instrument Sans</FontFamily>
     <FontFamily x:Key="ConsoleSansMediumFont">ms-appx:///Assets/Fonts/InstrumentSans-Medium.ttf#Instrument Sans Medium</FontFamily>
+    <Style x:Key="ConsoleWordmarkStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleSansMediumFont}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
     <Style x:Key="ConsolePageTitleStyle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource ConsoleSerifFont}" />
-        <Setter Property="FontSize" Value="52" />
+        <Setter Property="FontSize" Value="42" />
         <Setter Property="CharacterSpacing" Value="-15" />
-        <Setter Property="LineHeight" Value="53.04" />
         <Setter Property="Foreground" Value="{StaticResource ConsoleInkBrush}" />
     </Style>
     <Style x:Key="ConsoleSectionTitleStyle" TargetType="TextBlock">

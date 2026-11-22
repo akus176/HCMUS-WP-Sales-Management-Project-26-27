@@ -26,7 +26,5 @@
     <Content Include="Assets\Ornaments\*.svg" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Patterns\*.svg" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Assets\Icons\*.svg" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="Assets\IconsLight\*.svg" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="Assets\Photos\*.jpg" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
