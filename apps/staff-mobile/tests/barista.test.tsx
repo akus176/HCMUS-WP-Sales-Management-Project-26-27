@@ -6,6 +6,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import { onlineManager } from '@tanstack/react-query';
+import { BackHandler } from 'react-native';
 
 import { PreparationScreen } from '../src/barista/PreparationScreen';
 import { ConnectivityProvider } from '../src/connectivity/connectivity';
@@ -44,6 +45,58 @@ const page = (items = [ticket], totalCount = items.length) => ({
   totalCount,
   page: 1,
   pageSize: 10,
+});
+
+test('Android Back dismisses confirmation without a write, then restores the selected queue', async () => {
+  let back: Parameters<typeof BackHandler.addEventListener>[1] | undefined;
+  const spy = jest
+    .spyOn(BackHandler, 'addEventListener')
+    .mockImplementation((_event, callback) => {
+      back = callback;
+      return { remove: jest.fn() };
+    });
+  try {
+    const preparing = { ...ticket, status: 'preparing' };
+    const h = await mount(async (request) =>
+      json(
+        request.url.includes(`${ticket.orderId}`)
+          ? preparing
+          : page([preparing]),
+      ),
+    );
+    await fireEvent.press(
+      await screen.findByRole('button', { name: 'Preparing' }),
+    );
+    await openTicket('Preparing');
+    await fireEvent.press(screen.getByRole('button', { name: 'Mark ready' }));
+    await screen.findByRole('button', { name: 'Confirm ready' });
+    await act(async () => {
+      expect(back?.({} as Parameters<NonNullable<typeof back>>[0])).toBe(true);
+    });
+    expect(screen.queryByRole('button', { name: 'Confirm ready' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Mark ready' })).toBeVisible();
+    await act(async () => {
+      expect(back?.({} as Parameters<NonNullable<typeof back>>[0])).toBe(true);
+    });
+    expect(
+      await screen.findByRole('button', {
+        name: 'Select ticket ORD-155',
+        selected: true,
+      }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Preparing', selected: true }),
+    ).toBeVisible();
+    expect(
+      h.fetcher.mock.calls.some(
+        ([request]) =>
+          request.method === 'POST' &&
+          request.url.includes('/preparation-tickets/'),
+      ),
+    ).toBe(false);
+  } finally {
+    spy.mockRestore();
+  }
 });
 
 beforeEach(() => {

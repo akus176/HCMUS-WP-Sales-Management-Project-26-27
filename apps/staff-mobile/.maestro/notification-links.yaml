@@ -14,7 +14,7 @@ name: Notification link reauthorizes a recipient with no approval permission
     element: Sign out
     direction: DOWN
 - tapOn: Sign out
-- assertVisible: Staff mobile
+- assertVisible: Staff sign-in
 - openLink: coffeeshop-staff:///notifications/approval/${MAESTRO_DISCOUNT_ID}
-- assertVisible: Staff mobile
+- assertVisible: Staff sign-in
 - assertNotVisible: Discount review

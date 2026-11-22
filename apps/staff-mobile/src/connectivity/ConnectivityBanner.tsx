@@ -1,5 +1,11 @@
 import { useState, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 
 import { PageNotice, ShellButton, ShellFeedback } from '../shell/controls';
 import { mobileTokens } from '../shell/designTokens';
@@ -58,6 +64,7 @@ export function ConnectivityBanner({
   branded = false,
 }: { expanded?: boolean; onToggle?: () => void; branded?: boolean } = {}) {
   const { status, refreshConnection } = useConnectivity();
+  const { fontScale } = useWindowDimensions();
   const message = {
     checking: 'Checking connection…',
     online: 'Online',
@@ -69,7 +76,13 @@ export function ConnectivityBanner({
     status === 'offline' ? 'Check connection' : 'Refresh data';
 
   return (
-    <View style={[styles.container, branded && styles.brandedContainer]}>
+    <View
+      style={[
+        styles.container,
+        branded && styles.brandedContainer,
+        branded && fontScale > 1.5 && styles.stackedBrand,
+      ]}
+    >
       {branded && (
         <Text accessibilityRole="header" style={styles.brand}>
           Corner Cafe
@@ -156,6 +169,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   brandedStatus: { flexGrow: 0 },
+  stackedBrand: { flexDirection: 'column', alignItems: 'flex-start', gap: 0 },
   brandedSummary: {
     fontSize: mobileTokens.type.body,
     color: mobileTokens.color.info,

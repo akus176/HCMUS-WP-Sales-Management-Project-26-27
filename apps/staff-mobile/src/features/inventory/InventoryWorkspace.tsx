@@ -391,7 +391,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                 Number(ingredient.reorderThreshold);
               return (
                 <View key={ingredient.ingredientId} style={styles.card}>
-                  <ShellText>{ingredient.name}</ShellText>
+                  <ShellHeading level="section">{ingredient.name}</ShellHeading>
                   <ShellText>
                     Balance: {quantity(ingredient.availableQuantity)}{' '}
                     {ingredient.baseUnit}
@@ -406,24 +406,28 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                       label={`Low stock · ${quantity(ingredient.availableQuantity)} ${ingredient.baseUnit} / ${quantity(ingredient.reorderThreshold)} ${ingredient.baseUnit}`}
                     />
                   )}
-                  {user.permissions.includes('inventory.adjust') && (
-                    <ShellButton
-                      label={`Record adjustment for ${ingredient.name}`}
-                      variant="secondary"
-                      onPress={() => {
-                        setAdjustmentIngredient(ingredient);
-                        setAdjustmentMessage(undefined);
-                        setAdjustmentResult(undefined);
-                      }}
-                    />
-                  )}
-                  {canManage && (
-                    <ShellButton
-                      label={`Show movement history for ${ingredient.name}`}
-                      variant="secondary"
-                      onPress={() => setMovementIngredient(ingredient)}
-                    />
-                  )}
+                  <ShellSelection>
+                    {user.permissions.includes('inventory.adjust') && (
+                      <ShellButton
+                        label={`Record adjustment for ${ingredient.name}`}
+                        displayLabel="Adjust stock"
+                        variant="secondary"
+                        onPress={() => {
+                          setAdjustmentIngredient(ingredient);
+                          setAdjustmentMessage(undefined);
+                          setAdjustmentResult(undefined);
+                        }}
+                      />
+                    )}
+                    {canManage && (
+                      <ShellButton
+                        label={`Show movement history for ${ingredient.name}`}
+                        displayLabel="Movement history"
+                        variant="secondary"
+                        onPress={() => setMovementIngredient(ingredient)}
+                      />
+                    )}
+                  </ShellSelection>
                   {adjustmentIngredient?.ingredientId ===
                     ingredient.ingredientId && (
                     <View style={styles.form}>
@@ -708,12 +712,11 @@ const styles = StyleSheet.create({
     backgroundColor: mobileTokens.color.background,
   },
   card: {
-    backgroundColor: mobileTokens.color.infoBackground,
+    backgroundColor: mobileTokens.color.background,
     borderColor: mobileTokens.color.border,
-    borderRadius: mobileTokens.shape.card,
-    borderWidth: 2,
+    borderBottomWidth: 1,
     gap: mobileTokens.spacing.sm,
-    padding: mobileTokens.spacing.md,
+    paddingVertical: mobileTokens.spacing.md,
   },
   form: { gap: mobileTokens.spacing.sm },
 });

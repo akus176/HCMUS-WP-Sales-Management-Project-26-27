@@ -1,0 +1,36 @@
+{
+  "baseRevision": "c0c3a8589646e1f5747f5508d758959c2e7c82cf",
+  "device": "Android Emulator Medium_Phone_API_36.1 / emulator-5554",
+  "androidApi": 36,
+  "client": "Expo Go 58.0.5",
+  "capturePixels": [
+    1170,
+    2676
+  ],
+  "densityDpi": 480,
+  "referenceContentDp": [
+    390,
+    844
+  ],
+  "systemChromeDp": {
+    "top": 24,
+    "bottom": 24
+  },
+  "textScales": [
+    1,
+    2
+  ],
+  "node": "v22.14.0",
+  "sourceSha256": {
+    "apps/staff-mobile/src/shell/controls.tsx": "37bc002589e80e4b2019fa8949cf7a20b1936b9a3c9a26a49708f397b4862e8a",
+    "apps/staff-mobile/src/shell/StaffHome.tsx": "780812cc19743df5e0742aef0685ddedc55a2a5b929a5aa7ab98072b98e8d3a9",
+    "apps/staff-mobile/src/connectivity/ConnectivityBanner.tsx": "ca49c2bf80dedd06b20207edbc56fa7fe6a4461fb8966ace0db1c36e267b7347",
+    "apps/staff-mobile/src/barista/PreparationScreen.tsx": "c29da951267c1857a6db8b33c93a10942562501412da81051ead2512f2b02e7d",
+    "apps/staff-mobile/src/features/inventory/InventoryWorkspace.tsx": "e3a3a34de571a50cbbbfc5b3ed7d4ee751dbbb5bfa92556521aafe796a6e89f5",
+    "apps/staff-mobile/app/_layout.tsx": "974ceb699005c9dfe1490f55e5d04218384ef93eb6e0f7f0196f6463cd52187b",
+    "apps/staff-mobile/app/index.tsx": "7ef464f478a16dd800b654a97c68d1c91b778fff4d290d17e5d423c02ac9b212"
+  },
+  "beforeInventory": "Fresh capture of the previously running UI; JS revision was not revalidated, viewport differs from reference captures. Qualitative baseline only.",
+  "nativeScope": "ADB-driven read/cancel/navigation checks in Expo Go; not a new standalone-development-build Maestro full-suite claim.",
+  "captureStageNote": "Normal sign-in/home/inventory/queue captures use the final source hashes. Detail and 200% captures immediately precede only the nonvisual keyboard-focus additions; their layout and Back behavior are the same."
+}

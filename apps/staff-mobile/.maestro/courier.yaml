@@ -4,9 +4,8 @@ name: Courier delivered and failed workflows against the shared API
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: Staff mobile
+    visible: Staff sign-in
     timeout: 60000
-- tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
 - hideKeyboard

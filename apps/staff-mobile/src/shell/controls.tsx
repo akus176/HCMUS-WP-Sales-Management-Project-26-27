@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ComponentRef,
@@ -16,6 +17,7 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
   type TextInputProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -41,6 +43,19 @@ const PageNavigation = createContext({
 
 export const usePageNavigation = () => useContext(PageNavigation);
 export const PageNotice = createContext<ReactNode>(null);
+const PageFooter = createContext<(content: ReactNode) => void>(() => {});
+
+/** Keep working actions in reach; enlarged text reflows them into the page. */
+export function ShellPageFooter({ children }: { children: ReactNode }) {
+  const setFooter = useContext(PageFooter);
+  const { fontScale, height } = useWindowDimensions();
+  const inline = fontScale > 1.5 || height < 560;
+  useEffect(() => {
+    setFooter(inline ? null : children);
+    return () => setFooter(null);
+  }, [children, inline, setFooter]);
+  return inline ? <View>{children}</View> : null;
+}
 
 export function ShellPage({ children }: { children: ReactNode }) {
   const notice = useContext(PageNotice);
@@ -50,52 +65,63 @@ export function ShellPage({ children }: { children: ReactNode }) {
   const restore = useRef(false);
   const [returnTarget, setReturnTarget] = useState<string | null>(null);
   const [detailActive, setDetailActive] = useState(false);
+  const [footer, setFooter] = useState<ReactNode>(null);
+  // Footer updates must not recreate navigation and retrigger its consumers.
+  const navigation = useMemo(
+    () => ({
+      detailActive,
+      focusTarget: setReturnTarget,
+      rememberPosition: (key: string) => {
+        origin.current = { key, y: position.current };
+        setReturnTarget(null);
+      },
+      openDetail: (key: string) => {
+        setDetailActive(true);
+        origin.current = { key, y: position.current };
+        setReturnTarget(null);
+        scroll.current?.scrollTo({ y: 0, animated: false });
+      },
+      returnToList: () => {
+        setDetailActive(false);
+        restore.current = true;
+        setReturnTarget(origin.current.key);
+      },
+      returnTarget,
+      finishReturn: () => setReturnTarget(null),
+    }),
+    [detailActive, returnTarget],
+  );
   return (
     <SafeAreaView edges={['bottom']} style={styles.page}>
-      <ScrollView
-        ref={scroll}
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-        onScroll={(event) => {
-          position.current = event.nativeEvent.contentOffset.y;
-        }}
-        scrollEventThrottle={16}
-        onContentSizeChange={() => {
-          if (restore.current) {
-            scroll.current?.scrollTo({ y: origin.current.y, animated: false });
-            restore.current = false;
-          }
-        }}
-      >
-        <PageNavigation.Provider
-          value={{
-            detailActive,
-            focusTarget: setReturnTarget,
-            rememberPosition: (key) => {
-              origin.current = { key, y: position.current };
-              setReturnTarget(null);
-            },
-            openDetail: (key) => {
-              setDetailActive(true);
-              origin.current = { key, y: position.current };
-              setReturnTarget(null);
-              scroll.current?.scrollTo({ y: 0, animated: false });
-            },
-            returnToList: () => {
-              setDetailActive(false);
-              restore.current = true;
-              setReturnTarget(origin.current.key);
-            },
-            returnTarget,
-            finishReturn: () => setReturnTarget(null),
-          }}
-        >
-          <View style={styles.content}>
-            {notice}
-            {children}
-          </View>
-        </PageNavigation.Provider>
-      </ScrollView>
+      <PageNavigation.Provider value={navigation}>
+        <PageFooter.Provider value={setFooter}>
+          <ScrollView
+            testID="shell-scroll"
+            ref={scroll}
+            contentContainerStyle={styles.scroll}
+            keyboardShouldPersistTaps="handled"
+            onScroll={(event) => {
+              position.current = event.nativeEvent.contentOffset.y;
+            }}
+            scrollEventThrottle={16}
+            onContentSizeChange={() => {
+              if (restore.current) {
+                scroll.current?.scrollTo({
+                  y: origin.current.y,
+                  animated: false,
+                });
+                restore.current = false;
+              }
+            }}
+          >
+            <View style={styles.content}>
+              {notice}
+              {children}
+            </View>
+          </ScrollView>
+          {footer}
+        </PageFooter.Provider>
+      </PageNavigation.Provider>
     </SafeAreaView>
   );
 }
@@ -149,7 +175,16 @@ export function ShellPageHeader({
   return (
     <View style={styles.header}>
       {backLabel && onBack && (
-        <ShellButton label={backLabel} variant="secondary" onPress={onBack} />
+        <ShellButton
+          label={backLabel}
+          displayLabel={
+            backLabel === 'Back to staff home'
+              ? 'Staff home'
+              : backLabel.replace(/^Back to /i, '')
+          }
+          variant="text"
+          onPress={onBack}
+        />
       )}
       {title && <ShellHeading>{title}</ShellHeading>}
     </View>
@@ -281,6 +316,8 @@ export function ShellButton({
   compact = false,
   prominent = false,
   testID,
+  displayLabel,
+  showSelectionMark = true,
 }: {
   label: string;
   onPress: () => void;
@@ -288,12 +325,14 @@ export function ShellButton({
   disabled?: boolean;
   loading?: boolean;
   loadingLabel?: string;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'text';
   expanded?: boolean;
   focusKey?: string;
   compact?: boolean;
   prominent?: boolean;
   testID?: string;
+  displayLabel?: string;
+  showSelectionMark?: boolean;
 }) {
   const [focused, setFocused] = useState(false);
   const ref = useRef<ComponentRef<typeof View>>(null);
@@ -337,6 +376,7 @@ export function ShellButton({
         styles.button,
         prominent && styles.prominentButton,
         variant === 'secondary' && styles.secondaryButton,
+        variant === 'text' && styles.textButton,
         (focused || selected) && styles.selected,
         pressed && styles.pressed,
         unavailable && styles.disabled,
@@ -346,13 +386,17 @@ export function ShellButton({
         style={[
           styles.buttonText,
           compact && styles.compactButtonText,
-          variant === 'secondary' &&
+          variant !== 'primary' &&
             !(focused || selected) &&
             styles.secondaryButtonText,
           unavailable && styles.disabledButtonText,
         ]}
       >
-        {loading ? loadingLabel : selected ? `✓ ${label}` : label}
+        {loading
+          ? loadingLabel
+          : selected && showSelectionMark
+            ? `✓ ${displayLabel ?? label}`
+            : (displayLabel ?? label)}
       </Text>
     </Pressable>
   );
@@ -399,6 +443,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 720,
     padding: mobileTokens.spacing.lg,
+    paddingTop: mobileTokens.spacing.sm,
     gap: mobileTokens.spacing.md,
   },
   heading: {
@@ -435,7 +480,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: mobileTokens.spacing.md,
     paddingVertical: mobileTokens.spacing.sm,
     borderRadius: mobileTokens.shape.control,
-    borderWidth: 3,
+    borderWidth: 1,
     borderColor: mobileTokens.color.primary,
     backgroundColor: mobileTokens.color.primary,
     justifyContent: 'center',
@@ -444,11 +489,16 @@ const styles = StyleSheet.create({
   secondaryButton: {
     backgroundColor: mobileTokens.color.background,
   },
+  textButton: {
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+    paddingHorizontal: 0,
+  },
   selected: {
     borderColor: mobileTokens.color.focus,
     backgroundColor: mobileTokens.color.selectedBackground,
   },
-  pressed: { borderColor: mobileTokens.color.focus, borderWidth: 4 },
+  pressed: { borderColor: mobileTokens.color.focus, opacity: 0.8 },
   disabled: {
     borderColor: mobileTokens.color.disabledText,
     backgroundColor: mobileTokens.color.disabledBackground,

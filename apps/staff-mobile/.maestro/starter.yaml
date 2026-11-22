@@ -4,8 +4,8 @@ name: Staff-mobile Android starter
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: Staff mobile
+    visible: Staff sign-in
     timeout: 60000
-- assertVisible: Staff tools are being prepared.
-- assertVisible: No staff account or shop data is loaded.
+- assertVisible: Username
+- assertVisible: Password
 - assertVisible: Staff sign-in

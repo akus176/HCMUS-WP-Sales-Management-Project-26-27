@@ -4,9 +4,8 @@ name: Staff session login, restore, and logout
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: Staff mobile
+    visible: Staff sign-in
     timeout: 60000
-- tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
 - hideKeyboard
@@ -34,5 +33,5 @@ name: Staff session login, restore, and logout
     element: Sign out
     direction: DOWN
 - tapOn: Sign out
-- assertVisible: Staff mobile
+- assertVisible: Staff sign-in
 - assertNotVisible: ${MAESTRO_STAFF_NAME}

@@ -56,6 +56,26 @@ The application SHALL prioritize working content with compact connection informa
 - **WHEN** connectivity changes between checking, online, reconnecting and offline
 - **THEN** the interface communicates the current state, exposes manual refresh and explains disabled writes without claiming API availability from network status alone
 
+### Requirement: Reachable preparation actions
+The application SHALL keep preparation actions in a reserved bottom region outside scrolling records at normal phone sizes. Above 150% text or below 560dp viewport height, it SHALL reflow those actions into the page so they remain reachable without covering content.
+
+#### Scenario: Act on a selected ticket in a long queue
+- **WHEN** staff select a ticket and scroll the normal-size queue
+- **THEN** its Open action remains available without scrolling to the end of the records
+
+#### Scenario: Use Android Back while preparing
+- **WHEN** staff press Android Back with a preparation confirmation open
+- **THEN** only the confirmation is dismissed and no mutation is sent
+- **AND** a subsequent Back from detail returns to the retained queue selection, filter and page while no submission is pending
+
+### Requirement: Coherent entry and workspace presentation
+The application SHALL open working sign-in directly at the signed-out root, use a consistent compact branded header, and present permission-derived workspace and inventory navigation with the same paper/ink hierarchy. Concise visible action text SHALL retain record-specific accessible names.
+
+#### Scenario: Enter the app and choose a workspace
+- **WHEN** staff open the app signed out and then authenticate
+- **THEN** no unfinished starter page precedes sign-in and the home lists only workspaces allowed by current permissions
+- **AND** existing route guards, session cleanup and operational workflows remain effective
+
 ### Requirement: Predictable workflow navigation
 The application SHALL keep the active order filter visible when its options are collapsed, preserve all existing filters, separate staff account and security-event views and make account detail entry and return explicit.
 

@@ -4,9 +4,8 @@ name: Staff sign-in, visible form labels and keyboard
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: Staff mobile
+    visible: Staff sign-in
     timeout: 60000
-- tapOn: Staff sign-in
 - assertVisible: Username
 - assertVisible: Password
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/login
