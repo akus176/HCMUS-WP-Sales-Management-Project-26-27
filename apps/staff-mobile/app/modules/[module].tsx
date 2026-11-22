@@ -25,51 +25,64 @@ export default function ModuleScreen() {
   const access = useRouteAccess();
   return (
     <ShellPage>
-      <ShellPageHeader
-        backLabel="Back to staff home"
-        onBack={() => router.replace('/session')}
-        hideDuringDetail={module?.id === 'barista'}
-      />
-      <PermissionBoundary moduleId={moduleId} {...access}>
-        {(user) =>
-          module?.id === 'barista' ? (
-            <PreparationScreen />
-          ) : module?.id === 'approvals' ? (
-            <>
-              {user.permissions.some((permission) =>
-                ['orders.cancel', 'delivery.assign'].includes(permission),
-              ) && (
-                <ShellButton
-                  label="Manage cancellations and deliveries"
-                  onPress={() => router.push('/modules/approvals/operations')}
-                />
-              )}
-              <DiscountApprovals user={user} />
-            </>
-          ) : module?.id === 'inventory' ? (
-            <InventoryWorkspace user={user} />
-          ) : module?.id === 'cashier' ? (
-            <OrdersScreen user={user} />
-          ) : module?.id === 'delivery' ? (
-            <DeliveryScreen />
-          ) : module?.id === 'administration' ? (
-            <StaffAdministration user={user} />
-          ) : (
-            <>
-              <ShellHeading>{module!.title}</ShellHeading>
-              <ShellText>Selected module: {module!.title}</ShellText>
-              <ShellText>
-                Workflow screens are planned and are not available yet. No
-                business action can be performed here.
-              </ShellText>
-              {permittedActions(module!, user.permissions).map((action) => (
-                <ShellText key={action.permission}>
-                  {action.label} — planned
-                </ShellText>
-              ))}
-            </>
-          )
+      <PermissionBoundary
+        moduleId={moduleId}
+        {...access}
+        fallbackHeader={
+          <ShellPageHeader
+            backLabel="Back to staff home"
+            onBack={() => router.replace('/session')}
+          />
         }
+      >
+        {(user) => (
+          <>
+            <ShellPageHeader
+              title={module?.id === 'barista' ? 'Preparation' : undefined}
+              inline={module?.id === 'barista'}
+              backLabel="Back to staff home"
+              onBack={() => router.replace('/session')}
+              hideDuringDetail={module?.id === 'barista'}
+            />
+            {module?.id === 'barista' ? (
+              <PreparationScreen showHeading={false} />
+            ) : module?.id === 'approvals' ? (
+              <>
+                {user.permissions.some((permission) =>
+                  ['orders.cancel', 'delivery.assign'].includes(permission),
+                ) && (
+                  <ShellButton
+                    label="Manage cancellations and deliveries"
+                    onPress={() => router.push('/modules/approvals/operations')}
+                  />
+                )}
+                <DiscountApprovals user={user} />
+              </>
+            ) : module?.id === 'inventory' ? (
+              <InventoryWorkspace user={user} />
+            ) : module?.id === 'cashier' ? (
+              <OrdersScreen user={user} />
+            ) : module?.id === 'delivery' ? (
+              <DeliveryScreen />
+            ) : module?.id === 'administration' ? (
+              <StaffAdministration user={user} />
+            ) : (
+              <>
+                <ShellHeading>{module!.title}</ShellHeading>
+                <ShellText>Selected module: {module!.title}</ShellText>
+                <ShellText>
+                  Workflow screens are planned and are not available yet. No
+                  business action can be performed here.
+                </ShellText>
+                {permittedActions(module!, user.permissions).map((action) => (
+                  <ShellText key={action.permission}>
+                    {action.label} — planned
+                  </ShellText>
+                ))}
+              </>
+            )}
+          </>
+        )}
       </PermissionBoundary>
     </ShellPage>
   );

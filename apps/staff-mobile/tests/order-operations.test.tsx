@@ -171,7 +171,7 @@ async function reviewPayment(
 
 test('searches server orders by number/table, filters fulfillment and opens occupied tables', async () => {
   const { view } = await setup();
-  await view.findByText('Table T-182 · 2 seats · Occupied');
+  await view.findByRole('button', { name: 'Open order ORD-182' });
   await fireEvent.changeText(view.getByLabelText('Search orders'), 't-182');
   expect(view.getByRole('button', { name: 'Open order ORD-182' })).toBeTruthy();
   expect(view.queryByRole('button', { name: 'Show ready orders' })).toBeNull();
@@ -185,11 +185,25 @@ test('searches server orders by number/table, filters fulfillment and opens occu
   expect(
     view.getByRole('button', { name: 'Filter orders: Ready', expanded: false }),
   ).toBeVisible();
+  await fireEvent.press(view.getByRole('button', { name: 'Tables' }));
+  expect(view.queryByLabelText('Search orders')).toBeNull();
+  await view.findByText('Table T-182 · 2 seats · Occupied');
   await fireEvent.press(
     view.getByRole('button', { name: 'Open table T-182 order' }),
   );
   await view.findByText('Fulfillment: confirmed');
   await view.findByText('Add-ons: Oat milk');
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Back to table occupancy' }),
+  );
+  expect(
+    view.getByRole('button', { name: 'Tables', selected: true }),
+  ).toBeVisible();
+  await fireEvent.press(view.getByRole('button', { name: 'Orders' }));
+  expect(view.getByLabelText('Search orders')).toHaveDisplayValue('t-182');
+  expect(
+    view.getByRole('button', { name: 'Filter orders: Ready' }),
+  ).toBeVisible();
 });
 
 test('returns the viewport to the filter after a deeply scrolled selection collapses', async () => {

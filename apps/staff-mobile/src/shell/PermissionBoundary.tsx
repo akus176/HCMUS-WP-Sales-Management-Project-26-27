@@ -19,6 +19,7 @@ export function PermissionBoundary({
   scope = 'module',
   focused = true,
   refreshKey = 0,
+  fallbackHeader,
   children,
 }: {
   moduleId?: string | string[];
@@ -26,6 +27,7 @@ export function PermissionBoundary({
   scope?: 'home' | 'module';
   focused?: boolean;
   refreshKey?: number;
+  fallbackHeader?: ReactNode;
   children: (user: StaffSession) => ReactNode;
 }) {
   const { client, state } = useSession();
@@ -122,18 +124,24 @@ export function PermissionBoundary({
         }}
       />
     ) : null;
+  const fallback = (content: ReactNode) => (
+    <>
+      {fallbackHeader}
+      {content}
+    </>
+  );
   if (state.status === 'restoring')
-    return <ShellStatus>Restoring session…</ShellStatus>;
+    return fallback(<ShellStatus>Restoring session…</ShellStatus>);
   if (!snapshot)
-    return <ShellStatus>Session ended. Sign in again.</ShellStatus>;
+    return fallback(<ShellStatus>Session ended. Sign in again.</ShellStatus>);
   if (!accessId)
-    return (
+    return fallback(
       <>
         <ShellStatus>
           Access unavailable. This module is not available.
         </ShellStatus>
         {signOut}
-      </>
+      </>,
     );
   if (
     !focused ||
@@ -143,14 +151,14 @@ export function PermissionBoundary({
     check.moduleId !== checkId ||
     check.refreshKey !== refreshKey
   )
-    return (
+    return fallback(
       <>
         <ShellStatus>Checking access…</ShellStatus>
         {signOut}
-      </>
+      </>,
     );
   if (check.result === 'error')
-    return (
+    return fallback(
       <>
         <ShellStatus>
           Unable to verify access. Reconnect and try again.
@@ -163,16 +171,16 @@ export function PermissionBoundary({
           }}
         />
         {signOut}
-      </>
+      </>,
     );
   if (check.result === 'forbidden')
-    return (
+    return fallback(
       <>
         <ShellStatus>
           Access unavailable. Your current permissions do not allow this module.
         </ShellStatus>
         {signOut}
-      </>
+      </>,
     );
   return children(check.result);
 }

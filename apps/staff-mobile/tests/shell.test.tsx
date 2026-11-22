@@ -166,6 +166,17 @@ test('home renders only effective permission modules and an explicit empty state
     screen.getByRole('button', { name: 'Open Preparation' }),
   ).toBeVisible();
   expect(screen.queryByRole('button', { name: 'Open Deliveries' })).toBeNull();
+  mockSession.state.user = {
+    ...user,
+    permissions: ['orders.cancel', 'inventory.receive'],
+  };
+  await view.rerender(<StaffHome />);
+  expect(screen.getByText('Cancellations')).toBeVisible();
+  expect(screen.getByText('Purchase receipts')).toBeVisible();
+  expect(
+    screen.queryByText(/Discount decisions|Delivery assignment/),
+  ).toBeNull();
+  expect(screen.queryByText(/Balances|Low stock|Stock adjustments/)).toBeNull();
   mockSession.state.user = { ...user, roles: ['Admin'], permissions: [] };
   await view.rerender(<StaffHome />);
   expect(

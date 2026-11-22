@@ -6,6 +6,11 @@ historical screenshots are identified separately and are not a new native run.
 
 ## Concept-alignment follow-up (2026-11-22)
 
+Latest running-app follow-up: [compact header, direct Counter Tables view and
+specified-function navigation map](compact-header/README.md). This includes fresh
+normal/enlarged captures and distinguishes the restricted Manager demo account
+from the separate preview login that exposes all six workspaces.
+
 The [mobile concept pack](../../ui-concepts/mobile-2026-11-22/README.md) and revised
 [OpenSpec design](../../../openspec/changes/polish-staff-mobile-ux/design.md) now
 target the ledger Preparation queue and focused ticket detail. The paper-ticket

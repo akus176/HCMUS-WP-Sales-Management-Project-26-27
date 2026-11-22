@@ -41,6 +41,14 @@ At normal phone sizes, queue Open/Refresh and ticket state/confirmation controls
 
 These corrections supersede the previous oversized return buttons and all-scrolling action placement. Keep the visual references, domain transitions, permission checks, confirmation and no-replay protections unchanged. Revalidate affected layouts and selectors against the new source; earlier native acceptance does not establish acceptance of this correction.
 
+### Compact header and function discovery follow-up
+
+Place the Preparation heading and labeled Staff home return on one row at normal text, omit the redundant status subtitle, and size the three filters to their labels instead of stretching them across the page. Keep 48dp targets and stack navigation/filters when enlarged text needs room. Render the working heading only after fresh access verification; checking, denied and failed states retain return navigation.
+
+Home workspace summaries enumerate the functions allowed by effective permissions, including cancellations/delivery assignment, low stock, purchase receipts, movement history and account/security operations. Preserve every workflow from `add-staff-mobile-app`; a restricted demo role must not be mistaken for removal of a page. The existing full desktop administration/reporting exclusion remains authoritative.
+
+Counter exposes Orders and Tables as explicit selected views. Tables must be reachable without scrolling through order results; opening an occupied table and returning restores the Tables view. Switching back to Orders preserves its search and status filter. Manager order operations retain their existing search and cancellation/assignment flow.
+
 ### E2E tool and completion gate
 
 Use **Maestro CLI** with the existing Android YAML flows in `apps/staff-mobile/.maestro`, ADB, an installed development build and a disposable API fixture. Reuse the existing [quality runbook](../../../docs/mobile-quality-and-release.md), [workflow harness](../../../docs/mobile-workflow-verification-201.md), and their prerequisites. Record `maestro --version`, device/API level, app/source revision and fixture setup; the historical baseline used Maestro 2.12.1, not an instruction to silently upgrade. Installing tooling or committing a plan does not establish a passing Android run.

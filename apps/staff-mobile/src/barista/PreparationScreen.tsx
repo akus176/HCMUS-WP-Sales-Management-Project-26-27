@@ -60,7 +60,10 @@ const preview = (ticket: Ticket) => {
   return remaining > 0 ? `${items} + ${remaining} more` : items;
 };
 
-export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
+export function PreparationScreen({
+  ticketId,
+  showHeading = true,
+}: { ticketId?: string; showHeading?: boolean } = {}) {
   const { fontScale } = useWindowDimensions();
   const { client, state } = useSession();
   const queries = useQueryClient();
@@ -204,12 +207,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
 
   return (
     <View style={styles.workspace}>
-      {!selected && (
-        <>
-          <ShellHeading>Preparation</ShellHeading>
-          <ShellText>Confirmed &amp; preparing tickets</ShellText>
-        </>
-      )}
+      {!selected && showHeading && <ShellHeading>Preparation</ShellHeading>}
       <ShellMutationFeedback mutation={mutation} />
       {forbidden ? (
         <ShellFeedback
@@ -415,6 +413,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                       variant="secondary"
                       selected={filter === value}
                       showSelectionMark={false}
+                      compact
                       onPress={() => {
                         setFilter(value);
                         setPage(1);
@@ -550,10 +549,10 @@ const styles = StyleSheet.create({
   filters: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginVertical: 8,
+    gap: 6,
+    marginBottom: 4,
   },
-  filterOption: { flexGrow: 1, flexBasis: 96 },
+  filterOption: { flexGrow: 0 },
   largeFilterOption: { flexBasis: '100%' },
   actionDock: {
     backgroundColor: mobileTokens.color.background,

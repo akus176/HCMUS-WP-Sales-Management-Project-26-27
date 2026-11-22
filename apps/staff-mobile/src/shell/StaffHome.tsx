@@ -11,16 +11,22 @@ import {
   ShellStatus,
   ShellText,
 } from './controls';
-import { permittedModules } from './permissions';
+import { permittedActions, permittedModules } from './permissions';
 import { mobileTokens } from './designTokens';
 
-const descriptions: Record<string, string> = {
-  barista: 'Tickets, preparation and handoff',
-  cashier: 'Orders, tables and payments',
-  approvals: 'Discounts and order decisions',
-  inventory: 'Stock, receipts and adjustments',
-  delivery: 'Your assigned deliveries',
-  administration: 'Staff accounts and security',
+const actionDescriptions: Record<string, string> = {
+  'orders.fulfill': 'Tickets · Start preparation · Mark ready',
+  'orders.create': 'Orders · Tables',
+  'payments.record': 'Payments',
+  'discounts.approve': 'Discount decisions',
+  'orders.cancel': 'Cancellations',
+  'delivery.assign': 'Delivery assignment',
+  'inventory.manage': 'Balances · Movement history',
+  'reports.lowstock': 'Low stock',
+  'inventory.adjust': 'Stock adjustments',
+  'inventory.receive': 'Purchase receipts',
+  'delivery.update': 'Assigned deliveries · Navigation · Delivery outcomes',
+  'users.manage': 'Staff accounts · Deactivation · Security events',
 };
 
 export function StaffHome({
@@ -43,6 +49,14 @@ export function StaffHome({
       </ShellPage>
     );
   const modules = permittedModules(user.permissions);
+  const descriptions = Object.fromEntries(
+    modules.map((module) => [
+      module.id,
+      permittedActions(module, user.permissions)
+        .map((action) => actionDescriptions[action.permission] ?? action.label)
+        .join(' · '),
+    ]),
+  );
   const content = (
     <>
       <ShellHeading>Staff home</ShellHeading>

@@ -29,6 +29,7 @@ export function OrdersScreen({
   const { client } = useSession();
   const queries = useQueryClient();
   const { canMutate } = useConnectivity();
+  const [section, setSection] = useState<'orders' | 'tables'>('orders');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [filtersExpanded, setFiltersExpanded] = useState(false);
@@ -108,6 +109,20 @@ export function OrdersScreen({
       <ShellHeading>
         {manager ? 'Manager order operations' : 'Counter'}
       </ShellHeading>
+      {!manager && !selected && (
+        <ShellSelection>
+          {(['orders', 'tables'] as const).map((choice) => (
+            <ShellButton
+              key={choice}
+              label={choice === 'orders' ? 'Orders' : 'Tables'}
+              selected={section === choice}
+              variant="secondary"
+              compact
+              onPress={() => setSection(choice)}
+            />
+          ))}
+        </ShellSelection>
+      )}
       <ShellButton
         label="Refresh orders and tables"
         variant="secondary"
@@ -120,7 +135,11 @@ export function OrdersScreen({
       {selected ? (
         <>
           <ShellButton
-            label="Back to order search"
+            label={
+              !manager && section === 'tables'
+                ? 'Back to table occupancy'
+                : 'Back to order search'
+            }
             variant="secondary"
             onPress={() => {
               setSelected(null);
@@ -198,85 +217,89 @@ export function OrdersScreen({
         </>
       ) : (
         <>
-          <ShellInput
-            label="Search by order number or table"
-            accessibilityLabel="Search orders"
-            value={search}
-            onChangeText={setSearch}
-            autoCorrect={false}
-            autoCapitalize="none"
-            style={orderStyles.input}
-          />
-          <ShellButton
-            label={`Filter orders: ${filter === 'ready_delivery' ? 'Ready unassigned deliveries' : filter[0]!.toUpperCase() + filter.slice(1)}`}
-            expanded={filtersExpanded}
-            variant="secondary"
-            focusKey="order-filter"
-            onPress={() => {
-              if (filtersExpanded) navigation.returnToList();
-              else navigation.rememberPosition('order-filter');
-              setFiltersExpanded(!filtersExpanded);
-            }}
-          />
-          {filtersExpanded && (
-            <ShellSelection>
-              {[
-                'all',
-                'draft',
-                'confirmed',
-                'preparing',
-                'ready',
-                'completed',
-                'cancelled',
-                ...(manager ? ['ready_delivery'] : []),
-              ].map((value) => (
-                <ShellButton
-                  key={value}
-                  label={`Show ${value === 'ready_delivery' ? 'ready unassigned deliveries' : value} orders`}
-                  selected={filter === value}
-                  variant="secondary"
-                  onPress={() => {
-                    setFilter(value);
-                    setFiltersExpanded(false);
-                    navigation.returnToList();
-                  }}
-                />
-              ))}
-            </ShellSelection>
-          )}
-          {orders.isPending && (
-            <ShellFeedback kind="loading" label="Loading orders…" />
-          )}
-          {orders.isError ? (
-            <ShellFeedback
-              kind="error"
-              label="Orders could not be loaded. Refresh to retry."
-            />
-          ) : (
+          {(manager || section === 'orders') && (
             <>
-              {rows?.length === 0 && (
-                <ShellFeedback
-                  kind="empty"
-                  label="No orders match this search."
-                />
+              <ShellInput
+                label="Search by order number or table"
+                accessibilityLabel="Search orders"
+                value={search}
+                onChangeText={setSearch}
+                autoCorrect={false}
+                autoCapitalize="none"
+                style={orderStyles.input}
+              />
+              <ShellButton
+                label={`Filter orders: ${filter === 'ready_delivery' ? 'Ready unassigned deliveries' : filter[0]!.toUpperCase() + filter.slice(1)}`}
+                expanded={filtersExpanded}
+                variant="secondary"
+                focusKey="order-filter"
+                onPress={() => {
+                  if (filtersExpanded) navigation.returnToList();
+                  else navigation.rememberPosition('order-filter');
+                  setFiltersExpanded(!filtersExpanded);
+                }}
+              />
+              {filtersExpanded && (
+                <ShellSelection>
+                  {[
+                    'all',
+                    'draft',
+                    'confirmed',
+                    'preparing',
+                    'ready',
+                    'completed',
+                    'cancelled',
+                    ...(manager ? ['ready_delivery'] : []),
+                  ].map((value) => (
+                    <ShellButton
+                      key={value}
+                      label={`Show ${value === 'ready_delivery' ? 'ready unassigned deliveries' : value} orders`}
+                      selected={filter === value}
+                      variant="secondary"
+                      onPress={() => {
+                        setFilter(value);
+                        setFiltersExpanded(false);
+                        navigation.returnToList();
+                      }}
+                    />
+                  ))}
+                </ShellSelection>
               )}
-              {rows?.map((row) => (
-                <View key={row.id} style={orderStyles.card}>
-                  <ShellText>{`${row.orderNumber} · ${row.status} · ${row.channel}${row.tableNumber ? ` · Table ${row.tableNumber}` : ''}`}</ShellText>
-                  <ShellText>{`Fulfillment: ${row.deliveryStatus ?? row.status} · Paid: ${money(row.paidAmount)} · Balance: ${money(Math.max(0, Number(row.total) - Number(row.paidAmount)))}`}</ShellText>
-                  <ShellButton
-                    label={`Open order ${row.orderNumber}`}
-                    focusKey={`order:${row.id}`}
-                    onPress={() => {
-                      navigation.openDetail(`order:${row.id}`);
-                      setSelected(row.id);
-                    }}
-                  />
-                </View>
-              ))}
+              {orders.isPending && (
+                <ShellFeedback kind="loading" label="Loading orders…" />
+              )}
+              {orders.isError ? (
+                <ShellFeedback
+                  kind="error"
+                  label="Orders could not be loaded. Refresh to retry."
+                />
+              ) : (
+                <>
+                  {rows?.length === 0 && (
+                    <ShellFeedback
+                      kind="empty"
+                      label="No orders match this search."
+                    />
+                  )}
+                  {rows?.map((row) => (
+                    <View key={row.id} style={orderStyles.card}>
+                      <ShellText>{`${row.orderNumber} · ${row.status} · ${row.channel}${row.tableNumber ? ` · Table ${row.tableNumber}` : ''}`}</ShellText>
+                      <ShellText>{`Fulfillment: ${row.deliveryStatus ?? row.status} · Paid: ${money(row.paidAmount)} · Balance: ${money(Math.max(0, Number(row.total) - Number(row.paidAmount)))}`}</ShellText>
+                      <ShellButton
+                        label={`Open order ${row.orderNumber}`}
+                        focusKey={`order:${row.id}`}
+                        onPress={() => {
+                          navigation.openDetail(`order:${row.id}`);
+                          setSelected(row.id);
+                        }}
+                      />
+                    </View>
+                  ))}
+                </>
+              )}
             </>
           )}
-          {!manager && (
+          {!manager && section === 'tables' && (
             <>
               <ShellHeading level="section">Table occupancy</ShellHeading>
               {tables.isPending && (

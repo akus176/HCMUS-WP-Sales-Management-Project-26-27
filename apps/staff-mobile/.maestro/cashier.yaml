@@ -17,6 +17,14 @@ name: Cashier payment against the shared API
     visible: Open Counter
     timeout: 30000
 - tapOn: Open Counter
+- extendedWaitUntil:
+    visible: Tables
+    timeout: 30000
+- tapOn: Tables
+- assertVisible: Table occupancy
+- assertNotVisible: Search orders
+- takeScreenshot: .maestro/results/cashier-tables
+- tapOn: Orders
 - tapOn: Search orders
 - inputText: ${MAESTRO_PAYMENT_ORDER}
 - hideKeyboard

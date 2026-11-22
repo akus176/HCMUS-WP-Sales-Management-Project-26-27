@@ -164,16 +164,21 @@ export function ShellPageHeader({
   backLabel,
   onBack,
   hideDuringDetail = false,
+  inline = false,
 }: {
   title?: string;
   backLabel?: string;
   onBack?: () => void;
   hideDuringDetail?: boolean;
+  inline?: boolean;
 }) {
   const navigation = usePageNavigation();
+  const { fontScale } = useWindowDimensions();
+  const inlineLayout = inline && fontScale <= 1.5;
   if (hideDuringDetail && navigation.detailActive) return null;
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, inlineLayout && styles.inlineHeader]}>
+      {inlineLayout && title && <ShellHeading>{title}</ShellHeading>}
       {backLabel && onBack && (
         <ShellButton
           label={backLabel}
@@ -186,7 +191,7 @@ export function ShellPageHeader({
           onPress={onBack}
         />
       )}
-      {title && <ShellHeading>{title}</ShellHeading>}
+      {!inlineLayout && title && <ShellHeading>{title}</ShellHeading>}
     </View>
   );
 }
@@ -374,6 +379,7 @@ export function ShellButton({
       }}
       style={({ pressed }) => [
         styles.button,
+        compact && styles.compactButton,
         prominent && styles.prominentButton,
         variant === 'secondary' && styles.secondaryButton,
         variant === 'text' && styles.textButton,
@@ -419,6 +425,12 @@ const styles = StyleSheet.create({
   },
   scroll: { flexGrow: 1 },
   header: { gap: mobileTokens.spacing.sm, alignItems: 'flex-start' },
+  inlineHeader: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   field: { gap: mobileTokens.spacing.sm },
   selection: {
     flexDirection: 'row',
@@ -512,7 +524,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   secondaryButtonText: { color: mobileTokens.color.foreground },
-  compactButtonText: { fontSize: mobileTokens.type.caption },
+  compactButton: { paddingHorizontal: 10 },
+  compactButtonText: { fontSize: 16 },
   prominentButton: { minHeight: 56 },
   disabledButtonText: { color: mobileTokens.color.disabledText },
 });

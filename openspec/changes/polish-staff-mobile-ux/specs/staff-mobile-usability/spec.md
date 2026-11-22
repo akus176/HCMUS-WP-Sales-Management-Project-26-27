@@ -79,9 +79,19 @@ The application SHALL open working sign-in directly at the signed-out root, use 
 ### Requirement: Predictable workflow navigation
 The application SHALL keep the active order filter visible when its options are collapsed, preserve all existing filters, separate staff account and security-event views and make account detail entry and return explicit.
 
+#### Scenario: Discover functions from the mobile specification
+- **WHEN** staff inspect the home workspaces
+- **THEN** their summaries identify the permitted operational functions, including cancellation/assignment, inventory sections and account/security operations where authorized
+- **AND** every original mobile workflow retains an entry path without exposing functions absent from the user's effective permissions
+
 #### Scenario: Select an order status
 - **WHEN** staff expand the order filter and choose an existing status
 - **THEN** the result list uses that status and the collapsed control identifies the current selection
+
+#### Scenario: Reach table occupancy without traversing orders
+- **WHEN** cashier staff choose Tables in Counter
+- **THEN** table occupancy appears without traversing the order results
+- **AND** opening an occupied table and returning restores Tables, while switching to Orders retains its search and status filter
 
 #### Scenario: Open and return from an account
 - **WHEN** an administrator opens an account and returns to the account list
