@@ -158,7 +158,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
   }
 
   return (
-    <>
+    <View style={styles.workspace}>
       {!selected && (
         <>
           <ShellHeading>Preparation</ShellHeading>
@@ -242,31 +242,34 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                         <Text style={styles.quantity}>{line.quantity} ×</Text>
                         <View style={styles.itemDescription}>
                           <Text style={styles.itemName}>{line.itemName}</Text>
-                          <Text style={styles.body}>{line.sizeName}</Text>
-                          <Text
-                            style={[
-                              styles.body,
-                              line.addons.length > 0 && styles.addons,
-                            ]}
-                          >
-                            {line.addons.length
-                              ? `Add-ons: ${line.addons.join(', ')}`
-                              : 'No add-ons'}
-                          </Text>
+                          <View style={styles.itemMetadata}>
+                            <Text style={styles.body}>{line.sizeName}</Text>
+                            <Text
+                              style={[
+                                styles.body,
+                                line.addons.length > 0 && styles.addons,
+                              ]}
+                            >
+                              {line.addons.length
+                                ? `Add-ons: ${line.addons.join(', ')}`
+                                : 'No add-ons'}
+                            </Text>
+                          </View>
                         </View>
                       </View>
                     ))}
                   </View>
                   {intent && intent.status === ticket.status ? (
                     <View style={styles.confirmation}>
-                      <ShellFeedback
-                        kind="warning"
-                        label={
-                          intent.action === 'start'
-                            ? 'Start preparing this ticket?'
-                            : 'Mark this ticket ready?'
-                        }
-                      />
+                      <Text
+                        accessibilityRole="alert"
+                        accessibilityLiveRegion="polite"
+                        style={styles.confirmationTitle}
+                      >
+                        {intent.action === 'start'
+                          ? 'Start preparing this ticket?'
+                          : 'Mark this ticket ready?'}
+                      </Text>
                       {intent.action === 'ready' && (
                         <ShellText>This updates the whole ticket.</ShellText>
                       )}
@@ -460,11 +463,12 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
           )}
         </>
       )}
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  workspace: { gap: 8 },
   ledger: { borderTopWidth: 1, borderColor: mobileTokens.color.primary },
   ticketRow: {
     minHeight: 48,
@@ -535,6 +539,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   itemDescription: { flex: 1, gap: 4 },
+  itemMetadata: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 4,
+  },
   itemName: {
     fontFamily: mobileTokens.type.displayFont,
     fontSize: 24,
@@ -548,14 +558,19 @@ const styles = StyleSheet.create({
   addons: {
     backgroundColor: mobileTokens.color.highlight,
     borderRadius: 8,
-    padding: 8,
+    paddingHorizontal: 4,
   },
   confirmation: {
-    gap: 16,
+    gap: 8,
     padding: 16,
     backgroundColor: mobileTokens.color.highlight,
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: mobileTokens.color.primary,
+  },
+  confirmationTitle: {
+    fontFamily: mobileTokens.type.displayFont,
+    fontSize: 24,
+    color: mobileTokens.color.foreground,
   },
 });
