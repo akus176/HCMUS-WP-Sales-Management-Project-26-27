@@ -19,15 +19,26 @@ $taskProfileMap = @{
     # Measure the device's actual system bars below; do not assume their height.
     ref100 = @{ size = '1170x2664'; density = '480'; font = '1.0'; night = 'no' }
 }
-function Get-ReferenceBars {
-    $taskWindowState = & adb -s $DeviceSerial shell dumpsys window displays | Out-String
-    $taskBars = @{}
-    foreach ($taskBarName in @('statusBars', 'navigationBars')) {
-        $taskMatch = [regex]::Match($taskWindowState, "type=$taskBarName frame=\[(\d+),(\d+)\]\[(\d+),(\d+)\] visible=true")
-        if (!$taskMatch.Success) { throw "Cannot measure native $taskBarName for the reference viewport." }
-        $taskBars[$taskBarName] = [int]$taskMatch.Groups[4].Value - [int]$taskMatch.Groups[2].Value
+function Get-ReferenceBars([int]$ExpectedHeightPx) {
+    $taskPreviousFrame = ''
+    for ($taskAttempt = 0; $taskAttempt -lt 12; $taskAttempt++) {
+        $taskWindowState = & adb -s $DeviceSerial shell dumpsys window displays | Out-String
+        $taskBars = @{}
+        foreach ($taskBarName in @('statusBars', 'navigationBars')) {
+            $taskMatch = [regex]::Match($taskWindowState, "type=$taskBarName frame=\[(\d+),(\d+)\]\[(\d+),(\d+)\] visible=true")
+            if (!$taskMatch.Success -or ([int]$taskMatch.Groups[3].Value - [int]$taskMatch.Groups[1].Value) -ne 1170) { break }
+            $taskBars[$taskBarName] = [int]$taskMatch.Groups[4].Value - [int]$taskMatch.Groups[2].Value
+            $taskBars.widthPx = 1170
+            if ($taskBarName -eq 'navigationBars') { $taskBars.heightPx = [int]$taskMatch.Groups[4].Value }
+        }
+        if ($taskBars.ContainsKey('statusBars') -and $taskBars.ContainsKey('navigationBars') -and $taskBars.heightPx -eq $ExpectedHeightPx) {
+            $taskFrame = "$($taskBars.statusBars)/$($taskBars.navigationBars)/$($taskBars.heightPx)"
+            if ($taskFrame -eq $taskPreviousFrame) { return $taskBars }
+            $taskPreviousFrame = $taskFrame
+        }
+        Start-Sleep -Milliseconds 250
     }
-    return $taskBars
+    throw 'Native reference display frames did not stabilize at the requested size.'
 }
 foreach ($taskProfileName in $Profiles) {
     if (!$taskProfileMap.ContainsKey($taskProfileName)) { throw "Unknown profile: $taskProfileName" }
@@ -60,7 +71,7 @@ try {
         & adb -s $DeviceSerial shell settings put system font_scale $taskProfile.font | Out-Null
         & adb -s $DeviceSerial shell cmd uimode night $taskProfile.night | Out-Null
         if ($taskProfileName -eq 'ref100') {
-            $taskBars = Get-ReferenceBars
+            $taskBars = Get-ReferenceBars ([int]$taskProfile.size.Split('x')[1])
             $taskReferenceHeight = 844 * 3 + $taskBars.statusBars + $taskBars.navigationBars
             $taskProfile.size = "1170x$taskReferenceHeight"
             & adb -s $DeviceSerial shell wm size $taskProfile.size | Out-Null
@@ -91,6 +102,7 @@ try {
             $taskOk = $taskExit -eq 0 -and $taskNodes.Count -eq 1 -and $taskPassing -eq 1
             $taskCases += @{ profile = $taskProfileName; role = $taskRole.name; passed = $taskOk; exitCode = $taskExit; cases = $taskNodes.Count; passing = $taskPassing }
             if ($taskOk) {
+              try {
                 $taskSavedPreference = $ErrorActionPreference
                 try {
                     # adb writes ordinary transfer progress to stderr on Windows.
@@ -101,14 +113,19 @@ try {
                     if ($LASTEXITCODE) { throw 'Native hierarchy transfer failed.' }
                 } finally { $ErrorActionPreference = $taskSavedPreference }
                 if ($taskProfileName -eq 'ref100') {
-                    $taskBars = Get-ReferenceBars
-                    $taskContentHeight = ([int]$taskProfile.size.Split('x')[1] - $taskBars.statusBars - $taskBars.navigationBars) / 3
-                    @{ sizePx = $taskProfile.size; densityDpi = 480; topInsetPx = $taskBars.statusBars; bottomInsetPx = $taskBars.navigationBars; contentWidthDp = 390; contentHeightDp = $taskContentHeight } | ConvertTo-Json | Set-Content (Join-Path $taskCaseDir 'reference-geometry.json')
+                    $taskBars = Get-ReferenceBars ([int]$taskProfile.size.Split('x')[1])
+                    $taskContentHeight = ($taskBars.heightPx - $taskBars.statusBars - $taskBars.navigationBars) / 3
+                    @{ sizePx = "$($taskBars.widthPx)x$($taskBars.heightPx)"; densityDpi = 480; topInsetPx = $taskBars.statusBars; bottomInsetPx = $taskBars.navigationBars; contentWidthDp = $taskBars.widthPx / 3; contentHeightDp = $taskContentHeight } | ConvertTo-Json | Set-Content (Join-Path $taskCaseDir 'reference-geometry.json')
                     if ($taskContentHeight -ne 844) {
                         $taskCases[-1].passed = $false
                         throw 'The measured reference content viewport is not 390x844dp.'
                     }
                 }
+              } catch {
+                $taskCases[-1].passed = $false
+                $taskCases[-1].artifactError = 'Native artifact or reference geometry validation failed.'
+                throw
+              }
             }
             Write-Output "$Stage/$taskProfileName/$($taskRole.name): $taskOk"
             if (!$taskOk -and $Stage -eq 'after') { throw 'Native audit failed. Inspect the private case log and retain the failed attempt.' }

@@ -28,7 +28,11 @@ name: Matched ledger and focused ticket reference states
             MAESTRO_SCROLL_TARGET: Open ${MAESTRO_CONCEPT_ORDER}
             MAESTRO_SCROLL_DIRECTION: DOWN
       - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/reference-selection
-      - tapOn: Open ${MAESTRO_CONCEPT_ORDER}
+      - runFlow:
+          when:
+            true: ${MAESTRO_CONCEPT_PHASE == 'detail'}
+          commands:
+            - tapOn: Open ${MAESTRO_CONCEPT_ORDER}
 - runFlow:
     when:
       true: ${MAESTRO_UX_AFTER != 'true'}
@@ -40,7 +44,11 @@ name: Matched ledger and focused ticket reference states
             MAESTRO_SCROLL_TARGET: Open ticket ${MAESTRO_CONCEPT_ORDER}
             MAESTRO_SCROLL_DIRECTION: DOWN
       - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/reference-selection
-      - tapOn: Open ticket ${MAESTRO_CONCEPT_ORDER}
+      - runFlow:
+          when:
+            true: ${MAESTRO_CONCEPT_PHASE == 'detail'}
+          commands:
+            - tapOn: Open ticket ${MAESTRO_CONCEPT_ORDER}
 - runFlow:
     when:
       true: ${MAESTRO_CONCEPT_PHASE == 'detail'}

@@ -66,8 +66,12 @@ try {
         if (Test-Path -LiteralPath $report) { Remove-Item -LiteralPath $report }
         $nativeOutput = Join-Path $ResultsDirectory "private/$name"
         New-Item -ItemType Directory -Path $nativeOutput -Force | Out-Null
-        & maestro test --format junit --output $report --test-output-dir $nativeOutput ".maestro/$name.yaml"
-        $exitCode = $LASTEXITCODE
+        $savedPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            & maestro test --format junit --output $report --test-output-dir $nativeOutput ".maestro/$name.yaml"
+            $exitCode = $LASTEXITCODE
+        } finally { $ErrorActionPreference = $savedPreference }
         $cases = @()
         if (Test-Path -LiteralPath $report) {
             [xml]$xml = Get-Content -LiteralPath $report -Raw
