@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="57.316" timestamp="2026-11-22T15:56:10">
+    <testcase id="Notification link reauthorizes a recipient with no approval permission" name="Notification link reauthorizes a recipient with no approval permission" classname="Notification link reauthorizes a recipient with no approval permission" file=".maestro\notification-links.yaml" time="57.303" timestamp="2026-11-22T15:56:10" status="SUCCESS" />
+  </testsuite>
+</testsuites>

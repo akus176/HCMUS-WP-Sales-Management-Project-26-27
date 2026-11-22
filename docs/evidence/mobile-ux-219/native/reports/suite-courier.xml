@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="104.296" timestamp="2026-11-22T15:46:21">
+    <testcase id="Courier delivered and failed workflows against the shared API" name="Courier delivered and failed workflows against the shared API" classname="Courier delivered and failed workflows against the shared API" file=".maestro\courier.yaml" time="104.282" timestamp="2026-11-22T15:46:21" status="SUCCESS" />
+  </testsuite>
+</testsuites>

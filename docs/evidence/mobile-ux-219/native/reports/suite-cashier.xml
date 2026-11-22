@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="90.148" timestamp="2026-11-22T15:48:14">
+    <testcase id="Cashier payment against the shared API" name="Cashier payment against the shared API" classname="Cashier payment against the shared API" file=".maestro\cashier.yaml" time="90.137" timestamp="2026-11-22T15:48:14" status="SUCCESS" />
+  </testsuite>
+</testsuites>
