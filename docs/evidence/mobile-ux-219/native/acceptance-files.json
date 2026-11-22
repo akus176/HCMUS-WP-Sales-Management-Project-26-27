@@ -2,8 +2,8 @@
   {
     "file": "README.md",
     "hashEncoding": "utf8LF",
-    "hashedBytes": 5725,
-    "sha256": "6fa7060d5b80ed689eaaffbed9cf044d13041ffe9246ddcd5b735f622547438b"
+    "hashedBytes": 6123,
+    "sha256": "33fd3f7fd29431a5707afc1a6b5dd076b678d0d8b20cd6c86d0110b413611a7c"
   },
   {
     "file": "baseline-images.json",
@@ -14,8 +14,188 @@
   {
     "file": "comparison.html",
     "hashEncoding": "utf8LF",
-    "hashedBytes": 5330,
-    "sha256": "3b6c34078af0861149df8468df524f9d26e9c27eab7dfba5663028a5ed2c2cd0"
+    "hashedBytes": 5979,
+    "sha256": "a26f9d9bcb0b547e94d584394806e51d4718e5f680d8aa9095d0186325ccab96"
+  },
+  {
+    "file": "confirmation/README.md",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 2570,
+    "sha256": "795ca82d3068c08b4058036af9e3c58329fb7539ee06b3b304b15f3634a6cfa4"
+  },
+  {
+    "file": "confirmation/cancellation-state.json",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 6736,
+    "sha256": "ff11c6914f17c6e0ed13c1df2139868f0a1a4bc47b7cdf4ad61f2b7b0a231593"
+  },
+  {
+    "file": "confirmation/images.json",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 8752,
+    "sha256": "ca6cea8e492c00c08c47a2900fdee46a788f5e48703aa190a4564694a5d5a82d"
+  },
+  {
+    "file": "confirmation/p100/after-canceled.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 161104,
+    "sha256": "fd332334267db407d3673887a3c5dfa323910f7c9a32370084c7e2484a76b333"
+  },
+  {
+    "file": "confirmation/p100/after-confirmation.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 207186,
+    "sha256": "0be77e7b3151c6b158f4a5ec31b0ff79f484368b7d8b05400e07325f68af619b"
+  },
+  {
+    "file": "confirmation/p100/after-queue.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 211770,
+    "sha256": "2421637600c47d1800bf8ce7617af9923c424cff5c1ce99325feb18554efca01"
+  },
+  {
+    "file": "confirmation/p100/after-selection.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 189859,
+    "sha256": "c31dd9d9949589286c114a1ab17f7eee8ede41b35b342b27cb6f3c8073fefdc4"
+  },
+  {
+    "file": "confirmation/p100/junit.xml",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 510,
+    "sha256": "97517bb5854232734960e872aa808371b8d9fa73bc7c6f8fe95fa343d78c160b"
+  },
+  {
+    "file": "confirmation/p200/after-canceled.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 190725,
+    "sha256": "6fd6506cd0acd90f8fed8de4cb52ce3fa23ed864ae7616a5a8ea72911f2414a0"
+  },
+  {
+    "file": "confirmation/p200/after-confirmation.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 192327,
+    "sha256": "0d4886aa7e04d20e1ba55f9278bffd225a1832d0604a6aa981e5ea44b16dd680"
+  },
+  {
+    "file": "confirmation/p200/after-queue.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 220836,
+    "sha256": "3556d61908493ecbf33b15d2d8f16f3bf0fa5afa9a9514e68611e9175da74574"
+  },
+  {
+    "file": "confirmation/p200/after-selection.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 229909,
+    "sha256": "cf412e822f4ef7dfe6a83322d533099e72afdcd2d66b1b9e49aba01189f9f938"
+  },
+  {
+    "file": "confirmation/p200/junit.xml",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 512,
+    "sha256": "94bf90a4ab95965f3c4fcb9913fe87b2b8a149b72b2940fea8c72d740ae04293"
+  },
+  {
+    "file": "confirmation/ref100/after-canceled.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 163809,
+    "sha256": "1d0806b899117c8e4e6b06436c6ee125f088951dc0d9837b812e05f09afabe83"
+  },
+  {
+    "file": "confirmation/ref100/after-confirmation.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 210011,
+    "sha256": "19be7c92f29a65c80df506892162719a9641e38b63d7c96fc236a06c8e213be4"
+  },
+  {
+    "file": "confirmation/ref100/after-queue.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 237586,
+    "sha256": "9b816f242cbd8e4be864931ad2ea67a2b7cca8fee6437b9018032c23861addd3"
+  },
+  {
+    "file": "confirmation/ref100/after-selection.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 237586,
+    "sha256": "9b816f242cbd8e4be864931ad2ea67a2b7cca8fee6437b9018032c23861addd3"
+  },
+  {
+    "file": "confirmation/ref100/geometry.json",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 161,
+    "sha256": "deb42e33cebca4102a0e7109f434bbd90a3321204e255d64abb5bdf622855d79"
+  },
+  {
+    "file": "confirmation/ref100/junit.xml",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 510,
+    "sha256": "99b6b3a3ea971dafe440635e22e4d684548b9835ad2079d32f7aee2d18f91913"
+  },
+  {
+    "file": "confirmation/summary.json",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 2880,
+    "sha256": "b4ea23026f8f6429bc71e4c50cdef71c18cdc519044476ee329b250db185f8b5"
+  },
+  {
+    "file": "confirmation/t100/after-canceled.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 119168,
+    "sha256": "27a52bb8ea0ae6e36f8a8b80d04f544d3610f794467986ad539f8b6475eb4dec"
+  },
+  {
+    "file": "confirmation/t100/after-confirmation.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 150964,
+    "sha256": "36627b63ae398293486019a89f9cc70e340210041783278d6cc1e58ad26af08c"
+  },
+  {
+    "file": "confirmation/t100/after-queue.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 178196,
+    "sha256": "a0ea3b437458d44bcb697810d56302ba0542b8feddb374faad83aac80e90df24"
+  },
+  {
+    "file": "confirmation/t100/after-selection.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 177856,
+    "sha256": "29550b8d19da9e66f50a0d07d5d21ba23baff0d3fed1527bb3193b5e17d48b43"
+  },
+  {
+    "file": "confirmation/t100/junit.xml",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 509,
+    "sha256": "88441c83078907785d985ec8574cbb33b1f26758dddb5941d11e827d2c8269e9"
+  },
+  {
+    "file": "confirmation/t200/after-canceled.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 174079,
+    "sha256": "55adc51259d860307c0de574f257298d04af35ed71e561abab5a2dd190c31226"
+  },
+  {
+    "file": "confirmation/t200/after-confirmation.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 222283,
+    "sha256": "0e8b7d83d1053c720d3d43a10abc00e97986812b82607a6657140e909d476233"
+  },
+  {
+    "file": "confirmation/t200/after-queue.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 273505,
+    "sha256": "7afc2e8a84348ba468559b1677bea6ef5d28df0507b0ba4c93a990dd35b79f2f"
+  },
+  {
+    "file": "confirmation/t200/after-selection.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 273505,
+    "sha256": "7afc2e8a84348ba468559b1677bea6ef5d28df0507b0ba4c93a990dd35b79f2f"
+  },
+  {
+    "file": "confirmation/t200/junit.xml",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 510,
+    "sha256": "74b776b5098a2ba281f4ae1dc8101ace2a2e65a1aa8bb2bf537da5c396a1a7d7"
   },
   {
     "file": "gallery.html",

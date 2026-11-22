@@ -102,7 +102,9 @@
             </div>
         </figure>
         <figure>
-            <figcaption>After · <code>5876e57</code></figcaption>
+            <figcaption>
+                After · <code id="after-revision">5876e57</code>
+            </figcaption>
             <div class="frame native">
                 <img
                     id="after"
@@ -131,19 +133,31 @@
         <a href="reference/README.md"
             >capture provenance, measured targets and deliberate differences</a
         >,
-        <a href="reference/manifest.json">original-file SHA-256 hashes</a> and
+        <a href="reference/manifest.json">original reference SHA-256 hashes</a>,
+        <a href="confirmation/images.json">recorded detail SHA-256 hashes</a>
+        and
         <a href="reference/cancellation-state.json"
-            >independent cancellation state checks</a
+            >original independent cancellation state checks</a
         >.
+        <a href="confirmation/README.md"
+            >Responsive confirmation checks at fea0541</a
+        >
+        include a fresh measured 390×844dp detail capture on
+        <code>fea0541</code>.
     </p>
     <script>
         const state = document.getElementById("state");
         state.addEventListener("change", () => {
             for (const stage of ["before", "after"]) {
                 const img = document.getElementById(stage);
-                img.src = `reference/${stage}-${state.value}.png`;
+                img.src =
+                    stage === "after" && state.value !== "queue"
+                        ? `confirmation/ref100/after-${state.value}.png`
+                        : `reference/${stage}-${state.value}.png`;
                 img.alt = `${stage}: native ${state.options[state.selectedIndex].text}`;
             }
+            document.getElementById("after-revision").textContent =
+                state.value === "queue" ? "5876e57" : "fea0541";
             document.getElementById("art").src =
                 `../../../ui-concepts/mobile-2026-11-22/${state.value === "queue" ? "01-queue-ledger" : "03-ticket-focus"}.png`;
             document.getElementById("note").textContent =

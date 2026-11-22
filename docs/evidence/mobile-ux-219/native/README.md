@@ -1,11 +1,13 @@
 # Connected Android evidence (#219)
 
-The current implementation is `fea0541`. Its mobile source tree is
+This directory records the implementation at `fea0541`, before the subsequent
+direct-sign-in and compact-header corrections. These results do not establish
+acceptance of those later changes. Its mobile source tree is
 `60bb317547f56ab382aadae04590488b9ab44798`; subsequent evidence commits do not
 change that application tree. The API is built from `5876e57`, with binary and
 device/tool provenance in [native-run.json](reports/native-run.json).
 
-## Complete current runs
+## Complete runs at the recorded revision
 
 | Run                            | Result                                                   | Evidence                                                                                                          |
 | ------------------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -14,7 +16,7 @@ device/tool provenance in [native-run.json](reports/native-run.json).
 | Focused fault suite            | 19/19, 43 native steps, independent state/history checks | [Summary and snapshots](reports/workflows/summary.json), [original screenshots](workflows)                        |
 | Layout/keyboard matrix         | 16/16 in one complete fresh run                          | [Summary](reports/layout-summary.json), [gallery](gallery.html), [108 original image hashes](updated-images.json) |
 
-All four current stages belong to `acceptance-05`, with application revision
+All four stages below belong to `acceptance-05`, with application revision
 `fea0541`; see [the pipeline record](reports/acceptance-pipeline.json). Earlier
 failed/partial attempts are not combined into these results. The PowerShell 5.1
 host ran the same public full-suite script directly because `pwsh` is unavailable;
@@ -66,11 +68,14 @@ action and selected queue row. These are sampled native measurements, supplement
 by the shared-control and accessibility regressions, rather than a claim that
 every control was individually measured in every intermediate state.
 
-## Remaining acceptance work
+## Confirmation and remaining acceptance work
 
-Enlarged ready-confirmation captures and
-manual TalkBack checks are being finalized. Acceptance item 2.2 remains open until
-that evidence is complete. Named reviewer approval is separately outstanding.
+[Five additional confirmation cases](confirmation/README.md) pass at `fea0541`,
+including the reference viewport and normal/enlarged phone/large layouts.
+Independent API snapshots remain unchanged after cancellation. These captures
+also predate the later UI corrections. Current-revision native acceptance and
+manual TalkBack evidence remain required under item 2.2; named reviewer approval
+is separately outstanding.
 
 The device is a physical Samsung SM-A155F, Android 16/API 36. Large layouts use
 display/density overrides on this phone; no physical tablet test is claimed.
