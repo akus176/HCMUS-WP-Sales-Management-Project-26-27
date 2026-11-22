@@ -16,9 +16,18 @@ $taskProfileMap = @{
     p200 = @{ size = '1080x2400'; density = '480'; font = '2.0'; night = 'yes' }
     t100 = @{ size = '1600x2560'; density = '320'; font = '1.0'; night = 'yes' }
     t200 = @{ size = '1600x2560'; density = '320'; font = '2.0'; night = 'no' }
-    # API 36 device: 28dp status bar + 24dp navigation bar leave a 390x844dp
-    # content viewport. Retain/measure the OS bounds with the original capture.
-    ref100 = @{ size = '1170x2688'; density = '480'; font = '1.0'; night = 'no' }
+    # Measure the device's actual system bars below; do not assume their height.
+    ref100 = @{ size = '1170x2664'; density = '480'; font = '1.0'; night = 'no' }
+}
+function Get-ReferenceBars {
+    $taskWindowState = & adb -s $DeviceSerial shell dumpsys window displays | Out-String
+    $taskBars = @{}
+    foreach ($taskBarName in @('statusBars', 'navigationBars')) {
+        $taskMatch = [regex]::Match($taskWindowState, "type=$taskBarName frame=\[(\d+),(\d+)\]\[(\d+),(\d+)\] visible=true")
+        if (!$taskMatch.Success) { throw "Cannot measure native $taskBarName for the reference viewport." }
+        $taskBars[$taskBarName] = [int]$taskMatch.Groups[4].Value - [int]$taskMatch.Groups[2].Value
+    }
+    return $taskBars
 }
 foreach ($taskProfileName in $Profiles) {
     if (!$taskProfileMap.ContainsKey($taskProfileName)) { throw "Unknown profile: $taskProfileName" }
@@ -50,6 +59,12 @@ try {
         & adb -s $DeviceSerial shell wm density $taskProfile.density | Out-Null
         & adb -s $DeviceSerial shell settings put system font_scale $taskProfile.font | Out-Null
         & adb -s $DeviceSerial shell cmd uimode night $taskProfile.night | Out-Null
+        if ($taskProfileName -eq 'ref100') {
+            $taskBars = Get-ReferenceBars
+            $taskReferenceHeight = 844 * 3 + $taskBars.statusBars + $taskBars.navigationBars
+            $taskProfile.size = "1170x$taskReferenceHeight"
+            & adb -s $DeviceSerial shell wm size $taskProfile.size | Out-Null
+        }
         foreach ($taskRole in $taskRoles) {
             $env:MAESTRO_STAFF_USERNAME = [Environment]::GetEnvironmentVariable("COFFEESHOP_E2E_$($taskRole.role)_USERNAME")
             if (!$env:MAESTRO_STAFF_USERNAME -or !$env:MAESTRO_STAFF_PASSWORD) { throw 'Set synthetic role accounts and MAESTRO_STAFF_PASSWORD.' }
@@ -85,6 +100,15 @@ try {
                     & adb -s $DeviceSerial pull /sdcard/ux219-audit-tree.xml (Join-Path $taskCaseDir 'tree.xml') *> (Join-Path $taskCaseDir 'tree-pull.log')
                     if ($LASTEXITCODE) { throw 'Native hierarchy transfer failed.' }
                 } finally { $ErrorActionPreference = $taskSavedPreference }
+                if ($taskProfileName -eq 'ref100') {
+                    $taskBars = Get-ReferenceBars
+                    $taskContentHeight = ([int]$taskProfile.size.Split('x')[1] - $taskBars.statusBars - $taskBars.navigationBars) / 3
+                    @{ sizePx = $taskProfile.size; densityDpi = 480; topInsetPx = $taskBars.statusBars; bottomInsetPx = $taskBars.navigationBars; contentWidthDp = 390; contentHeightDp = $taskContentHeight } | ConvertTo-Json | Set-Content (Join-Path $taskCaseDir 'reference-geometry.json')
+                    if ($taskContentHeight -ne 844) {
+                        $taskCases[-1].passed = $false
+                        throw 'The measured reference content viewport is not 390x844dp.'
+                    }
+                }
             }
             Write-Output "$Stage/$taskProfileName/$($taskRole.name): $taskOk"
             if (!$taskOk -and $Stage -eq 'after') { throw 'Native audit failed. Inspect the private case log and retain the failed attempt.' }
