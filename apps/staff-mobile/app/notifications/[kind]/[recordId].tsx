@@ -7,7 +7,7 @@ import { notificationDestination } from '../../../src/notifications/destination'
 import { LowStockRecord } from '../../../src/notifications/LowStockRecord';
 import { PermissionBoundary } from '../../../src/shell/PermissionBoundary';
 import {
-  ShellButton,
+  ShellPageHeader,
   ShellPage,
   ShellStatus,
 } from '../../../src/shell/controls';
@@ -19,9 +19,10 @@ export default function NotificationRecordRoute() {
   const access = useRouteAccess();
   return (
     <ShellPage>
-      <ShellButton
-        label="Back to staff home"
-        onPress={() => router.replace('/session')}
+      <ShellPageHeader
+        backLabel="Back to staff home"
+        onBack={() => router.replace('/session')}
+        hideDuringDetail={target?.kind === 'urgent-order'}
       />
       {target ? (
         <PermissionBoundary

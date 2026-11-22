@@ -5,7 +5,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react-native';
-import { Dimensions } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
@@ -163,14 +163,21 @@ const scenes: {
   {
     name: 'preparation queue',
     content: <PreparationScreen />,
-    loaded: 'ORD-186 · Confirmed',
+    loaded: 'ORD-186',
     selected: 'All active',
   },
   {
     name: 'preparation detail',
     content: <PreparationScreen />,
-    loaded: 'ORD-186 · Confirmed',
-    open: 'Open ticket ORD-186',
+    loaded: 'ORD-186',
+    open: ['Select ticket ORD-186', 'Open ORD-186'],
+  },
+  {
+    name: 'preparation ready confirmation',
+    content: <PreparationScreen ticketId={id} />,
+    loaded: 'ORD-186',
+    open: 'Mark ready',
+    settled: 'This updates the whole ticket.',
   },
   {
     name: 'approval inbox',
@@ -381,7 +388,12 @@ describe.each([
             if (path.includes('/courier/assignments/')) return json(assignment);
             if (path.endsWith('/preparation-tickets'))
               return json(page([ticket]));
-            if (path.includes('/preparation-tickets/')) return json(ticket);
+            if (path.includes('/preparation-tickets/'))
+              return json(
+                scene.name === 'preparation ready confirmation'
+                  ? { ...ticket, status: 'preparing' }
+                  : ticket,
+              );
             throw new Error(
               'Unexpected accessibility fixture request: ' + path,
             );
@@ -398,7 +410,9 @@ describe.each([
           >
             <QueryCleanup />
             <ConnectivityProvider>
-              <ConnectivityPresentation>
+              <ConnectivityPresentation
+                branded={scene.name.startsWith('preparation')}
+              >
                 <SignedIn>
                   {scene.name === 'login' || scene.name === 'home' ? (
                     scene.content
@@ -434,7 +448,7 @@ describe.each([
             await screen.findByRole('button', { name: scene.afterEntry }),
           );
         if (scene.name === 'preparation detail')
-          await screen.findByText('Status: Confirmed');
+          await screen.findByLabelText('Status: Confirmed');
         if (scene.selected)
           expect(
             screen.getByRole('button', {
@@ -454,7 +468,9 @@ describe.each([
         }
         for (const button of screen.getAllByRole('button')) {
           expect(button.props.accessibilityLabel?.trim()).toBeTruthy();
-          expect(button).toHaveStyle({ minHeight: 48 });
+          expect(
+            StyleSheet.flatten(button.props.style).minHeight,
+          ).toBeGreaterThanOrEqual(48);
         }
         for (const input of screen.container.queryAll(
           (node) => node.type === 'TextInput',

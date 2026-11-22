@@ -7,10 +7,12 @@ import { useConnectivity } from './connectivity';
 
 export function ConnectivityPresentation({
   children,
+  branded = false,
 }: {
   children: ReactNode;
+  branded?: boolean;
 }) {
-  const { status } = useConnectivity();
+  const { status, refreshConnection } = useConnectivity();
   const [expanded, setExpanded] = useState(false);
   const detail =
     status === 'offline'
@@ -22,16 +24,28 @@ export function ConnectivityPresentation({
     <PageNotice.Provider
       value={
         expanded || status === 'offline' || status === 'reconnecting' ? (
-          <ShellFeedback
-            kind={status === 'offline' ? 'warning' : 'info'}
-            label={detail}
-          />
+          <>
+            <ShellFeedback
+              kind={status === 'offline' ? 'warning' : 'info'}
+              label={detail}
+            />
+            {branded && (
+              <ShellButton
+                label={
+                  status === 'offline' ? 'Check connection' : 'Refresh data'
+                }
+                variant="secondary"
+                onPress={() => void refreshConnection()}
+              />
+            )}
+          </>
         ) : null
       }
     >
       <ConnectivityBanner
         expanded={expanded}
         onToggle={() => setExpanded(!expanded)}
+        branded={branded}
       />
       {children}
     </PageNotice.Provider>
@@ -41,7 +55,8 @@ export function ConnectivityPresentation({
 export function ConnectivityBanner({
   expanded = false,
   onToggle,
-}: { expanded?: boolean; onToggle?: () => void } = {}) {
+  branded = false,
+}: { expanded?: boolean; onToggle?: () => void; branded?: boolean } = {}) {
   const { status, refreshConnection } = useConnectivity();
   const message = {
     checking: 'Checking connection…',
@@ -54,7 +69,12 @@ export function ConnectivityBanner({
     status === 'offline' ? 'Check connection' : 'Refresh data';
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, branded && styles.brandedContainer]}>
+      {branded && (
+        <Text accessibilityRole="header" style={styles.brand}>
+          Corner Cafe
+        </Text>
+      )}
       {onToggle ? (
         <Pressable
           accessibilityRole="button"
@@ -64,10 +84,14 @@ export function ConnectivityBanner({
           onPress={onToggle}
           style={({ pressed }) => [
             styles.statusControl,
+            branded && styles.brandedStatus,
             pressed && styles.pressed,
           ]}
         >
-          <Text accessibilityLiveRegion="polite" style={styles.summary}>
+          <Text
+            accessibilityLiveRegion="polite"
+            style={[styles.summary, branded && styles.brandedSummary]}
+          >
             {message} ▾
           </Text>
         </Pressable>
@@ -76,15 +100,17 @@ export function ConnectivityBanner({
           {message}
         </Text>
       )}
-      <ShellButton
-        label={actionLabel}
-        loading={refreshing}
-        loadingLabel="Refreshing…"
-        disabled={refreshing}
-        variant="secondary"
-        compact
-        onPress={() => void refreshConnection()}
-      />
+      {!branded && (
+        <ShellButton
+          label={actionLabel}
+          loading={refreshing}
+          loadingLabel="Refreshing…"
+          disabled={refreshing}
+          variant="secondary"
+          compact
+          onPress={() => void refreshConnection()}
+        />
+      )}
     </View>
   );
 }
@@ -117,4 +143,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   pressed: { backgroundColor: mobileTokens.color.highlight },
+  brandedContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 4,
+    justifyContent: 'space-between',
+    borderColor: mobileTokens.color.primary,
+  },
+  brand: {
+    fontFamily: mobileTokens.type.displayFont,
+    fontSize: 24,
+    color: mobileTokens.color.foreground,
+    flexShrink: 1,
+  },
+  brandedStatus: { flexGrow: 0 },
+  brandedSummary: {
+    fontSize: mobileTokens.type.body,
+    color: mobileTokens.color.info,
+  },
 });

@@ -30,6 +30,7 @@ export const shellTheme = {
 };
 
 const PageNavigation = createContext({
+  detailActive: false,
   rememberPosition: (_key: string) => {},
   openDetail: (_key: string) => {},
   returnToList: () => {},
@@ -47,6 +48,7 @@ export function ShellPage({ children }: { children: ReactNode }) {
   const origin = useRef({ key: '', y: 0 });
   const restore = useRef(false);
   const [returnTarget, setReturnTarget] = useState<string | null>(null);
+  const [detailActive, setDetailActive] = useState(false);
   return (
     <SafeAreaView edges={['bottom']} style={styles.page}>
       <ScrollView
@@ -66,16 +68,19 @@ export function ShellPage({ children }: { children: ReactNode }) {
       >
         <PageNavigation.Provider
           value={{
+            detailActive,
             rememberPosition: (key) => {
               origin.current = { key, y: position.current };
               setReturnTarget(null);
             },
             openDetail: (key) => {
+              setDetailActive(true);
               origin.current = { key, y: position.current };
               setReturnTarget(null);
               scroll.current?.scrollTo({ y: 0, animated: false });
             },
             returnToList: () => {
+              setDetailActive(false);
               restore.current = true;
               setReturnTarget(origin.current.key);
             },
@@ -130,11 +135,15 @@ export function ShellPageHeader({
   title,
   backLabel,
   onBack,
+  hideDuringDetail = false,
 }: {
   title?: string;
   backLabel?: string;
   onBack?: () => void;
+  hideDuringDetail?: boolean;
 }) {
+  const navigation = usePageNavigation();
+  if (hideDuringDetail && navigation.detailActive) return null;
   return (
     <View style={styles.header}>
       {backLabel && onBack && (
@@ -268,6 +277,7 @@ export function ShellButton({
   expanded,
   focusKey,
   compact = false,
+  prominent = false,
 }: {
   label: string;
   onPress: () => void;
@@ -279,6 +289,7 @@ export function ShellButton({
   expanded?: boolean;
   focusKey?: string;
   compact?: boolean;
+  prominent?: boolean;
 }) {
   const [focused, setFocused] = useState(false);
   const ref = useRef<ComponentRef<typeof View>>(null);
@@ -319,6 +330,7 @@ export function ShellButton({
       }}
       style={({ pressed }) => [
         styles.button,
+        prominent && styles.prominentButton,
         variant === 'secondary' && styles.secondaryButton,
         (focused || selected) && styles.selected,
         pressed && styles.pressed,
@@ -446,5 +458,6 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: { color: mobileTokens.color.foreground },
   compactButtonText: { fontSize: mobileTokens.type.caption },
+  prominentButton: { minHeight: 56 },
   disabledButtonText: { color: mobileTokens.color.disabledText },
 });

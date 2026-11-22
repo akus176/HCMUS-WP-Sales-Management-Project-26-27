@@ -28,6 +28,7 @@ export default function ModuleScreen() {
       <ShellPageHeader
         backLabel="Back to staff home"
         onBack={() => router.replace('/session')}
+        hideDuringDetail={module?.id === 'barista'}
       />
       <PermissionBoundary moduleId={moduleId} {...access}>
         {(user) =>

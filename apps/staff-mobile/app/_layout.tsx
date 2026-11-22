@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { KeyboardAvoidingView, Text } from 'react-native';
@@ -43,6 +43,7 @@ function SessionNavigation({
 }: {
   state: ReturnType<typeof useSession>['state'];
 }) {
+  const pathname = usePathname();
   const [fontsLoaded, fontError] = useFonts({
     Kalam: require('../assets/fonts/Kalam-Bold.ttf'),
     PatrickHand: require('../assets/fonts/PatrickHand-Regular.ttf'),
@@ -68,7 +69,12 @@ function SessionNavigation({
   return (
     <KeyboardAvoidingView behavior="height" style={{ flex: 1 }}>
       <StatusBar style="dark" />
-      <ConnectivityPresentation>
+      <ConnectivityPresentation
+        branded={
+          pathname === '/modules/barista' ||
+          pathname.startsWith('/notifications/urgent-order/')
+        }
+      >
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Protected guard={!state.user}>
             <Stack.Screen name="index" />
