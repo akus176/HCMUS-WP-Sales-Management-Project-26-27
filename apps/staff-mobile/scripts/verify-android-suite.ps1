@@ -28,6 +28,10 @@ $qualityPath = Join-Path $ResultsDirectory 'quality-fixture.json'
 & "$PSScriptRoot/courier-fixture.ps1" -Action Seed -FixturePath $courierPath
 $env:COFFEESHOP_MOBILE_TEST_MANAGER_USERNAME = $env:COFFEESHOP_E2E_ADMIN_USERNAME
 & "$PSScriptRoot/quality-fixture.ps1" -Action Seed -FixturePath $qualityPath
+# Other seeders insert confirmed orders into the sorted preparation queue.
+# Locate only after all fixtures exist so a page boundary cannot stale the index.
+$env:COFFEESHOP_MOBILE_TEST_MANAGER_USERNAME = $env:COFFEESHOP_E2E_MANAGER_USERNAME
+& "$PSScriptRoot/barista-fixture.ps1" -Action Locate -FixturePath $baristaPath
 $barista = Get-Content -LiteralPath $baristaPath -Raw | ConvertFrom-Json
 $orders = Get-Content -LiteralPath $ordersPath -Raw | ConvertFrom-Json
 $courier = Get-Content -LiteralPath $courierPath -Raw | ConvertFrom-Json

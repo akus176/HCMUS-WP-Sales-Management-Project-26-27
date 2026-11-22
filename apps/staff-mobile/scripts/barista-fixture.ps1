@@ -1,5 +1,5 @@
 param(
-    [Parameter(Mandatory)][ValidateSet('Seed', 'Verify')][string]$Action,
+    [Parameter(Mandatory)][ValidateSet('Seed', 'Locate', 'Verify')][string]$Action,
     [Parameter(Mandatory)][string]$FixturePath
 )
 $ErrorActionPreference = 'Stop'
@@ -44,6 +44,13 @@ if ($Action -eq 'Seed') {
     if (!$queuePage) { throw 'Confirmed fixture was not found in the active queue.' }
     @{ orderId = $id; orderNumber = $order.orderNumber; itemName = $item.name; addonName = $addonName; queuePageSkip = $queuePage - 1 } | ConvertTo-Json | Set-Content -LiteralPath $FixturePath
     Write-Output "Confirmed fixture saved to $FixturePath. Set MAESTRO_ORDER_NUMBER to $($order.orderNumber) and MAESTRO_QUEUE_PAGE_SKIP to $($queuePage - 1)."
+} elseif ($Action -eq 'Locate') {
+    $fixture = Get-Content -LiteralPath $FixturePath -Raw | ConvertFrom-Json
+    $queuePage = Find-QueuePage $fixture.orderId
+    if (!$queuePage) { throw 'Confirmed fixture was not found after suite setup.' }
+    $fixture.queuePageSkip = $queuePage - 1
+    $fixture | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $FixturePath
+    Write-Output 'Located the barista fixture after all suite orders were seeded.'
 } else {
     $fixture = Get-Content -LiteralPath $FixturePath -Raw | ConvertFrom-Json
     $order = Invoke-RestMethod -Uri "$base/orders/$($fixture.orderId)" -Headers $headers
