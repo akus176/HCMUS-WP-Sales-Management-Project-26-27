@@ -30,12 +30,14 @@ name: Inventory sections, labelled adjustment and receipt review
       MAESTRO_SCROLL_DIRECTION: DOWN
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/low-stock
 - tapOn: Record adjustment for ${MAESTRO_INGREDIENT}
-- runFlow:
-    file: scroll-to.yaml
-    env:
-      MAESTRO_SCROLL_TARGET: Quantity change
-      MAESTRO_SCROLL_DIRECTION: DOWN
-- tapOn: Quantity change
+- scrollUntilVisible:
+    element:
+      text: Quantity change
+      below: Quantity change
+    direction: DOWN
+- tapOn:
+    text: Quantity change
+    below: Quantity change
 - inputText: '2'
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/adjustment-keyboard
 - runFlow: hide-keyboard.yaml

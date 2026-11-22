@@ -15,9 +15,13 @@ name: Low stock, required adjustment reason, receipt posting and history
 - assertVisible: 'Low stock.*'
 - tapOn: Record adjustment for ${MAESTRO_INGREDIENT}
 - scrollUntilVisible:
-    element: Quantity change
+    element:
+      text: Quantity change
+      below: Quantity change
     direction: DOWN
-- tapOn: Quantity change
+- tapOn:
+    text: Quantity change
+    below: Quantity change
 - inputText: '2'
 - runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
