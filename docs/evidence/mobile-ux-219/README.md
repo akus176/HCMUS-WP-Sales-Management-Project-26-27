@@ -1,5 +1,11 @@
 # Staff mobile usability audit (#219)
 
+[Final verification wrap-up](current/README.md): additional latest-UI native
+validation was stopped at the user's request. Existing passing device evidence
+is retained at its recorded revision; latest-UI native/TalkBack acceptance and
+named reviewer approval remain pending. The connected phone's original settings
+have been restored.
+
 OpenSpec change: `polish-staff-mobile-ux`. Baseline source:
 `5c9ed019398099cc59e3a007b6cf82a71208d25f`. This is a fresh source audit on 2026-11-19;
 historical screenshots are identified separately and are not a new native run.
