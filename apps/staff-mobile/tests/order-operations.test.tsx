@@ -407,6 +407,30 @@ test.each(['card', 'e-wallet'])(
   },
 );
 
+test('manager order details and cancellation review render without duplicate child keys', async () => {
+  const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+  try {
+    const { view } = await setup({ manager: true });
+    await open(view);
+    await fireEvent.changeText(
+      view.getByLabelText('Cancellation reason'),
+      'Customer changed plans',
+    );
+    await fireEvent.press(
+      view.getByRole('button', { name: 'Review cancellation' }),
+    );
+    await view.findByRole('button', { name: 'Confirm cancellation' });
+    const duplicateKeys = error.mock.calls.filter((args) =>
+      args.some(
+        (arg) => typeof arg === 'string' && /same key|unique.*key/i.test(arg),
+      ),
+    );
+    expect(duplicateKeys).toEqual([]);
+  } finally {
+    error.mockRestore();
+  }
+});
+
 test('requires a cancellation reason and displays the server-confirmed cancelled state', async () => {
   const { view, post, setRows, setOrder } = await setup({ manager: true });
   await open(view);

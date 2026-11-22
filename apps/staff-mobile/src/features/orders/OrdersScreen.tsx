@@ -142,7 +142,11 @@ export function OrdersScreen({
           )}
           {order && current && (
             <>
-              <ShellHeading key={current.id} level="section" focusOnMount>
+              <ShellHeading
+                key={`heading:${current.id}`}
+                level="section"
+                focusOnMount
+              >
                 Order {current.orderNumber}
               </ShellHeading>
               <ShellText>{`Status: ${current.status} · ${current.channel}${current.tableNumber ? ` · Table ${current.tableNumber}` : ''}`}</ShellText>
@@ -163,7 +167,7 @@ export function OrdersScreen({
                 (!['cancelled', 'completed'].includes(current.status) ||
                   pendingPayments.has(current.id)) && (
                   <OrderPayment
-                    key={`order-heading:${current.id}`}
+                    key={`payment:${current.id}`}
                     orderId={current.id}
                     pendingPayments={pendingPayments}
                     balance={Math.max(
@@ -176,7 +180,7 @@ export function OrdersScreen({
                 )}
               {manager && (
                 <ManagerOrderActions
-                  key={current.id}
+                  key={`management:${current.id}`}
                   order={order}
                   permissions={user.permissions}
                   disabled={disabled}
