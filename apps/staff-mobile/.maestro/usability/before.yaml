@@ -40,4 +40,15 @@ name: Recorded preparation and Counter layout
       MAESTRO_SCROLL_DIRECTION: DOWN
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/prep-detail
 - openLink: coffeeshop-staff:///modules/cashier
+- runFlow:
+    when:
+      true: ${MAESTRO_UX_AFTER == 'true'}
+    commands:
+      - extendedWaitUntil:
+          visible: Tables
+          timeout: 30000
+      - assertVisible: Table occupancy
+      - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/counter-tables
+      - tapOn: Orders
+      - assertVisible: Search orders
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/counter
