@@ -129,6 +129,11 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
   const forbidden = [queue.error, detail.error, mutation.error].some(
     (error) => error instanceof ApiError && error.status === 403,
   );
+  useEffect(() => {
+    // A denied detail hides private content, but must reveal the route-level
+    // Staff home recovery instead of leaving only the connection header.
+    if (forbidden && navigation.detailActive) navigation.returnToList();
+  }, [forbidden, navigation]);
   const busy = mutation.isPending;
   const disabled =
     mutation.isWriteDisabled || busy || detail.isFetching || detail.isError;
@@ -292,7 +297,10 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                         }
                         variant="secondary"
                         disabled={busy}
-                        onPress={() => setIntent(null)}
+                        onPress={() => {
+                          setIntent(null);
+                          navigation.focusTarget('preparation-state-action');
+                        }}
                       />
                     </View>
                   ) : ticket.status === 'confirmed' ||
@@ -307,6 +315,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                       loading={busy}
                       prominent
                       loadingLabel="Sending…"
+                      focusKey="preparation-state-action"
                       onPress={() => {
                         clearFeedback();
                         setIntent({

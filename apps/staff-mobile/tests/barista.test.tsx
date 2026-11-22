@@ -13,6 +13,7 @@ import * as network from '../src/connectivity/networkAdapter';
 import type { NetworkState } from '../src/connectivity/networkAdapter';
 import { SessionProvider } from '../src/session/context';
 import { PermissionBoundary } from '../src/shell/PermissionBoundary';
+import { ShellPage, ShellPageHeader } from '../src/shell/controls';
 import { deferred, harness, json, user } from './helpers';
 import { QueryCleanup } from './query-cleanup';
 
@@ -60,6 +61,7 @@ async function mount(
   handler: (request: Request) => Promise<Response>,
   permissions = user.permissions,
 ) {
+  const backToHome = jest.fn();
   const h = harness(async (request) =>
     request.url.endsWith('/auth/me')
       ? json({ ...user, permissions })
@@ -69,9 +71,16 @@ async function mount(
     <SessionProvider client={h.client}>
       <QueryCleanup />
       <ConnectivityProvider>
-        <PermissionBoundary moduleId="barista">
-          {() => <PreparationScreen />}
-        </PermissionBoundary>
+        <ShellPage>
+          <ShellPageHeader
+            backLabel="Back to staff home"
+            onBack={backToHome}
+            hideDuringDetail
+          />
+          <PermissionBoundary moduleId="barista">
+            {() => <PreparationScreen />}
+          </PermissionBoundary>
+        </ShellPage>
       </ConnectivityProvider>
     </SessionProvider>,
   );
@@ -79,7 +88,7 @@ async function mount(
   await act(async () => {
     await h.client.login('staff', 'fixture-password');
   });
-  return h;
+  return { ...h, backToHome };
 }
 async function openTicket(status = 'Confirmed') {
   await fireEvent.press(
@@ -145,6 +154,9 @@ test('details contain preparation fields, confirm each write, and show only serv
     return json(page(status === 'ready' ? [] : [{ ...ticket, status }]));
   });
   await openTicket();
+  expect(
+    screen.queryByRole('button', { name: 'Back to staff home' }),
+  ).toBeNull();
   expect(screen.getByText('2 ×')).toBeVisible();
   expect(screen.getByText('Latte')).toBeVisible();
   expect(screen.getByText('Large')).toBeVisible();
@@ -281,6 +293,10 @@ test('API forbidden response immediately hides cached details even if refresh wo
   ).toBeVisible();
   expect(screen.queryByText('Latte')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Start preparing' })).toBeNull();
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Back to staff home' }),
+  );
+  expect(h.backToHome).toHaveBeenCalledTimes(1);
   expect(
     h.fetcher.mock.calls.filter(([r]) => r.url.endsWith('/start')),
   ).toHaveLength(1);

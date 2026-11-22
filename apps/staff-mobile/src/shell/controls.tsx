@@ -31,6 +31,7 @@ export const shellTheme = {
 
 const PageNavigation = createContext({
   detailActive: false,
+  focusTarget: (_key: string) => {},
   rememberPosition: (_key: string) => {},
   openDetail: (_key: string) => {},
   returnToList: () => {},
@@ -69,6 +70,7 @@ export function ShellPage({ children }: { children: ReactNode }) {
         <PageNavigation.Provider
           value={{
             detailActive,
+            focusTarget: setReturnTarget,
             rememberPosition: (key) => {
               origin.current = { key, y: position.current };
               setReturnTarget(null);
