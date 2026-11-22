@@ -1,4 +1,5 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { ScrollView } from 'react-native';
 import { QueryClient, onlineManager } from '@tanstack/react-query';
 import { ApiError, NetworkError } from '../src/api/errors';
 import type { components } from '../src/api/schema';
@@ -8,6 +9,7 @@ import type { NetworkState } from '../src/connectivity/networkAdapter';
 import { OrdersScreen } from '../src/features/orders/OrdersScreen';
 import { SessionProvider } from '../src/session/context';
 import type { SessionClient, StaffSession } from '../src/session/session';
+import { ShellPage } from '../src/shell/controls';
 
 jest.mock('expo-crypto', () => ({
   randomUUID: () => '00000000-0000-4000-8000-000000000182',
@@ -128,7 +130,9 @@ async function setup({ manager = false, permissions = user.permissions } = {}) {
   const view = await render(
     <SessionProvider client={client} queryClient={queryClient}>
       <ConnectivityProvider>
-        <OrdersScreen user={session.user} manager={manager} />
+        <ShellPage>
+          <OrdersScreen user={session.user} manager={manager} />
+        </ShellPage>
       </ConnectivityProvider>
     </SessionProvider>,
   );
@@ -186,6 +190,39 @@ test('searches server orders by number/table, filters fulfillment and opens occu
   );
   await view.findByText('Fulfillment: confirmed');
   await view.findByText('Add-ons: Oat milk');
+});
+
+test('returns the viewport to the filter after a deeply scrolled selection collapses', async () => {
+  const scrollTo = jest.spyOn(ScrollView.prototype, 'scrollTo');
+  try {
+    const { view } = await setup();
+    await view.findByRole('button', { name: 'Open order ORD-182' });
+    const scroll = view.container.queryAll(
+      (node) => node.type === 'RCTScrollView',
+    )[0]!;
+    await fireEvent.scroll(scroll, {
+      nativeEvent: { contentOffset: { x: 0, y: 400 } },
+    });
+    await fireEvent.press(
+      view.getByRole('button', { name: 'Filter orders: All' }),
+    );
+    await fireEvent.scroll(scroll, {
+      nativeEvent: { contentOffset: { x: 0, y: 1400 } },
+    });
+    await fireEvent.press(
+      view.getByRole('button', { name: 'Show ready orders' }),
+    );
+    await fireEvent(scroll, 'contentSizeChange', 360, 2400);
+    expect(scrollTo).toHaveBeenLastCalledWith({ y: 400, animated: false });
+    expect(
+      view.getByRole('button', {
+        name: 'Filter orders: Ready',
+        expanded: false,
+      }),
+    ).toBeVisible();
+  } finally {
+    scrollTo.mockRestore();
+  }
 });
 
 test('shows empty lists, read failure and manual recovery', async () => {

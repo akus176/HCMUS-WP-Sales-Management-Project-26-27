@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useRef,
   useState,
   type ComponentRef,
@@ -29,6 +30,7 @@ export const shellTheme = {
 };
 
 const PageNavigation = createContext({
+  rememberPosition: (_key: string) => {},
   openDetail: (_key: string) => {},
   returnToList: () => {},
   returnTarget: null as string | null,
@@ -64,6 +66,10 @@ export function ShellPage({ children }: { children: ReactNode }) {
       >
         <PageNavigation.Provider
           value={{
+            rememberPosition: (key) => {
+              origin.current = { key, y: position.current };
+              setReturnTarget(null);
+            },
             openDetail: (key) => {
               origin.current = { key, y: position.current };
               setReturnTarget(null);
@@ -278,6 +284,18 @@ export function ShellButton({
   const ref = useRef<ComponentRef<typeof View>>(null);
   const navigation = usePageNavigation();
   const unavailable = disabled || loading;
+  useEffect(() => {
+    if (!focusKey || navigation.returnTarget !== focusKey) return;
+    // A collapsed disclosure stays mounted, so it may not receive onLayout.
+    // Wait for the updated layout before returning accessible focus to it.
+    const frame = requestAnimationFrame(() => {
+      if (ref.current) {
+        AccessibilityInfo.sendAccessibilityEvent(ref.current, 'focus');
+        navigation.finishReturn();
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [focusKey, navigation]);
   return (
     <Pressable
       ref={ref}

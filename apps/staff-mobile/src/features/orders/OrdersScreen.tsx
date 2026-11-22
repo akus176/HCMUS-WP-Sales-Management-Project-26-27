@@ -211,7 +211,12 @@ export function OrdersScreen({
             label={`Filter orders: ${filter === 'ready_delivery' ? 'Ready unassigned deliveries' : filter[0]!.toUpperCase() + filter.slice(1)}`}
             expanded={filtersExpanded}
             variant="secondary"
-            onPress={() => setFiltersExpanded(!filtersExpanded)}
+            focusKey="order-filter"
+            onPress={() => {
+              if (filtersExpanded) navigation.returnToList();
+              else navigation.rememberPosition('order-filter');
+              setFiltersExpanded(!filtersExpanded);
+            }}
           />
           {filtersExpanded && (
             <ShellSelection>
@@ -233,6 +238,7 @@ export function OrdersScreen({
                   onPress={() => {
                     setFilter(value);
                     setFiltersExpanded(false);
+                    navigation.returnToList();
                   }}
                 />
               ))}
