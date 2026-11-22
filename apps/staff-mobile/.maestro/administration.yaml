@@ -11,7 +11,7 @@ name: Account details, deactivation and security event filters
     direction: DOWN
 - tapOn: Search staff accounts
 - inputText: ${MAESTRO_TARGET_NAME}
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: View details for ${MAESTRO_TARGET_NAME}
     direction: DOWN

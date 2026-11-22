@@ -20,7 +20,7 @@ name: Manager cancellation and ready delivery assignment against the shared API
 - tapOn: Manage cancellations and deliveries
 - tapOn: Search orders
 - inputText: ${MAESTRO_CANCEL_ORDER}
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Open order ${MAESTRO_CANCEL_ORDER}
     direction: DOWN
@@ -52,7 +52,7 @@ name: Manager cancellation and ready delivery assignment against the shared API
 - tapOn: Manage cancellations and deliveries
 - tapOn: Search orders
 - inputText: ${MAESTRO_DELIVERY_ORDER}
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Open order ${MAESTRO_DELIVERY_ORDER}
     direction: DOWN

@@ -8,7 +8,7 @@ name: Offline stock writes stay disabled and are not replayed
     direction: DOWN
 - tapOn: Search ingredients
 - inputText: ${MAESTRO_OFFLINE_INGREDIENT}
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Record adjustment for ${MAESTRO_OFFLINE_INGREDIENT}
     direction: DOWN
@@ -18,13 +18,13 @@ name: Offline stock writes stay disabled and are not replayed
     direction: DOWN
 - tapOn: Quantity change
 - inputText: '2'
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Adjustment reason
     direction: DOWN
 - tapOn: Adjustment reason
 - inputText: Must never be saved
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - setAirplaneMode: enabled
 - extendedWaitUntil:
     visible: 'Offline.*'

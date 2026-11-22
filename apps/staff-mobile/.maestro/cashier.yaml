@@ -27,7 +27,7 @@ name: Cashier payment against the shared API
 - tapOn: Orders
 - tapOn: Search orders
 - inputText: ${MAESTRO_PAYMENT_ORDER}
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Open order ${MAESTRO_PAYMENT_ORDER}
     direction: DOWN
@@ -37,7 +37,7 @@ name: Cashier payment against the shared API
     direction: DOWN
 - tapOn: Payment amount
 - inputText: '10'
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Review payment
     direction: DOWN
