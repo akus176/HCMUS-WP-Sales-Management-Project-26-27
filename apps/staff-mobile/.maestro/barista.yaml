@@ -25,11 +25,17 @@ name: Barista progression against the shared API
     text: Open selected ticket
     enabled: false
 - scrollUntilVisible:
-    element: Confirmed
+    element: '^Confirmed$'
     direction: UP
-- tapOn: Confirmed
-- tapOn: Preparing
-- tapOn: All active
+- tapOn: '^Confirmed$'
+- scrollUntilVisible:
+    element: '^Preparing$'
+    direction: UP
+- tapOn: '^Preparing$'
+- scrollUntilVisible:
+    element: '^All active$'
+    direction: UP
+- tapOn: '^All active$'
 - repeat:
     times: ${MAESTRO_QUEUE_PAGE_SKIP}
     commands:
@@ -38,7 +44,7 @@ name: Barista progression against the shared API
           direction: DOWN
       - tapOn: Next page
 - scrollUntilVisible:
-    element: All active
+    element: '^All active$'
     direction: UP
 - scrollUntilVisible:
     element: Select ticket ${MAESTRO_ORDER_NUMBER}
