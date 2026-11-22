@@ -4,6 +4,24 @@ OpenSpec change: `polish-staff-mobile-ux`. Baseline source:
 `5c9ed019398099cc59e3a007b6cf82a71208d25f`. This is a fresh source audit on 2026-11-19;
 historical screenshots are identified separately and are not a new native run.
 
+## Concept-alignment follow-up (2026-11-22)
+
+The [mobile concept pack](../../ui-concepts/mobile-2026-11-22/README.md) and revised
+[OpenSpec design](../../../openspec/changes/polish-staff-mobile-ux/design.md) now
+target the ledger Preparation queue and focused ticket detail. The paper-ticket
+stack is an alternative, not a second required implementation. The existing
+inventory, findings, shared-control work and recorded results below remain baseline
+evidence; they do not prove the new concept layout or its E2E acceptance.
+
+Issue #219 holds the single consolidated checklist. Remaining work is queue/detail
+alignment, component and **Maestro CLI** Android flow updates, one combined
+quality/native evidence pass, and @longtoZ review. Reuse the existing Maestro
+barista/workflow/full-suite runners with their disposable fixtures. Retain fresh
+JUnit, matched-state 390×844dp captures, small/large normal/200% text results,
+manual TalkBack/keyboard/target checks and independent API outcome verification.
+No new Android run or concept-implementation pass is claimed by this planning
+update; incomplete native checks remain open.
+
 ## Screen and role inventory
 
 Navigation is permission-based, including users with several roles. Each entry
