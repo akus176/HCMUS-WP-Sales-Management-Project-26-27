@@ -231,8 +231,10 @@ pass with independent state/history checks and no cleanup errors; [their native
 steps and API snapshots](native/reports/workflows/summary.json) are retained.
 Canceled-ready state/history is unchanged with zero business POSTs. The complete **16/16 layout/keyboard cases** pass in one fresh four-profile run;
 [the native evidence index](native/README.md) links 108 original updated screenshots,
-measured targets and the complete reports. Additional baseline profiles, enlarged
-ready-confirmation captures and TalkBack are being finalized; item 2.2 stays open.
+measured targets and the complete reports. Five baseline states are retained for
+each of the four profiles; the additional baseline run passes all four cases.
+Enlarged ready-confirmation captures and TalkBack are being finalized; item 2.2
+stays open.
 
 Failed/partial attempts,
 initial reference-height probes, frame-settling rejection, npm argument forwarding

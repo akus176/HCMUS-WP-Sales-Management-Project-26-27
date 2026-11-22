@@ -33,7 +33,10 @@ states with the current captures. Images retain their aspect ratios and include
 Android chrome. The original baseline is `5c9ed01`; individual baseline provenance
 and whether its originating workflow passed are explicit in
 [baseline-images.json](baseline-images.json). Baseline visual states from a failed
-harness attempt do not establish a passing baseline workflow.
+harness attempt do not establish a passing baseline workflow. The additional
+p200/t100 baseline run passes all four manager/admin capture cases; their
+[summary](reports/additional-baseline-summary.json) is retained separately from
+current acceptance. There are five baseline visual states in each profile.
 
 [The matched concept comparison](comparison.html) uses controlled data and a
 measured 390×844dp content viewport. Its [reference notes](reference/README.md)
@@ -65,7 +68,7 @@ every control was individually measured in every intermediate state.
 
 ## Remaining acceptance work
 
-Additional baseline profile comparisons, enlarged ready-confirmation captures and
+Enlarged ready-confirmation captures and
 manual TalkBack checks are being finalized. Acceptance item 2.2 remains open until
 that evidence is complete. Named reviewer approval is separately outstanding.
 
@@ -75,3 +78,7 @@ The installed ARM development shell is reused with unchanged native dependencies
 and the recorded Metro JavaScript revision. The APIs use disposable PostgreSQL
 databases and synthetic accounts. Raw Maestro command logs and authentication
 material are not published.
+
+The evidence file index uses raw SHA-256 for PNGs and UTF-8 with LF line endings
+for text, so text hashes survive Git newline conversion. Each index entry records
+its hash encoding.

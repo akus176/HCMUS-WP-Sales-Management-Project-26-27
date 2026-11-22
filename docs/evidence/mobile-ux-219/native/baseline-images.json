@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "attempt": "run-before-02",
     "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
@@ -78,5 +78,85 @@
     "workflowPassed": false,
     "captured": "2026-11-22T09:57:34.3758901+07:00",
     "file": "t200/before-account-entry.png"
+  },
+  {
+    "attempt": "baseline-remaining-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "ac26718ed7baa62013089e1e9a2be691c9ee8205aeac75192f2333a744d92287",
+    "workflowPassed": true,
+    "captured": "2026-11-22T17:02:24.1664076+07:00",
+    "file": "p200/before-login.png"
+  },
+  {
+    "attempt": "baseline-remaining-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "cd2cc8acc3cd5246cabfcabeca5763ed56c9e63400e8f5335dd71ad82e6d26e5",
+    "workflowPassed": true,
+    "captured": "2026-11-22T17:02:54.3975622+07:00",
+    "file": "p200/before-prep-top.png"
+  },
+  {
+    "attempt": "baseline-remaining-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "c9a4455118fa089d0b820c6b645368b77bf63b38e057ba3ed37d7dd5e67af4e9",
+    "workflowPassed": true,
+    "captured": "2026-11-22T17:03:22.7757418+07:00",
+    "file": "p200/before-counter.png"
+  },
+  {
+    "attempt": "baseline-remaining-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "cda610444ab575775e3b153b35219035c4dde000e2f32eb1cf96c2c6de3a46e0",
+    "workflowPassed": true,
+    "captured": "2026-11-22T17:04:38.7330011+07:00",
+    "file": "p200/before-accounts.png"
+  },
+  {
+    "attempt": "baseline-remaining-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "1698072045ffd9d82872e417cb982f52599506c74d7bc2130691a9cb8f1c819a",
+    "workflowPassed": true,
+    "captured": "2026-11-22T17:05:16.5910204+07:00",
+    "file": "p200/before-account-entry.png"
+  },
+  {
+    "attempt": "baseline-remaining-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "93666d3939867bd04d279de305a8a700e5c08af71256ac6e25fe3efdf26da23d",
+    "workflowPassed": true,
+    "captured": "2026-11-22T17:11:58.3593126+07:00",
+    "file": "t100/before-login.png"
+  },
+  {
+    "attempt": "baseline-remaining-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "665099879e1873ebfe474c4973e29731b46517821a36b72d3af24fe65da0b612",
+    "workflowPassed": true,
+    "captured": "2026-11-22T17:12:28.4638559+07:00",
+    "file": "t100/before-prep-top.png"
+  },
+  {
+    "attempt": "baseline-remaining-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "f8cf4281775fe592b993e243b633edc0099ee7500bdf1c495c01a764e97c4af3",
+    "workflowPassed": true,
+    "captured": "2026-11-22T17:12:37.5267503+07:00",
+    "file": "t100/before-counter.png"
+  },
+  {
+    "attempt": "baseline-remaining-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "b3a5eccffa579cabffa771676c18775a84cbfd14befbf61c6c062a0813e3b7c2",
+    "workflowPassed": true,
+    "captured": "2026-11-22T17:13:43.5543160+07:00",
+    "file": "t100/before-accounts.png"
+  },
+  {
+    "attempt": "baseline-remaining-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "131ad36d79cbbfec9c72a13417d58b0244607c72897c10bdd8a7a05da04d4b4c",
+    "workflowPassed": true,
+    "captured": "2026-11-22T17:14:02.1680949+07:00",
+    "file": "t100/before-account-entry.png"
   }
 ]

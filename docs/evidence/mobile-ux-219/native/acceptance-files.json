@@ -1,1237 +1,1574 @@
 [
   {
     "file": "README.md",
-    "bytes": 5339,
-    "sha256": "deea55357792944c478406f51790f8d99a4bd33a9b58fa915551abf445b56127"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 5725,
+    "sha256": "6fa7060d5b80ed689eaaffbed9cf044d13041ffe9246ddcd5b735f622547438b"
   },
   {
     "file": "baseline-images.json",
-    "bytes": 3022,
-    "sha256": "b1c60dd054c44f949f13c030d3b55f047b6eb00a6c1be27ba0297fedbc0bd53e"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 6117,
+    "sha256": "8a7c808eb67629c64192a912d8278e08fd342351d0550f452fe3f1ca107e926e"
   },
   {
     "file": "comparison.html",
-    "bytes": 5330,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 5330,
     "sha256": "3b6c34078af0861149df8468df524f9d26e9c27eab7dfba5663028a5ed2c2cd0"
   },
   {
     "file": "gallery.html",
-    "bytes": 11007,
-    "sha256": "70186a163916ceb583271babaf3654758599890ab257ac1f0c4f5c00e573b9f0"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 11409,
+    "sha256": "1d4f60a930f3d657d36a6e05c075c7f1694ffceb9be36d5efb3efae028e78b5d"
   },
   {
     "file": "measured-targets.json",
-    "bytes": 34266,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 34266,
     "sha256": "4ee6bd3043e583ec5a981e6c0e513d426af6f161cc8910190efa986d82dbecde"
   },
   {
     "file": "p100/after-account-detail.png",
-    "bytes": 197208,
+    "hashEncoding": "raw",
+    "hashedBytes": 197208,
     "sha256": "246d5c0fbb84afa67747e601e3c4260b41d42b3e952703eafc6b73ef71b12681"
   },
   {
     "file": "p100/after-account-entry.png",
-    "bytes": 197208,
+    "hashEncoding": "raw",
+    "hashedBytes": 197208,
     "sha256": "246d5c0fbb84afa67747e601e3c4260b41d42b3e952703eafc6b73ef71b12681"
   },
   {
     "file": "p100/after-accounts.png",
-    "bytes": 204928,
+    "hashEncoding": "raw",
+    "hashedBytes": 204928,
     "sha256": "35d23c459a654a72d6a3cd726e50d4b090311c34975dbe4be43153f6d9dd8eaf"
   },
   {
     "file": "p100/after-adjustment-keyboard.png",
-    "bytes": 176865,
+    "hashEncoding": "raw",
+    "hashedBytes": 176865,
     "sha256": "25a0713314e0e32c22e7cc02e566f8243e93811692d1bc0f1d3ca3522d690ff8"
   },
   {
     "file": "p100/after-adjustment.png",
-    "bytes": 218745,
+    "hashEncoding": "raw",
+    "hashedBytes": 218745,
     "sha256": "316f97b8c78b22ef64658466d853cd299a44aa0d33e2a5fe4b4bb2298e4c250f"
   },
   {
     "file": "p100/after-approval-detail.png",
-    "bytes": 159945,
+    "hashEncoding": "raw",
+    "hashedBytes": 159945,
     "sha256": "a604bf487c2437d1609ceace30fc4242c88398697fb739fb6692df330b98f802"
   },
   {
     "file": "p100/after-assignment-review.png",
-    "bytes": 228476,
+    "hashEncoding": "raw",
+    "hashedBytes": 228476,
     "sha256": "6f44476ab1698f10142d59706342b25d93269bca9cb4e21bd379f4a4be3b1f1d"
   },
   {
     "file": "p100/after-cancellation-keyboard.png",
-    "bytes": 213074,
+    "hashEncoding": "raw",
+    "hashedBytes": 213074,
     "sha256": "ba71cf73e4a181fdaaf50dcbae09ac8f99a25fe5857a18661231550de18b0bb0"
   },
   {
     "file": "p100/after-cancellation-review.png",
-    "bytes": 240393,
+    "hashEncoding": "raw",
+    "hashedBytes": 240393,
     "sha256": "ae4bf72a7598e5daca731ba01f7d6acfc82d26216ac81718a37f61a04be9ecea"
   },
   {
     "file": "p100/after-counter.png",
-    "bytes": 212492,
+    "hashEncoding": "raw",
+    "hashedBytes": 212492,
     "sha256": "61cb5b0e592e205dca85df2dbf7cd9f67286d5126256dbc448e983beed1a2365"
   },
   {
     "file": "p100/after-deactivation-error.png",
-    "bytes": 221660,
+    "hashEncoding": "raw",
+    "hashedBytes": 221660,
     "sha256": "3242413254c72b3da43eb7b7165eaf6aadfdf204944355a4d9d623c401faa87b"
   },
   {
     "file": "p100/after-delivery-detail.png",
-    "bytes": 217644,
+    "hashEncoding": "raw",
+    "hashedBytes": 217644,
     "sha256": "ba2e6e4f2d32b3551e0e259012a0e18bb071046a3bb082da6560bbbc58b8433a"
   },
   {
     "file": "p100/after-failure-form.png",
-    "bytes": 222895,
+    "hashEncoding": "raw",
+    "hashedBytes": 222895,
     "sha256": "43415aeb79ec6c9dcc8a3e834e04f262e47205a3b9b1300877a62ebe2a2b6661"
   },
   {
     "file": "p100/after-failure-keyboard.png",
-    "bytes": 197621,
+    "hashEncoding": "raw",
+    "hashedBytes": 197621,
     "sha256": "ce121350891d9a349de698bdf1f5d02edafb84db1115b12ff5792f47498e80fc"
   },
   {
     "file": "p100/after-filter-selected.png",
-    "bytes": 206832,
+    "hashEncoding": "raw",
+    "hashedBytes": 206832,
     "sha256": "855dbda24c8cdec71cb3f30d2c30f680d2baf0335965cd9510a2faba9b4b62e4"
   },
   {
     "file": "p100/after-filters-expanded.png",
-    "bytes": 186842,
+    "hashEncoding": "raw",
+    "hashedBytes": 186842,
     "sha256": "c86aa74c6459a78037fd216b6839c37385101ebd1143fbddea99789dc592568e"
   },
   {
     "file": "p100/after-login.png",
-    "bytes": 81833,
+    "hashEncoding": "raw",
+    "hashedBytes": 81833,
     "sha256": "1e819ff0272ad86776db749cdd73afa0d9707860e36952b4765ee1cd54fc0959"
   },
   {
     "file": "p100/after-low-stock.png",
-    "bytes": 202358,
+    "hashEncoding": "raw",
+    "hashedBytes": 202358,
     "sha256": "3c3bd24eefbef4c044fe641052397bdc5d0e650be985bb0cb3caf37b1d24f6e9"
   },
   {
     "file": "p100/after-movements.png",
-    "bytes": 207178,
+    "hashEncoding": "raw",
+    "hashedBytes": 207178,
     "sha256": "144d03b0dfab50488809ea67518ec1d23cbc34c4e4edb16476c86677668a39a1"
   },
   {
     "file": "p100/after-payment-keyboard.png",
-    "bytes": 164455,
+    "hashEncoding": "raw",
+    "hashedBytes": 164455,
     "sha256": "b9dd14fb6ebe9fda17b987269bc8865f78f74ad17b5c6363cb94bde2805a0da1"
   },
   {
     "file": "p100/after-payment-review.png",
-    "bytes": 215554,
+    "hashEncoding": "raw",
+    "hashedBytes": 215554,
     "sha256": "67850f0447f543a2c72e731845db848164c6c23b99fba1e80dd51f002df8facf"
   },
   {
     "file": "p100/after-prep-detail.png",
-    "bytes": 155982,
+    "hashEncoding": "raw",
+    "hashedBytes": 155982,
     "sha256": "e0bdcd976a5afb84e2d8ca045ec976e53bd414ffeb2122014a672619d4e67659"
   },
   {
     "file": "p100/after-prep-record.png",
-    "bytes": 228205,
+    "hashEncoding": "raw",
+    "hashedBytes": 228205,
     "sha256": "fa3738e3c963bd98a58e8310a8c05cc9f4a4a32668d8c139352af003e07f2c43"
   },
   {
     "file": "p100/after-prep-selected.png",
-    "bytes": 229109,
+    "hashEncoding": "raw",
+    "hashedBytes": 229109,
     "sha256": "7e2d8ab8410c12febb5d45431d9a00667fb4c519bc4209fef4cd9d5e25f96cc5"
   },
   {
     "file": "p100/after-prep-top.png",
-    "bytes": 228205,
+    "hashEncoding": "raw",
+    "hashedBytes": 228205,
     "sha256": "fa3738e3c963bd98a58e8310a8c05cc9f4a4a32668d8c139352af003e07f2c43"
   },
   {
     "file": "p100/after-receipt-detail.png",
-    "bytes": 179089,
+    "hashEncoding": "raw",
+    "hashedBytes": 179089,
     "sha256": "b52b8b440045677118cbf5ab362d329dc82cdee57dcb0afcfe5cfb3a60744d38"
   },
   {
     "file": "p100/after-security-events.png",
-    "bytes": 203002,
+    "hashEncoding": "raw",
+    "hashedBytes": 203002,
     "sha256": "f44abc4c0ac162aaf11029106f2b89df5402266066a90a2097f19a401d0320a4"
   },
   {
     "file": "p100/before-account-entry.png",
-    "bytes": 188427,
+    "hashEncoding": "raw",
+    "hashedBytes": 188427,
     "sha256": "f122815e1109569f06ee7f5f2b01c7a25413c79da929fa5d78a003990b2401ab"
   },
   {
     "file": "p100/before-accounts.png",
-    "bytes": 200456,
+    "hashEncoding": "raw",
+    "hashedBytes": 200456,
     "sha256": "877d17d083d4d8c25cc173afbd8a932b1af328733d95d1b9c31f19e7b52022d7"
   },
   {
     "file": "p100/before-counter.png",
-    "bytes": 154890,
+    "hashEncoding": "raw",
+    "hashedBytes": 154890,
     "sha256": "5f3f6bd0753afa704dd5ca394017c32e256944ccc54f01b87b12995edf344d44"
   },
   {
     "file": "p100/before-login.png",
-    "bytes": 83764,
+    "hashEncoding": "raw",
+    "hashedBytes": 83764,
     "sha256": "ad6e145c885897bae5632376ac2ae09f211d723fe1bbe139d600e9d0e1c24c19"
   },
   {
     "file": "p100/before-prep-top.png",
-    "bytes": 179285,
+    "hashEncoding": "raw",
+    "hashedBytes": 179285,
     "sha256": "efd8b5f8db5cf00db60137d197b4bf80b8768aaa6a4c6ba9fecabba114f7df28"
   },
   {
     "file": "p200/after-account-detail.png",
-    "bytes": 228349,
+    "hashEncoding": "raw",
+    "hashedBytes": 228349,
     "sha256": "d131e32a576ddafe684d0dd9686a4c05ffd5a55ea0d65778bd47b0d642e23f5a"
   },
   {
     "file": "p200/after-account-entry.png",
-    "bytes": 214452,
+    "hashEncoding": "raw",
+    "hashedBytes": 214452,
     "sha256": "812ea5b4aa46f25eadb86e5f9e34e7cd1b925610e801209b33be8b113cdfa484"
   },
   {
     "file": "p200/after-accounts.png",
-    "bytes": 197600,
+    "hashEncoding": "raw",
+    "hashedBytes": 197600,
     "sha256": "b582ef52b2eeb001cd0f0dfdc2be25eb1716eec2db0cb4f571ead9aaf3585c3b"
   },
   {
     "file": "p200/after-adjustment-keyboard.png",
-    "bytes": 188957,
+    "hashEncoding": "raw",
+    "hashedBytes": 188957,
     "sha256": "694c0942e39faee48f49020c71bd6777a5af9b159a97ca34ad25775dcff8b674"
   },
   {
     "file": "p200/after-adjustment.png",
-    "bytes": 226843,
+    "hashEncoding": "raw",
+    "hashedBytes": 226843,
     "sha256": "10858672b0a9b6142fedd5f20682670851aa30e3121e06b2ea3b58b1965e66e3"
   },
   {
     "file": "p200/after-approval-detail.png",
-    "bytes": 227035,
+    "hashEncoding": "raw",
+    "hashedBytes": 227035,
     "sha256": "ad003ecdfa22eb6a2309582d849dcc8b40ac3786a9d5d073bc801679ecccab8b"
   },
   {
     "file": "p200/after-assignment-review.png",
-    "bytes": 243242,
+    "hashEncoding": "raw",
+    "hashedBytes": 243242,
     "sha256": "a6c83b0e1d82a4e5c42328bf977ece5e7748800532b37c511f167c4e64c89851"
   },
   {
     "file": "p200/after-cancellation-keyboard.png",
-    "bytes": 212805,
+    "hashEncoding": "raw",
+    "hashedBytes": 212805,
     "sha256": "fded5d2036bfd2edeff224ea539dec7bef82ccd9a58201b434ca8eec320f1d5b"
   },
   {
     "file": "p200/after-cancellation-review.png",
-    "bytes": 235089,
+    "hashEncoding": "raw",
+    "hashedBytes": 235089,
     "sha256": "4da39f8802af9b09879c944766cf92325bac358e95c647d7aa87704b4d1e103a"
   },
   {
     "file": "p200/after-counter.png",
-    "bytes": 196782,
+    "hashEncoding": "raw",
+    "hashedBytes": 196782,
     "sha256": "fcb3475d63ab4162862b4eeb3184a8b12d008b15a240a9f9b50ac56b94c831b0"
   },
   {
     "file": "p200/after-deactivation-error.png",
-    "bytes": 246009,
+    "hashEncoding": "raw",
+    "hashedBytes": 246009,
     "sha256": "d64c9c71854407bcec12e5c2ea1fe246c193a354f2ba19a0c1b9845f8eb6f13b"
   },
   {
     "file": "p200/after-delivery-detail.png",
-    "bytes": 205780,
+    "hashEncoding": "raw",
+    "hashedBytes": 205780,
     "sha256": "54c53fb4457827c693e4b125271f3d2156cf75e1973ccaf7e36b7dabaa6b711d"
   },
   {
     "file": "p200/after-failure-form.png",
-    "bytes": 223108,
+    "hashEncoding": "raw",
+    "hashedBytes": 223108,
     "sha256": "64489aac3b8ec4a8edc9aa0b797c164758d35b36430265189c4155ae75c6d958"
   },
   {
     "file": "p200/after-failure-keyboard.png",
-    "bytes": 212017,
+    "hashEncoding": "raw",
+    "hashedBytes": 212017,
     "sha256": "ebf3211702d1142340d5b2001b68ea7dc005c1d319bddfe7fd55a6dbe339aa5f"
   },
   {
     "file": "p200/after-filter-selected.png",
-    "bytes": 210849,
+    "hashEncoding": "raw",
+    "hashedBytes": 210849,
     "sha256": "723a04a18a91baf04b173c7060cbf2094344a393cac2aa5cb3283f8e1b926f9c"
   },
   {
     "file": "p200/after-filters-expanded.png",
-    "bytes": 208123,
+    "hashEncoding": "raw",
+    "hashedBytes": 208123,
     "sha256": "9765d3800e20d90740054f5d46d9e41bbd10082ebf4bed6b9677d0dd0a528a88"
   },
   {
     "file": "p200/after-login.png",
-    "bytes": 116040,
+    "hashEncoding": "raw",
+    "hashedBytes": 116040,
     "sha256": "65f20162f3c721f71e68b59f50aedd4ba31076f7ef8f875ce9a9a98cc4cea2c0"
   },
   {
     "file": "p200/after-low-stock.png",
-    "bytes": 216092,
+    "hashEncoding": "raw",
+    "hashedBytes": 216092,
     "sha256": "43b71620c53db3481af0f3c3d32e3dfa88ab38f32b96ba70c7bba387c5bf6e68"
   },
   {
     "file": "p200/after-movements.png",
-    "bytes": 208240,
+    "hashEncoding": "raw",
+    "hashedBytes": 208240,
     "sha256": "bd5fd2e18b2c70dda23776ceb1bbcce6daf4dcc4e70e3b8d26925020a6276b49"
   },
   {
     "file": "p200/after-payment-keyboard.png",
-    "bytes": 165747,
+    "hashEncoding": "raw",
+    "hashedBytes": 165747,
     "sha256": "22dac7f621696e770330c970649faaceb4db0c9bc39528907b7a10b53d34256c"
   },
   {
     "file": "p200/after-payment-review.png",
-    "bytes": 239500,
+    "hashEncoding": "raw",
+    "hashedBytes": 239500,
     "sha256": "12005771fd2c7400cddc79fe72983eebbedcc77c1bb6569f4c518d6da528c3a1"
   },
   {
     "file": "p200/after-prep-detail.png",
-    "bytes": 226278,
+    "hashEncoding": "raw",
+    "hashedBytes": 226278,
     "sha256": "4c43617c772a767af6d62030c23bf75b8aff10999c038eb3fad73f19dcf4e024"
   },
   {
     "file": "p200/after-prep-record.png",
-    "bytes": 236731,
+    "hashEncoding": "raw",
+    "hashedBytes": 236731,
     "sha256": "05c2a24483c89b4893fc510ab2d2301b8d5c2cce77cb7caef5f7f06b71ead1b8"
   },
   {
     "file": "p200/after-prep-selected.png",
-    "bytes": 240848,
+    "hashEncoding": "raw",
+    "hashedBytes": 240848,
     "sha256": "6846b983366973c90866bccfebdc7678652f09374d5601fb5bec9b26482cd3dd"
   },
   {
     "file": "p200/after-prep-top.png",
-    "bytes": 236731,
+    "hashEncoding": "raw",
+    "hashedBytes": 236731,
     "sha256": "05c2a24483c89b4893fc510ab2d2301b8d5c2cce77cb7caef5f7f06b71ead1b8"
   },
   {
     "file": "p200/after-receipt-detail.png",
-    "bytes": 210441,
+    "hashEncoding": "raw",
+    "hashedBytes": 210441,
     "sha256": "7edc030f7465dbdee24e131ff7d0da331bba5f87028a0c50ed3209fdc6105f95"
   },
   {
     "file": "p200/after-security-events.png",
-    "bytes": 189078,
+    "hashEncoding": "raw",
+    "hashedBytes": 189078,
     "sha256": "cfb13842bab1b53f8a3babebd402ba1398547b0a822821e830d958e206912bfc"
   },
   {
+    "file": "p200/before-account-entry.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 185882,
+    "sha256": "1698072045ffd9d82872e417cb982f52599506c74d7bc2130691a9cb8f1c819a"
+  },
+  {
+    "file": "p200/before-accounts.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 221610,
+    "sha256": "cda610444ab575775e3b153b35219035c4dde000e2f32eb1cf96c2c6de3a46e0"
+  },
+  {
+    "file": "p200/before-counter.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 165856,
+    "sha256": "c9a4455118fa089d0b820c6b645368b77bf63b38e057ba3ed37d7dd5e67af4e9"
+  },
+  {
+    "file": "p200/before-login.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 103227,
+    "sha256": "ac26718ed7baa62013089e1e9a2be691c9ee8205aeac75192f2333a744d92287"
+  },
+  {
+    "file": "p200/before-prep-top.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 191632,
+    "sha256": "cd2cc8acc3cd5246cabfcabeca5763ed56c9e63400e8f5335dd71ad82e6d26e5"
+  },
+  {
     "file": "reference/README.md",
-    "bytes": 4764,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 4764,
     "sha256": "c6b92b87233dd4e0318e4e9b154a6d305f11df0f67238acfb20d7ab629db3897"
   },
   {
     "file": "reference/after-canceled.png",
-    "bytes": 164852,
+    "hashEncoding": "raw",
+    "hashedBytes": 164852,
     "sha256": "98fcb5c50c5c1ecdaf01963b6a8ecfb292228112d617978fa2e75224a9717705"
   },
   {
     "file": "reference/after-confirmation.png",
-    "bytes": 211461,
+    "hashEncoding": "raw",
+    "hashedBytes": 211461,
     "sha256": "39ccd81d4fbaf8593bc7454c9b7dc6e567b9fdceead0619a92310e6812c10eb4"
   },
   {
     "file": "reference/after-detail-geometry.json",
-    "bytes": 143,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 143,
     "sha256": "8622b01965ff7ace659e50bbea5209812fe68432f2bc7d512c5319551ea023de"
   },
   {
     "file": "reference/after-detail.xml",
-    "bytes": 515,
-    "sha256": "53997007c2faa0ad351808470ee1de4cae48c0ea7ffb24eaddec2f40f8ba006d"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 510,
+    "sha256": "dc94f8a4ec992f84c3e20399c889be2df5b4e577352b7b00ffbc3590d5a007a6"
   },
   {
     "file": "reference/after-queue-geometry.json",
-    "bytes": 143,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 143,
     "sha256": "8622b01965ff7ace659e50bbea5209812fe68432f2bc7d512c5319551ea023de"
   },
   {
     "file": "reference/after-queue.png",
-    "bytes": 237672,
+    "hashEncoding": "raw",
+    "hashedBytes": 237672,
     "sha256": "11d3429bd2a9e869db32b1fc30250d44e7b7812ef1eabbd8dab0fdbe8e9810af"
   },
   {
     "file": "reference/after-queue.xml",
-    "bytes": 515,
-    "sha256": "43437be40de4f572fdb44a8134124e82688bbb23921335ae4558fa1bd316b7dd"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 510,
+    "sha256": "06ae0dfa4fe455d06f91c4f284892d72935b39fb41f6f14d5469aca30eedd644"
   },
   {
     "file": "reference/after-selection.png",
-    "bytes": 237748,
+    "hashEncoding": "raw",
+    "hashedBytes": 237748,
     "sha256": "8ac61311af4a41e144109211c9159d3862365b97fb5da57c7095fc408cfd7cf1"
   },
   {
     "file": "reference/before-canceled.png",
-    "bytes": 177275,
+    "hashEncoding": "raw",
+    "hashedBytes": 177275,
     "sha256": "d5aac28308cb40eedd635f80dff33f912714ed561c9960948424239d58b79fdc"
   },
   {
     "file": "reference/before-confirmation.png",
-    "bytes": 184120,
+    "hashEncoding": "raw",
+    "hashedBytes": 184120,
     "sha256": "cc30283c7b23cbdf64e29ca3495eab96ad2e8a3d44aade8c1d3c6bb6c20ce9a9"
   },
   {
     "file": "reference/before-detail-geometry.json",
-    "bytes": 143,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 143,
     "sha256": "8622b01965ff7ace659e50bbea5209812fe68432f2bc7d512c5319551ea023de"
   },
   {
     "file": "reference/before-detail.xml",
-    "bytes": 515,
-    "sha256": "ecc9533f7bae69831149e191d9bc38ecc67825cd18b596291fbea94b15c79edb"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 510,
+    "sha256": "4f5fb4fb8f16e57cc0c1bebdcd048a54b46fc579dbd1fb1eb2bbf92e401548d2"
   },
   {
     "file": "reference/before-queue-geometry.json",
-    "bytes": 143,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 143,
     "sha256": "8622b01965ff7ace659e50bbea5209812fe68432f2bc7d512c5319551ea023de"
   },
   {
     "file": "reference/before-queue.png",
-    "bytes": 192108,
+    "hashEncoding": "raw",
+    "hashedBytes": 192108,
     "sha256": "659c5af1665c38779b6b85be79855f4ef0df7038acd650a02084eb783909a5a8"
   },
   {
     "file": "reference/before-queue.xml",
-    "bytes": 515,
-    "sha256": "11ed7ae09468adde52f88370ab4b0f4841c3654c934ad9b2d262d43cfb323d9c"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 510,
+    "sha256": "31a35d6e17f019ce73d8fbab92484d683ab2c161a8c9b21766ebb8b05185dc3f"
   },
   {
     "file": "reference/before-selection.png",
-    "bytes": 192108,
+    "hashEncoding": "raw",
+    "hashedBytes": 192108,
     "sha256": "659c5af1665c38779b6b85be79855f4ef0df7038acd650a02084eb783909a5a8"
   },
   {
     "file": "reference/cancellation-state.json",
-    "bytes": 4080,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 4080,
     "sha256": "2a2f6fa116a7a0ba4320a80eb17850e41031a8d189041528e0d10f6a9791e018"
   },
   {
     "file": "reference/manifest.json",
-    "bytes": 4491,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 4491,
     "sha256": "7116d22c08422594be400aa2352d89a347294fc7f1e7817ea0cf8f7004272a55"
   },
   {
     "file": "reports/acceptance-pipeline.json",
-    "bytes": 558,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 558,
     "sha256": "901295d19d1c32c5f90b5719ac73e7fd8ff2716649ce5eb57d1e246aef88e39c"
   },
   {
+    "file": "reports/additional-baseline-summary.json",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 1230,
+    "sha256": "26276f9d6caa620f93ed78719a7868abf685cd0aecc438becffa7ded769678b3"
+  },
+  {
     "file": "reports/automated-checks.json",
-    "bytes": 636,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 636,
     "sha256": "b635719910b1ce2ebab36d9416eee4de02445e0a62a1e6cdf0e613fefb1bbd8d"
   },
   {
     "file": "reports/barista-standalone.xml",
-    "bytes": 481,
-    "sha256": "761150e7c3fa6f9afa1be219679869e7192562df7970f5210d0fcec387233f1f"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 475,
+    "sha256": "6abd1a45b38d1866cfa1d85481ec4b1ca37db31def7292b94bd1f9b50c812ee5"
+  },
+  {
+    "file": "reports/baseline-p200-admin.xml",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 537,
+    "sha256": "2298f1ec8f943360892fe26f0059b00c22319213b1576e152959286997edc9c7"
+  },
+  {
+    "file": "reports/baseline-p200-manager.xml",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 476,
+    "sha256": "c843c56668881c793904d287dba15e0053c038c8c81a1d76f271ad858957179b"
+  },
+  {
+    "file": "reports/baseline-t100-admin.xml",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 537,
+    "sha256": "aff91923a293ba0910ff2bcf0a83efea53560c1f486fa46eb61ea48c756a4c52"
+  },
+  {
+    "file": "reports/baseline-t100-manager.xml",
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 476,
+    "sha256": "cc9420268f0d3ec8a5f2e089c43ce0135b3dec2b7cb9fea92787639fc8961310"
   },
   {
     "file": "reports/independent-api-checks.txt",
-    "bytes": 551,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 551,
     "sha256": "e23b380e6bc1244aaa0ca0ceb23936af367d1b27ed87f9128987062e8a97c0c2"
   },
   {
     "file": "reports/layout-summary.json",
-    "bytes": 2955,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 2955,
     "sha256": "82173489686185103aeafa4a2d7b57eca99d3ba81af576fe7c0ce2fd22700fad"
   },
   {
     "file": "reports/native-run.json",
-    "bytes": 2907,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 2907,
     "sha256": "63fc3e3d8feced8abb8dffc1bf8199a6b10956ff12fb09a806696ff77126965a"
   },
   {
     "file": "reports/p100-admin.xml",
-    "bytes": 539,
-    "sha256": "78070f53b806a847c93d0d96365a58d5943393795239ddf3f24388b451cce83f"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 534,
+    "sha256": "20cf6cc919420334887a52251963db7f24cc678e7c08aa04f1d5d3614f88d860"
   },
   {
     "file": "reports/p100-delivery.xml",
-    "bytes": 519,
-    "sha256": "f05534818b61b39ee2473a8bacabd0b6607072d0cb5299789c75c02c0be66389"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 514,
+    "sha256": "ad77983c694522008ea2b8804eb49265dda7d7b47e29ddce5ed30fc65cb14911"
   },
   {
     "file": "reports/p100-inventory.xml",
-    "bytes": 543,
-    "sha256": "b0255e64e78e137eb4713627dc446323507f94a44f51c490cb14d9b65a4a673e"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 538,
+    "sha256": "e5e6897f3da14b3d3f38e06d78180a87a23ba645a56164fa6f6764e2be5312b1"
   },
   {
     "file": "reports/p100-manager.xml",
-    "bytes": 535,
-    "sha256": "7eb10bd0d9cbc5ad242423e672d3bb3be36dc84963f843dc050eaf18bc3a4a12"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 530,
+    "sha256": "56b5c15b667613ca49fc8e1418aab291a4f38a448bdca07e661acafbef6aa31f"
   },
   {
     "file": "reports/p200-admin.xml",
-    "bytes": 542,
-    "sha256": "1b6a5e5689eac1f6d7a370144eb9923fdc644c3bf66a0218629b66fbd59a2a78"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 537,
+    "sha256": "f4c93a3d6ea4ea16aa5bd3a1011fe66897b5a2c56b4a037681833213e7db3a9b"
   },
   {
     "file": "reports/p200-delivery.xml",
-    "bytes": 520,
-    "sha256": "e4faf12d90e8560308f99f4be4c4e0555b9ac4ebc37e1170e8179d2688e839cd"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 515,
+    "sha256": "912863c7e1209a2b2ce44c3f6e23c0171edf1ae44391d6a44d4a77d8d7b96463"
   },
   {
     "file": "reports/p200-inventory.xml",
-    "bytes": 543,
-    "sha256": "6d1ba0755a7ccaf62be057f3822c554a5ece21bd86f0423a3012e55eba6a2bf0"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 538,
+    "sha256": "2f34b462083e35ca55d1c0896d48ecab21abe163cc00ecb270f0a7a45ecd4ee1"
   },
   {
     "file": "reports/p200-manager.xml",
-    "bytes": 535,
-    "sha256": "eeee49ce9ccd91672d8aae69232372a2c1f2ff244c3d692e1c0b50ffb761b6c6"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 530,
+    "sha256": "c68329e6cbd2dee41df35d2f1566b298cb28c90de2de400e8c5e487c94883875"
   },
   {
     "file": "reports/suite-administration.xml",
-    "bytes": 528,
-    "sha256": "091057e41f2dfbd03f641ec4e581a5c99ceca3e7641a7cf4156d0d0cf19d7ee4"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 522,
+    "sha256": "722c7dafc6a4e7cedf9816830b8dbcc212dc8be3b60b6ddb00157ad357430e17"
   },
   {
     "file": "reports/suite-approvals.xml",
-    "bytes": 508,
-    "sha256": "718f02e0ec37f73acea93462acfb8678dbc72ff74d1ac5d07ca07dbe54844fc2"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 502,
+    "sha256": "87617c816ecb9bd503f736c586587f4a815ac33cee6a002e756802dfed0c200c"
   },
   {
     "file": "reports/suite-barista.xml",
-    "bytes": 481,
-    "sha256": "587a37108063e5283029ee4eb1a9488b2b83aa6f89babb3ccd7031cf7a498e37"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 475,
+    "sha256": "0976f5713ce73c696bf4bc5196d851085355ef160b5132cfbf55f901af00711d"
   },
   {
     "file": "reports/suite-cashier.xml",
-    "bytes": 467,
-    "sha256": "031f802560a20208634d1034b9b513df28653cd9a5361ae14849c7679bc1db9d"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 461,
+    "sha256": "d1c312a867876f334085f41b7e12be5bf6bd78a48a726475de95ad5799b12612"
   },
   {
     "file": "reports/suite-courier.xml",
-    "bytes": 538,
-    "sha256": "fc1fbbda4616241ed22bd9a819907ebf51104f3acad385f5b65a55fc66296173"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 532,
+    "sha256": "34438f3b43d6c2a20354f0154f54af10bf9cc817bfb3d041b25ad6fcc1cc5365"
   },
   {
     "file": "reports/suite-inventory.xml",
-    "bytes": 554,
-    "sha256": "6879a2f27c5f75934644cef4c7355acef8c44668b7963cd114316389377e50c0"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 548,
+    "sha256": "5c5dd89945ba74597d2df4d71d56421834e7794655b7c4f6c1e314f0098f6e0d"
   },
   {
     "file": "reports/suite-manager-orders.xml",
-    "bytes": 581,
-    "sha256": "37de69e8ec5e90eb1a9343aa478e210e3e70c48f9dca372611285973b209dfa4"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 575,
+    "sha256": "36a777d17d61a3b71a1fc515113cdbb443253bfcf7d5dd37c7e44101e9830e6d"
   },
   {
     "file": "reports/suite-notification-links.xml",
-    "bytes": 574,
-    "sha256": "f041307289cf834783f43841999a03a6c6b89cefcd80bf17e366dae11a7b4b8c"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 568,
+    "sha256": "c3adbe6d695942f2060bda26dc5d61055a425400ec4b5bac3ce20c021b93fac4"
   },
   {
     "file": "reports/suite-offline.xml",
-    "bytes": 520,
-    "sha256": "88b6d8734adf380b386a8fbfcc6f317e80a296b3b1a681b5a5714025d989916d"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 514,
+    "sha256": "599640f37cfdef7e49dea451d289c8e9a1c535da99682cdb5fc6e81aebe92d35"
   },
   {
     "file": "reports/suite-session.xml",
-    "bytes": 473,
-    "sha256": "be7d6a587c01d928fb88881e636b080ea07d8c4afe4ccd8da0b37d0fcfd3f0fd"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 467,
+    "sha256": "2df7aaa7a78429ac7615e571201140f3ce50cba1a46ba566df93860e4a774216"
   },
   {
     "file": "reports/suite-summary.json",
-    "bytes": 1447,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 1447,
     "sha256": "352fc50677f647e98aeb3689441f0907bc7c15dc6b8a0d7fe01434aa9d63fc8a"
   },
   {
     "file": "reports/t100-admin.xml",
-    "bytes": 540,
-    "sha256": "e4b6eddcc957828c3304e0ea4e53c991c7220b8308a0fcc21d89fb6a4d9f85b0"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 535,
+    "sha256": "1fc1c4a339351fdfdd78d23666c286e19cf934bfd7d94ab9108f2cbf90e08a54"
   },
   {
     "file": "reports/t100-delivery.xml",
-    "bytes": 518,
-    "sha256": "d381b8d214bb47120a128da813e433736c3fd19331b87b04c2479a6ff4014cb6"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 513,
+    "sha256": "29b37b75e2d88f44c805b9b7711b9b18325aa48af1aa9f2fd101bf469237b664"
   },
   {
     "file": "reports/t100-inventory.xml",
-    "bytes": 543,
-    "sha256": "d237dfa4188df3ae2600dad1fb3ef82459561644d895b58d978dcb9b16a07759"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 538,
+    "sha256": "680bdeeadf4a0f631fc707c6d1e0c565a15ac9c407ea741849b69b919535196e"
   },
   {
     "file": "reports/t100-manager.xml",
-    "bytes": 535,
-    "sha256": "71aa2032977e65b366c7d16ba76e09eb80a10a7f3fb2959d5421a2573da63ecd"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 530,
+    "sha256": "d62aff53260f17424d22963132d1c1ed96ed467f26813f3b508c9914115d0fa2"
   },
   {
     "file": "reports/t200-admin.xml",
-    "bytes": 542,
-    "sha256": "8b593b41d191b1ec481b76b095fd8a7eba06eb93b3aa6b3e7243aedc8562fed2"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 537,
+    "sha256": "ec342f94fc9082cfc697ac041a8d59e6deea4678f78379be140424e1ce24052f"
   },
   {
     "file": "reports/t200-delivery.xml",
-    "bytes": 519,
-    "sha256": "1f4b586a6114767b673f17ad0c0f8ec9f1fe7884a52cb237ffd2d0037a6ecfe7"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 514,
+    "sha256": "a5735f34f4182d0287932c1d617e14443cfb79c6ac81e4fd21280ea1367a27e1"
   },
   {
     "file": "reports/t200-inventory.xml",
-    "bytes": 543,
-    "sha256": "4192ac9fb34e5f749dfaa7346397c9b7b11534c0fe7c2e3057ca7f5056bb0b58"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 538,
+    "sha256": "8f0b4cff5d462fd2de4ce80e08785916dfa96373c49e9fdb4e90bd817501b529"
   },
   {
     "file": "reports/t200-manager.xml",
-    "bytes": 535,
-    "sha256": "516a650cd6a43fe69efa90f975826b287e05437af2dbb6f7edd63d839d411ac0"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 530,
+    "sha256": "ec88bb43d6f1c0ede4355a5b80641df9172a1467430b5f5a0f4c973d1c3aaa7a"
   },
   {
     "file": "reports/workflows/barista-conflict-1-open.xml",
-    "bytes": 378,
-    "sha256": "6ec96894ba79a988bdb120bb4a90ee03edfd9cb86ffd3c4c19afd1837f13f2e5"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "50b5a560f792720de4a146b2a14712d2e5cd6dbc908d16982eea06c1da760685"
   },
   {
     "file": "reports/workflows/barista-conflict-2-barista-start.xml",
-    "bytes": 414,
-    "sha256": "fbb08b5bb9ecee417ee262375ca5bb745a3611b6728e2a353b51e93064a5744b"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 408,
+    "sha256": "334562b4fd4775891524613d38ce80bdf7ecfb6261f7c0322f46091e5b4e03cf"
   },
   {
     "file": "reports/workflows/barista-forbidden-1-open.xml",
-    "bytes": 376,
-    "sha256": "fa30e2021df0c9c4ff97b5a6be81cfbf459616cf819abba8b58f79af6832cf3c"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 370,
+    "sha256": "1fabc8f7c5e8114a9f8846c0d90a347af7eba9a8475ec04a25ee14b0f76cc017"
   },
   {
     "file": "reports/workflows/barista-forbidden-2-barista-start.xml",
-    "bytes": 416,
-    "sha256": "022066b6ec44b4579f3f62e6013e74306336450f579595758d7cf18fa4683cb3"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 410,
+    "sha256": "758e3e898cdc4f9a52f810c8b2fe9ed75d1e9f48ad3cd61f5fb27c9d97fed058"
   },
   {
     "file": "reports/workflows/barista-offline-1-open.xml",
-    "bytes": 377,
-    "sha256": "8e9e131320b09d0a9be6552b2c0f6936ba3997f9cf102bbf1d57097cdac3ca6d"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 371,
+    "sha256": "92acc21c1f37d35d05fc05d5daa7f8cc7353438fd4a0035e8556f22b2ba3e44b"
   },
   {
     "file": "reports/workflows/barista-offline-2-offline.xml",
-    "bytes": 390,
-    "sha256": "63535eed9be2fdf7051f1b5579f3365a9871559293cb68aa9c40149d9d71b650"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 384,
+    "sha256": "6be7a623e3ff280f1ec713fd20cebb9033ed83281e80f3f79c3fffe7cb19b52a"
   },
   {
     "file": "reports/workflows/barista-offline-3-reconnected.xml",
-    "bytes": 406,
-    "sha256": "f3a58d6898f10d5729958bc0a7a29c8dff24cd98713727ecaaed42ee6dff3310"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 400,
+    "sha256": "1b2c98b16ca1a0ee74724a6b3b526abdea92397b5060a4404e469e524cd7ae87"
   },
   {
     "file": "reports/workflows/barista-progression-1-login.xml",
-    "bytes": 384,
-    "sha256": "9a60e15284e3c3dd0f78fcd65d800fbb8834e160ea5a6df008d553cf05f3ee9f"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 378,
+    "sha256": "95dc29ed755d5cc45e016e5289caca953f6a67c227dd46d1245c7dead36406d9"
   },
   {
     "file": "reports/workflows/barista-progression-2-open.xml",
-    "bytes": 378,
-    "sha256": "377bda449958e0fc020d842c7a7dbd621cbe119f4a25c01e93817c7c37f18c2e"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "75cbd1bfaddf0f1662f09e09307142bcadd53220dccd65ea388869f247efb005"
   },
   {
     "file": "reports/workflows/barista-progression-3-barista-start.xml",
-    "bytes": 416,
-    "sha256": "515299482ff46cdd62ef3dc0511cece678cc89863363c906cf564994309d8617"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 410,
+    "sha256": "274bf0af6702434f595719b03284b43f71c00fe074c206f429055e4bb2517b71"
   },
   {
     "file": "reports/workflows/barista-progression-4-barista-cancel-ready.xml",
-    "bytes": 442,
-    "sha256": "819416481551602295d43f7bc8d8f9b045b8a3c489130e598bd08aa41ebf0794"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 436,
+    "sha256": "5ad30b34fda73532a3695b933398fe488e0f9f8bc19487c6c66a89aa5a294684"
   },
   {
     "file": "reports/workflows/barista-progression-5-barista-ready.xml",
-    "bytes": 414,
-    "sha256": "9fafb001c57d9edb8869330122fc9085b2a9a22155bccae245ff140e9b997671"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 408,
+    "sha256": "8a01d1691d4d893c00e575b9fb625166d3e3ba7cb3518ccf1b1fad77adae590e"
   },
   {
     "file": "reports/workflows/barista-stale-1-unavailable.xml",
-    "bytes": 406,
-    "sha256": "4131d172867315ed5454c08af836632070e040d45ab2876ab5b49a2b0332d04b"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 400,
+    "sha256": "beefcb34e853b27ac076f9fd8c143e255707a9d48e25ea475595cc19dce9d891"
   },
   {
     "file": "reports/workflows/courier-conflict-1-open.xml",
-    "bytes": 378,
-    "sha256": "4e026f53fe3c9b006132c2dd42a372736e98e8a55885dc81d6856b6d39fce32c"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "a3b50a7668cbde1fc188f39102d1aee760377b8203ed7e4f11adef1590c9dd1d"
   },
   {
     "file": "reports/workflows/courier-conflict-2-delivery-start.xml",
-    "bytes": 418,
-    "sha256": "2b015604b2491ce6d90c62755ed302669c8beb2cc8e1934ce18f87c77fa81675"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 412,
+    "sha256": "10b5c4b2e348a8f3ccf3bdf475f949211817a49235d2b68adb22e20b1905ba82"
   },
   {
     "file": "reports/workflows/courier-delivered-1-open.xml",
-    "bytes": 378,
-    "sha256": "69bda575d69bb097e9e67269414c023474a23abe50030ec77359438e539a680e"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "60e66def5afc3f62bd2e22c5f342ccd8bd213da32c567b71c04e5867e6cc7904"
   },
   {
     "file": "reports/workflows/courier-delivered-2-delivery-start.xml",
-    "bytes": 417,
-    "sha256": "32aeacc62c7a2e455c515da1a609539eae1108afe904b3da8e84f89366a7c548"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 411,
+    "sha256": "ea7d4ef2f0bfc13c3ca9f0851f9378abd76e95251000102a61333b363f2dc56b"
   },
   {
     "file": "reports/workflows/courier-delivered-3-delivery-complete.xml",
-    "bytes": 431,
-    "sha256": "900ac97b76cd869d130ce8a1d628c63c651cecdbad85487ea44d801898f43b81"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 425,
+    "sha256": "d5709c026afae4fb70184dc50fabe3bf34344a9e7b7f35d8e497c2cdb949387a"
   },
   {
     "file": "reports/workflows/courier-failed-1-open.xml",
-    "bytes": 378,
-    "sha256": "fd59c26cd8ddd482adee768e03135a1428457dcbecb9dc29bcb5d1733c0e8bb8"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "12fa97df0d9f08db7db8588a82e53f7be4fbeeeb7f82f39fa46c003234c850f3"
   },
   {
     "file": "reports/workflows/courier-failed-2-delivery-start.xml",
-    "bytes": 418,
-    "sha256": "a29342933d49cd9e81869d20e4031eea3881bc98e800b28caaf45c9ebea4d655"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 412,
+    "sha256": "1a599c78e983e9590b795c2dac2e1edf9de4456f88c250240a4efccd53c87f1d"
   },
   {
     "file": "reports/workflows/courier-failed-3-delivery-fail.xml",
-    "bytes": 416,
-    "sha256": "447b05ed52afb832a1d8d92df9f28047bf8278b5eb9c5bcc7fa057666f9c69a0"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 410,
+    "sha256": "7b4ca03892797e4d21e1c9a5e1f8fe722f7902db5ec4ac4c8db46e8a39bfc476"
   },
   {
     "file": "reports/workflows/courier-forbidden-1-open.xml",
-    "bytes": 378,
-    "sha256": "545eaf19336ef1cbdd99cdd17aab239c42622cf3407ed4949fbe10d76e8de92a"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "b339b402b1d1d737402e3879983ad7a681a7d1bc0fa6dab1a99df5da4a60a07f"
   },
   {
     "file": "reports/workflows/courier-forbidden-2-delivery-start.xml",
-    "bytes": 416,
-    "sha256": "045ac6ab8666bd4510a58f953017f1529a70011fd03ee21ac0e9337b8b2cdfd0"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 410,
+    "sha256": "f43ca0224cf67ac8723f7d2ad49f787cdee02d525c138669a56713d24f92e0d4"
   },
   {
     "file": "reports/workflows/courier-offline-1-open.xml",
-    "bytes": 378,
-    "sha256": "33cce295c1874c16d1f0212fa1f5f0986d8e50a6c5288c9cdecda2ceb96d6c62"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "980d6031cc96332f91571a3c1f79f777c2e74a6f0b933edba2d03a354e1b4d63"
   },
   {
     "file": "reports/workflows/courier-offline-2-offline.xml",
-    "bytes": 390,
-    "sha256": "c373f503a472c4558b1a65a2b5986bb6e75b177e45389baee7e30f44d09777c6"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 384,
+    "sha256": "7b24a517c5b912126e0abc755e7b7b6af4c64c67336f020d3e85c1b2e32c7f47"
   },
   {
     "file": "reports/workflows/courier-offline-3-reconnected.xml",
-    "bytes": 406,
-    "sha256": "b8caa3a286414010155e0bbfbc85e82d078dd6636ac93721ff6e4093eb37400a"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 400,
+    "sha256": "5afff9f02ff1457c21ffad942f4dad86c85a8fbe9d08adaf526f8bc5c50cea5f"
   },
   {
     "file": "reports/workflows/courier-other-detail-1-unavailable.xml",
-    "bytes": 405,
-    "sha256": "898c13a2b37a819311a06f691234c1f1154ce31e292bac6b47023b3f02c3aaac"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 399,
+    "sha256": "18ab0fd2ae7f2c5ab7c8bbec65330698b6280d3029b4e21dc2bc7885e4ae5b50"
   },
   {
     "file": "reports/workflows/courier-own-list-1-login.xml",
-    "bytes": 384,
-    "sha256": "59665b0dabeac86bd884daf1074100ac817fed7d00d7badd3d38057c9a40e779"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 378,
+    "sha256": "f7f0d577fc5d8701a6607bd8f5d798e69d04302187f2443748796a84c417b452"
   },
   {
     "file": "reports/workflows/courier-own-list-2-delivery-list.xml",
-    "bytes": 416,
-    "sha256": "aacc5637a76af6ca37f6c7594b0b5163595cf57707282c67d9b7a76837d9e200"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 410,
+    "sha256": "2b4934a0517b0c1727d06ba121f173777358d2b9595d0e88369c068e59f3218d"
   },
   {
     "file": "reports/workflows/courier-stale-1-unavailable.xml",
-    "bytes": 406,
-    "sha256": "080f307be73c51e655d5c274d935c2598f96f2a1519f970aad5dfa1687d08468"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 400,
+    "sha256": "455d8493eb47f3274b4f8037a112d6043187c4485e5fd425c9b11964d1e62d6f"
   },
   {
     "file": "reports/workflows/discount-approve-1-login.xml",
-    "bytes": 384,
-    "sha256": "3d1ff02a1fb1abaa5146ff43db4918e6c645546ae134d2d91385a85f5eaba914"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 378,
+    "sha256": "9b7e54208b5f35c258aa3ec1d34037dcc5fe5a2131c7194561a3d783d77d0652"
   },
   {
     "file": "reports/workflows/discount-approve-2-open.xml",
-    "bytes": 378,
-    "sha256": "53ee220932346480ecd2752f8e9b090b03d06307dce4a9438d30800dbcdc3f9c"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "19019d7fc34ff43ce4aa3d883bceddb6f54ed5ed8d6941d777a370b68db78251"
   },
   {
     "file": "reports/workflows/discount-approve-3-discount-decision.xml",
-    "bytes": 429,
-    "sha256": "6f4cfdc5e9f3dcc3f76082ab9a5831d89bbda3aa34a7acce5ca9c7932f237428"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 423,
+    "sha256": "829c2dddcf0853faa9a5b9ebefae2e420caab647bd1354895938895c93367221"
   },
   {
     "file": "reports/workflows/discount-conflict-1-open.xml",
-    "bytes": 378,
-    "sha256": "00df084ef0a5380dd705e15acd171aad807319b2a282a9c579c55d39319ac79e"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "6eea07f30f448a2f5ece7606d31203ad2750416779dde65a74b2c93acd7faf0e"
   },
   {
     "file": "reports/workflows/discount-conflict-2-discount-decision.xml",
-    "bytes": 429,
-    "sha256": "2f2689d9c0a6a5fdab66066b9d7866e6a114a3bdc2a513bd87402e127e76cc97"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 423,
+    "sha256": "b54c29e44823bdee4fc69559a7741ca3637a0671197a60a56bf9f9da4302a449"
   },
   {
     "file": "reports/workflows/discount-forbidden-1-open.xml",
-    "bytes": 378,
-    "sha256": "28f6f6ff461b73161315318c4a2be9df89f67b582ebb8a6dc05ff1c4c2351b8b"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "92511a2e4432d4adea7d5fb0bf4a4ab8b4f45d4b58def8440ec11161975264fe"
   },
   {
     "file": "reports/workflows/discount-forbidden-2-discount-denied.xml",
-    "bytes": 422,
-    "sha256": "f72909097b82d8af70bd9df71b7ba84fb8963fababd018e5c7791ca87067e75a"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 416,
+    "sha256": "e18eb249a06562abe782499548c2971517bcde2495f6108ce1ce7910646d020c"
   },
   {
     "file": "reports/workflows/discount-offline-1-open.xml",
-    "bytes": 378,
-    "sha256": "08db8d2a8acbe6737e93006b3087ab1390ad2af2c7797311c75ad18de2df24aa"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 372,
+    "sha256": "84b1d7b0099fa04c6cce0644c5700385b724d9576fb839d2bfd2ff5c30a79d7a"
   },
   {
     "file": "reports/workflows/discount-offline-2-offline.xml",
-    "bytes": 390,
-    "sha256": "ffcfa801b1db738626ff10ddb49f1ae219d2d5ebcbe7e677f3d8bd0c2c0761f8"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 384,
+    "sha256": "c538361ebc9d98d75a2a6b74343658fd68e15e29aa8071c28eecbbc02c4ef8c6"
   },
   {
     "file": "reports/workflows/discount-offline-3-reconnected.xml",
-    "bytes": 406,
-    "sha256": "f0295684e92e95774deb3a058deaa2fab6e8ba05568183c7781cd95f1e84ed1d"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 400,
+    "sha256": "29ea4e0db2efc62e4558e35c716dcafd92e91082aad1d3a8a1ce10c76e5b79ff"
   },
   {
     "file": "reports/workflows/discount-reject-1-open.xml",
-    "bytes": 375,
-    "sha256": "4f1ef9e866db2c888cd5f4b9f634064d76704cad60df27eaf9fb3f8121b7da26"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 369,
+    "sha256": "953308f5fce2766029ff7f658942bb2449ab49cd38066ece98326d7aa72c8323"
   },
   {
     "file": "reports/workflows/discount-reject-2-discount-decision.xml",
-    "bytes": 430,
-    "sha256": "0fb4b14ef938605b11e196a27c6436dd7ac12dac9a644ff219e667d456a2587f"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 424,
+    "sha256": "e59da314e34f69cbdb179926bce8bd25670880a91c27f111f2f58171dc2b88f1"
   },
   {
     "file": "reports/workflows/discount-stale-1-unavailable.xml",
-    "bytes": 406,
-    "sha256": "0d5763b9cf4059e44308158885d2702c5efee639b7153524a825a510f366fdb6"
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 400,
+    "sha256": "e9285e208be9a6e363e0884e824a75815214ddfeed214f5d0ca9665a32c2903c"
   },
   {
     "file": "reports/workflows/summary.json",
-    "bytes": 49872,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 49872,
     "sha256": "019bd933d6c32dae830ef311ee780d5feb43e267b1bfc8e0adfeea1da520233e"
   },
   {
     "file": "standalone/barista-confirmed.png",
-    "bytes": 166513,
+    "hashEncoding": "raw",
+    "hashedBytes": 166513,
     "sha256": "c625ddacf483d3b60f8aacd2a4bc21ea615167194525bbd124158f9077a5140f"
   },
   {
     "file": "standalone/barista-preparing.png",
-    "bytes": 186453,
+    "hashEncoding": "raw",
+    "hashedBytes": 186453,
     "sha256": "4f5aad0c518220cc75db130f4b9dd1891f62b027e65631380d163ca09efde30c"
   },
   {
     "file": "standalone/barista-ready-review.png",
-    "bytes": 210244,
+    "hashEncoding": "raw",
+    "hashedBytes": 210244,
     "sha256": "dee08aa855cfc08410fbfa23a7bfabf5b3674d80def0367143a31856a3c48fb3"
   },
   {
     "file": "standalone/barista-ready.png",
-    "bytes": 243711,
+    "hashEncoding": "raw",
+    "hashedBytes": 243711,
     "sha256": "e2169fd80d6728452740189f0e0a79d32f3602bb4578e37e985274bca8a34692"
   },
   {
     "file": "t100/after-account-detail.png",
-    "bytes": 145778,
+    "hashEncoding": "raw",
+    "hashedBytes": 145778,
     "sha256": "d55a43e933d144138cb235dbde419136f47525aa2fcba49e2faf2bab3d6ce978"
   },
   {
     "file": "t100/after-account-entry.png",
-    "bytes": 145778,
+    "hashEncoding": "raw",
+    "hashedBytes": 145778,
     "sha256": "d55a43e933d144138cb235dbde419136f47525aa2fcba49e2faf2bab3d6ce978"
   },
   {
     "file": "t100/after-accounts.png",
-    "bytes": 247609,
+    "hashEncoding": "raw",
+    "hashedBytes": 247609,
     "sha256": "3a2903811df6bf50787520949a8e839a5a423bfe2924dd938ca25385b04fa7a4"
   },
   {
     "file": "t100/after-adjustment-keyboard.png",
-    "bytes": 163093,
+    "hashEncoding": "raw",
+    "hashedBytes": 163093,
     "sha256": "77efc887d2601b5ac5432725c2083b3c427e269e00bf916d872786b21ce92404"
   },
   {
     "file": "t100/after-adjustment.png",
-    "bytes": 214800,
+    "hashEncoding": "raw",
+    "hashedBytes": 214800,
     "sha256": "87efeb79615e5a6ed3f685c54ebea3c817f47a5a24cc5cc6438d5d0eeda50c6e"
   },
   {
     "file": "t100/after-approval-detail.png",
-    "bytes": 121185,
+    "hashEncoding": "raw",
+    "hashedBytes": 121185,
     "sha256": "fba683a74aa199b2e20ae0e54269a5817c5f6ac3da9462e31b8e95699eadc3dc"
   },
   {
     "file": "t100/after-assignment-review.png",
-    "bytes": 184313,
+    "hashEncoding": "raw",
+    "hashedBytes": 184313,
     "sha256": "a9f14d99c39eaac9c5c5b6b0c533ab783998fd2a5880e22c1c6ddfec6c0fed8a"
   },
   {
     "file": "t100/after-cancellation-keyboard.png",
-    "bytes": 246929,
+    "hashEncoding": "raw",
+    "hashedBytes": 246929,
     "sha256": "2f8868dc34108ae3e57a1448c0f16ad61412fac2b81d5260cd8305600d56a398"
   },
   {
     "file": "t100/after-cancellation-review.png",
-    "bytes": 192214,
+    "hashEncoding": "raw",
+    "hashedBytes": 192214,
     "sha256": "b7a99cc924cdc9bfba3a474b81fcb635b86fe7490794957996213f31d5e626b9"
   },
   {
     "file": "t100/after-counter.png",
-    "bytes": 316724,
+    "hashEncoding": "raw",
+    "hashedBytes": 316724,
     "sha256": "c1bd0af5f1556600ac983da6fd764e1c7b627195aa1d7da7fdc12be94998eb1e"
   },
   {
     "file": "t100/after-deactivation-error.png",
-    "bytes": 252429,
+    "hashEncoding": "raw",
+    "hashedBytes": 252429,
     "sha256": "5f936927f75634d4e1cf2db996ae3c8ef0beb42362b0c984e235006eddf06f28"
   },
   {
     "file": "t100/after-delivery-detail.png",
-    "bytes": 159095,
+    "hashEncoding": "raw",
+    "hashedBytes": 159095,
     "sha256": "0d4dd82442d3e22e4b441b116a9c1a6a2d829cc03bf403743aa644854e9ed571"
   },
   {
     "file": "t100/after-failure-form.png",
-    "bytes": 165750,
+    "hashEncoding": "raw",
+    "hashedBytes": 165750,
     "sha256": "ff82dd28f6d960832d881addc36272954d2becfdae80f38d9690953645cbc244"
   },
   {
     "file": "t100/after-failure-keyboard.png",
-    "bytes": 231763,
+    "hashEncoding": "raw",
+    "hashedBytes": 231763,
     "sha256": "c1eac6f12962360d15dc55a71f8b56c9af66c0b65dd37d915c24617c3ae50af4"
   },
   {
     "file": "t100/after-filter-selected.png",
-    "bytes": 209676,
+    "hashEncoding": "raw",
+    "hashedBytes": 209676,
     "sha256": "33a49df7748720bf827f37e76c62f10b8991597d494f8c76030642038eecd4d3"
   },
   {
     "file": "t100/after-filters-expanded.png",
-    "bytes": 270560,
+    "hashEncoding": "raw",
+    "hashedBytes": 270560,
     "sha256": "a43a160f28dd9eb71b4697c3d1e6fe468ab0747f18fd3daaf9bfecc7876ecde9"
   },
   {
     "file": "t100/after-login.png",
-    "bytes": 67037,
+    "hashEncoding": "raw",
+    "hashedBytes": 67037,
     "sha256": "15119fc8eb9ab6856f4d88e2ee4e8982766b5447057e0b9b611f0c2a3f5a0a55"
   },
   {
     "file": "t100/after-low-stock.png",
-    "bytes": 164226,
+    "hashEncoding": "raw",
+    "hashedBytes": 164226,
     "sha256": "790cf0bde614372d0aaa064147c8ec45802577b756e64fa6f6a4857efff2424c"
   },
   {
     "file": "t100/after-movements.png",
-    "bytes": 198869,
+    "hashEncoding": "raw",
+    "hashedBytes": 198869,
     "sha256": "c2bafff56f42ae11257c63b37df5f36022de10f9c60a019d5da94e81b7fe1107"
   },
   {
     "file": "t100/after-payment-keyboard.png",
-    "bytes": 157572,
+    "hashEncoding": "raw",
+    "hashedBytes": 157572,
     "sha256": "b10f35d9416aca12dc0631fde670c0824e8a8f16925f89715db90fd48058fcc7"
   },
   {
     "file": "t100/after-payment-review.png",
-    "bytes": 168578,
+    "hashEncoding": "raw",
+    "hashedBytes": 168578,
     "sha256": "93c9c09c850dd3c1218824f323684b9cec4a035deccd4bab2111d90d7563dfe4"
   },
   {
     "file": "t100/after-prep-detail.png",
-    "bytes": 115526,
+    "hashEncoding": "raw",
+    "hashedBytes": 115526,
     "sha256": "8bd8e5a25e677fbbab08068f733491a5a93ce1a9ccd2165c6a3607572ffcf1f2"
   },
   {
     "file": "t100/after-prep-record.png",
-    "bytes": 374962,
+    "hashEncoding": "raw",
+    "hashedBytes": 374962,
     "sha256": "b2ae0710eacb1b9d024d9ecd20b7fad3cc049c7664c2184ceb44edceb69a7e96"
   },
   {
     "file": "t100/after-prep-selected.png",
-    "bytes": 351522,
+    "hashEncoding": "raw",
+    "hashedBytes": 351522,
     "sha256": "cc8cdd076225234779eaf777d39596b0b22d363baca7604ee4972e233fc2a0bf"
   },
   {
     "file": "t100/after-prep-top.png",
-    "bytes": 374962,
+    "hashEncoding": "raw",
+    "hashedBytes": 374962,
     "sha256": "b2ae0710eacb1b9d024d9ecd20b7fad3cc049c7664c2184ceb44edceb69a7e96"
   },
   {
     "file": "t100/after-receipt-detail.png",
-    "bytes": 125990,
+    "hashEncoding": "raw",
+    "hashedBytes": 125990,
     "sha256": "a8ba31a01eb59a7143c9207c7a97e17ffb56f6ab9374e29112536c7c991689cd"
   },
   {
     "file": "t100/after-security-events.png",
-    "bytes": 188901,
+    "hashEncoding": "raw",
+    "hashedBytes": 188901,
     "sha256": "6532d7aaa4e491ec1cd1c0e1e8838f43f5f8ef5cd14260ba910f3c2a1a6a187e"
   },
   {
+    "file": "t100/before-account-entry.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 223976,
+    "sha256": "131ad36d79cbbfec9c72a13417d58b0244607c72897c10bdd8a7a05da04d4b4c"
+  },
+  {
+    "file": "t100/before-accounts.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 201806,
+    "sha256": "b3a5eccffa579cabffa771676c18775a84cbfd14befbf61c6c062a0813e3b7c2"
+  },
+  {
+    "file": "t100/before-counter.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 219880,
+    "sha256": "f8cf4281775fe592b993e243b633edc0099ee7500bdf1c495c01a764e97c4af3"
+  },
+  {
+    "file": "t100/before-login.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 60731,
+    "sha256": "93666d3939867bd04d279de305a8a700e5c08af71256ac6e25fe3efdf26da23d"
+  },
+  {
+    "file": "t100/before-prep-top.png",
+    "hashEncoding": "raw",
+    "hashedBytes": 252528,
+    "sha256": "665099879e1873ebfe474c4973e29731b46517821a36b72d3af24fe65da0b612"
+  },
+  {
     "file": "t200/after-account-detail.png",
-    "bytes": 212852,
+    "hashEncoding": "raw",
+    "hashedBytes": 212852,
     "sha256": "f9c6bf3da97e2de1ba214b21b99d12ed4830602f000ad5c331874f8b8e2d48e7"
   },
   {
     "file": "t200/after-account-entry.png",
-    "bytes": 212852,
+    "hashEncoding": "raw",
+    "hashedBytes": 212852,
     "sha256": "f9c6bf3da97e2de1ba214b21b99d12ed4830602f000ad5c331874f8b8e2d48e7"
   },
   {
     "file": "t200/after-accounts.png",
-    "bytes": 301742,
+    "hashEncoding": "raw",
+    "hashedBytes": 301742,
     "sha256": "41b93c816d950be572c56ac03fa64be20569b7c77ffc8cb30d44066ded412500"
   },
   {
     "file": "t200/after-adjustment-keyboard.png",
-    "bytes": 191527,
+    "hashEncoding": "raw",
+    "hashedBytes": 191527,
     "sha256": "831ecb115cf9bc7a1f7ce26dd410b18908ad23379d7bc46358fbd18ad36b38e3"
   },
   {
     "file": "t200/after-adjustment.png",
-    "bytes": 307466,
+    "hashEncoding": "raw",
+    "hashedBytes": 307466,
     "sha256": "7e26dbd06df2faf04fc897113af4c4e6f86f1b067c428ffbcadc0c4a2f6072cb"
   },
   {
     "file": "t200/after-approval-detail.png",
-    "bytes": 171618,
+    "hashEncoding": "raw",
+    "hashedBytes": 171618,
     "sha256": "2b6b8fee5d0b8b2073bc05d15c4ff9bac3efc44c37f0fff76ea479b40b3dcd3b"
   },
   {
     "file": "t200/after-assignment-review.png",
-    "bytes": 282642,
+    "hashEncoding": "raw",
+    "hashedBytes": 282642,
     "sha256": "1d0bc11d3fc57a3487b98f50d290da7c7fc529a973f3fa9acd34c3afba9980f9"
   },
   {
     "file": "t200/after-cancellation-keyboard.png",
-    "bytes": 268961,
+    "hashEncoding": "raw",
+    "hashedBytes": 268961,
     "sha256": "8976303cabddd138b2e9e7b2f0252a696edc8ec1822fde5d884f840fc342b752"
   },
   {
     "file": "t200/after-cancellation-review.png",
-    "bytes": 290174,
+    "hashEncoding": "raw",
+    "hashedBytes": 290174,
     "sha256": "0221c694afd3fb5154150f69420bf404d0ba96069e0dc5bcf2fb2441cf8d842c"
   },
   {
     "file": "t200/after-counter.png",
-    "bytes": 365059,
+    "hashEncoding": "raw",
+    "hashedBytes": 365059,
     "sha256": "160b1ff7110eb5832411b48c840ac0950b95508c1665c31d08536e9fef5a7f72"
   },
   {
     "file": "t200/after-deactivation-error.png",
-    "bytes": 320339,
+    "hashEncoding": "raw",
+    "hashedBytes": 320339,
     "sha256": "11eae9f8f373c70e25745ac3bbc5410abd8da93a615e62e5eefc83c917b1ab6e"
   },
   {
     "file": "t200/after-delivery-detail.png",
-    "bytes": 229299,
+    "hashEncoding": "raw",
+    "hashedBytes": 229299,
     "sha256": "811f5f1ef63d42d288dedbffcfdeb8ba657059b8bf31627d6a04e87494c93a74"
   },
   {
     "file": "t200/after-failure-form.png",
-    "bytes": 240259,
+    "hashEncoding": "raw",
+    "hashedBytes": 240259,
     "sha256": "575e1f87286e11e04a326b78d401cf9e5d22e872440c8a48467195d0e23db685"
   },
   {
     "file": "t200/after-failure-keyboard.png",
-    "bytes": 234175,
+    "hashEncoding": "raw",
+    "hashedBytes": 234175,
     "sha256": "2d87e1fa418d3c0179a8729352dbaadfab27a880b6ff24dd48b5e82c90a00d13"
   },
   {
     "file": "t200/after-filter-selected.png",
-    "bytes": 293680,
+    "hashEncoding": "raw",
+    "hashedBytes": 293680,
     "sha256": "e61ffec0f3e52fd3046e959c174ba6b81569dee68126f9710df99012d164ac10"
   },
   {
     "file": "t200/after-filters-expanded.png",
-    "bytes": 331421,
+    "hashEncoding": "raw",
+    "hashedBytes": 331421,
     "sha256": "5aee720887a699e5dc30b60a618da6dddc9e6d2831f909ff94ab9277fe005274"
   },
   {
     "file": "t200/after-login.png",
-    "bytes": 85841,
+    "hashEncoding": "raw",
+    "hashedBytes": 85841,
     "sha256": "081e887e415aca43a19d10a4a4d14c036ea58266029b6ae38c6ac5f62df12d19"
   },
   {
     "file": "t200/after-low-stock.png",
-    "bytes": 250161,
+    "hashEncoding": "raw",
+    "hashedBytes": 250161,
     "sha256": "558728c4068df45c90b6c96a959445651c1c46d28a5c50742590442e87818f78"
   },
   {
     "file": "t200/after-movements.png",
-    "bytes": 307573,
+    "hashEncoding": "raw",
+    "hashedBytes": 307573,
     "sha256": "37ab8758cd0c751aee0b13fbece1dc1354e102142c98c7a7a48080140b18e71b"
   },
   {
     "file": "t200/after-payment-keyboard.png",
-    "bytes": 167630,
+    "hashEncoding": "raw",
+    "hashedBytes": 167630,
     "sha256": "faaff2cf7054c1730b7569665f9eb87ac83a7a08d0aad8897a5455df41205f09"
   },
   {
     "file": "t200/after-payment-review.png",
-    "bytes": 251608,
+    "hashEncoding": "raw",
+    "hashedBytes": 251608,
     "sha256": "44a45e2c3a3b6502ab31955bae6763a1dca88d0ef1f64a0fd7cf7b8f30073786"
   },
   {
     "file": "t200/after-prep-detail.png",
-    "bytes": 159775,
+    "hashEncoding": "raw",
+    "hashedBytes": 159775,
     "sha256": "dde89d8e1cad4efb3908621402a121cc3988fb32e204f1bd781738f1ede97f72"
   },
   {
     "file": "t200/after-prep-record.png",
-    "bytes": 358151,
+    "hashEncoding": "raw",
+    "hashedBytes": 358151,
     "sha256": "63678df85c23042630cecb403d6ba93b8024aead192cad22579964902dd72057"
   },
   {
     "file": "t200/after-prep-selected.png",
-    "bytes": 325806,
+    "hashEncoding": "raw",
+    "hashedBytes": 325806,
     "sha256": "c8b8209cab0d76260a8452ddc65040bb4f03550277b5f1208be30d54797e880a"
   },
   {
     "file": "t200/after-prep-top.png",
-    "bytes": 358151,
+    "hashEncoding": "raw",
+    "hashedBytes": 358151,
     "sha256": "63678df85c23042630cecb403d6ba93b8024aead192cad22579964902dd72057"
   },
   {
     "file": "t200/after-receipt-detail.png",
-    "bytes": 186982,
+    "hashEncoding": "raw",
+    "hashedBytes": 186982,
     "sha256": "9b3ceae2fb5edd7a1a7be2af40fd01ddccc244e508febc94be16412f79af3497"
   },
   {
     "file": "t200/after-security-events.png",
-    "bytes": 289779,
+    "hashEncoding": "raw",
+    "hashedBytes": 289779,
     "sha256": "aa33a7236a6384471a981351fbc3a2104719941d20c072c5ae8903c4511ec131"
   },
   {
     "file": "t200/before-account-entry.png",
-    "bytes": 268317,
+    "hashEncoding": "raw",
+    "hashedBytes": 268317,
     "sha256": "6780aaf2db8fb6c82e7251069e9cf0e87cb36039af7b2cfebacedff15c331d9f"
   },
   {
     "file": "t200/before-accounts.png",
-    "bytes": 268317,
+    "hashEncoding": "raw",
+    "hashedBytes": 268317,
     "sha256": "6780aaf2db8fb6c82e7251069e9cf0e87cb36039af7b2cfebacedff15c331d9f"
   },
   {
     "file": "t200/before-counter.png",
-    "bytes": 235769,
+    "hashEncoding": "raw",
+    "hashedBytes": 235769,
     "sha256": "ecd2848dc9bf7ff8e142cf9a75c0b79fe10e7aa442cafb9ebd84160c05155a08"
   },
   {
     "file": "t200/before-login.png",
-    "bytes": 86453,
+    "hashEncoding": "raw",
+    "hashedBytes": 86453,
     "sha256": "324da811238b5a21da0b283cbf60881f4c85641ad6896e2d8d93a04fbee496f4"
   },
   {
     "file": "t200/before-prep-top.png",
-    "bytes": 279166,
+    "hashEncoding": "raw",
+    "hashedBytes": 279166,
     "sha256": "0f003b98d88674cd2aec6b73df28a6893e116d193147e033a9848f93d327bd2b"
   },
   {
     "file": "updated-images.json",
-    "bytes": 35478,
+    "hashEncoding": "utf8LF",
+    "hashedBytes": 35478,
     "sha256": "d736ee748a773073cd7d55d91baa54992f180833385b028ca31650b3396b71c2"
   },
   {
     "file": "workflows/barista-conflict.png",
-    "bytes": 216237,
+    "hashEncoding": "raw",
+    "hashedBytes": 216237,
     "sha256": "7ce322939af13e77396488f3a42cda92b635aeb2f5f0480eb415921b41003653"
   },
   {
     "file": "workflows/barista-forbidden.png",
-    "bytes": 90912,
+    "hashEncoding": "raw",
+    "hashedBytes": 90912,
     "sha256": "f3f00c162a82785bdfd33d917593ae7e7b183d7fa47f9df0f47b71e0b2a67c7b"
   },
   {
     "file": "workflows/barista-offline-disabled.png",
-    "bytes": 222754,
+    "hashEncoding": "raw",
+    "hashedBytes": 222754,
     "sha256": "638bbf4f06bf614a6baaa3228df3ee0c7cd7841b035420324e02777545e39ee9"
   },
   {
     "file": "workflows/barista-offline.png",
-    "bytes": 166142,
+    "hashEncoding": "raw",
+    "hashedBytes": 166142,
     "sha256": "c6a0a9ffc6268d44f0b34e11da9eafd67b3edf3a4044d4f8c899d2d9937ebd4d"
   },
   {
     "file": "workflows/barista-progression.png",
-    "bytes": 251288,
+    "hashEncoding": "raw",
+    "hashedBytes": 251288,
     "sha256": "b8dffafe4a3dbcf31627d7141ec2e213fa11b715205f5cf2f46e61cb4e925f7a"
   },
   {
     "file": "workflows/barista-ready-canceled.png",
-    "bytes": 165884,
+    "hashEncoding": "raw",
+    "hashedBytes": 165884,
     "sha256": "773770b6935cbf44549d6e866ff2a9c8b420714719beb31bcfa0bc66ce7c005c"
   },
   {
     "file": "workflows/barista-stale.png",
-    "bytes": 109568,
+    "hashEncoding": "raw",
+    "hashedBytes": 109568,
     "sha256": "4c92af83050ee600245df4d0f29f64cc102a06b065664785a6d5e147ca22be5e"
   },
   {
     "file": "workflows/courier-conflict.png",
-    "bytes": 270862,
+    "hashEncoding": "raw",
+    "hashedBytes": 270862,
     "sha256": "8846f1b61b89ea0bc4e5073fe3ee4a76470369cf855c238619a60ce5eb1b16ac"
   },
   {
     "file": "workflows/courier-delivered.png",
-    "bytes": 109997,
+    "hashEncoding": "raw",
+    "hashedBytes": 109997,
     "sha256": "08e4aa8ac34498e4521d2e57dfcbc2da8c5d87a13087258a7f4e4f62e885459b"
   },
   {
     "file": "workflows/courier-failed.png",
-    "bytes": 108190,
+    "hashEncoding": "raw",
+    "hashedBytes": 108190,
     "sha256": "e7c4efdbcde07b0f87b7a7b6d909343a2df30eecb86e6a42d2e1cfab89aa5277"
   },
   {
     "file": "workflows/courier-forbidden.png",
-    "bytes": 145453,
+    "hashEncoding": "raw",
+    "hashedBytes": 145453,
     "sha256": "831e9b87dbe18abaab0a06cc9aaf13e11a05a86b397c5c0e3a625b44cf81e1ae"
   },
   {
     "file": "workflows/courier-offline-disabled.png",
-    "bytes": 241687,
+    "hashEncoding": "raw",
+    "hashedBytes": 241687,
     "sha256": "acb353f46a14688fd1eaf7e46ecf5fb592d3c7ada10c687076795ac0f3d5b5bf"
   },
   {
     "file": "workflows/courier-offline.png",
-    "bytes": 237130,
+    "hashEncoding": "raw",
+    "hashedBytes": 237130,
     "sha256": "39949e2a43074153506d3fa6d6ed0f388ed63f5176e24332ffc85c03c42041c4"
   },
   {
     "file": "workflows/courier-other-detail.png",
-    "bytes": 112473,
+    "hashEncoding": "raw",
+    "hashedBytes": 112473,
     "sha256": "5e909241234083caf83051f3cd1b0abbcc3ade7b758e041e9e97a1891c1bebc5"
   },
   {
     "file": "workflows/courier-own-list.png",
-    "bytes": 318496,
+    "hashEncoding": "raw",
+    "hashedBytes": 318496,
     "sha256": "5536c257255921c8658ab8fea0ca9ba4b4738acf03225b8ce5781538ab3f957a"
   },
   {
     "file": "workflows/courier-stale.png",
-    "bytes": 112271,
+    "hashEncoding": "raw",
+    "hashedBytes": 112271,
     "sha256": "c64a0fa01a0fb1f5df71c7dec84811b7eb578947bbf366234a52592a49f1e239"
   },
   {
     "file": "workflows/discount-approve.png",
-    "bytes": 197952,
+    "hashEncoding": "raw",
+    "hashedBytes": 197952,
     "sha256": "94da286ccb77b9bb9472d89e216e81a5de87503a149519c1b5ef5a329149d045"
   },
   {
     "file": "workflows/discount-conflict.png",
-    "bytes": 192158,
+    "hashEncoding": "raw",
+    "hashedBytes": 192158,
     "sha256": "f5b42294eafec6537da3b6d71b8194c07d96428ccb541fb0efe75d7f20fcfb0f"
   },
   {
     "file": "workflows/discount-forbidden.png",
-    "bytes": 118013,
+    "hashEncoding": "raw",
+    "hashedBytes": 118013,
     "sha256": "262f72f556b04c0618f2e8e7146a232b7bd4ff98ec9719bd01e207efa1b7e151"
   },
   {
     "file": "workflows/discount-offline-disabled.png",
-    "bytes": 234751,
+    "hashEncoding": "raw",
+    "hashedBytes": 234751,
     "sha256": "f491cc3a266aa05e38cc2165394b6fda9c20a146ef1cca36a131b8b93b83af42"
   },
   {
     "file": "workflows/discount-offline.png",
-    "bytes": 194250,
+    "hashEncoding": "raw",
+    "hashedBytes": 194250,
     "sha256": "e4cca6ea9aa282e8b19bdc4d3777f778c558be8b9a0568c1bfa7344eae0e6a43"
   },
   {
     "file": "workflows/discount-reject.png",
-    "bytes": 195166,
+    "hashEncoding": "raw",
+    "hashedBytes": 195166,
     "sha256": "957f2fda25023d4968d8ebd03f96344422306247a124c6875ab7e967c2698fc6"
   },
   {
     "file": "workflows/discount-stale.png",
-    "bytes": 144614,
+    "hashEncoding": "raw",
+    "hashedBytes": 144614,
     "sha256": "616f80ec7cf4f0bc0c485d47f01c950bc3e52270067e06f33c2d7f4719f99d34"
   }
 ]
