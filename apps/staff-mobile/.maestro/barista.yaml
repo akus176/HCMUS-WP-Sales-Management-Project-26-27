@@ -18,6 +18,18 @@ name: Barista progression against the shared API
     visible: Open Preparation
     timeout: 30000
 - tapOn: Open Preparation
+- scrollUntilVisible:
+    element: Open selected ticket
+    direction: DOWN
+- assertVisible:
+    text: Open selected ticket
+    enabled: false
+- scrollUntilVisible:
+    element: Confirmed
+    direction: UP
+- tapOn: Confirmed
+- tapOn: Preparing
+- tapOn: All active
 - repeat:
     times: ${MAESTRO_QUEUE_PAGE_SKIP}
     commands:
@@ -29,9 +41,35 @@ name: Barista progression against the shared API
     element: All active
     direction: UP
 - scrollUntilVisible:
-    element: Open ticket ${MAESTRO_ORDER_NUMBER}
+    element: Select ticket ${MAESTRO_ORDER_NUMBER}
     direction: DOWN
-- tapOn: Open ticket ${MAESTRO_ORDER_NUMBER}
+- tapOn: Select ticket ${MAESTRO_ORDER_NUMBER}
+- scrollUntilVisible:
+    element: Open ${MAESTRO_ORDER_NUMBER}
+    direction: DOWN
+- assertVisible:
+    text: Open ${MAESTRO_ORDER_NUMBER}
+    enabled: true
+- tapOn: Open ${MAESTRO_ORDER_NUMBER}
+- scrollUntilVisible:
+    element: Large
+    direction: DOWN
+- assertVisible: Large
+- scrollUntilVisible:
+    element: 'Add-ons: ${MAESTRO_BARISTA_ADDON}'
+    direction: DOWN
+- assertVisible: 'Add-ons: ${MAESTRO_BARISTA_ADDON}'
+- scrollUntilVisible:
+    element: Back to Preparation
+    direction: UP
+- tapOn: Back to Preparation
+- scrollUntilVisible:
+    element: Open ${MAESTRO_ORDER_NUMBER}
+    direction: DOWN
+- assertVisible:
+    text: Open ${MAESTRO_ORDER_NUMBER}
+    enabled: true
+- tapOn: Open ${MAESTRO_ORDER_NUMBER}
 - scrollUntilVisible:
     element: Start preparing
     direction: DOWN
@@ -49,6 +87,17 @@ name: Barista progression against the shared API
     element: Mark ready
     direction: DOWN
 - takeScreenshot: .maestro/results/barista-preparing
+- tapOn: Mark ready
+- assertVisible: This updates the whole ticket.
+- scrollUntilVisible:
+    element: Keep preparing
+    direction: DOWN
+- takeScreenshot: .maestro/results/barista-ready-review
+- tapOn: Keep preparing
+- assertNotVisible: Confirm ready
+- scrollUntilVisible:
+    element: Mark ready
+    direction: DOWN
 - tapOn: Mark ready
 - scrollUntilVisible:
     element: Confirm ready

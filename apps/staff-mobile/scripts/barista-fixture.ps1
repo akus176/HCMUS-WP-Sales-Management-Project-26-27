@@ -31,20 +31,24 @@ if ($Action -eq 'Seed') {
     $suffix = [guid]::NewGuid().ToString('N').Substring(0, 8)
     $category = Send 'categories' @{ name = "Barista E2E $suffix"; displayOrder = 0 }
     $item = Send 'menu-items' @{ categoryId = $category.id; name = "Test latte $suffix"; initialVariants = @(@{ sizeName = 'Large'; price = 5 }) }
+    $addon = Send 'addons' @{ name = "Oat milk $suffix"; price = 0 }
+    $null = Invoke-RestMethod -Method Put -Uri "$base/menu-items/$($item.id)/addons" -Headers $headers -ContentType 'application/json' -Body (@{ addonIds = @($addon.id) } | ConvertTo-Json)
     $id = [guid]::NewGuid().ToString()
     $null = Send 'orders' @{
         orderId = $id; channel = 'takeaway'
-        lines = @(@{ menuItemId = $item.id; sizeVariantId = $item.sizeVariants[0].id; quantity = 2; addonIds = @() })
+        lines = @(@{ menuItemId = $item.id; sizeVariantId = $item.sizeVariants[0].id; quantity = 2; addonIds = @($addon.id) })
     }
     $order = Send "orders/$id/confirm" @{ reviewedTotal = 10 }
     $queuePage = Find-QueuePage $id
     if (!$queuePage) { throw 'Confirmed fixture was not found in the active queue.' }
-    @{ orderId = $id; orderNumber = $order.orderNumber; itemName = $item.name; queuePageSkip = $queuePage - 1 } | ConvertTo-Json | Set-Content -LiteralPath $FixturePath
+    @{ orderId = $id; orderNumber = $order.orderNumber; itemName = $item.name; addonName = $addon.name; queuePageSkip = $queuePage - 1 } | ConvertTo-Json | Set-Content -LiteralPath $FixturePath
     Write-Output "Confirmed fixture saved to $FixturePath. Set MAESTRO_ORDER_NUMBER to $($order.orderNumber) and MAESTRO_QUEUE_PAGE_SKIP to $($queuePage - 1)."
 } else {
     $fixture = Get-Content -LiteralPath $FixturePath -Raw | ConvertFrom-Json
     $order = Invoke-RestMethod -Uri "$base/orders/$($fixture.orderId)" -Headers $headers
     if ($order.status -ne 'ready') { throw "Expected ready; service returned $($order.status)." }
+    $line = @($order.lines | Where-Object { $_.itemName -eq $fixture.itemName -and $_.sizeName -eq 'Large' -and $_.addons -contains $fixture.addonName })
+    if ($line.Count -ne 1 -or $line[0].quantity -ne 2) { throw 'Authoritative item, size, quantity or add-on snapshot changed.' }
     if (Find-QueuePage $fixture.orderId) { throw 'Ready ticket remained in the active queue.' }
     Write-Output 'PASS: separate manager session observes Ready and the ticket is absent from the active preparation queue.'
 }

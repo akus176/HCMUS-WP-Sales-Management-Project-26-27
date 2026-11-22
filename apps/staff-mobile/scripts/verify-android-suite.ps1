@@ -34,6 +34,7 @@ $courier = Get-Content -LiteralPath $courierPath -Raw | ConvertFrom-Json
 $quality = Get-Content -LiteralPath $qualityPath -Raw | ConvertFrom-Json
 $env:MAESTRO_ORDER_NUMBER = $barista.orderNumber
 $env:MAESTRO_QUEUE_PAGE_SKIP = "$($barista.queuePageSkip)"
+$env:MAESTRO_BARISTA_ADDON = $barista.addonName
 $env:MAESTRO_PAYMENT_ORDER = $orders.paymentOrder
 $env:MAESTRO_CANCEL_ORDER = $orders.cancelOrder
 $env:MAESTRO_DELIVERY_ORDER = $orders.deliveryOrder
@@ -63,7 +64,9 @@ try {
         $report = Join-Path $ResultsDirectory "$name.xml"
         # Remove only the old report for this flow: a stale success must never count.
         if (Test-Path -LiteralPath $report) { Remove-Item -LiteralPath $report }
-        & maestro test --format junit --output $report ".maestro/$name.yaml"
+        $nativeOutput = Join-Path $ResultsDirectory "private/$name"
+        New-Item -ItemType Directory -Path $nativeOutput -Force | Out-Null
+        & maestro test --format junit --output $report --test-output-dir $nativeOutput ".maestro/$name.yaml"
         $exitCode = $LASTEXITCODE
         $cases = @()
         if (Test-Path -LiteralPath $report) {

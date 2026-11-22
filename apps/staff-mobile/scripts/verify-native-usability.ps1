@@ -3,6 +3,7 @@ param(
     [Parameter(Mandatory)][string]$DeviceSerial,
     [string[]]$Profiles = @('p100', 'p200', 't100', 't200'),
     [string[]]$RoleNames = @('manager', 'admin', 'inventory', 'delivery'),
+    [ValidateSet('queue', 'detail')][string]$ReferencePhase = 'queue',
     [string]$ResultsDirectory = '.maestro/results/usability'
 )
 $ErrorActionPreference = 'Stop'
@@ -15,6 +16,9 @@ $taskProfileMap = @{
     p200 = @{ size = '1080x2400'; density = '480'; font = '2.0'; night = 'yes' }
     t100 = @{ size = '1600x2560'; density = '320'; font = '1.0'; night = 'yes' }
     t200 = @{ size = '1600x2560'; density = '320'; font = '2.0'; night = 'no' }
+    # API 36 device: 28dp status bar + 24dp navigation bar leave a 390x844dp
+    # content viewport. Retain/measure the OS bounds with the original capture.
+    ref100 = @{ size = '1170x2688'; density = '480'; font = '1.0'; night = 'no' }
 }
 foreach ($taskProfileName in $Profiles) {
     if (!$taskProfileMap.ContainsKey($taskProfileName)) { throw "Unknown profile: $taskProfileName" }
@@ -27,7 +31,8 @@ $taskRoles = @(
     @{ name = 'manager'; role = 'Manager'; flow = $(if ($Stage -eq 'before') { 'before' } else { 'manager' }) },
     @{ name = 'admin'; role = 'Admin'; flow = 'admin' },
     @{ name = 'inventory'; role = 'InventoryStaff'; flow = 'inventory' },
-    @{ name = 'delivery'; role = 'DeliveryStaff'; flow = 'delivery' }
+    @{ name = 'delivery'; role = 'DeliveryStaff'; flow = 'delivery' },
+    @{ name = 'concept'; role = 'Manager'; flow = 'concept' }
 )
 $taskRoles = @($taskRoles | Where-Object { $_.name -in $RoleNames })
 if (!$taskRoles.Count) { throw 'Select at least one known audit role.' }
@@ -50,6 +55,7 @@ try {
             if (!$env:MAESTRO_STAFF_USERNAME -or !$env:MAESTRO_STAFF_PASSWORD) { throw 'Set synthetic role accounts and MAESTRO_STAFF_PASSWORD.' }
             $env:MAESTRO_UX_AFTER = if ($Stage -eq 'after') { 'true' } else { 'false' }
             $env:MAESTRO_CAPTURE_DIR = '.'
+            $env:MAESTRO_CONCEPT_PHASE = $ReferencePhase
             $taskCaseDir = Join-Path $taskRoot "$Stage/$taskProfileName/$($taskRole.name)"
             New-Item -ItemType Directory -Path $taskCaseDir -Force | Out-Null
             $taskXmlPath = Join-Path $taskCaseDir 'junit.xml'

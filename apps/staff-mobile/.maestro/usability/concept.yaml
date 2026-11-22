@@ -1,0 +1,67 @@
+appId: com.coffeeshop.staffmobile
+name: Matched ledger and focused ticket reference states
+---
+- runFlow: login.yaml
+- scrollUntilVisible:
+    element: Open Preparation
+    direction: DOWN
+- tapOn: Open Preparation
+- runFlow:
+    when:
+      true: ${MAESTRO_UX_AFTER == 'true'}
+    commands:
+      - runFlow:
+          file: scroll-to.yaml
+          env:
+            MAESTRO_SCROLL_TARGET: Select ticket ${MAESTRO_CONCEPT_ORDER}
+            MAESTRO_SCROLL_DIRECTION: DOWN
+      - tapOn: Select ticket ${MAESTRO_CONCEPT_ORDER}
+      - runFlow:
+          file: scroll-to.yaml
+          env:
+            MAESTRO_SCROLL_TARGET: Preparation
+            MAESTRO_SCROLL_DIRECTION: UP
+      - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/reference-queue
+      - runFlow:
+          file: scroll-to.yaml
+          env:
+            MAESTRO_SCROLL_TARGET: Open ${MAESTRO_CONCEPT_ORDER}
+            MAESTRO_SCROLL_DIRECTION: DOWN
+      - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/reference-selection
+      - tapOn: Open ${MAESTRO_CONCEPT_ORDER}
+- runFlow:
+    when:
+      true: ${MAESTRO_UX_AFTER != 'true'}
+    commands:
+      - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/reference-queue
+      - runFlow:
+          file: scroll-to.yaml
+          env:
+            MAESTRO_SCROLL_TARGET: Open ticket ${MAESTRO_CONCEPT_ORDER}
+            MAESTRO_SCROLL_DIRECTION: DOWN
+      - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/reference-selection
+      - tapOn: Open ticket ${MAESTRO_CONCEPT_ORDER}
+- runFlow:
+    when:
+      true: ${MAESTRO_CONCEPT_PHASE == 'detail'}
+    commands:
+      - runFlow:
+          file: scroll-to.yaml
+          env:
+            MAESTRO_SCROLL_TARGET: Mark ready
+            MAESTRO_SCROLL_DIRECTION: DOWN
+      - tapOn: Mark ready
+      - runFlow:
+          file: scroll-to.yaml
+          env:
+            MAESTRO_SCROLL_TARGET: Confirm ready
+            MAESTRO_SCROLL_DIRECTION: DOWN
+      - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/reference-confirmation
+      - runFlow:
+          file: scroll-to.yaml
+          env:
+            MAESTRO_SCROLL_TARGET: '${MAESTRO_UX_AFTER == "true" ? "Keep preparing" : "Keep current state"}'
+            MAESTRO_SCROLL_DIRECTION: DOWN
+      - tapOn: '${MAESTRO_UX_AFTER == "true" ? "Keep preparing" : "Keep current state"}'
+      - assertNotVisible: Confirm ready
+      - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/reference-canceled

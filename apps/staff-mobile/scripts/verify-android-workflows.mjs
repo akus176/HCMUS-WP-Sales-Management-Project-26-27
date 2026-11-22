@@ -28,8 +28,16 @@ const device = new URL(
     required('EXPO_PUBLIC_API_BASE_URL'),
   ).apiBaseUrl,
 );
-assert.ok(['device', 'emulator'].includes(process.env.EXPO_PUBLIC_APP_ENV));
 const host = required('COFFEESHOP_WORKFLOW_PROXY_HOST');
+const usb = process.env.COFFEESHOP_WORKFLOW_USB === '1';
+if (usb) {
+  assert.equal(process.env.EXPO_PUBLIC_APP_ENV, 'test');
+  assert.equal(host, '127.0.0.1');
+  assert.equal(device.hostname, '127.0.0.1');
+  required('ANDROID_SERIAL');
+} else {
+  assert.ok(['device', 'emulator'].includes(process.env.EXPO_PUBLIC_APP_ENV));
+}
 assert.equal(
   device.hostname,
   process.env.EXPO_PUBLIC_APP_ENV === 'emulator' ? '10.0.2.2' : host,
@@ -293,7 +301,7 @@ async function native(flow, variables = {}) {
       'junit',
       '--output',
       xml,
-      '--debug-output',
+      '--test-output-dir',
       join(results, 'private', name),
       join(root, '.maestro/workflows-focused', `${flow}.yaml`),
     ],
@@ -566,6 +574,7 @@ try {
     proxy.server.listen(Number(device.port), host, accept);
   });
   await android('reverse', 'tcp:8081', 'tcp:8081');
+  if (usb) await android('reverse', `tcp:${device.port}`, `tcp:${device.port}`);
   const fault = (method, path, before, order) =>
     proxy.arm({ method, path, before, observe: () => snapshot(order) });
   const baristaStart = (expected) =>
@@ -575,6 +584,28 @@ try {
     await open('urgent-order', o, 'Start preparing');
     await baristaStart('Preparation started. Confirmed by the service.');
     assert.equal((await snapshot(o)).status, 'preparing');
+    const beforeCancel = await snapshot(o);
+    const writesBeforeCancel = proxy.exchanges.filter(
+      (entry) => entry.method === 'POST',
+    ).length;
+    await native('barista-cancel-ready');
+    const afterCancel = await snapshot(o);
+    assert.deepEqual(
+      afterCancel,
+      beforeCancel,
+      'Canceling ready changed authoritative state.',
+    );
+    assert.equal(
+      proxy.exchanges.filter((entry) => entry.method === 'POST').length,
+      writesBeforeCancel,
+      'Canceling ready sent a business command.',
+    );
+    await screenshot('barista-ready-canceled');
+    current.canceledReady = {
+      before: beforeCancel,
+      after: afterCancel,
+      businessWrites: 0,
+    };
     await native('barista-ready');
     const state = await snapshot(o);
     assert.equal(state.status, 'ready');
@@ -614,7 +645,7 @@ try {
       RECORD_ID: o.id,
       EXPECTED: 'Ticket is no longer in the preparation queue.*',
       FORBIDDEN_ACTION: 'Start preparing',
-      PRIVATE_LABEL: `Ticket ${o.orderNumber}`,
+      PRIVATE_LABEL: o.orderNumber,
     });
     return proxy.verify(f, 404);
   });
