@@ -12,7 +12,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react-native';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Text } from 'react-native';
 
 import { ApiError } from '../src/api/errors';
@@ -120,6 +120,51 @@ beforeEach(() => {
 
 afterEach(() => {
   onlineManager.setOnline(true);
+});
+
+test('query registration during a confirmed detail transition does not update the provider during render', async () => {
+  getNetworkStateAsync.mockResolvedValueOnce(onlineState);
+  const client = makeClient();
+  const errors = jest.spyOn(console, 'error').mockImplementation(() => {});
+  function DetailTransition() {
+    const [id, setId] = useState('first detail');
+    const detail = useQuery({
+      queryKey: ['detail-transition', id],
+      queryFn: async () => id,
+    });
+    const mutation = useSafeMutation({
+      mutationFn: async () => 'confirmed',
+      onSuccess: () => setId('second detail'),
+    });
+    return (
+      <>
+        <Text>{detail.data}</Text>
+        <ShellButton
+          label="Finish detail"
+          disabled={mutation.isWriteDisabled || mutation.isPending}
+          onPress={() => mutation.mutate()}
+        />
+      </>
+    );
+  }
+  try {
+    await render(<DetailTransition />, { wrapper: wrapperFor(client) });
+    await screen.findByText('first detail');
+    await fireEvent.press(
+      screen.getByRole('button', { name: 'Finish detail' }),
+    );
+    await screen.findByText('second detail');
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Finish detail' }),
+      ).toBeEnabled(),
+    );
+    expect(
+      errors.mock.calls.map((call) => call.map(String).join(' ')).join('\n'),
+    ).not.toMatch(/Cannot update a component.*while rendering/s);
+  } finally {
+    errors.mockRestore();
+  }
 });
 
 test('reports offline status and exposes a manual connection check', async () => {

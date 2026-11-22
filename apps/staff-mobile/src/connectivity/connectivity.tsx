@@ -1,5 +1,6 @@
 import {
   onlineManager,
+  notifyManager,
   useMutation,
   useQueryClient,
   type UseMutationOptions,
@@ -58,19 +59,30 @@ export function ConnectivityProvider({ children }: { children: ReactNode }) {
   const failedHashes = useRef<string[]>([]);
   useEffect(() => {
     const cache = queryClient.getQueryCache();
-    return cache.subscribe(() => {
-      setRefreshFailures((current) => {
-        const remaining = current.filter((hash) => {
-          const query = cache.get(hash);
-          return (
-            query &&
-            (query.state.isInvalidated || query.state.status === 'error')
-          );
+    let active = true;
+    // Query registration can notify synchronously during a child's render.
+    // Match React Query's observer scheduling instead of updating its parent
+    // in that render; retain the write guard until the deferred snapshot runs.
+    const unsubscribe = cache.subscribe(
+      notifyManager.batchCalls(() => {
+        if (!active) return;
+        setRefreshFailures((current) => {
+          const remaining = current.filter((hash) => {
+            const query = cache.get(hash);
+            return (
+              query &&
+              (query.state.isInvalidated || query.state.status === 'error')
+            );
+          });
+          failedHashes.current = remaining;
+          return remaining.length === current.length ? current : remaining;
         });
-        failedHashes.current = remaining;
-        return remaining.length === current.length ? current : remaining;
-      });
-    });
+      }),
+    );
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, [queryClient]);
   const beginWriteRefresh = useCallback(
     () => setPendingRefreshes((count) => count + 1),
