@@ -1,0 +1,138 @@
+﻿[
+  {
+    "captured": "2026-11-22T11:27:25.4751688+07:00",
+    "file": "before-queue.png",
+    "appSource": "a5a4f0d456a8a81064473a1a11c42e1d3fd65057",
+    "apiSource": "f3c9373285b51c5a4d439e52c7b13a7be7d728bf",
+    "attempt": "reference-before-queue-02",
+    "viewport": {
+      "topInsetPx": 87,
+      "contentWidthDp": 390,
+      "contentHeightDp": 844,
+      "sizePx": "1170x2664",
+      "bottomInsetPx": 45,
+      "densityDpi": 480
+    },
+    "role": "Manager",
+    "sha256": "659c5af1665c38779b6b85be79855f4ef0df7038acd650a02084eb783909a5a8"
+  },
+  {
+    "captured": "2026-11-22T11:27:26.4093523+07:00",
+    "file": "before-selection.png",
+    "appSource": "a5a4f0d456a8a81064473a1a11c42e1d3fd65057",
+    "apiSource": "f3c9373285b51c5a4d439e52c7b13a7be7d728bf",
+    "attempt": "reference-before-queue-02",
+    "viewport": {
+      "topInsetPx": 87,
+      "contentWidthDp": 390,
+      "contentHeightDp": 844,
+      "sizePx": "1170x2664",
+      "bottomInsetPx": 45,
+      "densityDpi": 480
+    },
+    "role": "Manager",
+    "sha256": "659c5af1665c38779b6b85be79855f4ef0df7038acd650a02084eb783909a5a8"
+  },
+  {
+    "captured": "2026-11-22T14:50:13.9989983+07:00",
+    "file": "after-queue.png",
+    "appSource": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+    "apiSource": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+    "attempt": "reference-after-queue-05",
+    "viewport": {
+      "topInsetPx": 87,
+      "contentWidthDp": 390,
+      "contentHeightDp": 844,
+      "sizePx": "1170x2664",
+      "bottomInsetPx": 45,
+      "densityDpi": 480
+    },
+    "role": "Manager",
+    "sha256": "11d3429bd2a9e869db32b1fc30250d44e7b7812ef1eabbd8dab0fdbe8e9810af"
+  },
+  {
+    "captured": "2026-11-22T14:50:15.0827657+07:00",
+    "file": "after-selection.png",
+    "appSource": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+    "apiSource": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+    "attempt": "reference-after-queue-05",
+    "viewport": {
+      "topInsetPx": 87,
+      "contentWidthDp": 390,
+      "contentHeightDp": 844,
+      "sizePx": "1170x2664",
+      "bottomInsetPx": 45,
+      "densityDpi": 480
+    },
+    "role": "Manager",
+    "sha256": "8ac61311af4a41e144109211c9159d3862365b97fb5da57c7095fc408cfd7cf1"
+  },
+  {
+    "captured": "2026-11-22T14:55:35.4135065+07:00",
+    "file": "before-confirmation.png",
+    "appSource": "a5a4f0d456a8a81064473a1a11c42e1d3fd65057",
+    "apiSource": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+    "attempt": "reference-before-detail-01",
+    "viewport": {
+      "topInsetPx": 87,
+      "contentWidthDp": 390,
+      "contentHeightDp": 844,
+      "sizePx": "1170x2664",
+      "bottomInsetPx": 45,
+      "densityDpi": 480
+    },
+    "role": "Manager",
+    "sha256": "cc30283c7b23cbdf64e29ca3495eab96ad2e8a3d44aade8c1d3c6bb6c20ce9a9"
+  },
+  {
+    "captured": "2026-11-22T14:55:48.8001829+07:00",
+    "file": "before-canceled.png",
+    "appSource": "a5a4f0d456a8a81064473a1a11c42e1d3fd65057",
+    "apiSource": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+    "attempt": "reference-before-detail-01",
+    "viewport": {
+      "topInsetPx": 87,
+      "contentWidthDp": 390,
+      "contentHeightDp": 844,
+      "sizePx": "1170x2664",
+      "bottomInsetPx": 45,
+      "densityDpi": 480
+    },
+    "role": "Manager",
+    "sha256": "d5aac28308cb40eedd635f80dff33f912714ed561c9960948424239d58b79fdc"
+  },
+  {
+    "captured": "2026-11-22T14:57:30.4692987+07:00",
+    "file": "after-confirmation.png",
+    "appSource": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+    "apiSource": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+    "attempt": "reference-after-detail-01",
+    "viewport": {
+      "topInsetPx": 87,
+      "contentWidthDp": 390,
+      "contentHeightDp": 844,
+      "sizePx": "1170x2664",
+      "bottomInsetPx": 45,
+      "densityDpi": 480
+    },
+    "role": "Manager",
+    "sha256": "39ccd81d4fbaf8593bc7454c9b7dc6e567b9fdceead0619a92310e6812c10eb4"
+  },
+  {
+    "captured": "2026-11-22T14:57:35.8068928+07:00",
+    "file": "after-canceled.png",
+    "appSource": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+    "apiSource": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+    "attempt": "reference-after-detail-01",
+    "viewport": {
+      "topInsetPx": 87,
+      "contentWidthDp": 390,
+      "contentHeightDp": 844,
+      "sizePx": "1170x2664",
+      "bottomInsetPx": 45,
+      "densityDpi": 480
+    },
+    "role": "Manager",
+    "sha256": "98fcb5c50c5c1ecdaf01963b6a8ecfb292228112d617978fa2e75224a9717705"
+  }
+]

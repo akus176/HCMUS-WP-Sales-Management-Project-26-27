@@ -1,0 +1,82 @@
+[
+  {
+    "attempt": "run-before-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "ad6e145c885897bae5632376ac2ae09f211d723fe1bbe139d600e9d0e1c24c19",
+    "workflowPassed": false,
+    "captured": "2026-11-22T09:47:01.4983320+07:00",
+    "file": "p100/before-login.png"
+  },
+  {
+    "attempt": "run-before-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "efd8b5f8db5cf00db60137d197b4bf80b8768aaa6a4c6ba9fecabba114f7df28",
+    "workflowPassed": false,
+    "captured": "2026-11-22T09:47:29.7070488+07:00",
+    "file": "p100/before-prep-top.png"
+  },
+  {
+    "attempt": "run-before-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "5f3f6bd0753afa704dd5ca394017c32e256944ccc54f01b87b12995edf344d44",
+    "workflowPassed": false,
+    "captured": "2026-11-22T09:47:35.6249241+07:00",
+    "file": "p100/before-counter.png"
+  },
+  {
+    "attempt": "run-before-03",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "877d17d083d4d8c25cc173afbd8a932b1af328733d95d1b9c31f19e7b52022d7",
+    "workflowPassed": false,
+    "captured": "2026-11-22T09:55:27.0396369+07:00",
+    "file": "p100/before-accounts.png"
+  },
+  {
+    "attempt": "run-before-03",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "f122815e1109569f06ee7f5f2b01c7a25413c79da929fa5d78a003990b2401ab",
+    "workflowPassed": false,
+    "captured": "2026-11-22T09:55:45.0583955+07:00",
+    "file": "p100/before-account-entry.png"
+  },
+  {
+    "attempt": "run-before-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "324da811238b5a21da0b283cbf60881f4c85641ad6896e2d8d93a04fbee496f4",
+    "workflowPassed": true,
+    "captured": "2026-11-22T09:51:56.3155049+07:00",
+    "file": "t200/before-login.png"
+  },
+  {
+    "attempt": "run-before-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "0f003b98d88674cd2aec6b73df28a6893e116d193147e033a9848f93d327bd2b",
+    "workflowPassed": true,
+    "captured": "2026-11-22T09:52:40.9541262+07:00",
+    "file": "t200/before-prep-top.png"
+  },
+  {
+    "attempt": "run-before-02",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "ecd2848dc9bf7ff8e142cf9a75c0b79fe10e7aa442cafb9ebd84160c05155a08",
+    "workflowPassed": true,
+    "captured": "2026-11-22T09:52:47.3358269+07:00",
+    "file": "t200/before-counter.png"
+  },
+  {
+    "attempt": "run-before-03",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "6780aaf2db8fb6c82e7251069e9cf0e87cb36039af7b2cfebacedff15c331d9f",
+    "workflowPassed": false,
+    "captured": "2026-11-22T09:57:24.3048251+07:00",
+    "file": "t200/before-accounts.png"
+  },
+  {
+    "attempt": "run-before-03",
+    "source": "5c9ed019398099cc59e3a007b6cf82a71208d25f",
+    "sha256": "6780aaf2db8fb6c82e7251069e9cf0e87cb36039af7b2cfebacedff15c331d9f",
+    "workflowPassed": false,
+    "captured": "2026-11-22T09:57:34.3758901+07:00",
+    "file": "t200/before-account-entry.png"
+  }
+]
