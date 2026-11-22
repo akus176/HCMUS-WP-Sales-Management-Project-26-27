@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <testsuites>
   <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="98.731" timestamp="2026-11-22T15:52:29">
-    <testcase id="Account details, deactivation and security event filters" name="Account details, deactivation and security event filters" classname="Account details, deactivation and security event filters" file=".maestro\administration.yaml" time="98.715" timestamp="2026-11-22T15:52:29" status="SUCCESS" />
+    <testcase id="Account details, deactivation and security event filters" name="Account details, deactivation and security event filters" classname="Account details, deactivation and security event filters" file=".maestro\administration.yaml" time="98.715" timestamp="2026-11-22T15:52:29" status="SUCCESS"/>
   </testsuite>
 </testsuites>

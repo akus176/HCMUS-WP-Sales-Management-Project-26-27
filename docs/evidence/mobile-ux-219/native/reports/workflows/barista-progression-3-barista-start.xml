@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <testsuites>
   <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="11.426" timestamp="2026-11-22T15:58:56">
-    <testcase id="barista-start" name="barista-start" classname="barista-start" file=".maestro\workflows-focused\barista-start.yaml" time="11.416" timestamp="2026-11-22T15:58:56" status="SUCCESS" />
+    <testcase id="barista-start" name="barista-start" classname="barista-start" file=".maestro\workflows-focused\barista-start.yaml" time="11.416" timestamp="2026-11-22T15:58:56" status="SUCCESS"/>
   </testsuite>
 </testsuites>

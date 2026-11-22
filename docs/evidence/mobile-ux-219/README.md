@@ -229,9 +229,10 @@ are retained. All nine CI checks also pass for that revision. The standalone
 barista progression passes independently. All **19/19 focused fault cases** now
 pass with independent state/history checks and no cleanup errors; [their native
 steps and API snapshots](native/reports/workflows/summary.json) are retained.
-Canceled-ready state/history is unchanged with zero business POSTs. The complete
-four-profile layout matrix and TalkBack checks remain in progress; acceptance
-item 2.2 stays open.
+Canceled-ready state/history is unchanged with zero business POSTs. The complete **16/16 layout/keyboard cases** pass in one fresh four-profile run;
+[the native evidence index](native/README.md) links 108 original updated screenshots,
+measured targets and the complete reports. Additional baseline profiles, enlarged
+ready-confirmation captures and TalkBack are being finalized; item 2.2 stays open.
 
 Failed/partial attempts,
 initial reference-height probes, frame-settling rejection, npm argument forwarding

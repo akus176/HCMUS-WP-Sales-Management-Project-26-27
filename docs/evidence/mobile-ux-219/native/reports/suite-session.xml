@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <testsuites>
   <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="83.179" timestamp="2026-11-22T15:38:04">
-    <testcase id="Staff session login, restore, and logout" name="Staff session login, restore, and logout" classname="Staff session login, restore, and logout" file=".maestro\session.yaml" time="83.166" timestamp="2026-11-22T15:38:04" status="SUCCESS" />
+    <testcase id="Staff session login, restore, and logout" name="Staff session login, restore, and logout" classname="Staff session login, restore, and logout" file=".maestro\session.yaml" time="83.166" timestamp="2026-11-22T15:38:04" status="SUCCESS"/>
   </testsuite>
 </testsuites>

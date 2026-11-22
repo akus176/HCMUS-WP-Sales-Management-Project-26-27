@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <testsuites>
   <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="4.324" timestamp="2026-11-22T16:05:45">
-    <testcase id="reconnected" name="reconnected" classname="reconnected" file=".maestro\workflows-focused\reconnected.yaml" time="4.315" timestamp="2026-11-22T16:05:45" status="SUCCESS" />
+    <testcase id="reconnected" name="reconnected" classname="reconnected" file=".maestro\workflows-focused\reconnected.yaml" time="4.315" timestamp="2026-11-22T16:05:45" status="SUCCESS"/>
   </testsuite>
 </testsuites>

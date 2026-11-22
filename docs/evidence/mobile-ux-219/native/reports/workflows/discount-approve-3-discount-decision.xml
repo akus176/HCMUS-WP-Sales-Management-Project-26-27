@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <testsuites>
   <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="7.688" timestamp="2026-11-22T16:03:17">
-    <testcase id="discount-decision" name="discount-decision" classname="discount-decision" file=".maestro\workflows-focused\discount-decision.yaml" time="7.68" timestamp="2026-11-22T16:03:17" status="SUCCESS" />
+    <testcase id="discount-decision" name="discount-decision" classname="discount-decision" file=".maestro\workflows-focused\discount-decision.yaml" time="7.68" timestamp="2026-11-22T16:03:17" status="SUCCESS"/>
   </testsuite>
 </testsuites>

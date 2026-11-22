@@ -73,5 +73,10 @@
       }
     ],
     "Count": 9
-  }
+  },
+  "mobileTree": "60bb317547f56ab382aadae04590488b9ab44798",
+  "backendDllSha256": "8a5abc47c3ff438452a2189198e309c7a3e0777f5abc92eedb8d2932fc35a35a",
+  "layoutCasesPassed": 16,
+  "focusedCasesPassed": 19,
+  "focusedNativeStepsPassed": 43
 }
