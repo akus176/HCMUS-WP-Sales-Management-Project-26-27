@@ -331,6 +331,11 @@ test('ledger selection identifies one Open action and never reads detail or writ
   expect(
     await screen.findByRole('button', { name: 'Open selected ticket' }),
   ).toBeDisabled();
+  const row = await screen.findByRole('button', {
+    name: 'Select ticket ORD-155',
+  });
+  expect(screen.getByText('2 × Latte')).toBeVisible();
+  expect(row.props.accessibilityHint).toContain('2 × Latte');
   await fireEvent.press(
     await screen.findByRole('button', {
       name: 'Select ticket ORD-155',

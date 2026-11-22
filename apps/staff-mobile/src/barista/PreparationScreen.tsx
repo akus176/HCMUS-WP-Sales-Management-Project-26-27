@@ -43,6 +43,14 @@ const itemCount = (ticket: Ticket) =>
   ticket.lines.reduce((sum, line) => sum + Number(line.quantity), 0);
 const location = (ticket: Ticket) =>
   ticket.tableNumber ? `Table ${ticket.tableNumber}` : 'Takeaway / delivery';
+const preview = (ticket: Ticket) => {
+  const items = ticket.lines
+    .slice(0, 2)
+    .map((line) => `${line.quantity} × ${line.itemName}`)
+    .join(', ');
+  const remaining = ticket.lines.length - 2;
+  return remaining > 0 ? `${items} + ${remaining} more` : items;
+};
 
 export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
   const { client, state } = useSession();
@@ -378,10 +386,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                         key={item.orderId}
                         accessibilityRole="button"
                         accessibilityLabel={`Select ticket ${item.orderNumber}`}
-                        accessibilityHint={`${item.status}. ${itemCount(item)} items. ${location(item)}. ${item.lines
-                          .slice(0, 2)
-                          .map((line) => line.itemName)
-                          .join(', ')}`}
+                        accessibilityHint={`${item.status}. ${itemCount(item)} items. ${location(item)}. ${preview(item)}`}
                         accessibilityState={{
                           selected: queueSelection === item.orderId,
                         }}
@@ -405,15 +410,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                         <Text style={styles.metadata}>
                           {itemCount(item)} items · {location(item)}
                         </Text>
-                        <Text style={styles.metadata}>
-                          {item.lines
-                            .slice(0, 2)
-                            .map((line) => line.itemName)
-                            .join(', ')}
-                          {item.lines.length > 2
-                            ? ` + ${item.lines.length - 2} more`
-                            : ''}
-                        </Text>
+                        <Text style={styles.metadata}>{preview(item)}</Text>
                       </Pressable>
                     ))}
                   </View>
