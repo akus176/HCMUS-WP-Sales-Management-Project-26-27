@@ -1,0 +1,38 @@
+appId: com.coffeeshop.staffmobile
+---
+# The default center swipe can start inside an enlarged single-line input and
+# be consumed by that input. Use the ScrollView's margin instead. Keep the loop
+# bounded and retain the visible-target assertion.
+- evalScript: ${output.uxScrollCount = 0; output.uxScrollFound = false}
+- runFlow:
+    when:
+      visible: ${MAESTRO_SCROLL_TARGET}
+    commands:
+      - evalScript: ${output.uxScrollFound = true}
+- repeat:
+    while:
+      true: ${!output.uxScrollFound && output.uxScrollCount < 20}
+    commands:
+      - runFlow:
+          when:
+            true: ${MAESTRO_SCROLL_DIRECTION == 'UP'}
+          commands:
+            - swipe:
+                start: 96%, 35%
+                end: 96%, 85%
+                duration: 500
+      - runFlow:
+          when:
+            true: ${MAESTRO_SCROLL_DIRECTION != 'UP'}
+          commands:
+            - swipe:
+                start: 96%, 85%
+                end: 96%, 35%
+                duration: 500
+      - evalScript: ${output.uxScrollCount = output.uxScrollCount + 1}
+      - runFlow:
+          when:
+            visible: ${MAESTRO_SCROLL_TARGET}
+          commands:
+            - evalScript: ${output.uxScrollFound = true}
+- assertVisible: ${MAESTRO_SCROLL_TARGET}

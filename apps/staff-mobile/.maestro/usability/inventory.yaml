@@ -2,61 +2,83 @@ appId: com.coffeeshop.staffmobile
 name: Inventory sections, labelled adjustment and receipt review
 ---
 - runFlow: login.yaml
-- scrollUntilVisible:
-    element: Open Inventory
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Open Inventory
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Open Inventory
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/inventory
-- scrollUntilVisible:
-    element: Low stock
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Low stock
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Low stock
-- scrollUntilVisible:
-    element: Search ingredients
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Search ingredients
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Search ingredients
 - inputText: ${MAESTRO_INGREDIENT}
 - runFlow: hide-keyboard.yaml
-- scrollUntilVisible:
-    element: Record adjustment for ${MAESTRO_INGREDIENT}
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Record adjustment for ${MAESTRO_INGREDIENT}
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/low-stock
 - tapOn: Record adjustment for ${MAESTRO_INGREDIENT}
-- scrollUntilVisible:
-    element: Quantity change
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Quantity change
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Quantity change
 - inputText: '2'
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/adjustment-keyboard
 - runFlow: hide-keyboard.yaml
-- scrollUntilVisible:
-    element: Adjustment reason
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Adjustment reason
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Adjustment reason
 - inputText: Usability audit only
 - runFlow: hide-keyboard.yaml
-- scrollUntilVisible:
-    element: Save adjustment
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Save adjustment
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - assertVisible:
     text: Save adjustment
     enabled: true
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/adjustment
-- scrollUntilVisible:
-    element: Purchase receipts
-    direction: UP
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Purchase receipts
+      MAESTRO_SCROLL_DIRECTION: UP
 - tapOn: Purchase receipts
-- scrollUntilVisible:
-    element: Review receipt ${MAESTRO_RECEIPT}
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Review receipt ${MAESTRO_RECEIPT}
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/receipts
 - tapOn: Review receipt ${MAESTRO_RECEIPT}
-- scrollUntilVisible:
-    element: Post receipt ${MAESTRO_RECEIPT}
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Post receipt ${MAESTRO_RECEIPT}
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/receipt-detail
-- scrollUntilVisible:
-    element: Movement history
-    direction: UP
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Movement history
+      MAESTRO_SCROLL_DIRECTION: UP
 - tapOn: Movement history
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/movements

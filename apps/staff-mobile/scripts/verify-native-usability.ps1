@@ -38,6 +38,9 @@ $taskSummaryPath = Join-Path $taskRoot "summary-$Stage.json"
 try {
     foreach ($taskProfileName in $Profiles) {
         $taskProfile = $taskProfileMap[$taskProfileName]
+        # Apply device configuration before mounting the development app. Live
+        # Activity recreation can leave two temporary Expo navigation roots.
+        & adb -s $DeviceSerial shell am force-stop com.coffeeshop.staffmobile | Out-Null
         & adb -s $DeviceSerial shell wm size $taskProfile.size | Out-Null
         & adb -s $DeviceSerial shell wm density $taskProfile.density | Out-Null
         & adb -s $DeviceSerial shell settings put system font_scale $taskProfile.font | Out-Null
@@ -50,8 +53,14 @@ try {
             $taskCaseDir = Join-Path $taskRoot "$Stage/$taskProfileName/$($taskRole.name)"
             New-Item -ItemType Directory -Path $taskCaseDir -Force | Out-Null
             $taskXmlPath = Join-Path $taskCaseDir 'junit.xml'
-            & maestro --device $DeviceSerial test --format junit --output $taskXmlPath --test-output-dir $taskCaseDir ".maestro/usability/$($taskRole.flow).yaml" *> (Join-Path $taskCaseDir 'private.log')
-            $taskExit = $LASTEXITCODE
+            $taskSavedPreference = $ErrorActionPreference
+            try {
+                # Native stderr must be retained even when parsing fails, so the
+                # case is counted as failed instead of bypassing the report.
+                $ErrorActionPreference = 'Continue'
+                & maestro --device $DeviceSerial test --format junit --output $taskXmlPath --test-output-dir $taskCaseDir ".maestro/usability/$($taskRole.flow).yaml" *> (Join-Path $taskCaseDir 'private.log')
+                $taskExit = $LASTEXITCODE
+            } finally { $ErrorActionPreference = $taskSavedPreference }
             $taskNodes = @()
             if (Test-Path -LiteralPath $taskXmlPath) {
                 [xml]$taskXml = Get-Content -Raw -LiteralPath $taskXmlPath
@@ -76,6 +85,7 @@ try {
         }
     }
 } finally {
+    & adb -s $DeviceSerial shell am force-stop com.coffeeshop.staffmobile | Out-Null
     if ($taskOriginalSize -match 'Override size: (\d+x\d+)') { & adb -s $DeviceSerial shell wm size $Matches[1] | Out-Null }
     else { & adb -s $DeviceSerial shell wm size reset | Out-Null }
     if ($taskOriginalDensity -match 'Override density: (\d+)') { & adb -s $DeviceSerial shell wm density $Matches[1] | Out-Null }

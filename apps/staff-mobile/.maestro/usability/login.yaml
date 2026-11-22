@@ -10,22 +10,28 @@ name: Staff sign-in, visible form labels and keyboard
 - assertVisible: Username
 - assertVisible: Password
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/login
-- scrollUntilVisible:
-    element: Username
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Username
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/login-keyboard
 - runFlow: hide-keyboard.yaml
-- scrollUntilVisible:
-    element: Password
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Password
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Password
 - inputText: ${MAESTRO_STAFF_PASSWORD}
 - hideKeyboard
-- scrollUntilVisible:
-    element: Sign in
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Sign in
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Sign in
 - extendedWaitUntil:
     visible: Staff home

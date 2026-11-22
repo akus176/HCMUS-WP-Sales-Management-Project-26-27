@@ -2,34 +2,46 @@ appId: com.coffeeshop.staffmobile
 name: Account detail entry, return, rejection and security events
 ---
 - runFlow: login.yaml
-- scrollUntilVisible:
-    element: Open Administration
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Open Administration
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Open Administration
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/accounts
-- scrollUntilVisible:
-    element: View details for Audit Admin 219
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: View details for Audit Admin 219
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: View details for Audit Admin 219
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/account-entry
-- scrollUntilVisible:
-    element: Account details
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Account details
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/account-detail
-- scrollUntilVisible:
-    element: Close account details
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Close account details
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Close account details
-- scrollUntilVisible:
-    element: Deactivate Audit Admin 219
-    direction: UP
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Deactivate Audit Admin 219
+      MAESTRO_SCROLL_DIRECTION: UP
 - tapOn: Deactivate Audit Admin 219
 - tapOn:
     text: Deactivate
     index: 0
-- scrollUntilVisible:
-    element: 'This account cannot be deactivated.*'
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: 'This account cannot be deactivated.*'
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - assertVisible: 'This account cannot be deactivated.*'
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/deactivation-error
 - runFlow:
@@ -40,8 +52,10 @@ name: Account detail entry, return, rejection and security events
           element: Security events
           direction: UP
       - tapOn: Security events
-- scrollUntilVisible:
-    element: Sign-in failures
-    direction: DOWN
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Sign-in failures
+      MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Sign-in failures
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/security-events
