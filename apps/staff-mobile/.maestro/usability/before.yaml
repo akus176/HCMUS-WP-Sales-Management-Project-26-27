@@ -1,0 +1,17 @@
+appId: com.coffeeshop.staffmobile
+name: Original preparation, Counter and payment layout
+---
+- runFlow: login.yaml
+- openLink: coffeeshop-staff:///modules/barista
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/prep-top
+- scrollUntilVisible:
+    element: Open ticket ${MAESTRO_ORDER_NUMBER}
+    direction: DOWN
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/prep-record
+- tapOn: Open ticket ${MAESTRO_ORDER_NUMBER}
+- scrollUntilVisible:
+    element: Start preparing
+    direction: DOWN
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/prep-detail
+- openLink: coffeeshop-staff:///modules/cashier
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/counter

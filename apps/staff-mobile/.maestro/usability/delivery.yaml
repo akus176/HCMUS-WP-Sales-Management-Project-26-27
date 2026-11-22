@@ -1,0 +1,28 @@
+appId: com.coffeeshop.staffmobile
+name: Active deliveries, contact details and failure form
+---
+- runFlow: login.yaml
+- scrollUntilVisible:
+    element: Open Deliveries
+    direction: DOWN
+- tapOn: Open Deliveries
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/deliveries
+- scrollUntilVisible:
+    element: Open delivery ${MAESTRO_DELIVERED_ORDER}
+    direction: DOWN
+- tapOn: Open delivery ${MAESTRO_DELIVERED_ORDER}
+- scrollUntilVisible:
+    element: Open navigation
+    direction: DOWN
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/delivery-detail
+- scrollUntilVisible:
+    element: Failure reason
+    direction: DOWN
+- tapOn: Failure reason
+- inputText: Usability audit only
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/failure-keyboard
+- hideKeyboard
+- scrollUntilVisible:
+    element: Mark failed
+    direction: DOWN
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/failure-form

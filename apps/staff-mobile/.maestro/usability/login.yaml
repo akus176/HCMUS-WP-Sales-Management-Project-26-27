@@ -1,0 +1,33 @@
+appId: com.coffeeshop.staffmobile
+name: Staff sign-in, visible form labels and keyboard
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: Staff mobile
+    timeout: 60000
+- tapOn: Staff sign-in
+- assertVisible: Username
+- assertVisible: Password
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/login
+- scrollUntilVisible:
+    element: Username
+    direction: DOWN
+- tapOn: Username
+- inputText: ${MAESTRO_STAFF_USERNAME}
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/login-keyboard
+- runFlow: hide-keyboard.yaml
+- scrollUntilVisible:
+    element: Password
+    direction: DOWN
+- tapOn: Password
+- inputText: ${MAESTRO_STAFF_PASSWORD}
+- hideKeyboard
+- scrollUntilVisible:
+    element: Sign in
+    direction: DOWN
+- tapOn: Sign in
+- extendedWaitUntil:
+    visible: Staff home
+    timeout: 30000
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/home
