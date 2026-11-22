@@ -226,7 +226,10 @@ disposable PostgreSQL databases and synthetic accounts over USB loopback.
 The fresh full native suite passes **10/10 flows** with independent API outcome
 verification on app revision `fea0541`; [sanitized JUnit and API checks](native/reports/suite-summary.json)
 are retained. All nine CI checks also pass for that revision. The standalone
-barista progression passes independently. The 19 focused fault cases, complete
+barista progression passes independently. All **19/19 focused fault cases** now
+pass with independent state/history checks and no cleanup errors; [their native
+steps and API snapshots](native/reports/workflows/summary.json) are retained.
+Canceled-ready state/history is unchanged with zero business POSTs. The complete
 four-profile layout matrix and TalkBack checks remain in progress; acceptance
 item 2.2 stays open.
 

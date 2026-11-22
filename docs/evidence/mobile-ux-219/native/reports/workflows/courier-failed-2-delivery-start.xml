@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="6.173" timestamp="2026-11-22T16:08:48">
+    <testcase id="delivery-start" name="delivery-start" classname="delivery-start" file=".maestro\workflows-focused\delivery-start.yaml" time="6.166" timestamp="2026-11-22T16:08:48" status="SUCCESS" />
+  </testsuite>
+</testsuites>

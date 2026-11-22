@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="3.987" timestamp="2026-11-22T16:11:18">
+    <testcase id="reconnected" name="reconnected" classname="reconnected" file=".maestro\workflows-focused\reconnected.yaml" time="3.978" timestamp="2026-11-22T16:11:18" status="SUCCESS" />
+  </testsuite>
+</testsuites>

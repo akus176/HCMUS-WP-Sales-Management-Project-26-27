@@ -1,0 +1,1641 @@
+﻿{
+  "issue": 201,
+  "runId": "8ab54ffd",
+  "expected": 19,
+  "passed": 19,
+  "failedOrMissing": 0,
+  "serverVerificationPassed": true,
+  "cases": [
+    {
+      "name": "barista-progression",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "barista-progression-1-login",
+          "report": "barista-progression-1-login.xml",
+          "passed": true
+        },
+        {
+          "name": "barista-progression-2-open",
+          "report": "barista-progression-2-open.xml",
+          "passed": true
+        },
+        {
+          "name": "barista-progression-3-barista-start",
+          "report": "barista-progression-3-barista-start.xml",
+          "passed": true
+        },
+        {
+          "name": "barista-progression-4-barista-cancel-ready",
+          "report": "barista-progression-4-barista-cancel-ready.xml",
+          "passed": true
+        },
+        {
+          "name": "barista-progression-5-barista-ready",
+          "report": "barista-progression-5-barista-ready.xml",
+          "passed": true
+        }
+      ],
+      "canceledReady": {
+        "before": {
+          "status": "preparing",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "1cff5721-fe0c-4d4c-8916-52106adf2c32",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "477a176a-fbb3-49b8-8f6f-051bed3a395f",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a3e39705-3ae4-4fc5-8e69-ba16dc0eb80c"
+            }
+          ]
+        },
+        "after": {
+          "status": "preparing",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "1cff5721-fe0c-4d4c-8916-52106adf2c32",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "477a176a-fbb3-49b8-8f6f-051bed3a395f",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a3e39705-3ae4-4fc5-8e69-ba16dc0eb80c"
+            }
+          ]
+        },
+        "businessWrites": 0
+      },
+      "state": {
+        "status": "ready",
+        "total": 10,
+        "discounts": [],
+        "history": [
+          {
+            "id": "1cff5721-fe0c-4d4c-8916-52106adf2c32",
+            "from_status": "draft",
+            "to_status": "confirmed",
+            "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+          },
+          {
+            "id": "477a176a-fbb3-49b8-8f6f-051bed3a395f",
+            "from_status": "confirmed",
+            "to_status": "preparing",
+            "changed_by": "a3e39705-3ae4-4fc5-8e69-ba16dc0eb80c"
+          },
+          {
+            "id": "b1e21c23-bc70-4ada-b6f0-a7b94da9df9b",
+            "from_status": "preparing",
+            "to_status": "ready",
+            "changed_by": "a3e39705-3ae4-4fc5-8e69-ba16dc0eb80c"
+          }
+        ]
+      }
+    },
+    {
+      "name": "barista-conflict",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "barista-conflict-1-open",
+          "report": "barista-conflict-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "barista-conflict-2-barista-start",
+          "report": "barista-conflict-2-barista-start.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": 409,
+        "before": {
+          "status": "preparing",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "1ec2c9f3-263d-49e1-84e6-49d70c7e760d",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "62d354a3-27d8-476d-9ca9-434e2ba3f041",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        },
+        "after": {
+          "status": "preparing",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "1ec2c9f3-263d-49e1-84e6-49d70c7e760d",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "62d354a3-27d8-476d-9ca9-434e2ba3f041",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "barista-stale",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "barista-stale-1-unavailable",
+          "report": "barista-stale-1-unavailable.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": 404,
+        "before": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "82a512ea-86fc-4049-b5c8-bea0ac2189c4",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "aeb11524-b0d8-44fc-87a3-d514ddc7fb42",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "c2d1a262-9a73-42e1-a2fe-1edbf30c0405",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        },
+        "after": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "82a512ea-86fc-4049-b5c8-bea0ac2189c4",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "aeb11524-b0d8-44fc-87a3-d514ddc7fb42",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "c2d1a262-9a73-42e1-a2fe-1edbf30c0405",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "barista-forbidden",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "barista-forbidden-1-open",
+          "report": "barista-forbidden-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "barista-forbidden-2-barista-start",
+          "report": "barista-forbidden-2-barista-start.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": 403,
+        "before": {
+          "status": "confirmed",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "f37c5dc7-297a-4003-bb79-61424d1a9c7c",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        },
+        "after": {
+          "status": "confirmed",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "f37c5dc7-297a-4003-bb79-61424d1a9c7c",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "barista-offline",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "barista-offline-1-open",
+          "report": "barista-offline-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "barista-offline-2-offline",
+          "report": "barista-offline-2-offline.xml",
+          "passed": true
+        },
+        {
+          "name": "barista-offline-3-reconnected",
+          "report": "barista-offline-3-reconnected.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "before": {
+          "status": "confirmed",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "2a9a53d0-139a-4280-ab99-9b490bf92eff",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        },
+        "after": {
+          "status": "confirmed",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "2a9a53d0-139a-4280-ab99-9b490bf92eff",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        },
+        "businessWrites": 0
+      }
+    },
+    {
+      "name": "discount-approve",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "discount-approve-1-login",
+          "report": "discount-approve-1-login.xml",
+          "passed": true
+        },
+        {
+          "name": "discount-approve-2-open",
+          "report": "discount-approve-2-open.xml",
+          "passed": true
+        },
+        {
+          "name": "discount-approve-3-discount-decision",
+          "report": "discount-approve-3-discount-decision.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": "draft",
+        "total": 9,
+        "discounts": [
+          {
+            "id": "14128fb7-5fe1-4969-a668-9a6007a5b86f",
+            "type": "fixed",
+            "value": 1,
+            "status": "approved",
+            "amount": 1,
+            "reason": "I201 8ab54ffd discount-approve"
+          }
+        ],
+        "history": []
+      }
+    },
+    {
+      "name": "discount-reject",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "discount-reject-1-open",
+          "report": "discount-reject-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "discount-reject-2-discount-decision",
+          "report": "discount-reject-2-discount-decision.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": "draft",
+        "total": 10,
+        "discounts": [
+          {
+            "id": "9c362353-7ad3-4eb4-90de-0ad95b6e1a57",
+            "type": "fixed",
+            "value": 1,
+            "status": "rejected",
+            "amount": null,
+            "reason": "I201 8ab54ffd discount-reject"
+          }
+        ],
+        "history": []
+      }
+    },
+    {
+      "name": "discount-conflict",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "discount-conflict-1-open",
+          "report": "discount-conflict-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "discount-conflict-2-discount-decision",
+          "report": "discount-conflict-2-discount-decision.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": 409,
+        "before": {
+          "status": "draft",
+          "total": 10,
+          "discounts": [
+            {
+              "id": "0c735733-e990-4e1d-8466-fbc0d5be06f2",
+              "type": "fixed",
+              "value": 1,
+              "status": "rejected",
+              "amount": null,
+              "reason": "I201 8ab54ffd discount-conflict"
+            }
+          ],
+          "history": []
+        },
+        "after": {
+          "status": "draft",
+          "total": 10,
+          "discounts": [
+            {
+              "id": "0c735733-e990-4e1d-8466-fbc0d5be06f2",
+              "type": "fixed",
+              "value": 1,
+              "status": "rejected",
+              "amount": null,
+              "reason": "I201 8ab54ffd discount-conflict"
+            }
+          ],
+          "history": []
+        }
+      }
+    },
+    {
+      "name": "discount-stale",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "discount-stale-1-unavailable",
+          "report": "discount-stale-1-unavailable.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": "draft",
+        "total": 9,
+        "discounts": [
+          {
+            "id": "c0307d7c-5fa2-49af-9cd2-37248420388a",
+            "type": "fixed",
+            "value": 1,
+            "status": "approved",
+            "amount": 1,
+            "reason": "I201 8ab54ffd discount-stale"
+          }
+        ],
+        "history": []
+      }
+    },
+    {
+      "name": "discount-forbidden",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "discount-forbidden-1-open",
+          "report": "discount-forbidden-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "discount-forbidden-2-discount-denied",
+          "report": "discount-forbidden-2-discount-denied.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": 403,
+        "before": {
+          "status": "draft",
+          "total": 10,
+          "discounts": [
+            {
+              "id": "2d0fcfc1-e27e-4c3d-a0c0-b22009da2b65",
+              "type": "fixed",
+              "value": 1,
+              "status": "pending",
+              "amount": null,
+              "reason": "I201 8ab54ffd discount-forbidden"
+            }
+          ],
+          "history": []
+        },
+        "after": {
+          "status": "draft",
+          "total": 10,
+          "discounts": [
+            {
+              "id": "2d0fcfc1-e27e-4c3d-a0c0-b22009da2b65",
+              "type": "fixed",
+              "value": 1,
+              "status": "pending",
+              "amount": null,
+              "reason": "I201 8ab54ffd discount-forbidden"
+            }
+          ],
+          "history": []
+        }
+      }
+    },
+    {
+      "name": "discount-offline",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "discount-offline-1-open",
+          "report": "discount-offline-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "discount-offline-2-offline",
+          "report": "discount-offline-2-offline.xml",
+          "passed": true
+        },
+        {
+          "name": "discount-offline-3-reconnected",
+          "report": "discount-offline-3-reconnected.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "before": {
+          "status": "draft",
+          "total": 10,
+          "discounts": [
+            {
+              "id": "fba938a9-95c5-4776-ad3a-e1fba2faedfe",
+              "type": "fixed",
+              "value": 1,
+              "status": "pending",
+              "amount": null,
+              "reason": "I201 8ab54ffd discount-offline"
+            }
+          ],
+          "history": []
+        },
+        "after": {
+          "status": "draft",
+          "total": 10,
+          "discounts": [
+            {
+              "id": "fba938a9-95c5-4776-ad3a-e1fba2faedfe",
+              "type": "fixed",
+              "value": 1,
+              "status": "pending",
+              "amount": null,
+              "reason": "I201 8ab54ffd discount-offline"
+            }
+          ],
+          "history": []
+        },
+        "businessWrites": 0
+      }
+    },
+    {
+      "name": "courier-own-list",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "courier-own-list-1-login",
+          "report": "courier-own-list-1-login.xml",
+          "passed": true
+        },
+        {
+          "name": "courier-own-list-2-delivery-list",
+          "report": "courier-own-list-2-delivery-list.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "items": [
+          {
+            "orderId": "02a32497-25e6-479b-9716-0c9949328c16",
+            "orderNumber": "POS-02a3249725e6479b97160c9949",
+            "deliveryStatus": "assigned"
+          },
+          {
+            "orderId": "ce5bee39-24e4-4a0e-ac06-19a10326f27c",
+            "orderNumber": "POS-ce5bee3924e44a0eac0619a103",
+            "deliveryStatus": "assigned"
+          },
+          {
+            "orderId": "dc5b1930-51f8-4b76-9d83-06c260abb966",
+            "orderNumber": "POS-dc5b193051f84b769d8306c260",
+            "deliveryStatus": "assigned"
+          },
+          {
+            "orderId": "e093504a-7554-4c50-a8b6-87d0bf43ef8b",
+            "orderNumber": "POS-e093504a75544c50a8b687d0bf",
+            "deliveryStatus": "assigned"
+          },
+          {
+            "orderId": "e094493a-2ed3-472a-8178-967fa644902c",
+            "orderNumber": "POS-e094493a2ed3472a8178967fa6",
+            "deliveryStatus": "assigned"
+          },
+          {
+            "orderId": "e654dd6f-1d8f-49cd-985d-e17682631aa6",
+            "orderNumber": "POS-e654dd6f1d8f49cd985de17682",
+            "deliveryStatus": "assigned"
+          }
+        ],
+        "page": 1,
+        "pageSize": 100,
+        "totalCount": 6
+      }
+    },
+    {
+      "name": "courier-other-detail",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "courier-other-detail-1-unavailable",
+          "report": "courier-other-detail-1-unavailable.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "before": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "0e20f4e0-6a59-4aff-989a-c5aa93f32d7c",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "2147b912-0509-47d7-9a13-9f129b6c0d49",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "ef934e21-03dc-4c4b-8c1b-622998d21b56",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ],
+          "delivery": {
+            "status": "assigned",
+            "assigned_staff_id": "5e4f6a3d-5474-4fd9-9a3f-602f3e03d1f7",
+            "failure_reason": null
+          },
+          "deliveryHistory": [
+            {
+              "id": "774c044d-8942-4eb0-8f4e-68d66e1a9167",
+              "from_status": "unassigned",
+              "to_status": "assigned",
+              "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        },
+        "after": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "0e20f4e0-6a59-4aff-989a-c5aa93f32d7c",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "2147b912-0509-47d7-9a13-9f129b6c0d49",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "ef934e21-03dc-4c4b-8c1b-622998d21b56",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ],
+          "delivery": {
+            "status": "assigned",
+            "assigned_staff_id": "5e4f6a3d-5474-4fd9-9a3f-602f3e03d1f7",
+            "failure_reason": null
+          },
+          "deliveryHistory": [
+            {
+              "id": "774c044d-8942-4eb0-8f4e-68d66e1a9167",
+              "from_status": "unassigned",
+              "to_status": "assigned",
+              "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        },
+        "status": 404
+      }
+    },
+    {
+      "name": "courier-delivered",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "courier-delivered-1-open",
+          "report": "courier-delivered-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "courier-delivered-2-delivery-start",
+          "report": "courier-delivered-2-delivery-start.xml",
+          "passed": true
+        },
+        {
+          "name": "courier-delivered-3-delivery-complete",
+          "report": "courier-delivered-3-delivery-complete.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": "ready",
+        "total": 10,
+        "discounts": [],
+        "history": [
+          {
+            "id": "8dbcf028-2e12-4a7d-8eb0-edfc4707a079",
+            "from_status": "preparing",
+            "to_status": "ready",
+            "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+          },
+          {
+            "id": "918d8997-66d3-407a-9ba6-45c7f218d68b",
+            "from_status": "draft",
+            "to_status": "confirmed",
+            "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+          },
+          {
+            "id": "d9c97a84-845e-459c-8182-5a37079cc5f6",
+            "from_status": "confirmed",
+            "to_status": "preparing",
+            "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+          }
+        ],
+        "delivery": {
+          "status": "delivered",
+          "assigned_staff_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+          "failure_reason": null
+        },
+        "deliveryHistory": [
+          {
+            "id": "b89d8b0e-4cb4-44bf-b3d4-8bb19569ce73",
+            "from_status": "assigned",
+            "to_status": "out_for_delivery",
+            "actor_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518"
+          },
+          {
+            "id": "d5b17063-7210-4423-b738-07536a054f74",
+            "from_status": "unassigned",
+            "to_status": "assigned",
+            "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+          },
+          {
+            "id": "e92e90e8-620a-4a6a-9157-ac58720d5f46",
+            "from_status": "out_for_delivery",
+            "to_status": "delivered",
+            "actor_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518"
+          }
+        ]
+      }
+    },
+    {
+      "name": "courier-failed",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "courier-failed-1-open",
+          "report": "courier-failed-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "courier-failed-2-delivery-start",
+          "report": "courier-failed-2-delivery-start.xml",
+          "passed": true
+        },
+        {
+          "name": "courier-failed-3-delivery-fail",
+          "report": "courier-failed-3-delivery-fail.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": "ready",
+        "total": 10,
+        "discounts": [],
+        "history": [
+          {
+            "id": "7b4a2377-a107-4e72-8cef-0adb7ab45885",
+            "from_status": "confirmed",
+            "to_status": "preparing",
+            "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+          },
+          {
+            "id": "a93d31a4-126e-4269-9285-37b71ccb8d9c",
+            "from_status": "preparing",
+            "to_status": "ready",
+            "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+          },
+          {
+            "id": "cde8550d-f8ea-4bd9-b6b0-8ee6f46781bc",
+            "from_status": "draft",
+            "to_status": "confirmed",
+            "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+          }
+        ],
+        "delivery": {
+          "status": "failed",
+          "assigned_staff_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+          "failure_reason": "Customer unavailable"
+        },
+        "deliveryHistory": [
+          {
+            "id": "407accc6-d1ce-4f31-a179-fc9a8f5453c5",
+            "from_status": "out_for_delivery",
+            "to_status": "failed",
+            "actor_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518"
+          },
+          {
+            "id": "c7cc20a7-c3ef-4aec-bbfd-adaa31a9d09d",
+            "from_status": "assigned",
+            "to_status": "out_for_delivery",
+            "actor_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518"
+          },
+          {
+            "id": "fe509fe7-221b-4264-a6fd-11a13ed0462e",
+            "from_status": "unassigned",
+            "to_status": "assigned",
+            "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+          }
+        ]
+      }
+    },
+    {
+      "name": "courier-conflict",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "courier-conflict-1-open",
+          "report": "courier-conflict-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "courier-conflict-2-delivery-start",
+          "report": "courier-conflict-2-delivery-start.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": 409,
+        "before": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "0ad2ad9e-9e08-4382-b72e-5663e0ee8ab4",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "5e789c3b-ec57-4c7a-8f18-38640a04533a",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "93f681ab-cfb5-4b1e-8adb-cb315e9fe24d",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ],
+          "delivery": {
+            "status": "out_for_delivery",
+            "assigned_staff_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+            "failure_reason": null
+          },
+          "deliveryHistory": [
+            {
+              "id": "41f7ba9e-f6cb-4448-95b8-0030192e2dd6",
+              "from_status": "unassigned",
+              "to_status": "assigned",
+              "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "79646d44-99d5-4850-940f-0a06c19e3efb",
+              "from_status": "assigned",
+              "to_status": "out_for_delivery",
+              "actor_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518"
+            }
+          ]
+        },
+        "after": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "0ad2ad9e-9e08-4382-b72e-5663e0ee8ab4",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "5e789c3b-ec57-4c7a-8f18-38640a04533a",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "93f681ab-cfb5-4b1e-8adb-cb315e9fe24d",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ],
+          "delivery": {
+            "status": "out_for_delivery",
+            "assigned_staff_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+            "failure_reason": null
+          },
+          "deliveryHistory": [
+            {
+              "id": "41f7ba9e-f6cb-4448-95b8-0030192e2dd6",
+              "from_status": "unassigned",
+              "to_status": "assigned",
+              "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "79646d44-99d5-4850-940f-0a06c19e3efb",
+              "from_status": "assigned",
+              "to_status": "out_for_delivery",
+              "actor_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "courier-stale",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "courier-stale-1-unavailable",
+          "report": "courier-stale-1-unavailable.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": 404,
+        "before": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "40a20ef9-b1ce-4c8f-bb9a-5c8461b71c77",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "7c7e64fd-49ab-40f3-9709-99c4747a111e",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "9d5926ee-e721-4f2d-86e4-3817bccd62fb",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ],
+          "delivery": {
+            "status": "delivered",
+            "assigned_staff_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+            "failure_reason": null
+          },
+          "deliveryHistory": [
+            {
+              "id": "38aaeb70-cc44-4b94-bd73-a15ba4e19b8f",
+              "from_status": "unassigned",
+              "to_status": "assigned",
+              "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "6748e8f0-d2b0-4d42-b6cd-cda163ef43f7",
+              "from_status": "assigned",
+              "to_status": "out_for_delivery",
+              "actor_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518"
+            },
+            {
+              "id": "eb930763-2eb1-476f-9ef5-3a8ee9ed7ef7",
+              "from_status": "out_for_delivery",
+              "to_status": "delivered",
+              "actor_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518"
+            }
+          ]
+        },
+        "after": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "40a20ef9-b1ce-4c8f-bb9a-5c8461b71c77",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "7c7e64fd-49ab-40f3-9709-99c4747a111e",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "9d5926ee-e721-4f2d-86e4-3817bccd62fb",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ],
+          "delivery": {
+            "status": "delivered",
+            "assigned_staff_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+            "failure_reason": null
+          },
+          "deliveryHistory": [
+            {
+              "id": "38aaeb70-cc44-4b94-bd73-a15ba4e19b8f",
+              "from_status": "unassigned",
+              "to_status": "assigned",
+              "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "6748e8f0-d2b0-4d42-b6cd-cda163ef43f7",
+              "from_status": "assigned",
+              "to_status": "out_for_delivery",
+              "actor_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518"
+            },
+            {
+              "id": "eb930763-2eb1-476f-9ef5-3a8ee9ed7ef7",
+              "from_status": "out_for_delivery",
+              "to_status": "delivered",
+              "actor_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "courier-forbidden",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "courier-forbidden-1-open",
+          "report": "courier-forbidden-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "courier-forbidden-2-delivery-start",
+          "report": "courier-forbidden-2-delivery-start.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "status": 403,
+        "before": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "2e13fc8c-f817-4aba-a276-bffe41940fce",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "bdb29822-4963-4387-b85a-773b744cd467",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "ee92b2aa-a5ae-4523-b68a-58327851a36d",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ],
+          "delivery": {
+            "status": "assigned",
+            "assigned_staff_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+            "failure_reason": null
+          },
+          "deliveryHistory": [
+            {
+              "id": "c3d2ed3c-aa7d-4678-8efa-5e451f444af1",
+              "from_status": "unassigned",
+              "to_status": "assigned",
+              "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        },
+        "after": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "2e13fc8c-f817-4aba-a276-bffe41940fce",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "bdb29822-4963-4387-b85a-773b744cd467",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "ee92b2aa-a5ae-4523-b68a-58327851a36d",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ],
+          "delivery": {
+            "status": "assigned",
+            "assigned_staff_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+            "failure_reason": null
+          },
+          "deliveryHistory": [
+            {
+              "id": "c3d2ed3c-aa7d-4678-8efa-5e451f444af1",
+              "from_status": "unassigned",
+              "to_status": "assigned",
+              "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "courier-offline",
+      "passed": true,
+      "status": "passed",
+      "steps": [
+        {
+          "name": "courier-offline-1-open",
+          "report": "courier-offline-1-open.xml",
+          "passed": true
+        },
+        {
+          "name": "courier-offline-2-offline",
+          "report": "courier-offline-2-offline.xml",
+          "passed": true
+        },
+        {
+          "name": "courier-offline-3-reconnected",
+          "report": "courier-offline-3-reconnected.xml",
+          "passed": true
+        }
+      ],
+      "state": {
+        "before": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "1ac6f0e3-681e-454a-9ef7-c089cdc7ab97",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "7211bfbf-5faf-4fe1-ac95-698b899ef182",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "f80ec0bf-cd9f-4961-a3e6-1973fda3057e",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ],
+          "delivery": {
+            "status": "assigned",
+            "assigned_staff_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+            "failure_reason": null
+          },
+          "deliveryHistory": [
+            {
+              "id": "d9ce6b55-2338-4032-9823-334eea4d840a",
+              "from_status": "unassigned",
+              "to_status": "assigned",
+              "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        },
+        "after": {
+          "status": "ready",
+          "total": 10,
+          "discounts": [],
+          "history": [
+            {
+              "id": "1ac6f0e3-681e-454a-9ef7-c089cdc7ab97",
+              "from_status": "preparing",
+              "to_status": "ready",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "7211bfbf-5faf-4fe1-ac95-698b899ef182",
+              "from_status": "confirmed",
+              "to_status": "preparing",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            },
+            {
+              "id": "f80ec0bf-cd9f-4961-a3e6-1973fda3057e",
+              "from_status": "draft",
+              "to_status": "confirmed",
+              "changed_by": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ],
+          "delivery": {
+            "status": "assigned",
+            "assigned_staff_id": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+            "failure_reason": null
+          },
+          "deliveryHistory": [
+            {
+              "id": "d9ce6b55-2338-4032-9823-334eea4d840a",
+              "from_status": "unassigned",
+              "to_status": "assigned",
+              "actor_id": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7"
+            }
+          ]
+        },
+        "businessWrites": 0
+      }
+    }
+  ],
+  "device": {
+    "model": "SM-A155F",
+    "android": "16",
+    "apiLevel": "36",
+    "abi": "arm64-v8a",
+    "build": ["versionCode=1 minSdk=24 targetSdk=36", "versionName=0.1.0"]
+  },
+  "appCommit": "fea05418f75f05b072a90d659e818f10a071e0ef",
+  "harnessCommit": "fea05418f75f05b072a90d659e818f10a071e0ef",
+  "environment": "Separate disposable issue201 PostgreSQL database; shared ASP.NET Core API; synthetic staff; real API forwarding on port 52321",
+  "apkSha256": "4d20f33f0dfdddde66fe64aecb03eff4918d5ebc94b5d1d2896853b0c0eaa213",
+  "seed": {
+    "barista-progression": {
+      "id": "eeff6eed-66d5-4190-bb7c-ef538ff5b304",
+      "orderNumber": "POS-eeff6eed66d54190bb7cef538f",
+      "delivery": false,
+      "label": "barista-progression"
+    },
+    "barista-conflict": {
+      "id": "586e8df0-eab1-41de-9439-6890cb229424",
+      "orderNumber": "POS-586e8df0eab141de94396890cb",
+      "delivery": false,
+      "label": "barista-conflict"
+    },
+    "barista-stale": {
+      "id": "7eaca229-a58f-471f-aeae-f62d19f0982c",
+      "orderNumber": "POS-7eaca229a58f471faeaef62d19",
+      "delivery": false,
+      "label": "barista-stale"
+    },
+    "barista-forbidden": {
+      "id": "c761eeb8-18b6-493f-8d5c-afb91a79f2f1",
+      "orderNumber": "POS-c761eeb818b6493f8d5cafb91a",
+      "delivery": false,
+      "label": "barista-forbidden"
+    },
+    "barista-offline": {
+      "id": "1416ee41-8412-401e-a109-ff97a9728e99",
+      "orderNumber": "POS-1416ee418412401ea109ff97a9",
+      "delivery": false,
+      "label": "barista-offline"
+    },
+    "discount-approve": {
+      "id": "dd556802-1404-441f-8c93-9f2650c691bd",
+      "orderNumber": "POS-dd5568021404441f8c939f2650",
+      "delivery": false,
+      "label": "discount-approve",
+      "discountId": "14128fb7-5fe1-4969-a668-9a6007a5b86f"
+    },
+    "discount-reject": {
+      "id": "4b32fb61-ede1-4225-b4ad-6c61ba5a24e6",
+      "orderNumber": "POS-4b32fb61ede14225b4ad6c61ba",
+      "delivery": false,
+      "label": "discount-reject",
+      "discountId": "9c362353-7ad3-4eb4-90de-0ad95b6e1a57"
+    },
+    "discount-conflict": {
+      "id": "3feac39b-83be-4024-b2fc-96fbfd956b85",
+      "orderNumber": "POS-3feac39b83be4024b2fc96fbfd",
+      "delivery": false,
+      "label": "discount-conflict",
+      "discountId": "0c735733-e990-4e1d-8466-fbc0d5be06f2"
+    },
+    "discount-stale": {
+      "id": "3ff8835e-74c8-4a07-9119-2961a471f64a",
+      "orderNumber": "POS-3ff8835e74c84a0791192961a4",
+      "delivery": false,
+      "label": "discount-stale",
+      "discountId": "c0307d7c-5fa2-49af-9cd2-37248420388a"
+    },
+    "discount-forbidden": {
+      "id": "5bb4188d-943b-4e1b-9e35-d52838b69df8",
+      "orderNumber": "POS-5bb4188d943b4e1b9e35d52838",
+      "delivery": false,
+      "label": "discount-forbidden",
+      "discountId": "2d0fcfc1-e27e-4c3d-a0c0-b22009da2b65"
+    },
+    "discount-offline": {
+      "id": "2bee1a6f-6251-443f-a47d-1f5f1ee2d66a",
+      "orderNumber": "POS-2bee1a6f6251443fa47d1f5f1e",
+      "delivery": false,
+      "label": "discount-offline",
+      "discountId": "fba938a9-95c5-4776-ad3a-e1fba2faedfe"
+    },
+    "courier-delivered": {
+      "id": "e094493a-2ed3-472a-8178-967fa644902c",
+      "orderNumber": "POS-e094493a2ed3472a8178967fa6",
+      "delivery": true,
+      "label": "courier-delivered"
+    },
+    "courier-failed": {
+      "id": "dc5b1930-51f8-4b76-9d83-06c260abb966",
+      "orderNumber": "POS-dc5b193051f84b769d8306c260",
+      "delivery": true,
+      "label": "courier-failed"
+    },
+    "courier-conflict": {
+      "id": "e654dd6f-1d8f-49cd-985d-e17682631aa6",
+      "orderNumber": "POS-e654dd6f1d8f49cd985de17682",
+      "delivery": true,
+      "label": "courier-conflict"
+    },
+    "courier-stale": {
+      "id": "02a32497-25e6-479b-9716-0c9949328c16",
+      "orderNumber": "POS-02a3249725e6479b97160c9949",
+      "delivery": true,
+      "label": "courier-stale"
+    },
+    "courier-forbidden": {
+      "id": "ce5bee39-24e4-4a0e-ac06-19a10326f27c",
+      "orderNumber": "POS-ce5bee3924e44a0eac0619a103",
+      "delivery": true,
+      "label": "courier-forbidden"
+    },
+    "courier-offline": {
+      "id": "e093504a-7554-4c50-a8b6-87d0bf43ef8b",
+      "orderNumber": "POS-e093504a75544c50a8b687d0bf",
+      "delivery": true,
+      "label": "courier-offline"
+    },
+    "courier-other": {
+      "id": "9b3dd2b7-5538-492f-8c52-863901e7359e",
+      "orderNumber": "POS-9b3dd2b75538492f8c52863901",
+      "delivery": true,
+      "label": "courier-other"
+    }
+  },
+  "actors": {
+    "Admin": "a4ed6fc5-631d-4ab9-ad35-4b9cb5fbc2b7",
+    "Manager": "21722182-5268-4f42-a6cf-d56dd3b9d31c",
+    "Barista": "a3e39705-3ae4-4fc5-8e69-ba16dc0eb80c",
+    "DeliveryStaff": "b308f4fe-ebcb-4485-8b85-105b24ce9518",
+    "OtherCourier": "5e4f6a3d-5474-4fd9-9a3f-602f3e03d1f7"
+  },
+  "cleanupErrors": [],
+  "exchanges": [
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/eeff6eed-66d5-4190-bb7c-ef538ff5b304",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preparation-tickets/eeff6eed-66d5-4190-bb7c-ef538ff5b304/start",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/eeff6eed-66d5-4190-bb7c-ef538ff5b304",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preparation-tickets/eeff6eed-66d5-4190-bb7c-ef538ff5b304/ready",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/eeff6eed-66d5-4190-bb7c-ef538ff5b304",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/586e8df0-eab1-41de-9439-6890cb229424",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/586e8df0-eab1-41de-9439-6890cb229424",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preparation-tickets/586e8df0-eab1-41de-9439-6890cb229424/start",
+      "status": 409
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/586e8df0-eab1-41de-9439-6890cb229424",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/7eaca229-a58f-471f-aeae-f62d19f0982c",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/7eaca229-a58f-471f-aeae-f62d19f0982c",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/7eaca229-a58f-471f-aeae-f62d19f0982c",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/c761eeb8-18b6-493f-8d5c-afb91a79f2f1",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preparation-tickets/c761eeb8-18b6-493f-8d5c-afb91a79f2f1/start",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/1416ee41-8412-401e-a109-ff97a9728e99",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/1416ee41-8412-401e-a109-ff97a9728e99",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/1416ee41-8412-401e-a109-ff97a9728e99",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/discounts/14128fb7-5fe1-4969-a668-9a6007a5b86f/approve",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/discounts/9c362353-7ad3-4eb4-90de-0ad95b6e1a57/reject",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/discounts/0c735733-e990-4e1d-8466-fbc0d5be06f2/approve",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/discounts/2d0fcfc1-e27e-4c3d-a0c0-b22009da2b65/approve",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/9b3dd2b7-5538-492f-8c52-863901e7359e",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/e094493a-2ed3-472a-8178-967fa644902c",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/courier/assignments/e094493a-2ed3-472a-8178-967fa644902c/start",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/e094493a-2ed3-472a-8178-967fa644902c",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/courier/assignments/e094493a-2ed3-472a-8178-967fa644902c/complete",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/dc5b1930-51f8-4b76-9d83-06c260abb966",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/courier/assignments/dc5b1930-51f8-4b76-9d83-06c260abb966/start",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/dc5b1930-51f8-4b76-9d83-06c260abb966",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/courier/assignments/dc5b1930-51f8-4b76-9d83-06c260abb966/fail",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/e654dd6f-1d8f-49cd-985d-e17682631aa6",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/e654dd6f-1d8f-49cd-985d-e17682631aa6",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/courier/assignments/e654dd6f-1d8f-49cd-985d-e17682631aa6/start",
+      "status": 409
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/e654dd6f-1d8f-49cd-985d-e17682631aa6",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/e654dd6f-1d8f-49cd-985d-e17682631aa6",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/02a32497-25e6-479b-9716-0c9949328c16",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/02a32497-25e6-479b-9716-0c9949328c16",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/02a32497-25e6-479b-9716-0c9949328c16",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/ce5bee39-24e4-4a0e-ac06-19a10326f27c",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/courier/assignments/ce5bee39-24e4-4a0e-ac06-19a10326f27c/start",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/e093504a-7554-4c50-a8b6-87d0bf43ef8b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/e093504a-7554-4c50-a8b6-87d0bf43ef8b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments/e093504a-7554-4c50-a8b6-87d0bf43ef8b",
+      "status": 200
+    }
+  ],
+  "backendRevision": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de"
+}
