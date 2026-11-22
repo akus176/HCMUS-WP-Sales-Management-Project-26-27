@@ -280,6 +280,7 @@ export function ShellButton({
   focusKey,
   compact = false,
   prominent = false,
+  testID,
 }: {
   label: string;
   onPress: () => void;
@@ -292,6 +293,7 @@ export function ShellButton({
   focusKey?: string;
   compact?: boolean;
   prominent?: boolean;
+  testID?: string;
 }) {
   const [focused, setFocused] = useState(false);
   const ref = useRef<ComponentRef<typeof View>>(null);
@@ -312,6 +314,7 @@ export function ShellButton({
   return (
     <Pressable
       ref={ref}
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{

@@ -31,7 +31,8 @@ if ($Action -eq 'Seed') {
     $suffix = [guid]::NewGuid().ToString('N').Substring(0, 8)
     $category = Send 'categories' @{ name = "Barista E2E $suffix"; displayOrder = 0 }
     $item = Send 'menu-items' @{ categoryId = $category.id; name = "Test latte $suffix"; initialVariants = @(@{ sizeName = 'Large'; price = 5 }) }
-    $addon = Send 'addons' @{ name = "Oat milk $suffix"; price = 0 }
+    $addonName = "Oat milk $suffix"
+    $addon = Send 'addons' @{ name = $addonName; price = 0 }
     $null = Invoke-RestMethod -Method Put -Uri "$base/menu-items/$($item.id)/addons" -Headers $headers -ContentType 'application/json' -Body (@{ addonIds = @($addon.id) } | ConvertTo-Json)
     $id = [guid]::NewGuid().ToString()
     $null = Send 'orders' @{
@@ -41,7 +42,7 @@ if ($Action -eq 'Seed') {
     $order = Send "orders/$id/confirm" @{ reviewedTotal = 10 }
     $queuePage = Find-QueuePage $id
     if (!$queuePage) { throw 'Confirmed fixture was not found in the active queue.' }
-    @{ orderId = $id; orderNumber = $order.orderNumber; itemName = $item.name; addonName = $addon.name; queuePageSkip = $queuePage - 1 } | ConvertTo-Json | Set-Content -LiteralPath $FixturePath
+    @{ orderId = $id; orderNumber = $order.orderNumber; itemName = $item.name; addonName = $addonName; queuePageSkip = $queuePage - 1 } | ConvertTo-Json | Set-Content -LiteralPath $FixturePath
     Write-Output "Confirmed fixture saved to $FixturePath. Set MAESTRO_ORDER_NUMBER to $($order.orderNumber) and MAESTRO_QUEUE_PAGE_SKIP to $($queuePage - 1)."
 } else {
     $fixture = Get-Content -LiteralPath $FixturePath -Raw | ConvertFrom-Json

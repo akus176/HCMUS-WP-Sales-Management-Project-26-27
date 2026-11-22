@@ -346,6 +346,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                 ).map((value) => (
                   <ShellButton
                     key={value}
+                    testID={`preparation-filter-${value === 'confirmed,preparing' ? 'active' : value}`}
                     label={
                       value === 'confirmed,preparing'
                         ? 'All active'
