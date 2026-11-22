@@ -73,9 +73,11 @@ every control was individually measured in every intermediate state.
 [Five additional confirmation cases](confirmation/README.md) pass at `fea0541`,
 including the reference viewport and normal/enlarged phone/large layouts.
 Independent API snapshots remain unchanged after cancellation. These captures
-also predate the later UI corrections. Current-revision native acceptance and
-manual TalkBack evidence remain required under item 2.2; named reviewer approval
-is separately outstanding.
+also predate the later UI corrections. The owner accepted the existing
+verification for item 2.2 and waived additional verification of the minor
+follow-ups, including the outstanding manual TalkBack work; see the
+[acceptance record](../current/README.md). No new run is claimed. Named reviewer
+approval remains outstanding.
 
 The device is a physical Samsung SM-A155F, Android 16/API 36. Large layouts use
 display/density overrides on this phone; no physical tablet test is claimed.

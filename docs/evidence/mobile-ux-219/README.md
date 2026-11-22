@@ -1,10 +1,10 @@
 # Staff mobile usability audit (#219)
 
-[Final verification wrap-up](current/README.md): additional latest-UI native
-validation was stopped at the user's request. Existing passing device evidence
-is retained at its recorded revision; latest-UI native/TalkBack acceptance and
-named reviewer approval remain pending. The connected phone's original settings
-have been restored.
+[Final verification wrap-up](current/README.md): the owner accepted the existing
+verification for item 2.2 and waived repeating it for the minor UI follow-ups.
+Evidence retains its actual revision; no new native/TalkBack run is claimed.
+Only named reviewer approval remains pending. The connected phone's original
+settings have been restored.
 
 OpenSpec change: `polish-staff-mobile-ux`. Baseline source:
 `5c9ed019398099cc59e3a007b6cf82a71208d25f`. This is a fresh source audit on 2026-11-19;
@@ -25,8 +25,8 @@ inventory, findings, shared-control work and recorded results below remain basel
 evidence; they do not prove the new concept layout or its E2E acceptance.
 
 Issue #219 holds the single consolidated checklist. Queue/detail alignment and
-component/**Maestro CLI** flow updates are implemented. The combined native
-acceptance pass and @longtoZ review remain open. The connected-device section
+component/**Maestro CLI** flow updates are implemented. The owner accepted the
+existing verification for item 2.2; @longtoZ review remains open. The connected-device section
 below records fresh reference captures separately from the original planning
 baseline and from the transaction/fault, layout, keyboard and TalkBack gates.
 
@@ -244,8 +244,11 @@ Canceled-ready state/history is unchanged with zero business POSTs. The complete
 [the native evidence index](native/README.md) links 108 original updated screenshots,
 measured targets and the complete reports. Five baseline states are retained for
 each of the four profiles; the additional baseline run passes all four cases.
-Enlarged ready-confirmation captures and TalkBack are being finalized; item 2.2
-stays open.
+Five reference/normal/enlarged ready-confirmation cases also pass with unchanged
+independent API snapshots. The owner accepted this existing evidence for item
+2.2 and waived additional verification of the minor UI follow-ups. See the
+[acceptance record](current/README.md) for the exact scope; no further native or
+completed manual TalkBack run is claimed.
 
 Failed/partial attempts,
 initial reference-height probes, frame-settling rejection, npm argument forwarding

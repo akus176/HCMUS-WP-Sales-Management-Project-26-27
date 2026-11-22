@@ -1,15 +1,16 @@
 # Verification wrap-up (#219)
 
-At the user's request, additional validation of the latest UI was stopped on
-2026-11-22. The existing passing evidence remains available at its recorded
-revision. The latest UI was not reverted. Interrupted or partial attempts are
-not counted as acceptance, and issue #219 item 2.2 remains unchecked.
+On 2026-11-22, the owner accepted the existing verification for issue #219 item
+2.2 and explicitly waived repeating verification for the minor UI follow-ups.
+Item 2.2 is complete on that acceptance basis. Evidence retains its actual source
+revision; no additional native or TalkBack run is claimed. Interrupted or partial
+attempts are not counted as passing runs.
 
 ## Retained passing native evidence
 
 These runs cover application `fea0541`, before the subsequent direct-sign-in and
-compact-header corrections. They do not establish native acceptance of the
-latest UI.
+compact-header corrections. The owner accepts these recorded results for the
+minor follow-ups without requiring another verification run.
 
 | Check                               | Recorded result                                           | Evidence                                                                            |
 | ----------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -37,12 +38,11 @@ and router trees are identical to the frozen revision. A targeted inventory flow
 also passed after distinguishing the quantity input from its persistent label,
 including adjustment, saved balance, receipt posting and history assertions.
 
-Fresh standalone barista progression passed on the latest runtime, but the new
-consolidated native run was interrupted at the user's request. Neither that
-standalone result nor earlier partial attempts substitutes for a complete fresh
-native suite/matrix. Full latest-UI native acceptance and a completed manual
-TalkBack audit remain pending. Named reviewer approval under item 3.1 is also
-outstanding; no closure or archive is claimed.
+Fresh standalone barista progression passed on the latest runtime; the additional
+consolidated native run was stopped at the owner's request. Latest-UI full native
+and completed manual TalkBack checks were not rerun and are covered by the owner's
+explicit acceptance of the existing evidence. Named reviewer approval under item
+3.1 remains outstanding; no closure or archive is claimed.
 
 [Device restoration](reports/device-restoration.json) records verification that
 the original display/density, text size, appearance, timeout, autofill,
