@@ -6,6 +6,11 @@ name: Staff sign-in, visible form labels and keyboard
 - extendedWaitUntil:
     visible: Staff sign-in
     timeout: 60000
+- runFlow:
+    when:
+      visible: Staff mobile
+    commands:
+      - tapOn: Staff sign-in
 - assertVisible: Username
 - assertVisible: Password
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/login
