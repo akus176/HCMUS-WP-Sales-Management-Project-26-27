@@ -76,9 +76,7 @@ test('unauthorized administration deep link exposes no account or event data', a
   await screen.findByText(
     'Access unavailable. Your current permissions do not allow this module.',
   );
-  expect(
-    screen.queryByRole('header', { name: 'Staff administration' }),
-  ).toBeNull();
+  expect(screen.queryByRole('header', { name: 'Staff' })).toBeNull();
   expect(
     h.fetcher.mock.calls.some(
       ([request]) =>
@@ -130,7 +128,7 @@ test('authorized account views are safe and deactivation requires confirmation',
   await fireEvent.press(
     screen.getByRole('button', { name: 'Open Administration' }),
   );
-  await screen.findByRole('header', { name: 'Staff administration' });
+  await screen.findByRole('header', { name: 'Staff' });
   await screen.findByText('At Risk Staff');
   expect(screen.queryByText('login failed')).toBeNull();
   expect(

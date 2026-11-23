@@ -138,9 +138,7 @@ test('real routes reject signed-out and unauthorized links, allow a grant, then 
     'Access unavailable. Your current permissions do not allow this module.',
   );
   expect(screen.queryByRole('header', { name: 'Approvals' })).toBeNull();
-  await fireEvent.press(
-    screen.getByRole('button', { name: 'Back to staff home' }),
-  );
+  await fireEvent.press(screen.getByRole('tab', { name: 'Home' }));
   await fireEvent.press(
     await screen.findByRole('button', { name: 'Open Preparation' }),
   );
@@ -149,9 +147,7 @@ test('real routes reject signed-out and unauthorized links, allow a grant, then 
   ).toBeVisible();
   expect(screen.queryByText('Record payments — planned')).toBeNull();
   permissions = [];
-  await fireEvent.press(
-    screen.getByRole('button', { name: 'Back to staff home' }),
-  );
+  await fireEvent.press(screen.getByRole('tab', { name: 'Home' }));
   await screen.findByText(
     'No mobile modules are available for your permissions.',
   );
@@ -247,17 +243,16 @@ test('a retained module refocuses only after a fresh permission check', async ()
   await act(async () => {
     await h.client.login('staff', 'fixture-password');
   });
-  await fireEvent.press(
-    await screen.findByRole('button', { name: 'Open Preparation' }),
-  );
+  await screen.findByRole('header', { name: 'Staff home' });
+  await act(async () => router.push('/modules/barista'));
   await screen.findByRole('header', { name: 'Preparation' });
   permissions = [];
-  // push preserves the module in navigation history, unlike replace/back-home.
+  // Legacy module links normalize into the retained native workspace host.
   await act(async () => router.push('/session'));
   await screen.findByText(
     'No mobile modules are available for your permissions.',
   );
-  await act(async () => router.back());
+  await act(async () => router.push('/modules/barista'));
   await screen.findByText(
     'Access unavailable. Your current permissions do not allow this module.',
   );

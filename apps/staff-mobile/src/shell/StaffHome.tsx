@@ -1,18 +1,24 @@
-import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { ReactNode } from 'react';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { router } from 'expo-router';
-
 import { useSession } from '../session/context';
 import type { StaffSession } from '../session/session';
-import {
-  ShellButton,
-  ShellHeading,
-  ShellPage,
-  ShellStatus,
-  ShellText,
-} from './controls';
+import { ShellButton, ShellHeading, ShellPage, ShellStatus } from './controls';
 import { permittedActions, permittedModules } from './permissions';
-import { mobileTokens } from './designTokens';
+import { mobileTokens as t } from './designTokens';
+import { useNativeNavigation } from './NativeNavigation';
+import {
+  navigationFor,
+  workspaceNavigation,
+  type Workspace,
+} from './navigationPolicy';
+import { ShellIcon } from './ShellIcon';
 
 const actionDescriptions: Record<string, string> = {
   'orders.fulfill': 'Tickets · Start preparation · Mark ready',
@@ -32,9 +38,11 @@ const actionDescriptions: Record<string, string> = {
 export function StaffHome({
   user: verifiedUser,
   embedded = false,
-}: { user?: StaffSession; embedded?: boolean } = {}) {
+  summary,
+}: { user?: StaffSession; embedded?: boolean; summary?: ReactNode } = {}) {
   const { client, state } = useSession();
-  const [focusedModule, setFocusedModule] = useState<string | null>(null);
+  const navigation = useNativeNavigation();
+  const { fontScale } = useWindowDimensions();
   if (state.status === 'restoring')
     return (
       <ShellPage>
@@ -49,87 +57,152 @@ export function StaffHome({
       </ShellPage>
     );
   const modules = permittedModules(user.permissions);
-  const descriptions = Object.fromEntries(
-    modules.map((module) => [
-      module.id,
-      permittedActions(module, user.permissions)
-        .map((action) => actionDescriptions[action.permission] ?? action.label)
-        .join(' · '),
-    ]),
-  );
+  const quick = !!navigation && modules.length > 2;
+  const primary = navigationFor(user.permissions).map((tab) => tab.id);
+  const visibleModules = quick
+    ? modules.filter((module) => primary.includes(module.id as Workspace))
+    : modules;
   const content = (
     <>
-      <ShellHeading>Staff home</ShellHeading>
-      <ShellText>{user.fullName}</ShellText>
-      <ShellText>Choose your workspace.</ShellText>
-      {!modules.length && (
-        <ShellText>
-          No mobile modules are available for your permissions.
-        </ShellText>
-      )}
-      <View style={styles.workspaces}>
-        {modules.map((module) => (
-          <Pressable
-            key={module.id}
-            accessibilityRole="button"
-            accessibilityLabel={`Open ${module.title}`}
-            accessibilityHint={descriptions[module.id]}
-            onFocus={() => setFocusedModule(module.id)}
-            onBlur={() => setFocusedModule(null)}
-            style={({ pressed }) => [
-              styles.workspace,
-              (pressed || focusedModule === module.id) && styles.pressed,
-            ]}
-            onPress={() =>
-              router.push({
-                pathname: '/modules/[module]',
-                params: { module: module.id },
-              })
-            }
-          >
-            <Text style={styles.title}>{module.title}</Text>
-            <Text style={styles.description}>{descriptions[module.id]}</Text>
-          </Pressable>
-        ))}
+      <View style={styles.header}>
+        <ShellHeading accessibilityLabel="Staff home">
+          {navigation
+            ? `Good ${new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, ${user.fullName.split(' ')[0]}`
+            : 'Staff home'}
+        </ShellHeading>
+        <Text style={styles.caption}>{user.fullName}</Text>
       </View>
-      <ShellButton
-        label="Sign out"
-        variant="text"
-        onPress={() => {
-          void client
-            ?.logout()
-            .catch(() =>
-              Alert.alert(
-                'Unable to remove the saved session. Please try again.',
-              ),
-            );
-        }}
-      />
+      {summary}
+      {!modules.length && (
+        <ShellStatus>
+          No mobile modules are available for your permissions.
+        </ShellStatus>
+      )}
+      {!!modules.length && (
+        <View style={styles.sectionHeader}>
+          <ShellHeading level="section">Your workspaces</ShellHeading>
+          {quick && (
+            <ShellButton
+              label="View all workspaces"
+              displayLabel="View all"
+              compact
+              variant="text"
+              onPress={() => navigation?.open('more')}
+            />
+          )}
+        </View>
+      )}
+      <View style={quick && fontScale <= 1.5 ? styles.quickGrid : styles.list}>
+        {visibleModules.map((module) => {
+          const description = permittedActions(module, user.permissions)
+            .map(
+              (action) => actionDescriptions[action.permission] ?? action.label,
+            )
+            .join(' · ');
+          return (
+            <View
+              key={module.id}
+              style={quick && fontScale <= 1.5 ? styles.quickCell : undefined}
+            >
+              <ShellButton
+                label={`Open ${module.title}`}
+                variant="text"
+                onPress={() =>
+                  navigation
+                    ? navigation.open(module.id as Workspace)
+                    : router.push({
+                        pathname: '/modules/[module]',
+                        params: { module: module.id },
+                      })
+                }
+              >
+                <View style={quick ? styles.quickWorkspace : styles.workspace}>
+                  <View style={styles.icon}>
+                    <ShellIcon
+                      name={workspaceNavigation[module.id]!.icon}
+                      color={t.color.primary}
+                    />
+                  </View>
+                  <View style={styles.copy}>
+                    <Text style={styles.title}>
+                      {module.id === 'cashier' && quick
+                        ? 'Orders'
+                        : module.title}
+                    </Text>
+                    <Text style={styles.caption}>
+                      {quick
+                        ? module.id === 'cashier'
+                          ? 'Orders and tables'
+                          : module.id === 'inventory'
+                            ? 'Balances and receipts'
+                            : description
+                        : description}
+                    </Text>
+                  </View>
+                  {!quick && (
+                    <ShellIcon
+                      name="chevron"
+                      size={16}
+                      color={t.color.disabledText}
+                    />
+                  )}
+                </View>
+              </ShellButton>
+            </View>
+          );
+        })}
+      </View>
+      {!navigation && (
+        <ShellButton
+          label="Sign out"
+          variant="text"
+          onPress={() => {
+            void client
+              ?.logout()
+              .catch(() =>
+                Alert.alert(
+                  'Unable to remove the saved session. Please try again.',
+                ),
+              );
+          }}
+        />
+      )}
     </>
   );
   return embedded ? content : <ShellPage>{content}</ShellPage>;
 }
-
 const styles = StyleSheet.create({
-  workspaces: { borderTopWidth: 1, borderColor: mobileTokens.color.primary },
-  workspace: {
-    minHeight: 48,
-    minWidth: 48,
+  header: { gap: 6, paddingBottom: 8 },
+  workspace: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  list: { gap: 12 },
+  quickGrid: { flexDirection: 'row', gap: 12 },
+  quickCell: { flex: 1 },
+  quickWorkspace: { alignItems: 'flex-start', gap: 12 },
+  icon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
-    gap: 4,
-    borderBottomWidth: 1,
-    borderColor: mobileTokens.color.disabledBackground,
+    backgroundColor: t.color.selectedBackground,
   },
+  copy: { flex: 1, gap: 6 },
   title: {
-    fontFamily: mobileTokens.type.displayFont,
-    fontSize: 24,
-    color: mobileTokens.color.foreground,
-  },
-  description: {
-    fontFamily: mobileTokens.type.bodyFont,
+    fontFamily: t.type.mediumFont,
     fontSize: 16,
-    color: mobileTokens.color.disabledText,
+    lineHeight: 23,
+    color: t.color.foreground,
   },
-  pressed: { backgroundColor: mobileTokens.color.highlight },
+  caption: {
+    fontFamily: t.type.bodyFont,
+    fontSize: 13,
+    lineHeight: 20,
+    color: t.color.disabledText,
+  },
 });

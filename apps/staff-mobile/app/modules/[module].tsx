@@ -1,4 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect } from 'react';
+import { useNativeNavigation } from '../../src/shell/NativeNavigation';
+import type { Workspace } from '../../src/shell/navigationPolicy';
 import { PreparationScreen } from '../../src/barista/PreparationScreen';
 
 import { PermissionBoundary } from '../../src/shell/PermissionBoundary';
@@ -9,6 +12,7 @@ import {
   ShellPage,
   ShellPageHeader,
   ShellText,
+  ShellStatus,
 } from '../../src/shell/controls';
 import { findModule, permittedActions } from '../../src/shell/permissions';
 import { DiscountApprovals } from '../../src/features/approvals/DiscountApprovals';
@@ -23,6 +27,7 @@ export default function ModuleScreen() {
   }>();
   const module = findModule(moduleId);
   const access = useRouteAccess();
+  const navigation = useNativeNavigation();
   return (
     <ShellPage>
       <PermissionBoundary
@@ -35,62 +40,76 @@ export default function ModuleScreen() {
           />
         }
       >
-        {(user) => (
-          <>
-            <ShellPageHeader
-              title={
-                module?.id === 'approvals'
-                  ? 'Manager approvals'
-                  : module?.id === 'administration'
-                    ? 'Staff administration'
-                    : module?.title
-              }
-              inline
-              backLabel="Back to staff home"
-              onBack={() => router.replace('/session')}
-              hideDuringDetail={module?.id === 'barista'}
-            />
-            {module?.id === 'barista' ? (
-              <PreparationScreen showHeading={false} />
-            ) : module?.id === 'approvals' ? (
-              <>
-                {user.permissions.some((permission) =>
-                  ['orders.cancel', 'delivery.assign'].includes(permission),
-                ) && (
-                  <ShellButton
-                    label="Manage cancellations and deliveries"
-                    variant="secondary"
-                    onPress={() => router.push('/modules/approvals/operations')}
-                  />
-                )}
-                <DiscountApprovals user={user} showHeading={false} />
-              </>
-            ) : module?.id === 'inventory' ? (
-              <InventoryWorkspace user={user} showHeading={false} />
-            ) : module?.id === 'cashier' ? (
-              <OrdersScreen user={user} showHeading={false} />
-            ) : module?.id === 'delivery' ? (
-              <DeliveryScreen showHeading={false} />
-            ) : module?.id === 'administration' ? (
-              <StaffAdministration user={user} showHeading={false} />
-            ) : (
-              <>
-                <ShellHeading>{module!.title}</ShellHeading>
-                <ShellText>Selected module: {module!.title}</ShellText>
-                <ShellText>
-                  Workflow screens are planned and are not available yet. No
-                  business action can be performed here.
-                </ShellText>
-                {permittedActions(module!, user.permissions).map((action) => (
-                  <ShellText key={action.permission}>
-                    {action.label} — planned
+        {(user) =>
+          navigation && module ? (
+            <NativeModuleEntry id={module.id as Workspace} />
+          ) : (
+            <>
+              <ShellPageHeader
+                title={
+                  module?.id === 'approvals'
+                    ? 'Manager approvals'
+                    : module?.id === 'administration'
+                      ? 'Staff administration'
+                      : module?.title
+                }
+                inline
+                backLabel="Back to staff home"
+                onBack={() => router.replace('/session')}
+                hideDuringDetail={module?.id === 'barista'}
+              />
+              {module?.id === 'barista' ? (
+                <PreparationScreen showHeading={false} />
+              ) : module?.id === 'approvals' ? (
+                <>
+                  {user.permissions.some((permission) =>
+                    ['orders.cancel', 'delivery.assign'].includes(permission),
+                  ) && (
+                    <ShellButton
+                      label="Manage cancellations and deliveries"
+                      variant="secondary"
+                      onPress={() =>
+                        router.push('/modules/approvals/operations')
+                      }
+                    />
+                  )}
+                  <DiscountApprovals user={user} showHeading={false} />
+                </>
+              ) : module?.id === 'inventory' ? (
+                <InventoryWorkspace user={user} showHeading={false} />
+              ) : module?.id === 'cashier' ? (
+                <OrdersScreen user={user} showHeading={false} />
+              ) : module?.id === 'delivery' ? (
+                <DeliveryScreen showHeading={false} />
+              ) : module?.id === 'administration' ? (
+                <StaffAdministration user={user} showHeading={false} />
+              ) : (
+                <>
+                  <ShellHeading>{module!.title}</ShellHeading>
+                  <ShellText>Selected module: {module!.title}</ShellText>
+                  <ShellText>
+                    Workflow screens are planned and are not available yet. No
+                    business action can be performed here.
                   </ShellText>
-                ))}
-              </>
-            )}
-          </>
-        )}
+                  {permittedActions(module!, user.permissions).map((action) => (
+                    <ShellText key={action.permission}>
+                      {action.label} — planned
+                    </ShellText>
+                  ))}
+                </>
+              )}
+            </>
+          )
+        }
       </PermissionBoundary>
     </ShellPage>
   );
+}
+
+function NativeModuleEntry({ id }: { id: Workspace }) {
+  const open = useNativeNavigation()?.open;
+  useEffect(() => {
+    open?.(id);
+  }, [open, id]);
+  return <ShellStatus>Opening workspace…</ShellStatus>;
 }

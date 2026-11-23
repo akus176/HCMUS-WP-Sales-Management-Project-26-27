@@ -11,7 +11,9 @@ import {
   refreshOperationalQueries,
 } from './operationalEvents';
 
-export function OperationalUpdates() {
+export function OperationalUpdates({
+  onAvailability,
+}: { onAvailability?: (degraded: boolean) => void } = {}) {
   const { client, state } = useSession();
   const { status } = useConnectivity();
   const queries = useQueryClient();
@@ -76,7 +78,11 @@ export function OperationalUpdates() {
     };
   }, [client, foreground, queries, status, userId]);
 
-  if (!userId || status !== 'online' || !degraded) return null;
+  const unavailable = !!userId && status === 'online' && degraded;
+  useEffect(() => {
+    onAvailability?.(unavailable);
+  }, [onAvailability, unavailable]);
+  if (onAvailability || !unavailable) return null;
   return (
     <ShellStatus>
       Live updates unavailable. Refresh to check for changes.

@@ -1,4 +1,5 @@
 import { Stack } from 'expo-router';
+import { useState } from 'react';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { KeyboardAvoidingView, Text } from 'react-native';
@@ -12,6 +13,10 @@ import { OperationalUpdates } from '../src/realtime/OperationalUpdates';
 import { SessionProvider, useSession } from '../src/session/context';
 import { ShellPage } from '../src/shell/controls';
 import { mobileTokens } from '../src/shell/designTokens';
+import {
+  NativeNavigationProvider,
+  NativeTabBar,
+} from '../src/shell/NativeNavigation';
 
 export default function RootLayout() {
   return (
@@ -27,7 +32,6 @@ export function SessionRoutes() {
   const { state } = useSession();
   return (
     <ConnectivityProvider>
-      <OperationalUpdates />
       <SafeAreaView
         edges={['top', 'left', 'right']}
         style={{ flex: 1, backgroundColor: mobileTokens.color.background }}
@@ -43,6 +47,7 @@ function SessionNavigation({
 }: {
   state: ReturnType<typeof useSession>['state'];
 }) {
+  const [liveUpdatesUnavailable, setLiveUpdatesUnavailable] = useState(false);
   const [fontsLoaded, fontError] = useFonts({
     InterRegular: require('../assets/fonts/Inter-Regular.otf'),
     InterMedium: require('../assets/fonts/Inter-Medium.otf'),
@@ -69,23 +74,31 @@ function SessionNavigation({
   return (
     <KeyboardAvoidingView behavior="height" style={{ flex: 1 }}>
       <StatusBar style="dark" />
-      <ConnectivityPresentation branded>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Protected guard={!state.user}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="login" />
-          </Stack.Protected>
-          <Stack.Protected guard={!!state.user}>
-            <Stack.Screen name="session" />
-            <Stack.Screen name="modules/[module]" />
-            <Stack.Screen name="modules/delivery/[orderId]" />
-            <Stack.Screen name="modules/approvals/[discountId]" />
-            <Stack.Screen name="modules/approvals/operations" />
-            <Stack.Screen name="notifications/[kind]/[recordId]" />
-          </Stack.Protected>
-        </Stack>
-        <MobileNotifications />
-      </ConnectivityPresentation>
+      <OperationalUpdates onAvailability={setLiveUpdatesUnavailable} />
+      <NativeNavigationProvider key={state.user?.id ?? 'signed-out'}>
+        <ConnectivityPresentation
+          branded
+          compact={!!state.user}
+          liveUpdatesUnavailable={liveUpdatesUnavailable}
+        >
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Protected guard={!state.user}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="login" />
+            </Stack.Protected>
+            <Stack.Protected guard={!!state.user}>
+              <Stack.Screen name="session" />
+              <Stack.Screen name="modules/[module]" />
+              <Stack.Screen name="modules/delivery/[orderId]" />
+              <Stack.Screen name="modules/approvals/[discountId]" />
+              <Stack.Screen name="modules/approvals/operations" />
+              <Stack.Screen name="notifications/[kind]/[recordId]" />
+            </Stack.Protected>
+          </Stack>
+          <MobileNotifications />
+        </ConnectivityPresentation>
+        {!!state.user && <NativeTabBar />}
+      </NativeNavigationProvider>
     </KeyboardAvoidingView>
   );
 }

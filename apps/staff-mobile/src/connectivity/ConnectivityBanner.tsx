@@ -14,9 +14,13 @@ import { useConnectivity } from './connectivity';
 export function ConnectivityPresentation({
   children,
   branded = false,
+  compact = false,
+  liveUpdatesUnavailable = false,
 }: {
   children: ReactNode;
   branded?: boolean;
+  compact?: boolean;
+  liveUpdatesUnavailable?: boolean;
 }) {
   const { status, refreshConnection } = useConnectivity();
   const [expanded, setExpanded] = useState(false);
@@ -45,14 +49,21 @@ export function ConnectivityPresentation({
               />
             )}
           </>
+        ) : liveUpdatesUnavailable ? (
+          <ShellFeedback
+            kind="warning"
+            label="Live updates unavailable. Refresh to check for changes."
+          />
         ) : null
       }
     >
-      <ConnectivityBanner
-        expanded={expanded}
-        onToggle={() => setExpanded(!expanded)}
-        branded={branded}
-      />
+      {!compact && (
+        <ConnectivityBanner
+          expanded={expanded}
+          onToggle={() => setExpanded(!expanded)}
+          branded={branded}
+        />
+      )}
       {children}
     </PageNotice.Provider>
   );
