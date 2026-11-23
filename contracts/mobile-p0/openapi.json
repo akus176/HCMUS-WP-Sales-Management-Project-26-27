@@ -4177,6 +4177,7 @@
     },
     "/api/v1/customers": {
       "get": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "query",
@@ -4247,6 +4248,7 @@
         ]
       },
       "post": {
+        "description": "Outside the first staff mobile release.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -4321,6 +4323,7 @@
     },
     "/api/v1/customers/{id}": {
       "get": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -4374,6 +4377,7 @@
         ]
       },
       "patch": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -4462,6 +4466,7 @@
     },
     "/api/v1/customers/{id}/addresses": {
       "get": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -4525,6 +4530,7 @@
         ]
       },
       "post": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -4610,6 +4616,7 @@
     },
     "/api/v1/customers/{id}/addresses/{addressId}": {
       "patch": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -4707,6 +4714,7 @@
     },
     "/api/v1/customers/{id}/addresses/{addressId}/deactivate": {
       "post": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -4794,6 +4802,7 @@
     },
     "/api/v1/customers/{id}/addresses/{addressId}/default": {
       "post": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -4881,6 +4890,7 @@
     },
     "/api/v1/customers/{id}/deactivate": {
       "post": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -4959,6 +4969,7 @@
     },
     "/api/v1/customers/{id}/loyalty-transactions": {
       "get": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -5038,6 +5049,7 @@
     },
     "/api/v1/delivery-staff": {
       "get": {
+        "description": "Outside the first staff mobile release. Staff Mobile uses /api/v1/delivery-staff/options.",
         "responses": {
           "200": {
             "description": "OK"
@@ -5827,6 +5839,7 @@
     },
     "/api/v1/loyalty-settings": {
       "get": {
+        "description": "Outside the first staff mobile release.",
         "responses": {
           "200": {
             "content": {
@@ -5859,6 +5872,7 @@
         ]
       },
       "patch": {
+        "description": "Outside the first staff mobile release.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -6665,6 +6679,7 @@
     },
     "/api/v1/operations/orders": {
       "get": {
+        "description": "Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints.",
         "responses": {
           "200": {
             "content": {
@@ -6702,6 +6717,7 @@
     },
     "/api/v1/operations/orders/{id}": {
       "get": {
+        "description": "Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints.",
         "parameters": [
           {
             "in": "path",
@@ -6782,6 +6798,7 @@
         ]
       },
       "post": {
+        "description": "Outside the first staff mobile release.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -6927,6 +6944,7 @@
     },
     "/api/v1/orders/{id}/complete": {
       "post": {
+        "description": "Outside the first staff mobile release. Staff Mobile records delivery outcomes through courier assignments.",
         "parameters": [
           {
             "in": "path",
@@ -6955,6 +6973,7 @@
     },
     "/api/v1/orders/{id}/confirm": {
       "post": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -7000,6 +7019,7 @@
     },
     "/api/v1/orders/{id}/discounts": {
       "post": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -7045,6 +7065,7 @@
     },
     "/api/v1/orders/{id}/loyalty/redeem": {
       "post": {
+        "description": "Outside the first staff mobile release.",
         "parameters": [
           {
             "in": "path",
@@ -7235,6 +7256,7 @@
     },
     "/api/v1/orders/{id}/preparing": {
       "post": {
+        "description": "Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints.",
         "parameters": [
           {
             "in": "path",
@@ -7263,6 +7285,7 @@
     },
     "/api/v1/orders/{id}/ready": {
       "post": {
+        "description": "Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints.",
         "parameters": [
           {
             "in": "path",
@@ -8776,6 +8799,7 @@
     },
     "/api/v1/tables": {
       "get": {
+        "description": "Outside the first staff mobile release. Staff Mobile uses /api/v1/pos/tables.",
         "responses": {
           "200": {
             "description": "OK"

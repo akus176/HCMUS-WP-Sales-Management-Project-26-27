@@ -1098,6 +1098,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. */
         get: {
             parameters: {
                 query?: {
@@ -1133,6 +1134,7 @@ export interface paths {
             };
         };
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -1206,6 +1208,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. */
         get: {
             parameters: {
                 query?: never;
@@ -1251,6 +1254,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /** @description Outside the first staff mobile release. */
         patch: {
             parameters: {
                 query?: never;
@@ -1329,6 +1333,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. */
         get: {
             parameters: {
                 query?: {
@@ -1372,6 +1377,7 @@ export interface paths {
             };
         };
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -1453,6 +1459,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /** @description Outside the first staff mobile release. */
         patch: {
             parameters: {
                 query?: never;
@@ -1534,6 +1541,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -1615,6 +1623,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -1696,6 +1705,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -1774,6 +1784,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. */
         get: {
             parameters: {
                 query?: {
@@ -1832,6 +1843,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. Staff Mobile uses /api/v1/delivery-staff/options. */
         get: {
             parameters: {
                 query?: never;
@@ -2572,6 +2584,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. */
         get: {
             parameters: {
                 query?: never;
@@ -2606,6 +2619,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /** @description Outside the first staff mobile release. */
         patch: {
             parameters: {
                 query?: never;
@@ -3353,6 +3367,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints. */
         get: {
             parameters: {
                 query?: never;
@@ -3397,6 +3412,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints. */
         get: {
             parameters: {
                 query?: never;
@@ -3473,6 +3489,7 @@ export interface paths {
             };
         };
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -3627,6 +3644,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. Staff Mobile records delivery outcomes through courier assignments. */
         post: {
             parameters: {
                 query?: never;
@@ -3662,6 +3680,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -3703,6 +3722,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -3744,6 +3764,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -3916,6 +3937,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints. */
         post: {
             parameters: {
                 query?: never;
@@ -3951,6 +3973,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints. */
         post: {
             parameters: {
                 query?: never;
@@ -5395,6 +5418,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. Staff Mobile uses /api/v1/pos/tables. */
         get: {
             parameters: {
                 query?: never;

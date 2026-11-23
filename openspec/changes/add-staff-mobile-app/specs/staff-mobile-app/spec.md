@@ -62,6 +62,13 @@ Authorized cashiers SHALL be able to search and inspect orders, view table occup
 - **WHEN** a cashier records a valid payment for an eligible order
 - **THEN** the server persists the payment once and the application displays the updated paid amount and balance
 
+### Requirement: First-release sales boundary
+The first staff mobile release SHALL use preparation-ticket and courier-assignment endpoints for the progression described in their workflows. Order drafting, confirmation, non-delivery completion, initiating discount requests, customer profile and address management, and loyalty history, settings, and redemption SHALL remain outside the first staff mobile release. The generated OpenAPI document SHALL identify shared sales routes outside this boundary while preserving those operations for authorized clients.
+
+#### Scenario: Staff works across WinUI and Staff Mobile
+- **WHEN** an authorized staff member creates and confirms an order or requests a discount in WinUI
+- **THEN** authorized mobile staff can act on the resulting preparation ticket or pending approval through their existing workflows
+
 ### Requirement: Inventory mobile workflow
 Authorized inventory staff SHALL be able to view ingredient balances and low-stock items, post prepared purchase receipts, and record stock adjustments with mandatory reasons.
 
