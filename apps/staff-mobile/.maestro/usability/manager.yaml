@@ -64,21 +64,7 @@ name: Updated operational navigation, filters and review forms
 - tapOn: Show ready orders
 - assertVisible: 'Filter orders: Ready'
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/filter-selected
-- openLink: coffeeshop-staff:///modules/approvals
-- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/approvals
-- runFlow:
-    file: scroll-to.yaml
-    env:
-      MAESTRO_SCROLL_TARGET: Review order ${MAESTRO_APPROVE_ORDER} discount
-      MAESTRO_SCROLL_DIRECTION: DOWN
-- tapOn: Review order ${MAESTRO_APPROVE_ORDER} discount
-- runFlow:
-    file: scroll-to.yaml
-    env:
-      MAESTRO_SCROLL_TARGET: Approve discount
-      MAESTRO_SCROLL_DIRECTION: DOWN
-- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/approval-detail
-- openLink: coffeeshop-staff:///modules/approvals/operations
+- openLink: coffeeshop-staff:///modules/cashier/operations
 - runFlow:
     file: scroll-to.yaml
     env:
@@ -126,13 +112,7 @@ name: Updated operational navigation, filters and review forms
 - extendedWaitUntil:
     visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 30000
-- runFlow:
-    when:
-      visible: More
-    commands:
-      - tapOn: More
-- tapOn: Open Approvals
-- tapOn: Manage cancellations and deliveries
+- openLink: coffeeshop-staff:///modules/cashier/operations
 - runFlow:
     file: scroll-to.yaml
     env:

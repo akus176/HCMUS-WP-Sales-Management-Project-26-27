@@ -92,12 +92,6 @@ const names = [
   'barista-stale',
   'barista-forbidden',
   'barista-offline',
-  'discount-approve',
-  'discount-reject',
-  'discount-conflict',
-  'discount-stale',
-  'discount-forbidden',
-  'discount-offline',
   'courier-own-list',
   'courier-other-detail',
   'courier-delivered',
@@ -364,7 +358,7 @@ async function check(name, role, run) {
 const open = (kind, order, expected) =>
   native('open', {
     KIND: kind,
-    RECORD_ID: kind === 'approval' ? order.discountId : order.id,
+    RECORD_ID: order.id,
     EXPECTED: expected,
   });
 let proxy;
@@ -483,10 +477,7 @@ try {
     name: `I201 latte ${runId}`,
     initialVariants: [{ sizeName: 'Regular', price: 10 }],
   });
-  async function order(
-    label,
-    { discount = false, delivery = false, other = false } = {},
-  ) {
+  async function order(label, { delivery = false, other = false } = {}) {
     const id = randomUUID();
     const record = await post('/orders', {
       orderId: id,
@@ -510,23 +501,13 @@ try {
       ],
     });
     const result = { id, orderNumber: record.orderNumber, delivery, label };
-    if (discount) {
-      result.discountId = randomUUID();
-      await post(`/orders/${id}/discounts`, {
-        discountId: result.discountId,
-        type: 'fixed',
-        value: 1,
-        reason: `I201 ${runId} ${label}`,
+    await post(`/orders/${id}/confirm`, { reviewedTotal: 10 });
+    if (delivery) {
+      await post(`/orders/${id}/preparing`);
+      await post(`/orders/${id}/ready`);
+      await post(`/orders/${id}/assign-delivery`, {
+        staffId: sessions[other ? 'OtherCourier' : 'DeliveryStaff'].user.id,
       });
-    } else {
-      await post(`/orders/${id}/confirm`, { reviewedTotal: 10 });
-      if (delivery) {
-        await post(`/orders/${id}/preparing`);
-        await post(`/orders/${id}/ready`);
-        await post(`/orders/${id}/assign-delivery`, {
-          staffId: sessions[other ? 'OtherCourier' : 'DeliveryStaff'].user.id,
-        });
-      }
     }
     return result;
   }
@@ -539,17 +520,6 @@ try {
     'offline',
   ])
     seed[`barista-${name}`] = await order(`barista-${name}`);
-  for (const name of [
-    'approve',
-    'reject',
-    'conflict',
-    'stale',
-    'forbidden',
-    'offline',
-  ])
-    seed[`discount-${name}`] = await order(`discount-${name}`, {
-      discount: true,
-    });
   for (const name of [
     'delivered',
     'failed',
@@ -671,77 +641,6 @@ try {
       'urgent-order',
       'Start preparing',
       'Status: Confirmed',
-    ),
-  );
-  for (const action of ['approve', 'reject'])
-    await check(`discount-${action}`, 'Manager', async () => {
-      const o = seed[`discount-${action}`];
-      await open('approval', o, 'Approve discount');
-      await native('discount-decision', {
-        ACTION: action === 'approve' ? 'Approve discount' : 'Reject discount',
-        EXPECTED: `${action === 'approve' ? 'Approved' : 'Rejected'} by the server.*`,
-      });
-      const state = await snapshot(o);
-      assert.equal(state.total, action === 'approve' ? 9 : 10);
-      assert.equal(
-        state.discounts.find((d) => d.id === o.discountId).status,
-        action === 'approve' ? 'approved' : 'rejected',
-      );
-      return state;
-    });
-  await check('discount-conflict', 'Manager', async () => {
-    const o = seed['discount-conflict'];
-    await open('approval', o, 'Approve discount');
-    const f = fault(
-      'POST',
-      `/api/v1/discounts/${o.discountId}/approve`,
-      () => post(`/discounts/${o.discountId}/reject`),
-      o,
-    );
-    await native('discount-decision', {
-      ACTION: 'Approve discount',
-      EXPECTED: 'This discount changed before your decision.*',
-    });
-    return proxy.verify(f, 409);
-  });
-  await check('discount-stale', 'Manager', async () => {
-    const o = seed['discount-stale'];
-    await post(`/discounts/${o.discountId}/approve`);
-    await native('unavailable', {
-      KIND: 'approval',
-      RECORD_ID: o.discountId,
-      EXPECTED: 'This discount is no longer pending.*',
-      FORBIDDEN_ACTION: 'Approve discount',
-      PRIVATE_LABEL: `Order ${o.orderNumber}`,
-    });
-    const state = await snapshot(o);
-    assert.equal(state.total, 9);
-    return state;
-  });
-  await check('discount-forbidden', 'Manager', async () => {
-    const o = seed['discount-forbidden'];
-    await open('approval', o, 'Approve discount');
-    const f = fault(
-      'POST',
-      `/api/v1/discounts/${o.discountId}/approve`,
-      () => setRole('Manager', false),
-      o,
-    );
-    try {
-      await native('discount-denied', {
-        PRIVATE_LABEL: `Order ${o.orderNumber}`,
-      });
-      return await proxy.verify(f, 403);
-    } finally {
-      await setRole('Manager', true);
-    }
-  });
-  await check('discount-offline', 'Manager', () =>
-    offline(
-      seed['discount-offline'],
-      'approval',
-      'Approve discount',
-      'Approve discount',
     ),
   );
   const privateLabel = `Address: Synthetic I201 ${runId} address`;

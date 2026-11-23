@@ -183,3 +183,19 @@ Every page that exposes back or manual refresh SHALL place those actions in its 
 - **WHEN** a manager opens order operations from Approvals and views an order
 - **THEN** the sheet displays its own back and refresh header actions
 - **AND** closing the sheet restores the Approvals header without changing the page's navigation state
+
+### Requirement: Preparation workspace and Account-only More
+The mobile application SHALL expose Preparation as its own bottom-tab workspace for staff with preparation access. More SHALL contain only the Account entry. Other permitted operational pages SHALL use direct tabs, with staff administration reachable through Account. Existing cached workspace navigation and backend permission enforcement SHALL remain effective.
+
+#### Scenario: Open Preparation directly
+- **WHEN** staff with `orders.fulfill` view the bottom navigation
+- **THEN** Preparation opens its queue directly without entering More
+- **AND** More contains Account without Preparation or other operational entries
+
+### Requirement: Remove mobile discount approvals
+The mobile application SHALL NOT display a discount approval inbox, home approval counts or discount decision actions, even if a session retains the legacy permission. Removed approval notifications SHALL be rejected without reading discount data. Order cancellation and delivery assignment SHALL remain available through permission-checked order controls. These rules supersede earlier mobile discount approval requirements.
+
+#### Scenario: Receive a retired approval link
+- **WHEN** a legacy approval notification or module link is opened
+- **THEN** the application reports that the destination is unavailable
+- **AND** it does not request pending discounts or expose a decision action

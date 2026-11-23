@@ -1,22 +1,23 @@
 appId: com.coffeeshop.staffmobile
-name: Notification link reauthorizes a recipient with no approval permission
+name: Removed discount links cannot expose a retired screen
 ---
 - runFlow: common/login.yaml
 - assertVisible: Open Preparation
 - assertNotVisible: Open Approvals
-- openLink: coffeeshop-staff:///notifications/approval/${MAESTRO_DISCOUNT_ID}
+- openLink: coffeeshop-staff:///notifications/approval/${MAESTRO_RETIRED_RECORD_ID}
 - extendedWaitUntil:
-    visible: Access unavailable. Your current permissions do not allow this module.
+    visible: This notification link is unavailable.
     timeout: 30000
 - assertNotVisible: Discount review
 - tapOn: Home
-- tapOn: Account
+- tapOn: More
+- tapOn: Open Account
 - scrollUntilVisible:
     element: Sign out
     direction: DOWN
 - tapOn: Sign out
 - tapOn: Confirm sign out
 - assertVisible: Staff sign-in
-- openLink: coffeeshop-staff:///notifications/approval/${MAESTRO_DISCOUNT_ID}
+- openLink: coffeeshop-staff:///notifications/approval/${MAESTRO_RETIRED_RECORD_ID}
 - assertVisible: Staff sign-in
 - assertNotVisible: Discount review

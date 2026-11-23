@@ -16,12 +16,7 @@ name: Courier delivered and failed workflows against the shared API
 - extendedWaitUntil:
     visible: Open Deliveries
     timeout: 30000
-- runFlow:
-    when:
-      visible: More
-    commands:
-      - tapOn: More
-- tapOn: Open Deliveries
+- tapOn: Deliveries
 - scrollUntilVisible:
     element: Open delivery ${MAESTRO_DELIVERED_ORDER}
     direction: DOWN

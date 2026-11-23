@@ -279,7 +279,7 @@ from native Android checks. Required reviewer: @vt-Toan. Contributor: @akus176
 
 ## Barista preparation (#155)
 
-Open **Preparation** from staff home with `orders.fulfill`. The queue filters
+Open the **Preparation** bottom tab with `orders.fulfill`. More contains only **Account**; staff administration is available from Account when permitted. Discount approvals, their home summary and approval notification destinations are no longer part of the mobile app. Cancellation and delivery-assignment controls remain in authorized order details. The queue filters
 confirmed/preparing tickets and paginates ten tickets at a time. Open a ticket
 to inspect its items, sizes, quantities, add-ons and table. **Start preparing**
 and **Mark ready** each require confirmation and a successful service response.

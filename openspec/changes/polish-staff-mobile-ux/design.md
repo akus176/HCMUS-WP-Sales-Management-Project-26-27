@@ -110,3 +110,7 @@ Use separate title, section and search header slots. Titles/section navigation r
 ### Owner follow-up: consistent header actions (2026-11-23)
 
 Render each page's back action on the left of its title and its manual refresh action on the right, outside scrolling records. Use named 48dp icon buttons with visible focus, disabled and loading states. Detail headers override route-level titles/back actions while open and restore them on return. Sheets own their header and scroll/navigation state so manager order controls cannot replace actions on the Approvals page underneath. Keep search/filter reflow and existing refresh handlers, cache invalidation, mutation confirmations and permission checks.
+
+### Owner follow-up: Preparation tab and Account-only More (2026-11-23)
+
+Remove discount approval UI, home counts, protected routes and notification destinations from the mobile app. Preparation is a direct, permission-derived bottom-tab workspace; More contains only Account. Operational tabs no longer spill into More. Staff administration remains reachable from Account, and permission-checked cancellation/delivery assignment controls remain with order details. The dedicated manager operations route moves under cashier. These instructions supersede earlier mobile approval and overflow-navigation designs. Update automated coverage and retired-flow fixtures for GitHub CI; do not run local tests for this change, as explicitly requested by the owner.

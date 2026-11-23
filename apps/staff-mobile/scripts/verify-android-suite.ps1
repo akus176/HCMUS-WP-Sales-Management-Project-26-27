@@ -9,7 +9,7 @@ if (!$env:COFFEESHOP_E2E_PASSWORD) { throw 'Set the synthetic accounts password 
 foreach ($command in @('maestro', 'adb')) { $null = Get-Command $command -ErrorAction Stop }
 New-Item -ItemType Directory -Path $ResultsDirectory -Force | Out-Null
 $flows = @(
-    @('session', 'Barista'), @('barista', 'Barista'), @('approvals', 'Manager'),
+    @('session', 'Barista'), @('barista', 'Barista'),
     @('inventory', 'InventoryStaff'), @('courier', 'DeliveryStaff'),
     @('cashier', 'Cashier'), @('manager-orders', 'Manager'),
     @('administration', 'Admin'), @('offline', 'InventoryStaff'),
@@ -45,9 +45,7 @@ $env:MAESTRO_DELIVERY_ORDER = $orders.deliveryOrder
 $env:MAESTRO_COURIER_NAME = $orders.courierName
 $env:MAESTRO_DELIVERED_ORDER = $courier.deliveredOrder
 $env:MAESTRO_FAILED_ORDER = $courier.failedOrder
-$env:MAESTRO_APPROVE_ORDER = $quality.decisions[0].orderNumber
-$env:MAESTRO_REJECT_ORDER = $quality.decisions[1].orderNumber
-$env:MAESTRO_DISCOUNT_ID = $quality.decisions[0].discountId
+$env:MAESTRO_RETIRED_RECORD_ID = $quality.ingredientId
 $env:MAESTRO_INGREDIENT = $quality.ingredientName
 $env:MAESTRO_OFFLINE_INGREDIENT = $quality.offlineName
 $env:MAESTRO_RECEIPT = $quality.receiptNumber

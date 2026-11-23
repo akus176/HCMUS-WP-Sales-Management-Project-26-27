@@ -53,14 +53,8 @@ name: Native mockup navigation and canceled confirmations
 - assertVisible: Payment amount
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-payment-sheet
 - tapOn: Close Record payment
-- tapOn: More
-- extendedWaitUntil:
-    visible: Open Preparation
-    timeout: 15000
-- scrollUntilVisible:
-    element: Open Preparation
-    direction: DOWN
-- tapOn: Open Preparation
+- tapOn:
+    id: workspace-tab-barista
 - extendedWaitUntil:
     visible: Open ticket 1042
     timeout: 15000

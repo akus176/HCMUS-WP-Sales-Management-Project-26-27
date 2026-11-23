@@ -16,14 +16,9 @@ name: Manager cancellation and ready delivery assignment against the shared API
 - extendedWaitUntil:
     visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 30000
-- runFlow:
-    when:
-      visible: More
-    commands:
-      - tapOn: More
-- tapOn: Open Approvals
-- tapOn: Manage cancellations and deliveries
+- tapOn: Orders
 - tapOn: Search orders
+- eraseText
 - inputText: ${MAESTRO_CANCEL_ORDER}
 - runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
@@ -49,9 +44,9 @@ name: Manager cancellation and ready delivery assignment against the shared API
     direction: UP
 - assertVisible: Cancellation confirmed by the service.
 - takeScreenshot: .maestro/results/manager-cancelled
-- tapOn: Close Order operations
-- tapOn: Manage cancellations and deliveries
+- tapOn: Back to order search
 - tapOn: Search orders
+- eraseText
 - inputText: ${MAESTRO_DELIVERY_ORDER}
 - runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:

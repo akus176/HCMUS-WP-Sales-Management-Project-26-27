@@ -2,15 +2,8 @@ appId: com.coffeeshop.staffmobile
 name: Matched native queue and focused ticket reference states
 ---
 - runFlow: login.yaml
-- runFlow:
-    when:
-      visible: More
-    commands:
-      - tapOn: More
-- scrollUntilVisible:
-    element: Open Preparation
-    direction: DOWN
-- tapOn: Open Preparation
+- tapOn:
+    id: workspace-tab-barista
 - runFlow:
     when:
       true: ${MAESTRO_UX_AFTER == 'true'}

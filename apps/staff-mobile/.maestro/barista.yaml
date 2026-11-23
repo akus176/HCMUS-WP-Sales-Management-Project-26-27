@@ -16,12 +16,8 @@ name: Barista progression against the shared API
 - extendedWaitUntil:
     visible: Open Preparation
     timeout: 30000
-- runFlow:
-    when:
-      visible: More
-    commands:
-      - tapOn: More
-- tapOn: Open Preparation
+- tapOn:
+    id: workspace-tab-barista
 - scrollUntilVisible:
     element:
       id: preparation-filter-confirmed
