@@ -17,4 +17,4 @@ status=$?
 set -e
 test "$status" = 1
 echo 'Secret gate: synthetic credential rejected.'
-"$tools/gitleaks" git --no-banner --redact --log-opts=HEAD .
+"$tools/gitleaks" git --no-banner --redact --verbose --log-opts=HEAD .
