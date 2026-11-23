@@ -16,7 +16,7 @@ public sealed class TableManagementRepository(CoffeeShopDbContext context) : ITa
             return true;
         }
         catch (DbUpdateException exception) when (exception.InnerException is PostgresException
-            { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "IX_tables_table_number" })
+        { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "IX_tables_table_number" })
         {
             return false;
         }

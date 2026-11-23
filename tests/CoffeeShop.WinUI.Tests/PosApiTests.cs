@@ -27,7 +27,7 @@ public sealed class PosApiTests
             {
                 var body = (await request.Content!.ReadFromJsonAsync<CreateTableRequest>())!;
                 posts.Add((request.Headers.Authorization?.Parameter, body));
-                var row = new PosTableResponse(tableId, body.TableNumber!, body.Seats, false, null);
+                var row = new PosTableResponse(tableId, body.TableNumber!.Trim(), body.Seats, false, null);
                 tables.Add(row);
                 return new HttpResponseMessage(HttpStatusCode.Created) { Content = JsonContent.Create(row) };
             }
@@ -39,7 +39,8 @@ public sealed class PosApiTests
                 _ => throw new InvalidOperationException($"Unexpected route {path}"),
             };
             return new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(result) };
-        })) { BaseAddress = new Uri("https://example.test/api/v1/") };
+        }))
+        { BaseAddress = new Uri("https://example.test/api/v1/") };
         using var services = new ServiceCollection().BuildServiceProvider();
         var actor = new PosOperatorSession(() => session.CurrentUser);
         var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new CustomerOrderContext(), actor,
@@ -62,7 +63,7 @@ public sealed class PosApiTests
         var session = new StaffSessionManager(new Identity(user), new Store());
         await session.LoginAsync("fixture", "fixture");
         using var http = new HttpClient(new Handler(_ => throw new InvalidOperationException("No table write expected")))
-            { BaseAddress = new Uri("https://example.test/api/v1/") };
+        { BaseAddress = new Uri("https://example.test/api/v1/") };
         using var services = new ServiceCollection().BuildServiceProvider();
         var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new CustomerOrderContext(),
             new PosOperatorSession(() => session.CurrentUser),

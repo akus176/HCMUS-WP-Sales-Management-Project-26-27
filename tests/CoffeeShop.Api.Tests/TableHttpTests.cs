@@ -32,7 +32,7 @@ public sealed class TableHttpTests : IAsyncLifetime
             await create.ExecuteNonQueryAsync();
         }
         var connectionString = new NpgsqlConnectionStringBuilder(adminConnection)
-            { Database = databaseName, Pooling = false }.ConnectionString;
+        { Database = databaseName, Pooling = false }.ConnectionString;
         var options = new DbContextOptionsBuilder<CoffeeShopDbContext>();
         CoffeeShopPostgresOptions.Configure(options, connectionString);
         await using (var db = new CoffeeShopDbContext(options.Options)) await db.Database.MigrateAsync();
