@@ -73,6 +73,38 @@ public sealed class OperationsWorkspaceTests
     }
 
     [Fact]
+    public void ServiceBoardTables_ShowServerAvailabilityAndAssociatedOrder()
+    {
+        var available = new OperationalTable(EntityId.New(), "T1", 2, false, null);
+        var orderId = EntityId.New();
+        var occupied = new OperationalTable(EntityId.New(), "T2", 4, true, orderId);
+        var orders = new[]
+        {
+            new OperationalOrder(orderId, "ORD-42", "dine_in", OrderStatus.Confirmed, 20m, 0m, "T2", null, null, [])
+        };
+
+        var rows = OperationsWorkspace.BuildTableRows([occupied, available], orders);
+
+        Assert.Collection(rows,
+            row => Assert.Equal(("T1", "Available", "No active order", "Table T1, available"),
+                (row.TableNumber, row.Availability, row.Association, row.AccessibilityLabel)),
+            row => Assert.Equal(("T2", "Occupied", "ORD-42", "Table T2, occupied, order ORD-42"),
+                (row.TableNumber, row.Availability, row.Association, row.AccessibilityLabel)));
+    }
+
+    [Fact]
+    public void ServiceBoardTable_ReportsOccupiedWhenOrderSummaryIsNotLoaded()
+    {
+        var table = new OperationalTable(EntityId.New(), "T3", null, true, EntityId.New());
+
+        var row = OperationsWorkspace.BuildTableRows([table], []).Single();
+
+        Assert.Equal("Occupied", row.Availability);
+        Assert.Equal("Order details unavailable", row.Association);
+        Assert.Equal("Table T3, occupied, order details unavailable", row.AccessibilityLabel);
+    }
+
+    [Fact]
     public async Task DatabaseFailure_IsSafeAndLeavesFulfillmentReloadable()
     {
         using var services = new ServiceCollection().BuildServiceProvider();
