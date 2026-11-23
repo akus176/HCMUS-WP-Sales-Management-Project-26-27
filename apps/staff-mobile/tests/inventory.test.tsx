@@ -621,3 +621,58 @@ test('a receipt API error result does not claim that posting succeeded', async (
     view.queryByText('Receipt RCPT-184 was posted by the server.'),
   ).toBeNull();
 });
+
+test('large receipt and movement lists render in batches while keeping all records reachable', async () => {
+  const receipts = Array.from({ length: 45 }, (_, index) => ({
+    ...receipt,
+    id: `receipt-${index}`,
+    receiptNumber: `Batch receipt ${index}`,
+  }));
+  const movements = Array.from({ length: 45 }, (_, index) => ({
+    ...movement,
+    id: `movement-${index}`,
+    reason: `Batch movement ${index}`,
+  }));
+  const get = jest.fn().mockImplementation(async (path: string) => ({
+    data:
+      path === '/api/v1/purchase-receipts'
+        ? receipts
+        : path === '/api/v1/stock-movements'
+          ? movements
+          : { items: [balance], page: 1, pageSize: 100, totalCount: 1 },
+  }));
+  const { post } = createClient(get);
+  const view = await setup();
+  await view.findByText('Oat milk');
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Purchase receipts' }),
+  );
+  await view.findByText('Batch receipt 19');
+  expect(view.queryByText('Batch receipt 20')).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Show more receipts' }),
+  );
+  await view.findByText('Batch receipt 39');
+  expect(view.queryByText('Batch receipt 40')).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Show more receipts' }),
+  );
+  await view.findByText('Batch receipt 44');
+  expect(view.queryByRole('button', { name: 'Show more receipts' })).toBeNull();
+  await fireEvent.press(view.getByRole('button', { name: 'Movement history' }));
+  await view.findByText('Batch movement 19');
+  expect(view.queryByText('Batch movement 20')).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Show more movements' }),
+  );
+  await view.findByText('Batch movement 39');
+  expect(view.queryByText('Batch movement 40')).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Show more movements' }),
+  );
+  await view.findByText('Batch movement 44');
+  expect(
+    view.queryByRole('button', { name: 'Show more movements' }),
+  ).toBeNull();
+  expect(post).not.toHaveBeenCalled();
+});

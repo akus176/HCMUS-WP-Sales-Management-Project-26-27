@@ -22,6 +22,7 @@ import {
   ShellMutationFeedback,
   ShellSheet,
   ShellBadge,
+  ShellPinnedHeader,
   usePageNavigation,
 } from '../../shell/controls';
 import { mobileTokens } from '../../shell/designTokens';
@@ -33,6 +34,7 @@ type Balance = components['schemas']['IngredientBalanceResponse'];
 type Movement = components['schemas']['StockMovementResponse'];
 type Receipt = components['schemas']['ReceiptResponse'];
 type InventorySection = 'balances' | 'low-stock' | 'receipts' | 'history';
+const recordBatchSize = 20;
 
 const quantity = (value: number | string) =>
   Number(value).toLocaleString('vi-VN', { maximumFractionDigits: 3 });
@@ -113,6 +115,8 @@ export function InventoryWorkspace({
     canManage ? 'balances' : canViewLowStock ? 'low-stock' : 'receipts',
   );
   const [search, setSearch] = useState('');
+  const [receiptLimit, setReceiptLimit] = useState(recordBatchSize);
+  const [historyLimit, setHistoryLimit] = useState(recordBatchSize);
   const [adjustmentIngredient, setAdjustmentIngredient] = useState<Balance>();
   const [adjustmentReview, setAdjustmentReview] = useState(false);
   const [receiptReview, setReceiptReview] = useState(false);
@@ -364,7 +368,7 @@ export function InventoryWorkspace({
 
   return (
     <>
-      {showHeading && <ShellHeading>Inventory</ShellHeading>}
+      {showHeading && !native?.user && <ShellHeading>Inventory</ShellHeading>}
       <ShellMutationFeedback
         mutation={{
           isRefreshing:
@@ -373,53 +377,63 @@ export function InventoryWorkspace({
         }}
       />
       {(ingredientId || receiptId) && (
-        <ShellButton
-          label={ingredientId ? 'Back to ingredients' : 'Back to inventory'}
-          variant="text"
-          onPress={() => {
-            setIngredientId(undefined);
-            setReceiptId(undefined);
-            navigation.returnToList();
-          }}
-        />
+        <ShellPinnedHeader enabled={!!native?.user}>
+          <ShellButton
+            label={ingredientId ? 'Back to ingredients' : 'Back to inventory'}
+            variant="text"
+            onPress={() => {
+              setIngredientId(undefined);
+              setReceiptId(undefined);
+              navigation.returnToList();
+            }}
+          />
+        </ShellPinnedHeader>
       )}
       {!ingredientId && !receiptId && (
-        <ShellSelection segmented>
-          {sections
-            .filter(({ id }) => availableSections.includes(id))
-            .map(({ id, title }) => (
-              <ShellButton
-                key={id}
-                label={title}
-                displayLabel={
-                  id === 'balances'
-                    ? 'Balances'
-                    : id === 'low-stock'
-                      ? 'Low stock'
-                      : id === 'receipts'
-                        ? 'Receipts'
-                        : 'History'
-                }
-                selected={selectedSection === id}
-                compact
-                variant="secondary"
-                onPress={() => setSection(id)}
-              />
-            ))}
-        </ShellSelection>
+        <ShellPinnedHeader enabled={!!native?.user}>
+          <ShellSelection segmented>
+            {sections
+              .filter(({ id }) => availableSections.includes(id))
+              .map(({ id, title }) => (
+                <ShellButton
+                  key={id}
+                  testID={`inventory-section-${id}`}
+                  label={title}
+                  displayLabel={
+                    id === 'balances'
+                      ? 'Balances'
+                      : id === 'low-stock'
+                        ? 'Low stock'
+                        : id === 'receipts'
+                          ? 'Receipts'
+                          : 'History'
+                  }
+                  selected={selectedSection === id}
+                  compact
+                  variant="secondary"
+                  onPress={() => {
+                    setSection(id);
+                    navigation.scrollToTop();
+                  }}
+                />
+              ))}
+          </ShellSelection>
+        </ShellPinnedHeader>
       )}
       {selectedSection === 'balances' || selectedSection === 'low-stock' ? (
         <>
           {!ingredientId && (
-            <ShellInput
-              label="Search ingredients"
-              accessibilityLabel="Search ingredients"
-              placeholder="Search ingredients"
-              placeholderTextColor={mobileTokens.color.disabledText}
-              returnKeyType="search"
-              value={search}
-              onChangeText={setSearch}
-            />
+            <ShellPinnedHeader slot="search" enabled={!!native?.user}>
+              <ShellInput
+                label="Search ingredients"
+                accessibilityLabel="Search ingredients"
+                placeholder="Search ingredients"
+                placeholderTextColor={mobileTokens.color.disabledText}
+                returnKeyType="search"
+                value={search}
+                onChangeText={setSearch}
+              />
+            </ShellPinnedHeader>
           )}
           {refreshButton}
           {status === 'offline' && !ingredientQuery.data ? (
@@ -797,23 +811,35 @@ export function InventoryWorkspace({
                   label="No purchase receipts are available."
                 />
               ) : (
-                receiptsQuery.data?.map((receipt: Receipt) => (
-                  <View key={receipt.id} style={styles.card}>
-                    <ShellText>{receipt.receiptNumber}</ShellText>
-                    <ShellText>Status: {receipt.status}</ShellText>
-                    <ShellButton
-                      label={`Review receipt ${receipt.receiptNumber}`}
-                      variant="secondary"
-                      onPress={() => {
-                        setReceiptId(receipt.id);
-                        navigation.openDetail(`receipt:${receipt.id}`);
-                        setReceiptMessage(undefined);
-                        setReceiptFailure(undefined);
-                      }}
-                    />
-                  </View>
-                ))
+                receiptsQuery.data
+                  ?.slice(0, receiptLimit)
+                  .map((receipt: Receipt) => (
+                    <View key={receipt.id} style={styles.card}>
+                      <ShellText>{receipt.receiptNumber}</ShellText>
+                      <ShellText>Status: {receipt.status}</ShellText>
+                      <ShellButton
+                        label={`Review receipt ${receipt.receiptNumber}`}
+                        variant="secondary"
+                        onPress={() => {
+                          setReceiptId(receipt.id);
+                          navigation.openDetail(`receipt:${receipt.id}`);
+                          setReceiptMessage(undefined);
+                          setReceiptFailure(undefined);
+                        }}
+                      />
+                    </View>
+                  ))
               )}
+              {!receiptsQuery.error &&
+                (receiptsQuery.data?.length ?? 0) > receiptLimit && (
+                  <ShellButton
+                    label="Show more receipts"
+                    variant="secondary"
+                    onPress={() =>
+                      setReceiptLimit((count) => count + recordBatchSize)
+                    }
+                  />
+                )}
             </>
           )}
         </>
@@ -845,20 +871,32 @@ export function InventoryWorkspace({
               label="No stock movements are recorded."
             />
           ) : (
-            movementHistoryQuery.data?.map((movement: Movement) => (
-              <View key={movement.id} style={styles.card}>
-                <ShellText>
-                  {movement.type} · {quantity(movement.quantityDelta)}
-                </ShellText>
-                <ShellText>{movement.reason}</ShellText>
-                {movement.purchaseReceiptId && (
+            movementHistoryQuery.data
+              ?.slice(0, historyLimit)
+              .map((movement: Movement) => (
+                <View key={movement.id} style={styles.card}>
                   <ShellText>
-                    Receipt ID: {movement.purchaseReceiptId}
+                    {movement.type} · {quantity(movement.quantityDelta)}
                   </ShellText>
-                )}
-              </View>
-            ))
+                  <ShellText>{movement.reason}</ShellText>
+                  {movement.purchaseReceiptId && (
+                    <ShellText>
+                      Receipt ID: {movement.purchaseReceiptId}
+                    </ShellText>
+                  )}
+                </View>
+              ))
           )}
+          {!movementHistoryQuery.error &&
+            (movementHistoryQuery.data?.length ?? 0) > historyLimit && (
+              <ShellButton
+                label="Show more movements"
+                variant="secondary"
+                onPress={() =>
+                  setHistoryLimit((count) => count + recordBatchSize)
+                }
+              />
+            )}
         </>
       )}
       {movementIngredient && selectedSection !== 'receipts' && (

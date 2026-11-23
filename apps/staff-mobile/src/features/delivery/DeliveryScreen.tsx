@@ -1,3 +1,4 @@
+import { useNativeNavigation } from '../../shell/NativeNavigation';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -13,6 +14,8 @@ import {
   ShellHeading,
   ShellText,
   ShellSelection,
+  ShellPinnedHeader,
+  usePageNavigation,
 } from '../../shell/controls';
 
 const pageSize = 10;
@@ -21,6 +24,8 @@ export function DeliveryScreen({
   showHeading = true,
 }: { showHeading?: boolean } = {}) {
   const { client, state } = useSession();
+  const native = useNativeNavigation();
+  const navigation = usePageNavigation();
   const [view, setView] = useState<'active' | 'completed'>('active');
   const [page, setPage] = useState(1);
   const assignments = useQuery({
@@ -45,24 +50,29 @@ export function DeliveryScreen({
   return (
     <>
       {showHeading && <ShellHeading>Deliveries</ShellHeading>}
-      <ShellSelection segmented>
-        {(['active', 'completed'] as const).map((choice) => (
-          <ShellButton
-            key={choice}
-            label={
-              choice === 'active' ? 'Active deliveries' : 'Completed deliveries'
-            }
-            displayLabel={choice === 'active' ? 'Active' : 'Completed'}
-            variant="secondary"
-            compact
-            selected={view === choice}
-            onPress={() => {
-              setPage(1);
-              setView(choice);
-            }}
-          />
-        ))}
-      </ShellSelection>
+      <ShellPinnedHeader enabled={!!native?.user}>
+        <ShellSelection segmented>
+          {(['active', 'completed'] as const).map((choice) => (
+            <ShellButton
+              key={choice}
+              label={
+                choice === 'active'
+                  ? 'Active deliveries'
+                  : 'Completed deliveries'
+              }
+              displayLabel={choice === 'active' ? 'Active' : 'Completed'}
+              variant="secondary"
+              compact
+              selected={view === choice}
+              onPress={() => {
+                setPage(1);
+                setView(choice);
+                navigation.scrollToTop();
+              }}
+            />
+          ))}
+        </ShellSelection>
+      </ShellPinnedHeader>
       {assignments.isPending && (
         <ShellFeedback kind="loading" label="Loading deliveries…" />
       )}

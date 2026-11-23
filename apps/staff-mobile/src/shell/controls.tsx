@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -51,23 +52,31 @@ const PageNavigation = createContext({
 export const usePageNavigation = () => useContext(PageNavigation);
 export const PageNotice = createContext<ReactNode>(null);
 const PageFooter = createContext<(content: ReactNode) => void>(() => {});
-const PageHeader = createContext<((content: ReactNode) => void) | null>(null);
+type HeaderSlot = 'title' | 'controls' | 'search';
+const PageHeader = createContext<
+  ((slot: HeaderSlot, content: ReactNode) => void) | null
+>(null);
 
 /** Reserve space above the scrolling content for persistent page controls. */
 export function ShellPinnedHeader({
   children,
   enabled = true,
+  slot = 'controls',
 }: {
   children: ReactNode;
   enabled?: boolean;
+  slot?: HeaderSlot;
 }) {
   const setHeader = useContext(PageHeader);
+  const { fontScale, height } = useWindowDimensions();
+  const pinned =
+    enabled && (slot !== 'search' || (fontScale <= 1.5 && height >= 560));
   useLayoutEffect(() => {
-    if (!setHeader || !enabled) return;
-    setHeader(children);
-    return () => setHeader(null);
-  }, [children, enabled, setHeader]);
-  return setHeader && enabled ? null : <>{children}</>;
+    if (!setHeader || !pinned) return;
+    setHeader(slot, children);
+    return () => setHeader(slot, null);
+  }, [children, pinned, setHeader, slot]);
+  return setHeader && pinned ? null : <>{children}</>;
 }
 
 /** Keep working actions in reach; enlarged text reflows them into the page. */
@@ -92,7 +101,14 @@ export function ShellPage({ children }: { children: ReactNode }) {
   const [returnTarget, setReturnTarget] = useState<string | null>(null);
   const [detailActive, setDetailActive] = useState(false);
   const [footer, setFooter] = useState<ReactNode>(null);
-  const [header, setHeader] = useState<ReactNode>(null);
+  const [header, setHeader] = useState<Partial<Record<HeaderSlot, ReactNode>>>(
+    {},
+  );
+  const updateHeader = useCallback((slot: HeaderSlot, content: ReactNode) => {
+    setHeader((previous) =>
+      previous[slot] === content ? previous : { ...previous, [slot]: content },
+    );
+  }, []);
   // Footer updates must not recreate navigation and retrigger its consumers.
   const navigation = useMemo(
     () => ({
@@ -115,7 +131,10 @@ export function ShellPage({ children }: { children: ReactNode }) {
       },
       returnTarget,
       finishReturn: () => setReturnTarget(null),
-      scrollToTop: () => scroll.current?.scrollTo({ y: 0, animated: false }),
+      scrollToTop: () => {
+        restore.current = false;
+        scroll.current?.scrollTo({ y: 0, animated: false });
+      },
     }),
     [detailActive, returnTarget],
   );
@@ -126,8 +145,14 @@ export function ShellPage({ children }: { children: ReactNode }) {
     >
       <PageNavigation.Provider value={navigation}>
         <PageFooter.Provider value={setFooter}>
-          <PageHeader.Provider value={setHeader}>
-            {header && <View style={styles.pinnedHeader}>{header}</View>}
+          <PageHeader.Provider value={updateHeader}>
+            {(header.title || header.controls || header.search) && (
+              <View style={styles.pinnedHeader}>
+                {header.title}
+                {header.controls}
+                {header.search}
+              </View>
+            )}
             <ScrollView
               testID="shell-scroll"
               ref={scroll}
@@ -215,28 +240,30 @@ export function ShellPageHeader({
   const inlineLayout = inline && fontScale <= 1.5;
   if (hideDuringDetail && navigation.detailActive) return null;
   return (
-    <View style={[styles.header, inlineLayout && styles.inlineHeader]}>
-      {backLabel && onBack && backLabel !== 'Back to staff home' && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={backLabel}
-          onPress={onBack}
-          style={styles.backButton}
-        >
-          <ShellIcon name="back" />
-        </Pressable>
-      )}
-      {inlineLayout && title && <ShellHeading>{title}</ShellHeading>}
-      {backLabel === 'Back to staff home' && onBack && !nativeHeader && (
-        <ShellButton
-          label={backLabel}
-          displayLabel="Staff home"
-          variant="text"
-          onPress={onBack}
-        />
-      )}
-      {!inlineLayout && title && <ShellHeading>{title}</ShellHeading>}
-    </View>
+    <ShellPinnedHeader slot="title" enabled={nativeHeader}>
+      <View style={[styles.header, inlineLayout && styles.inlineHeader]}>
+        {backLabel && onBack && backLabel !== 'Back to staff home' && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={backLabel}
+            onPress={onBack}
+            style={styles.backButton}
+          >
+            <ShellIcon name="back" />
+          </Pressable>
+        )}
+        {inlineLayout && title && <ShellHeading>{title}</ShellHeading>}
+        {backLabel === 'Back to staff home' && onBack && !nativeHeader && (
+          <ShellButton
+            label={backLabel}
+            displayLabel="Staff home"
+            variant="text"
+            onPress={onBack}
+          />
+        )}
+        {!inlineLayout && title && <ShellHeading>{title}</ShellHeading>}
+      </View>
+    </ShellPinnedHeader>
   );
 }
 

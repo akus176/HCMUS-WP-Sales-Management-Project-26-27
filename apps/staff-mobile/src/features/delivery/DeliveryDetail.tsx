@@ -1,3 +1,4 @@
+import { useNativeNavigation } from '../../shell/NativeNavigation';
 import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -14,10 +15,12 @@ import {
   ShellInput,
   ShellMutationFeedback,
   ShellSheet,
+  ShellPinnedHeader,
 } from '../../shell/controls';
 
 export function DeliveryDetail({ orderId }: { orderId: string }) {
   const { client, state } = useSession();
+  const native = useNativeNavigation();
   const queries = useQueryClient();
   const [navigationError, setNavigationError] = useState(false);
   const [accessRevoked, setAccessRevoked] = useState(false);
@@ -136,12 +139,14 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
   };
   return (
     <>
-      <ShellButton
-        label="Back to deliveries"
-        variant="text"
-        onPress={() => router.replace('/modules/delivery')}
-      />
-      <ShellHeading>Delivery details</ShellHeading>
+      <ShellPinnedHeader enabled={!!native?.user}>
+        <ShellButton
+          label="Back to deliveries"
+          variant="text"
+          onPress={() => router.replace('/modules/delivery')}
+        />
+        <ShellHeading>Delivery details</ShellHeading>
+      </ShellPinnedHeader>
       <ShellMutationFeedback mutation={mutation} />
       {notice && <ShellFeedback kind="info" label={notice} />}
       {mutation.error && (

@@ -1,3 +1,4 @@
+import { useNativeNavigation } from '../shell/NativeNavigation';
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -21,6 +22,7 @@ import {
   ShellSelection,
   ShellMutationFeedback,
   ShellPageFooter,
+  ShellPinnedHeader,
   ShellSheet,
   usePageNavigation,
 } from '../shell/controls';
@@ -68,6 +70,7 @@ export function PreparationScreen({
 }: { ticketId?: string; showHeading?: boolean; directOpen?: boolean } = {}) {
   const { fontScale } = useWindowDimensions();
   const { client, state } = useSession();
+  const native = useNativeNavigation();
   const queries = useQueryClient();
   const [filter, setFilter] = useState<Filter>('confirmed,preparing');
   const [page, setPage] = useState(1);
@@ -234,29 +237,32 @@ export function PreparationScreen({
           )}
           {selected ? (
             <>
-              <ShellSelection>
-                <ShellButton
-                  label="Back to Preparation"
-                  displayLabel="Preparation"
-                  variant="text"
-                  disabled={busy}
-                  onPress={() => {
-                    setSelected(null);
-                    clearFeedback();
-                    navigation.returnToList();
-                  }}
-                />
-                <ShellButton
-                  label="Refresh ticket"
-                  variant="secondary"
-                  loading={detail.isFetching}
-                  disabled={busy || !mutation.canMutate}
-                  onPress={() => {
-                    setIntent(null);
-                    void detail.refetch();
-                  }}
-                />
-              </ShellSelection>
+              <ShellPinnedHeader enabled={!!native?.user}>
+                <ShellSelection>
+                  <ShellButton
+                    label="Back to Preparation"
+                    displayLabel="Preparation"
+                    variant="text"
+                    disabled={busy}
+                    onPress={() => {
+                      setSelected(null);
+                      clearFeedback();
+                      navigation.returnToList();
+                    }}
+                  />
+                  <ShellButton
+                    label="Refresh ticket"
+                    variant="secondary"
+                    loading={detail.isFetching}
+                    disabled={busy || !mutation.canMutate}
+                    onPress={() => {
+                      setIntent(null);
+                      void detail.refetch();
+                    }}
+                  />
+                </ShellSelection>
+              </ShellPinnedHeader>
+
               {detail.isPending && (
                 <ShellFeedback kind="loading" label="Loading ticket…" />
               )}
@@ -387,6 +393,7 @@ export function PreparationScreen({
                           focusKey="preparation-state-action"
                           onPress={() => {
                             clearFeedback();
+                            navigation.scrollToTop();
                             setIntent({
                               id: ticket.orderId,
                               status: ticket.status,
@@ -405,40 +412,42 @@ export function PreparationScreen({
             </>
           ) : (
             <>
-              <View style={styles.filters}>
-                {(
-                  ['confirmed,preparing', 'confirmed', 'preparing'] as const
-                ).map((value) => (
-                  <View
-                    key={value}
-                    style={[
-                      styles.filterOption,
-                      fontScale > 1.5 && styles.largeFilterOption,
-                    ]}
-                  >
-                    <ShellButton
+              <ShellPinnedHeader enabled={!!native?.user}>
+                <View style={styles.filters}>
+                  {(
+                    ['confirmed,preparing', 'confirmed', 'preparing'] as const
+                  ).map((value) => (
+                    <View
                       key={value}
-                      testID={`preparation-filter-${value === 'confirmed,preparing' ? 'active' : value}`}
-                      label={
-                        value === 'confirmed,preparing'
-                          ? 'All active'
-                          : value === 'confirmed'
-                            ? 'Confirmed'
-                            : 'Preparing'
-                      }
-                      variant="secondary"
-                      selected={filter === value}
-                      showSelectionMark={false}
-                      compact
-                      onPress={() => {
-                        setFilter(value);
-                        setPage(1);
-                        clearFeedback();
-                      }}
-                    />
-                  </View>
-                ))}
-              </View>
+                      style={[
+                        styles.filterOption,
+                        fontScale > 1.5 && styles.largeFilterOption,
+                      ]}
+                    >
+                      <ShellButton
+                        key={value}
+                        testID={`preparation-filter-${value === 'confirmed,preparing' ? 'active' : value}`}
+                        label={
+                          value === 'confirmed,preparing'
+                            ? 'All active'
+                            : value === 'confirmed'
+                              ? 'Confirmed'
+                              : 'Preparing'
+                        }
+                        variant="secondary"
+                        selected={filter === value}
+                        showSelectionMark={false}
+                        compact
+                        onPress={() => {
+                          setFilter(value);
+                          setPage(1);
+                          clearFeedback();
+                        }}
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ShellPinnedHeader>
               {queue.isPending && (
                 <ShellFeedback
                   kind="loading"

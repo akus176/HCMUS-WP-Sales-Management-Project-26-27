@@ -137,7 +137,6 @@ export function OrdersScreen({
       )}
       {!manager && !selected && (
         <ShellPinnedHeader enabled={!!native?.user}>
-          {!!native?.user && <ShellHeading>Orders</ShellHeading>}
           <ShellSelection segmented>
             {(['orders', 'tables'] as const).map((choice) => (
               <ShellButton
@@ -169,18 +168,21 @@ export function OrdersScreen({
       />
       {selected ? (
         <>
-          <ShellButton
-            label={
-              !manager && section === 'tables'
-                ? 'Back to table occupancy'
-                : 'Back to order search'
-            }
-            variant="text"
-            onPress={() => {
-              setSelected(null);
-              navigation.returnToList();
-            }}
-          />
+          <ShellPinnedHeader enabled={!!native?.user && !manager}>
+            <ShellButton
+              label={
+                !manager && section === 'tables'
+                  ? 'Back to table occupancy'
+                  : 'Back to order search'
+              }
+              variant="text"
+              onPress={() => {
+                setSelected(null);
+                navigation.returnToList();
+              }}
+            />
+          </ShellPinnedHeader>
+
           {detail.isPending && (
             <ShellFeedback kind="loading" label="Loading order…" />
           )}
@@ -279,45 +281,50 @@ export function OrdersScreen({
         <>
           {(manager || section === 'orders') && (
             <>
-              <View style={styles.toolbar}>
-                <View style={styles.search}>
-                  <ShellInput
-                    label="Search by order number or table"
-                    accessibilityLabel="Search orders"
-                    placeholder="Search orders or tables"
-                    hideLabel
-                    value={search}
-                    onChangeText={(value) => {
-                      setSearch(value);
-                      setVisibleCount(orderBatchSize);
+              <ShellPinnedHeader
+                slot="search"
+                enabled={!!native?.user && !manager}
+              >
+                <View style={styles.toolbar}>
+                  <View style={styles.search}>
+                    <ShellInput
+                      label="Search by order number or table"
+                      accessibilityLabel="Search orders"
+                      placeholder="Search orders or tables"
+                      hideLabel
+                      value={search}
+                      onChangeText={(value) => {
+                        setSearch(value);
+                        setVisibleCount(orderBatchSize);
+                      }}
+                      autoCorrect={false}
+                      autoCapitalize="none"
+                    />
+                  </View>
+                  <ShellButton
+                    label={`Filter orders: ${filter === 'ready_delivery' ? 'Ready unassigned deliveries' : filter[0]!.toUpperCase() + filter.slice(1)}`}
+                    expanded={filtersExpanded}
+                    variant="secondary"
+                    focusKey="order-filter"
+                    onPress={() => {
+                      if (filtersExpanded) navigation.returnToList();
+                      else navigation.rememberPosition('order-filter');
+                      setFiltersExpanded(!filtersExpanded);
                     }}
-                    autoCorrect={false}
-                    autoCapitalize="none"
-                  />
+                  >
+                    <ShellIcon name="filter" />
+                  </ShellButton>
                 </View>
-                <ShellButton
-                  label={`Filter orders: ${filter === 'ready_delivery' ? 'Ready unassigned deliveries' : filter[0]!.toUpperCase() + filter.slice(1)}`}
-                  expanded={filtersExpanded}
-                  variant="secondary"
-                  focusKey="order-filter"
-                  onPress={() => {
-                    if (filtersExpanded) navigation.returnToList();
-                    else navigation.rememberPosition('order-filter');
-                    setFiltersExpanded(!filtersExpanded);
-                  }}
-                >
-                  <ShellIcon name="filter" />
-                </ShellButton>
-              </View>
-              {filter !== 'all' && (
-                <ShellBadge
-                  label={
-                    filter === 'ready_delivery'
-                      ? 'Ready unassigned deliveries'
-                      : filter[0]!.toUpperCase() + filter.slice(1)
-                  }
-                />
-              )}
+                {filter !== 'all' && (
+                  <ShellBadge
+                    label={
+                      filter === 'ready_delivery'
+                        ? 'Ready unassigned deliveries'
+                        : filter[0]!.toUpperCase() + filter.slice(1)
+                    }
+                  />
+                )}
+              </ShellPinnedHeader>
               {filtersExpanded && (
                 <ShellSheet
                   visible

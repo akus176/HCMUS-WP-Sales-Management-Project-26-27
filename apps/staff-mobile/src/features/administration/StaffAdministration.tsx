@@ -1,3 +1,4 @@
+import { useNativeNavigation } from '../../shell/NativeNavigation';
 import { useMemo, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
@@ -17,6 +18,7 @@ import {
   ShellText,
   ShellInput,
   ShellSelection,
+  ShellPinnedHeader,
   usePageNavigation,
   ShellMutationFeedback,
 } from '../../shell/controls';
@@ -55,6 +57,7 @@ export function StaffAdministration({
   showHeading?: boolean;
 }) {
   const { client } = useSession();
+  const native = useNativeNavigation();
   const { canMutate, refreshConnection } = useConnectivity();
   const [search, setSearch] = useState('');
   const navigation = usePageNavigation();
@@ -182,28 +185,30 @@ export function StaffAdministration({
     <>
       {showHeading && <ShellHeading>Staff administration</ShellHeading>}
       <ShellMutationFeedback mutation={deactivation} />
-      <ShellSelection>
-        <ShellButton
-          label="Staff accounts"
-          selected={section === 'accounts'}
-          compact
-          variant="secondary"
-          onPress={() => {
-            setSection('accounts');
-            setSelectedAccountId(undefined);
-          }}
-        />
-        <ShellButton
-          label="Security events"
-          selected={section === 'events'}
-          compact
-          variant="secondary"
-          onPress={() => {
-            setSection('events');
-            setSelectedAccountId(undefined);
-          }}
-        />
-      </ShellSelection>
+      <ShellPinnedHeader enabled={!!native?.user}>
+        <ShellSelection>
+          <ShellButton
+            label="Staff accounts"
+            selected={section === 'accounts'}
+            compact
+            variant="secondary"
+            onPress={() => {
+              setSection('accounts');
+              setSelectedAccountId(undefined);
+            }}
+          />
+          <ShellButton
+            label="Security events"
+            selected={section === 'events'}
+            compact
+            variant="secondary"
+            onPress={() => {
+              setSection('events');
+              setSelectedAccountId(undefined);
+            }}
+          />
+        </ShellSelection>
+      </ShellPinnedHeader>
       {actionFeedback?.kind === 'success' && (
         <ShellFeedback
           kind={actionFeedback.kind}
@@ -212,28 +217,30 @@ export function StaffAdministration({
       )}
       {section === 'accounts' && !selectedAccountId && (
         <>
-          <ShellInput
-            label="Search staff accounts"
-            accessibilityLabel="Search staff accounts"
-            autoCapitalize="none"
-            autoCorrect={false}
-            onChangeText={setSearch}
-            placeholder="Search name, username, or email"
-            placeholderTextColor={mobileTokens.color.disabledText}
-            value={search}
-          />
-          <ShellSelection>
-            {(['active', 'inactive', 'all'] as const).map((filter) => (
-              <ShellButton
-                key={filter}
-                label={`${filter[0]?.toUpperCase()}${filter.slice(1)} accounts`}
-                selected={activeFilter === filter}
-                compact
-                variant="secondary"
-                onPress={() => setActiveFilter(filter)}
-              />
-            ))}
-          </ShellSelection>
+          <ShellPinnedHeader slot="search" enabled={!!native?.user}>
+            <ShellInput
+              label="Search staff accounts"
+              accessibilityLabel="Search staff accounts"
+              autoCapitalize="none"
+              autoCorrect={false}
+              onChangeText={setSearch}
+              placeholder="Search name, username, or email"
+              placeholderTextColor={mobileTokens.color.disabledText}
+              value={search}
+            />
+            <ShellSelection>
+              {(['active', 'inactive', 'all'] as const).map((filter) => (
+                <ShellButton
+                  key={filter}
+                  label={`${filter[0]?.toUpperCase()}${filter.slice(1)} accounts`}
+                  selected={activeFilter === filter}
+                  compact
+                  variant="secondary"
+                  onPress={() => setActiveFilter(filter)}
+                />
+              ))}
+            </ShellSelection>
+          </ShellPinnedHeader>
           {accountsQuery.isPending ? (
             <ShellFeedback kind="loading" label="Loading staff accounts…" />
           ) : accountsQuery.error ? (
@@ -342,31 +349,36 @@ export function StaffAdministration({
               )}
             </>
           ) : null}
-          <ShellButton
-            label="Close account details"
-            variant="text"
-            onPress={() => {
-              setSelectedAccountId(undefined);
-              navigation.returnToList();
-            }}
-          />
+          <ShellPinnedHeader slot="title" enabled={!!native?.user}>
+            <ShellButton
+              label="Close account details"
+              variant="text"
+              onPress={() => {
+                setSelectedAccountId(undefined);
+                navigation.returnToList();
+              }}
+            />
+          </ShellPinnedHeader>
         </View>
       )}
       {section === 'events' && (
         <>
           <ShellHeading level="section">Security events</ShellHeading>
-          <ShellSelection>
-            {eventFilters.map((filter) => (
-              <ShellButton
-                key={filter.label}
-                label={filter.label}
-                selected={eventType === filter.value}
-                compact
-                variant="secondary"
-                onPress={() => setEventType(filter.value)}
-              />
-            ))}
-          </ShellSelection>
+          <ShellPinnedHeader slot="search" enabled={!!native?.user}>
+            <ShellSelection>
+              {eventFilters.map((filter) => (
+                <ShellButton
+                  key={filter.label}
+                  label={filter.label}
+                  selected={eventType === filter.value}
+                  compact
+                  variant="secondary"
+                  onPress={() => setEventType(filter.value)}
+                />
+              ))}
+            </ShellSelection>
+          </ShellPinnedHeader>
+
           {eventsQuery.isPending ? (
             <ShellFeedback kind="loading" label="Loading security events…" />
           ) : eventsQuery.error ? (
