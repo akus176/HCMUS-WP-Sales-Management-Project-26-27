@@ -100,3 +100,9 @@ Capture the reference content state at 390×844dp and normal text; review side b
 ## Migration Plan
 
 Retain the completed audit/shared-control/feedback work. Commit the concept pack and aligned plan, implement the ledger queue and focused detail, extend component/Maestro regressions, then perform one consolidated automated/native evidence pass and named review. GitHub issue #219 is the only task checklist: archive old completed items as baseline context instead of duplicating them or copying tasks into a local `tasks.md`. Previous test counts remain historical and do not complete the new concept/E2E work. No data migration is needed. Reverting the visual feature commits restores the prior UI. Issue #219 remains open until all new work, acceptance evidence and @longtoZ approval are recorded.
+
+### Owner follow-up: pinned controls and cached workspace navigation (2026-11-23)
+
+The owner requested pinned Stock controls, consistent fixed navigation across workspaces, and no repeated server requests merely from changing pages. Local workspaces share the already verified `/session` route; this supersedes the earlier per-tab fresh-request rule. Route entry, foregrounding, realtime reconnect and account-change events revalidate access. Changed grants discard cached user queries, while server authorization and online-only mutations remain authoritative. Query data stays fresh until explicit invalidation rather than becoming stale solely on remount. Manual refresh, mutation reconciliation and committed live events remain effective.
+
+Use separate title, section and search header slots. Titles/section navigation remain fixed; search controls reflow into content above 150% text or below 560dp height. Keep existing reserved action docks. Render long receipt and movement results in batches of 20 with Show more, preserving every returned record.

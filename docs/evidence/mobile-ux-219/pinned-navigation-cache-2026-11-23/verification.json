@@ -1,0 +1,54 @@
+{
+  "baseRevision": "3bcf5b004351b9f4c46e05c9042c06dcfd456cf9",
+  "sourceState": "committed implementation",
+  "sourceSha256": {
+    "apps/staff-mobile/app/_layout.tsx": "75eb17de886e00249a07e4ad7a37440ccf2a5a9625969f940e6015c39d055ef8",
+    "apps/staff-mobile/app/session.tsx": "b7c873c8e54da04d15faea6d2f44e8a984b2c3d8b17d70e4f7ba9edd036a3202",
+    "apps/staff-mobile/src/barista/PreparationScreen.tsx": "c64a7c08e6b2ce6c539de90dcd1a0ec6602b5b4782626266e15c7165dfad6ecb",
+    "apps/staff-mobile/src/features/administration/StaffAdministration.tsx": "dc7ad037de08d25c6ba93b1bf38f619ec0f94216358a4bad8e1b972e236d67f7",
+    "apps/staff-mobile/src/features/approvals/DiscountApprovals.tsx": "42ede3337d0f5a5e4c4f5b3ccf383e1aff69eb9bfc68402fa1c78a46b1fffd4e",
+    "apps/staff-mobile/src/features/delivery/DeliveryDetail.tsx": "2f578bc0999a548a70cf33eb6d876c2315b858cd44ba586e8fc657266ec74878",
+    "apps/staff-mobile/src/features/delivery/DeliveryScreen.tsx": "8eac36689ae54cb088ed10a9de1e7212d75250aaf0ebb59c59acc41a38b0832d",
+    "apps/staff-mobile/src/features/inventory/InventoryWorkspace.tsx": "11c7d7b10dd33876c1ffed7641a8365d3f5c85de9953560c6c8033bcc2888c3b",
+    "apps/staff-mobile/src/features/orders/OrdersScreen.tsx": "7b6297948d6756f082a28cf3ba935570529227ead5c1943d3b1240a73f78d08e",
+    "apps/staff-mobile/src/realtime/OperationalUpdates.tsx": "2ee17644b38a94c74750120fcc5ae2cb25e2c03515c34b1f1f5925eba900cec3",
+    "apps/staff-mobile/src/realtime/operationalEvents.ts": "94666b0bba34ab0452ab167c0054d7c9ca16162c7a1661e07bd020efa70e970e",
+    "apps/staff-mobile/src/session/context.tsx": "ebc46357ba6e9fc00ebf0d4663cf4fee50b13c1a28f4362bbe31ccc9b04f4c21",
+    "apps/staff-mobile/src/shell/NativeNavigation.tsx": "7ac066d0ee2caf479e8b0998d87fd7935bd75f64285b6b878320a18f4b59ef6d",
+    "apps/staff-mobile/src/shell/NativeWorkspaceHost.tsx": "678523d83ee729f0cbce2483570c63995941a06f0ce8f8cee7475f889e96f964",
+    "apps/staff-mobile/src/shell/controls.tsx": "b0d434fe9dad2ae1a8a57c9a1c7f955a043b9a40a0f6c5a79cd027c5e791311b",
+    "apps/staff-mobile/tests/discount-approvals.test.tsx": "463ce50ce4f223a01b1f76e78bed564a1761395de1e0b37552fdbea65a9b17ef",
+    "apps/staff-mobile/tests/inventory.test.tsx": "a94df695e8dd5c2418f820b938e1265a3478a3764fd83700467dc4d4866cfc82",
+    "apps/staff-mobile/tests/module-navigation.test.tsx": "40f5a430b85494fd2526551ba1be96050be83e983ef3e33d0f1f8ff1d71d797f",
+    "apps/staff-mobile/tests/native-navigation.test.tsx": "d373bbdfc0c4f1e1b206218b328dee3b0993ff5129cbb09ed6a4ce994d33379a",
+    "apps/staff-mobile/tests/operational-updates.test.tsx": "751016e682e3eee4ea1e9c61048bbc0229e57b5883f94e6dfd2dafa09eef05b5"
+  },
+  "checks": {
+    "node": "26.5.0",
+    "npm": "11.17.0",
+    "typecheck": "passed",
+    "lint": "passed",
+    "format": "passed",
+    "componentTests": 353,
+    "componentSuites": 29,
+    "forwarderChecks": 7,
+    "focusedCacheAndBatchTests": 21,
+    "nativeCasesPassed": 2
+  },
+  "cacheProof": {
+    "mainTabSwitches": 9,
+    "stockSectionSwitches": 6,
+    "additionalRequests": 0,
+    "manualRefresh": "still reloads data",
+    "accessRefresh": "protected route focus, foreground, realtime reconnect and account events",
+    "permissionChanges": "remove the prior user query data",
+    "localWrites": "confirmed stock adjustments, receipt posts and approval decisions invalidate their overview counts; adjustments also invalidate the retained all-stock history"
+  },
+  "nativeScope": "Manager workspaces on API 36.1 Expo Go, normal and 200% text, real local API; no business mutation actions",
+  "limits": [
+    "No measured FPS or latency percentage claim",
+    "Staff and courier layouts covered by components/shared pinning, not a new native role matrix",
+    "No new manual TalkBack, tablet, iOS or release acceptance claim"
+  ],
+  "implementationRevision": "5ea2a801c6937f4b24fbd2781b11da6eccc97e20"
+}

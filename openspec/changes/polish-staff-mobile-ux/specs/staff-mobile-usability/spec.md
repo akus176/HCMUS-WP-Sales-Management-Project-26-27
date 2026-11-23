@@ -149,10 +149,24 @@ The application SHALL apply `docs/ui-concepts/mobile-native-reorganization` with
 
 #### Scenario: Switch workspaces and return
 - **WHEN** a staff member switches between permitted tabs and returns
-- **THEN** search, filter and detail state remain available after a fresh permission check
+- **THEN** search, filter and detail state remain available from the verified session without a request solely for changing a local workspace
 - **AND** revoked workspaces disappear and cannot load operational data
 
 #### Scenario: Cancel a reviewed action
 - **WHEN** staff close a payment, preparation, inventory, delivery, discount or sign-out confirmation
 - **THEN** no corresponding write is submitted
 - **AND** the previous record remains reachable with scalable text and safe-area-aware controls
+
+### Requirement: Cached local workspace navigation and fixed controls
+Local workspace changes SHALL reuse the verified session and loaded data without additional requests solely for page switching. Access SHALL be revalidated on protected route entry, foregrounding, realtime reconnect and account events. Changed effective permissions SHALL discard prior user query data, and all backend authorization and online-only mutation guards SHALL remain effective. Manual refresh, successful edits and committed live updates SHALL invalidate relevant query data.
+
+#### Scenario: Return between loaded pages
+- **WHEN** staff repeatedly switch between loaded Orders, Stock sections and Today
+- **THEN** the application retains state without additional fetch calls
+- **AND** an explicit refresh still reloads current data
+
+#### Scenario: Browse a long list
+- **WHEN** records scroll below a workspace header
+- **THEN** its title and primary section controls remain available
+- **AND** search fields reflow into scrolling content when enlarged text or a short viewport needs the space
+- **AND** receipts and movements render in batches while Show more preserves access to all returned records
