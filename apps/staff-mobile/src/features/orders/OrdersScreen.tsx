@@ -8,6 +8,8 @@ import { useSession } from '../../session/context';
 import type { StaffSession } from '../../session/session';
 import {
   ShellButton,
+  ShellHeaderAction,
+  ShellPageHeader,
   ShellFeedback,
   ShellHeading,
   ShellText,
@@ -131,9 +133,9 @@ export function OrdersScreen({
   return (
     <>
       {showHeading && (!native?.user || manager) && (
-        <ShellHeading>
-          {manager ? 'Manager order operations' : 'Counter'}
-        </ShellHeading>
+        <ShellPageHeader
+          title={manager ? 'Manager order operations' : 'Orders'}
+        />
       )}
       {!manager && !selected && (
         <ShellPinnedHeader enabled={!!native?.user}>
@@ -155,11 +157,9 @@ export function OrdersScreen({
           </ShellSelection>
         </ShellPinnedHeader>
       )}
-      <ShellButton
+      <ShellHeaderAction
+        kind="refresh"
         label="Refresh orders and tables"
-        displayLabel="Refresh"
-        variant="text"
-        compact
         disabled={!canMutate}
         loading={fetching}
         onPress={() => {
@@ -168,20 +168,19 @@ export function OrdersScreen({
       />
       {selected ? (
         <>
-          <ShellPinnedHeader enabled={!!native?.user && !manager}>
-            <ShellButton
-              label={
-                !manager && section === 'tables'
-                  ? 'Back to table occupancy'
-                  : 'Back to order search'
-              }
-              variant="text"
-              onPress={() => {
-                setSelected(null);
-                navigation.returnToList();
-              }}
-            />
-          </ShellPinnedHeader>
+          <ShellPageHeader title="Order details" priority={1} />
+          <ShellHeaderAction
+            kind="back"
+            label={
+              !manager && section === 'tables'
+                ? 'Back to table occupancy'
+                : 'Back to order search'
+            }
+            onPress={() => {
+              setSelected(null);
+              navigation.returnToList();
+            }}
+          />
 
           {detail.isPending && (
             <ShellFeedback kind="loading" label="Loading order…" />

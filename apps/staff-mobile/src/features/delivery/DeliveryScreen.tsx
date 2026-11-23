@@ -10,8 +10,9 @@ import { ShellIcon } from '../../shell/ShellIcon';
 import { useSession } from '../../session/context';
 import {
   ShellButton,
+  ShellHeaderAction,
+  ShellPageHeader,
   ShellFeedback,
-  ShellHeading,
   ShellText,
   ShellSelection,
   ShellPinnedHeader,
@@ -49,7 +50,7 @@ export function DeliveryScreen({
   });
   return (
     <>
-      {showHeading && <ShellHeading>Deliveries</ShellHeading>}
+      {showHeading && <ShellPageHeader title="Deliveries" />}
       <ShellPinnedHeader enabled={!!native?.user}>
         <ShellSelection segmented>
           {(['active', 'completed'] as const).map((choice) => (
@@ -79,10 +80,9 @@ export function DeliveryScreen({
       {assignments.isError && (
         <ShellFeedback kind="error" label={assignments.error.message} />
       )}
-      <ShellButton
+      <ShellHeaderAction
+        kind="refresh"
         label="Refresh deliveries"
-        variant="text"
-        compact
         loading={assignments.isFetching}
         onPress={() => void assignments.refetch()}
       />

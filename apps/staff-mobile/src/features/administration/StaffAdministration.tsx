@@ -13,6 +13,8 @@ import { useSession } from '../../session/context';
 import type { StaffSession } from '../../session/session';
 import {
   ShellButton,
+  ShellHeaderAction,
+  ShellPageHeader,
   ShellFeedback,
   ShellHeading,
   ShellText,
@@ -183,7 +185,7 @@ export function StaffAdministration({
 
   return (
     <>
-      {showHeading && <ShellHeading>Staff administration</ShellHeading>}
+      {showHeading && <ShellPageHeader title="Staff administration" />}
       <ShellMutationFeedback mutation={deactivation} />
       <ShellPinnedHeader enabled={!!native?.user}>
         <ShellSelection>
@@ -309,9 +311,6 @@ export function StaffAdministration({
       )}
       {selectedAccountId && (
         <View style={styles.card}>
-          <ShellHeading key={selectedAccountId} level="section" focusOnMount>
-            Account details
-          </ShellHeading>
           {accountDetailQuery.isPending ? (
             <ShellFeedback kind="loading" label="Loading account details…" />
           ) : accountDetailQuery.error ? (
@@ -349,16 +348,15 @@ export function StaffAdministration({
               )}
             </>
           ) : null}
-          <ShellPinnedHeader slot="title" enabled={!!native?.user}>
-            <ShellButton
-              label="Close account details"
-              variant="text"
-              onPress={() => {
-                setSelectedAccountId(undefined);
-                navigation.returnToList();
-              }}
-            />
-          </ShellPinnedHeader>
+          <ShellPageHeader title="Account details" priority={1} />
+          <ShellHeaderAction
+            kind="back"
+            label="Close account details"
+            onPress={() => {
+              setSelectedAccountId(undefined);
+              navigation.returnToList();
+            }}
+          />
         </View>
       )}
       {section === 'events' && (
@@ -405,12 +403,11 @@ export function StaffAdministration({
           label="Reconnect to load or change staff administration data."
         />
       )}
-      <ShellButton
+      <ShellHeaderAction
+        kind="refresh"
         label="Refresh staff administration"
         disabled={accountsQuery.isFetching || eventsQuery.isFetching}
         loading={accountsQuery.isFetching || eventsQuery.isFetching}
-        loadingLabel="Refreshing staff data…"
-        variant="secondary"
         onPress={refresh}
       />
     </>

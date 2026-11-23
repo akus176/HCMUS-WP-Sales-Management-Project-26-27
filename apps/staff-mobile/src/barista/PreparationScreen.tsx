@@ -16,6 +16,8 @@ import { useSafeMutation } from '../connectivity/connectivity';
 import { useSession } from '../session/context';
 import {
   ShellButton,
+  ShellHeaderAction,
+  ShellPageHeader,
   ShellFeedback,
   ShellHeading,
   ShellText,
@@ -212,7 +214,7 @@ export function PreparationScreen({
 
   return (
     <View style={styles.workspace}>
-      {!selected && showHeading && <ShellHeading>Preparation</ShellHeading>}
+      {!selected && showHeading && <ShellPageHeader title="Preparation" />}
       <ShellMutationFeedback mutation={mutation} />
       {forbidden ? (
         <ShellFeedback
@@ -237,31 +239,28 @@ export function PreparationScreen({
           )}
           {selected ? (
             <>
-              <ShellPinnedHeader enabled={!!native?.user}>
-                <ShellSelection>
-                  <ShellButton
-                    label="Back to Preparation"
-                    displayLabel="Preparation"
-                    variant="text"
-                    disabled={busy}
-                    onPress={() => {
-                      setSelected(null);
-                      clearFeedback();
-                      navigation.returnToList();
-                    }}
-                  />
-                  <ShellButton
-                    label="Refresh ticket"
-                    variant="secondary"
-                    loading={detail.isFetching}
-                    disabled={busy || !mutation.canMutate}
-                    onPress={() => {
-                      setIntent(null);
-                      void detail.refetch();
-                    }}
-                  />
-                </ShellSelection>
-              </ShellPinnedHeader>
+              <ShellPageHeader title="Ticket details" priority={1} />
+
+              <ShellHeaderAction
+                kind="back"
+                label="Back to Preparation"
+                disabled={busy}
+                onPress={() => {
+                  setSelected(null);
+                  clearFeedback();
+                  navigation.returnToList();
+                }}
+              />
+              <ShellHeaderAction
+                kind="refresh"
+                label="Refresh ticket"
+                loading={detail.isFetching}
+                disabled={busy || !mutation.canMutate}
+                onPress={() => {
+                  setIntent(null);
+                  void detail.refetch();
+                }}
+              />
 
               {detail.isPending && (
                 <ShellFeedback kind="loading" label="Loading ticket…" />
@@ -412,6 +411,13 @@ export function PreparationScreen({
             </>
           ) : (
             <>
+              <ShellHeaderAction
+                kind="refresh"
+                label="Refresh queue"
+                loading={queue.isFetching}
+                disabled={!mutation.canMutate}
+                onPress={() => void queue.refetch()}
+              />
               <ShellPinnedHeader enabled={!!native?.user}>
                 <View style={styles.filters}>
                   {(
@@ -507,16 +513,9 @@ export function PreparationScreen({
                   </View>
                 </>
               )}
-              <ShellPageFooter>
-                <View style={styles.actionDock}>
-                  <ShellButton
-                    label="Refresh queue"
-                    variant="text"
-                    loading={queue.isFetching}
-                    disabled={!mutation.canMutate}
-                    onPress={() => void queue.refetch()}
-                  />
-                  {!directOpen && (
+              {!directOpen && (
+                <ShellPageFooter>
+                  <View style={styles.actionDock}>
                     <ShellButton
                       label={
                         selectedRow
@@ -536,9 +535,9 @@ export function PreparationScreen({
                         clearFeedback();
                       }}
                     />
-                  )}
-                </View>
-              </ShellPageFooter>
+                  </View>
+                </ShellPageFooter>
+              )}
               {!queue.isError && queue.data && (
                 <>
                   <Text style={styles.metadata}>

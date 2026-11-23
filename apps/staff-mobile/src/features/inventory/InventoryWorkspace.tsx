@@ -14,6 +14,8 @@ import { useSession } from '../../session/context';
 import type { StaffSession } from '../../session/session';
 import {
   ShellButton,
+  ShellHeaderAction,
+  ShellPageHeader,
   ShellFeedback,
   ShellHeading,
   ShellText,
@@ -339,12 +341,11 @@ export function InventoryWorkspace({
       ? 'Refresh low-stock list'
       : 'Refresh inventory';
   const refreshButton = (
-    <ShellButton
+    <ShellHeaderAction
+      kind="refresh"
       label={refreshLabel}
-      variant="secondary"
       disabled={status !== 'online' || ingredientQuery.isFetching}
       loading={ingredientQuery.isFetching}
-      loadingLabel="Refreshing inventory…"
       onPress={() => void refreshConnection()}
     />
   );
@@ -368,7 +369,7 @@ export function InventoryWorkspace({
 
   return (
     <>
-      {showHeading && !native?.user && <ShellHeading>Inventory</ShellHeading>}
+      {showHeading && !native?.user && <ShellPageHeader title="Inventory" />}
       <ShellMutationFeedback
         mutation={{
           isRefreshing:
@@ -376,18 +377,19 @@ export function InventoryWorkspace({
           refreshError: adjustmentMutation.refreshError,
         }}
       />
-      {(ingredientId || receiptId) && (
-        <ShellPinnedHeader enabled={!!native?.user}>
-          <ShellButton
-            label={ingredientId ? 'Back to ingredients' : 'Back to inventory'}
-            variant="text"
+      {ingredientId && (
+        <>
+          <ShellPageHeader title="Ingredient details" priority={1} />
+          <ShellHeaderAction
+            kind="back"
+            label="Back to ingredients"
             onPress={() => {
               setIngredientId(undefined);
               setReceiptId(undefined);
               navigation.returnToList();
             }}
           />
-        </ShellPinnedHeader>
+        </>
       )}
       {!ingredientId && !receiptId && (
         <ShellPinnedHeader enabled={!!native?.user}>
@@ -664,9 +666,22 @@ export function InventoryWorkspace({
         <>
           {receiptId ? (
             <>
-              <ShellButton
+              <ShellPageHeader title="Receipt details" priority={1} />
+              <ShellHeaderAction
+                kind="refresh"
+                label="Refresh receipt status"
+                disabled={status !== 'online' || receiptDetailQuery.isFetching}
+                loading={receiptDetailQuery.isFetching}
+                onPress={() => {
+                  setReceiptFailure(undefined);
+                  void queryClient.invalidateQueries({
+                    queryKey: ['purchase-receipt', user.id, receiptId],
+                  });
+                }}
+              />
+              <ShellHeaderAction
+                kind="back"
                 label="Back to receipt list"
-                variant="text"
                 onPress={() => {
                   setReceiptId(undefined);
                   navigation.returnToList();
@@ -709,23 +724,6 @@ export function InventoryWorkspace({
                   )}
                   {receiptFailure && !receiptReview && (
                     <ShellFeedback kind="error" label={receiptFailure} />
-                  )}
-                  {receiptFailure && receiptId && (
-                    <ShellButton
-                      label="Refresh receipt status"
-                      variant="secondary"
-                      disabled={
-                        status !== 'online' || receiptDetailQuery.isFetching
-                      }
-                      loading={receiptDetailQuery.isFetching}
-                      loadingLabel="Refreshing receipt status…"
-                      onPress={() => {
-                        setReceiptFailure(undefined);
-                        void queryClient.invalidateQueries({
-                          queryKey: ['purchase-receipt', user.id, receiptId],
-                        });
-                      }}
-                    />
                   )}
                   {receiptDetailQuery.data.status.toLowerCase() === 'draft' &&
                     receiptDetailQuery.data.lines.length > 0 && (
@@ -786,9 +784,9 @@ export function InventoryWorkspace({
               <ShellText>
                 Review prepared receipts from the shared API.
               </ShellText>
-              <ShellButton
+              <ShellHeaderAction
+                kind="refresh"
                 label="Refresh receipts"
-                variant="secondary"
                 disabled={status !== 'online' || receiptsQuery.isFetching}
                 loading={receiptsQuery.isFetching}
                 onPress={() => void refreshConnection()}
@@ -846,9 +844,9 @@ export function InventoryWorkspace({
       ) : (
         <>
           <ShellText>Recent stock movements from the shared API.</ShellText>
-          <ShellButton
+          <ShellHeaderAction
+            kind="refresh"
             label="Refresh movement history"
-            variant="secondary"
             disabled={status !== 'online' || movementHistoryQuery.isFetching}
             loading={movementHistoryQuery.isFetching}
             onPress={() => void refreshConnection()}

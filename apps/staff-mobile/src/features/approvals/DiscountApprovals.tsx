@@ -14,6 +14,8 @@ import { useSession } from '../../session/context';
 import type { StaffSession } from '../../session/session';
 import {
   ShellButton,
+  ShellHeaderAction,
+  ShellPageHeader,
   ShellSelection,
   ShellSheet,
   ShellFeedback,
@@ -171,12 +173,11 @@ export function DiscountApprovals({
     (discount) => discount.discountId === discountId,
   );
   const refreshButton = (
-    <ShellButton
+    <ShellHeaderAction
+      kind="refresh"
       label="Refresh pending approvals"
-      variant="secondary"
       disabled={status !== 'online' || pendingQuery.isFetching}
       loading={pendingQuery.isFetching}
-      loadingLabel="Refreshing approvals…"
       onPress={() => void refreshConnection()}
     />
   );
@@ -189,9 +190,9 @@ export function DiscountApprovals({
           kind="error"
           label="Your approval permission has changed. Return to staff home and refresh access."
         />
-        <ShellButton
+        <ShellHeaderAction
+          kind="back"
           label="Back to staff home"
-          variant="text"
           onPress={() => router.replace('/session')}
         />
       </>
@@ -201,12 +202,12 @@ export function DiscountApprovals({
     const discount = item ?? selected;
     return (
       <>
-        <ShellButton
+        <ShellHeaderAction
+          kind="back"
           label="Back to pending approvals"
-          variant="text"
           onPress={() => router.back()}
         />
-        <ShellHeading>Discount review</ShellHeading>
+        <ShellPageHeader title="Discount review" priority={1} />
         <ShellMutationFeedback mutation={decisionMutation} />
         {status !== 'online' && !pendingQuery.data ? (
           <ShellFeedback
@@ -349,7 +350,7 @@ export function DiscountApprovals({
 
   return (
     <>
-      {showHeading && <ShellHeading>Manager approvals</ShellHeading>}
+      {showHeading && <ShellPageHeader title="Approvals" />}
       <ShellMutationFeedback mutation={decisionMutation} />
       {refreshButton}
       {actionError && <ShellFeedback kind="error" label={actionError} />}

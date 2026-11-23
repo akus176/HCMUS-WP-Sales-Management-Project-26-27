@@ -1,4 +1,3 @@
-import { useNativeNavigation } from '../../shell/NativeNavigation';
 import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
@@ -9,18 +8,18 @@ import { useSafeMutation } from '../../connectivity/connectivity';
 import { useSession } from '../../session/context';
 import {
   ShellButton,
+  ShellHeaderAction,
+  ShellPageHeader,
   ShellFeedback,
   ShellHeading,
   ShellText,
   ShellInput,
   ShellMutationFeedback,
   ShellSheet,
-  ShellPinnedHeader,
 } from '../../shell/controls';
 
 export function DeliveryDetail({ orderId }: { orderId: string }) {
   const { client, state } = useSession();
-  const native = useNativeNavigation();
   const queries = useQueryClient();
   const [navigationError, setNavigationError] = useState(false);
   const [accessRevoked, setAccessRevoked] = useState(false);
@@ -139,14 +138,12 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
   };
   return (
     <>
-      <ShellPinnedHeader enabled={!!native?.user}>
-        <ShellButton
-          label="Back to deliveries"
-          variant="text"
-          onPress={() => router.replace('/modules/delivery')}
-        />
-        <ShellHeading>Delivery details</ShellHeading>
-      </ShellPinnedHeader>
+      <ShellPageHeader
+        title="Delivery details"
+        backLabel="Back to deliveries"
+        onBack={() => router.replace('/modules/delivery')}
+        priority={1}
+      />
       <ShellMutationFeedback mutation={mutation} />
       {notice && <ShellFeedback kind="info" label={notice} />}
       {mutation.error && (
@@ -174,9 +171,9 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
         <ShellFeedback kind="loading" label="Loading delivery…" />
       )}
       {!finished && !accessLost && (
-        <ShellButton
+        <ShellHeaderAction
+          kind="refresh"
           label="Refresh delivery"
-          variant="secondary"
           loading={detail.isFetching}
           onPress={() => void detail.refetch()}
         />

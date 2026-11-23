@@ -1,4 +1,4 @@
-import { act, fireEvent, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, waitFor, within } from '@testing-library/react-native';
 import { AppState, type AppStateStatus } from 'react-native';
 import { renderRouter, screen } from 'expo-router/testing-library';
 import { SessionRoutes } from '../app/_layout';
@@ -215,9 +215,21 @@ test('native inventory keeps its focused ingredient and search while canceling a
   await fireEvent.press(screen.getByRole('tab', { name: 'Home' }));
   await screen.findByRole('header', { name: 'Staff home' });
   await fireEvent.press(screen.getByRole('tab', { name: 'Stock' }));
+  const detailHeader = within(screen.getByTestId('shell-header'));
+  expect(
+    detailHeader.getByRole('header', { name: 'Ingredient details' }),
+  ).toBeVisible();
+  expect(
+    detailHeader
+      .getAllByRole('button')
+      .map((action) => action.props.accessibilityLabel),
+  ).toEqual(['Back to ingredients', 'Refresh inventory']);
   await fireEvent.press(
-    await screen.findByRole('button', { name: 'Back to ingredients' }),
+    detailHeader.getByRole('button', { name: 'Back to ingredients' }),
   );
+  expect(
+    within(screen.getByTestId('shell-header')).queryByTestId('header-back'),
+  ).toBeNull();
   expect(await screen.findByLabelText('Search ingredients')).toHaveProp(
     'value',
     'Oat',

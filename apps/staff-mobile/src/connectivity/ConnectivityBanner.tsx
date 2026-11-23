@@ -7,7 +7,12 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
-import { PageNotice, ShellButton, ShellFeedback } from '../shell/controls';
+import {
+  PageNotice,
+  ShellButton,
+  ShellFeedback,
+  ShellHeaderAction,
+} from '../shell/controls';
 import { mobileTokens } from '../shell/designTokens';
 import { useConnectivity } from './connectivity';
 
@@ -39,15 +44,21 @@ export function ConnectivityPresentation({
               kind={status === 'offline' ? 'warning' : 'info'}
               label={detail}
             />
-            {branded && (
-              <ShellButton
-                label={
-                  status === 'offline' ? 'Check connection' : 'Refresh data'
-                }
-                variant="secondary"
-                onPress={() => void refreshConnection()}
-              />
-            )}
+            {branded &&
+              (status === 'offline' ? (
+                <ShellButton
+                  label="Check connection"
+                  variant="secondary"
+                  onPress={() => void refreshConnection()}
+                />
+              ) : (
+                <ShellHeaderAction
+                  kind="refresh"
+                  label="Refresh data"
+                  priority={0}
+                  onPress={() => void refreshConnection()}
+                />
+              ))}
           </>
         ) : liveUpdatesUnavailable ? (
           <ShellFeedback
@@ -124,17 +135,26 @@ export function ConnectivityBanner({
           {message}
         </Text>
       )}
-      {!branded && (
-        <ShellButton
-          label={actionLabel}
-          loading={refreshing}
-          loadingLabel="Refreshing…"
-          disabled={refreshing}
-          variant="secondary"
-          compact
-          onPress={() => void refreshConnection()}
-        />
-      )}
+      {!branded &&
+        (status === 'offline' ? (
+          <ShellButton
+            label={actionLabel}
+            loading={refreshing}
+            disabled={refreshing}
+            variant="secondary"
+            compact
+            onPress={() => void refreshConnection()}
+          />
+        ) : (
+          <ShellHeaderAction
+            kind="refresh"
+            label={actionLabel}
+            loading={refreshing}
+            disabled={refreshing}
+            priority={0}
+            onPress={() => void refreshConnection()}
+          />
+        ))}
     </View>
   );
 }

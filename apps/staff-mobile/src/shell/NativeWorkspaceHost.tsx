@@ -143,7 +143,7 @@ function ManagerOperationsLink({ user }: { user: StaffSession }) {
         visible={operations}
         onClose={() => setOperations(false)}
       >
-        <OrdersScreen user={user} manager />
+        <OrdersScreen user={user} manager showHeading={false} />
       </ShellSheet>
     </>
   );
