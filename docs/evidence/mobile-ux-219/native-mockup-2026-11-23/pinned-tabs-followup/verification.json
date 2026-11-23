@@ -1,0 +1,20 @@
+{
+  "baseRevision": "4ed30a5428ce6f984f58ab05cab3548631ce5bb3",
+  "sourceState": "captured in the working tree; file hashes match sourceRevision",
+  "sourceSha256": {
+    "apps/staff-mobile/src/shell/controls.tsx": "a850884a30b422a98ab54b1e1feaec6da44649aeef342717baed1cb7a80c1c7f",
+    "apps/staff-mobile/src/shell/NativeWorkspaceHost.tsx": "54e637e121dfaaed4e272208c9ec932da7dff439ab9ff5a08da851a5557705d7",
+    "apps/staff-mobile/src/features/orders/OrdersScreen.tsx": "26207ca99722a85456c7cf267de731448cc53d6bad63d436e4d4b07d61d49638",
+    "apps/staff-mobile/tests/native-navigation.test.tsx": "cbfb4eccd91e36fb600f420e75e7ada227289d775e76ff7fc617f0bd0856915e"
+  },
+  "checks": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "format": "passed",
+    "focusedTests": 138,
+    "nativeFlow": "passed"
+  },
+  "nativeScope": "Normal-text Android emulator, real local API; three list swipes, pinned Tables action, return to order search. No business mutation actions.",
+  "limits": "No new complete release, tablet, enlarged-text or manual TalkBack acceptance run.",
+  "sourceRevision": "8909553fc9c3eda3d706246f962d992edc8e5e57"
+}
