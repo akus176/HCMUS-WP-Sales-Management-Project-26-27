@@ -1,4 +1,4 @@
-import { act, fireEvent, waitFor, within } from '@testing-library/react-native';
+import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { AppState, type AppStateStatus } from 'react-native';
 import { renderRouter, screen } from 'expo-router/testing-library';
 import { SessionRoutes } from '../app/_layout';
@@ -95,19 +95,19 @@ async function setup(permissions = grants) {
   };
 }
 
-test('operational tabs preserve state and More contains only Account', async () => {
+test('Counter and Preparation are the only work tabs and More contains only Account', async () => {
   const h = await setup();
   expect(
     screen.getAllByRole('tab').map((tab) => tab.props.accessibilityLabel),
-  ).toEqual(['Today', 'Orders', 'Stock', 'Preparation', 'Deliveries', 'More']);
-  await fireEvent.press(screen.getByRole('tab', { name: 'Orders' }));
+  ).toEqual(['Today', 'Counter', 'Preparation', 'More']);
+  await fireEvent.press(screen.getByRole('tab', { name: 'Counter' }));
   const search = await screen.findByLabelText('Search orders');
   await fireEvent.changeText(search, 'T04');
-  await fireEvent.press(screen.getByRole('tab', { name: 'Stock' }));
-  await screen.findByLabelText('Search ingredients');
+  await fireEvent.press(screen.getByRole('tab', { name: 'Preparation' }));
+  await screen.findByRole('button', { name: 'All active' });
   expect(screen.queryByLabelText('Search orders')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Tables' })).toBeNull();
-  await fireEvent.press(screen.getByRole('tab', { name: 'Orders' }));
+  await fireEvent.press(screen.getByRole('tab', { name: 'Counter' }));
   expect(await screen.findByLabelText('Search orders')).toHaveProp(
     'value',
     'T04',
@@ -125,6 +125,8 @@ test('operational tabs preserve state and More contains only Account', async () 
   ).toBeVisible();
   expect(screen.queryByRole('button', { name: 'Open Preparation' })).toBeNull();
   expect(screen.queryByRole('button', { name: 'Open Approvals' })).toBeNull();
+  expect(screen.queryByRole('tab', { name: 'Stock' })).toBeNull();
+  expect(screen.queryByRole('tab', { name: 'Deliveries' })).toBeNull();
   expect(
     screen.queryByRole('button', { name: 'Open Administration' }),
   ).toBeNull();
@@ -137,7 +139,7 @@ test('operational tabs preserve state and More contains only Account', async () 
   await screen.findByRole('button', { name: 'All active' });
   expect(
     screen.getAllByRole('tab').map((tab) => tab.props.accessibilityLabel),
-  ).toEqual(['Today', 'Orders', 'Stock', 'Preparation', 'Deliveries', 'More']);
+  ).toEqual(['Today', 'Counter', 'Preparation', 'More']);
   expect(
     screen.getByRole('tab', { name: 'Preparation', selected: true }),
   ).toBeVisible();
@@ -153,10 +155,10 @@ test('a fresh revocation removes cached workspaces and never reloads their recor
   const h = await setup(['orders.fulfill']);
   expect(
     screen.getAllByRole('tab').map((tab) => tab.props.accessibilityLabel),
-  ).toEqual(['Home', 'Preparation', 'More']);
+  ).toEqual(['Today', 'Preparation', 'More']);
   await fireEvent.press(screen.getByRole('tab', { name: 'Preparation' }));
   await screen.findByRole('button', { name: 'All active' });
-  await fireEvent.press(screen.getByRole('tab', { name: 'Home' }));
+  await fireEvent.press(screen.getByRole('tab', { name: 'Today' }));
   await screen.findByRole('header', { name: 'Staff home' });
   const before = h.fetcher.mock.calls.filter(([r]) =>
     r.url.includes('/preparation-tickets'),
@@ -197,100 +199,25 @@ test('sign-out can be canceled in Account without losing the active session', as
   ).toBe(false);
 });
 
-test('native inventory keeps its focused ingredient and search while canceling a reviewed adjustment sends no write', async () => {
-  const h = await setup(['inventory.manage', 'inventory.adjust']);
-  await fireEvent.press(screen.getByRole('tab', { name: 'Stock' }));
-  await fireEvent.changeText(
-    await screen.findByLabelText('Search ingredients'),
-    'Oat',
-  );
-  await fireEvent.press(
-    await screen.findByRole('button', { name: 'Open ingredient Oat milk' }),
-  );
-  await fireEvent.press(
-    await screen.findByRole('button', {
-      name: 'Record adjustment for Oat milk',
-    }),
-  );
-  await fireEvent.changeText(screen.getByLabelText('Quantity change'), '2');
-  await fireEvent.changeText(
-    screen.getByLabelText('Adjustment reason'),
-    'Physical count',
-  );
-  await fireEvent.press(
-    screen.getByRole('button', { name: 'Save adjustment' }),
-  );
-  expect(
-    await screen.findByRole('button', { name: 'Confirm adjustment' }),
-  ).toBeVisible();
-  await fireEvent.press(
-    screen.getByRole('button', { name: 'Close Review stock adjustment' }),
-  );
-  await fireEvent.press(screen.getByRole('tab', { name: 'Home' }));
-  await screen.findByRole('header', { name: 'Staff home' });
-  await fireEvent.press(screen.getByRole('tab', { name: 'Stock' }));
-  const detailHeader = within(screen.getByTestId('shell-header'));
-  expect(
-    detailHeader.getByRole('header', { name: 'Ingredient details' }),
-  ).toBeVisible();
-  expect(
-    detailHeader
-      .getAllByRole('button')
-      .map((action) => action.props.accessibilityLabel),
-  ).toEqual(['Back to ingredients', 'Refresh inventory']);
-  await fireEvent.press(
-    detailHeader.getByRole('button', { name: 'Back to ingredients' }),
-  );
-  expect(
-    within(screen.getByTestId('shell-header')).queryByTestId('header-back'),
-  ).toBeNull();
-  expect(await screen.findByLabelText('Search ingredients')).toHaveProp(
-    'value',
-    'Oat',
-  );
-  expect(
-    h.fetcher.mock.calls.filter(
-      ([r]) => r.method === 'POST' && !r.url.endsWith('/auth/login'),
-    ),
-  ).toHaveLength(0);
-});
-
-test('warm workspace switches make no server requests and manual refresh still reloads data', async () => {
+test('Counter and Preparation retain their data across warm tab switches and manual refresh still works', async () => {
   const h = await setup();
-  await fireEvent.press(screen.getByRole('tab', { name: 'Orders' }));
+  await fireEvent.press(screen.getByRole('tab', { name: 'Counter' }));
   await screen.findByLabelText('Search orders');
-  await fireEvent.press(screen.getByRole('tab', { name: 'Stock' }));
-  await screen.findByLabelText('Search ingredients');
-  await fireEvent.press(
-    screen.getByRole('button', { name: 'Movement history' }),
-  );
-  await screen.findByText('No stock movements are recorded.');
-  await fireEvent.press(
-    screen.getByRole('button', { name: 'Ingredient balances' }),
-  );
-  await screen.findByLabelText('Search ingredients');
+  await fireEvent.press(screen.getByRole('tab', { name: 'Preparation' }));
+  await screen.findByRole('button', { name: 'All active' });
   await fireEvent.press(screen.getByRole('tab', { name: 'Today' }));
   await screen.findByRole('header', { name: 'Staff home' });
   const loaded = h.fetcher.mock.calls.length;
   for (let pass = 0; pass < 3; pass++) {
-    await fireEvent.press(screen.getByRole('tab', { name: 'Orders' }));
+    await fireEvent.press(screen.getByRole('tab', { name: 'Counter' }));
     await screen.findByLabelText('Search orders');
-    await fireEvent.press(screen.getByRole('tab', { name: 'Stock' }));
-    await screen.findByLabelText('Search ingredients');
-    await fireEvent.press(
-      screen.getByRole('button', { name: 'Movement history' }),
-    );
-    await screen.findByText('No stock movements are recorded.');
-    await fireEvent.press(
-      screen.getByRole('button', { name: 'Ingredient balances' }),
-    );
-    await screen.findByLabelText('Search ingredients');
+    await fireEvent.press(screen.getByRole('tab', { name: 'Preparation' }));
+    await screen.findByRole('button', { name: 'All active' });
     await fireEvent.press(screen.getByRole('tab', { name: 'Today' }));
     await screen.findByRole('header', { name: 'Staff home' });
   }
   expect(h.fetcher).toHaveBeenCalledTimes(loaded);
-  await fireEvent.press(screen.getByRole('tab', { name: 'Orders' }));
-  await screen.findByLabelText('Search orders');
+  await fireEvent.press(screen.getByRole('tab', { name: 'Counter' }));
   await fireEvent.press(
     screen.getByRole('button', { name: 'Refresh orders and tables' }),
   );

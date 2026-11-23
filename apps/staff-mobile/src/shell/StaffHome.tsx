@@ -10,11 +10,12 @@ import { router } from 'expo-router';
 import { useSession } from '../session/context';
 import type { StaffSession } from '../session/session';
 import { ShellButton, ShellHeading, ShellPage, ShellStatus } from './controls';
-import { permittedActions, permittedModules } from './permissions';
+import { permittedActions } from './permissions';
 import { mobileTokens as t } from './designTokens';
 import { useNativeNavigation } from './NativeNavigation';
 import {
   navigationFor,
+  availableWorkspaces,
   workspaceNavigation,
   type Workspace,
 } from './navigationPolicy';
@@ -55,8 +56,8 @@ export function StaffHome({
         <ShellStatus>Session ended. Sign in again.</ShellStatus>
       </ShellPage>
     );
-  const modules = permittedModules(user.permissions);
-  const quick = !!navigation && modules.length > 2;
+  const modules = availableWorkspaces(user.permissions);
+  const quick = !!navigation && modules.length > 1;
   const primary = navigationFor(user.permissions).map((tab) => tab.id);
   const visibleModules = quick
     ? modules.filter((module) => primary.includes(module.id as Workspace))
@@ -117,7 +118,7 @@ export function StaffHome({
                   <View style={styles.copy}>
                     <Text style={styles.title}>
                       {module.id === 'cashier' && quick
-                        ? 'Orders'
+                        ? 'Counter'
                         : module.title}
                     </Text>
                     <Text style={styles.caption}>

@@ -1,58 +1,38 @@
 import { permittedModules } from './permissions';
 
-export type Workspace =
-  | 'home'
-  | 'more'
-  | 'account'
-  | 'barista'
-  | 'cashier'
-  | 'inventory'
-  | 'delivery'
-  | 'administration';
+export type Workspace = 'home' | 'more' | 'account' | 'barista' | 'cashier';
 export type NavigationItem = {
   id: Workspace;
   label: string;
-  icon:
-    | 'home'
-    | 'orders'
-    | 'stock'
-    | 'more'
-    | 'account'
-    | 'cup'
-    | 'approve'
-    | 'delivery';
+  icon: 'home' | 'orders' | 'more' | 'account' | 'cup';
 };
 export const workspaceNavigation: Record<string, NavigationItem> = {
   barista: { id: 'barista', label: 'Preparation', icon: 'cup' },
-  cashier: { id: 'cashier', label: 'Orders', icon: 'orders' },
-  inventory: { id: 'inventory', label: 'Stock', icon: 'stock' },
-  delivery: { id: 'delivery', label: 'Deliveries', icon: 'delivery' },
-  administration: { id: 'administration', label: 'Staff', icon: 'account' },
+  cashier: { id: 'cashier', label: 'Counter', icon: 'orders' },
 };
-
+export function availableWorkspaces(permissions: readonly string[]) {
+  return permittedModules(permissions).filter((module) =>
+    ['cashier', 'barista'].includes(module.id),
+  );
+}
 export function navigationFor(
   permissions: readonly string[],
 ): NavigationItem[] {
-  const modules = permittedModules(permissions);
-  const broad = modules.length > 2;
-  // Operational workspaces have their own pages; More is reserved for Account.
-  // Staff administration is reached from Account instead of an overflow list.
-  const primary = ['cashier', 'inventory', 'barista', 'delivery'].filter((id) =>
-    modules.some((module) => module.id === id),
-  );
+  const modules = availableWorkspaces(permissions);
   return [
-    { id: 'home', label: broad ? 'Today' : 'Home', icon: 'home' },
-    ...primary.map((id) => workspaceNavigation[id]!),
+    { id: 'home', label: 'Today', icon: 'home' },
+    ...['cashier', 'barista']
+      .filter((id) => modules.some((module) => module.id === id))
+      .map((id) => workspaceNavigation[id]!),
     { id: 'more', label: 'More', icon: 'more' },
   ];
 }
-
 export function isWorkspaceAllowed(
-  workspace: Workspace,
+  workspace: string,
   permissions: readonly string[],
 ) {
   return (
     ['home', 'more', 'account'].includes(workspace) ||
-    permittedModules(permissions).some((m) => m.id === workspace)
+    availableWorkspaces(permissions).some((module) => module.id === workspace)
   );
 }

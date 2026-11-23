@@ -134,7 +134,7 @@ export function OrdersScreen({
     <>
       {showHeading && (!native?.user || manager) && (
         <ShellPageHeader
-          title={manager ? 'Manager order operations' : 'Orders'}
+          title={manager ? 'Manager order operations' : 'Counter'}
         />
       )}
       {!manager && !selected && (

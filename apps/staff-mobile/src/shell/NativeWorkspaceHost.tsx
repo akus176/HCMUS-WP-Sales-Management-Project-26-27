@@ -1,17 +1,12 @@
 import { Activity, useLayoutEffect, useState } from 'react';
 import { Alert, BackHandler, StyleSheet, Text, View } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
 import type { StaffSession } from '../session/session';
 import { useSession } from '../session/context';
 import { useConnectivity } from '../connectivity/connectivity';
 import { PreparationScreen } from '../barista/PreparationScreen';
 import { OrdersScreen } from '../features/orders/OrdersScreen';
-import { InventoryWorkspace } from '../features/inventory/InventoryWorkspace';
-import { DeliveryScreen } from '../features/delivery/DeliveryScreen';
-import { StaffAdministration } from '../features/administration/StaffAdministration';
 import { useNativeNavigation } from './NativeNavigation';
 import { isWorkspaceAllowed, type Workspace } from './navigationPolicy';
-import { permittedModules } from './permissions';
 import { StaffHome } from './StaffHome';
 import {
   ShellButton,
@@ -63,11 +58,7 @@ export function NativeWorkspaceHost({
                 <ShellPage>
                   {personal ? (
                     id === 'home' ? (
-                      <StaffHome
-                        user={user}
-                        embedded
-                        summary={<HomeAttention user={user} />}
-                      />
+                      <StaffHome user={user} embedded />
                     ) : id === 'more' ? (
                       <MoreWorkspaces />
                     ) : (
@@ -76,15 +67,7 @@ export function NativeWorkspaceHost({
                   ) : (
                     <>
                       <ShellPageHeader
-                        title={
-                          id === 'cashier'
-                            ? 'Orders'
-                            : id === 'administration'
-                              ? 'Staff'
-                              : permittedModules(user.permissions).find(
-                                  (module) => module.id === id,
-                                )?.title
-                        }
+                        title={id === 'cashier' ? 'Counter' : 'Preparation'}
                         inline
                         hideDuringDetail
                       />
@@ -92,13 +75,7 @@ export function NativeWorkspaceHost({
                         <PreparationScreen showHeading={false} directOpen />
                       ) : id === 'cashier' ? (
                         <OrdersScreen user={user} showHeading={false} />
-                      ) : id === 'inventory' ? (
-                        <InventoryWorkspace user={user} showHeading={false} />
-                      ) : id === 'delivery' ? (
-                        <DeliveryScreen showHeading={false} />
-                      ) : (
-                        <StaffAdministration user={user} showHeading={false} />
-                      )}
+                      ) : null}
                     </>
                   )}
                 </ShellPage>
@@ -107,50 +84,6 @@ export function NativeWorkspaceHost({
           );
         })}
     </View>
-  );
-}
-
-function HomeAttention({ user }: { user: StaffSession }) {
-  const { client } = useSession();
-  const navigation = useNativeNavigation();
-  const canSeeLowStock = user.permissions.includes('reports.lowstock');
-  const lowStock = useQuery({
-    queryKey: ['inventory', user.id, 'overview'],
-    enabled: canSeeLowStock,
-    queryFn: async ({ signal }) => {
-      const { data } = await client!.api.GET('/api/v1/ingredients/low-stock', {
-        signal,
-      });
-      return data!;
-    },
-  });
-  return (
-    <>
-      {canSeeLowStock && (
-        <ShellButton
-          label="Review low stock"
-          variant="text"
-          onPress={() => navigation?.open('inventory')}
-        >
-          <View style={styles.row}>
-            <ShellIcon name="stock" color={t.color.primary} />
-            <View style={styles.rowBody}>
-              <Text style={styles.rowTitle}>
-                {typeof lowStock.data?.totalCount === 'number'
-                  ? `${lowStock.data.totalCount} ingredients low`
-                  : 'Low stock'}
-              </Text>
-              <Text style={styles.caption}>
-                {lowStock.isError
-                  ? 'Refresh inventory to check current levels.'
-                  : 'Check balances and replenishment.'}
-              </Text>
-            </View>
-            <ShellIcon name="chevron" size={16} />
-          </View>
-        </ShellButton>
-      )}
-    </>
   );
 }
 
@@ -191,13 +124,6 @@ function Account({ user }: { user: StaffSession }) {
         backLabel="Back to More"
         onBack={() => navigation?.open('more')}
       />
-      {user.permissions.includes('users.manage') && (
-        <ShellButton
-          label="Open Administration"
-          variant="secondary"
-          onPress={() => navigation?.open('administration')}
-        />
-      )}
       <View style={styles.account}>
         <ShellIcon name="account" size={32} color={t.color.primary} />
         <View style={styles.rowBody}>

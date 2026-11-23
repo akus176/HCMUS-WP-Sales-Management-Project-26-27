@@ -47,9 +47,7 @@ test('an unauthorized delivery deep link never loads another courier assignment'
   await act(async () => {
     router.push(`/modules/delivery/${orderId}`);
   });
-  await screen.findByText(
-    'Access unavailable. Your current permissions do not allow this module.',
-  );
+  await screen.findByText('Access unavailable. This module is not available.');
   expect(
     h.fetcher.mock.calls.some(([request]) =>
       request.url.includes('/courier/assignments'),
@@ -133,11 +131,9 @@ test('real routes reject signed-out and unauthorized links, allow a grant, then 
   await act(async () => {
     router.push('/modules/approvals');
   });
-  await screen.findByText(
-    'Access unavailable. Your current permissions do not allow this module.',
-  );
+  await screen.findByText('Access unavailable. This module is not available.');
   expect(screen.queryByRole('header', { name: 'Approvals' })).toBeNull();
-  await fireEvent.press(screen.getByRole('tab', { name: 'Home' }));
+  await fireEvent.press(screen.getByRole('tab', { name: 'Today' }));
   await fireEvent.press(
     await screen.findByRole('button', { name: 'Open Preparation' }),
   );
@@ -150,7 +146,7 @@ test('real routes reject signed-out and unauthorized links, allow a grant, then 
   await screen.findByText(
     'Access unavailable. Your current permissions do not allow this module.',
   );
-  await fireEvent.press(screen.getByRole('tab', { name: 'Home' }));
+  await fireEvent.press(screen.getByRole('tab', { name: 'Today' }));
   await screen.findByText(
     'No mobile modules are available for your permissions.',
   );
@@ -195,12 +191,11 @@ test('the removed approval workspace never loads discount data even with the old
     },
     { initialUrl: '/' },
   );
+  await waitFor(() => expect(h.client.getSnapshot().status).toBe('signedOut'));
   await act(async () => h.client.login('staff', 'fixture-password'));
   await screen.findByRole('header', { name: 'Staff home' });
   await act(async () => router.push('/modules/approvals'));
-  await screen.findByText(
-    'Access unavailable. Your current permissions do not allow this module.',
-  );
+  await screen.findByText('Access unavailable. This module is not available.');
   expect(
     h.fetcher.mock.calls.some(([request]) =>
       request.url.includes('/discounts/'),
@@ -254,3 +249,47 @@ test('a retained module refocuses only after a fresh permission check', async ()
   );
   expect(screen.queryByRole('header', { name: 'Preparation' })).toBeNull();
 });
+
+test.each(['inventory', 'delivery', 'administration'])(
+  'the %s page is unavailable in the Counter and Preparation app even with a grant',
+  async (module) => {
+    const h = harness(async () =>
+      json({
+        ...user,
+        permissions: ['inventory.manage', 'delivery.update', 'users.manage'],
+      }),
+    );
+    function Layout() {
+      return (
+        <SessionProvider client={h.client}>
+          <QueryCleanup />
+          <SessionRoutes />
+        </SessionProvider>
+      );
+    }
+    await renderRouter(
+      {
+        _layout: Layout,
+        index: StarterScreen,
+        login: LoginScreen,
+        session: SessionScreen,
+        'modules/[module]': ModuleScreen,
+      },
+      { initialUrl: '/' },
+    );
+    await waitFor(() =>
+      expect(h.client.getSnapshot().status).toBe('signedOut'),
+    );
+    await act(async () => h.client.login('staff', 'fixture-password'));
+    await screen.findByRole('header', { name: 'Staff home' });
+    await act(async () => router.push(`/modules/${module}`));
+    await screen.findByText(
+      'Access unavailable. This module is not available.',
+    );
+    expect(
+      h.fetcher.mock.calls.some(([request]) =>
+        /\/(ingredients|users|courier)(\/|\?|$)/.test(request.url),
+      ),
+    ).toBe(false);
+  },
+);

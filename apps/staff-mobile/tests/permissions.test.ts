@@ -1,4 +1,7 @@
-import { navigationFor } from '../src/shell/navigationPolicy';
+import {
+  isWorkspaceAllowed,
+  navigationFor,
+} from '../src/shell/navigationPolicy';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
@@ -135,7 +138,25 @@ test('manager navigation gives Preparation its own tab and does not expose disco
       'discounts.approve',
       'orders.cancel',
     ]).map(({ label }) => label),
-  ).toEqual(['Today', 'Orders', 'Stock', 'Preparation', 'More']);
+  ).toEqual(['Today', 'Counter', 'Preparation', 'More']);
   expect(findModule('approvals')).toBeUndefined();
   expect(permittedModules(['discounts.approve'])).toEqual([]);
+});
+
+test('broad account permissions do not expose Stock, Deliveries or staff administration', () => {
+  const permissions = [
+    'orders.create',
+    'orders.fulfill',
+    'inventory.manage',
+    'delivery.update',
+    'users.manage',
+  ];
+  expect(navigationFor(permissions).map(({ label }) => label)).toEqual([
+    'Today',
+    'Counter',
+    'Preparation',
+    'More',
+  ]);
+  for (const workspace of ['inventory', 'delivery', 'administration'])
+    expect(isWorkspaceAllowed(workspace, permissions)).toBe(false);
 });
