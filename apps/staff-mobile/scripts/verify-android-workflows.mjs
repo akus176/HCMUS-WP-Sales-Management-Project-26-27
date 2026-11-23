@@ -69,7 +69,7 @@ const dbUser = required('COFFEESHOP_WORKFLOW_POSTGRES_USER');
 for (const value of [container, database, dbUser])
   assert.match(value, /^[a-zA-Z0-9_-]+$/);
 assert.match(database, /^issue201_/);
-const roles = ['Admin', 'Manager', 'Barista', 'DeliveryStaff', 'OtherCourier'];
+const roles = ['Admin', 'Manager', 'DeliveryStaff', 'OtherCourier'];
 const accounts = Object.fromEntries(
   roles.map((role) => {
     const username = required(
@@ -87,11 +87,6 @@ const accounts = Object.fromEntries(
   }),
 );
 const names = [
-  'barista-progression',
-  'barista-conflict',
-  'barista-stale',
-  'barista-forbidden',
-  'barista-offline',
   'courier-own-list',
   'courier-other-detail',
   'courier-delivered',
@@ -513,14 +508,6 @@ try {
   }
   const seed = {};
   for (const name of [
-    'progression',
-    'conflict',
-    'stale',
-    'forbidden',
-    'offline',
-  ])
-    seed[`barista-${name}`] = await order(`barista-${name}`);
-  for (const name of [
     'delivered',
     'failed',
     'conflict',
@@ -547,102 +534,6 @@ try {
   if (usb) await android('reverse', `tcp:${device.port}`, `tcp:${device.port}`);
   const fault = (method, path, before, order) =>
     proxy.arm({ method, path, before, observe: () => snapshot(order) });
-  const baristaStart = (expected) =>
-    native('barista-start', { EXPECTED: expected });
-  await check('barista-progression', 'Barista', async () => {
-    const o = seed['barista-progression'];
-    await open('urgent-order', o, 'Start preparing');
-    await baristaStart('Preparation started. Confirmed by the service.');
-    assert.equal((await snapshot(o)).status, 'preparing');
-    const beforeCancel = await snapshot(o);
-    const writesBeforeCancel = proxy.exchanges.filter(
-      (entry) => entry.method === 'POST',
-    ).length;
-    await native('barista-cancel-ready');
-    const afterCancel = await snapshot(o);
-    assert.deepEqual(
-      afterCancel,
-      beforeCancel,
-      'Canceling ready changed authoritative state.',
-    );
-    assert.equal(
-      proxy.exchanges.filter((entry) => entry.method === 'POST').length,
-      writesBeforeCancel,
-      'Canceling ready sent a business command.',
-    );
-    await screenshot('barista-ready-canceled');
-    current.canceledReady = {
-      before: beforeCancel,
-      after: afterCancel,
-      businessWrites: 0,
-    };
-    await native('barista-ready');
-    const state = await snapshot(o);
-    assert.equal(state.status, 'ready');
-    assert.deepEqual(
-      state.history
-        .filter((h) => ['preparing', 'ready'].includes(h.to_status))
-        .map((h) => h.changed_by),
-      [sessions.Barista.user.id, sessions.Barista.user.id],
-    );
-    return state;
-  });
-  await check('barista-conflict', 'Barista', async () => {
-    const o = seed['barista-conflict'];
-    await open('urgent-order', o, 'Start preparing');
-    const f = fault(
-      'POST',
-      `/api/v1/preparation-tickets/${o.id}/start`,
-      () => post(`/orders/${o.id}/preparing`),
-      o,
-    );
-    await baristaStart('Ticket changed elsewhere.*');
-    return proxy.verify(f, 409);
-  });
-  await check('barista-stale', 'Barista', async () => {
-    const o = seed['barista-stale'];
-    const f = fault(
-      'GET',
-      `/api/v1/preparation-tickets/${o.id}`,
-      async () => {
-        await post(`/orders/${o.id}/preparing`);
-        await post(`/orders/${o.id}/ready`);
-      },
-      o,
-    );
-    await native('unavailable', {
-      KIND: 'urgent-order',
-      RECORD_ID: o.id,
-      EXPECTED: 'Ticket is no longer in the preparation queue.*',
-      FORBIDDEN_ACTION: 'Start preparing',
-      PRIVATE_LABEL: o.orderNumber,
-    });
-    return proxy.verify(f, 404);
-  });
-  await check('barista-forbidden', 'Barista', async () => {
-    const o = seed['barista-forbidden'];
-    await open('urgent-order', o, 'Start preparing');
-    const f = fault(
-      'POST',
-      `/api/v1/preparation-tickets/${o.id}/start`,
-      () => setRole('Barista', false),
-      o,
-    );
-    try {
-      await baristaStart('Access unavailable.*');
-      return await proxy.verify(f, 403);
-    } finally {
-      await setRole('Barista', true);
-    }
-  });
-  await check('barista-offline', 'Barista', () =>
-    offline(
-      seed['barista-offline'],
-      'urgent-order',
-      'Start preparing',
-      'Status: Confirmed',
-    ),
-  );
   const privateLabel = `Address: Synthetic I201 ${runId} address`;
   await check('courier-own-list', 'DeliveryStaff', async () => {
     const list = await request('/courier/assignments?pageSize=100', {

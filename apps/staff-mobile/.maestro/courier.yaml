@@ -16,7 +16,8 @@ name: Courier delivered and failed workflows against the shared API
 - extendedWaitUntil:
     visible: Open Deliveries
     timeout: 30000
-- tapOn: Deliveries
+- tapOn:
+    id: workspace-tab-delivery
 - scrollUntilVisible:
     element: Open delivery ${MAESTRO_DELIVERED_ORDER}
     direction: DOWN
