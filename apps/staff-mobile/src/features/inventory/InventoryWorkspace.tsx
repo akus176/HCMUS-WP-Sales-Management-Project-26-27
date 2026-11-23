@@ -283,7 +283,10 @@ export function InventoryWorkspace({
         queryKey: ['inventory-balances', user.id],
       });
       await queryClient.invalidateQueries({
-        queryKey: ['inventory-movements', user.id, result.ingredientId],
+        queryKey: ['inventory', user.id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['inventory-movements', user.id],
       });
     },
     onError: (error) => setAdjustmentMessage(adjustmentError(error)),
@@ -316,6 +319,9 @@ export function InventoryWorkspace({
       });
       await queryClient.invalidateQueries({
         queryKey: ['inventory-balances', user.id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['inventory', user.id],
       });
       await queryClient.invalidateQueries({
         queryKey: ['inventory-movements', user.id],

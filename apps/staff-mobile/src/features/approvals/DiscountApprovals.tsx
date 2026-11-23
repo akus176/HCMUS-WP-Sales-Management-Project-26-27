@@ -134,7 +134,7 @@ export function DiscountApprovals({
         throw new Error('The API returned no confirmed discount decision.');
       return { action, result: response.data };
     },
-    onSuccess: ({ action, result }) => {
+    onSuccess: async ({ action, result }) => {
       setActionError(undefined);
       setDecisionResult({ action, result });
       queryClient.setQueryData(queryKey, (current: typeof pendingQuery.data) =>
@@ -148,6 +148,9 @@ export function DiscountApprovals({
             }
           : current,
       );
+      await queryClient.invalidateQueries({
+        queryKey: ['discounts', user.id],
+      });
     },
     onError: (error) => {
       setDecisionResult(undefined);

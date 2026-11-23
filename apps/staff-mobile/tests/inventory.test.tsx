@@ -312,7 +312,16 @@ test('adjustment requires a reason and displays server-confirmed balance and mov
     data: { ingredientId: balance.ingredientId, availableQuantity: 3 },
   }));
   createClient(get as never, post as never);
-  const view = await setup();
+  let queries!: QueryClient;
+  const overviewKey = ['inventory', user.id, 'overview'];
+  const historyKey = ['inventory-movements', user.id, 'all'];
+  const view = await setup(user, (current) => {
+    queries = current;
+    for (const key of [overviewKey, historyKey]) {
+      current.setQueryDefaults(key, { gcTime: Infinity, staleTime: Infinity });
+      current.setQueryData(key, { cached: true });
+    }
+  });
 
   await view.findByText('Oat milk');
   await fireEvent.press(
@@ -355,6 +364,10 @@ test('adjustment requires a reason and displays server-confirmed balance and mov
   expect(
     await view.findByText(/adjustment: 2 l · Physical count/),
   ).toBeVisible();
+  await waitFor(() => {
+    expect(queries.getQueryState(overviewKey)?.isInvalidated).toBe(true);
+    expect(queries.getQueryState(historyKey)?.isInvalidated).toBe(true);
+  });
 });
 
 test('server validation rejection does not report an adjustment as successful', async () => {
@@ -427,7 +440,16 @@ test('reviews and posts a prepared receipt once, then shows its server status', 
     return { data: undefined, response: { ok: true } };
   });
   createClient(get as never, post as never);
-  const view = await setup();
+  let queries!: QueryClient;
+  const overviewKey = ['inventory', user.id, 'overview'];
+  const historyKey = ['inventory-movements', user.id, 'all'];
+  const view = await setup(user, (current) => {
+    queries = current;
+    for (const key of [overviewKey, historyKey]) {
+      current.setQueryDefaults(key, { gcTime: Infinity, staleTime: Infinity });
+      current.setQueryData(key, { cached: true });
+    }
+  });
 
   await view.findByText('Oat milk');
   await fireEvent.press(
@@ -454,6 +476,10 @@ test('reviews and posts a prepared receipt once, then shows its server status', 
   expect(
     view.queryByRole('button', { name: 'Post receipt RCPT-184' }),
   ).toBeNull();
+  await waitFor(() => {
+    expect(queries.getQueryState(overviewKey)?.isInvalidated).toBe(true);
+    expect(queries.getQueryState(historyKey)?.isInvalidated).toBe(true);
+  });
 });
 
 test('empty receipts remain unpostable', async () => {

@@ -103,6 +103,7 @@ function ClearQueriesOnUnmount() {
 async function setup(
   source: ReturnType<typeof createNetworkSource>,
   screenContent: React.ReactElement,
+  queriesReady?: (queries: QueryClient) => void,
 ) {
   getNetworkStateAsync.mockResolvedValue(source.initial);
   const queryClient = new QueryClient({
@@ -111,6 +112,7 @@ async function setup(
       mutations: { retry: false, gcTime: 0 },
     },
   });
+  queriesReady?.(queryClient);
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <SessionProvider client={currentClient} queryClient={queryClient}>
@@ -161,9 +163,19 @@ test('loads pending discounts for an authorized manager and opens a review', asy
 
 test('shows the server-confirmed approved decision and updated order total', async () => {
   const { post } = mockClient();
+  let queries!: QueryClient;
+  const overviewKey = ['discounts', manager.id, 'overview'];
   const view = await setup(
     createNetworkSource(onlineState),
     <DiscountApprovals user={manager} discountId={discount.discountId} />,
+    (current) => {
+      queries = current;
+      current.setQueryDefaults(overviewKey, {
+        gcTime: Infinity,
+        staleTime: Infinity,
+      });
+      current.setQueryData(overviewKey, { cached: true });
+    },
   );
 
   await view.findByText('Reason: Service recovery');
@@ -178,6 +190,9 @@ test('shows the server-confirmed approved decision and updated order total', asy
     params: { path: { id: discount.discountId } },
   });
   expect(view.queryByRole('button', { name: 'Approve discount' })).toBeNull();
+  await waitFor(() =>
+    expect(queries.getQueryState(overviewKey)?.isInvalidated).toBe(true),
+  );
 });
 
 test('shows the server-confirmed rejected decision without changing the total', async () => {
