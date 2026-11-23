@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -44,11 +45,30 @@ const PageNavigation = createContext({
   returnToList: () => {},
   returnTarget: null as string | null,
   finishReturn: () => {},
+  scrollToTop: () => {},
 });
 
 export const usePageNavigation = () => useContext(PageNavigation);
 export const PageNotice = createContext<ReactNode>(null);
 const PageFooter = createContext<(content: ReactNode) => void>(() => {});
+const PageHeader = createContext<((content: ReactNode) => void) | null>(null);
+
+/** Reserve space above the scrolling content for persistent page controls. */
+export function ShellPinnedHeader({
+  children,
+  enabled = true,
+}: {
+  children: ReactNode;
+  enabled?: boolean;
+}) {
+  const setHeader = useContext(PageHeader);
+  useLayoutEffect(() => {
+    if (!setHeader || !enabled) return;
+    setHeader(children);
+    return () => setHeader(null);
+  }, [children, enabled, setHeader]);
+  return setHeader && enabled ? null : <>{children}</>;
+}
 
 /** Keep working actions in reach; enlarged text reflows them into the page. */
 export function ShellPageFooter({ children }: { children: ReactNode }) {
@@ -72,6 +92,7 @@ export function ShellPage({ children }: { children: ReactNode }) {
   const [returnTarget, setReturnTarget] = useState<string | null>(null);
   const [detailActive, setDetailActive] = useState(false);
   const [footer, setFooter] = useState<ReactNode>(null);
+  const [header, setHeader] = useState<ReactNode>(null);
   // Footer updates must not recreate navigation and retrigger its consumers.
   const navigation = useMemo(
     () => ({
@@ -94,6 +115,7 @@ export function ShellPage({ children }: { children: ReactNode }) {
       },
       returnTarget,
       finishReturn: () => setReturnTarget(null),
+      scrollToTop: () => scroll.current?.scrollTo({ y: 0, animated: false }),
     }),
     [detailActive, returnTarget],
   );
@@ -104,31 +126,34 @@ export function ShellPage({ children }: { children: ReactNode }) {
     >
       <PageNavigation.Provider value={navigation}>
         <PageFooter.Provider value={setFooter}>
-          <ScrollView
-            testID="shell-scroll"
-            ref={scroll}
-            contentContainerStyle={styles.scroll}
-            keyboardShouldPersistTaps="handled"
-            onScroll={(event) => {
-              position.current = event.nativeEvent.contentOffset.y;
-            }}
-            scrollEventThrottle={16}
-            onContentSizeChange={() => {
-              if (restore.current) {
-                scroll.current?.scrollTo({
-                  y: origin.current.y,
-                  animated: false,
-                });
-                restore.current = false;
-              }
-            }}
-          >
-            <View style={styles.content}>
-              {notice}
-              {children}
-            </View>
-          </ScrollView>
-          {footer}
+          <PageHeader.Provider value={setHeader}>
+            {header && <View style={styles.pinnedHeader}>{header}</View>}
+            <ScrollView
+              testID="shell-scroll"
+              ref={scroll}
+              contentContainerStyle={styles.scroll}
+              keyboardShouldPersistTaps="handled"
+              onScroll={(event) => {
+                position.current = event.nativeEvent.contentOffset.y;
+              }}
+              scrollEventThrottle={16}
+              onContentSizeChange={() => {
+                if (restore.current) {
+                  scroll.current?.scrollTo({
+                    y: origin.current.y,
+                    animated: false,
+                  });
+                  restore.current = false;
+                }
+              }}
+            >
+              <View style={styles.content}>
+                {notice}
+                {children}
+              </View>
+            </ScrollView>
+            {footer}
+          </PageHeader.Provider>
         </PageFooter.Provider>
       </PageNavigation.Provider>
     </SafeAreaView>
@@ -601,6 +626,12 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 12,
     gap: 16,
+  },
+  pinnedHeader: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 16,
+    backgroundColor: mobileTokens.color.background,
   },
   heading: {
     color: mobileTokens.color.foreground,

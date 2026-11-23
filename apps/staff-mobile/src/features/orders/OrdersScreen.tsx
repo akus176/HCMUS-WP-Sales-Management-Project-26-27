@@ -16,7 +16,9 @@ import {
   usePageNavigation,
   ShellBadge,
   ShellSheet,
+  ShellPinnedHeader,
 } from '../../shell/controls';
+import { useNativeNavigation } from '../../shell/NativeNavigation';
 import { ShellIcon } from '../../shell/ShellIcon';
 import { mobileTokens as t } from '../../shell/designTokens';
 import { OrderPayment, type PendingPayments } from './OrderPayment';
@@ -35,6 +37,7 @@ export function OrdersScreen({
   showHeading?: boolean;
 }) {
   const { client } = useSession();
+  const native = useNativeNavigation();
   const queries = useQueryClient();
   const { canMutate } = useConnectivity();
   const [section, setSection] = useState<'orders' | 'tables'>('orders');
@@ -127,24 +130,31 @@ export function OrdersScreen({
 
   return (
     <>
-      {showHeading && (
+      {showHeading && (!native?.user || manager) && (
         <ShellHeading>
           {manager ? 'Manager order operations' : 'Counter'}
         </ShellHeading>
       )}
       {!manager && !selected && (
-        <ShellSelection segmented>
-          {(['orders', 'tables'] as const).map((choice) => (
-            <ShellButton
-              key={choice}
-              label={choice === 'orders' ? 'Orders' : 'Tables'}
-              selected={section === choice}
-              variant="secondary"
-              compact
-              onPress={() => setSection(choice)}
-            />
-          ))}
-        </ShellSelection>
+        <ShellPinnedHeader enabled={!!native?.user}>
+          {!!native?.user && <ShellHeading>Orders</ShellHeading>}
+          <ShellSelection segmented>
+            {(['orders', 'tables'] as const).map((choice) => (
+              <ShellButton
+                key={choice}
+                testID={`order-section-${choice}`}
+                label={choice === 'orders' ? 'Orders' : 'Tables'}
+                selected={section === choice}
+                variant="secondary"
+                compact
+                onPress={() => {
+                  setSection(choice);
+                  navigation.scrollToTop();
+                }}
+              />
+            ))}
+          </ShellSelection>
+        </ShellPinnedHeader>
       )}
       <ShellButton
         label="Refresh orders and tables"

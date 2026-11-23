@@ -93,21 +93,21 @@ export function NativeWorkspaceHost({
                   >
                     {(verified) => (
                       <>
-                        <ShellPageHeader
-                          title={
-                            id === 'cashier'
-                              ? 'Orders'
-                              : id === 'administration'
+                        {id !== 'cashier' && (
+                          <ShellPageHeader
+                            title={
+                              id === 'administration'
                                 ? 'Staff'
                                 : id === 'approvals'
                                   ? 'Approvals'
                                   : permittedModules(verified.permissions).find(
                                       (m) => m.id === id,
                                     )?.title
-                          }
-                          inline
-                          hideDuringDetail
-                        />
+                            }
+                            inline
+                            hideDuringDetail
+                          />
+                        )}
                         {id === 'barista' ? (
                           <PreparationScreen showHeading={false} directOpen />
                         ) : id === 'cashier' ? (

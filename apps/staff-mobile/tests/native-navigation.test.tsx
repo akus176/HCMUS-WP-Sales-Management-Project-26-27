@@ -92,7 +92,15 @@ test('manager tabs preserve order search across workspaces and expose overflow w
   await fireEvent.press(screen.getByRole('tab', { name: 'Stock' }));
   await screen.findByLabelText('Search ingredients');
   expect(screen.queryByLabelText('Search orders')).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Tables' })).toBeNull();
   await fireEvent.press(screen.getByRole('tab', { name: 'Orders' }));
+  expect(await screen.findByLabelText('Search orders')).toHaveProp(
+    'value',
+    'T04',
+  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Tables' }));
+  await screen.findByText('Table occupancy');
+  await fireEvent.press(screen.getByRole('button', { name: 'Orders' }));
   expect(await screen.findByLabelText('Search orders')).toHaveProp(
     'value',
     'T04',
