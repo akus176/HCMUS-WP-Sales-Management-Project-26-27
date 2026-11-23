@@ -1,21 +1,15 @@
 appId: com.coffeeshop.staffmobile
-name: Delivery app rejects retired staff workflow links
+name: Removed discount links cannot expose a retired screen
 ---
 - runFlow: common/login.yaml
-- assertVisible: Open Deliveries
-- assertNotVisible:
-    id: workspace-tab-barista
-- assertNotVisible:
-    id: workspace-tab-cashier
-- assertNotVisible:
-    id: workspace-tab-inventory
+- assertVisible: Open Preparation
 - assertNotVisible: Open Approvals
 - openLink: coffeeshop-staff:///notifications/approval/${MAESTRO_RETIRED_RECORD_ID}
 - extendedWaitUntil:
     visible: This notification link is unavailable.
     timeout: 30000
 - assertNotVisible: Discount review
-- tapOn: Today
+- tapOn: Home
 - tapOn: More
 - tapOn: Open Account
 - scrollUntilVisible:

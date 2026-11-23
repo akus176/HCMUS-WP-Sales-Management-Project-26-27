@@ -1,7 +1,7 @@
 param([string]$ResultsDirectory = '.maestro/results/quality')
 $ErrorActionPreference = 'Stop'
 # Run from apps/staff-mobile against freshly provisioned, disposable accounts.
-$roles = @('Manager', 'DeliveryStaff')
+$roles = @('Manager', 'Admin', 'Barista', 'InventoryStaff', 'Cashier', 'DeliveryStaff')
 foreach ($role in $roles) {
     if (![Environment]::GetEnvironmentVariable("COFFEESHOP_E2E_${role}_USERNAME")) { throw "Set COFFEESHOP_E2E_${role}_USERNAME." }
 }
@@ -9,23 +9,47 @@ if (!$env:COFFEESHOP_E2E_PASSWORD) { throw 'Set the synthetic accounts password 
 foreach ($command in @('maestro', 'adb')) { $null = Get-Command $command -ErrorAction Stop }
 New-Item -ItemType Directory -Path $ResultsDirectory -Force | Out-Null
 $flows = @(
-    @('session', 'DeliveryStaff'), @('courier', 'DeliveryStaff'),
-    @('notification-links', 'DeliveryStaff')
+    @('session', 'Barista'), @('barista', 'Barista'),
+    @('inventory', 'InventoryStaff'), @('courier', 'DeliveryStaff'),
+    @('cashier', 'Cashier'), @('manager-orders', 'Manager'),
+    @('administration', 'Admin'), @('offline', 'InventoryStaff'),
+    @('notification-links', 'Barista')
 )
 # Reset the summary before fixture setup, so a failed seed cannot leave a green report.
 @{ expected = $flows.Count; passed = 0; failedOrMissing = $flows.Count; serverVerificationPassed = $false; workflows = @() } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $ResultsDirectory 'summary.json')
 $env:COFFEESHOP_MOBILE_TEST_MANAGER_USERNAME = $env:COFFEESHOP_E2E_MANAGER_USERNAME
 $env:COFFEESHOP_MOBILE_TEST_MANAGER_PASSWORD = $env:COFFEESHOP_E2E_PASSWORD
+$baristaPath = Join-Path $ResultsDirectory 'barista-fixture.json'
+$ordersPath = Join-Path $ResultsDirectory 'orders-fixture.json'
 $courierPath = Join-Path $ResultsDirectory 'courier-fixture.json'
-$courierSession = Invoke-RestMethod -Method Post -Uri "$env:COFFEESHOP_MOBILE_TEST_API_BASE_URL/auth/login" -ContentType 'application/json' -Body (@{
-    username = $env:COFFEESHOP_E2E_DELIVERYSTAFF_USERNAME; password = $env:COFFEESHOP_E2E_PASSWORD
-} | ConvertTo-Json)
-$env:COFFEESHOP_MOBILE_TEST_COURIER_NAME = $courierSession.user.fullName
+$qualityPath = Join-Path $ResultsDirectory 'quality-fixture.json'
+& "$PSScriptRoot/barista-fixture.ps1" -Action Seed -FixturePath $baristaPath
+& "$PSScriptRoot/cashier-manager-fixture.ps1" -Action Seed -FixturePath $ordersPath
 & "$PSScriptRoot/courier-fixture.ps1" -Action Seed -FixturePath $courierPath
+$env:COFFEESHOP_MOBILE_TEST_MANAGER_USERNAME = $env:COFFEESHOP_E2E_ADMIN_USERNAME
+& "$PSScriptRoot/quality-fixture.ps1" -Action Seed -FixturePath $qualityPath
+# Other seeders insert confirmed orders into the sorted preparation queue.
+# Locate only after all fixtures exist so a page boundary cannot stale the index.
+$env:COFFEESHOP_MOBILE_TEST_MANAGER_USERNAME = $env:COFFEESHOP_E2E_MANAGER_USERNAME
+& "$PSScriptRoot/barista-fixture.ps1" -Action Locate -FixturePath $baristaPath
+$barista = Get-Content -LiteralPath $baristaPath -Raw | ConvertFrom-Json
+$orders = Get-Content -LiteralPath $ordersPath -Raw | ConvertFrom-Json
 $courier = Get-Content -LiteralPath $courierPath -Raw | ConvertFrom-Json
+$quality = Get-Content -LiteralPath $qualityPath -Raw | ConvertFrom-Json
+$env:MAESTRO_ORDER_NUMBER = $barista.orderNumber
+$env:MAESTRO_QUEUE_PAGE_SKIP = "$($barista.queuePageSkip)"
+$env:MAESTRO_BARISTA_ADDON = $barista.addonName
+$env:MAESTRO_PAYMENT_ORDER = $orders.paymentOrder
+$env:MAESTRO_CANCEL_ORDER = $orders.cancelOrder
+$env:MAESTRO_DELIVERY_ORDER = $orders.deliveryOrder
+$env:MAESTRO_COURIER_NAME = $orders.courierName
 $env:MAESTRO_DELIVERED_ORDER = $courier.deliveredOrder
 $env:MAESTRO_FAILED_ORDER = $courier.failedOrder
-$env:MAESTRO_RETIRED_RECORD_ID = '00000000-0000-0000-0000-000000000186'
+$env:MAESTRO_RETIRED_RECORD_ID = $quality.ingredientId
+$env:MAESTRO_INGREDIENT = $quality.ingredientName
+$env:MAESTRO_OFFLINE_INGREDIENT = $quality.offlineName
+$env:MAESTRO_RECEIPT = $quality.receiptNumber
+$env:MAESTRO_TARGET_NAME = $quality.targetName
 $results = @()
 $serverVerified = $false
 try {
@@ -62,7 +86,11 @@ try {
         if ($name -eq 'offline') { & adb shell cmd connectivity airplane-mode disable | Out-Null }
     }
     $env:COFFEESHOP_MOBILE_TEST_MANAGER_USERNAME = $env:COFFEESHOP_E2E_MANAGER_USERNAME
+    & "$PSScriptRoot/barista-fixture.ps1" -Action Verify -FixturePath $baristaPath
+    & "$PSScriptRoot/cashier-manager-fixture.ps1" -Action Verify -FixturePath $ordersPath
     & "$PSScriptRoot/courier-fixture.ps1" -Action Verify -FixturePath $courierPath
+    $env:COFFEESHOP_MOBILE_TEST_MANAGER_USERNAME = $env:COFFEESHOP_E2E_ADMIN_USERNAME
+    & "$PSScriptRoot/quality-fixture.ps1" -Action Verify -FixturePath $qualityPath
     $serverVerified = $true
 } finally {
     & adb shell cmd connectivity airplane-mode disable | Out-Null

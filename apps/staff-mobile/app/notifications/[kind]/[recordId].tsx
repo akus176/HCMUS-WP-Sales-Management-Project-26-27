@@ -1,7 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 
+import { PreparationScreen } from '../../../src/barista/PreparationScreen';
 import { DeliveryDetail } from '../../../src/features/delivery/DeliveryDetail';
 import { notificationDestination } from '../../../src/notifications/destination';
+import { LowStockRecord } from '../../../src/notifications/LowStockRecord';
 import { PermissionBoundary } from '../../../src/shell/PermissionBoundary';
 import {
   ShellPageHeader,
@@ -19,6 +21,7 @@ export default function NotificationRecordRoute() {
       <ShellPageHeader
         backLabel="Back to staff home"
         onBack={() => router.replace('/session')}
+        hideDuringDetail={target?.kind === 'urgent-order'}
       />
       {target ? (
         <PermissionBoundary
@@ -27,8 +30,20 @@ export default function NotificationRecordRoute() {
           requiredPermission={target.permission}
           {...access}
         >
-          {() => {
-            return <DeliveryDetail orderId={target.recordId} />;
+          {(user) => {
+            switch (target.kind) {
+              case 'assignment':
+                return <DeliveryDetail orderId={target.recordId} />;
+              case 'low-stock':
+                return <LowStockRecord id={target.recordId} />;
+              case 'urgent-order':
+                return (
+                  <PreparationScreen
+                    key={target.recordId}
+                    ticketId={target.recordId}
+                  />
+                );
+            }
           }}
         </PermissionBoundary>
       ) : (

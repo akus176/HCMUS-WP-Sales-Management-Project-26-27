@@ -1,4 +1,4 @@
-# Delivery staff mobile development
+# Staff mobile development
 
 Strict TypeScript, Expo SDK 58, React Native 0.88, and Expo Router. The public
 starter links to staff sign-in. An authenticated session screen supports sign-out;
@@ -251,43 +251,46 @@ while offline/reconnecting, rejects before sending, never pauses/replays a write
 and refreshes server data after success or a `409` conflict. See [#145 evidence](../../docs/evidence/mobile-connectivity-145/README.md)
 for the test cases and native verification limits.
 
-## Delivery-only application scope
+## Permission-aware shell (#144)
 
-The mobile app exposes **Today · Deliveries · More**. More contains only Account,
-with the signed-in profile, connection details and sign-out. Delivery work requires
-`delivery.update`; role names never grant access. A signed-in account without that
-permission gets a clear access message and can still sign out from Account.
+After sign-in, `/session` lists only modules permitted by effective API permission
+codes. Role names are never authorization inputs. `/modules/[module]` rechecks
+`/api/v1/auth/me` before mounting module content, including on route focus and app
+resume. Unknown routes, malformed/cross-account responses and missing grants fail
+closed. Failed checks offer retry without displaying protected content. The API
+remains authoritative for every later business request.
 
-Today shows the active assignment count and a shortcut to continue a delivery.
-It shares the active-page query cache with Deliveries, so changing tabs does not
-repeat unchanged requests. Counts describe active jobs, without claiming a
-completed-today metric that the current API does not provide.
+The Preparation module now hosts the #155 barista workflow described below.
+Other modules still label their business screens/actions **planned**.
+The home also checks current server permissions before displaying navigation,
+including when a previously empty home regains focus or the app resumes.
+Home verification uses an explicit scope, so `/modules/home` is not a valid module.
 
-Deliveries contains active assignments and completed/failed history. Active
-records provide recipient/contact/address details, a call-customer button,
-directions, and server-confirmed start/complete/fail actions. Cancellation of a
-confirmation sends no write; offline changes are never queued. Only the assigned
-courier may read private details or change an assignment.
+The permission-aware shell uses these shared controls and preserves the sign-in
+palette. Its scrollable phone/tablet layout, scalable text, accessible labels,
+48-dp action targets, and focus/selection feedback are covered by the #140
+foundation and the #144 shell integration evidence.
 
-Preparation, Orders/payments, Stock/purchase receipts, discounts, manager order
-operations and staff administration are not exposed in mobile. Old module links
-fail closed and old preparation, inventory and approval notification payloads
-are rejected. Shared legacy workflow components and permission metadata remain
-available to isolated regression tests; they do not grant app navigation access.
-The backend and Windows workflows are unchanged.
+`npm test` includes the six-backend-role policy matrix, module action filtering,
+real-router deep links, revocation, permission-check failures, terminal sessions,
+background/resume and late-response checks. [Evidence and remaining verification](../../docs/evidence/mobile-shell-144/README.md) distinguish browser visual fixtures
+from native Android checks. Required reviewer: @vt-Toan. Contributor: @akus176
+(with Codex assistance); the existing ticket owner remains @JakeConal.
 
-Assignment push notifications and authenticated live updates remain supported.
-A durable alerts inbox, shift tracking and earnings require separate product/API
-work and are not represented by placeholder screens.
+## Barista preparation (#155)
 
-## Validation workflow
+Open the **Preparation** bottom tab with `orders.fulfill`. More contains only **Account**; staff administration is available from Account when permitted. Discount approvals, their home summary and approval notification destinations are no longer part of the mobile app. Cancellation and delivery-assignment controls remain in authorized order details. The queue filters
+confirmed/preparing tickets and paginates ten tickets at a time. Open a ticket
+to inspect its items, sizes, quantities, add-ons and table. **Start preparing**
+and **Mark ready** each require confirmation and a successful service response.
+Success and conflicts refresh authoritative data; a ticket that has left the
+queue exposes no further action. Shared connectivity feedback and manual refresh
+remain available, while offline/reconnecting writes are disabled and never queued.
 
-For this delivery-only follow-up, the owner requested GitHub CI instead of local
-test execution. Updated regression cases cover the delivery-only shell, retired
-routes, permission revocation, shared assignment caching and phone launch behavior.
-No new local test or native acceptance result is claimed.
+The feature uses the generated API client, permission boundary, shared controls
+and in-memory TanStack Query cache. It adds no backend transitions, database
+access, persistent business storage or live-event subscription.
 
-The active native suite uses DeliveryStaff accounts for session, courier outcome
-and retired-link checks. Manager/Admin credentials are used only by disposable
-API fixture setup where required. Historical native evidence and unused legacy
-flow files describe earlier app scopes, not the current navigation.
+Run `npm run check` for automated coverage. The opt-in Android flow is
+`npm run test:e2e:barista`; its disposable API fixture, exact setup, executed
+results and remaining emulator acceptance gate are in [#155 evidence](../../docs/evidence/mobile-barista-155/README.md).

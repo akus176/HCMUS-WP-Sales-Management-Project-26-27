@@ -61,6 +61,7 @@
     "test:accessibility": "jest --runInBand tests/accessibility.test.tsx",
     "test:e2e:suite": "pwsh -NoProfile -File scripts/verify-android-suite.ps1",
     "test:inventory-harness": "node --test scripts/inventory-forwarder.test.mjs",
+    "test:e2e:inventory": "node --env-file-if-exists=.env.inventory.local scripts/verify-android-inventory.mjs",
     "test:workflow-harness": "node --test scripts/workflow-forwarder.test.mjs",
     "test:e2e:workflows": "node --env-file-if-exists=.env.workflows.local scripts/verify-android-workflows.mjs",
     "test:unit": "jest --runInBand tests/session.test.ts tests/secure-storage.test.ts tests/environment.test.ts",
@@ -70,8 +71,14 @@
     "test:e2e:android": "maestro test --format junit --output .maestro/results/junit.xml .maestro/starter.yaml",
     "pretest:e2e:session": "npm run pretest:e2e:android",
     "test:e2e:session": "maestro test --format junit --output .maestro/results/session.xml .maestro/session.yaml",
+    "pretest:e2e:barista": "npm run pretest:e2e:android",
+    "test:e2e:barista": "maestro test --format junit --output .maestro/results/barista.xml .maestro/barista.yaml",
     "pretest:e2e:courier": "npm run pretest:e2e:android",
     "test:e2e:courier": "maestro test --format junit --output .maestro/results/courier.xml .maestro/courier.yaml",
+    "pretest:e2e:cashier": "npm run pretest:e2e:android",
+    "test:e2e:cashier": "maestro test --format junit --output .maestro/results/cashier.xml .maestro/cashier.yaml",
+    "pretest:e2e:manager-orders": "npm run pretest:e2e:android",
+    "test:e2e:manager-orders": "maestro test --format junit --output .maestro/results/manager-orders.xml .maestro/manager-orders.yaml",
     "check": "npm run type-check && npm run lint && npm run format:check && npm test && npm run test:inventory-harness && npm run test:workflow-harness"
   }
 }

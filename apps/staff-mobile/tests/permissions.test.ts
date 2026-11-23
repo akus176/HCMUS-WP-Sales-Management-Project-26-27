@@ -1,7 +1,4 @@
-import {
-  isWorkspaceAllowed,
-  navigationFor,
-} from '../src/shell/navigationPolicy';
+import { navigationFor } from '../src/shell/navigationPolicy';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
@@ -129,33 +126,16 @@ test('matches all six actual backend seed bundles', () => {
   }
 });
 
-test('the mobile delivery scope excludes every other staff workflow', () => {
-  const broad = [
-    'orders.create',
-    'orders.fulfill',
-    'inventory.manage',
-    'discounts.approve',
-    'orders.cancel',
-    'users.manage',
-    'delivery.update',
-  ];
-  expect(navigationFor(broad).map(({ label }) => label)).toEqual([
-    'Today',
-    'Deliveries',
-    'More',
-  ]);
-  for (const workspace of [
-    'barista',
-    'cashier',
-    'inventory',
-    'administration',
-    'approvals',
-    'operations',
-  ])
-    expect(isWorkspaceAllowed(workspace, broad)).toBe(false);
-  expect(navigationFor(['orders.fulfill']).map(({ label }) => label)).toEqual([
-    'Today',
-    'More',
-  ]);
-  expect(isWorkspaceAllowed('delivery', [])).toBe(false);
+test('manager navigation gives Preparation its own tab and does not expose discount approvals', () => {
+  expect(
+    navigationFor([
+      'orders.create',
+      'orders.fulfill',
+      'inventory.manage',
+      'discounts.approve',
+      'orders.cancel',
+    ]).map(({ label }) => label),
+  ).toEqual(['Today', 'Orders', 'Stock', 'Preparation', 'More']);
+  expect(findModule('approvals')).toBeUndefined();
+  expect(permittedModules(['discounts.approve'])).toEqual([]);
 });

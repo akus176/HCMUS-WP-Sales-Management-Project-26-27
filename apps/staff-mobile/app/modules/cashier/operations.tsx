@@ -1,20 +1,21 @@
 import { router } from 'expo-router';
-import {
-  ShellPage,
-  ShellPageHeader,
-  ShellStatus,
-} from '../../../src/shell/controls';
 
-/** Retired staff-workflow links never load operational data. */
-export default function RetiredOperationsScreen() {
+import { OrdersScreen } from '../../../src/features/orders/OrdersScreen';
+import { PermissionBoundary } from '../../../src/shell/PermissionBoundary';
+import { ShellPageHeader, ShellPage } from '../../../src/shell/controls';
+import { useRouteAccess } from '../../../src/shell/useRouteAccess';
+
+export default function ManagerOrdersScreen() {
+  const access = useRouteAccess();
   return (
     <ShellPage>
       <ShellPageHeader
-        title="Page unavailable"
-        backLabel="Back to Today"
+        backLabel="Back to staff home"
         onBack={() => router.replace('/session')}
       />
-      <ShellStatus>This page is not available in the delivery app.</ShellStatus>
+      <PermissionBoundary moduleId="operations" {...access}>
+        {(user) => <OrdersScreen user={user} manager />}
+      </PermissionBoundary>
     </ShellPage>
   );
 }

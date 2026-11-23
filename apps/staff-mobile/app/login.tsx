@@ -9,7 +9,6 @@ import {
   ShellHeading,
   ShellInput,
   ShellPage,
-  ShellText,
 } from '../src/shell/controls';
 
 export default function LoginScreen() {
@@ -43,7 +42,6 @@ export default function LoginScreen() {
   return (
     <ShellPage>
       <ShellHeading>Staff sign-in</ShellHeading>
-      <ShellText>Sign in with your delivery staff account.</ShellText>
       {!client ? (
         <ShellFeedback
           kind="error"

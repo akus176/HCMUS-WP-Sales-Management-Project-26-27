@@ -2,7 +2,7 @@ param(
     [Parameter(Mandatory)][ValidateSet('before', 'after')][string]$Stage,
     [Parameter(Mandatory)][string]$DeviceSerial,
     [string[]]$Profiles = @('p100', 'p200', 't100', 't200'),
-    [string[]]$RoleNames = @('delivery'),
+    [string[]]$RoleNames = @('manager', 'admin', 'inventory', 'delivery'),
     [ValidateSet('queue', 'detail')][string]$ReferencePhase = 'queue',
     [string]$ResultsDirectory = '.maestro/results/usability',
     [string]$AppId = 'com.coffeeshop.staffmobile'
@@ -49,7 +49,12 @@ $taskOriginalDensity = (& adb -s $DeviceSerial shell wm density | Out-String).Tr
 $taskOriginalFont = (& adb -s $DeviceSerial shell settings get system font_scale | Out-String).Trim()
 $taskOriginalNight = (& adb -s $DeviceSerial shell cmd uimode night | Out-String).Trim()
 $taskRoles = @(
-    @{ name = 'delivery'; role = 'DeliveryStaff'; flow = 'delivery' }
+    @{ name = 'manager'; role = 'Manager'; flow = $(if ($Stage -eq 'before') { 'before' } else { 'manager' }) },
+    @{ name = 'admin'; role = 'Admin'; flow = 'admin' },
+    @{ name = 'inventory'; role = 'InventoryStaff'; flow = 'inventory' },
+    @{ name = 'delivery'; role = 'DeliveryStaff'; flow = 'delivery' },
+    @{ name = 'concept'; role = 'Manager'; flow = 'concept' }
+    @{ name = 'mockup'; role = 'Manager'; flow = 'native-mockup' }
 )
 $taskRoles = @($taskRoles | Where-Object { $_.name -in $RoleNames })
 if (!$taskRoles.Count) { throw 'Select at least one known audit role.' }
