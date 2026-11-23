@@ -6,11 +6,21 @@ See proposal.md for motivation. The existing Expo Router shell has permission ch
 
 The 2026-11-22 [mobile concept pack](../../../docs/ui-concepts/mobile-2026-11-22/README.md) supplies the remaining visual target. Use the Queue ledger for Preparation and Ticket focus for detail/ready confirmation. The Paper ticket stack remains an alternative exploration; do not implement both queue presentations or a mode switch. Other mobile workflows retain the completed shared polish and regression coverage, without inventing unillustrated concept screens.
 
+## Approved revision (2026-11-23)
+
+The editable mockup at `docs/ui-concepts/mobile-native-reorganization` is now the visual source of truth. The user explicitly requested implementation. Its Inter typography, original vector icons, white cards, 20dp page padding, 12dp corners and native tab navigation supersede conflicting visual rules in the earlier concept contract below. Retain those earlier sections as historical design rationale only where they remain compatible.
+
+Use Inter Regular/Medium/SemiBold, background #faf8f4, white surfaces, ink #302820, cocoa #6d4936, border #e6e0d6 and selection #eee8df. Metadata is 13sp, body 16sp and headings 24sp. Keep text scaling and 48dp controls. Use the original mockup paths through Expo-compatible react-native-svg.
+
+Derive tabs from effective permissions rather than role names. Broad access receives Today, Orders/another primary workspace, Stock/another permitted primary workspace and More. Narrow access receives Home, its permitted workspaces and Account. Cache mounted workspace state with React Activity, hide inactive content from accessibility, recheck permissions before revealing it and discard revoked trees. Normalize legacy module links only after their permission gate passes. Account owns connection details and confirmed sign-out. Normal online status does not occupy a masthead; degraded connection/live-update notices remain in scrollable page content.
+
+Open records directly without mutations. Preserve bounded order results, complete search, filters, paging and detail-return state. Use keyboard-aware, safe-area bottom sheets for payment entry, stock adjustment, receipt posting, preparation and business confirmations. Canceled reviews send no business writes. Retry IDs, API validation and online guards remain unchanged.
+
 ## Goals / Non-Goals
 
 **Goals:** align the preparation queue/detail with the selected planning references; expose working content sooner; preserve enlarged text and 48dp controls; make detail transitions and form feedback predictable; distinguish confirmed writes from refresh and transport uncertainty; verify the changed native experience with Maestro and matched-state captures.
 
-**Non-Goals:** new business actions, role changes, bottom-tab navigation, the desktop serif/gold theme, an additional paper-stack queue mode, a dark palette, new application dependencies or E2E frameworks, generic transport retries or a production deployment. Per-item checkboxes/completion, swipe-only actions, drag-and-drop priority, undo, timers and analytics are not implied by the art.
+**Non-Goals:** new business actions, role changes, the desktop serif/gold theme, an additional paper-stack queue mode, a dark palette, new E2E frameworks, generic transport retries or a production deployment. Per-item checkboxes/completion, swipe-only actions, drag-and-drop priority, undo, timers and analytics are not implied by the art.
 
 ## Decisions
 

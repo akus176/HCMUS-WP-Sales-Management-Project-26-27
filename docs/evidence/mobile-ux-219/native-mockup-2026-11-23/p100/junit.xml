@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="99.99" timestamp="2026-11-23T15:07:07">
+    <testcase id="Native mockup navigation and canceled confirmations" name="Native mockup navigation and canceled confirmations" classname="Native mockup navigation and canceled confirmations" file="\\wsl.localhost\Ubuntu\home\hieu_nguyen\dev\personal\sales-management\apps\staff-mobile\.maestro\usability\native-mockup.yaml" time="99.939" timestamp="2026-11-23T15:07:07" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

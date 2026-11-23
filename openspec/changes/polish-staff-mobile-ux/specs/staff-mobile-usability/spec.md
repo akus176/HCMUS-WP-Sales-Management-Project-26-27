@@ -5,7 +5,7 @@ Help staff reach operational records and complete existing workflows efficiently
 ## ADDED Requirements
 
 ### Requirement: Mobile concept visual contract
-The application SHALL align Preparation with the ledger queue and focused ticket concepts in `docs/ui-concepts/mobile-2026-11-22`, retaining the mobile warm-paper palette and bundled Kalam/Patrick Hand fonts. Explicit design rules SHALL resolve raster ambiguities.
+The application SHALL align Preparation with the ledger queue and focused ticket concepts in `docs/ui-concepts/mobile-2026-11-22`, using the approved native mockup palette and bundled Inter fonts. Explicit design rules SHALL resolve raster ambiguities.
 
 #### Scenario: Scope the alternative queue art
 - **WHEN** implementation scope is derived from the concept pack
@@ -14,11 +14,11 @@ The application SHALL align Preparation with the ledger queue and focused ticket
 
 #### Scenario: Compare the implemented reference state
 - **WHEN** the queue or ticket detail is captured at a 390×844dp content viewport and normal text scale with equivalent seeded data
-- **THEN** the capture is compared side by side with the corresponding concept for header hierarchy, ruled rows, typography, palette, spacing, selected state, add-on emphasis and confirmation placement
+- **THEN** the capture is compared side by side with the corresponding concept for header hierarchy, white record cards, typography, palette, spacing, selected state, add-on emphasis and confirmation placement
 - **AND** comparison excludes native OS chrome without distorting the image, records source/reference revisions and resolves material deviations before acceptance
 
 ### Requirement: Ledger preparation queue
-The application SHALL present existing preparation tickets as open ruled rows with live order number, textual status, item count, table or channel context and an item preview. It SHALL retain All active, Confirmed and Preparing filters, refresh, pagination and a labeled Staff home return. It SHALL expose an accessible selected-row state and a single primary action that opens the selected ticket without mutating it.
+The application SHALL present existing preparation tickets as directly openable white record cards with live order number, textual status, item count, table or channel context and an item preview. It SHALL retain All active, Confirmed and Preparing filters, refresh, pagination and permission-derived bottom navigation. It SHALL open a ticket directly through its record-specific accessible action without mutating it.
 
 #### Scenario: Select and open a ticket
 - **WHEN** a permitted staff member selects an active ticket
@@ -30,7 +30,7 @@ The application SHALL present existing preparation tickets as open ruled rows wi
 - **THEN** the obsolete selection is cleared and opening is disabled until another valid ticket is selected
 
 ### Requirement: Focused ticket detail and confirmation
-The application SHALL present quantity, item name, size and add-ons in readable rows with highlighted add-on text, current order state, labeled Preparation return and refresh. It SHALL retain both start-preparing and ready confirmation flows, with an inline ready-confirmation area offering Confirm ready and Keep preparing. It MUST retain server-confirmed, permission-checked, online-only writes.
+The application SHALL present quantity, item name, size and add-ons in readable rows with highlighted add-on text, current order state, labeled Preparation return and refresh. It SHALL retain both start-preparing and ready confirmation flows, with a scrollable ready-confirmation sheet offering Confirm ready and Keep preparing. It MUST retain server-confirmed, permission-checked, online-only writes.
 
 #### Scenario: Dismiss ready confirmation
 - **WHEN** a preparing ticket's ready confirmation is open and staff choose Keep preparing
@@ -143,3 +143,16 @@ The change SHALL extend the existing Maestro CLI Android YAML flows and npm runn
 - **WHEN** automated native behavior passes
 - **THEN** matched-state concept captures and small-phone/tablet checks at normal/200% text, light/dark system appearance with the light-only app, keyboard reachability, safe areas, measured touch targets and manual TalkBack traversal are reviewed separately
 - **AND** a Maestro pass alone does not establish visual acceptance or named-reviewer approval
+
+### Requirement: Approved native app shell
+The application SHALL apply `docs/ui-concepts/mobile-native-reorganization` with bundled Inter, the original vector artwork, white cards and permission-derived tabs. These rules supersede conflicting historical visual and selected-queue requirements above. Existing business and access guarantees SHALL remain effective.
+
+#### Scenario: Switch workspaces and return
+- **WHEN** a staff member switches between permitted tabs and returns
+- **THEN** search, filter and detail state remain available after a fresh permission check
+- **AND** revoked workspaces disappear and cannot load operational data
+
+#### Scenario: Cancel a reviewed action
+- **WHEN** staff close a payment, preparation, inventory, delivery, discount or sign-out confirmation
+- **THEN** no corresponding write is submitted
+- **AND** the previous record remains reachable with scalable text and safe-area-aware controls
