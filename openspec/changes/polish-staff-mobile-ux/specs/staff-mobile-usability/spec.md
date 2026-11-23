@@ -170,3 +170,16 @@ Local workspace changes SHALL reuse the verified session and loaded data without
 - **THEN** its title and primary section controls remain available
 - **AND** search fields reflow into scrolling content when enlarged text or a short viewport needs the space
 - **AND** receipts and movements render in batches while Show more preserves access to all returned records
+
+### Requirement: Consistent back and refresh header actions
+Every page that exposes back or manual refresh SHALL place those actions in its fixed header, with back to the left of the title and refresh to the right. Icon actions SHALL retain specific accessible names, visible focus, at least 48dp touch targets, and their disabled/loading behavior. Workflow sheets SHALL own their header actions independently of the page underneath.
+
+#### Scenario: Review a record and return
+- **WHEN** a staff member opens an order, preparation ticket, ingredient, receipt, discount, delivery or staff account
+- **THEN** its applicable back and refresh controls appear in the header rather than as full-width actions among records
+- **AND** returning restores the list header without duplicate or stale actions
+
+#### Scenario: Open a manager workflow sheet
+- **WHEN** a manager opens order operations from Approvals and views an order
+- **THEN** the sheet displays its own back and refresh header actions
+- **AND** closing the sheet restores the Approvals header without changing the page's navigation state
