@@ -51,6 +51,7 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
     public string Message { get; private set; } = "Load the menu and choose an operator to start a ticket.";
     public bool CanEdit => !IsBusy && !RequiresReload && Order is null;
     public bool CanConfirm => !IsBusy && !RequiresReload && Order?.Status == OrderStatus.Draft;
+    public bool CanManageTables => api?.CanManageTables == true;
     public bool IsEmpty => !IsBusy && Error is null && Menu.Count == 0;
     public WorkflowFeedback Feedback => WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
 
@@ -88,6 +89,19 @@ public sealed class PosWorkspace(IServiceScopeFactory scopes, CustomerOrderConte
             ? "Choose a drink, size and optional toppings. Save the draft to review exact snapshots and totals. Showing up to 200 matches; narrow the search for more."
             : $"Ticket reloaded: {Order.Status}. Review the current total before confirming.";
     });
+
+    public Task CreateTableAsync(string number, int seats)
+    {
+        if (!CanManageTables || api is null) return Task.CompletedTask;
+        return RunAsync(async _ =>
+        {
+            var created = await api.CreateTableAsync(number, seats);
+            Options = await api.OptionsAsync();
+            if (Order is null && !RequiresReload && Options.Tables.Any(table => table.Id.Value == created.Id))
+                TableId = new EntityId(created.Id);
+            Message = $"Table {created.TableNumber} created. Available tables are up to date.";
+        });
+    }
 
     public void UseCustomerSelection()
     {

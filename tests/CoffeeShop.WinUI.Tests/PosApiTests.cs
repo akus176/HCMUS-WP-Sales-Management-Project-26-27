@@ -12,6 +12,69 @@ namespace CoffeeShop.WinUI.Tests;
 public sealed class PosApiTests
 {
     [Fact]
+    public async Task ManagerCreatesTable_AndCounterRefreshesAvailableSelection()
+    {
+        var user = new StaffSession(Guid.NewGuid(), "Test manager", ["Manager"], ["orders.create", "tables.manage"]);
+        var session = new StaffSessionManager(new Identity(user), new Store());
+        await session.LoginAsync("fixture", "fixture");
+        var tableId = Guid.NewGuid();
+        var tables = new List<PosTableResponse>();
+        var posts = new List<(string? Bearer, CreateTableRequest Body)>();
+        using var http = new HttpClient(new Handler(async request =>
+        {
+            var path = request.RequestUri!.AbsolutePath;
+            if (path == "/api/v1/tables")
+            {
+                var body = (await request.Content!.ReadFromJsonAsync<CreateTableRequest>())!;
+                posts.Add((request.Headers.Authorization?.Parameter, body));
+                var row = new PosTableResponse(tableId, body.TableNumber!.Trim(), body.Seats, false, null);
+                tables.Add(row);
+                return new HttpResponseMessage(HttpStatusCode.Created) { Content = JsonContent.Create(row) };
+            }
+            object result = path switch
+            {
+                "/api/v1/menu-items" => Array.Empty<MenuItemResponse>(),
+                "/api/v1/categories" => Array.Empty<CategoryResponse>(),
+                "/api/v1/pos/tables" => tables.ToArray(),
+                _ => throw new InvalidOperationException($"Unexpected route {path}"),
+            };
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(result) };
+        }))
+        { BaseAddress = new Uri("https://example.test/api/v1/") };
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var actor = new PosOperatorSession(() => session.CurrentUser);
+        var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new CustomerOrderContext(), actor,
+            new ApiPosSource(new AuthenticatedApiClient(http, session), session));
+
+        await model.LoadAsync();
+        Assert.True(model.CanManageTables);
+        await model.CreateTableAsync(" T12 ", 4);
+
+        Assert.Null(model.Error);
+        Assert.Equal("T12", Assert.Single(model.Options.Tables).TableNumber);
+        Assert.Equal(tableId, model.TableId!.Value);
+        Assert.Equal("fixture-access", Assert.Single(posts).Bearer);
+    }
+
+    [Fact]
+    public async Task CashierCannotCreateTableFromCounter()
+    {
+        var user = new StaffSession(Guid.NewGuid(), "Test cashier", ["Cashier"], ["orders.create"]);
+        var session = new StaffSessionManager(new Identity(user), new Store());
+        await session.LoginAsync("fixture", "fixture");
+        using var http = new HttpClient(new Handler(_ => throw new InvalidOperationException("No table write expected")))
+        { BaseAddress = new Uri("https://example.test/api/v1/") };
+        using var services = new ServiceCollection().BuildServiceProvider();
+        var model = new PosWorkspace(services.GetRequiredService<IServiceScopeFactory>(), new CustomerOrderContext(),
+            new PosOperatorSession(() => session.CurrentUser),
+            new ApiPosSource(new AuthenticatedApiClient(http, session), session));
+
+        Assert.False(model.CanManageTables);
+        await model.CreateTableAsync("T1", 2);
+        Assert.Empty(model.Options.Tables);
+    }
+
+    [Fact]
     public async Task DraftAndConfirmation_UseAuthenticatedHttpWithoutDirectHandlers()
     {
         var categoryId = Guid.NewGuid();

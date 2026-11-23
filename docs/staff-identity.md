@@ -24,6 +24,8 @@ This idempotently creates six operational role bundles and their explicit permis
 dotnet run --project src/CoffeeShop.Api -- --provision-staff
 ```
 
+Run the role-seed command again after deploying table creation (#229) to grant `tables.manage` to existing Admin and Manager roles. Cashiers retain `orders.create` for table selection but cannot create tables. No schema migration or account reprovisioning is required for this grant.
+
 Roles are comma-separated exact codes: `Admin`, `Manager`, `Cashier`, `Barista`, `InventoryStaff`, `DeliveryStaff`. Provisioning requires a 12–1024-character password, hashes it with ASP.NET Core's versioned salted PBKDF2 password hasher, and refuses to overwrite an existing username/email. Remove the provisioning password from the environment afterward. This is a local operator provisioning path; account administration and final-administrator protection remain Windows task 10.6.
 
 ## Implemented HTTP contract
@@ -39,6 +41,8 @@ All paths have prefix `/api/v1` and return RFC 7807 failures.
 | POST `/auth/logout-all` | No body → 204 | Bearer token; account derived from caller |
 
 Existing category writes require `menu.manage`. All named operational permission policies are registered for subsequent workflow endpoints. Admin and manager can manage the menu; cashier, barista, inventory, and delivery roles cannot. Barista preparation uses the existing Application permission `orders.fulfill`, rather than granting cashier order-creation rights. Role bundles are explicit in `StaffRoleSeed.Bundles`; multi-role accounts receive their permission union. Neither client-side role names nor caller-supplied permission fields are trusted.
+
+`POST /tables` accepts `{ "tableNumber": "T12", "seats": 4 }` and returns the new available table (201). It requires `tables.manage`; invalid inputs return 400, and a duplicate table number returns 409. Counter refreshes the shared table list and selects the new table for an unsaved dine-in ticket. `GET /pos/tables` remains available to staff with `orders.create`.
 
 Refresh, login, and logout serialize through a PostgreSQL user-row lock. Two requests presenting the same refresh token cannot both rotate successfully: the second observes revocation, rejects reuse, and revokes the successor family. Independent login sessions remain separate families. Security audits contain event type, account identifier where available, time, outcome, and remote IP. Persistence also records account-state and role-assignment changes with identifier-only metadata, in the same save as the change. Passwords and raw tokens are never audit fields.
 

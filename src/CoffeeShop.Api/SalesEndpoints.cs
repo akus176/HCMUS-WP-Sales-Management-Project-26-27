@@ -80,6 +80,15 @@ public static class SalesEndpoints
 
         api.MapGet("/tables", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
             Results.Ok(await handler.GetTablesAsync(ct))).RequireAuthorization("orders.create");
+        api.MapPost("/tables", async (CreateTableRequest request, TableManagementCommandHandler handler, CancellationToken ct) =>
+        {
+            var result = await handler.CreateAsync(new(request.TableNumber, request.Seats), ct);
+            return result.IsSuccess
+                ? Results.Json(new PosTableResponse(result.Value.Id.Value, result.Value.TableNumber, result.Value.Seats,
+                    result.Value.IsOccupied, result.Value.ActiveOrderId?.Value), statusCode: 201)
+                : ApiErrorResults.From(result.Error!);
+        }).RequireAuthorization("tables.manage").Produces<PosTableResponse>(201)
+            .ProducesProblem(400).ProducesProblem(401).ProducesProblem(403).ProducesProblem(409);
         api.MapGet("/pos/tables", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
             Results.Ok((await handler.GetTablesAsync(ct)).Select(table => new PosTableResponse(table.Id.Value,
                 table.TableNumber, table.Seats, table.IsOccupied, table.ActiveOrderId?.Value)).ToArray()))
