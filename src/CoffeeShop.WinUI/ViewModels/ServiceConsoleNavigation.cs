@@ -1,6 +1,6 @@
 namespace CoffeeShop.WinUI.ViewModels;
 
-public enum ServiceConsoleWorkspace { Counter, ServiceBoard, Menu, StockRoom, Customers, Reports }
+public enum ServiceConsoleWorkspace { Counter, ServiceBoard, Menu, StockRoom, Customers, Reports, Accounts }
 public enum ServiceConsoleLayoutMode { Compact, Medium, Expanded }
 
 public sealed record ServiceConsoleDestination(string Tag, string Label, string Numeral, string Group, ServiceConsoleWorkspace Workspace);
@@ -18,6 +18,7 @@ public static class ServiceConsoleNavigation
             ["stock-room"] = ["inventory.manage", "inventory.receive", "inventory.adjust"],
             ["customers"] = ["customers.manage"],
             ["reports"] = ["reports.revenue", "reports.bestsellers", "reports.channels", "reports.lowstock"],
+            ["accounts"] = ["users.manage"],
         };
     public static IReadOnlyList<ServiceConsoleDestination> PrimaryDestinations { get; } = Array.AsReadOnly<ServiceConsoleDestination>(
     [
@@ -28,6 +29,8 @@ public static class ServiceConsoleNavigation
         new("customers", "Customers", "V", "Manage", ServiceConsoleWorkspace.Customers),
         new("reports", "Reports", "VI", "Insights", ServiceConsoleWorkspace.Reports),
     ]);
+    private static IReadOnlyList<ServiceConsoleDestination> AuthorizedDestinations { get; } =
+        [.. PrimaryDestinations, new("accounts", "Accounts", "VII", "Administration", ServiceConsoleWorkspace.Accounts)];
     public static IReadOnlyDictionary<string, string> StockSections { get; } =
         new System.Collections.ObjectModel.ReadOnlyDictionary<string, string>(new Dictionary<string, string>
         {
@@ -52,7 +55,7 @@ public static class ServiceConsoleNavigation
             _ when section is not null => "stock-room",
             _ => key,
         };
-        var destination = PrimaryDestinations.SingleOrDefault(item => item.Tag == primary)
+        var destination = AuthorizedDestinations.SingleOrDefault(item => item.Tag == primary)
             ?? throw new ArgumentException("Unknown service-console destination.", nameof(tag));
         return new(destination, section ?? (primary == "stock-room" ? "ingredients" : null));
     }
@@ -61,7 +64,7 @@ public static class ServiceConsoleNavigation
     {
         ArgumentNullException.ThrowIfNull(permissions);
         var effectivePermissions = permissions.ToHashSet(StringComparer.Ordinal);
-        return PrimaryDestinations
+        return AuthorizedDestinations
             .Where(destination => DestinationPermissions[destination.Tag].Any(effectivePermissions.Contains))
             .ToArray();
     }
