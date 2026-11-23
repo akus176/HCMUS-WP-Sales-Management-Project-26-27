@@ -8,6 +8,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CoffeeShop.WinUI.ViewModels;
 
+public sealed record ServiceBoardTableRow(string TableNumber, string Availability, string Association)
+{
+    public string AccessibilityLabel => Association == "No active order"
+        ? $"Table {TableNumber}, available"
+        : Association == "Order details unavailable"
+            ? $"Table {TableNumber}, occupied, order details unavailable"
+            : $"Table {TableNumber}, {Availability.ToLowerInvariant()}, order {Association}";
+}
+
 public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperatorSession session,
     ApiOperationsSource? api = null) : INotifyPropertyChanged
 {
@@ -35,6 +44,7 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public bool IsEmpty => !IsBusy && Error is null && Orders.Count == 0 && Tables.Count == 0;
     public bool HasOperator => session.IsAuthenticated;
     public bool ApiMode => api is not null;
+    public bool CanViewTables => !ApiMode || session.HasPermission("orders.create");
     public bool CanFulfill => !ApiMode || session.HasPermission("orders.fulfill");
     public bool CanComplete => !ApiMode || session.HasPermission("orders.complete");
     public bool CanRecordPayments => !ApiMode || session.HasPermission("payments.record");
@@ -43,6 +53,19 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public bool CanAssignDelivery => !ApiMode || session.HasPermission("delivery.assign");
     public bool CanUpdateDelivery => !ApiMode || session.HasPermission("delivery.update");
     public WorkflowFeedback Feedback => WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
+
+    public static IReadOnlyList<ServiceBoardTableRow> BuildTableRows(IEnumerable<OperationalTable> tables,
+        IEnumerable<OperationalOrder> orders)
+    {
+        var orderNumbers = orders.ToDictionary(order => order.Id, order => order.OrderNumber);
+        return tables.OrderBy(table => table.TableNumber, StringComparer.CurrentCultureIgnoreCase)
+            .Select(table => new ServiceBoardTableRow(table.TableNumber,
+                table.IsOccupied ? "Occupied" : "Available",
+                !table.IsOccupied ? "No active order"
+                    : table.ActiveOrderId is { } orderId && orderNumbers.TryGetValue(orderId, out var number)
+                        ? number : "Order details unavailable"))
+            .ToArray();
+    }
 
     public void EnableOperationalWorkflow() => session.EnableOperationalWorkflow();
 

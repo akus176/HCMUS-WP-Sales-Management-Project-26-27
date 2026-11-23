@@ -280,6 +280,16 @@ public sealed partial class OperationsPage : Page
         SummaryText.Text = active.Length == 0 ? "No active service work." :
             $"{active.Length} active tickets · Select a note to manage its order";
         EmptyText.Visibility = !model.IsBusy && active.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        TableOverview.Visibility = model.CanViewTables ? Visibility.Visible : Visibility.Collapsed;
+        var tableRows = OperationsWorkspace.BuildTableRows(model.Tables, model.Orders);
+        TableList.ItemsSource = tableRows;
+        var occupiedTables = tableRows.Count(table => table.Availability == "Occupied");
+        TableSummary.Text = $"{tableRows.Count} tables · {occupiedTables} occupied · {tableRows.Count - occupiedTables} available";
+        TableOverviewEmpty.Text = model.Error is null
+            ? "No dining tables are configured yet."
+            : "Table status is unavailable. Refresh the board to try again.";
+        TableOverviewEmpty.Visibility = !model.IsBusy && tableRows.Count == 0
+            ? Visibility.Visible : Visibility.Collapsed;
         ConfirmedCount.Text = cards.Count(card => card.Status == "Confirmed").ToString(CultureInfo.CurrentCulture);
         PreparingCount.Text = cards.Count(card => card.Status == "Preparing").ToString(CultureInfo.CurrentCulture);
         ReadyCount.Text = cards.Count(card => card.Status == "Ready").ToString(CultureInfo.CurrentCulture);

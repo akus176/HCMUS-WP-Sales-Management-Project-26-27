@@ -41,6 +41,21 @@
                 </Grid>
             </controls:ConceptNote>
         </DataTemplate>
+        <DataTemplate x:Key="TableOverviewTemplate">
+            <Border MinWidth="160" MinHeight="88" Margin="0,0,10,10" Padding="12"
+                    Background="{StaticResource ConsoleRaisedGroundBrush}"
+                    BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1"
+                    AutomationProperties.Name="{Binding AccessibilityLabel}">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding TableNumber}" FontFamily="{StaticResource ConsoleSerifFont}"
+                               FontSize="18" Foreground="{StaticResource ConsoleInkBrush}" />
+                    <TextBlock Text="{Binding Availability}" Style="{StaticResource ConsoleLabelStyle}"
+                               Foreground="{StaticResource ConsoleAccentTextBrush}" />
+                    <TextBlock Text="{Binding Association}" Style="{StaticResource ConsoleBodyStyle}"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Border>
+        </DataTemplate>
         <DataTemplate x:Key="OrderLineTemplate">
             <Grid Padding="0,9" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" ColumnSpacing="8">
                 <Grid.ColumnDefinitions>
@@ -120,6 +135,29 @@
             <ProgressBar x:Name="LoadingBar" IsIndeterminate="True" Visibility="Collapsed" />
             <TextBlock x:Name="EmptyText" Text="No active orders. Confirm a ticket at Counter to start service." Visibility="Collapsed" />
             <TextBlock x:Name="OperatorHint" Text="Choose an operator above to move tickets or record payments." FontSize="13" Foreground="{StaticResource ConsoleAccentTextBrush}" TextWrapping="Wrap" />
+            <StackPanel x:Name="TableOverview" Spacing="6" AutomationProperties.Name="Dining table availability">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Tables" Style="{StaticResource ConsoleSectionTitleStyle}"
+                               AutomationProperties.HeadingLevel="Level2" />
+                    <TextBlock x:Name="TableSummary" Grid.Column="1" Style="{StaticResource ConsoleLabelStyle}"
+                               VerticalAlignment="Center" />
+                </Grid>
+                <ItemsControl x:Name="TableList" ItemTemplate="{StaticResource TableOverviewTemplate}"
+                              AutomationProperties.Name="Dining tables and current availability">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapGrid Orientation="Horizontal" MaximumRowsOrColumns="4" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+                <TextBlock x:Name="TableOverviewEmpty" Text="No dining tables are configured yet."
+                           Visibility="Collapsed" Style="{StaticResource ConsoleBodyStyle}"
+                           TextWrapping="Wrap" />
+            </StackPanel>
             <Grid x:Name="BoardLayout" ColumnSpacing="24" RowSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="NotesColumn" Width="*" />
