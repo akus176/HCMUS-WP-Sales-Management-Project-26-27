@@ -9,7 +9,7 @@ name: Removed discount links cannot expose a retired screen
     visible: This notification link is unavailable.
     timeout: 30000
 - assertNotVisible: Discount review
-- tapOn: Home
+- tapOn: Today
 - tapOn: More
 - tapOn: Open Account
 - scrollUntilVisible:

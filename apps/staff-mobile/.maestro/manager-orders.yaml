@@ -16,7 +16,8 @@ name: Manager cancellation and ready delivery assignment against the shared API
 - extendedWaitUntil:
     visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 30000
-- tapOn: Orders
+- tapOn:
+    id: workspace-tab-cashier
 - tapOn: Search orders
 - eraseText
 - inputText: ${MAESTRO_CANCEL_ORDER}

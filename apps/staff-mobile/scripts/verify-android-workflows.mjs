@@ -69,7 +69,7 @@ const dbUser = required('COFFEESHOP_WORKFLOW_POSTGRES_USER');
 for (const value of [container, database, dbUser])
   assert.match(value, /^[a-zA-Z0-9_-]+$/);
 assert.match(database, /^issue201_/);
-const roles = ['Admin', 'Manager', 'Barista', 'DeliveryStaff', 'OtherCourier'];
+const roles = ['Admin', 'Manager', 'Barista'];
 const accounts = Object.fromEntries(
   roles.map((role) => {
     const username = required(
@@ -92,14 +92,6 @@ const names = [
   'barista-stale',
   'barista-forbidden',
   'barista-offline',
-  'courier-own-list',
-  'courier-other-detail',
-  'courier-delivered',
-  'courier-failed',
-  'courier-conflict',
-  'courier-stale',
-  'courier-forbidden',
-  'courier-offline',
 ];
 const runId = randomUUID().slice(0, 8);
 const results = resolve(
@@ -477,20 +469,11 @@ try {
     name: `I201 latte ${runId}`,
     initialVariants: [{ sizeName: 'Regular', price: 10 }],
   });
-  async function order(label, { delivery = false, other = false } = {}) {
+  async function order(label) {
     const id = randomUUID();
     const record = await post('/orders', {
       orderId: id,
-      channel: delivery ? 'delivery' : 'takeaway',
-      ...(delivery
-        ? {
-            customer: {
-              recipientName: `Synthetic ${label}`,
-              contactNumber: '0123456789',
-              addressLine: `Synthetic I201 ${runId} address`,
-            },
-          }
-        : {}),
+      channel: 'takeaway',
       lines: [
         {
           menuItemId: item.id,
@@ -500,15 +483,8 @@ try {
         },
       ],
     });
-    const result = { id, orderNumber: record.orderNumber, delivery, label };
+    const result = { id, orderNumber: record.orderNumber, label };
     await post(`/orders/${id}/confirm`, { reviewedTotal: 10 });
-    if (delivery) {
-      await post(`/orders/${id}/preparing`);
-      await post(`/orders/${id}/ready`);
-      await post(`/orders/${id}/assign-delivery`, {
-        staffId: sessions[other ? 'OtherCourier' : 'DeliveryStaff'].user.id,
-      });
-    }
     return result;
   }
   const seed = {};
@@ -520,19 +496,6 @@ try {
     'offline',
   ])
     seed[`barista-${name}`] = await order(`barista-${name}`);
-  for (const name of [
-    'delivered',
-    'failed',
-    'conflict',
-    'stale',
-    'forbidden',
-    'offline',
-    'other',
-  ])
-    seed[`courier-${name}`] = await order(`courier-${name}`, {
-      delivery: true,
-      other: name === 'other',
-    });
   summary.seed = seed;
   summary.actors = Object.fromEntries(
     roles.map((role) => [role, sessions[role].user.id]),
@@ -641,151 +604,6 @@ try {
       'urgent-order',
       'Start preparing',
       'Status: Confirmed',
-    ),
-  );
-  const privateLabel = `Address: Synthetic I201 ${runId} address`;
-  await check('courier-own-list', 'DeliveryStaff', async () => {
-    const list = await request('/courier/assignments?pageSize=100', {
-      role: 'DeliveryStaff',
-    });
-    const index = list.items.findIndex(
-      (o) => o.orderId === seed['courier-delivered'].id,
-    );
-    assert.ok(index >= 0);
-    await native('delivery-list', {
-      PAGE_SKIP: String(Math.floor(index / 10)),
-      OWN_ORDER: seed['courier-delivered'].orderNumber,
-      OTHER_ORDER: seed['courier-other'].orderNumber,
-      PRIVATE_LABEL: privateLabel,
-    });
-    assert.ok(
-      list.items.some((o) => o.orderId === seed['courier-delivered'].id),
-    );
-    assert.ok(!list.items.some((o) => o.orderId === seed['courier-other'].id));
-    return list;
-  });
-  await check('courier-other-detail', 'DeliveryStaff', async () => {
-    const o = seed['courier-other'];
-    const before = await snapshot(o);
-    await native('unavailable', {
-      KIND: 'assignment',
-      RECORD_ID: o.id,
-      EXPECTED: 'Delivery is unavailable or no longer assigned to you.',
-      FORBIDDEN_ACTION: 'Start delivery',
-      PRIVATE_LABEL: privateLabel,
-    });
-    await request(`/courier/assignments/${o.id}/start`, {
-      role: 'DeliveryStaff',
-      method: 'POST',
-      expected: 404,
-    });
-    assert.deepEqual(await snapshot(o), before);
-    return { before, after: await snapshot(o), status: 404 };
-  });
-  const start = () =>
-    native('delivery-start', {
-      EXPECTED: 'Delivery is out for delivery. Confirmed by the service.',
-    });
-  for (const outcome of ['delivered', 'failed'])
-    await check(`courier-${outcome}`, 'DeliveryStaff', async () => {
-      const o = seed[`courier-${outcome}`];
-      await open('assignment', o, 'Start delivery');
-      await start();
-      await native(
-        outcome === 'delivered' ? 'delivery-complete' : 'delivery-fail',
-        { PRIVATE_LABEL: privateLabel },
-      );
-      const state = await snapshot(o);
-      assert.equal(state.delivery.status, outcome);
-      assert.equal(
-        state.delivery.assigned_staff_id,
-        sessions.DeliveryStaff.user.id,
-      );
-      assert.equal(
-        state.delivery.failure_reason,
-        outcome === 'failed' ? 'Customer unavailable' : null,
-      );
-      assert.equal(
-        state.deliveryHistory.filter(
-          (h) =>
-            h.to_status === outcome &&
-            h.actor_id === sessions.DeliveryStaff.user.id,
-        ).length,
-        1,
-      );
-      await request(`/courier/assignments/${o.id}`, {
-        role: 'DeliveryStaff',
-        expected: 404,
-      });
-      return state;
-    });
-  await check('courier-conflict', 'DeliveryStaff', async () => {
-    const o = seed['courier-conflict'];
-    await open('assignment', o, 'Start delivery');
-    const f = fault(
-      'POST',
-      `/api/v1/courier/assignments/${o.id}/start`,
-      () =>
-        post(`/courier/assignments/${o.id}/start`, undefined, 'DeliveryStaff'),
-      o,
-    );
-    await native('delivery-start', {
-      EXPECTED: 'Delivery changed elsewhere.*',
-    });
-    return proxy.verify(f, 409);
-  });
-  await check('courier-stale', 'DeliveryStaff', async () => {
-    const o = seed['courier-stale'];
-    const f = fault(
-      'GET',
-      `/api/v1/courier/assignments/${o.id}`,
-      async () => {
-        await post(
-          `/courier/assignments/${o.id}/start`,
-          undefined,
-          'DeliveryStaff',
-        );
-        await post(
-          `/courier/assignments/${o.id}/complete`,
-          undefined,
-          'DeliveryStaff',
-        );
-      },
-      o,
-    );
-    await native('unavailable', {
-      KIND: 'assignment',
-      RECORD_ID: o.id,
-      EXPECTED: 'Delivery is unavailable or no longer assigned to you.',
-      FORBIDDEN_ACTION: 'Start delivery',
-      PRIVATE_LABEL: privateLabel,
-    });
-    return proxy.verify(f, 404);
-  });
-  await check('courier-forbidden', 'DeliveryStaff', async () => {
-    const o = seed['courier-forbidden'];
-    await open('assignment', o, 'Start delivery');
-    const f = fault(
-      'POST',
-      `/api/v1/courier/assignments/${o.id}/start`,
-      () => setRole('DeliveryStaff', false),
-      o,
-    );
-    try {
-      await native('delivery-start', {
-        EXPECTED: 'Delivery is unavailable or no longer assigned to you.',
-      });
-      return await proxy.verify(f, 403);
-    } finally {
-      await setRole('DeliveryStaff', true);
-    }
-  });
-  await check('courier-offline', 'DeliveryStaff', () =>
-    offline(
-      seed['courier-offline'],
-      'assignment',
-      'Start delivery',
-      'Status: assigned',
     ),
   );
   summary.serverVerificationPassed = true;

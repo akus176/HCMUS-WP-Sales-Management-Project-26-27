@@ -199,3 +199,22 @@ The mobile application SHALL NOT display a discount approval inbox, home approva
 - **WHEN** a legacy approval notification or module link is opened
 - **THEN** the application reports that the destination is unavailable
 - **AND** it does not request pending discounts or expose a decision action
+
+### Requirement: Counter and Preparation mobile scope
+The application SHALL expose Counter and Preparation as its operational workspaces, authorized by their effective API permissions. Today and More containing only Account SHALL remain available. Stock, courier delivery pages, staff administration and discount approvals SHALL NOT be exposed, even for broadly privileged accounts. These rules supersede the prior delivery-only and broader workspace scope decisions.
+
+#### Scenario: Resume counter and preparation work
+- **WHEN** authorized staff use the mobile application
+- **THEN** Counter provides order/table lookup and payments with applicable manager controls
+- **AND** Preparation provides ticket preparation and ready confirmation
+- **AND** warm tab switches retain their loaded state without repeated requests solely for navigation
+
+#### Scenario: Open a workflow outside the mobile scope
+- **WHEN** a stock, courier, administration or discount link is opened
+- **THEN** the app denies that destination without fetching its protected records
+- **AND** the corresponding workspace never appears in the navigation or More
+
+#### Scenario: Receive a staff notification
+- **WHEN** a valid preparation-ticket notification is opened
+- **THEN** current preparation access is verified before loading the ticket
+- **AND** courier, inventory and discount notification destinations remain unavailable
