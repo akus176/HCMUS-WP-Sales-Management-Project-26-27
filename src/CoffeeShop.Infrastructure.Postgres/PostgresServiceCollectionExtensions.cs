@@ -51,6 +51,8 @@ public static class PostgresServiceCollectionExtensions
         services.AddScoped<LoyaltyCommandHandler>();
         services.AddScoped<OrderCancellationCommandHandler>();
         services.AddScoped<IPosRepository, PosRepository>();
+        services.AddScoped<ITableManagementRepository, TableManagementRepository>();
+        services.AddScoped<TableManagementCommandHandler>();
 
         return services;
     }

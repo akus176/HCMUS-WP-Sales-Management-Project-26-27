@@ -17,6 +17,7 @@ public sealed record OrderResponse(Guid Id, string OrderNumber, string Channel, 
     string? CustomerName = null, string? RecipientName = null, string? ContactNumber = null,
     string? AddressLine = null, Guid? CustomerAddressId = null);
 public sealed record PosTableResponse(Guid Id, string TableNumber, int? Seats, bool IsOccupied, Guid? ActiveOrderId);
+public sealed record CreateTableRequest(string? TableNumber, int? Seats);
 public sealed record OperationalOrderResponse(Guid Id, string OrderNumber, string Channel, string Status,
     decimal Total, decimal PaidAmount, string? TableNumber, string? DeliveryStatus, Guid? AssignedStaffId,
     IReadOnlyList<Guid> PendingDiscountIds);
