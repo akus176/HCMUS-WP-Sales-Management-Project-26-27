@@ -14,12 +14,13 @@ import { useSession } from '../../session/context';
 import type { StaffSession } from '../../session/session';
 import {
   ShellButton,
+  ShellSelection,
   ShellFeedback,
   ShellHeading,
   ShellText,
   ShellMutationFeedback,
 } from '../../shell/controls';
-import { mobileTokens } from '../../shell/designTokens';
+import { recordRow } from '../../shell/recordPresentation';
 
 type PendingDiscount = components['schemas']['PendingDiscountResponse'];
 type DiscountDecision = components['schemas']['DiscountDecisionResponse'];
@@ -58,10 +59,12 @@ export function DiscountApprovals({
   user,
   discountId,
   lookupAllPages = false,
+  showHeading = true,
 }: {
   user: StaffSession;
   discountId?: string;
   lookupAllPages?: boolean;
+  showHeading?: boolean;
 }) {
   const { client } = useSession();
   const { status, canMutate, refreshConnection } = useConnectivity();
@@ -180,6 +183,7 @@ export function DiscountApprovals({
         />
         <ShellButton
           label="Back to staff home"
+          variant="text"
           onPress={() => router.replace('/session')}
         />
       </>
@@ -191,7 +195,7 @@ export function DiscountApprovals({
       <>
         <ShellButton
           label="Back to pending approvals"
-          variant="secondary"
+          variant="text"
           onPress={() => router.back()}
         />
         <ShellHeading>Discount review</ShellHeading>
@@ -293,7 +297,7 @@ export function DiscountApprovals({
 
   return (
     <>
-      <ShellHeading>Manager approvals</ShellHeading>
+      {showHeading && <ShellHeading>Manager approvals</ShellHeading>}
       <ShellMutationFeedback mutation={decisionMutation} />
       <ShellText>
         Review pending discount requests from the shared API.
@@ -327,16 +331,19 @@ export function DiscountApprovals({
             <ShellText>
               Current order total: {money(discount.orderTotal)}
             </ShellText>
-            <ShellButton
-              label={`Review order ${discount.orderNumber} discount`}
-              variant="secondary"
-              onPress={() =>
-                router.push({
-                  pathname: '/modules/approvals/[discountId]',
-                  params: { discountId: discount.discountId },
-                })
-              }
-            />
+            <ShellSelection>
+              <ShellButton
+                label={`Review order ${discount.orderNumber} discount`}
+                displayLabel="Review discount"
+                variant="link"
+                onPress={() =>
+                  router.push({
+                    pathname: '/modules/approvals/[discountId]',
+                    params: { discountId: discount.discountId },
+                  })
+                }
+              />
+            </ShellSelection>
           </View>
         ))
       )}
@@ -345,12 +352,5 @@ export function DiscountApprovals({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: mobileTokens.color.infoBackground,
-    borderColor: mobileTokens.color.border,
-    borderRadius: mobileTokens.shape.card,
-    borderWidth: 2,
-    gap: mobileTokens.spacing.sm,
-    padding: mobileTokens.spacing.md,
-  },
+  card: recordRow,
 });

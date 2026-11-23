@@ -49,7 +49,13 @@ Home workspace summaries enumerate the functions allowed by effective permission
 
 Counter exposes Orders and Tables as explicit selected views. Tables must be reachable without scrolling through order results; opening an occupied table and returning restores the Tables view. Switching back to Orders preserves its search and status filter. Manager order operations retain their existing search and cancellation/assignment flow.
 
+The subsequent shared polish uses the compact, permission-checked title/return header for every workspace. Order, table, discount, delivery, inventory and staff/security records share open ruled rows. Shared input styling owns the thin outline, bundled body font and minimum 48dp height; feature-specific duplicates are removed. Record-opening links use concise visible labels with full record-specific accessible names, and return controls use the plain treatment. Business confirmations retain their existing emphasis and guards.
+
+Counter and manager order search initially render ten matching orders. Show more orders adds the next ten and focuses the first newly revealed record. Search and status filtering apply to the complete server result before this rendering limit, and reset the visible batch. Returning from detail retains the expanded batch and existing view state. This reduces large-list rendering without adding an API contract or limiting which records can be found.
+
 ### E2E tool and completion gate
+
+The owner acceptance recorded in [the verification wrap-up](../../../docs/evidence/mobile-ux-219/current/README.md) completes item 2.2 and waives repeating the existing verification for minor UI follow-ups. Preserve its source revisions and limitations. The commands below describe the original verification plan; they do not override that acceptance. Subsequent visual polish uses bounded visual/static checks and focused regressions for new rendering behavior, without claiming another complete native or TalkBack run. Item 3.1 remains the named review gate.
 
 Use **Maestro CLI** with the existing Android YAML flows in `apps/staff-mobile/.maestro`, ADB, an installed development build and a disposable API fixture. Reuse the existing [quality runbook](../../../docs/mobile-quality-and-release.md), [workflow harness](../../../docs/mobile-workflow-verification-201.md), and their prerequisites. Record `maestro --version`, device/API level, app/source revision and fixture setup; the historical baseline used Maestro 2.12.1, not an instruction to silently upgrade. Installing tooling or committing a plan does not establish a passing Android run.
 

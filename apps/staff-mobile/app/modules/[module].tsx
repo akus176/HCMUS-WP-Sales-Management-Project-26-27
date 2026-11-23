@@ -38,8 +38,14 @@ export default function ModuleScreen() {
         {(user) => (
           <>
             <ShellPageHeader
-              title={module?.id === 'barista' ? 'Preparation' : undefined}
-              inline={module?.id === 'barista'}
+              title={
+                module?.id === 'approvals'
+                  ? 'Manager approvals'
+                  : module?.id === 'administration'
+                    ? 'Staff administration'
+                    : module?.title
+              }
+              inline
               backLabel="Back to staff home"
               onBack={() => router.replace('/session')}
               hideDuringDetail={module?.id === 'barista'}
@@ -53,19 +59,20 @@ export default function ModuleScreen() {
                 ) && (
                   <ShellButton
                     label="Manage cancellations and deliveries"
+                    variant="secondary"
                     onPress={() => router.push('/modules/approvals/operations')}
                   />
                 )}
-                <DiscountApprovals user={user} />
+                <DiscountApprovals user={user} showHeading={false} />
               </>
             ) : module?.id === 'inventory' ? (
-              <InventoryWorkspace user={user} />
+              <InventoryWorkspace user={user} showHeading={false} />
             ) : module?.id === 'cashier' ? (
-              <OrdersScreen user={user} />
+              <OrdersScreen user={user} showHeading={false} />
             ) : module?.id === 'delivery' ? (
-              <DeliveryScreen />
+              <DeliveryScreen showHeading={false} />
             ) : module?.id === 'administration' ? (
-              <StaffAdministration user={user} />
+              <StaffAdministration user={user} showHeading={false} />
             ) : (
               <>
                 <ShellHeading>{module!.title}</ShellHeading>

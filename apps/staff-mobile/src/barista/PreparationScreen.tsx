@@ -236,7 +236,7 @@ export function PreparationScreen({
                 <ShellButton
                   label="Back to Preparation"
                   displayLabel="Preparation"
-                  variant="secondary"
+                  variant="text"
                   disabled={busy}
                   onPress={() => {
                     setSelected(null);

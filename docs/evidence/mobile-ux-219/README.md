@@ -6,6 +6,11 @@ Evidence retains its actual revision; no new native/TalkBack run is claimed.
 Only named reviewer approval remains pending. The connected phone's original
 settings have been restored.
 
+[Further shared polish (2026-11-23)](visual-polish-2026-11-23/README.md)
+continues from the teammate's latest changes with compact workspace headers,
+open ruled records, consistent fields and bounded order rendering. Its focused
+checks and visual samples are separate from the retained acceptance evidence.
+
 OpenSpec change: `polish-staff-mobile-ux`. Baseline source:
 `5c9ed019398099cc59e3a007b6cf82a71208d25f`. This is a fresh source audit on 2026-11-19;
 historical screenshots are identified separately and are not a new native run.

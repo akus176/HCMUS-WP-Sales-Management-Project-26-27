@@ -11,6 +11,7 @@ export default function ManagerOrdersScreen() {
     <ShellPage>
       <ShellButton
         label="Back to staff home"
+        variant="text"
         onPress={() => router.replace('/session')}
       />
       <PermissionBoundary moduleId="approvals" {...access}>

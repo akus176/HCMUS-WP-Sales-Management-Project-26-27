@@ -14,7 +14,7 @@ import {
   ShellInput,
   ShellMutationFeedback,
 } from '../../shell/controls';
-import { orderStyles, money } from './presentation';
+import { money } from './presentation';
 
 type Payment = components['schemas']['RecordPaymentRequest'];
 export type PendingPayments = Map<string, Payment>;
@@ -175,7 +175,6 @@ export function OrderPayment({
               value={amount}
               onChangeText={setAmount}
               editable={!unavailable}
-              style={orderStyles.input}
             />
             {(['cash', 'card', 'e_wallet'] as const).map((value) => (
               <ShellButton
@@ -194,7 +193,6 @@ export function OrderPayment({
               onChangeText={setReference}
               editable={!unavailable}
               maxLength={120}
-              style={orderStyles.input}
             />
             <ShellButton
               label="Review payment"

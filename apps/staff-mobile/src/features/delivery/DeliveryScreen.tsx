@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
+import { recordRow } from '../../shell/recordPresentation';
 
 import { useSession } from '../../session/context';
 import {
@@ -14,7 +15,9 @@ import {
 
 const pageSize = 10;
 
-export function DeliveryScreen() {
+export function DeliveryScreen({
+  showHeading = true,
+}: { showHeading?: boolean } = {}) {
   const { client, state } = useSession();
   const [view, setView] = useState<'active' | 'completed'>('active');
   const [page, setPage] = useState(1);
@@ -39,7 +42,7 @@ export function DeliveryScreen() {
   });
   return (
     <>
-      <ShellHeading>Deliveries</ShellHeading>
+      {showHeading && <ShellHeading>Deliveries</ShellHeading>}
       <ShellSelection>
         {(['active', 'completed'] as const).map((choice) => (
           <ShellButton
@@ -48,6 +51,7 @@ export function DeliveryScreen() {
               choice === 'active' ? 'Active deliveries' : 'Completed deliveries'
             }
             variant="secondary"
+            compact
             selected={view === choice}
             onPress={() => {
               setPage(1);
@@ -79,16 +83,19 @@ export function DeliveryScreen() {
                 {item.orderNumber} · {item.deliveryStatus.replaceAll('_', ' ')}
               </ShellText>
               {view === 'active' && (
-                <ShellButton
-                  label={`Open delivery ${item.orderNumber}`}
-                  variant="secondary"
-                  onPress={() =>
-                    router.push({
-                      pathname: '/modules/delivery/[orderId]',
-                      params: { orderId: item.orderId },
-                    })
-                  }
-                />
+                <ShellSelection>
+                  <ShellButton
+                    label={`Open delivery ${item.orderNumber}`}
+                    displayLabel="Open delivery"
+                    variant="link"
+                    onPress={() =>
+                      router.push({
+                        pathname: '/modules/delivery/[orderId]',
+                        params: { orderId: item.orderId },
+                      })
+                    }
+                  />
+                </ShellSelection>
               )}
             </View>
           ))}
@@ -116,4 +123,4 @@ export function DeliveryScreen() {
   );
 }
 
-const styles = StyleSheet.create({ group: { gap: 8, marginVertical: 8 } });
+const styles = StyleSheet.create({ group: recordRow });

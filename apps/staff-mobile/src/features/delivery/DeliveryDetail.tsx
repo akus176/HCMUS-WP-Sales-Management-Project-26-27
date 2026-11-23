@@ -1,12 +1,11 @@
 import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { Linking, StyleSheet } from 'react-native';
+import { Linking } from 'react-native';
 
 import { ApiError } from '../../api/errors';
 import { useSafeMutation } from '../../connectivity/connectivity';
 import { useSession } from '../../session/context';
-import { mobileTokens } from '../../shell/designTokens';
 import {
   ShellButton,
   ShellFeedback,
@@ -135,7 +134,7 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
     <>
       <ShellButton
         label="Back to deliveries"
-        variant="secondary"
+        variant="text"
         onPress={() => router.replace('/modules/delivery')}
       />
       <ShellHeading>Delivery details</ShellHeading>
@@ -223,7 +222,7 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
                 label="Reason for failed delivery"
                 accessibilityLabel="Failure reason"
                 value={reason}
-                style={styles.input}
+
                 editable={!mutation.isPending && !mutation.isWriteDisabled}
                 onChangeText={(value) => {
                   setReason(value);
@@ -253,16 +252,3 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  input: {
-    minHeight: 48,
-    borderWidth: 2,
-    borderColor: mobileTokens.color.border,
-    borderRadius: mobileTokens.shape.control,
-    padding: mobileTokens.spacing.sm,
-    color: mobileTokens.color.foreground,
-    backgroundColor: mobileTokens.color.background,
-    fontSize: mobileTokens.type.body,
-  },
-});

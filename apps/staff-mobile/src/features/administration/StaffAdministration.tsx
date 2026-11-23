@@ -21,6 +21,7 @@ import {
   ShellMutationFeedback,
 } from '../../shell/controls';
 import { mobileTokens } from '../../shell/designTokens';
+import { recordRow } from '../../shell/recordPresentation';
 
 type StaffAccount = components['schemas']['StaffAccountResponse'];
 type SecurityEvent = components['schemas']['SecurityEventResponse'];
@@ -46,7 +47,13 @@ function errorMessage(error: unknown, operation: string) {
   return `${operation} could not be completed. Refresh the data and try again.`;
 }
 
-export function StaffAdministration({ user }: { user: StaffSession }) {
+export function StaffAdministration({
+  user,
+  showHeading = true,
+}: {
+  user: StaffSession;
+  showHeading?: boolean;
+}) {
   const { client } = useSession();
   const { canMutate, refreshConnection } = useConnectivity();
   const [search, setSearch] = useState('');
@@ -173,12 +180,13 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
 
   return (
     <>
-      <ShellHeading>Staff administration</ShellHeading>
+      {showHeading && <ShellHeading>Staff administration</ShellHeading>}
       <ShellMutationFeedback mutation={deactivation} />
       <ShellSelection>
         <ShellButton
           label="Staff accounts"
           selected={section === 'accounts'}
+          compact
           variant="secondary"
           onPress={() => {
             setSection('accounts');
@@ -188,6 +196,7 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
         <ShellButton
           label="Security events"
           selected={section === 'events'}
+          compact
           variant="secondary"
           onPress={() => {
             setSection('events');
@@ -211,7 +220,6 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
             onChangeText={setSearch}
             placeholder="Search name, username, or email"
             placeholderTextColor={mobileTokens.color.disabledText}
-            style={styles.search}
             value={search}
           />
           <ShellSelection>
@@ -220,6 +228,7 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
                 key={filter}
                 label={`${filter[0]?.toUpperCase()}${filter.slice(1)} accounts`}
                 selected={activeFilter === filter}
+                compact
                 variant="secondary"
                 onPress={() => setActiveFilter(filter)}
               />
@@ -245,15 +254,18 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
                   @{account.username} ·{' '}
                   {account.isActive ? 'Active' : 'Inactive'}
                 </ShellText>
-                <ShellButton
-                  label={`View details for ${account.fullName}`}
-                  variant="secondary"
-                  focusKey={`account:${account.id}`}
-                  onPress={() => {
-                    navigation.openDetail(`account:${account.id}`);
-                    setSelectedAccountId(account.id);
-                  }}
-                />
+                <ShellSelection>
+                  <ShellButton
+                    label={`View details for ${account.fullName}`}
+                    displayLabel="View account"
+                    variant="link"
+                    focusKey={`account:${account.id}`}
+                    onPress={() => {
+                      navigation.openDetail(`account:${account.id}`);
+                      setSelectedAccountId(account.id);
+                    }}
+                  />
+                </ShellSelection>
                 {account.isActive && (
                   <ShellButton
                     label={`Deactivate ${account.fullName}`}
@@ -332,7 +344,7 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
           ) : null}
           <ShellButton
             label="Close account details"
-            variant="secondary"
+            variant="text"
             onPress={() => {
               setSelectedAccountId(undefined);
               navigation.returnToList();
@@ -349,6 +361,7 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
                 key={filter.label}
                 label={filter.label}
                 selected={eventType === filter.value}
+                compact
                 variant="secondary"
                 onPress={() => setEventType(filter.value)}
               />
@@ -407,24 +420,6 @@ function EventCard({ event }: { event: SecurityEvent }) {
 }
 
 const styles = StyleSheet.create({
-  search: {
-    minHeight: 48,
-    borderWidth: 2,
-    borderColor: mobileTokens.color.border,
-    borderRadius: mobileTokens.shape.control,
-    backgroundColor: mobileTokens.color.background,
-    color: mobileTokens.color.foreground,
-    fontFamily: mobileTokens.type.bodyFont,
-    fontSize: mobileTokens.type.body,
-    paddingHorizontal: mobileTokens.spacing.md,
-  },
   filters: { gap: mobileTokens.spacing.sm },
-  card: {
-    gap: mobileTokens.spacing.sm,
-    borderWidth: 2,
-    borderColor: mobileTokens.color.border,
-    borderRadius: mobileTokens.shape.card,
-    backgroundColor: mobileTokens.color.background,
-    padding: mobileTokens.spacing.md,
-  },
+  card: recordRow,
 });

@@ -19,12 +19,16 @@ import { OrderPayment, type PendingPayments } from './OrderPayment';
 import { ManagerOrderActions } from './ManagerOrderActions';
 import { orderStyles, money } from './presentation';
 
+const orderBatchSize = 10;
+
 export function OrdersScreen({
   user,
   manager = false,
+  showHeading = true,
 }: {
   user: StaffSession;
   manager?: boolean;
+  showHeading?: boolean;
 }) {
   const { client } = useSession();
   const queries = useQueryClient();
@@ -32,6 +36,7 @@ export function OrdersScreen({
   const [section, setSection] = useState<'orders' | 'tables'>('orders');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
+  const [visibleCount, setVisibleCount] = useState(orderBatchSize);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const navigation = usePageNavigation();
   const [selected, setSelected] = useState<string | null>(null);
@@ -106,9 +111,11 @@ export function OrdersScreen({
 
   return (
     <>
-      <ShellHeading>
-        {manager ? 'Manager order operations' : 'Counter'}
-      </ShellHeading>
+      {showHeading && (
+        <ShellHeading>
+          {manager ? 'Manager order operations' : 'Counter'}
+        </ShellHeading>
+      )}
       {!manager && !selected && (
         <ShellSelection>
           {(['orders', 'tables'] as const).map((choice) => (
@@ -140,7 +147,7 @@ export function OrdersScreen({
                 ? 'Back to table occupancy'
                 : 'Back to order search'
             }
-            variant="secondary"
+            variant="text"
             onPress={() => {
               setSelected(null);
               navigation.returnToList();
@@ -223,10 +230,12 @@ export function OrdersScreen({
                 label="Search by order number or table"
                 accessibilityLabel="Search orders"
                 value={search}
-                onChangeText={setSearch}
+                onChangeText={(value) => {
+                  setSearch(value);
+                  setVisibleCount(orderBatchSize);
+                }}
                 autoCorrect={false}
                 autoCapitalize="none"
-                style={orderStyles.input}
               />
               <ShellButton
                 label={`Filter orders: ${filter === 'ready_delivery' ? 'Ready unassigned deliveries' : filter[0]!.toUpperCase() + filter.slice(1)}`}
@@ -258,6 +267,7 @@ export function OrdersScreen({
                       variant="secondary"
                       onPress={() => {
                         setFilter(value);
+                        setVisibleCount(orderBatchSize);
                         setFiltersExpanded(false);
                         navigation.returnToList();
                       }}
@@ -281,20 +291,44 @@ export function OrdersScreen({
                       label="No orders match this search."
                     />
                   )}
-                  {rows?.map((row) => (
+                  {rows?.slice(0, visibleCount).map((row) => (
                     <View key={row.id} style={orderStyles.card}>
                       <ShellText>{`${row.orderNumber} · ${row.status} · ${row.channel}${row.tableNumber ? ` · Table ${row.tableNumber}` : ''}`}</ShellText>
                       <ShellText>{`Fulfillment: ${row.deliveryStatus ?? row.status} · Paid: ${money(row.paidAmount)} · Balance: ${money(Math.max(0, Number(row.total) - Number(row.paidAmount)))}`}</ShellText>
-                      <ShellButton
-                        label={`Open order ${row.orderNumber}`}
-                        focusKey={`order:${row.id}`}
-                        onPress={() => {
-                          navigation.openDetail(`order:${row.id}`);
-                          setSelected(row.id);
-                        }}
-                      />
+                      <ShellSelection>
+                        <ShellButton
+                          label={`Open order ${row.orderNumber}`}
+                          displayLabel="Open order"
+                          variant="link"
+                          focusKey={`order:${row.id}`}
+                          onPress={() => {
+                            navigation.openDetail(`order:${row.id}`);
+                            setSelected(row.id);
+                          }}
+                        />
+                      </ShellSelection>
                     </View>
                   ))}
+                  {rows && rows.length > orderBatchSize && (
+                    <>
+                      <ShellText>
+                        Showing {Math.min(visibleCount, rows.length)} of{' '}
+                        {rows.length} orders
+                      </ShellText>
+                      {visibleCount < rows.length && (
+                        <ShellButton
+                          label="Show more orders"
+                          variant="secondary"
+                          onPress={() => {
+                            const next = rows[visibleCount];
+                            setVisibleCount((count) => count + orderBatchSize);
+                            if (next)
+                              navigation.focusTarget(`order:${next.id}`);
+                          }}
+                        />
+                      )}
+                    </>
+                  )}
                 </>
               )}
             </>
@@ -322,15 +356,18 @@ export function OrdersScreen({
                     <View key={table.id} style={orderStyles.card}>
                       <ShellText>{`Table ${table.tableNumber} · ${table.seats ?? 'Unspecified'} seats · ${table.isOccupied ? 'Occupied' : 'Available'}`}</ShellText>
                       {table.activeOrderId && (
-                        <ShellButton
-                          label={`Open table ${table.tableNumber} order`}
-                          variant="secondary"
-                          focusKey={`table:${table.id}`}
-                          onPress={() => {
-                            navigation.openDetail(`table:${table.id}`);
-                            setSelected(table.activeOrderId);
-                          }}
-                        />
+                        <ShellSelection>
+                          <ShellButton
+                            label={`Open table ${table.tableNumber} order`}
+                            displayLabel="Open order"
+                            variant="link"
+                            focusKey={`table:${table.id}`}
+                            onPress={() => {
+                              navigation.openDetail(`table:${table.id}`);
+                              setSelected(table.activeOrderId);
+                            }}
+                          />
+                        </ShellSelection>
                       )}
                     </View>
                   ))}

@@ -330,7 +330,7 @@ export function ShellButton({
   disabled?: boolean;
   loading?: boolean;
   loadingLabel?: string;
-  variant?: 'primary' | 'secondary' | 'text';
+  variant?: 'primary' | 'secondary' | 'text' | 'link';
   expanded?: boolean;
   focusKey?: string;
   compact?: boolean;
@@ -382,7 +382,7 @@ export function ShellButton({
         compact && styles.compactButton,
         prominent && styles.prominentButton,
         variant === 'secondary' && styles.secondaryButton,
-        variant === 'text' && styles.textButton,
+        (variant === 'text' || variant === 'link') && styles.textButton,
         (focused || selected) && styles.selected,
         pressed && styles.pressed,
         unavailable && styles.disabled,
@@ -395,6 +395,10 @@ export function ShellButton({
           variant !== 'primary' &&
             !(focused || selected) &&
             styles.secondaryButtonText,
+          variant === 'link' && styles.linkButtonText,
+          variant === 'link' &&
+            !(focused || selected) &&
+            styles.linkButtonColor,
           unavailable && styles.disabledButtonText,
         ]}
       >
@@ -439,7 +443,7 @@ const styles = StyleSheet.create({
   },
   input: {
     minHeight: 48,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: mobileTokens.color.border,
     borderRadius: mobileTokens.shape.control,
     padding: mobileTokens.spacing.sm,
@@ -524,6 +528,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   secondaryButtonText: { color: mobileTokens.color.foreground },
+  linkButtonText: { textDecorationLine: 'underline' },
+  linkButtonColor: { color: mobileTokens.color.primary },
   compactButton: { paddingHorizontal: 10 },
   compactButtonText: { fontSize: 16 },
   prominentButton: { minHeight: 56 },

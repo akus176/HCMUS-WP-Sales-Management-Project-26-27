@@ -93,6 +93,11 @@ The application SHALL keep the active order filter visible when its options are 
 - **THEN** table occupancy appears without traversing the order results
 - **AND** opening an occupied table and returning restores Tables, while switching to Orders retains its search and status filter
 
+#### Scenario: Browse a large order result without hiding records
+- **WHEN** Counter or manager order search has more than ten matching orders
+- **THEN** the interface initially renders ten and offers Show more orders to reveal subsequent batches
+- **AND** search and status filters apply to the complete server result before the rendering limit, reset that limit, and never send a business mutation
+
 #### Scenario: Open and return from an account
 - **WHEN** an administrator opens an account and returns to the account list
 - **THEN** details appear in the working viewport, accessible focus identifies the new view and the previous search, selection and originating position are restored where available

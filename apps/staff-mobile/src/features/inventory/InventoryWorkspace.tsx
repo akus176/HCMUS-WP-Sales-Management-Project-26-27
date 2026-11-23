@@ -22,6 +22,7 @@ import {
   ShellMutationFeedback,
 } from '../../shell/controls';
 import { mobileTokens } from '../../shell/designTokens';
+import { recordRow } from '../../shell/recordPresentation';
 
 type Balance = components['schemas']['IngredientBalanceResponse'];
 type Movement = components['schemas']['StockMovementResponse'];
@@ -77,7 +78,13 @@ function receiptError(error: unknown) {
   return 'The receipt post was not confirmed. Refresh before trying again.';
 }
 
-export function InventoryWorkspace({ user }: { user: StaffSession }) {
+export function InventoryWorkspace({
+  user,
+  showHeading = true,
+}: {
+  user: StaffSession;
+  showHeading?: boolean;
+}) {
   const { client } = useSession();
   const { status, refreshConnection } = useConnectivity();
   const queryClient = useQueryClient();
@@ -329,7 +336,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
 
   return (
     <>
-      <ShellHeading>Inventory</ShellHeading>
+      {showHeading && <ShellHeading>Inventory</ShellHeading>}
       <ShellMutationFeedback
         mutation={{
           isRefreshing:
@@ -345,6 +352,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
               key={id}
               label={title}
               selected={selectedSection === id}
+              compact
               variant="secondary"
               onPress={() => setSection(id)}
             />
@@ -360,7 +368,6 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
             returnKeyType="search"
             value={search}
             onChangeText={setSearch}
-            style={styles.search}
           />
           {refreshButton}
           {status === 'offline' && !ingredientQuery.data ? (
@@ -442,7 +449,6 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                         placeholderTextColor={mobileTokens.color.disabledText}
                         value={quantityDelta}
                         onChangeText={setQuantityDelta}
-                        style={styles.search}
                       />
                       <ShellInput
                         label="Adjustment reason (required)"
@@ -451,7 +457,6 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                         placeholderTextColor={mobileTokens.color.disabledText}
                         value={adjustmentReason}
                         onChangeText={setAdjustmentReason}
-                        style={styles.search}
                       />
                       {adjustmentMessage && (
                         <ShellFeedback kind="error" label={adjustmentMessage} />
@@ -496,7 +501,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
             <>
               <ShellButton
                 label="Back to receipt list"
-                variant="secondary"
+                variant="text"
                 onPress={() => {
                   setReceiptId(undefined);
                   setReceiptMessage(undefined);
@@ -701,22 +706,6 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
 
 const styles = StyleSheet.create({
   tabs: { gap: mobileTokens.spacing.sm },
-  search: {
-    minHeight: 48,
-    borderColor: mobileTokens.color.border,
-    borderWidth: 2,
-    borderRadius: mobileTokens.shape.control,
-    paddingHorizontal: mobileTokens.spacing.md,
-    color: mobileTokens.color.foreground,
-    fontSize: mobileTokens.type.body,
-    backgroundColor: mobileTokens.color.background,
-  },
-  card: {
-    backgroundColor: mobileTokens.color.background,
-    borderColor: mobileTokens.color.border,
-    borderBottomWidth: 1,
-    gap: mobileTokens.spacing.sm,
-    paddingVertical: mobileTokens.spacing.md,
-  },
+  card: recordRow,
   form: { gap: mobileTokens.spacing.sm },
 });

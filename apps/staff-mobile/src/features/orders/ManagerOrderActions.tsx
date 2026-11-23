@@ -12,7 +12,6 @@ import {
   ShellInput,
   ShellMutationFeedback,
 } from '../../shell/controls';
-import { orderStyles } from './presentation';
 
 type Command =
   { action: 'cancel'; reason: string } | { action: 'assign'; staffId: string };
@@ -180,7 +179,6 @@ export function ManagerOrderActions({
                 maxLength={255}
                 multiline
                 editable={!unavailable}
-                style={orderStyles.input}
               />
               <ShellButton
                 label="Review cancellation"

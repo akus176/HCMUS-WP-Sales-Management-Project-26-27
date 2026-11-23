@@ -84,7 +84,11 @@ afterEach(() => {
   queries = [];
 });
 
-async function setup({ manager = false, permissions = user.permissions } = {}) {
+async function setup({
+  manager = false,
+  permissions = user.permissions,
+  page = true,
+} = {}) {
   let rows = [{ ...summary }];
   let order = { ...detail };
   const get = jest.fn(async (path: string) => {
@@ -130,9 +134,13 @@ async function setup({ manager = false, permissions = user.permissions } = {}) {
   const view = await render(
     <SessionProvider client={client} queryClient={queryClient}>
       <ConnectivityProvider>
-        <ShellPage>
+        {page ? (
+          <ShellPage>
+            <OrdersScreen user={session.user} manager={manager} />
+          </ShellPage>
+        ) : (
           <OrdersScreen user={session.user} manager={manager} />
-        </ShellPage>
+        )}
       </ConnectivityProvider>
     </SessionProvider>,
   );
@@ -205,6 +213,63 @@ test('searches server orders by number/table, filters fulfillment and opens occu
     view.getByRole('button', { name: 'Filter orders: Ready' }),
   ).toBeVisible();
 });
+
+test.each([false, true])(
+  'renders small batches while searching and filtering all orders (manager=%s)',
+  async (manager) => {
+    const h = await setup({ manager, page: false });
+    h.setRows(
+      Array.from({ length: 25 }, (_, index) => ({
+        ...summary,
+        id: `batch-${index}`,
+        orderNumber: `BATCH-${String(index).padStart(2, '0')}`,
+        status: index >= 20 ? 'ready' : 'confirmed',
+      })),
+    );
+    await act(async () => {
+      await h.queryClient.invalidateQueries({
+        queryKey: ['sales', user.id, 'orders'],
+      });
+    });
+    await h.view.findByText('Showing 10 of 25 orders');
+    const rendered = () =>
+      h.view.getAllByRole('button', { name: /^Open order / });
+    const revealMore = async () => {
+      await fireEvent.press(
+        h.view.getByRole('button', { name: 'Show more orders' }),
+      );
+    };
+    expect(rendered()).toHaveLength(10);
+    await revealMore();
+    expect(rendered()).toHaveLength(20);
+    await revealMore();
+    expect(rendered()).toHaveLength(25);
+    expect(
+      h.view.queryByRole('button', { name: 'Show more orders' }),
+    ).toBeNull();
+    await fireEvent.changeText(
+      h.view.getByLabelText('Search orders'),
+      'BATCH-24',
+    );
+    expect(
+      h.view.getByRole('button', { name: 'Open order BATCH-24' }),
+    ).toBeVisible();
+    expect(rendered()).toHaveLength(1);
+    await fireEvent.changeText(h.view.getByLabelText('Search orders'), '');
+    expect(h.view.getByText('Showing 10 of 25 orders')).toBeVisible();
+    await fireEvent.press(
+      h.view.getByRole('button', { name: 'Filter orders: All' }),
+    );
+    await fireEvent.press(
+      h.view.getByRole('button', { name: 'Show ready orders' }),
+    );
+    expect(rendered()).toHaveLength(5);
+    expect(
+      h.view.getByRole('button', { name: 'Open order BATCH-24' }),
+    ).toBeVisible();
+    expect(h.post).not.toHaveBeenCalled();
+  },
+);
 
 test('returns the viewport to the filter after a deeply scrolled selection collapses', async () => {
   const scrollTo = jest.spyOn(ScrollView.prototype, 'scrollTo');
