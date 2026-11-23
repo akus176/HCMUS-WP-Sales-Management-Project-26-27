@@ -94,7 +94,7 @@
 - [x] 10.3 Implement short-lived JWT access tokens and hashed refresh-token storage; verify token tests check claims, expiry, and absence of sensitive data
 - [x] 10.4 Implement refresh-token rotation, logout revocation, family revocation on reuse, and account-wide revocation; verify security integration tests cover each invalidation path
 - [x] 10.5 Implement permission-based API policies and endpoint requirements; verify authorization tests cover allowed and forbidden operations for admin, manager, cashier, barista, inventory, and delivery roles
-- [x] 10.6 Implement account administration with final-active-administrator protection; verify attempts to remove the last administrator fail without state changes
+- [ ] 10.6 Implement account administration with final-active-administrator protection; verify attempts to remove the last administrator fail without state changes
 - [x] 10.7 Implement security audit events for login, token reuse, account state, and role changes; verify audits omit passwords, access tokens, and refresh tokens
 
 ## 11. Final WinUI API Migration
