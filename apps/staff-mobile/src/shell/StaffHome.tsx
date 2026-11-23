@@ -107,6 +107,7 @@ export function StaffHome({
               <ShellButton
                 label={`Open ${module.title}`}
                 variant="text"
+                fill={quick && fontScale <= 1.5}
                 onPress={() =>
                   navigation
                     ? navigation.open(module.id as Workspace)

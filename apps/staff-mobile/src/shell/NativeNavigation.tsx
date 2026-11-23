@@ -106,7 +106,10 @@ export function NativeTabBar() {
             onPress={() => navigation.open(tab.id)}
             style={({ pressed }) => [styles.tab, pressed && styles.pressed]}
           >
-            <View style={[styles.icon, active === tab.id && styles.activeIcon]}>
+            <View
+              collapsable={false}
+              style={[styles.icon, active === tab.id && styles.activeIcon]}
+            >
               <ShellIcon
                 name={tab.icon}
                 color={
@@ -143,9 +146,10 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   icon: {
-    minWidth: 56,
-    minHeight: 30,
-    borderRadius: 15,
+    width: 64,
+    height: 32,
+    borderRadius: t.shape.pill,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
   },

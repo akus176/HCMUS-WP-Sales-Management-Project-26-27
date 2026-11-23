@@ -441,6 +441,7 @@ export function ShellButton({
   focusKey,
   compact = false,
   prominent = false,
+  fill = false,
   testID,
   displayLabel,
   showSelectionMark = false,
@@ -457,6 +458,7 @@ export function ShellButton({
   focusKey?: string;
   compact?: boolean;
   prominent?: boolean;
+  fill?: boolean;
   testID?: string;
   displayLabel?: string;
   showSelectionMark?: boolean;
@@ -511,6 +513,7 @@ export function ShellButton({
         segmented && styles.segmentedButton,
         segmented && selected && styles.segmentedSelected,
         !!children && styles.recordButton,
+        fill && styles.fillButton,
         pressed && styles.pressed,
         unavailable && styles.disabled,
       ]}
@@ -674,9 +677,11 @@ const styles = StyleSheet.create({
   recordButton: {
     backgroundColor: mobileTokens.color.surface,
     alignItems: 'stretch',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     gap: 8,
   },
+  fillButton: { flexGrow: 1 },
   badge: {
     alignSelf: 'flex-start',
     backgroundColor: mobileTokens.color.selectedBackground,

@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="19.109" timestamp="2026-11-23T15:43:34">
+    <testcase id="Review mobile card insets and rounded selected tabs" name="Review mobile card insets and rounded selected tabs" classname="Review mobile card insets and rounded selected tabs" file="\\wsl.localhost\Ubuntu\tmp\mobile-padding-review.yaml" time="19.088" timestamp="2026-11-23T15:43:34" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
