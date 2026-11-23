@@ -14,7 +14,7 @@ export default function SessionScreen() {
         scope="home"
         retain
         {...access}
-        refreshKey={access.refreshKey + native.revision}
+        refreshKey={access.refreshKey + native.accessRevision}
       >
         {(user) => <NativeWorkspaceHost user={user} />}
       </PermissionBoundary>

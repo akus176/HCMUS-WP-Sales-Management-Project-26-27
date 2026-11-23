@@ -38,6 +38,7 @@ export function SessionProvider({
         defaultOptions: {
           queries: {
             retry: false,
+            staleTime: Infinity,
             refetchOnReconnect: true,
           },
           mutations: { retry: false },

@@ -10,7 +10,6 @@ import { InventoryWorkspace } from '../features/inventory/InventoryWorkspace';
 import { DiscountApprovals } from '../features/approvals/DiscountApprovals';
 import { DeliveryScreen } from '../features/delivery/DeliveryScreen';
 import { StaffAdministration } from '../features/administration/StaffAdministration';
-import { PermissionBoundary } from './PermissionBoundary';
 import { useNativeNavigation } from './NativeNavigation';
 import {
   isWorkspaceAllowed,
@@ -22,7 +21,6 @@ import { permittedModules } from './permissions';
 import { StaffHome } from './StaffHome';
 import {
   ShellButton,
-  ShellHeading,
   ShellPage,
   ShellPageHeader,
   ShellSheet,
@@ -67,10 +65,10 @@ export function NativeWorkspaceHost({
                 focused ? 'auto' : 'no-hide-descendants'
               }
             >
-              {personal ? (
-                <Activity mode={focused ? 'visible' : 'hidden'}>
-                  <ShellPage>
-                    {id === 'home' ? (
+              <Activity mode={focused ? 'visible' : 'hidden'}>
+                <ShellPage>
+                  {personal ? (
+                    id === 'home' ? (
                       <StaffHome
                         user={user}
                         embedded
@@ -80,64 +78,44 @@ export function NativeWorkspaceHost({
                       <MoreWorkspaces user={user} />
                     ) : (
                       <Account user={user} />
-                    )}
-                  </ShellPage>
-                </Activity>
-              ) : (
-                <ShellPage>
-                  <PermissionBoundary
-                    moduleId={id}
-                    focused={focused}
-                    refreshKey={navigation.revision}
-                    retain
-                  >
-                    {(verified) => (
-                      <>
-                        {id !== 'cashier' && (
-                          <ShellPageHeader
-                            title={
-                              id === 'administration'
-                                ? 'Staff'
-                                : id === 'approvals'
-                                  ? 'Approvals'
-                                  : permittedModules(verified.permissions).find(
-                                      (m) => m.id === id,
-                                    )?.title
-                            }
-                            inline
-                            hideDuringDetail
-                          />
-                        )}
-                        {id === 'barista' ? (
-                          <PreparationScreen showHeading={false} directOpen />
-                        ) : id === 'cashier' ? (
-                          <OrdersScreen user={verified} showHeading={false} />
-                        ) : id === 'inventory' ? (
-                          <InventoryWorkspace
-                            user={verified}
-                            showHeading={false}
-                          />
-                        ) : id === 'approvals' ? (
-                          <>
-                            <ManagerOperationsLink user={verified} />
-                            <DiscountApprovals
-                              user={verified}
-                              showHeading={false}
-                            />
-                          </>
-                        ) : id === 'delivery' ? (
-                          <DeliveryScreen showHeading={false} />
-                        ) : (
-                          <StaffAdministration
-                            user={verified}
-                            showHeading={false}
-                          />
-                        )}
-                      </>
-                    )}
-                  </PermissionBoundary>
+                    )
+                  ) : (
+                    <>
+                      <ShellPageHeader
+                        title={
+                          id === 'cashier'
+                            ? 'Orders'
+                            : id === 'administration'
+                              ? 'Staff'
+                              : id === 'approvals'
+                                ? 'Approvals'
+                                : permittedModules(user.permissions).find(
+                                    (module) => module.id === id,
+                                  )?.title
+                        }
+                        inline
+                        hideDuringDetail
+                      />
+                      {id === 'barista' ? (
+                        <PreparationScreen showHeading={false} directOpen />
+                      ) : id === 'cashier' ? (
+                        <OrdersScreen user={user} showHeading={false} />
+                      ) : id === 'inventory' ? (
+                        <InventoryWorkspace user={user} showHeading={false} />
+                      ) : id === 'approvals' ? (
+                        <>
+                          <ManagerOperationsLink user={user} />
+                          <DiscountApprovals user={user} showHeading={false} />
+                        </>
+                      ) : id === 'delivery' ? (
+                        <DeliveryScreen showHeading={false} />
+                      ) : (
+                        <StaffAdministration user={user} showHeading={false} />
+                      )}
+                    </>
+                  )}
                 </ShellPage>
-              )}
+              </Activity>
             </View>
           );
         })}
@@ -254,7 +232,7 @@ function MoreWorkspaces({ user }: { user: StaffSession }) {
   const primary = navigationFor(user.permissions).map((tab) => tab.id);
   return (
     <>
-      <ShellHeading>More</ShellHeading>
+      <ShellPageHeader title="More" />
       {permittedModules(user.permissions)
         .filter((module) => !primary.includes(module.id as Workspace))
         .map((module) => (
@@ -306,7 +284,7 @@ function Account({ user }: { user: StaffSession }) {
   const [busy, setBusy] = useState(false);
   return (
     <>
-      <ShellHeading>Account</ShellHeading>
+      <ShellPageHeader title="Account" />
       <View style={styles.account}>
         <ShellIcon name="account" size={32} color={t.color.primary} />
         <View style={styles.rowBody}>

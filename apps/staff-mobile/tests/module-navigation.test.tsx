@@ -147,6 +147,10 @@ test('real routes reject signed-out and unauthorized links, allow a grant, then 
   ).toBeVisible();
   expect(screen.queryByText('Record payments — planned')).toBeNull();
   permissions = [];
+  await act(async () => router.push('/modules/barista'));
+  await screen.findByText(
+    'Access unavailable. Your current permissions do not allow this module.',
+  );
   await fireEvent.press(screen.getByRole('tab', { name: 'Home' }));
   await screen.findByText(
     'No mobile modules are available for your permissions.',

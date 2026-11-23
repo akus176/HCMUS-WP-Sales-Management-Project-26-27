@@ -74,8 +74,8 @@ function SessionNavigation({
   return (
     <KeyboardAvoidingView behavior="height" style={{ flex: 1 }}>
       <StatusBar style="dark" />
-      <OperationalUpdates onAvailability={setLiveUpdatesUnavailable} />
       <NativeNavigationProvider key={state.user?.id ?? 'signed-out'}>
+        <OperationalUpdates onAvailability={setLiveUpdatesUnavailable} />
         <ConnectivityPresentation
           branded
           compact={!!state.user}

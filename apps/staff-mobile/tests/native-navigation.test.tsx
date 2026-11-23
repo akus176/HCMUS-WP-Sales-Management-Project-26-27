@@ -1,4 +1,5 @@
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
+import { AppState, type AppStateStatus } from 'react-native';
 import { renderRouter, screen } from 'expo-router/testing-library';
 import { SessionRoutes } from '../app/_layout';
 import StarterScreen from '../app/index';
@@ -16,6 +17,21 @@ jest.mock('../src/connectivity/networkAdapter', () => ({
     .mockResolvedValue({ isConnected: true, isInternetReachable: true }),
   addNetworkStateListener: jest.fn(() => ({ remove: jest.fn() })),
 }));
+
+const appStateListeners = new Set<(state: AppStateStatus) => void>();
+beforeEach(() => {
+  appStateListeners.clear();
+  jest
+    .spyOn(AppState, 'addEventListener')
+    .mockImplementation((_event, listener) => {
+      appStateListeners.add(listener);
+      return {
+        remove: () => {
+          appStateListeners.delete(listener);
+        },
+      };
+    });
+});
 
 const grants = [
   'orders.create',
@@ -70,9 +86,7 @@ async function setup(permissions = grants) {
   await waitFor(() => expect(h.client.getSnapshot().status).toBe('signedOut'));
   await act(async () => h.client.login('synthetic', 'fixture-password'));
   await screen.findByRole('header', { name: 'Staff home' });
-  await screen.findByRole('tab', {
-    name: permissions.length > 2 ? 'Today' : 'Home',
-  });
+  await screen.findAllByRole('tab');
   return {
     ...h,
     revoke: () => {
@@ -124,6 +138,7 @@ test('manager tabs preserve order search across workspaces and expose overflow w
 });
 
 test('a fresh revocation removes cached workspaces and never reloads their records', async () => {
+  const listeners = appStateListeners;
   const h = await setup(['orders.fulfill']);
   expect(
     screen.getAllByRole('tab').map((tab) => tab.props.accessibilityLabel),
@@ -136,7 +151,12 @@ test('a fresh revocation removes cached workspaces and never reloads their recor
     r.url.includes('/preparation-tickets'),
   ).length;
   h.revoke();
-  await fireEvent.press(screen.getByRole('tab', { name: 'Queue' }));
+  await act(async () => {
+    listeners.forEach((listener) => listener('background'));
+  });
+  await act(async () => {
+    listeners.forEach((listener) => listener('active'));
+  });
   await screen.findByText(
     'No mobile modules are available for your permissions.',
   );
@@ -207,4 +227,48 @@ test('native inventory keeps its focused ingredient and search while canceling a
       ([r]) => r.method === 'POST' && !r.url.endsWith('/auth/login'),
     ),
   ).toHaveLength(0);
+});
+
+test('warm workspace switches make no server requests and manual refresh still reloads data', async () => {
+  const h = await setup();
+  await fireEvent.press(screen.getByRole('tab', { name: 'Orders' }));
+  await screen.findByLabelText('Search orders');
+  await fireEvent.press(screen.getByRole('tab', { name: 'Stock' }));
+  await screen.findByLabelText('Search ingredients');
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Movement history' }),
+  );
+  await screen.findByText('No stock movements are recorded.');
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Ingredient balances' }),
+  );
+  await screen.findByLabelText('Search ingredients');
+  await fireEvent.press(screen.getByRole('tab', { name: 'Today' }));
+  await screen.findByRole('header', { name: 'Staff home' });
+  const loaded = h.fetcher.mock.calls.length;
+  for (let pass = 0; pass < 3; pass++) {
+    await fireEvent.press(screen.getByRole('tab', { name: 'Orders' }));
+    await screen.findByLabelText('Search orders');
+    await fireEvent.press(screen.getByRole('tab', { name: 'Stock' }));
+    await screen.findByLabelText('Search ingredients');
+    await fireEvent.press(
+      screen.getByRole('button', { name: 'Movement history' }),
+    );
+    await screen.findByText('No stock movements are recorded.');
+    await fireEvent.press(
+      screen.getByRole('button', { name: 'Ingredient balances' }),
+    );
+    await screen.findByLabelText('Search ingredients');
+    await fireEvent.press(screen.getByRole('tab', { name: 'Today' }));
+    await screen.findByRole('header', { name: 'Staff home' });
+  }
+  expect(h.fetcher).toHaveBeenCalledTimes(loaded);
+  await fireEvent.press(screen.getByRole('tab', { name: 'Orders' }));
+  await screen.findByLabelText('Search orders');
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Refresh orders and tables' }),
+  );
+  await waitFor(() =>
+    expect(h.fetcher.mock.calls.length).toBeGreaterThan(loaded),
+  );
 });

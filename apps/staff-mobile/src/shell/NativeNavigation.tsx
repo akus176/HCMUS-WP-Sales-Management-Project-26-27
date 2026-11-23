@@ -4,12 +4,14 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
 import { Keyboard, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, usePathname } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useQueryClient } from '@tanstack/react-query';
 import type { StaffSession } from '../session/session';
 import { mobileTokens as t } from './designTokens';
 import { ShellIcon } from './ShellIcon';
@@ -23,7 +25,8 @@ type Navigation = {
   user: StaffSession | null;
   workspace: Workspace;
   visited: Workspace[];
-  revision: number;
+  accessRevision: number;
+  refreshAccess: () => void;
   open: (workspace: Workspace) => void;
   verify: (user: StaffSession) => void;
 };
@@ -36,32 +39,62 @@ export function NativeNavigationProvider({
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  const queries = useQueryClient();
+  const verifiedUser = useRef<StaffSession | null>(null);
   const [user, setUser] = useState<StaffSession | null>(null);
   const [workspace, setWorkspace] = useState<Workspace>('home');
   const [visited, setVisited] = useState<Workspace[]>(['home']);
-  const [revision, setRevision] = useState(0);
-  const verify = useCallback((fresh: StaffSession) => {
-    setUser((previous) =>
-      previous && JSON.stringify(previous) === JSON.stringify(fresh)
-        ? previous
-        : fresh,
-    );
-  }, []);
+  const [accessRevision, setAccessRevision] = useState(0);
+  const refreshAccess = useCallback(
+    () => setAccessRevision((value) => value + 1),
+    [],
+  );
+  const verify = useCallback(
+    (fresh: StaffSession) => {
+      const previous = verifiedUser.current;
+      if (
+        previous &&
+        (previous.permissions.length !== fresh.permissions.length ||
+          previous.permissions.some(
+            (code) => !fresh.permissions.includes(code),
+          ))
+      ) {
+        queries.removeQueries({
+          predicate: ({ queryKey }) => queryKey[1] === previous.id,
+        });
+      }
+      verifiedUser.current = fresh;
+      setUser((previous) =>
+        previous && JSON.stringify(previous) === JSON.stringify(fresh)
+          ? previous
+          : fresh,
+      );
+    },
+    [queries],
+  );
   const open = useCallback(
     (next: Workspace) => {
       if (!user || !isWorkspaceAllowed(next, user.permissions)) return;
+      if (next === workspace && pathname === '/session') return;
       setVisited((previous) =>
         previous.includes(next) ? previous : [...previous, next],
       );
       setWorkspace(next);
-      setRevision((previous) => previous + 1);
       if (pathname !== '/session') router.dismissTo('/session');
     },
-    [pathname, user],
+    [pathname, user, workspace],
   );
   const value = useMemo(
-    () => ({ user, workspace, visited, revision, open, verify }),
-    [user, workspace, visited, revision, open, verify],
+    () => ({
+      user,
+      workspace,
+      visited,
+      accessRevision,
+      refreshAccess,
+      open,
+      verify,
+    }),
+    [user, workspace, visited, accessRevision, refreshAccess, open, verify],
   );
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
