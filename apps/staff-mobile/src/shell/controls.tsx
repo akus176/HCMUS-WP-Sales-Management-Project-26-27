@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useId,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -13,6 +14,7 @@ import {
 } from 'react';
 import {
   AccessibilityInfo,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -24,6 +26,7 @@ import {
   View,
   useWindowDimensions,
   type TextInputProps,
+  type ScrollViewProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { mobileTokens } from './designTokens';
@@ -51,31 +54,135 @@ const PageNavigation = createContext({
 
 export const usePageNavigation = () => useContext(PageNavigation);
 export const PageNotice = createContext<ReactNode>(null);
-const PageFooter = createContext<(content: ReactNode) => void>(() => {});
-type HeaderSlot = 'title' | 'controls' | 'search';
-const PageHeader = createContext<
-  ((slot: HeaderSlot, content: ReactNode) => void) | null
->(null);
+const ignoreFooter = () => {};
+const PageFooter = createContext<(content: ReactNode) => void>(ignoreFooter);
+type HeaderSlot = 'title' | 'back' | 'refresh' | 'controls' | 'search';
+type HeaderEntry = {
+  id: string;
+  slot: HeaderSlot;
+  content: ReactNode;
+  priority: number;
+};
+const PageHeader = createContext<((entry: HeaderEntry) => void) | null>(null);
+
+function useHeaderRegistry() {
+  const [entries, setEntries] = useState<HeaderEntry[]>([]);
+  const updateHeader = useCallback((entry: HeaderEntry) => {
+    setEntries((previous) => {
+      const next = previous.filter(({ id }) => id !== entry.id);
+      return entry.content == null ? next : [...next, entry];
+    });
+  }, []);
+  const header: Partial<Record<HeaderSlot, ReactNode>> = {};
+  const priorities: Partial<Record<HeaderSlot, number>> = {};
+  for (const entry of entries) {
+    if (entry.priority >= (priorities[entry.slot] ?? -Infinity)) {
+      header[entry.slot] = entry.content;
+      priorities[entry.slot] = entry.priority;
+    }
+  }
+  return { header, updateHeader };
+}
+
+function ShellHeaderRow({
+  header,
+  title,
+  leading,
+}: {
+  header: Partial<Record<HeaderSlot, ReactNode>>;
+  title?: ReactNode;
+  leading?: ReactNode;
+}) {
+  if (!header.title && !header.back && !header.refresh && !title && !leading)
+    return null;
+  return (
+    <View testID="shell-header" style={styles.headerRow}>
+      {header.back ?? leading}
+      <View style={styles.headerTitle}>{header.title ?? title}</View>
+      {header.refresh}
+    </View>
+  );
+}
+
+/** Put page-level back and refresh actions in the shared header. */
+export function ShellHeaderAction({
+  kind,
+  label,
+  onPress,
+  disabled = false,
+  loading = false,
+  priority = 1,
+}: {
+  kind: 'back' | 'refresh';
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  priority?: number;
+}) {
+  const [focused, setFocused] = useState(false);
+  const unavailable = disabled || loading;
+  return (
+    <ShellPinnedHeader slot={kind} priority={priority}>
+      <Pressable
+        testID={`header-${kind}`}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ disabled: unavailable, busy: loading }}
+        disabled={unavailable}
+        onPress={onPress}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={({ pressed }) => [
+          styles.headerAction,
+          focused && styles.selected,
+          pressed && styles.pressed,
+          unavailable && styles.unavailableHeaderAction,
+        ]}
+      >
+        {loading ? (
+          <ActivityIndicator
+            accessible={false}
+            size="small"
+            color={mobileTokens.color.primary}
+          />
+        ) : (
+          <ShellIcon
+            name={kind}
+            color={
+              unavailable
+                ? mobileTokens.color.disabledText
+                : mobileTokens.color.foreground
+            }
+          />
+        )}
+      </Pressable>
+    </ShellPinnedHeader>
+  );
+}
 
 /** Reserve space above the scrolling content for persistent page controls. */
 export function ShellPinnedHeader({
   children,
   enabled = true,
   slot = 'controls',
+  priority = 0,
 }: {
   children: ReactNode;
   enabled?: boolean;
   slot?: HeaderSlot;
+  priority?: number;
 }) {
   const setHeader = useContext(PageHeader);
+  const id = useId();
   const { fontScale, height } = useWindowDimensions();
   const pinned =
     enabled && (slot !== 'search' || (fontScale <= 1.5 && height >= 560));
   useLayoutEffect(() => {
     if (!setHeader || !pinned) return;
-    setHeader(slot, children);
-    return () => setHeader(slot, null);
-  }, [children, pinned, setHeader, slot]);
+    setHeader({ id, slot, content: children, priority });
+    return () => setHeader({ id, slot, content: null, priority });
+  }, [children, pinned, setHeader, slot, id, priority]);
   return setHeader && pinned ? null : <>{children}</>;
 }
 
@@ -91,25 +198,14 @@ export function ShellPageFooter({ children }: { children: ReactNode }) {
   return inline ? <View>{children}</View> : null;
 }
 
-export function ShellPage({ children }: { children: ReactNode }) {
-  const nativeNavigation = useNativeNavigation();
-  const notice = useContext(PageNotice);
+function usePageNavigationState() {
   const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
   const position = useRef(0);
   const origin = useRef({ key: '', y: 0 });
   const restore = useRef(false);
   const [returnTarget, setReturnTarget] = useState<string | null>(null);
   const [detailActive, setDetailActive] = useState(false);
-  const [footer, setFooter] = useState<ReactNode>(null);
-  const [header, setHeader] = useState<Partial<Record<HeaderSlot, ReactNode>>>(
-    {},
-  );
-  const updateHeader = useCallback((slot: HeaderSlot, content: ReactNode) => {
-    setHeader((previous) =>
-      previous[slot] === content ? previous : { ...previous, [slot]: content },
-    );
-  }, []);
-  // Footer updates must not recreate navigation and retrigger its consumers.
+  // Header and footer updates must not recreate navigation.
   const navigation = useMemo(
     () => ({
       detailActive,
@@ -138,6 +234,25 @@ export function ShellPage({ children }: { children: ReactNode }) {
     }),
     [detailActive, returnTarget],
   );
+  const onScroll: ScrollViewProps['onScroll'] = (event) => {
+    position.current = event.nativeEvent.contentOffset.y;
+  };
+  const onContentSizeChange = () => {
+    if (restore.current) {
+      scroll.current?.scrollTo({ y: origin.current.y, animated: false });
+      restore.current = false;
+    }
+  };
+  return { scroll, navigation, onScroll, onContentSizeChange };
+}
+
+export function ShellPage({ children }: { children: ReactNode }) {
+  const nativeNavigation = useNativeNavigation();
+  const notice = useContext(PageNotice);
+  const { scroll, navigation, onScroll, onContentSizeChange } =
+    usePageNavigationState();
+  const [footer, setFooter] = useState<ReactNode>(null);
+  const { header, updateHeader } = useHeaderRegistry();
   return (
     <SafeAreaView
       edges={nativeNavigation?.user ? [] : ['bottom']}
@@ -146,9 +261,13 @@ export function ShellPage({ children }: { children: ReactNode }) {
       <PageNavigation.Provider value={navigation}>
         <PageFooter.Provider value={setFooter}>
           <PageHeader.Provider value={updateHeader}>
-            {(header.title || header.controls || header.search) && (
+            {(header.title ||
+              header.back ||
+              header.refresh ||
+              header.controls ||
+              header.search) && (
               <View style={styles.pinnedHeader}>
-                {header.title}
+                <ShellHeaderRow header={header} />
                 {header.controls}
                 {header.search}
               </View>
@@ -158,19 +277,9 @@ export function ShellPage({ children }: { children: ReactNode }) {
               ref={scroll}
               contentContainerStyle={styles.scroll}
               keyboardShouldPersistTaps="handled"
-              onScroll={(event) => {
-                position.current = event.nativeEvent.contentOffset.y;
-              }}
+              onScroll={onScroll}
               scrollEventThrottle={16}
-              onContentSizeChange={() => {
-                if (restore.current) {
-                  scroll.current?.scrollTo({
-                    y: origin.current.y,
-                    animated: false,
-                  });
-                  restore.current = false;
-                }
-              }}
+              onContentSizeChange={onContentSizeChange}
             >
               <View style={styles.content}>
                 {notice}
@@ -226,44 +335,33 @@ export function ShellPageHeader({
   backLabel,
   onBack,
   hideDuringDetail = false,
-  inline = false,
+  priority = 0,
 }: {
   title?: string;
   backLabel?: string;
   onBack?: () => void;
   hideDuringDetail?: boolean;
   inline?: boolean;
+  priority?: number;
 }) {
   const navigation = usePageNavigation();
-  const nativeHeader = !!useNativeNavigation()?.user;
-  const { fontScale } = useWindowDimensions();
-  const inlineLayout = inline && fontScale <= 1.5;
   if (hideDuringDetail && navigation.detailActive) return null;
   return (
-    <ShellPinnedHeader slot="title" enabled={nativeHeader}>
-      <View style={[styles.header, inlineLayout && styles.inlineHeader]}>
-        {backLabel && onBack && backLabel !== 'Back to staff home' && (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={backLabel}
-            onPress={onBack}
-            style={styles.backButton}
-          >
-            <ShellIcon name="back" />
-          </Pressable>
-        )}
-        {inlineLayout && title && <ShellHeading>{title}</ShellHeading>}
-        {backLabel === 'Back to staff home' && onBack && !nativeHeader && (
-          <ShellButton
-            label={backLabel}
-            displayLabel="Staff home"
-            variant="text"
-            onPress={onBack}
-          />
-        )}
-        {!inlineLayout && title && <ShellHeading>{title}</ShellHeading>}
-      </View>
-    </ShellPinnedHeader>
+    <>
+      {title && (
+        <ShellPinnedHeader slot="title" priority={priority}>
+          <ShellHeading focusOnMount={priority > 0}>{title}</ShellHeading>
+        </ShellPinnedHeader>
+      )}
+      {backLabel && onBack && (
+        <ShellHeaderAction
+          kind="back"
+          label={backLabel}
+          onPress={onBack}
+          priority={priority}
+        />
+      )}
+    </>
   );
 }
 
@@ -363,6 +461,9 @@ export function ShellSheet({
   children: ReactNode;
 }) {
   const { height } = useWindowDimensions();
+  const { header, updateHeader } = useHeaderRegistry();
+  const { scroll, navigation, onScroll, onContentSizeChange } =
+    usePageNavigationState();
   return (
     <Modal
       visible={visible}
@@ -389,24 +490,41 @@ export function ShellSheet({
           style={[styles.sheet, { maxHeight: height * 0.9 }]}
         >
           <View style={styles.sheetHandle} />
-          <View style={styles.sheetHeader}>
-            <ShellHeading focusOnMount>{title}</ShellHeading>
-            <Pressable
-              style={styles.backButton}
-              accessibilityRole="button"
-              accessibilityLabel={`Close ${title}`}
-              disabled={busy}
-              onPress={onClose}
-            >
-              <ShellIcon name="close" />
-            </Pressable>
-          </View>
-          <ScrollView
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={styles.sheetContent}
-          >
-            {children}
-          </ScrollView>
+          <PageNavigation.Provider value={navigation}>
+            <PageFooter.Provider value={ignoreFooter}>
+              <PageHeader.Provider value={updateHeader}>
+                <View style={styles.sheetHeader}>
+                  <ShellHeaderRow
+                    header={header}
+                    title={<ShellHeading focusOnMount>{title}</ShellHeading>}
+                    leading={
+                      <Pressable
+                        style={styles.backButton}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Close ${title}`}
+                        disabled={busy}
+                        onPress={onClose}
+                      >
+                        <ShellIcon name="close" />
+                      </Pressable>
+                    }
+                  />
+                </View>
+                {header.controls}
+                {header.search}
+                <ScrollView
+                  ref={scroll}
+                  onScroll={onScroll}
+                  scrollEventThrottle={16}
+                  onContentSizeChange={onContentSizeChange}
+                  keyboardShouldPersistTaps="handled"
+                  contentContainerStyle={styles.sheetContent}
+                >
+                  {children}
+                </ScrollView>
+              </PageHeader.Provider>
+            </PageFooter.Provider>
+          </PageNavigation.Provider>
         </SafeAreaView>
       </KeyboardAvoidingView>
     </Modal>
@@ -600,13 +718,27 @@ export function ShellButton({
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: mobileTokens.color.background },
   scroll: { flexGrow: 1 },
-  header: { gap: 8, alignItems: 'flex-start' },
-  inlineHeader: {
+  headerRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
     gap: 8,
+    minHeight: 48,
+    width: '100%',
   },
+  headerTitle: { flex: 1, minWidth: 0 },
+  headerAction: {
+    minWidth: 48,
+    minHeight: 48,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    backgroundColor: mobileTokens.color.selectedBackground,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unavailableHeaderAction: { opacity: 0.5 },
   backButton: {
     minHeight: 48,
     minWidth: 48,
