@@ -13,5 +13,5 @@ appId: com.coffeeshop.staffmobile
 - hideKeyboard
 - tapOn: Sign in
 - extendedWaitUntil:
-    visible: Staff home
+    visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 30000

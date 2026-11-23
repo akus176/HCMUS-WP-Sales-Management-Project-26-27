@@ -33,6 +33,10 @@ name: Cashier payment against the shared API
     direction: DOWN
 - tapOn: Open order ${MAESTRO_PAYMENT_ORDER}
 - scrollUntilVisible:
+    element: Record payment
+    direction: DOWN
+- tapOn: Record payment
+- scrollUntilVisible:
     element: Payment amount
     direction: DOWN
 - tapOn: Payment amount

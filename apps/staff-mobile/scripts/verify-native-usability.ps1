@@ -4,7 +4,8 @@ param(
     [string[]]$Profiles = @('p100', 'p200', 't100', 't200'),
     [string[]]$RoleNames = @('manager', 'admin', 'inventory', 'delivery'),
     [ValidateSet('queue', 'detail')][string]$ReferencePhase = 'queue',
-    [string]$ResultsDirectory = '.maestro/results/usability'
+    [string]$ResultsDirectory = '.maestro/results/usability',
+    [string]$AppId = 'com.coffeeshop.staffmobile'
 )
 $ErrorActionPreference = 'Stop'
 # Run from apps/staff-mobile, with Metro serving the recorded source revision.
@@ -53,10 +54,11 @@ $taskRoles = @(
     @{ name = 'inventory'; role = 'InventoryStaff'; flow = 'inventory' },
     @{ name = 'delivery'; role = 'DeliveryStaff'; flow = 'delivery' },
     @{ name = 'concept'; role = 'Manager'; flow = 'concept' }
+    @{ name = 'mockup'; role = 'Manager'; flow = 'native-mockup' }
 )
 $taskRoles = @($taskRoles | Where-Object { $_.name -in $RoleNames })
 if (!$taskRoles.Count) { throw 'Select at least one known audit role.' }
-$taskRoot = [IO.Path]::GetFullPath($ResultsDirectory)
+$taskRoot = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($ResultsDirectory)
 New-Item -ItemType Directory -Path $taskRoot -Force | Out-Null
 $taskCases = @()
 $taskSummaryPath = Join-Path $taskRoot "summary-$Stage.json"
@@ -65,7 +67,7 @@ try {
         $taskProfile = $taskProfileMap[$taskProfileName]
         # Apply device configuration before mounting the development app. Live
         # Activity recreation can leave two temporary Expo navigation roots.
-        & adb -s $DeviceSerial shell am force-stop com.coffeeshop.staffmobile | Out-Null
+        & adb -s $DeviceSerial shell am force-stop $AppId | Out-Null
         & adb -s $DeviceSerial shell wm size $taskProfile.size | Out-Null
         & adb -s $DeviceSerial shell wm density $taskProfile.density | Out-Null
         & adb -s $DeviceSerial shell settings put system font_scale $taskProfile.font | Out-Null
@@ -80,17 +82,21 @@ try {
             $env:MAESTRO_STAFF_USERNAME = [Environment]::GetEnvironmentVariable("COFFEESHOP_E2E_$($taskRole.role)_USERNAME")
             if (!$env:MAESTRO_STAFF_USERNAME -or !$env:MAESTRO_STAFF_PASSWORD) { throw 'Set synthetic role accounts and MAESTRO_STAFF_PASSWORD.' }
             $env:MAESTRO_UX_AFTER = if ($Stage -eq 'after') { 'true' } else { 'false' }
-            $env:MAESTRO_CAPTURE_DIR = '.'
+            $env:MAESTRO_APP_ID = $AppId
             $env:MAESTRO_CONCEPT_PHASE = $ReferencePhase
             $taskCaseDir = Join-Path $taskRoot "$Stage/$taskProfileName/$($taskRole.name)"
             New-Item -ItemType Directory -Path $taskCaseDir -Force | Out-Null
+            # Maestro confines relative screenshot names to its per-run output
+            # directory. Absolute paths are rejected by the CLI's path guard.
+            $env:MAESTRO_CAPTURE_DIR = '.'
             $taskXmlPath = Join-Path $taskCaseDir 'junit.xml'
             $taskSavedPreference = $ErrorActionPreference
             try {
                 # Native stderr must be retained even when parsing fails, so the
                 # case is counted as failed instead of bypassing the report.
                 $ErrorActionPreference = 'Continue'
-                & maestro --device $DeviceSerial test --format junit --output $taskXmlPath --test-output-dir $taskCaseDir ".maestro/usability/$($taskRole.flow).yaml" *> (Join-Path $taskCaseDir 'private.log')
+                $taskFlowPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".maestro/usability/$($taskRole.flow).yaml")
+                & maestro --device $DeviceSerial test --format junit --output $taskXmlPath --test-output-dir $taskCaseDir $taskFlowPath *> (Join-Path $taskCaseDir 'private.log')
                 $taskExit = $LASTEXITCODE
             } finally { $ErrorActionPreference = $taskSavedPreference }
             $taskNodes = @()
@@ -132,7 +138,7 @@ try {
         }
     }
 } finally {
-    & adb -s $DeviceSerial shell am force-stop com.coffeeshop.staffmobile | Out-Null
+    & adb -s $DeviceSerial shell am force-stop $AppId | Out-Null
     if ($taskOriginalSize -match 'Override size: (\d+x\d+)') { & adb -s $DeviceSerial shell wm size $Matches[1] | Out-Null }
     else { & adb -s $DeviceSerial shell wm size reset | Out-Null }
     if ($taskOriginalDensity -match 'Override density: (\d+)') { & adb -s $DeviceSerial shell wm density $Matches[1] | Out-Null }

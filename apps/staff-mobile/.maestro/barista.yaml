@@ -16,13 +16,12 @@ name: Barista progression against the shared API
 - extendedWaitUntil:
     visible: Open Preparation
     timeout: 30000
+- runFlow:
+    when:
+      visible: More
+    commands:
+      - tapOn: More
 - tapOn: Open Preparation
-- scrollUntilVisible:
-    element: Open selected ticket
-    direction: DOWN
-- assertVisible:
-    text: Open selected ticket
-    enabled: false
 - scrollUntilVisible:
     element:
       id: preparation-filter-confirmed
@@ -53,16 +52,9 @@ name: Barista progression against the shared API
       id: preparation-filter-active
     direction: UP
 - scrollUntilVisible:
-    element: Select ticket ${MAESTRO_ORDER_NUMBER}
+    element: Open ticket ${MAESTRO_ORDER_NUMBER}
     direction: DOWN
-- tapOn: Select ticket ${MAESTRO_ORDER_NUMBER}
-- scrollUntilVisible:
-    element: Open ${MAESTRO_ORDER_NUMBER}
-    direction: DOWN
-- assertVisible:
-    text: Open ${MAESTRO_ORDER_NUMBER}
-    enabled: true
-- tapOn: Open ${MAESTRO_ORDER_NUMBER}
+- tapOn: Open ticket ${MAESTRO_ORDER_NUMBER}
 - scrollUntilVisible:
     element: Large
     direction: DOWN
@@ -76,12 +68,12 @@ name: Barista progression against the shared API
     direction: UP
 - tapOn: Back to Preparation
 - scrollUntilVisible:
-    element: Open ${MAESTRO_ORDER_NUMBER}
+    element: Open ticket ${MAESTRO_ORDER_NUMBER}
     direction: DOWN
 - assertVisible:
-    text: Open ${MAESTRO_ORDER_NUMBER}
+    text: Open ticket ${MAESTRO_ORDER_NUMBER}
     enabled: true
-- tapOn: Open ${MAESTRO_ORDER_NUMBER}
+- tapOn: Open ticket ${MAESTRO_ORDER_NUMBER}
 - scrollUntilVisible:
     element: Start preparing
     direction: DOWN

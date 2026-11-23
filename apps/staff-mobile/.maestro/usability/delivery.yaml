@@ -7,6 +7,11 @@ name: Active deliveries, contact details and failure form
     env:
       MAESTRO_SCROLL_TARGET: Open Deliveries
       MAESTRO_SCROLL_DIRECTION: DOWN
+- runFlow:
+    when:
+      visible: More
+    commands:
+      - tapOn: More
 - tapOn: Open Deliveries
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/deliveries
 - runFlow:

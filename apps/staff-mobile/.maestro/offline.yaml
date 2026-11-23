@@ -10,6 +10,10 @@ name: Offline stock writes stay disabled and are not replayed
 - inputText: ${MAESTRO_OFFLINE_INGREDIENT}
 - runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
+    element: Open ingredient ${MAESTRO_OFFLINE_INGREDIENT}
+    direction: DOWN
+- tapOn: Open ingredient ${MAESTRO_OFFLINE_INGREDIENT}
+- scrollUntilVisible:
     element: Record adjustment for ${MAESTRO_OFFLINE_INGREDIENT}
     direction: DOWN
 - tapOn: Record adjustment for ${MAESTRO_OFFLINE_INGREDIENT}
@@ -42,7 +46,8 @@ name: Offline stock writes stay disabled and are not replayed
     enabled: false
 - setAirplaneMode: disabled
 - extendedWaitUntil:
-    visible: 'Online.*'
+    visible:
+      text: Save adjustment
+      enabled: true
     timeout: 30000
-- assertVisible: 'Online.*'
 - assertNotVisible: 'Adjustment saved by the server.*'

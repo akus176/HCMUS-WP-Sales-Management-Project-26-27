@@ -9,11 +9,13 @@ name: Notification link reauthorizes a recipient with no approval permission
     visible: Access unavailable. Your current permissions do not allow this module.
     timeout: 30000
 - assertNotVisible: Discount review
-- tapOn: Back to staff home
+- tapOn: Home
+- tapOn: Account
 - scrollUntilVisible:
     element: Sign out
     direction: DOWN
 - tapOn: Sign out
+- tapOn: Confirm sign out
 - assertVisible: Staff sign-in
 - openLink: coffeeshop-staff:///notifications/approval/${MAESTRO_DISCOUNT_ID}
 - assertVisible: Staff sign-in

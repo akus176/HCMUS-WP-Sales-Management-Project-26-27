@@ -2,6 +2,11 @@ appId: com.coffeeshop.staffmobile
 name: Approve and reject discounts against the shared API
 ---
 - runFlow: common/login.yaml
+- runFlow:
+    when:
+      visible: More
+    commands:
+      - tapOn: More
 - tapOn: Open Approvals
 - scrollUntilVisible:
     element: Review order ${MAESTRO_APPROVE_ORDER} discount
@@ -11,6 +16,10 @@ name: Approve and reject discounts against the shared API
     element: Approve discount
     direction: DOWN
 - tapOn: Approve discount
+- scrollUntilVisible:
+    element: Confirm discount approval
+    direction: DOWN
+- tapOn: Confirm discount approval
 - scrollUntilVisible:
     element: 'Approved by the server. Confirmed order total: 9.'
     direction: UP
@@ -24,6 +33,10 @@ name: Approve and reject discounts against the shared API
     element: Reject discount
     direction: DOWN
 - tapOn: Reject discount
+- scrollUntilVisible:
+    element: Confirm discount rejection
+    direction: DOWN
+- tapOn: Confirm discount rejection
 - scrollUntilVisible:
     element: 'Rejected by the server. Confirmed order total: 10.'
     direction: UP

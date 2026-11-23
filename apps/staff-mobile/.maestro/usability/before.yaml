@@ -11,17 +11,10 @@ name: Recorded preparation and Counter layout
       - runFlow:
           file: scroll-to.yaml
           env:
-            MAESTRO_SCROLL_TARGET: Select ticket ${MAESTRO_ORDER_NUMBER}
+            MAESTRO_SCROLL_TARGET: Open ticket ${MAESTRO_ORDER_NUMBER}
             MAESTRO_SCROLL_DIRECTION: DOWN
       - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/prep-record
-      - tapOn: Select ticket ${MAESTRO_ORDER_NUMBER}
-      - runFlow:
-          file: scroll-to.yaml
-          env:
-            MAESTRO_SCROLL_TARGET: Open ${MAESTRO_ORDER_NUMBER}
-            MAESTRO_SCROLL_DIRECTION: DOWN
-      - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/prep-selected
-      - tapOn: Open ${MAESTRO_ORDER_NUMBER}
+      - tapOn: Open ticket ${MAESTRO_ORDER_NUMBER}
 - runFlow:
     when:
       true: ${MAESTRO_UX_AFTER != 'true'}
@@ -47,6 +40,7 @@ name: Recorded preparation and Counter layout
       - extendedWaitUntil:
           visible: Tables
           timeout: 30000
+      - tapOn: Tables
       - assertVisible: Table occupancy
       - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/counter-tables
       - tapOn: Orders

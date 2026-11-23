@@ -5,6 +5,10 @@ appId: com.coffeeshop.staffmobile
     direction: DOWN
 - tapOn: Approve discount
 - scrollUntilVisible:
+    element: Confirm discount approval
+    direction: DOWN
+- tapOn: Confirm discount approval
+- scrollUntilVisible:
     element: Access changed
     direction: UP
 - assertVisible: Access changed

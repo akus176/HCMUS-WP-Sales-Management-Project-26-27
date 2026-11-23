@@ -10,6 +10,10 @@ name: Low stock, required adjustment reason, receipt posting and history
 - inputText: ${MAESTRO_INGREDIENT}
 - runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
+    element: Open ingredient ${MAESTRO_INGREDIENT}
+    direction: DOWN
+- tapOn: Open ingredient ${MAESTRO_INGREDIENT}
+- scrollUntilVisible:
     element: Record adjustment for ${MAESTRO_INGREDIENT}
     direction: DOWN
 - assertVisible: 'Low stock.*'
@@ -35,6 +39,10 @@ name: Low stock, required adjustment reason, receipt posting and history
 - runFlow: usability/hide-keyboard.yaml
 - tapOn: Save adjustment
 - scrollUntilVisible:
+    element: Confirm adjustment
+    direction: DOWN
+- tapOn: Confirm adjustment
+- scrollUntilVisible:
     element: 'Adjustment saved by the server. New balance: 3 l.'
     direction: UP
 - assertVisible: 'Adjustment saved by the server. New balance: 3 l.'
@@ -46,6 +54,11 @@ name: Low stock, required adjustment reason, receipt posting and history
     element: 'adjustment: 2 l · Quality physical count'
     direction: DOWN
 - assertVisible: 'adjustment: 2 l · Quality physical count'
+- tapOn: Close Movement history · ${MAESTRO_INGREDIENT}
+- scrollUntilVisible:
+    element: Back to ingredients
+    direction: UP
+- tapOn: Back to ingredients
 - scrollUntilVisible:
     element: Purchase receipts
     direction: UP
@@ -58,6 +71,10 @@ name: Low stock, required adjustment reason, receipt posting and history
     element: Post receipt ${MAESTRO_RECEIPT}
     direction: DOWN
 - tapOn: Post receipt ${MAESTRO_RECEIPT}
+- scrollUntilVisible:
+    element: Confirm receipt posting
+    direction: DOWN
+- tapOn: Confirm receipt posting
 - scrollUntilVisible:
     element: 'Status: posted'
     direction: UP

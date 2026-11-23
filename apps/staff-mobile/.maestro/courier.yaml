@@ -16,6 +16,11 @@ name: Courier delivered and failed workflows against the shared API
 - extendedWaitUntil:
     visible: Open Deliveries
     timeout: 30000
+- runFlow:
+    when:
+      visible: More
+    commands:
+      - tapOn: More
 - tapOn: Open Deliveries
 - scrollUntilVisible:
     element: Open delivery ${MAESTRO_DELIVERED_ORDER}
@@ -26,9 +31,17 @@ name: Courier delivered and failed workflows against the shared API
     direction: DOWN
 - tapOn: Start delivery
 - scrollUntilVisible:
+    element: Confirm start delivery
+    direction: DOWN
+- tapOn: Confirm start delivery
+- scrollUntilVisible:
     element: Mark delivered
     direction: DOWN
 - tapOn: Mark delivered
+- scrollUntilVisible:
+    element: Confirm delivered
+    direction: DOWN
+- tapOn: Confirm delivered
 - extendedWaitUntil:
     visible: Delivery delivered. Confirmed by the service.
     timeout: 30000
@@ -46,6 +59,10 @@ name: Courier delivered and failed workflows against the shared API
     direction: DOWN
 - tapOn: Start delivery
 - scrollUntilVisible:
+    element: Confirm start delivery
+    direction: DOWN
+- tapOn: Confirm start delivery
+- scrollUntilVisible:
     element: Mark failed
     direction: DOWN
 - tapOn: Mark failed
@@ -57,6 +74,10 @@ name: Courier delivered and failed workflows against the shared API
 - inputText: Customer unavailable
 - hideKeyboard
 - tapOn: Mark failed
+- scrollUntilVisible:
+    element: Confirm failed
+    direction: DOWN
+- tapOn: Confirm failed
 - extendedWaitUntil:
     visible: Delivery failed. Confirmed by the service.
     timeout: 30000

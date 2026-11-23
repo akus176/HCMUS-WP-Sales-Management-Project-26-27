@@ -38,6 +38,6 @@ name: Staff sign-in, visible form labels and keyboard
       MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Sign in
 - extendedWaitUntil:
-    visible: Staff home
+    visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 30000
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/home

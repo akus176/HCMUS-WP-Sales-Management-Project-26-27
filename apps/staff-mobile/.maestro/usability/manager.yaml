@@ -16,6 +16,10 @@ name: Updated operational navigation, filters and review forms
       MAESTRO_SCROLL_TARGET: Open order ${MAESTRO_PAYMENT_ORDER}
       MAESTRO_SCROLL_DIRECTION: DOWN
 - tapOn: Open order ${MAESTRO_PAYMENT_ORDER}
+- scrollUntilVisible:
+    element: Record payment
+    direction: DOWN
+- tapOn: Record payment
 - runFlow:
     file: scroll-to.yaml
     env:
@@ -38,6 +42,7 @@ name: Updated operational navigation, filters and review forms
       MAESTRO_SCROLL_TARGET: Confirm payment
       MAESTRO_SCROLL_DIRECTION: DOWN
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/payment-review
+- tapOn: Close Record payment
 - runFlow:
     file: scroll-to.yaml
     env:
@@ -117,10 +122,15 @@ name: Updated operational navigation, filters and review forms
 - tapOn: Keep current order
 # Start a fresh view: tapping a long order ID can place the caret midway through
 # the existing value, so eraseText alone does not reliably clear the search.
-- launchApp
+- openLink: coffeeshop-staff:///session
 - extendedWaitUntil:
-    visible: Open Approvals
+    visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 30000
+- runFlow:
+    when:
+      visible: More
+    commands:
+      - tapOn: More
 - tapOn: Open Approvals
 - tapOn: Manage cancellations and deliveries
 - runFlow:

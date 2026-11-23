@@ -1,0 +1,131 @@
+appId: ${MAESTRO_APP_ID}
+name: Native mockup navigation and canceled confirmations
+---
+- openLink: ${MAESTRO_REVIEW_URL}
+- extendedWaitUntil:
+    visible: 'Staff sign-in|Good (morning|afternoon|evening).*'
+    timeout: 90000
+- runFlow:
+    when:
+      visible: Staff sign-in
+    commands:
+      - tapOn: Username
+      - inputText: ${MAESTRO_STAFF_USERNAME}
+      - hideKeyboard
+      - tapOn: Password
+      - inputText: ${MAESTRO_STAFF_PASSWORD}
+      - hideKeyboard
+      - tapOn: Sign in
+- extendedWaitUntil:
+    visible: 'Good (morning|afternoon|evening).*'
+    timeout: 30000
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-home
+- tapOn: Orders
+- extendedWaitUntil:
+    visible: Search orders
+    timeout: 15000
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-orders
+- tapOn: Search orders
+- inputText: '1042'
+- hideKeyboard
+- tapOn: Stock
+- extendedWaitUntil:
+    visible: Search ingredients
+    timeout: 15000
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-inventory
+- tapOn: Orders
+- assertVisible: '1042'
+- scrollUntilVisible:
+    element: Open order 1042
+    direction: DOWN
+- tapOn: Open order 1042
+- extendedWaitUntil:
+    visible: Back to order search
+    timeout: 15000
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-order-detail
+- scrollUntilVisible:
+    element: Record payment
+    direction: DOWN
+- tapOn: Record payment
+- scrollUntilVisible:
+    element: Payment amount
+    direction: DOWN
+- assertVisible: Payment amount
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-payment-sheet
+- tapOn: Close Record payment
+- tapOn: More
+- extendedWaitUntil:
+    visible: Open Preparation
+    timeout: 15000
+- scrollUntilVisible:
+    element: Open Preparation
+    direction: DOWN
+- tapOn: Open Preparation
+- extendedWaitUntil:
+    visible: Open ticket 1042
+    timeout: 15000
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-queue
+- scrollUntilVisible:
+    element: Open ticket 1042
+    direction: DOWN
+- tapOn: Open ticket 1042
+- extendedWaitUntil:
+    visible: Back to Preparation
+    timeout: 15000
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-ticket
+- scrollUntilVisible:
+    element: Mark ready
+    direction: DOWN
+- tapOn: Mark ready
+- scrollUntilVisible:
+    element: Confirm ready
+    direction: DOWN
+- assertVisible: Confirm ready
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-ready-sheet
+- scrollUntilVisible:
+    element: Keep preparing
+    direction: DOWN
+- tapOn: Keep preparing
+- scrollUntilVisible:
+    element: Mark ready
+    direction: DOWN
+- tapOn: Stock
+- extendedWaitUntil:
+    visible: Open ingredient Oat milk
+    timeout: 15000
+- scrollUntilVisible:
+    element: Open ingredient Oat milk
+    direction: DOWN
+- tapOn: Open ingredient Oat milk
+- scrollUntilVisible:
+    element: Record adjustment for Oat milk
+    direction: DOWN
+- tapOn: Record adjustment for Oat milk
+- scrollUntilVisible:
+    element: Quantity change
+    direction: DOWN
+- assertVisible: Quantity change
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-adjustment-sheet
+- tapOn: Close Adjust stock
+- tapOn: More
+- scrollUntilVisible:
+    element: Open Account
+    direction: DOWN
+- tapOn: Open Account
+- extendedWaitUntil:
+    visible: Account
+    timeout: 15000
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/native-account
+- scrollUntilVisible:
+    element: Sign out
+    direction: DOWN
+- tapOn: Sign out
+- scrollUntilVisible:
+    element: Confirm sign out
+    direction: DOWN
+- assertVisible: Confirm sign out
+- scrollUntilVisible:
+    element: Stay signed in
+    direction: DOWN
+- tapOn: Stay signed in
+- assertVisible: Sign out
