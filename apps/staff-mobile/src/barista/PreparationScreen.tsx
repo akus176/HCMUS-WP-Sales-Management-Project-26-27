@@ -21,6 +21,7 @@ import {
   ShellSelection,
   ShellMutationFeedback,
   ShellPageFooter,
+  ShellSheet,
   usePageNavigation,
 } from '../shell/controls';
 import { mobileTokens } from '../shell/designTokens';
@@ -63,7 +64,8 @@ const preview = (ticket: Ticket) => {
 export function PreparationScreen({
   ticketId,
   showHeading = true,
-}: { ticketId?: string; showHeading?: boolean } = {}) {
+  directOpen = false,
+}: { ticketId?: string; showHeading?: boolean; directOpen?: boolean } = {}) {
   const { fontScale } = useWindowDimensions();
   const { client, state } = useSession();
   const queries = useQueryClient();
@@ -314,48 +316,62 @@ export function PreparationScreen({
                       ]}
                     >
                       {intent && intent.status === ticket.status ? (
-                        <View style={styles.confirmation}>
-                          <Text
-                            accessibilityRole="alert"
-                            accessibilityLiveRegion="polite"
-                            style={styles.confirmationTitle}
-                          >
-                            {intent.action === 'start'
-                              ? 'Start preparing this ticket?'
-                              : 'Mark this ticket ready?'}
-                          </Text>
-                          {intent.action === 'ready' && (
-                            <ShellText>
-                              This updates the whole ticket.
-                            </ShellText>
-                          )}
-                          <ShellButton
-                            label={
-                              intent.action === 'start'
-                                ? 'Confirm start'
-                                : 'Confirm ready'
-                            }
-                            disabled={disabled}
-                            loading={busy}
-                            prominent
-                            onPress={() => void confirm()}
-                          />
-                          <ShellButton
-                            label={
-                              intent.action === 'ready'
-                                ? 'Keep preparing'
-                                : 'Keep current state'
-                            }
-                            variant="secondary"
-                            disabled={busy}
-                            onPress={() => {
-                              setIntent(null);
-                              navigation.focusTarget(
-                                'preparation-state-action',
-                              );
-                            }}
-                          />
-                        </View>
+                        <ShellSheet
+                          visible
+                          title={
+                            intent.action === 'start'
+                              ? 'Start preparation?'
+                              : 'Ready to serve?'
+                          }
+                          busy={busy}
+                          onClose={() => {
+                            setIntent(null);
+                            navigation.focusTarget('preparation-state-action');
+                          }}
+                        >
+                          <View style={styles.confirmation}>
+                            <Text
+                              accessibilityRole="alert"
+                              accessibilityLiveRegion="polite"
+                              style={styles.confirmationTitle}
+                            >
+                              {intent.action === 'start'
+                                ? 'Start preparing this ticket?'
+                                : 'Mark this ticket ready?'}
+                            </Text>
+                            {intent.action === 'ready' && (
+                              <ShellText>
+                                This updates the whole ticket.
+                              </ShellText>
+                            )}
+                            <ShellButton
+                              label={
+                                intent.action === 'start'
+                                  ? 'Confirm start'
+                                  : 'Confirm ready'
+                              }
+                              disabled={disabled}
+                              loading={busy}
+                              prominent
+                              onPress={() => void confirm()}
+                            />
+                            <ShellButton
+                              label={
+                                intent.action === 'ready'
+                                  ? 'Keep preparing'
+                                  : 'Keep current state'
+                              }
+                              variant="secondary"
+                              disabled={busy}
+                              onPress={() => {
+                                setIntent(null);
+                                navigation.focusTarget(
+                                  'preparation-state-action',
+                                );
+                              }}
+                            />
+                          </View>
+                        </ShellSheet>
                       ) : ticket.status === 'confirmed' ||
                         ticket.status === 'preparing' ? (
                         <ShellButton
@@ -445,7 +461,7 @@ export function PreparationScreen({
                       <Pressable
                         key={item.orderId}
                         accessibilityRole="button"
-                        accessibilityLabel={`Select ticket ${item.orderNumber}`}
+                        accessibilityLabel={`${directOpen ? 'Open' : 'Select'} ticket ${item.orderNumber}`}
                         accessibilityHint={`${item.status}. ${itemCount(item)} items. ${location(item)}. ${preview(item)}`}
                         accessibilityState={{
                           selected: queueSelection === item.orderId,
@@ -453,6 +469,10 @@ export function PreparationScreen({
                         onPress={() => {
                           setQueueSelection(item.orderId);
                           clearFeedback();
+                          if (directOpen) {
+                            navigation.openDetail(`ticket:${item.orderId}`);
+                            setSelected(item.orderId);
+                          }
                         }}
                         onFocus={() => setFocusedRow(item.orderId)}
                         onBlur={() => setFocusedRow(null)}
@@ -487,23 +507,27 @@ export function PreparationScreen({
                     disabled={!mutation.canMutate}
                     onPress={() => void queue.refetch()}
                   />
-                  <ShellButton
-                    label={
-                      selectedRow
-                        ? `Open ${selectedRow.orderNumber}`
-                        : 'Open selected ticket'
-                    }
-                    prominent
-                    focusKey="preparation-open"
-                    disabled={!selectedRow || queue.isFetching || queue.isError}
-                    onPress={() => {
-                      if (!selectedRow || queue.isFetching || queue.isError)
-                        return;
-                      navigation.openDetail('preparation-open');
-                      setSelected(selectedRow.orderId);
-                      clearFeedback();
-                    }}
-                  />
+                  {!directOpen && (
+                    <ShellButton
+                      label={
+                        selectedRow
+                          ? `Open ${selectedRow.orderNumber}`
+                          : 'Open selected ticket'
+                      }
+                      prominent
+                      focusKey="preparation-open"
+                      disabled={
+                        !selectedRow || queue.isFetching || queue.isError
+                      }
+                      onPress={() => {
+                        if (!selectedRow || queue.isFetching || queue.isError)
+                          return;
+                        navigation.openDetail('preparation-open');
+                        setSelected(selectedRow.orderId);
+                        clearFeedback();
+                      }}
+                    />
+                  )}
                 </View>
               </ShellPageFooter>
               {!queue.isError && queue.data && (
@@ -558,20 +582,19 @@ const styles = StyleSheet.create({
     backgroundColor: mobileTokens.color.background,
     borderTopWidth: 1,
     borderTopColor: mobileTokens.color.disabledBackground,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 12,
     gap: 8,
   },
-  confirmationDock: { backgroundColor: mobileTokens.color.highlight },
-  ledger: { borderTopWidth: 1, borderColor: mobileTokens.color.primary },
+  confirmationDock: { backgroundColor: mobileTokens.color.background },
+  ledger: { gap: 12 },
   ticketRow: {
     minHeight: 48,
     minWidth: 48,
-    gap: 4,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
-    borderBottomWidth: 1,
-    borderColor: mobileTokens.color.primary,
+    gap: 8,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: mobileTokens.color.surface,
     borderLeftWidth: 4,
     borderLeftColor: 'transparent',
   },
@@ -588,14 +611,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   ticketNumber: {
-    fontFamily: mobileTokens.type.displayFont,
-    fontSize: 24,
+    fontFamily: mobileTokens.type.mediumFont,
+    fontSize: 18,
+    lineHeight: 26,
     color: mobileTokens.color.foreground,
     flexShrink: 1,
   },
   status: {
     fontFamily: mobileTokens.type.bodyFont,
-    fontSize: 14,
+    fontSize: 13,
+    lineHeight: 20,
     color: mobileTokens.color.foreground,
     backgroundColor: mobileTokens.color.highlight,
     borderRadius: 8,
@@ -609,7 +634,8 @@ const styles = StyleSheet.create({
   },
   metadata: {
     fontFamily: mobileTokens.type.bodyFont,
-    fontSize: 14,
+    fontSize: 13,
+    lineHeight: 20,
     color: mobileTokens.color.foreground,
   },
   detailTitle: {
@@ -628,7 +654,7 @@ const styles = StyleSheet.create({
   },
   quantity: {
     fontFamily: mobileTokens.type.bodyFont,
-    fontSize: 24,
+    fontSize: 20,
     color: mobileTokens.color.foreground,
     flexShrink: 1,
   },
@@ -641,12 +667,13 @@ const styles = StyleSheet.create({
   },
   itemName: {
     fontFamily: mobileTokens.type.bodyFont,
-    fontSize: 24,
+    fontSize: 20,
     color: mobileTokens.color.foreground,
   },
   body: {
     fontFamily: mobileTokens.type.bodyFont,
-    fontSize: 18,
+    fontSize: 16,
+    lineHeight: 23,
     color: mobileTokens.color.foreground,
   },
   addons: {
@@ -658,8 +685,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   confirmationTitle: {
-    fontFamily: mobileTokens.type.displayFont,
-    fontSize: 24,
+    fontFamily: mobileTokens.type.mediumFont,
+    fontSize: 18,
+    lineHeight: 26,
     color: mobileTokens.color.foreground,
   },
 });

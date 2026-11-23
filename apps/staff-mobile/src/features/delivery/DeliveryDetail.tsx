@@ -13,6 +13,7 @@ import {
   ShellText,
   ShellInput,
   ShellMutationFeedback,
+  ShellSheet,
 } from '../../shell/controls';
 
 export function DeliveryDetail({ orderId }: { orderId: string }) {
@@ -22,6 +23,9 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
   const [accessRevoked, setAccessRevoked] = useState(false);
   const [finished, setFinished] = useState<'delivered' | 'failed' | null>(null);
   const [reason, setReason] = useState('');
+  const [intent, setIntent] = useState<'start' | 'complete' | 'fail' | null>(
+    null,
+  );
   const [reasonError, setReasonError] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const submitting = useRef(false);
@@ -204,7 +208,7 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
                 mutation.isPending ||
                 detail.isFetching
               }
-              onPress={() => void submit('start')}
+              onPress={() => setIntent('start')}
             />
           )}
           {assignment.deliveryStatus === 'out_for_delivery' && (
@@ -216,7 +220,7 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
                   mutation.isPending ||
                   detail.isFetching
                 }
-                onPress={() => void submit('complete')}
+                onPress={() => setIntent('complete')}
               />
               <ShellInput
                 label="Reason for failed delivery"
@@ -243,10 +247,57 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
                   mutation.isPending ||
                   detail.isFetching
                 }
-                onPress={() => void submit('fail')}
+                onPress={() => {
+                  if (!reason.trim()) {
+                    setReasonError(true);
+                    return;
+                  }
+                  setIntent('fail');
+                }}
               />
             </>
           )}
+          <ShellSheet
+            visible={!!intent}
+            title={
+              intent === 'start'
+                ? 'Start this delivery?'
+                : intent === 'complete'
+                  ? 'Confirm delivery?'
+                  : 'Report failed delivery?'
+            }
+            busy={mutation.isPending}
+            onClose={() => setIntent(null)}
+          >
+            <ShellText>Order {assignment.orderNumber}</ShellText>
+            {intent === 'fail' && <ShellText>{reason}</ShellText>}
+            <ShellButton
+              label={
+                intent === 'start'
+                  ? 'Confirm start delivery'
+                  : intent === 'complete'
+                    ? 'Confirm delivered'
+                    : 'Confirm failed delivery'
+              }
+              disabled={
+                mutation.isWriteDisabled ||
+                mutation.isPending ||
+                detail.isFetching
+              }
+              loading={mutation.isPending}
+              onPress={() => {
+                if (intent) {
+                  void submit(intent);
+                  setIntent(null);
+                }
+              }}
+            />
+            <ShellButton
+              label="Keep reviewing delivery"
+              variant="secondary"
+              onPress={() => setIntent(null)}
+            />
+          </ShellSheet>
         </>
       )}
     </>

@@ -168,6 +168,10 @@ test('shows the server-confirmed approved decision and updated order total', asy
 
   await view.findByText('Reason: Service recovery');
   await fireEvent.press(view.getByRole('button', { name: 'Approve discount' }));
+  const confirmation = view.queryByRole('button', {
+    name: 'Confirm discount approval',
+  });
+  if (confirmation) await fireEvent.press(confirmation);
 
   expect(await view.findByText(/Approved by the server.*2\.700/)).toBeVisible();
   expect(post).toHaveBeenCalledWith('/api/v1/discounts/{id}/approve', {
@@ -187,6 +191,9 @@ test('shows the server-confirmed rejected decision without changing the total', 
 
   await view.findByText('Reason: Service recovery');
   await fireEvent.press(view.getByRole('button', { name: 'Reject discount' }));
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Confirm discount rejection' }),
+  );
 
   expect(await view.findByText(/Rejected by the server.*3\.000/)).toBeVisible();
   expect(post).toHaveBeenCalledWith('/api/v1/discounts/{id}/reject', {
@@ -208,6 +215,10 @@ test('explains a decision conflict and refreshes without claiming success', asyn
 
   await view.findByText('Reason: Service recovery');
   await fireEvent.press(view.getByRole('button', { name: 'Approve discount' }));
+  const confirmation = view.queryByRole('button', {
+    name: 'Confirm discount approval',
+  });
+  if (confirmation) await fireEvent.press(confirmation);
 
   expect(await view.findByText(/changed before your decision/i)).toBeVisible();
   expect(view.getByText('Reason: Service recovery')).toBeVisible();
@@ -228,6 +239,10 @@ test('a lost decision response is unconfirmed and is never automatically replaye
   );
   await view.findByText('Reason: Service recovery');
   await fireEvent.press(view.getByRole('button', { name: 'Approve discount' }));
+  const confirmation = view.queryByRole('button', {
+    name: 'Confirm discount approval',
+  });
+  if (confirmation) await fireEvent.press(confirmation);
   expect(
     await view.findByRole('alert', { name: /decision could not be confirmed/ }),
   ).toBeVisible();
@@ -271,6 +286,10 @@ test('removes stale decision actions after the conflict refetch resolves the req
   );
   await view.findByText('Reason: Service recovery');
   await fireEvent.press(view.getByRole('button', { name: 'Approve discount' }));
+  const confirmation = view.queryByRole('button', {
+    name: 'Confirm discount approval',
+  });
+  if (confirmation) await fireEvent.press(confirmation);
   expect(
     await view.findByText(/This discount is no longer pending/),
   ).toBeVisible();

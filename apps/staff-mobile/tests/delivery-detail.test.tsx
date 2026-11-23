@@ -140,6 +140,9 @@ test.each(['complete', 'fail'] as const)(
     await fireEvent.press(
       await screen.findByRole('button', { name: 'Start delivery' }),
     );
+    await fireEvent.press(
+      screen.getByRole('button', { name: 'Confirm start delivery' }),
+    );
     await screen.findByText('Status: out for delivery');
     const activeKey = [
       'delivery',
@@ -170,6 +173,14 @@ test.each(['complete', 'fail'] as const)(
     await fireEvent.press(
       screen.getByRole('button', {
         name: outcome === 'complete' ? 'Mark delivered' : 'Mark failed',
+      }),
+    );
+    await fireEvent.press(
+      screen.getByRole('button', {
+        name:
+          outcome === 'complete'
+            ? 'Confirm delivered'
+            : 'Confirm failed delivery',
       }),
     );
     await screen.findByText(
@@ -227,6 +238,9 @@ test('conflicts refresh the server state without reporting success', async () =>
   await fireEvent.press(
     await screen.findByRole('button', { name: 'Start delivery' }),
   );
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Confirm start delivery' }),
+  );
   await screen.findByText(
     'Delivery changed elsewhere. Review the refreshed state before trying again.',
   );
@@ -269,6 +283,9 @@ test('a forbidden transition removes retained delivery contact data', async () =
   });
   await screen.findByText('Address: Private Address');
   await fireEvent.press(screen.getByRole('button', { name: 'Start delivery' }));
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Confirm start delivery' }),
+  );
   await screen.findByText(
     'Delivery is unavailable or no longer assigned to you.',
   );

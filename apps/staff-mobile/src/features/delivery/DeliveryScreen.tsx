@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { recordRow } from '../../shell/recordPresentation';
+import { mobileTokens as t } from '../../shell/designTokens';
+import { ShellIcon } from '../../shell/ShellIcon';
 
 import { useSession } from '../../session/context';
 import {
@@ -43,13 +45,14 @@ export function DeliveryScreen({
   return (
     <>
       {showHeading && <ShellHeading>Deliveries</ShellHeading>}
-      <ShellSelection>
+      <ShellSelection segmented>
         {(['active', 'completed'] as const).map((choice) => (
           <ShellButton
             key={choice}
             label={
               choice === 'active' ? 'Active deliveries' : 'Completed deliveries'
             }
+            displayLabel={choice === 'active' ? 'Active' : 'Completed'}
             variant="secondary"
             compact
             selected={view === choice}
@@ -68,7 +71,8 @@ export function DeliveryScreen({
       )}
       <ShellButton
         label="Refresh deliveries"
-        variant="secondary"
+        variant="text"
+        compact
         loading={assignments.isFetching}
         onPress={() => void assignments.refetch()}
       />
@@ -79,23 +83,34 @@ export function DeliveryScreen({
           )}
           {assignments.data.items.map((item) => (
             <View key={item.orderId} style={styles.group}>
-              <ShellText>
-                {item.orderNumber} · {item.deliveryStatus.replaceAll('_', ' ')}
-              </ShellText>
-              {view === 'active' && (
-                <ShellSelection>
-                  <ShellButton
-                    label={`Open delivery ${item.orderNumber}`}
-                    displayLabel="Open delivery"
-                    variant="link"
-                    onPress={() =>
-                      router.push({
-                        pathname: '/modules/delivery/[orderId]',
-                        params: { orderId: item.orderId },
-                      })
-                    }
-                  />
-                </ShellSelection>
+              {view === 'active' ? (
+                <ShellButton
+                  label={`Open delivery ${item.orderNumber}`}
+                  displayLabel="Open delivery"
+                  variant="text"
+                  onPress={() =>
+                    router.push({
+                      pathname: '/modules/delivery/[orderId]',
+                      params: { orderId: item.orderId },
+                    })
+                  }
+                >
+                  <View style={styles.row}>
+                    <View style={styles.copy}>
+                      <Text style={styles.order}>
+                        {item.orderNumber} ·{' '}
+                        {item.deliveryStatus.replaceAll('_', ' ')}
+                      </Text>
+                      <Text style={styles.caption}>View delivery details</Text>
+                    </View>
+                    <ShellIcon name="chevron" size={18} />
+                  </View>
+                </ShellButton>
+              ) : (
+                <ShellText>
+                  {item.orderNumber} ·{' '}
+                  {item.deliveryStatus.replaceAll('_', ' ')}
+                </ShellText>
               )}
             </View>
           ))}
@@ -123,4 +138,20 @@ export function DeliveryScreen({
   );
 }
 
-const styles = StyleSheet.create({ group: recordRow });
+const styles = StyleSheet.create({
+  group: recordRow,
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  copy: { flex: 1, gap: 6 },
+  order: {
+    fontFamily: t.type.mediumFont,
+    fontSize: 18,
+    lineHeight: 26,
+    color: t.color.foreground,
+  },
+  caption: {
+    fontFamily: t.type.bodyFont,
+    fontSize: 13,
+    lineHeight: 20,
+    color: t.color.disabledText,
+  },
+});

@@ -15,6 +15,7 @@ import type { StaffSession } from '../../session/session';
 import {
   ShellButton,
   ShellSelection,
+  ShellSheet,
   ShellFeedback,
   ShellHeading,
   ShellText,
@@ -74,6 +75,10 @@ export function DiscountApprovals({
     [user.id],
   );
   const [selected, setSelected] = useState<PendingDiscount>();
+  const [reviewDecision, setReviewDecision] = useState<{
+    id: string;
+    action: DecisionAction;
+  }>();
   const [decisionResult, setDecisionResult] = useState<{
     action: DecisionAction;
     result: DiscountDecision;
@@ -262,7 +267,7 @@ export function DiscountApprovals({
                   onPress={() => {
                     setActionError(undefined);
                     setSelected(discount);
-                    decisionMutation.mutate({
+                    setReviewDecision({
                       id: discount.discountId,
                       action: 'approve',
                     });
@@ -280,7 +285,7 @@ export function DiscountApprovals({
                   onPress={() => {
                     setActionError(undefined);
                     setSelected(discount);
-                    decisionMutation.mutate({
+                    setReviewDecision({
                       id: discount.discountId,
                       action: 'reject',
                     });
@@ -288,6 +293,50 @@ export function DiscountApprovals({
                 />
               </>
             )}
+            <ShellSheet
+              visible={!!reviewDecision && !!discount && !decisionResult}
+              title={
+                reviewDecision?.action === 'approve'
+                  ? 'Approve this discount?'
+                  : 'Reject this discount?'
+              }
+              busy={decisionMutation.isPending}
+              onClose={() => setReviewDecision(undefined)}
+            >
+              <ShellText>
+                Order {discount?.orderNumber} ·{' '}
+                {discount?.type === 'percentage'
+                  ? `${discount.value}%`
+                  : money(discount?.value ?? 0)}
+              </ShellText>
+              <ShellText>{discount?.reason}</ShellText>
+              <ShellButton
+                label={
+                  reviewDecision?.action === 'approve'
+                    ? 'Confirm discount approval'
+                    : 'Confirm discount rejection'
+                }
+                disabled={
+                  decisionMutation.isWriteDisabled ||
+                  pendingQuery.isFetching ||
+                  !pendingQuery.data?.items.some(
+                    (d) => d.discountId === reviewDecision?.id,
+                  )
+                }
+                loading={decisionMutation.isPending}
+                onPress={() => {
+                  if (reviewDecision) {
+                    decisionMutation.mutate(reviewDecision);
+                    setReviewDecision(undefined);
+                  }
+                }}
+              />
+              <ShellButton
+                label="Keep reviewing discount"
+                variant="secondary"
+                onPress={() => setReviewDecision(undefined)}
+              />
+            </ShellSheet>
             {refreshButton}
           </>
         )}
@@ -299,9 +348,6 @@ export function DiscountApprovals({
     <>
       {showHeading && <ShellHeading>Manager approvals</ShellHeading>}
       <ShellMutationFeedback mutation={decisionMutation} />
-      <ShellText>
-        Review pending discount requests from the shared API.
-      </ShellText>
       {refreshButton}
       {actionError && <ShellFeedback kind="error" label={actionError} />}
       {status !== 'online' && !pendingQuery.data ? (

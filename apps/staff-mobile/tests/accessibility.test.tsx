@@ -215,28 +215,28 @@ const scenes: {
   {
     name: 'counter search',
     content: <OrdersScreen user={staff} />,
-    loaded: 'ORD-219 · ready · delivery',
+    loaded: 'ORD-219',
   },
   {
     name: 'counter filters',
     content: <OrdersScreen user={staff} />,
-    loaded: 'ORD-219 · ready · delivery',
+    loaded: 'ORD-219',
     open: 'Filter orders: All',
     selected: 'Show all orders',
   },
   {
     name: 'payment form',
     content: <OrdersScreen user={staff} />,
-    loaded: 'ORD-219 · ready · delivery',
-    open: 'Open order ORD-219',
+    loaded: 'ORD-219',
+    open: ['Open order ORD-219', 'Record payment'],
     settled: 'Record payment',
     selected: 'Pay by cash',
   },
   {
     name: 'payment review',
     content: <OrdersScreen user={staff} />,
-    loaded: 'ORD-219 · ready · delivery',
-    open: 'Open order ORD-219',
+    loaded: 'ORD-219',
+    open: ['Open order ORD-219', 'Record payment'],
     settled: 'Record payment',
     entered: [{ label: 'Payment amount', value: '5' }],
     afterEntry: 'Review payment',
@@ -244,14 +244,14 @@ const scenes: {
   {
     name: 'manager order and cancellation form',
     content: <OrdersScreen user={staff} manager />,
-    loaded: 'ORD-219 · ready · delivery',
+    loaded: 'ORD-219',
     open: 'Open order ORD-219',
     settled: 'Authorize cancellation',
   },
   {
     name: 'cancellation review',
     content: <OrdersScreen user={staff} manager />,
-    loaded: 'ORD-219 · ready · delivery',
+    loaded: 'ORD-219',
     open: 'Open order ORD-219',
     settled: 'Authorize cancellation',
     entered: [{ label: 'Cancellation reason', value: 'Customer request' }],
@@ -260,7 +260,7 @@ const scenes: {
   {
     name: 'delivery assignment review',
     content: <OrdersScreen user={staff} manager />,
-    loaded: 'ORD-219 · ready · delivery',
+    loaded: 'ORD-219',
     open: ['Open order ORD-219', 'Select Delivery colleague'],
     afterEntry: 'Review assignment',
   },
@@ -437,7 +437,9 @@ describe.each([
           await fireEvent.press(
             await screen.findByRole('button', { name: action }),
           );
-        if (scene.settled) await screen.findByText(scene.settled);
+        if (scene.settled === 'Record payment')
+          await screen.findByRole('header', { name: 'Record payment' });
+        else if (scene.settled) await screen.findByText(scene.settled);
         for (const entry of scene.entered ?? [])
           await fireEvent.changeText(
             await screen.findByLabelText(entry.label),

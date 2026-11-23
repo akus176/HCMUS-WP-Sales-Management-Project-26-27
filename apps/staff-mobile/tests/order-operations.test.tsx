@@ -163,6 +163,9 @@ async function open(view: Awaited<ReturnType<typeof setup>>['view']) {
     await view.findByRole('button', { name: 'Open order ORD-182' }),
   );
   await view.findByText('2 × Test latte · Large · 10.00');
+  const payment = view.queryByRole('button', { name: 'Record payment' });
+  if (payment && !payment.props.accessibilityState?.disabled)
+    await fireEvent.press(payment);
   await waitFor(() =>
     expect(
       view.getByRole('button', { name: 'Refresh orders and tables' }),
@@ -331,7 +334,7 @@ test('a refreshed lower balance requires payment review again before the first s
   await fireEvent.press(
     view.getByRole('button', { name: 'Refresh orders and tables' }),
   );
-  await view.findByText('Total: 10.00 · Paid: 7.00 · Balance: 3.00');
+  await view.findByLabelText('Total: 10.00 · Paid: 7.00 · Balance: 3.00');
   await waitFor(() =>
     expect(view.getByRole('button', { name: 'Confirm payment' })).toBeEnabled(),
   );
@@ -354,7 +357,7 @@ test('a payment conflict refreshes the balance without retrying the write', asyn
   await view.findByText(
     'Order changed elsewhere. Review the refreshed balance before recording a payment.',
   );
-  await view.findByText('Total: 10.00 · Paid: 10.00 · Balance: 0.00');
+  await view.findByLabelText('Total: 10.00 · Paid: 10.00 · Balance: 0.00');
   expect(post).toHaveBeenCalledTimes(1);
   expect(view.queryByRole('button', { name: 'Review payment' })).toBeNull();
 });
@@ -443,7 +446,7 @@ test('guards double taps and refreshes server paid amount and balance', async ()
     }),
   );
   await view.findByText('Payment confirmed. Paid: 5.00. Balance: 5.00.');
-  await view.findByText('Total: 10.00 · Paid: 5.00 · Balance: 5.00');
+  await view.findByLabelText('Total: 10.00 · Paid: 5.00 · Balance: 5.00');
 });
 
 test('retains an uncertain payment across refresh and order navigation, then retries the identical command', async () => {

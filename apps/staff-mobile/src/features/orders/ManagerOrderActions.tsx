@@ -11,6 +11,7 @@ import {
   ShellHeading,
   ShellInput,
   ShellMutationFeedback,
+  ShellSheet,
 } from '../../shell/controls';
 
 type Command =
@@ -138,7 +139,16 @@ export function ManagerOrderActions({
       )}
       {validation && <ShellFeedback kind="error" label={validation} />}
       {intent ? (
-        <>
+        <ShellSheet
+          visible
+          title={
+            intent.action === 'cancel'
+              ? 'Confirm cancellation'
+              : 'Confirm assignment'
+          }
+          onClose={() => setIntent(null)}
+          busy={mutation.isPending}
+        >
           <ShellFeedback
             kind="warning"
             label={
@@ -163,7 +173,7 @@ export function ManagerOrderActions({
             disabled={unavailable}
             onPress={() => setIntent(null)}
           />
-        </>
+        </ShellSheet>
       ) : (
         <>
           {canCancel && (

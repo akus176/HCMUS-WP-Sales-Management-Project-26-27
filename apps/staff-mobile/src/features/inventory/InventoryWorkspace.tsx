@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { randomUUID } from 'expo-crypto';
 
@@ -20,9 +20,14 @@ import {
   ShellInput,
   ShellSelection,
   ShellMutationFeedback,
+  ShellSheet,
+  ShellBadge,
+  usePageNavigation,
 } from '../../shell/controls';
 import { mobileTokens } from '../../shell/designTokens';
 import { recordRow } from '../../shell/recordPresentation';
+import { useNativeNavigation } from '../../shell/NativeNavigation';
+import { ShellIcon } from '../../shell/ShellIcon';
 
 type Balance = components['schemas']['IngredientBalanceResponse'];
 type Movement = components['schemas']['StockMovementResponse'];
@@ -86,6 +91,9 @@ export function InventoryWorkspace({
   showHeading?: boolean;
 }) {
   const { client } = useSession();
+  const native = useNativeNavigation();
+  const navigation = usePageNavigation();
+  const [ingredientId, setIngredientId] = useState<string>();
   const { status, refreshConnection } = useConnectivity();
   const queryClient = useQueryClient();
   const canManage = user.permissions.includes('inventory.manage');
@@ -106,6 +114,8 @@ export function InventoryWorkspace({
   );
   const [search, setSearch] = useState('');
   const [adjustmentIngredient, setAdjustmentIngredient] = useState<Balance>();
+  const [adjustmentReview, setAdjustmentReview] = useState(false);
+  const [receiptReview, setReceiptReview] = useState(false);
   const [quantityDelta, setQuantityDelta] = useState('');
   const [adjustmentReason, setAdjustmentReason] = useState('');
   const [adjustmentResult, setAdjustmentResult] = useState<{
@@ -264,6 +274,7 @@ export function InventoryWorkspace({
     },
     onSuccess: async (result) => {
       setAdjustmentResult(result);
+      setAdjustmentReview(false);
       setAdjustmentMessage(undefined);
       setQuantityDelta('');
       setAdjustmentReason('');
@@ -293,6 +304,7 @@ export function InventoryWorkspace({
     },
     onSuccess: async (id) => {
       setReceiptFailure(undefined);
+      setReceiptReview(false);
       setReceiptMessage(
         `Receipt ${receiptDetailQuery.data?.receiptNumber ?? ''} was posted by the server.`.trim(),
       );
@@ -333,6 +345,16 @@ export function InventoryWorkspace({
     { id: 'receipts', title: 'Purchase receipts' },
     { id: 'history', title: 'Movement history' },
   ];
+  useEffect(() => {
+    if (!ingredientId && !receiptId) return;
+    const handler = BackHandler.addEventListener('hardwareBackPress', () => {
+      setIngredientId(undefined);
+      setReceiptId(undefined);
+      navigation.returnToList();
+      return true;
+    });
+    return () => handler.remove();
+  }, [ingredientId, receiptId, navigation]);
 
   return (
     <>
@@ -344,31 +366,55 @@ export function InventoryWorkspace({
           refreshError: adjustmentMutation.refreshError,
         }}
       />
-      <ShellSelection>
-        {sections
-          .filter(({ id }) => availableSections.includes(id))
-          .map(({ id, title }) => (
-            <ShellButton
-              key={id}
-              label={title}
-              selected={selectedSection === id}
-              compact
-              variant="secondary"
-              onPress={() => setSection(id)}
-            />
-          ))}
-      </ShellSelection>
+      {(ingredientId || receiptId) && (
+        <ShellButton
+          label={ingredientId ? 'Back to ingredients' : 'Back to inventory'}
+          variant="text"
+          onPress={() => {
+            setIngredientId(undefined);
+            setReceiptId(undefined);
+            navigation.returnToList();
+          }}
+        />
+      )}
+      {!ingredientId && !receiptId && (
+        <ShellSelection segmented>
+          {sections
+            .filter(({ id }) => availableSections.includes(id))
+            .map(({ id, title }) => (
+              <ShellButton
+                key={id}
+                label={title}
+                displayLabel={
+                  id === 'balances'
+                    ? 'Balances'
+                    : id === 'low-stock'
+                      ? 'Low stock'
+                      : id === 'receipts'
+                        ? 'Receipts'
+                        : 'History'
+                }
+                selected={selectedSection === id}
+                compact
+                variant="secondary"
+                onPress={() => setSection(id)}
+              />
+            ))}
+        </ShellSelection>
+      )}
       {selectedSection === 'balances' || selectedSection === 'low-stock' ? (
         <>
-          <ShellInput
-            label="Search ingredients"
-            accessibilityLabel="Search ingredients"
-            placeholder="Search ingredients"
-            placeholderTextColor={mobileTokens.color.disabledText}
-            returnKeyType="search"
-            value={search}
-            onChangeText={setSearch}
-          />
+          {!ingredientId && (
+            <ShellInput
+              label="Search ingredients"
+              accessibilityLabel="Search ingredients"
+              placeholder="Search ingredients"
+              placeholderTextColor={mobileTokens.color.disabledText}
+              returnKeyType="search"
+              value={search}
+              onChangeText={setSearch}
+            />
+          )}
           {refreshButton}
           {status === 'offline' && !ingredientQuery.data ? (
             <ShellFeedback
@@ -392,107 +438,206 @@ export function InventoryWorkspace({
               }
             />
           ) : (
-            ingredientQuery.data?.items.map((ingredient: Balance) => {
-              const isLow =
-                Number(ingredient.availableQuantity) <=
-                Number(ingredient.reorderThreshold);
-              return (
-                <View key={ingredient.ingredientId} style={styles.card}>
-                  <ShellHeading level="section">{ingredient.name}</ShellHeading>
-                  <ShellText>
-                    Balance: {quantity(ingredient.availableQuantity)}{' '}
-                    {ingredient.baseUnit}
-                  </ShellText>
-                  <ShellText>
-                    Reorder threshold: {quantity(ingredient.reorderThreshold)}{' '}
-                    {ingredient.baseUnit}
-                  </ShellText>
-                  {isLow && (
-                    <ShellFeedback
-                      kind="warning"
-                      label={`Low stock · ${quantity(ingredient.availableQuantity)} ${ingredient.baseUnit} / ${quantity(ingredient.reorderThreshold)} ${ingredient.baseUnit}`}
-                    />
-                  )}
-                  <ShellSelection>
-                    {user.permissions.includes('inventory.adjust') && (
-                      <ShellButton
-                        label={`Record adjustment for ${ingredient.name}`}
-                        displayLabel="Adjust stock"
-                        variant="secondary"
-                        onPress={() => {
-                          setAdjustmentIngredient(ingredient);
-                          setAdjustmentMessage(undefined);
-                          setAdjustmentResult(undefined);
-                        }}
+            ingredientQuery.data?.items
+              .filter(
+                (ingredient) =>
+                  !ingredientId || ingredient.ingredientId === ingredientId,
+              )
+              .map((ingredient: Balance) => {
+                const isLow =
+                  Number(ingredient.availableQuantity) <=
+                  Number(ingredient.reorderThreshold);
+                if (native && !ingredientId)
+                  return (
+                    <ShellButton
+                      key={ingredient.ingredientId}
+                      label={`Open ingredient ${ingredient.name}`}
+                      variant="text"
+                      focusKey={`ingredient:${ingredient.ingredientId}`}
+                      onPress={() => {
+                        navigation.openDetail(
+                          `ingredient:${ingredient.ingredientId}`,
+                        );
+                        setIngredientId(ingredient.ingredientId);
+                      }}
+                    >
+                      <View style={styles.recordHeader}>
+                        <ShellHeading level="section">
+                          {ingredient.name}
+                        </ShellHeading>
+                        <ShellIcon
+                          name="chevron"
+                          size={16}
+                          color={mobileTokens.color.disabledText}
+                        />
+                      </View>
+                      <Text style={styles.balance}>
+                        {quantity(ingredient.availableQuantity)}{' '}
+                        {ingredient.baseUnit} available
+                      </Text>
+                      <View style={styles.recordHeader}>
+                        <Text style={styles.caption}>
+                          Reorder at {quantity(ingredient.reorderThreshold)}{' '}
+                          {ingredient.baseUnit}
+                        </Text>
+                        {isLow && (
+                          <ShellBadge label="Low stock" kind="attention" />
+                        )}
+                      </View>
+                    </ShellButton>
+                  );
+                return (
+                  <View key={ingredient.ingredientId} style={styles.card}>
+                    <ShellHeading level="section">
+                      {ingredient.name}
+                    </ShellHeading>
+                    <ShellText>
+                      Balance: {quantity(ingredient.availableQuantity)}{' '}
+                      {ingredient.baseUnit}
+                    </ShellText>
+                    <ShellText>
+                      Reorder threshold: {quantity(ingredient.reorderThreshold)}{' '}
+                      {ingredient.baseUnit}
+                    </ShellText>
+                    {isLow && (
+                      <ShellFeedback
+                        kind="warning"
+                        label={`Low stock · ${quantity(ingredient.availableQuantity)} ${ingredient.baseUnit} / ${quantity(ingredient.reorderThreshold)} ${ingredient.baseUnit}`}
                       />
                     )}
-                    {canManage && (
-                      <ShellButton
-                        label={`Show movement history for ${ingredient.name}`}
-                        displayLabel="Movement history"
-                        variant="secondary"
-                        onPress={() => setMovementIngredient(ingredient)}
-                      />
-                    )}
-                  </ShellSelection>
-                  {adjustmentIngredient?.ingredientId ===
-                    ingredient.ingredientId && (
-                    <View style={styles.form}>
-                      <ShellText>
-                        Stock adjustment for {ingredient.name}
-                      </ShellText>
-                      <ShellInput
-                        label="Quantity change"
-                        accessibilityLabel="Quantity change"
-                        keyboardType="decimal-pad"
-                        placeholder="Quantity change"
-                        placeholderTextColor={mobileTokens.color.disabledText}
-                        value={quantityDelta}
-                        onChangeText={setQuantityDelta}
-                      />
-                      <ShellInput
-                        label="Adjustment reason (required)"
-                        accessibilityLabel="Adjustment reason"
-                        placeholder="Reason for adjustment"
-                        placeholderTextColor={mobileTokens.color.disabledText}
-                        value={adjustmentReason}
-                        onChangeText={setAdjustmentReason}
-                      />
-                      {adjustmentMessage && (
-                        <ShellFeedback kind="error" label={adjustmentMessage} />
-                      )}
-                      {adjustmentResult?.ingredientId ===
-                        ingredient.ingredientId && (
-                        <ShellFeedback
-                          kind="info"
-                          label={`Adjustment saved by the server. New balance: ${quantity(adjustmentResult.availableQuantity)} ${ingredient.baseUnit}.`}
+                    <ShellSelection>
+                      {user.permissions.includes('inventory.adjust') && (
+                        <ShellButton
+                          label={`Record adjustment for ${ingredient.name}`}
+                          displayLabel="Adjust stock"
+                          variant="secondary"
+                          onPress={() => {
+                            setAdjustmentIngredient(ingredient);
+                            setAdjustmentReview(false);
+                            setAdjustmentMessage(undefined);
+                            setAdjustmentResult(undefined);
+                          }}
                         />
                       )}
-                      <ShellButton
-                        label="Save adjustment"
-                        loading={adjustmentMutation.isPending}
-                        loadingLabel="Saving adjustment…"
-                        disabled={
-                          adjustmentMutation.isWriteDisabled ||
-                          !quantityDelta.trim() ||
-                          !Number.isFinite(Number(quantityDelta)) ||
-                          Number(quantityDelta) === 0 ||
-                          !adjustmentReason.trim()
+                      {canManage && (
+                        <ShellButton
+                          label={`Show movement history for ${ingredient.name}`}
+                          displayLabel="Movement history"
+                          variant="secondary"
+                          onPress={() => setMovementIngredient(ingredient)}
+                        />
+                      )}
+                    </ShellSelection>
+                    {adjustmentIngredient?.ingredientId ===
+                      ingredient.ingredientId && (
+                      <ShellSheet
+                        visible
+                        title={
+                          adjustmentReview
+                            ? 'Review stock adjustment'
+                            : 'Adjust stock'
                         }
-                        onPress={() => {
-                          setAdjustmentMessage(undefined);
-                          adjustmentMutation.mutate({
-                            ingredient,
-                            delta: Number(quantityDelta),
-                            reason: adjustmentReason.trim(),
-                          });
+                        busy={adjustmentMutation.isPending}
+                        onClose={() => {
+                          setAdjustmentIngredient(undefined);
+                          setAdjustmentReview(false);
                         }}
-                      />
-                    </View>
-                  )}
-                </View>
-              );
-            })
+                      >
+                        <View style={styles.form}>
+                          <ShellText>
+                            Stock adjustment for {ingredient.name}
+                          </ShellText>
+                          {!adjustmentReview && (
+                            <>
+                              <ShellInput
+                                label="Quantity change"
+                                accessibilityLabel="Quantity change"
+                                keyboardType="decimal-pad"
+                                placeholder="Quantity change"
+                                placeholderTextColor={
+                                  mobileTokens.color.disabledText
+                                }
+                                value={quantityDelta}
+                                onChangeText={setQuantityDelta}
+                              />
+                              <ShellInput
+                                label="Adjustment reason (required)"
+                                accessibilityLabel="Adjustment reason"
+                                placeholder="Reason for adjustment"
+                                placeholderTextColor={
+                                  mobileTokens.color.disabledText
+                                }
+                                value={adjustmentReason}
+                                onChangeText={setAdjustmentReason}
+                              />
+                            </>
+                          )}
+                          {adjustmentReview && (
+                            <ShellText>
+                              {ingredient.name} · {quantityDelta}{' '}
+                              {ingredient.baseUnit} · {adjustmentReason}
+                            </ShellText>
+                          )}
+                          {adjustmentMessage && (
+                            <ShellFeedback
+                              kind="error"
+                              label={adjustmentMessage}
+                            />
+                          )}
+                          {adjustmentResult?.ingredientId ===
+                            ingredient.ingredientId && (
+                            <ShellFeedback
+                              kind="info"
+                              label={`Adjustment saved by the server. New balance: ${quantity(adjustmentResult.availableQuantity)} ${ingredient.baseUnit}.`}
+                            />
+                          )}
+                          <ShellButton
+                            label={
+                              adjustmentReview
+                                ? 'Confirm adjustment'
+                                : 'Save adjustment'
+                            }
+                            displayLabel={
+                              adjustmentReview
+                                ? 'Confirm adjustment'
+                                : 'Review adjustment'
+                            }
+                            loading={adjustmentMutation.isPending}
+                            loadingLabel="Saving adjustment…"
+                            disabled={
+                              adjustmentMutation.isWriteDisabled ||
+                              !quantityDelta.trim() ||
+                              !Number.isFinite(Number(quantityDelta)) ||
+                              Number(quantityDelta) === 0 ||
+                              !adjustmentReason.trim()
+                            }
+                            onPress={() => {
+                              if (!adjustmentReview) {
+                                setAdjustmentReview(true);
+                                return;
+                              }
+                              setAdjustmentMessage(undefined);
+                              adjustmentMutation.mutate({
+                                ingredient,
+                                delta: Number(quantityDelta),
+                                reason: adjustmentReason.trim(),
+                              });
+                            }}
+                          />
+                          {adjustmentReview && (
+                            <ShellButton
+                              label="Keep editing adjustment"
+                              variant="secondary"
+                              disabled={adjustmentMutation.isPending}
+                              onPress={() => setAdjustmentReview(false)}
+                            />
+                          )}
+                        </View>
+                      </ShellSheet>
+                    )}
+                  </View>
+                );
+              })
           )}
         </>
       ) : selectedSection === 'receipts' ? (
@@ -504,6 +649,7 @@ export function InventoryWorkspace({
                 variant="text"
                 onPress={() => {
                   setReceiptId(undefined);
+                  navigation.returnToList();
                   setReceiptMessage(undefined);
                   setReceiptFailure(undefined);
                 }}
@@ -541,7 +687,7 @@ export function InventoryWorkspace({
                   {receiptMessage && (
                     <ShellFeedback kind="info" label={receiptMessage} />
                   )}
-                  {receiptFailure && (
+                  {receiptFailure && !receiptReview && (
                     <ShellFeedback kind="error" label={receiptFailure} />
                   )}
                   {receiptFailure && receiptId && (
@@ -573,10 +719,45 @@ export function InventoryWorkspace({
                         }
                         onPress={() => {
                           setReceiptFailure(undefined);
-                          receiptMutation.mutate(receiptDetailQuery.data!.id);
+                          setReceiptReview(true);
                         }}
                       />
                     )}
+                  <ShellSheet
+                    visible={receiptReview}
+                    title="Post this receipt?"
+                    busy={receiptMutation.isPending}
+                    onClose={() => setReceiptReview(false)}
+                  >
+                    <ShellText>
+                      Receipt {receiptDetailQuery.data.receiptNumber}
+                    </ShellText>
+                    <ShellText>
+                      Posting adds the reviewed quantities to inventory.
+                    </ShellText>
+                    {receiptFailure && (
+                      <ShellFeedback kind="error" label={receiptFailure} />
+                    )}
+                    <ShellButton
+                      label="Confirm receipt posting"
+                      loading={receiptMutation.isPending}
+                      disabled={
+                        receiptMutation.isWriteDisabled ||
+                        receiptDetailQuery.data.status.toLowerCase() !==
+                          'draft' ||
+                        !receiptDetailQuery.data.lines.length
+                      }
+                      onPress={() =>
+                        receiptMutation.mutate(receiptDetailQuery.data!.id)
+                      }
+                    />
+                    <ShellButton
+                      label="Keep reviewing receipt"
+                      variant="secondary"
+                      disabled={receiptMutation.isPending}
+                      onPress={() => setReceiptReview(false)}
+                    />
+                  </ShellSheet>
                 </View>
               ) : null}
             </>
@@ -619,6 +800,7 @@ export function InventoryWorkspace({
                       variant="secondary"
                       onPress={() => {
                         setReceiptId(receipt.id);
+                        navigation.openDetail(`receipt:${receipt.id}`);
                         setReceiptMessage(undefined);
                         setReceiptFailure(undefined);
                       }}
@@ -674,31 +856,37 @@ export function InventoryWorkspace({
         </>
       )}
       {movementIngredient && selectedSection !== 'receipts' && (
-        <View style={styles.card}>
-          <ShellHeading level="section">
-            Movement history · {movementIngredient.name}
-          </ShellHeading>
-          {movementQuery.isPending ? (
-            <ShellFeedback kind="loading" label="Loading movement history…" />
-          ) : movementQuery.error ? (
-            <ShellFeedback
-              kind="error"
-              label="Movement history could not be loaded. Refresh and try again."
-            />
-          ) : movementQuery.data?.length === 0 ? (
-            <ShellFeedback
-              kind="empty"
-              label="No stock movements are recorded."
-            />
-          ) : (
-            movementQuery.data?.map((movement: Movement) => (
-              <ShellText key={movement.id}>
-                {movement.type}: {quantity(movement.quantityDelta)}{' '}
-                {movementIngredient.baseUnit} · {movement.reason}
-              </ShellText>
-            ))
-          )}
-        </View>
+        <ShellSheet
+          visible
+          title={`Movement history · ${movementIngredient.name}`}
+          onClose={() => setMovementIngredient(undefined)}
+        >
+          <View style={styles.card}>
+            <ShellHeading level="section">
+              Movement history · {movementIngredient.name}
+            </ShellHeading>
+            {movementQuery.isPending ? (
+              <ShellFeedback kind="loading" label="Loading movement history…" />
+            ) : movementQuery.error ? (
+              <ShellFeedback
+                kind="error"
+                label="Movement history could not be loaded. Refresh and try again."
+              />
+            ) : movementQuery.data?.length === 0 ? (
+              <ShellFeedback
+                kind="empty"
+                label="No stock movements are recorded."
+              />
+            ) : (
+              movementQuery.data?.map((movement: Movement) => (
+                <ShellText key={movement.id}>
+                  {movement.type}: {quantity(movement.quantityDelta)}{' '}
+                  {movementIngredient.baseUnit} · {movement.reason}
+                </ShellText>
+              ))
+            )}
+          </View>
+        </ShellSheet>
       )}
     </>
   );
@@ -708,4 +896,24 @@ const styles = StyleSheet.create({
   tabs: { gap: mobileTokens.spacing.sm },
   card: recordRow,
   form: { gap: mobileTokens.spacing.sm },
+  recordHeader: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  balance: {
+    fontFamily: mobileTokens.type.mediumFont,
+    fontSize: 18,
+    lineHeight: 26,
+    color: mobileTokens.color.primary,
+    fontVariant: ['tabular-nums'],
+  },
+  caption: {
+    fontFamily: mobileTokens.type.bodyFont,
+    fontSize: 13,
+    lineHeight: 20,
+    color: mobileTokens.color.disabledText,
+  },
 });

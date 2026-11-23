@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { ApiError } from '../../api/errors';
@@ -14,7 +14,11 @@ import {
   ShellInput,
   ShellSelection,
   usePageNavigation,
+  ShellBadge,
+  ShellSheet,
 } from '../../shell/controls';
+import { ShellIcon } from '../../shell/ShellIcon';
+import { mobileTokens as t } from '../../shell/designTokens';
 import { OrderPayment, type PendingPayments } from './OrderPayment';
 import { ManagerOrderActions } from './ManagerOrderActions';
 import { orderStyles, money } from './presentation';
@@ -41,6 +45,18 @@ export function OrdersScreen({
   const navigation = usePageNavigation();
   const [selected, setSelected] = useState<string | null>(null);
   const [accessLost, setAccessLost] = useState(false);
+  useEffect(() => {
+    if (!selected && !filtersExpanded) return;
+    const handler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (filtersExpanded) setFiltersExpanded(false);
+      else {
+        setSelected(null);
+        navigation.returnToList();
+      }
+      return true;
+    });
+    return () => handler.remove();
+  }, [selected, filtersExpanded, navigation]);
   const [pendingPayments] = useState<PendingPayments>(() => new Map());
   const canRead = user.permissions.includes('orders.create');
   const key = ['sales', user.id];
@@ -117,7 +133,7 @@ export function OrdersScreen({
         </ShellHeading>
       )}
       {!manager && !selected && (
-        <ShellSelection>
+        <ShellSelection segmented>
           {(['orders', 'tables'] as const).map((choice) => (
             <ShellButton
               key={choice}
@@ -132,7 +148,9 @@ export function OrdersScreen({
       )}
       <ShellButton
         label="Refresh orders and tables"
-        variant="secondary"
+        displayLabel="Refresh"
+        variant="text"
+        compact
         disabled={!canMutate}
         loading={fetching}
         onPress={() => {
@@ -177,7 +195,32 @@ export function OrdersScreen({
               </ShellHeading>
               <ShellText>{`Status: ${current.status} · ${current.channel}${current.tableNumber ? ` · Table ${current.tableNumber}` : ''}`}</ShellText>
               <ShellText>{`Fulfillment: ${order.deliveryStatus ?? current.status}${order.assignedStaffId ? ` · Assigned staff: ${order.assignedStaffId}` : ''}`}</ShellText>
-              <ShellText>{`Total: ${money(current.total)} · Paid: ${money(order.paidAmount)} · Balance: ${money(Math.max(0, Number(current.total) - Number(order.paidAmount)))}`}</ShellText>
+              <View
+                style={orderStyles.card}
+                accessible
+                accessibilityRole="text"
+                accessibilityLabel={`Total: ${money(current.total)} · Paid: ${money(order.paidAmount)} · Balance: ${money(Math.max(0, Number(current.total) - Number(order.paidAmount)))}`}
+              >
+                <View style={styles.row}>
+                  <Text style={styles.caption}>Order total</Text>
+                  <Text style={styles.amount}>{money(current.total)}</Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={styles.caption}>Paid</Text>
+                  <Text style={styles.amount}>{money(order.paidAmount)}</Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={styles.title}>Balance due</Text>
+                  <Text style={styles.balance}>
+                    {money(
+                      Math.max(
+                        0,
+                        Number(current.total) - Number(order.paidAmount),
+                      ),
+                    )}
+                  </Text>
+                </View>
+              </View>
               {current.lines.map((line, index) => (
                 <View key={index} style={orderStyles.card}>
                   <ShellText>{`${line.quantity} × ${line.itemName} · ${line.sizeName} · ${money(line.total)}`}</ShellText>
@@ -226,54 +269,80 @@ export function OrdersScreen({
         <>
           {(manager || section === 'orders') && (
             <>
-              <ShellInput
-                label="Search by order number or table"
-                accessibilityLabel="Search orders"
-                value={search}
-                onChangeText={(value) => {
-                  setSearch(value);
-                  setVisibleCount(orderBatchSize);
-                }}
-                autoCorrect={false}
-                autoCapitalize="none"
-              />
-              <ShellButton
-                label={`Filter orders: ${filter === 'ready_delivery' ? 'Ready unassigned deliveries' : filter[0]!.toUpperCase() + filter.slice(1)}`}
-                expanded={filtersExpanded}
-                variant="secondary"
-                focusKey="order-filter"
-                onPress={() => {
-                  if (filtersExpanded) navigation.returnToList();
-                  else navigation.rememberPosition('order-filter');
-                  setFiltersExpanded(!filtersExpanded);
-                }}
-              />
+              <View style={styles.toolbar}>
+                <View style={styles.search}>
+                  <ShellInput
+                    label="Search by order number or table"
+                    accessibilityLabel="Search orders"
+                    placeholder="Search orders or tables"
+                    hideLabel
+                    value={search}
+                    onChangeText={(value) => {
+                      setSearch(value);
+                      setVisibleCount(orderBatchSize);
+                    }}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                  />
+                </View>
+                <ShellButton
+                  label={`Filter orders: ${filter === 'ready_delivery' ? 'Ready unassigned deliveries' : filter[0]!.toUpperCase() + filter.slice(1)}`}
+                  expanded={filtersExpanded}
+                  variant="secondary"
+                  focusKey="order-filter"
+                  onPress={() => {
+                    if (filtersExpanded) navigation.returnToList();
+                    else navigation.rememberPosition('order-filter');
+                    setFiltersExpanded(!filtersExpanded);
+                  }}
+                >
+                  <ShellIcon name="filter" />
+                </ShellButton>
+              </View>
+              {filter !== 'all' && (
+                <ShellBadge
+                  label={
+                    filter === 'ready_delivery'
+                      ? 'Ready unassigned deliveries'
+                      : filter[0]!.toUpperCase() + filter.slice(1)
+                  }
+                />
+              )}
               {filtersExpanded && (
-                <ShellSelection>
-                  {[
-                    'all',
-                    'draft',
-                    'confirmed',
-                    'preparing',
-                    'ready',
-                    'completed',
-                    'cancelled',
-                    ...(manager ? ['ready_delivery'] : []),
-                  ].map((value) => (
-                    <ShellButton
-                      key={value}
-                      label={`Show ${value === 'ready_delivery' ? 'ready unassigned deliveries' : value} orders`}
-                      selected={filter === value}
-                      variant="secondary"
-                      onPress={() => {
-                        setFilter(value);
-                        setVisibleCount(orderBatchSize);
-                        setFiltersExpanded(false);
-                        navigation.returnToList();
-                      }}
-                    />
-                  ))}
-                </ShellSelection>
+                <ShellSheet
+                  visible
+                  title="Filter orders"
+                  onClose={() => {
+                    setFiltersExpanded(false);
+                    navigation.returnToList();
+                  }}
+                >
+                  <ShellSelection>
+                    {[
+                      'all',
+                      'draft',
+                      'confirmed',
+                      'preparing',
+                      'ready',
+                      'completed',
+                      'cancelled',
+                      ...(manager ? ['ready_delivery'] : []),
+                    ].map((value) => (
+                      <ShellButton
+                        key={value}
+                        label={`Show ${value === 'ready_delivery' ? 'ready unassigned deliveries' : value} orders`}
+                        selected={filter === value}
+                        variant="secondary"
+                        onPress={() => {
+                          setFilter(value);
+                          setVisibleCount(orderBatchSize);
+                          setFiltersExpanded(false);
+                          navigation.returnToList();
+                        }}
+                      />
+                    ))}
+                  </ShellSelection>
+                </ShellSheet>
               )}
               {orders.isPending && (
                 <ShellFeedback kind="loading" label="Loading orders…" />
@@ -292,22 +361,50 @@ export function OrdersScreen({
                     />
                   )}
                   {rows?.slice(0, visibleCount).map((row) => (
-                    <View key={row.id} style={orderStyles.card}>
-                      <ShellText>{`${row.orderNumber} · ${row.status} · ${row.channel}${row.tableNumber ? ` · Table ${row.tableNumber}` : ''}`}</ShellText>
-                      <ShellText>{`Fulfillment: ${row.deliveryStatus ?? row.status} · Paid: ${money(row.paidAmount)} · Balance: ${money(Math.max(0, Number(row.total) - Number(row.paidAmount)))}`}</ShellText>
-                      <ShellSelection>
-                        <ShellButton
-                          label={`Open order ${row.orderNumber}`}
-                          displayLabel="Open order"
-                          variant="link"
-                          focusKey={`order:${row.id}`}
-                          onPress={() => {
-                            navigation.openDetail(`order:${row.id}`);
-                            setSelected(row.id);
-                          }}
+                    <ShellButton
+                      key={row.id}
+                      label={`Open order ${row.orderNumber}`}
+                      variant="text"
+                      focusKey={`order:${row.id}`}
+                      onPress={() => {
+                        navigation.openDetail(`order:${row.id}`);
+                        setSelected(row.id);
+                      }}
+                    >
+                      <View style={styles.row}>
+                        <Text style={styles.title}>
+                          {row.orderNumber}
+                          {row.tableNumber ? ` · Table ${row.tableNumber}` : ''}
+                        </Text>
+                        <ShellIcon
+                          name="chevron"
+                          size={16}
+                          color={t.color.disabledText}
                         />
-                      </ShellSelection>
-                    </View>
+                      </View>
+                      <Text style={styles.caption}>
+                        {row.channel.replaceAll('_', '-')}
+                      </Text>
+                      <View style={styles.row}>
+                        <Text style={styles.amount}>
+                          {Number(row.total) > Number(row.paidAmount)
+                            ? `Unpaid · ${money(Math.max(0, Number(row.total) - Number(row.paidAmount)))}`
+                            : `Paid · ${money(row.paidAmount)}`}
+                        </Text>
+                        <ShellBadge
+                          label={
+                            row.status[0]!.toUpperCase() + row.status.slice(1)
+                          }
+                          kind={
+                            row.status === 'preparing'
+                              ? 'info'
+                              : row.status === 'ready'
+                                ? 'attention'
+                                : 'neutral'
+                          }
+                        />
+                      </View>
+                    </ShellButton>
                   ))}
                   {rows && rows.length > orderBatchSize && (
                     <>
@@ -380,3 +477,42 @@ export function OrdersScreen({
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  toolbar: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  search: { flex: 1 },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  title: {
+    fontFamily: t.type.mediumFont,
+    fontSize: 16,
+    lineHeight: 23,
+    color: t.color.foreground,
+    flexShrink: 1,
+  },
+  caption: {
+    fontFamily: t.type.bodyFont,
+    fontSize: 14,
+    lineHeight: 21,
+    color: t.color.disabledText,
+  },
+  amount: {
+    fontFamily: t.type.mediumFont,
+    fontSize: 14,
+    lineHeight: 21,
+    fontVariant: ['tabular-nums'],
+    color: t.color.primary,
+  },
+  balance: {
+    fontFamily: t.type.displayFont,
+    fontSize: 18,
+    lineHeight: 25,
+    fontVariant: ['tabular-nums'],
+    color: t.color.primary,
+  },
+});

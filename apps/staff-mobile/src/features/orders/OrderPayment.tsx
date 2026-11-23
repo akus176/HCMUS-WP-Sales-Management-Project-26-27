@@ -9,10 +9,12 @@ import { useSession } from '../../session/context';
 import {
   ShellButton,
   ShellFeedback,
-  ShellHeading,
   ShellText,
   ShellInput,
   ShellMutationFeedback,
+  ShellSheet,
+  ShellSelection,
+  ShellPageFooter,
 } from '../../shell/controls';
 import { money } from './presentation';
 
@@ -41,6 +43,7 @@ export function OrderPayment({
     () => pendingPayments.get(orderId) ?? null,
   );
   const [sent, setSent] = useState(() => pendingPayments.has(orderId));
+  const [opened, setOpened] = useState(() => pendingPayments.has(orderId));
   const [validation, setValidation] = useState<string | null>(null);
   const submitting = useRef(false);
   const mutation = useSafeMutation({
@@ -57,6 +60,7 @@ export function OrderPayment({
       setAmount('');
       setReference('');
       setSent(false);
+      setOpened(false);
     },
     onError: async (error) => {
       if (error instanceof ApiError) {
@@ -126,7 +130,6 @@ export function OrderPayment({
 
   return (
     <>
-      <ShellHeading level="section">Record payment</ShellHeading>
       <ShellMutationFeedback mutation={mutation} />
       {mutation.data && (
         <ShellFeedback
@@ -134,74 +137,101 @@ export function OrderPayment({
           label={`Payment confirmed${mutation.data.alreadyRecorded ? ' (already recorded)' : ''}. Paid: ${money(mutation.data.paidAmount)}. Balance: ${money(mutation.data.outstandingBalance)}.`}
         />
       )}
-      {validation && <ShellFeedback kind="error" label={validation} />}
-      {mutation.error && (
-        <ShellFeedback
-          kind="error"
-          label={
-            attempt && sent
-              ? 'Payment outcome is unknown. Refresh the order, then retry this same payment to confirm it safely. Do not enter a second payment for this amount.'
-              : mutation.error instanceof ApiError &&
-                  mutation.error.status === 409
-                ? 'Order changed elsewhere. Review the refreshed balance before recording a payment.'
-                : mutation.error.message
-          }
-        />
-      )}
-      {attempt ? (
-        <>
-          <ShellText>{`Review payment: ${money(attempt.amount)} · ${attempt.method}${attempt.reference ? ` · ${attempt.reference}` : ''}`}</ShellText>
+      {(balance > 0 || attempt) && (
+        <ShellPageFooter>
           <ShellButton
-            label={sent ? 'Retry same payment' : 'Confirm payment'}
-            disabled={unavailable}
-            loading={mutation.isPending}
-            onPress={() => void confirm()}
+            label="Record payment"
+            prominent
+            disabled={unavailable && !attempt}
+            onPress={() => setOpened(true)}
           />
-          {!sent && (
-            <ShellButton
-              label="Edit payment"
-              variant="secondary"
-              onPress={() => setAttempt(null)}
-            />
-          )}
-        </>
-      ) : (
-        balance > 0 && (
-          <>
-            <ShellInput
-              label="Amount"
-              accessibilityLabel="Payment amount"
-              keyboardType="decimal-pad"
-              value={amount}
-              onChangeText={setAmount}
-              editable={!unavailable}
-            />
-            {(['cash', 'card', 'e_wallet'] as const).map((value) => (
-              <ShellButton
-                key={value}
-                label={`Pay by ${value === 'e_wallet' ? 'e-wallet' : value}`}
-                selected={method === value}
-                variant="secondary"
-                disabled={unavailable}
-                onPress={() => setMethod(value)}
-              />
-            ))}
-            <ShellInput
-              label="Payment reference (required for card or e-wallet)"
-              accessibilityLabel="Payment reference"
-              value={reference}
-              onChangeText={setReference}
-              editable={!unavailable}
-              maxLength={120}
-            />
-            <ShellButton
-              label="Review payment"
-              disabled={unavailable}
-              onPress={review}
-            />
-          </>
-        )
+        </ShellPageFooter>
       )}
+      <ShellSheet
+        visible={opened}
+        title="Record payment"
+        busy={mutation.isPending}
+        onClose={() => setOpened(false)}
+      >
+        <ShellText>Balance due: {money(balance)}</ShellText>
+        {validation && <ShellFeedback kind="error" label={validation} />}
+        {mutation.error && (
+          <ShellFeedback
+            kind="error"
+            label={
+              attempt && sent
+                ? 'Payment outcome is unknown. Refresh the order, then retry this same payment to confirm it safely. Do not enter a second payment for this amount.'
+                : mutation.error instanceof ApiError &&
+                    mutation.error.status === 409
+                  ? 'Order changed elsewhere. Review the refreshed balance before recording a payment.'
+                  : mutation.error.message
+            }
+          />
+        )}
+        {attempt ? (
+          <>
+            <ShellText>{`Review payment: ${money(attempt.amount)} · ${attempt.method}${attempt.reference ? ` · ${attempt.reference}` : ''}`}</ShellText>
+            <ShellButton
+              label={sent ? 'Retry same payment' : 'Confirm payment'}
+              disabled={unavailable}
+              loading={mutation.isPending}
+              onPress={() => void confirm()}
+            />
+            {!sent && (
+              <ShellButton
+                label="Edit payment"
+                variant="secondary"
+                onPress={() => setAttempt(null)}
+              />
+            )}
+          </>
+        ) : (
+          balance > 0 && (
+            <>
+              <ShellInput
+                label="Amount"
+                accessibilityLabel="Payment amount"
+                keyboardType="decimal-pad"
+                value={amount}
+                onChangeText={setAmount}
+                editable={!unavailable}
+              />
+              <ShellSelection segmented>
+                {(['cash', 'card', 'e_wallet'] as const).map((value) => (
+                  <ShellButton
+                    key={value}
+                    label={`Pay by ${value === 'e_wallet' ? 'e-wallet' : value}`}
+                    displayLabel={
+                      value === 'e_wallet'
+                        ? 'E-wallet'
+                        : value[0]!.toUpperCase() + value.slice(1)
+                    }
+                    selected={method === value}
+                    variant="secondary"
+                    disabled={unavailable}
+                    onPress={() => setMethod(value)}
+                  />
+                ))}
+              </ShellSelection>
+              {method !== 'cash' && (
+                <ShellInput
+                  label="Payment reference (required for card or e-wallet)"
+                  accessibilityLabel="Payment reference"
+                  value={reference}
+                  onChangeText={setReference}
+                  editable={!unavailable}
+                  maxLength={120}
+                />
+              )}
+              <ShellButton
+                label="Review payment"
+                disabled={unavailable}
+                onPress={review}
+              />
+            </>
+          )
+        )}
+      </ShellSheet>
     </>
   );
 }
