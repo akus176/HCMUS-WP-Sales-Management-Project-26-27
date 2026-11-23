@@ -43,6 +43,8 @@ public sealed class ServiceConsoleNavigationTests
         Assert.Equal(["reports"], ServiceConsoleNavigation.ForPermissions(["reports.lowstock"]).Select(item => item.Tag));
         Assert.Equal(["menu"], ServiceConsoleNavigation.ForPermissions(["menu.manage"]).Select(item => item.Tag));
         Assert.Empty(ServiceConsoleNavigation.ForPermissions(["unknown.permission"]));
+        Assert.Equal(["accounts"], ServiceConsoleNavigation.ForPermissions(["users.manage"]).Select(item => item.Tag));
+        Assert.DoesNotContain(ServiceConsoleNavigation.PrimaryDestinations, item => item.Tag == "accounts");
     }
 
     [Fact]
@@ -51,6 +53,9 @@ public sealed class ServiceConsoleNavigationTests
         Assert.Throws<UnauthorizedAccessException>(() =>
             ServiceConsoleNavigation.Resolve("reports", ["orders.create"]));
         Assert.Equal("counter", ServiceConsoleNavigation.Resolve("counter", ["orders.create"]).Destination.Tag);
+        Assert.Throws<UnauthorizedAccessException>(() =>
+            ServiceConsoleNavigation.Resolve("accounts", ["orders.create"]));
+        Assert.Equal("accounts", ServiceConsoleNavigation.Resolve("accounts", ["users.manage"]).Destination.Tag);
     }
 
     [Fact]
