@@ -55,11 +55,11 @@ test('selected and keyboard-focused controls have visible feedback and accessibl
     selected: true,
   });
   expect(button).toHaveStyle({
-    backgroundColor: shellTheme.foreground,
+    backgroundColor: '#eee8df',
     minHeight: 48,
     minWidth: 48,
   });
-  expect(screen.getByText('✓ Preparation')).toBeVisible();
+  expect(screen.getByText('Preparation')).toBeVisible();
   await view.rerender(<ShellButton label="Preparation" onPress={() => {}} />);
   await fireEvent(screen.getByRole('button', { name: 'Preparation' }), 'focus');
   expect(screen.getByRole('button', { name: 'Preparation' })).toHaveStyle({

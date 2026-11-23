@@ -40,7 +40,7 @@ test('blocks startup before session children mount and never displays unsafe inp
     screen.container.queryAll((node) => node.type === 'RCTScrollView').length,
   ).toBeGreaterThan(0);
   expect(screen.getByRole('alert')).toHaveStyle({
-    fontSize: 18,
+    fontSize: 16,
     color: '#aa2c2c',
   });
 });

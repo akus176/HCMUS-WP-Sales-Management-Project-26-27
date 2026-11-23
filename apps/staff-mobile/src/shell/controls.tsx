@@ -11,6 +11,9 @@ import {
 } from 'react';
 import {
   AccessibilityInfo,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -22,6 +25,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { mobileTokens } from './designTokens';
+import { useNativeNavigation } from './NativeNavigation';
+import { ShellIcon } from './ShellIcon';
 
 // Compatibility alias while existing shell consumers use this name.
 export const shellTheme = {
@@ -58,6 +63,7 @@ export function ShellPageFooter({ children }: { children: ReactNode }) {
 }
 
 export function ShellPage({ children }: { children: ReactNode }) {
+  const nativeNavigation = useNativeNavigation();
   const notice = useContext(PageNotice);
   const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
   const position = useRef(0);
@@ -92,7 +98,10 @@ export function ShellPage({ children }: { children: ReactNode }) {
     [detailActive, returnTarget],
   );
   return (
-    <SafeAreaView edges={['bottom']} style={styles.page}>
+    <SafeAreaView
+      edges={nativeNavigation?.user ? [] : ['bottom']}
+      style={styles.page}
+    >
       <PageNavigation.Provider value={navigation}>
         <PageFooter.Provider value={setFooter}>
           <ScrollView
@@ -130,10 +139,12 @@ export function ShellHeading({
   children,
   level = 'page',
   focusOnMount = false,
+  accessibilityLabel,
 }: {
   children: ReactNode;
   level?: 'page' | 'section';
   focusOnMount?: boolean;
+  accessibilityLabel?: string;
 }) {
   const ref = useRef<ComponentRef<typeof Text>>(null);
   const focused = useRef(false);
@@ -142,6 +153,7 @@ export function ShellHeading({
       ref={ref}
       accessible
       accessibilityRole="header"
+      accessibilityLabel={accessibilityLabel}
       style={[styles.heading, level === 'section' && styles.sectionHeading]}
       onLayout={() => {
         if (focusOnMount && !focused.current && ref.current) {
@@ -173,20 +185,27 @@ export function ShellPageHeader({
   inline?: boolean;
 }) {
   const navigation = usePageNavigation();
+  const nativeHeader = !!useNativeNavigation()?.user;
   const { fontScale } = useWindowDimensions();
   const inlineLayout = inline && fontScale <= 1.5;
   if (hideDuringDetail && navigation.detailActive) return null;
   return (
     <View style={[styles.header, inlineLayout && styles.inlineHeader]}>
+      {backLabel && onBack && backLabel !== 'Back to staff home' && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={backLabel}
+          onPress={onBack}
+          style={styles.backButton}
+        >
+          <ShellIcon name="back" />
+        </Pressable>
+      )}
       {inlineLayout && title && <ShellHeading>{title}</ShellHeading>}
-      {backLabel && onBack && (
+      {backLabel === 'Back to staff home' && onBack && !nativeHeader && (
         <ShellButton
           label={backLabel}
-          displayLabel={
-            backLabel === 'Back to staff home'
-              ? 'Staff home'
-              : backLabel.replace(/^Back to /i, '')
-          }
+          displayLabel="Staff home"
           variant="text"
           onPress={onBack}
         />
@@ -202,22 +221,26 @@ export function ShellInput({
   error,
   style,
   accessibilityLabel,
+  hideLabel = false,
   ...props
 }: TextInputProps & {
   label: string;
   hint?: string;
   error?: string;
   ref?: Ref<ComponentRef<typeof TextInput>>;
+  hideLabel?: boolean;
 }) {
   return (
     <View style={styles.field}>
-      <Text
-        accessible={false}
-        importantForAccessibility="no"
-        style={styles.text}
-      >
-        {label}
-      </Text>
+      {!hideLabel && (
+        <Text
+          accessible={false}
+          importantForAccessibility="no"
+          style={styles.text}
+        >
+          {label}
+        </Text>
+      )}
       <TextInput
         {...props}
         accessibilityLabel={accessibilityLabel ?? label}
@@ -236,8 +259,106 @@ export function ShellInput({
   );
 }
 
-export function ShellSelection({ children }: { children: ReactNode }) {
-  return <View style={styles.selection}>{children}</View>;
+const SegmentedSelection = createContext(false);
+export function ShellSelection({
+  children,
+  segmented = false,
+}: {
+  children: ReactNode;
+  segmented?: boolean;
+}) {
+  return (
+    <SegmentedSelection.Provider value={segmented}>
+      <View style={[styles.selection, segmented && styles.segmented]}>
+        {children}
+      </View>
+    </SegmentedSelection.Provider>
+  );
+}
+
+export function ShellBadge({
+  label,
+  kind = 'neutral',
+}: {
+  label: string;
+  kind?: 'neutral' | 'info' | 'attention';
+}) {
+  return (
+    <Text
+      style={[
+        styles.badge,
+        kind === 'info' && styles.infoBadge,
+        kind === 'attention' && styles.attentionBadge,
+      ]}
+    >
+      {label}
+    </Text>
+  );
+}
+
+/** Modal reviews reserve their own scrollable, keyboard-aware safe area. */
+export function ShellSheet({
+  visible,
+  title,
+  onClose,
+  busy = false,
+  children,
+}: {
+  visible: boolean;
+  title: string;
+  onClose: () => void;
+  busy?: boolean;
+  children: ReactNode;
+}) {
+  const { height } = useWindowDimensions();
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={() => {
+        if (!busy) onClose();
+      }}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.sheetScreen}
+      >
+        <Pressable
+          accessibilityLabel={`Dismiss ${title}`}
+          accessibilityRole="button"
+          disabled={busy}
+          onPress={onClose}
+          style={styles.sheetBackdrop}
+        />
+        <SafeAreaView
+          edges={['bottom']}
+          accessibilityViewIsModal
+          style={[styles.sheet, { maxHeight: height * 0.9 }]}
+        >
+          <View style={styles.sheetHandle} />
+          <View style={styles.sheetHeader}>
+            <ShellHeading focusOnMount>{title}</ShellHeading>
+            <Pressable
+              style={styles.backButton}
+              accessibilityRole="button"
+              accessibilityLabel={`Close ${title}`}
+              disabled={busy}
+              onPress={onClose}
+            >
+              <ShellIcon name="close" />
+            </Pressable>
+          </View>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={styles.sheetContent}
+          >
+            {children}
+          </ScrollView>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
 }
 
 export function ShellMutationFeedback({
@@ -322,7 +443,8 @@ export function ShellButton({
   prominent = false,
   testID,
   displayLabel,
-  showSelectionMark = true,
+  showSelectionMark = false,
+  children,
 }: {
   label: string;
   onPress: () => void;
@@ -338,7 +460,9 @@ export function ShellButton({
   testID?: string;
   displayLabel?: string;
   showSelectionMark?: boolean;
+  children?: ReactNode;
 }) {
+  const segmented = useContext(SegmentedSelection);
   const [focused, setFocused] = useState(false);
   const ref = useRef<ComponentRef<typeof View>>(null);
   const navigation = usePageNavigation();
@@ -384,73 +508,86 @@ export function ShellButton({
         variant === 'secondary' && styles.secondaryButton,
         (variant === 'text' || variant === 'link') && styles.textButton,
         (focused || selected) && styles.selected,
+        segmented && styles.segmentedButton,
+        segmented && selected && styles.segmentedSelected,
+        !!children && styles.recordButton,
         pressed && styles.pressed,
         unavailable && styles.disabled,
       ]}
     >
-      <Text
-        style={[
-          styles.buttonText,
-          compact && styles.compactButtonText,
-          variant !== 'primary' &&
-            !(focused || selected) &&
-            styles.secondaryButtonText,
-          variant === 'link' && styles.linkButtonText,
-          variant === 'link' &&
-            !(focused || selected) &&
-            styles.linkButtonColor,
-          unavailable && styles.disabledButtonText,
-        ]}
-      >
-        {loading
-          ? loadingLabel
-          : selected && showSelectionMark
-            ? `✓ ${displayLabel ?? label}`
-            : (displayLabel ?? label)}
-      </Text>
+      {children ?? (
+        <Text
+          style={[
+            styles.buttonText,
+            compact && styles.compactButtonText,
+            variant !== 'primary' &&
+              !(focused || selected) &&
+              styles.secondaryButtonText,
+            variant === 'link' && styles.linkButtonText,
+            variant === 'link' &&
+              !(focused || selected) &&
+              styles.linkButtonColor,
+            unavailable && styles.disabledButtonText,
+            (focused || selected) && !unavailable && styles.selectedButtonText,
+          ]}
+        >
+          {loading
+            ? loadingLabel
+            : selected && showSelectionMark
+              ? `✓ ${displayLabel ?? label}`
+              : (displayLabel ?? label)}
+        </Text>
+      )}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: mobileTokens.color.background },
-  connectionBanner: {
-    backgroundColor: mobileTokens.color.warningBackground,
-    borderBottomColor: mobileTokens.color.warning,
-    borderBottomWidth: 2,
-    paddingHorizontal: mobileTokens.spacing.md,
-    paddingVertical: mobileTokens.spacing.sm,
-  },
-  connectionText: {
-    color: mobileTokens.color.warning,
-    fontSize: mobileTokens.type.body,
-    fontFamily: mobileTokens.type.bodyFont,
-    textAlign: 'center',
-  },
   scroll: { flexGrow: 1 },
-  header: { gap: mobileTokens.spacing.sm, alignItems: 'flex-start' },
+  header: { gap: 8, alignItems: 'flex-start' },
   inlineHeader: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 8,
   },
-  field: { gap: mobileTokens.spacing.sm },
-  selection: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: mobileTokens.spacing.sm,
+  backButton: {
+    minHeight: 48,
+    minWidth: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  field: { gap: 8 },
+  selection: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  segmented: {
+    backgroundColor: mobileTokens.color.selectedBackground,
+    borderRadius: 12,
+    padding: 4,
+    gap: 4,
+  },
+  segmentedButton: {
+    flexGrow: 1,
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+    paddingHorizontal: 8,
+  },
+  segmentedSelected: {
+    backgroundColor: mobileTokens.color.surface,
+    borderColor: 'transparent',
   },
   input: {
     minHeight: 48,
     borderWidth: 1,
     borderColor: mobileTokens.color.border,
-    borderRadius: mobileTokens.shape.control,
-    padding: mobileTokens.spacing.sm,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     color: mobileTokens.color.foreground,
-    backgroundColor: mobileTokens.color.background,
+    backgroundColor: mobileTokens.color.surface,
     fontFamily: mobileTokens.type.bodyFont,
-    fontSize: mobileTokens.type.body,
+    fontSize: 16,
+    lineHeight: 23,
   },
   disabledInput: { backgroundColor: mobileTokens.color.disabledBackground },
   invalidInput: { borderColor: mobileTokens.color.error },
@@ -458,33 +595,37 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: '100%',
     maxWidth: 720,
-    padding: mobileTokens.spacing.lg,
-    paddingTop: mobileTokens.spacing.sm,
-    gap: mobileTokens.spacing.md,
+    padding: 20,
+    paddingTop: 12,
+    gap: 16,
   },
   heading: {
     color: mobileTokens.color.foreground,
-    fontSize: mobileTokens.type.display,
+    fontSize: 24,
+    lineHeight: 30,
     fontFamily: mobileTokens.type.displayFont,
-    fontWeight: '700',
+    letterSpacing: -0.45,
     flexShrink: 1,
     flexWrap: 'wrap',
   },
-  sectionHeading: { fontSize: mobileTokens.type.title },
+  sectionHeading: {
+    fontSize: 16,
+    lineHeight: 23,
+    letterSpacing: -0.15,
+    fontFamily: mobileTokens.type.mediumFont,
+  },
   text: {
     color: mobileTokens.color.foreground,
-    fontSize: mobileTokens.type.body,
+    fontSize: 16,
+    lineHeight: 23,
     fontFamily: mobileTokens.type.bodyFont,
     flexShrink: 1,
     flexWrap: 'wrap',
   },
-  feedback: {
-    borderLeftWidth: 4,
-    borderRadius: mobileTokens.shape.control,
-    padding: mobileTokens.spacing.md,
-  },
+  feedback: { borderRadius: 12, padding: 14 },
   feedbackText: {
-    fontSize: mobileTokens.type.body,
+    fontSize: 14,
+    lineHeight: 21,
     fontFamily: mobileTokens.type.bodyFont,
     flexShrink: 1,
     flexWrap: 'wrap',
@@ -493,45 +634,100 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     minHeight: 48,
     minWidth: 48,
-    paddingHorizontal: mobileTokens.spacing.md,
-    paddingVertical: mobileTokens.spacing.sm,
-    borderRadius: mobileTokens.shape.control,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: mobileTokens.color.primary,
+    borderColor: 'transparent',
     backgroundColor: mobileTokens.color.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  secondaryButton: {
-    backgroundColor: mobileTokens.color.background,
-  },
-  textButton: {
-    backgroundColor: 'transparent',
-    borderColor: 'transparent',
-    paddingHorizontal: 0,
-  },
+  secondaryButton: { backgroundColor: mobileTokens.color.selectedBackground },
+  textButton: { backgroundColor: 'transparent', paddingHorizontal: 0 },
   selected: {
     borderColor: mobileTokens.color.focus,
     backgroundColor: mobileTokens.color.selectedBackground,
   },
-  pressed: { borderColor: mobileTokens.color.focus, opacity: 0.8 },
+  pressed: { opacity: 0.8 },
   disabled: {
-    borderColor: mobileTokens.color.disabledText,
     backgroundColor: mobileTokens.color.disabledBackground,
+    borderColor: 'transparent',
   },
   buttonText: {
     color: mobileTokens.color.onPrimary,
-    fontSize: mobileTokens.type.body,
-    fontFamily: mobileTokens.type.bodyFont,
+    fontSize: 15,
+    lineHeight: 22,
+    fontFamily: mobileTokens.type.mediumFont,
     textAlign: 'center',
     flexShrink: 1,
     flexWrap: 'wrap',
   },
   secondaryButtonText: { color: mobileTokens.color.foreground },
-  linkButtonText: { textDecorationLine: 'underline' },
+  selectedButtonText: { color: mobileTokens.color.selectedForeground },
+  linkButtonText: {},
   linkButtonColor: { color: mobileTokens.color.primary },
   compactButton: { paddingHorizontal: 10 },
-  compactButtonText: { fontSize: 16 },
+  compactButtonText: { fontSize: 14 },
   prominentButton: { minHeight: 56 },
   disabledButtonText: { color: mobileTokens.color.disabledText },
+  recordButton: {
+    backgroundColor: mobileTokens.color.surface,
+    alignItems: 'stretch',
+    padding: 16,
+    gap: 8,
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    backgroundColor: mobileTokens.color.selectedBackground,
+    color: mobileTokens.color.primary,
+    fontFamily: mobileTokens.type.mediumFont,
+    fontSize: 12,
+    lineHeight: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  infoBadge: {
+    backgroundColor: mobileTokens.color.infoBackground,
+    color: mobileTokens.color.info,
+  },
+  attentionBadge: {
+    backgroundColor: mobileTokens.color.warningBackground,
+    color: mobileTokens.color.warning,
+  },
+  sheetScreen: { flex: 1, justifyContent: 'flex-end' },
+  sheetBackdrop: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    minHeight: 48,
+    minWidth: 48,
+    backgroundColor: '#00000042',
+  },
+  sheet: {
+    backgroundColor: mobileTokens.color.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  sheetHandle: {
+    width: 48,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: mobileTokens.color.border,
+    alignSelf: 'center',
+    marginTop: 12,
+  },
+  sheetHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sheetContent: { padding: 20, gap: 16 },
 });

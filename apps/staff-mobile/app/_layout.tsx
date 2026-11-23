@@ -44,8 +44,9 @@ function SessionNavigation({
   state: ReturnType<typeof useSession>['state'];
 }) {
   const [fontsLoaded, fontError] = useFonts({
-    Kalam: require('../assets/fonts/Kalam-Bold.ttf'),
-    PatrickHand: require('../assets/fonts/PatrickHand-Regular.ttf'),
+    InterRegular: require('../assets/fonts/Inter-Regular.otf'),
+    InterMedium: require('../assets/fonts/Inter-Medium.otf'),
+    InterSemiBold: require('../assets/fonts/Inter-SemiBold.otf'),
   });
   if (!fontsLoaded && !fontError)
     return (
