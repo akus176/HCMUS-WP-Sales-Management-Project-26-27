@@ -22,6 +22,7 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
   const { client, state } = useSession();
   const queries = useQueryClient();
   const [navigationError, setNavigationError] = useState(false);
+  const [callError, setCallError] = useState(false);
   const [accessRevoked, setAccessRevoked] = useState(false);
   const [finished, setFinished] = useState<'delivered' | 'failed' | null>(null);
   const [reason, setReason] = useState('');
@@ -187,6 +188,23 @@ export function DeliveryDetail({ orderId }: { orderId: string }) {
           <ShellText>Recipient: {assignment.recipientName}</ShellText>
           <ShellText>Contact: {assignment.contactNumber}</ShellText>
           <ShellText>Address: {assignment.addressLine}</ShellText>
+          {callError && (
+            <ShellFeedback
+              kind="error"
+              label="Unable to open the phone app on this device."
+            />
+          )}
+          <ShellButton
+            label="Call customer"
+            variant="secondary"
+            disabled={!assignment.contactNumber.trim()}
+            onPress={() => {
+              setCallError(false);
+              void Linking.openURL(
+                `tel:${encodeURIComponent(assignment.contactNumber)}`,
+              ).catch(() => setCallError(true));
+            }}
+          />
           {navigationError && (
             <ShellFeedback
               kind="error"

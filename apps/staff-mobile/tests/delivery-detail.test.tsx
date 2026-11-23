@@ -37,7 +37,7 @@ function SignedInDetail() {
   ) : null;
 }
 
-test('opens navigation with an encoded address and discards details on unmount', async () => {
+test('opens customer calls and encoded directions, reports launch failure, and discards details on unmount', async () => {
   const h = harness(async () =>
     json({
       orderId: 'delivery-1',
@@ -65,6 +65,14 @@ test('opens navigation with an encoded address and discards details on unmount',
     await h.client.login('courier', 'password');
   });
   await screen.findByText('Address: 1 Main St & 2nd');
+  await fireEvent.press(screen.getByRole('button', { name: 'Call customer' }));
+  expect(open).toHaveBeenCalledWith('tel:123456789');
+  open.mockRejectedValueOnce(new Error('Phone app unavailable'));
+  await fireEvent.press(screen.getByRole('button', { name: 'Call customer' }));
+  expect(
+    await screen.findByText('Unable to open the phone app on this device.'),
+  ).toBeVisible();
+
   await fireEvent.press(
     screen.getByRole('button', { name: 'Open navigation' }),
   );

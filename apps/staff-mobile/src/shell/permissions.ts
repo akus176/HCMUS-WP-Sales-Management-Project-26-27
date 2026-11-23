@@ -5,8 +5,9 @@ export type MobileModule = {
   actions: readonly MobileAction[];
 };
 
-// These are API permission codes, not role names. Workflow implementations are
-// deliberately separate from this navigation policy (#155, #156 and later).
+// Shared API permission metadata for existing workflow components. The delivery
+// app itself exposes only the workspaces allowed by navigationPolicy; this
+// catalogue does not grant navigation access to retired mobile workflows.
 export const mobileModules: readonly MobileModule[] = [
   {
     id: 'barista',

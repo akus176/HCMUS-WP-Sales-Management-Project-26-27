@@ -160,28 +160,21 @@ test('background hides content and resume rechecks permissions before remounting
   expect(screen.queryByText('Protected feature content')).toBeNull();
   jest.restoreAllMocks();
 });
-test('home renders only effective permission modules and an explicit empty state', async () => {
+test('home exposes delivery work only and explains missing courier access', async () => {
   const view = await render(<StaffHome />);
-  expect(
-    screen.getByRole('button', { name: 'Open Preparation' }),
-  ).toBeVisible();
-  expect(screen.queryByRole('button', { name: 'Open Deliveries' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Open Preparation' })).toBeNull();
+  expect(screen.getByText(/Delivery access is required/)).toBeVisible();
   mockSession.state.user = {
     ...user,
-    permissions: ['orders.cancel', 'inventory.receive'],
+    permissions: ['delivery.update', 'orders.cancel', 'inventory.receive'],
   };
   await view.rerender(<StaffHome />);
-  expect(screen.getByText('Cancellations')).toBeVisible();
-  expect(screen.getByText('Purchase receipts')).toBeVisible();
-  expect(
-    screen.queryByText(/Discount decisions|Delivery assignment/),
-  ).toBeNull();
-  expect(screen.queryByText(/Balances|Low stock|Stock adjustments/)).toBeNull();
+  expect(screen.getByRole('button', { name: 'Open Deliveries' })).toBeVisible();
+  expect(screen.queryByText('Cancellations')).toBeNull();
+  expect(screen.queryByText('Purchase receipts')).toBeNull();
   mockSession.state.user = { ...user, roles: ['Admin'], permissions: [] };
   await view.rerender(<StaffHome />);
-  expect(
-    screen.getByText('No mobile modules are available for your permissions.'),
-  ).toBeVisible();
+  expect(screen.getByText(/Delivery access is required/)).toBeVisible();
 });
 test('restoring session does not expose modules or staff identity', async () => {
   mockSession.state = { status: 'restoring', user: null };
@@ -190,8 +183,9 @@ test('restoring session does not expose modules or staff identity', async () => 
   expect(screen.queryByText(user.fullName)).toBeNull();
 });
 test('home actions have accessible names and at least 48 dp targets', async () => {
+  mockSession.state.user = { ...user, permissions: ['delivery.update'] };
   await render(<StaffHome />);
-  const button = screen.getByRole('button', { name: 'Open Preparation' });
+  const button = screen.getByRole('button', { name: 'Open Deliveries' });
   expect(button).toHaveStyle({ minHeight: 48, minWidth: 48 });
   await fireEvent.press(button);
 });
@@ -315,7 +309,7 @@ test('an initially empty home hides identity in background and discovers a new g
     </PermissionBoundary>,
   );
   await screen.findByText(
-    'No mobile modules are available for your permissions.',
+    'Delivery access is required. This app is for delivery staff. Contact your administrator or sign out from Account.',
   );
   await act(async () => listener?.('background'));
   expect(screen.queryByText(user.fullName)).toBeNull();

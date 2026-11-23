@@ -1,13 +1,12 @@
 import { useNativeNavigation } from '../../shell/NativeNavigation';
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { recordRow } from '../../shell/recordPresentation';
 import { mobileTokens as t } from '../../shell/designTokens';
 import { ShellIcon } from '../../shell/ShellIcon';
 
-import { useSession } from '../../session/context';
+import { useDeliveryAssignments } from './useDeliveryAssignments';
 import {
   ShellButton,
   ShellHeaderAction,
@@ -24,30 +23,11 @@ const pageSize = 10;
 export function DeliveryScreen({
   showHeading = true,
 }: { showHeading?: boolean } = {}) {
-  const { client, state } = useSession();
   const native = useNativeNavigation();
   const navigation = usePageNavigation();
   const [view, setView] = useState<'active' | 'completed'>('active');
   const [page, setPage] = useState(1);
-  const assignments = useQuery({
-    queryKey: ['delivery', state.user!.id, 'list', view, page],
-    queryFn: async ({ signal }) => {
-      const { data } = await client!.api.GET('/api/v1/courier/assignments', {
-        signal,
-        params: {
-          query: {
-            status:
-              view === 'active'
-                ? 'assigned,out_for_delivery'
-                : 'delivered,failed',
-            page,
-            pageSize,
-          },
-        },
-      });
-      return data!;
-    },
-  });
+  const assignments = useDeliveryAssignments(view, page);
   return (
     <>
       {showHeading && <ShellPageHeader title="Deliveries" />}
