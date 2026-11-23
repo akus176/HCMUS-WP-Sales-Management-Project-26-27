@@ -24,7 +24,6 @@ const actionDescriptions: Record<string, string> = {
   'orders.fulfill': 'Tickets · Start preparation · Mark ready',
   'orders.create': 'Orders · Tables',
   'payments.record': 'Payments',
-  'discounts.approve': 'Discount decisions',
   'orders.cancel': 'Cancellations',
   'delivery.assign': 'Delivery assignment',
   'inventory.manage': 'Balances · Movement history',
@@ -81,15 +80,6 @@ export function StaffHome({
       {!!modules.length && (
         <View style={styles.sectionHeader}>
           <ShellHeading level="section">Your workspaces</ShellHeading>
-          {quick && (
-            <ShellButton
-              label="View all workspaces"
-              displayLabel="View all"
-              compact
-              variant="text"
-              onPress={() => navigation?.open('more')}
-            />
-          )}
         </View>
       )}
       <View style={quick && fontScale <= 1.5 ? styles.quickGrid : styles.list}>
@@ -182,8 +172,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   list: { gap: 12 },
-  quickGrid: { flexDirection: 'row', gap: 12 },
-  quickCell: { flex: 1 },
+  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  quickCell: { flexBasis: '47%', flexGrow: 1 },
   quickWorkspace: { alignItems: 'flex-start', gap: 12 },
   icon: {
     width: 48,

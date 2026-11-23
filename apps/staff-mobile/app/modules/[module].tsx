@@ -7,7 +7,6 @@ import { PreparationScreen } from '../../src/barista/PreparationScreen';
 import { PermissionBoundary } from '../../src/shell/PermissionBoundary';
 import { useRouteAccess } from '../../src/shell/useRouteAccess';
 import {
-  ShellButton,
   ShellHeading,
   ShellPage,
   ShellPageHeader,
@@ -15,7 +14,6 @@ import {
   ShellStatus,
 } from '../../src/shell/controls';
 import { findModule, permittedActions } from '../../src/shell/permissions';
-import { DiscountApprovals } from '../../src/features/approvals/DiscountApprovals';
 import { StaffAdministration } from '../../src/features/administration/StaffAdministration';
 import { InventoryWorkspace } from '../../src/features/inventory/InventoryWorkspace';
 import { OrdersScreen } from '../../src/features/orders/OrdersScreen';
@@ -42,16 +40,14 @@ export default function ModuleScreen() {
       >
         {(user) =>
           navigation && module ? (
-            <NativeModuleEntry id={module.id as Workspace} />
+            <NativeModuleEntry id={module.id as Workspace | 'operations'} />
           ) : (
             <>
               <ShellPageHeader
                 title={
-                  module?.id === 'approvals'
-                    ? 'Manager approvals'
-                    : module?.id === 'administration'
-                      ? 'Staff administration'
-                      : module?.title
+                  module?.id === 'administration'
+                    ? 'Staff administration'
+                    : module?.title
                 }
                 inline
                 backLabel="Back to staff home"
@@ -60,21 +56,6 @@ export default function ModuleScreen() {
               />
               {module?.id === 'barista' ? (
                 <PreparationScreen showHeading={false} />
-              ) : module?.id === 'approvals' ? (
-                <>
-                  {user.permissions.some((permission) =>
-                    ['orders.cancel', 'delivery.assign'].includes(permission),
-                  ) && (
-                    <ShellButton
-                      label="Manage cancellations and deliveries"
-                      variant="secondary"
-                      onPress={() =>
-                        router.push('/modules/approvals/operations')
-                      }
-                    />
-                  )}
-                  <DiscountApprovals user={user} showHeading={false} />
-                </>
               ) : module?.id === 'inventory' ? (
                 <InventoryWorkspace user={user} showHeading={false} />
               ) : module?.id === 'cashier' ? (
@@ -106,10 +87,11 @@ export default function ModuleScreen() {
   );
 }
 
-function NativeModuleEntry({ id }: { id: Workspace }) {
+function NativeModuleEntry({ id }: { id: Workspace | 'operations' }) {
   const open = useNativeNavigation()?.open;
   useEffect(() => {
-    open?.(id);
+    if (id === 'operations') router.replace('/modules/cashier/operations');
+    else open?.(id);
   }, [open, id]);
   return <ShellStatus>Opening workspace…</ShellStatus>;
 }

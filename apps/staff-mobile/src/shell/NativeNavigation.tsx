@@ -133,6 +133,7 @@ export function NativeTabBar() {
         {tabs.map((tab) => (
           <Pressable
             key={tab.id}
+            testID={`workspace-tab-${tab.id}`}
             accessibilityRole="tab"
             accessibilityLabel={tab.label}
             accessibilityState={{ selected: active === tab.id }}

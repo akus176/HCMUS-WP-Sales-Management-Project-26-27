@@ -1,8 +1,8 @@
 import type { QueryClient } from '@tanstack/react-query';
 
 const affectedViews: Readonly<Record<string, readonly string[]>> = {
-  order: ['preparation', 'sales', 'delivery', 'discount-approvals'],
-  discount: ['discount-approvals', 'sales', 'discounts'],
+  order: ['preparation', 'sales', 'delivery'],
+  discount: ['sales'],
   payment: ['sales'],
   inventory: [
     'inventory',

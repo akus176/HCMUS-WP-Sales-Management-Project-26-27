@@ -95,11 +95,11 @@ async function setup(permissions = grants) {
   };
 }
 
-test('manager tabs preserve order search across workspaces and expose overflow work without switching identity', async () => {
+test('operational tabs preserve state and More contains only Account', async () => {
   const h = await setup();
   expect(
     screen.getAllByRole('tab').map((tab) => tab.props.accessibilityLabel),
-  ).toEqual(['Today', 'Orders', 'Stock', 'More']);
+  ).toEqual(['Today', 'Orders', 'Stock', 'Preparation', 'Deliveries', 'More']);
   await fireEvent.press(screen.getByRole('tab', { name: 'Orders' }));
   const search = await screen.findByLabelText('Search orders');
   await fireEvent.changeText(search, 'T04');
@@ -120,15 +120,26 @@ test('manager tabs preserve order search across workspaces and expose overflow w
     'T04',
   );
   await fireEvent.press(screen.getByRole('tab', { name: 'More' }));
-  await fireEvent.press(
-    await screen.findByRole('button', { name: 'Open Preparation' }),
-  );
+  expect(
+    await screen.findByRole('button', { name: 'Open Account' }),
+  ).toBeVisible();
+  expect(screen.queryByRole('button', { name: 'Open Preparation' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Open Approvals' })).toBeNull();
+  expect(
+    screen.queryByRole('button', { name: 'Open Administration' }),
+  ).toBeNull();
+  expect(
+    h.fetcher.mock.calls.some(([request]) =>
+      request.url.includes('/discounts/pending'),
+    ),
+  ).toBe(false);
+  await fireEvent.press(screen.getByRole('tab', { name: 'Preparation' }));
   await screen.findByRole('button', { name: 'All active' });
   expect(
     screen.getAllByRole('tab').map((tab) => tab.props.accessibilityLabel),
-  ).toEqual(['Today', 'Orders', 'Stock', 'More']);
+  ).toEqual(['Today', 'Orders', 'Stock', 'Preparation', 'Deliveries', 'More']);
   expect(
-    screen.getByRole('tab', { name: 'More', selected: true }),
+    screen.getByRole('tab', { name: 'Preparation', selected: true }),
   ).toBeVisible();
   expect(
     h.fetcher.mock.calls.filter(
@@ -142,8 +153,8 @@ test('a fresh revocation removes cached workspaces and never reloads their recor
   const h = await setup(['orders.fulfill']);
   expect(
     screen.getAllByRole('tab').map((tab) => tab.props.accessibilityLabel),
-  ).toEqual(['Home', 'Queue', 'Account']);
-  await fireEvent.press(screen.getByRole('tab', { name: 'Queue' }));
+  ).toEqual(['Home', 'Preparation', 'More']);
+  await fireEvent.press(screen.getByRole('tab', { name: 'Preparation' }));
   await screen.findByRole('button', { name: 'All active' });
   await fireEvent.press(screen.getByRole('tab', { name: 'Home' }));
   await screen.findByRole('header', { name: 'Staff home' });
@@ -160,7 +171,7 @@ test('a fresh revocation removes cached workspaces and never reloads their recor
   await screen.findByText(
     'No mobile modules are available for your permissions.',
   );
-  expect(screen.queryByRole('tab', { name: 'Queue' })).toBeNull();
+  expect(screen.queryByRole('tab', { name: 'Preparation' })).toBeNull();
   expect(screen.queryByRole('button', { name: 'All active' })).toBeNull();
   expect(
     h.fetcher.mock.calls.filter(([r]) =>
@@ -171,7 +182,10 @@ test('a fresh revocation removes cached workspaces and never reloads their recor
 
 test('sign-out can be canceled in Account without losing the active session', async () => {
   const h = await setup(['orders.fulfill']);
-  await fireEvent.press(screen.getByRole('tab', { name: 'Account' }));
+  await fireEvent.press(screen.getByRole('tab', { name: 'More' }));
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Open Account' }),
+  );
   await fireEvent.press(
     await screen.findByRole('button', { name: 'Sign out' }),
   );

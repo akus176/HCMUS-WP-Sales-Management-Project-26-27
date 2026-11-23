@@ -11,7 +11,6 @@ import type { ReactNode } from 'react';
 
 import LoginScreen from '../app/login';
 import { PreparationScreen } from '../src/barista/PreparationScreen';
-import { DiscountApprovals } from '../src/features/approvals/DiscountApprovals';
 import { InventoryWorkspace } from '../src/features/inventory/InventoryWorkspace';
 import { DeliveryScreen } from '../src/features/delivery/DeliveryScreen';
 import { DeliveryDetail } from '../src/features/delivery/DeliveryDetail';
@@ -68,16 +67,6 @@ const ticket = {
       addons: ['Oat milk'],
     },
   ],
-};
-const discount = {
-  discountId: id,
-  orderId: id,
-  orderNumber: 'ORD-186',
-  type: 'fixed',
-  value: 1,
-  reason: 'Service recovery',
-  orderTotal: 10,
-  computedAmount: 1,
 };
 const ingredient = {
   ingredientId: id,
@@ -178,16 +167,6 @@ const scenes: {
     loaded: 'ORD-186',
     open: 'Mark ready',
     settled: 'This updates the whole ticket.',
-  },
-  {
-    name: 'approval inbox',
-    content: <DiscountApprovals user={staff} />,
-    loaded: 'Reason: Service recovery',
-  },
-  {
-    name: 'approval detail',
-    content: <DiscountApprovals user={staff} discountId={id} />,
-    loaded: 'Reason: Service recovery',
   },
   {
     name: 'inventory balances',
@@ -380,8 +359,6 @@ describe.each([
               return json(page([ingredient]));
             if (path.includes('/ingredients/'))
               return json({ ...ingredient, isActive: true });
-            if (path.endsWith('/discounts/pending'))
-              return json(page([discount]));
             if (path.endsWith('/ingredients')) return json(page([ingredient]));
             if (path.endsWith('/courier/assignments'))
               return json(page([assignment]));

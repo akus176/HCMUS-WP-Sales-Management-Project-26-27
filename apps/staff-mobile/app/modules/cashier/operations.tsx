@@ -13,7 +13,7 @@ export default function ManagerOrdersScreen() {
         backLabel="Back to staff home"
         onBack={() => router.replace('/session')}
       />
-      <PermissionBoundary moduleId="approvals" {...access}>
+      <PermissionBoundary moduleId="operations" {...access}>
         {(user) => <OrdersScreen user={user} manager />}
       </PermissionBoundary>
     </ShellPage>

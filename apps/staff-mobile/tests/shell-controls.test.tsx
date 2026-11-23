@@ -173,10 +173,10 @@ test('a workflow sheet owns its header actions and preserves the page underneath
     const [opened, setOpened] = useState(true);
     return (
       <ShellPage>
-        <ShellPageHeader title="Approvals" />
+        <ShellPageHeader title="Inventory" />
         <ShellHeaderAction
           kind="refresh"
-          label="Refresh approvals"
+          label="Refresh inventory"
           onPress={() => {}}
         />
         <ShellSheet
@@ -206,7 +206,7 @@ test('a workflow sheet owns its header actions and preserves the page underneath
   expect(headers).toHaveLength(2);
   expect(
     within(headers[0]!).getByRole('header', {
-      name: 'Approvals',
+      name: 'Inventory',
       includeHiddenElements: true,
     }),
   ).toBeTruthy();
@@ -222,8 +222,8 @@ test('a workflow sheet owns its header actions and preserves the page underneath
     screen.getByRole('button', { name: 'Back to order search' }),
   );
   expect(screen.getAllByTestId('shell-header')).toHaveLength(1);
-  expect(screen.getByRole('header', { name: 'Approvals' })).toBeVisible();
+  expect(screen.getByRole('header', { name: 'Inventory' })).toBeVisible();
   expect(
-    screen.getByRole('button', { name: 'Refresh approvals' }),
+    screen.getByRole('button', { name: 'Refresh inventory' }),
   ).toBeEnabled();
 });

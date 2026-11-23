@@ -38,7 +38,10 @@ test('logout removes protected navigation history and rejects a stale session de
   });
   expect(await screen.findByText('Test Staff')).toBeVisible();
   expect(screen).toHavePathname('/session');
-  await fireEvent.press(screen.getByRole('tab', { name: 'Account' }));
+  await fireEvent.press(screen.getByRole('tab', { name: 'More' }));
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Open Account' }),
+  );
   await fireEvent.press(
     await screen.findByRole('button', { name: 'Sign out' }),
   );

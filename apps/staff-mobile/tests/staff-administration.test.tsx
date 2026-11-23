@@ -8,7 +8,6 @@ import StarterScreen from '../app/index';
 import LoginScreen from '../app/login';
 import SessionScreen from '../app/session';
 import ModuleScreen from '../app/modules/[module]';
-import DiscountReviewScreen from '../app/modules/approvals/[discountId]';
 import { SessionProvider } from '../src/session/context';
 import { harness, json, user } from './helpers';
 import { QueryCleanup } from './query-cleanup';
@@ -65,7 +64,6 @@ test('unauthorized administration deep link exposes no account or event data', a
       login: LoginScreen,
       session: SessionScreen,
       'modules/[module]': ModuleScreen,
-      'modules/approvals/[discountId]': DiscountReviewScreen,
     },
     { initialUrl: '/modules/administration' },
   );
@@ -119,7 +117,6 @@ test('authorized account views are safe and deactivation requires confirmation',
       login: LoginScreen,
       session: SessionScreen,
       'modules/[module]': ModuleScreen,
-      'modules/approvals/[discountId]': DiscountReviewScreen,
     },
     { initialUrl: '/' },
   );
@@ -264,7 +261,6 @@ test('API-forbidden account and event reads expose no previously rendered data',
       login: LoginScreen,
       session: SessionScreen,
       'modules/[module]': ModuleScreen,
-      'modules/approvals/[discountId]': DiscountReviewScreen,
     },
     { initialUrl: '/' },
   );

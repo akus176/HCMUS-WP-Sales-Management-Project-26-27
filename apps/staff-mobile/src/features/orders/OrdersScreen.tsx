@@ -258,7 +258,9 @@ export function OrdersScreen({
                     onAccessLost={() => setAccessLost(true)}
                   />
                 )}
-              {manager && (
+              {user.permissions.some((permission) =>
+                ['orders.cancel', 'delivery.assign'].includes(permission),
+              ) && (
                 <ManagerOrderActions
                   key={`management:${current.id}`}
                   order={order}

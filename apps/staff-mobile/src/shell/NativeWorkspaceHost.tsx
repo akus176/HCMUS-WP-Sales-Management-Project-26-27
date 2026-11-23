@@ -7,16 +7,10 @@ import { useConnectivity } from '../connectivity/connectivity';
 import { PreparationScreen } from '../barista/PreparationScreen';
 import { OrdersScreen } from '../features/orders/OrdersScreen';
 import { InventoryWorkspace } from '../features/inventory/InventoryWorkspace';
-import { DiscountApprovals } from '../features/approvals/DiscountApprovals';
 import { DeliveryScreen } from '../features/delivery/DeliveryScreen';
 import { StaffAdministration } from '../features/administration/StaffAdministration';
 import { useNativeNavigation } from './NativeNavigation';
-import {
-  isWorkspaceAllowed,
-  navigationFor,
-  workspaceNavigation,
-  type Workspace,
-} from './navigationPolicy';
+import { isWorkspaceAllowed, type Workspace } from './navigationPolicy';
 import { permittedModules } from './permissions';
 import { StaffHome } from './StaffHome';
 import {
@@ -75,7 +69,7 @@ export function NativeWorkspaceHost({
                         summary={<HomeAttention user={user} />}
                       />
                     ) : id === 'more' ? (
-                      <MoreWorkspaces user={user} />
+                      <MoreWorkspaces />
                     ) : (
                       <Account user={user} />
                     )
@@ -87,11 +81,9 @@ export function NativeWorkspaceHost({
                             ? 'Orders'
                             : id === 'administration'
                               ? 'Staff'
-                              : id === 'approvals'
-                                ? 'Approvals'
-                                : permittedModules(user.permissions).find(
-                                    (module) => module.id === id,
-                                  )?.title
+                              : permittedModules(user.permissions).find(
+                                  (module) => module.id === id,
+                                )?.title
                         }
                         inline
                         hideDuringDetail
@@ -102,11 +94,6 @@ export function NativeWorkspaceHost({
                         <OrdersScreen user={user} showHeading={false} />
                       ) : id === 'inventory' ? (
                         <InventoryWorkspace user={user} showHeading={false} />
-                      ) : id === 'approvals' ? (
-                        <>
-                          <ManagerOperationsLink user={user} />
-                          <DiscountApprovals user={user} showHeading={false} />
-                        </>
                       ) : id === 'delivery' ? (
                         <DeliveryScreen showHeading={false} />
                       ) : (
@@ -123,36 +110,9 @@ export function NativeWorkspaceHost({
   );
 }
 
-function ManagerOperationsLink({ user }: { user: StaffSession }) {
-  const [operations, setOperations] = useState(false);
-  if (
-    !user.permissions.some((p) =>
-      ['orders.cancel', 'delivery.assign'].includes(p),
-    )
-  )
-    return null;
-  return (
-    <>
-      <ShellButton
-        label="Manage cancellations and deliveries"
-        variant="secondary"
-        onPress={() => setOperations(true)}
-      />
-      <ShellSheet
-        title="Order operations"
-        visible={operations}
-        onClose={() => setOperations(false)}
-      >
-        <OrdersScreen user={user} manager showHeading={false} />
-      </ShellSheet>
-    </>
-  );
-}
-
 function HomeAttention({ user }: { user: StaffSession }) {
   const { client } = useSession();
   const navigation = useNativeNavigation();
-  const allowed = user.permissions.includes('discounts.approve');
   const canSeeLowStock = user.permissions.includes('reports.lowstock');
   const lowStock = useQuery({
     queryKey: ['inventory', user.id, 'overview'],
@@ -164,41 +124,8 @@ function HomeAttention({ user }: { user: StaffSession }) {
       return data!;
     },
   });
-  const pending = useQuery({
-    queryKey: ['discounts', user.id, 'overview'],
-    enabled: allowed,
-    queryFn: async ({ signal }) => {
-      const { data } = await client!.api.GET('/api/v1/discounts/pending', {
-        signal,
-      });
-      return data!;
-    },
-  });
-  const count = pending.data?.totalCount;
   return (
     <>
-      {allowed && (
-        <View style={styles.summary}>
-          <Text style={styles.summaryTitle}>
-            {typeof count === 'number'
-              ? `${count} ${count === 1 ? 'discount' : 'discounts'} to review`
-              : 'Discount approvals'}
-          </Text>
-          <Text style={styles.summaryText}>
-            {pending.isError
-              ? 'The overview could not be refreshed.'
-              : pending.isPending
-                ? 'Checking pending requests…'
-                : 'Review the request, reason and order total.'}
-          </Text>
-          <ShellButton
-            label="Review approvals"
-            displayLabel="Open approvals"
-            variant="secondary"
-            onPress={() => navigation?.open('approvals')}
-          />
-        </View>
-      )}
       {canSeeLowStock && (
         <ShellButton
           label="Review low stock"
@@ -227,37 +154,11 @@ function HomeAttention({ user }: { user: StaffSession }) {
   );
 }
 
-function MoreWorkspaces({ user }: { user: StaffSession }) {
+function MoreWorkspaces() {
   const navigation = useNativeNavigation();
-  const primary = navigationFor(user.permissions).map((tab) => tab.id);
   return (
     <>
       <ShellPageHeader title="More" />
-      {permittedModules(user.permissions)
-        .filter((module) => !primary.includes(module.id as Workspace))
-        .map((module) => (
-          <ShellButton
-            key={module.id}
-            label={`Open ${module.title}`}
-            variant="text"
-            onPress={() => navigation?.open(module.id as Workspace)}
-          >
-            <View style={styles.row}>
-              <ShellIcon
-                name={workspaceNavigation[module.id]!.icon}
-                color={t.color.primary}
-              />
-              <View style={styles.rowBody}>
-                <Text style={styles.rowTitle}>{module.title}</Text>
-              </View>
-              <ShellIcon
-                name="chevron"
-                size={18}
-                color={t.color.disabledText}
-              />
-            </View>
-          </ShellButton>
-        ))}
       <ShellButton
         label="Open Account"
         variant="text"
@@ -277,6 +178,7 @@ function MoreWorkspaces({ user }: { user: StaffSession }) {
 }
 
 function Account({ user }: { user: StaffSession }) {
+  const navigation = useNativeNavigation();
   const { client } = useSession();
   const { status, refreshConnection } = useConnectivity();
   const [connection, setConnection] = useState(false);
@@ -284,7 +186,18 @@ function Account({ user }: { user: StaffSession }) {
   const [busy, setBusy] = useState(false);
   return (
     <>
-      <ShellPageHeader title="Account" />
+      <ShellPageHeader
+        title="Account"
+        backLabel="Back to More"
+        onBack={() => navigation?.open('more')}
+      />
+      {user.permissions.includes('users.manage') && (
+        <ShellButton
+          label="Open Administration"
+          variant="secondary"
+          onPress={() => navigation?.open('administration')}
+        />
+      )}
       <View style={styles.account}>
         <ShellIcon name="account" size={32} color={t.color.primary} />
         <View style={styles.rowBody}>
@@ -368,24 +281,6 @@ function Account({ user }: { user: StaffSession }) {
 const styles = StyleSheet.create({
   host: { flex: 1 },
   hidden: { display: 'none' },
-  summary: {
-    backgroundColor: t.color.primary,
-    borderRadius: 12,
-    padding: 20,
-    gap: 12,
-  },
-  summaryTitle: {
-    fontFamily: t.type.displayFont,
-    fontSize: 20,
-    lineHeight: 27,
-    color: t.color.onPrimary,
-  },
-  summaryText: {
-    fontFamily: t.type.bodyFont,
-    fontSize: 14,
-    lineHeight: 21,
-    color: t.color.onPrimary,
-  },
   row: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   rowBody: { flex: 1, gap: 6 },
   rowTitle: {

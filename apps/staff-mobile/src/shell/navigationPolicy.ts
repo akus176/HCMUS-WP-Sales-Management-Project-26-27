@@ -7,7 +7,6 @@ export type Workspace =
   | 'barista'
   | 'cashier'
   | 'inventory'
-  | 'approvals'
   | 'delivery'
   | 'administration';
 export type NavigationItem = {
@@ -24,10 +23,9 @@ export type NavigationItem = {
     | 'delivery';
 };
 export const workspaceNavigation: Record<string, NavigationItem> = {
-  barista: { id: 'barista', label: 'Queue', icon: 'cup' },
+  barista: { id: 'barista', label: 'Preparation', icon: 'cup' },
   cashier: { id: 'cashier', label: 'Orders', icon: 'orders' },
   inventory: { id: 'inventory', label: 'Stock', icon: 'stock' },
-  approvals: { id: 'approvals', label: 'Approvals', icon: 'approve' },
   delivery: { id: 'delivery', label: 'Deliveries', icon: 'delivery' },
   administration: { id: 'administration', label: 'Staff', icon: 'account' },
 };
@@ -37,23 +35,15 @@ export function navigationFor(
 ): NavigationItem[] {
   const modules = permittedModules(permissions);
   const broad = modules.length > 2;
-  const preferred = [
-    'cashier',
-    'inventory',
-    'barista',
-    'delivery',
-    'approvals',
-    'administration',
-  ];
-  const primary = broad
-    ? preferred.filter((id) => modules.some((m) => m.id === id)).slice(0, 2)
-    : modules.map((m) => m.id);
+  // Operational workspaces have their own pages; More is reserved for Account.
+  // Staff administration is reached from Account instead of an overflow list.
+  const primary = ['cashier', 'inventory', 'barista', 'delivery'].filter((id) =>
+    modules.some((module) => module.id === id),
+  );
   return [
     { id: 'home', label: broad ? 'Today' : 'Home', icon: 'home' },
     ...primary.map((id) => workspaceNavigation[id]!),
-    broad
-      ? { id: 'more', label: 'More', icon: 'more' }
-      : { id: 'account', label: 'Account', icon: 'account' },
+    { id: 'more', label: 'More', icon: 'more' },
   ];
 }
 

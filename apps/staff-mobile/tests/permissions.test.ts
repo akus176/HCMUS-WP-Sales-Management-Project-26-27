@@ -1,3 +1,4 @@
+import { navigationFor } from '../src/shell/navigationPolicy';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
@@ -42,7 +43,7 @@ const fixtures: [string, string[], string[]][] = [
       'payments.record',
       'inventory.manage',
     ],
-    ['barista', 'approvals', 'cashier', 'inventory'],
+    ['barista', 'cashier', 'inventory'],
   ],
   [
     'Admin',
@@ -54,14 +55,7 @@ const fixtures: [string, string[], string[]][] = [
       'inventory.manage',
       'delivery.update',
     ],
-    [
-      'barista',
-      'approvals',
-      'cashier',
-      'inventory',
-      'delivery',
-      'administration',
-    ],
+    ['barista', 'cashier', 'inventory', 'delivery', 'administration'],
   ],
 ];
 
@@ -95,10 +89,10 @@ test('actions use their individual permissions, not module membership', () => {
     ),
   ).toEqual(['reports.lowstock']);
   expect(
-    permittedActions(findModule('approvals')!, ['discounts.approve']).map(
+    permittedActions(findModule('operations')!, ['orders.cancel']).map(
       (a) => a.permission,
     ),
-  ).toEqual(['discounts.approve']);
+  ).toEqual(['orders.cancel']);
   expect(permittedActions(findModule('administration')!, [])).toEqual([]);
 });
 
@@ -111,15 +105,8 @@ test('matches all six actual backend seed bundles', () => {
     'utf8',
   );
   const expected: Record<string, string[]> = {
-    Admin: [
-      'barista',
-      'approvals',
-      'cashier',
-      'inventory',
-      'delivery',
-      'administration',
-    ],
-    Manager: ['barista', 'approvals', 'cashier', 'inventory'],
+    Admin: ['barista', 'cashier', 'inventory', 'delivery', 'administration'],
+    Manager: ['barista', 'cashier', 'inventory'],
     Cashier: ['cashier'],
     Barista: ['barista'],
     InventoryStaff: ['inventory'],
@@ -137,4 +124,18 @@ test('matches all six actual backend seed bundles', () => {
       ids,
     );
   }
+});
+
+test('manager navigation gives Preparation its own tab and does not expose discount approvals', () => {
+  expect(
+    navigationFor([
+      'orders.create',
+      'orders.fulfill',
+      'inventory.manage',
+      'discounts.approve',
+      'orders.cancel',
+    ]).map(({ label }) => label),
+  ).toEqual(['Today', 'Orders', 'Stock', 'Preparation', 'More']);
+  expect(findModule('approvals')).toBeUndefined();
+  expect(permittedModules(['discounts.approve'])).toEqual([]);
 });

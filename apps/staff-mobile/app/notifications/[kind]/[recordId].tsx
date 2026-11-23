@@ -1,7 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 
 import { PreparationScreen } from '../../../src/barista/PreparationScreen';
-import { DiscountApprovals } from '../../../src/features/approvals/DiscountApprovals';
 import { DeliveryDetail } from '../../../src/features/delivery/DeliveryDetail';
 import { notificationDestination } from '../../../src/notifications/destination';
 import { LowStockRecord } from '../../../src/notifications/LowStockRecord';
@@ -33,14 +32,6 @@ export default function NotificationRecordRoute() {
         >
           {(user) => {
             switch (target.kind) {
-              case 'approval':
-                return (
-                  <DiscountApprovals
-                    user={user}
-                    discountId={target.recordId}
-                    lookupAllPages
-                  />
-                );
               case 'assignment':
                 return <DeliveryDetail orderId={target.recordId} />;
               case 'low-stock':
