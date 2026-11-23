@@ -5,13 +5,20 @@ peach preparing notes, and sage ready notes. A smaller page heading leaves more
 room for work. Each column has an aligned heading, count, short explanation, and
 empty state. Notes show the amount due and use 44-DIP action targets.
 
+The Service board starts with a compact table overview. Each table shows its
+server-reported availability and, when occupied, the associated active order
+number. A missing order summary is labeled as unavailable rather than guessed.
+The overview refreshes with the same snapshot as the order columns after refresh,
+assignment, completion, and cancellation. It includes newly created tables when
+the board reloads. Users without table-read permission do not see an empty-state
+message that could imply the shop has no tables.
+
 The ticket inspector uses a dark identity header and a light body so items, sizes,
 add-ons, two-decimal prices, totals, and the primary action remain readable. It
 shows one next action for the selected order. Payment, discount requests,
-delivery, and cancellation have separate disclosures. The order's table ID stays
-on its note and ticket header; the board has no seating or availability overview.
-Delivery controls follow the current delivery stage and appear only on delivery
-orders. Discount requests show their value instead of raw identifiers.
+delivery, and cancellation have separate disclosures. Delivery controls follow
+the current delivery stage and appear only on delivery orders. Discount requests
+show their value instead of raw identifiers.
 
 Unpaid ready notes expose **Review payment**. This selects that note and opens
 the payment form without changing order state. **Collect payment** in the inspector
@@ -60,6 +67,11 @@ The database test uses a temporary database. It verifies that an action moves it
 requested ticket even when another is selected, rejects skipped/reversed states,
 blocks unpaid completion, and completes after payment. The workspace suite includes
 operator and state eligibility tests.
+
+Service-board table-row tests cover available/occupied labels, order association,
+and the fallback when an occupied table's order summary is absent. Native Windows
+review must still confirm the overview's responsive layout, keyboard access, and
+screen-reader labels; attach that evidence to issue #231.
 
 The native verifier reads live orders and temporarily selects a local operator for
 capture without submitting business commands. `boardUx` in the local
