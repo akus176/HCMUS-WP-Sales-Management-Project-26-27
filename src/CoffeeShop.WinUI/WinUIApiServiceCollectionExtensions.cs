@@ -18,6 +18,7 @@ internal static class WinUIApiServiceCollectionExtensions
             new WindowsDpapiSecretProtector()));
         services.AddSingleton<StaffSessionManager>();
         services.AddSingleton<AuthenticatedApiClient>();
+        services.AddSingleton<ApiStaffAccountsSource>();
         services.AddSingleton<ApiReportsSource>();
         services.AddSingleton(provider => new ApiAssistantSource(apiBaseAddress, provider.GetRequiredService<StaffSessionManager>()));
         services.AddSingleton<ApiPosSource>();
