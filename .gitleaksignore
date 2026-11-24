@@ -14,3 +14,5 @@ b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/refe
 b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:91
 b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:108
 b21f2b1b0fbc764bf6797ce12d763806fce23ec3:docs/evidence/mobile-ux-219/native/reference/manifest.json:generic-api-key:125
+# #219 capture evidence: verified SHA-256 of the historical designTokens.ts source file.
+6e06670229aa9c5d5b962eb287f1f11b0d9f674d:docs/evidence/mobile-ux-219/native-mockup-2026-11-23/source-sha256.json:generic-api-key:65
