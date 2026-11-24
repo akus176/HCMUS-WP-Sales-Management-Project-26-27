@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { randomUUID } from 'expo-crypto';
 
@@ -14,16 +14,29 @@ import { useSession } from '../../session/context';
 import type { StaffSession } from '../../session/session';
 import {
   ShellButton,
+  ShellHeaderAction,
+  ShellPageHeader,
   ShellFeedback,
   ShellHeading,
   ShellText,
+  ShellInput,
+  ShellSelection,
+  ShellMutationFeedback,
+  ShellSheet,
+  ShellBadge,
+  ShellPinnedHeader,
+  usePageNavigation,
 } from '../../shell/controls';
 import { mobileTokens } from '../../shell/designTokens';
+import { recordRow } from '../../shell/recordPresentation';
+import { useNativeNavigation } from '../../shell/NativeNavigation';
+import { ShellIcon } from '../../shell/ShellIcon';
 
 type Balance = components['schemas']['IngredientBalanceResponse'];
 type Movement = components['schemas']['StockMovementResponse'];
 type Receipt = components['schemas']['ReceiptResponse'];
 type InventorySection = 'balances' | 'low-stock' | 'receipts' | 'history';
+const recordBatchSize = 20;
 
 const quantity = (value: number | string) =>
   Number(value).toLocaleString('vi-VN', { maximumFractionDigits: 3 });
@@ -74,8 +87,17 @@ function receiptError(error: unknown) {
   return 'The receipt post was not confirmed. Refresh before trying again.';
 }
 
-export function InventoryWorkspace({ user }: { user: StaffSession }) {
+export function InventoryWorkspace({
+  user,
+  showHeading = true,
+}: {
+  user: StaffSession;
+  showHeading?: boolean;
+}) {
   const { client } = useSession();
+  const native = useNativeNavigation();
+  const navigation = usePageNavigation();
+  const [ingredientId, setIngredientId] = useState<string>();
   const { status, refreshConnection } = useConnectivity();
   const queryClient = useQueryClient();
   const canManage = user.permissions.includes('inventory.manage');
@@ -95,7 +117,11 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
     canManage ? 'balances' : canViewLowStock ? 'low-stock' : 'receipts',
   );
   const [search, setSearch] = useState('');
+  const [receiptLimit, setReceiptLimit] = useState(recordBatchSize);
+  const [historyLimit, setHistoryLimit] = useState(recordBatchSize);
   const [adjustmentIngredient, setAdjustmentIngredient] = useState<Balance>();
+  const [adjustmentReview, setAdjustmentReview] = useState(false);
+  const [receiptReview, setReceiptReview] = useState(false);
   const [quantityDelta, setQuantityDelta] = useState('');
   const [adjustmentReason, setAdjustmentReason] = useState('');
   const [adjustmentResult, setAdjustmentResult] = useState<{
@@ -254,6 +280,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
     },
     onSuccess: async (result) => {
       setAdjustmentResult(result);
+      setAdjustmentReview(false);
       setAdjustmentMessage(undefined);
       setQuantityDelta('');
       setAdjustmentReason('');
@@ -262,7 +289,10 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
         queryKey: ['inventory-balances', user.id],
       });
       await queryClient.invalidateQueries({
-        queryKey: ['inventory-movements', user.id, result.ingredientId],
+        queryKey: ['inventory', user.id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['inventory-movements', user.id],
       });
     },
     onError: (error) => setAdjustmentMessage(adjustmentError(error)),
@@ -283,6 +313,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
     },
     onSuccess: async (id) => {
       setReceiptFailure(undefined);
+      setReceiptReview(false);
       setReceiptMessage(
         `Receipt ${receiptDetailQuery.data?.receiptNumber ?? ''} was posted by the server.`.trim(),
       );
@@ -296,6 +327,9 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
         queryKey: ['inventory-balances', user.id],
       });
       await queryClient.invalidateQueries({
+        queryKey: ['inventory', user.id],
+      });
+      await queryClient.invalidateQueries({
         queryKey: ['inventory-movements', user.id],
       });
     },
@@ -307,12 +341,11 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
       ? 'Refresh low-stock list'
       : 'Refresh inventory';
   const refreshButton = (
-    <ShellButton
+    <ShellHeaderAction
+      kind="refresh"
       label={refreshLabel}
-      variant="secondary"
       disabled={status !== 'online' || ingredientQuery.isFetching}
       loading={ingredientQuery.isFetching}
-      loadingLabel="Refreshing inventory…"
       onPress={() => void refreshConnection()}
     />
   );
@@ -323,35 +356,87 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
     { id: 'receipts', title: 'Purchase receipts' },
     { id: 'history', title: 'Movement history' },
   ];
+  useEffect(() => {
+    if (!ingredientId && !receiptId) return;
+    const handler = BackHandler.addEventListener('hardwareBackPress', () => {
+      setIngredientId(undefined);
+      setReceiptId(undefined);
+      navigation.returnToList();
+      return true;
+    });
+    return () => handler.remove();
+  }, [ingredientId, receiptId, navigation]);
 
   return (
     <>
-      <ShellHeading>Inventory</ShellHeading>
-      <ShellText>Balances and changes from the shared shop API.</ShellText>
-      <View style={styles.tabs}>
-        {sections
-          .filter(({ id }) => availableSections.includes(id))
-          .map(({ id, title }) => (
-            <ShellButton
-              key={id}
-              label={title}
-              selected={selectedSection === id}
-              variant="secondary"
-              onPress={() => setSection(id)}
-            />
-          ))}
-      </View>
+      {showHeading && !native?.user && <ShellPageHeader title="Inventory" />}
+      <ShellMutationFeedback
+        mutation={{
+          isRefreshing:
+            adjustmentMutation.isRefreshing || receiptMutation.isRefreshing,
+          refreshError: adjustmentMutation.refreshError,
+        }}
+      />
+      {ingredientId && (
+        <>
+          <ShellPageHeader title="Ingredient details" priority={1} />
+          <ShellHeaderAction
+            kind="back"
+            label="Back to ingredients"
+            onPress={() => {
+              setIngredientId(undefined);
+              setReceiptId(undefined);
+              navigation.returnToList();
+            }}
+          />
+        </>
+      )}
+      {!ingredientId && !receiptId && (
+        <ShellPinnedHeader enabled={!!native?.user}>
+          <ShellSelection segmented>
+            {sections
+              .filter(({ id }) => availableSections.includes(id))
+              .map(({ id, title }) => (
+                <ShellButton
+                  key={id}
+                  testID={`inventory-section-${id}`}
+                  label={title}
+                  displayLabel={
+                    id === 'balances'
+                      ? 'Balances'
+                      : id === 'low-stock'
+                        ? 'Low stock'
+                        : id === 'receipts'
+                          ? 'Receipts'
+                          : 'History'
+                  }
+                  selected={selectedSection === id}
+                  compact
+                  variant="secondary"
+                  onPress={() => {
+                    setSection(id);
+                    navigation.scrollToTop();
+                  }}
+                />
+              ))}
+          </ShellSelection>
+        </ShellPinnedHeader>
+      )}
       {selectedSection === 'balances' || selectedSection === 'low-stock' ? (
         <>
-          <TextInput
-            accessibilityLabel="Search ingredients"
-            placeholder="Search ingredients"
-            placeholderTextColor={mobileTokens.color.disabledText}
-            returnKeyType="search"
-            value={search}
-            onChangeText={setSearch}
-            style={styles.search}
-          />
+          {!ingredientId && (
+            <ShellPinnedHeader slot="search" enabled={!!native?.user}>
+              <ShellInput
+                label="Search ingredients"
+                accessibilityLabel="Search ingredients"
+                placeholder="Search ingredients"
+                placeholderTextColor={mobileTokens.color.disabledText}
+                returnKeyType="search"
+                value={search}
+                onChangeText={setSearch}
+              />
+            </ShellPinnedHeader>
+          )}
           {refreshButton}
           {status === 'offline' && !ingredientQuery.data ? (
             <ShellFeedback
@@ -375,114 +460,231 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
               }
             />
           ) : (
-            ingredientQuery.data?.items.map((ingredient: Balance) => {
-              const isLow =
-                Number(ingredient.availableQuantity) <=
-                Number(ingredient.reorderThreshold);
-              return (
-                <View key={ingredient.ingredientId} style={styles.card}>
-                  <ShellText>{ingredient.name}</ShellText>
-                  <ShellText>
-                    Balance: {quantity(ingredient.availableQuantity)}{' '}
-                    {ingredient.baseUnit}
-                  </ShellText>
-                  <ShellText>
-                    Reorder threshold: {quantity(ingredient.reorderThreshold)}{' '}
-                    {ingredient.baseUnit}
-                  </ShellText>
-                  {isLow && (
-                    <ShellFeedback
-                      kind="warning"
-                      label={`Low stock · ${quantity(ingredient.availableQuantity)} ${ingredient.baseUnit} / ${quantity(ingredient.reorderThreshold)} ${ingredient.baseUnit}`}
-                    />
-                  )}
-                  {user.permissions.includes('inventory.adjust') && (
+            ingredientQuery.data?.items
+              .filter(
+                (ingredient) =>
+                  !ingredientId || ingredient.ingredientId === ingredientId,
+              )
+              .map((ingredient: Balance) => {
+                const isLow =
+                  Number(ingredient.availableQuantity) <=
+                  Number(ingredient.reorderThreshold);
+                if (native && !ingredientId)
+                  return (
                     <ShellButton
-                      label={`Record adjustment for ${ingredient.name}`}
-                      variant="secondary"
+                      key={ingredient.ingredientId}
+                      label={`Open ingredient ${ingredient.name}`}
+                      variant="text"
+                      focusKey={`ingredient:${ingredient.ingredientId}`}
                       onPress={() => {
-                        setAdjustmentIngredient(ingredient);
-                        setAdjustmentMessage(undefined);
-                        setAdjustmentResult(undefined);
+                        navigation.openDetail(
+                          `ingredient:${ingredient.ingredientId}`,
+                        );
+                        setIngredientId(ingredient.ingredientId);
                       }}
-                    />
-                  )}
-                  {canManage && (
-                    <ShellButton
-                      label={`Show movement history for ${ingredient.name}`}
-                      variant="secondary"
-                      onPress={() => setMovementIngredient(ingredient)}
-                    />
-                  )}
-                  {adjustmentIngredient?.ingredientId ===
-                    ingredient.ingredientId && (
-                    <View style={styles.form}>
-                      <ShellText>
-                        Stock adjustment for {ingredient.name}
-                      </ShellText>
-                      <TextInput
-                        accessibilityLabel="Quantity change"
-                        keyboardType="decimal-pad"
-                        placeholder="Quantity change"
-                        placeholderTextColor={mobileTokens.color.disabledText}
-                        value={quantityDelta}
-                        onChangeText={setQuantityDelta}
-                        style={styles.search}
+                    >
+                      <View style={styles.recordHeader}>
+                        <ShellHeading level="section">
+                          {ingredient.name}
+                        </ShellHeading>
+                        <ShellIcon
+                          name="chevron"
+                          size={16}
+                          color={mobileTokens.color.disabledText}
+                        />
+                      </View>
+                      <Text style={styles.balance}>
+                        {quantity(ingredient.availableQuantity)}{' '}
+                        {ingredient.baseUnit} available
+                      </Text>
+                      <View style={styles.recordHeader}>
+                        <Text style={styles.caption}>
+                          Reorder at {quantity(ingredient.reorderThreshold)}{' '}
+                          {ingredient.baseUnit}
+                        </Text>
+                        {isLow && (
+                          <ShellBadge label="Low stock" kind="attention" />
+                        )}
+                      </View>
+                    </ShellButton>
+                  );
+                return (
+                  <View key={ingredient.ingredientId} style={styles.card}>
+                    <ShellHeading level="section">
+                      {ingredient.name}
+                    </ShellHeading>
+                    <ShellText>
+                      Balance: {quantity(ingredient.availableQuantity)}{' '}
+                      {ingredient.baseUnit}
+                    </ShellText>
+                    <ShellText>
+                      Reorder threshold: {quantity(ingredient.reorderThreshold)}{' '}
+                      {ingredient.baseUnit}
+                    </ShellText>
+                    {isLow && (
+                      <ShellFeedback
+                        kind="warning"
+                        label={`Low stock · ${quantity(ingredient.availableQuantity)} ${ingredient.baseUnit} / ${quantity(ingredient.reorderThreshold)} ${ingredient.baseUnit}`}
                       />
-                      <TextInput
-                        accessibilityLabel="Adjustment reason"
-                        placeholder="Reason for adjustment"
-                        placeholderTextColor={mobileTokens.color.disabledText}
-                        value={adjustmentReason}
-                        onChangeText={setAdjustmentReason}
-                        style={styles.search}
-                      />
-                      {adjustmentMessage && (
-                        <ShellFeedback kind="error" label={adjustmentMessage} />
-                      )}
-                      {adjustmentResult?.ingredientId ===
-                        ingredient.ingredientId && (
-                        <ShellFeedback
-                          kind="info"
-                          label={`Adjustment saved by the server. New balance: ${quantity(adjustmentResult.availableQuantity)} ${ingredient.baseUnit}.`}
+                    )}
+                    <ShellSelection>
+                      {user.permissions.includes('inventory.adjust') && (
+                        <ShellButton
+                          label={`Record adjustment for ${ingredient.name}`}
+                          displayLabel="Adjust stock"
+                          variant="secondary"
+                          onPress={() => {
+                            setAdjustmentIngredient(ingredient);
+                            setAdjustmentReview(false);
+                            setAdjustmentMessage(undefined);
+                            setAdjustmentResult(undefined);
+                          }}
                         />
                       )}
-                      <ShellButton
-                        label="Save adjustment"
-                        loading={adjustmentMutation.isPending}
-                        loadingLabel="Saving adjustment…"
-                        disabled={
-                          status !== 'online' ||
-                          !quantityDelta.trim() ||
-                          !Number.isFinite(Number(quantityDelta)) ||
-                          Number(quantityDelta) === 0 ||
-                          !adjustmentReason.trim()
+                      {canManage && (
+                        <ShellButton
+                          label={`Show movement history for ${ingredient.name}`}
+                          displayLabel="Movement history"
+                          variant="secondary"
+                          onPress={() => setMovementIngredient(ingredient)}
+                        />
+                      )}
+                    </ShellSelection>
+                    {adjustmentIngredient?.ingredientId ===
+                      ingredient.ingredientId && (
+                      <ShellSheet
+                        visible
+                        title={
+                          adjustmentReview
+                            ? 'Review stock adjustment'
+                            : 'Adjust stock'
                         }
-                        onPress={() => {
-                          setAdjustmentMessage(undefined);
-                          adjustmentMutation.mutate({
-                            ingredient,
-                            delta: Number(quantityDelta),
-                            reason: adjustmentReason.trim(),
-                          });
+                        busy={adjustmentMutation.isPending}
+                        onClose={() => {
+                          setAdjustmentIngredient(undefined);
+                          setAdjustmentReview(false);
                         }}
-                      />
-                    </View>
-                  )}
-                </View>
-              );
-            })
+                      >
+                        <View style={styles.form}>
+                          <ShellText>
+                            Stock adjustment for {ingredient.name}
+                          </ShellText>
+                          {!adjustmentReview && (
+                            <>
+                              <ShellInput
+                                label="Quantity change"
+                                accessibilityLabel="Quantity change"
+                                keyboardType="decimal-pad"
+                                placeholder="Quantity change"
+                                placeholderTextColor={
+                                  mobileTokens.color.disabledText
+                                }
+                                value={quantityDelta}
+                                onChangeText={setQuantityDelta}
+                              />
+                              <ShellInput
+                                label="Adjustment reason (required)"
+                                accessibilityLabel="Adjustment reason"
+                                placeholder="Reason for adjustment"
+                                placeholderTextColor={
+                                  mobileTokens.color.disabledText
+                                }
+                                value={adjustmentReason}
+                                onChangeText={setAdjustmentReason}
+                              />
+                            </>
+                          )}
+                          {adjustmentReview && (
+                            <ShellText>
+                              {ingredient.name} · {quantityDelta}{' '}
+                              {ingredient.baseUnit} · {adjustmentReason}
+                            </ShellText>
+                          )}
+                          {adjustmentMessage && (
+                            <ShellFeedback
+                              kind="error"
+                              label={adjustmentMessage}
+                            />
+                          )}
+                          {adjustmentResult?.ingredientId ===
+                            ingredient.ingredientId && (
+                            <ShellFeedback
+                              kind="info"
+                              label={`Adjustment saved by the server. New balance: ${quantity(adjustmentResult.availableQuantity)} ${ingredient.baseUnit}.`}
+                            />
+                          )}
+                          <ShellButton
+                            label={
+                              adjustmentReview
+                                ? 'Confirm adjustment'
+                                : 'Save adjustment'
+                            }
+                            displayLabel={
+                              adjustmentReview
+                                ? 'Confirm adjustment'
+                                : 'Review adjustment'
+                            }
+                            loading={adjustmentMutation.isPending}
+                            loadingLabel="Saving adjustment…"
+                            disabled={
+                              adjustmentMutation.isWriteDisabled ||
+                              !quantityDelta.trim() ||
+                              !Number.isFinite(Number(quantityDelta)) ||
+                              Number(quantityDelta) === 0 ||
+                              !adjustmentReason.trim()
+                            }
+                            onPress={() => {
+                              if (!adjustmentReview) {
+                                setAdjustmentReview(true);
+                                return;
+                              }
+                              setAdjustmentMessage(undefined);
+                              adjustmentMutation.mutate({
+                                ingredient,
+                                delta: Number(quantityDelta),
+                                reason: adjustmentReason.trim(),
+                              });
+                            }}
+                          />
+                          {adjustmentReview && (
+                            <ShellButton
+                              label="Keep editing adjustment"
+                              variant="secondary"
+                              disabled={adjustmentMutation.isPending}
+                              onPress={() => setAdjustmentReview(false)}
+                            />
+                          )}
+                        </View>
+                      </ShellSheet>
+                    )}
+                  </View>
+                );
+              })
           )}
         </>
       ) : selectedSection === 'receipts' ? (
         <>
           {receiptId ? (
             <>
-              <ShellButton
+              <ShellPageHeader title="Receipt details" priority={1} />
+              <ShellHeaderAction
+                kind="refresh"
+                label="Refresh receipt status"
+                disabled={status !== 'online' || receiptDetailQuery.isFetching}
+                loading={receiptDetailQuery.isFetching}
+                onPress={() => {
+                  setReceiptFailure(undefined);
+                  void queryClient.invalidateQueries({
+                    queryKey: ['purchase-receipt', user.id, receiptId],
+                  });
+                }}
+              />
+              <ShellHeaderAction
+                kind="back"
                 label="Back to receipt list"
-                variant="secondary"
                 onPress={() => {
                   setReceiptId(undefined);
+                  navigation.returnToList();
                   setReceiptMessage(undefined);
                   setReceiptFailure(undefined);
                 }}
@@ -499,7 +701,7 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                 />
               ) : receiptDetailQuery.data ? (
                 <View style={styles.card}>
-                  <ShellHeading>
+                  <ShellHeading level="section">
                     Receipt {receiptDetailQuery.data.receiptNumber}
                   </ShellHeading>
                   <ShellText>
@@ -520,25 +722,8 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                   {receiptMessage && (
                     <ShellFeedback kind="info" label={receiptMessage} />
                   )}
-                  {receiptFailure && (
+                  {receiptFailure && !receiptReview && (
                     <ShellFeedback kind="error" label={receiptFailure} />
-                  )}
-                  {receiptFailure && receiptId && (
-                    <ShellButton
-                      label="Refresh receipt status"
-                      variant="secondary"
-                      disabled={
-                        status !== 'online' || receiptDetailQuery.isFetching
-                      }
-                      loading={receiptDetailQuery.isFetching}
-                      loadingLabel="Refreshing receipt status…"
-                      onPress={() => {
-                        setReceiptFailure(undefined);
-                        void queryClient.invalidateQueries({
-                          queryKey: ['purchase-receipt', user.id, receiptId],
-                        });
-                      }}
-                    />
                   )}
                   {receiptDetailQuery.data.status.toLowerCase() === 'draft' &&
                     receiptDetailQuery.data.lines.length > 0 && (
@@ -547,14 +732,50 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                         loading={receiptMutation.isPending}
                         loadingLabel="Posting receipt…"
                         disabled={
-                          status !== 'online' || receiptMutation.isPending
+                          receiptMutation.isWriteDisabled ||
+                          receiptMutation.isPending
                         }
                         onPress={() => {
                           setReceiptFailure(undefined);
-                          receiptMutation.mutate(receiptDetailQuery.data!.id);
+                          setReceiptReview(true);
                         }}
                       />
                     )}
+                  <ShellSheet
+                    visible={receiptReview}
+                    title="Post this receipt?"
+                    busy={receiptMutation.isPending}
+                    onClose={() => setReceiptReview(false)}
+                  >
+                    <ShellText>
+                      Receipt {receiptDetailQuery.data.receiptNumber}
+                    </ShellText>
+                    <ShellText>
+                      Posting adds the reviewed quantities to inventory.
+                    </ShellText>
+                    {receiptFailure && (
+                      <ShellFeedback kind="error" label={receiptFailure} />
+                    )}
+                    <ShellButton
+                      label="Confirm receipt posting"
+                      loading={receiptMutation.isPending}
+                      disabled={
+                        receiptMutation.isWriteDisabled ||
+                        receiptDetailQuery.data.status.toLowerCase() !==
+                          'draft' ||
+                        !receiptDetailQuery.data.lines.length
+                      }
+                      onPress={() =>
+                        receiptMutation.mutate(receiptDetailQuery.data!.id)
+                      }
+                    />
+                    <ShellButton
+                      label="Keep reviewing receipt"
+                      variant="secondary"
+                      disabled={receiptMutation.isPending}
+                      onPress={() => setReceiptReview(false)}
+                    />
+                  </ShellSheet>
                 </View>
               ) : null}
             </>
@@ -563,9 +784,9 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
               <ShellText>
                 Review prepared receipts from the shared API.
               </ShellText>
-              <ShellButton
+              <ShellHeaderAction
+                kind="refresh"
                 label="Refresh receipts"
-                variant="secondary"
                 disabled={status !== 'online' || receiptsQuery.isFetching}
                 loading={receiptsQuery.isFetching}
                 onPress={() => void refreshConnection()}
@@ -588,31 +809,44 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
                   label="No purchase receipts are available."
                 />
               ) : (
-                receiptsQuery.data?.map((receipt: Receipt) => (
-                  <View key={receipt.id} style={styles.card}>
-                    <ShellText>{receipt.receiptNumber}</ShellText>
-                    <ShellText>Status: {receipt.status}</ShellText>
-                    <ShellButton
-                      label={`Review receipt ${receipt.receiptNumber}`}
-                      variant="secondary"
-                      onPress={() => {
-                        setReceiptId(receipt.id);
-                        setReceiptMessage(undefined);
-                        setReceiptFailure(undefined);
-                      }}
-                    />
-                  </View>
-                ))
+                receiptsQuery.data
+                  ?.slice(0, receiptLimit)
+                  .map((receipt: Receipt) => (
+                    <View key={receipt.id} style={styles.card}>
+                      <ShellText>{receipt.receiptNumber}</ShellText>
+                      <ShellText>Status: {receipt.status}</ShellText>
+                      <ShellButton
+                        label={`Review receipt ${receipt.receiptNumber}`}
+                        variant="secondary"
+                        onPress={() => {
+                          setReceiptId(receipt.id);
+                          navigation.openDetail(`receipt:${receipt.id}`);
+                          setReceiptMessage(undefined);
+                          setReceiptFailure(undefined);
+                        }}
+                      />
+                    </View>
+                  ))
               )}
+              {!receiptsQuery.error &&
+                (receiptsQuery.data?.length ?? 0) > receiptLimit && (
+                  <ShellButton
+                    label="Show more receipts"
+                    variant="secondary"
+                    onPress={() =>
+                      setReceiptLimit((count) => count + recordBatchSize)
+                    }
+                  />
+                )}
             </>
           )}
         </>
       ) : (
         <>
           <ShellText>Recent stock movements from the shared API.</ShellText>
-          <ShellButton
+          <ShellHeaderAction
+            kind="refresh"
             label="Refresh movement history"
-            variant="secondary"
             disabled={status !== 'online' || movementHistoryQuery.isFetching}
             loading={movementHistoryQuery.isFetching}
             onPress={() => void refreshConnection()}
@@ -635,48 +869,66 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
               label="No stock movements are recorded."
             />
           ) : (
-            movementHistoryQuery.data?.map((movement: Movement) => (
-              <View key={movement.id} style={styles.card}>
-                <ShellText>
-                  {movement.type} · {quantity(movement.quantityDelta)}
-                </ShellText>
-                <ShellText>{movement.reason}</ShellText>
-                {movement.purchaseReceiptId && (
+            movementHistoryQuery.data
+              ?.slice(0, historyLimit)
+              .map((movement: Movement) => (
+                <View key={movement.id} style={styles.card}>
                   <ShellText>
-                    Receipt ID: {movement.purchaseReceiptId}
+                    {movement.type} · {quantity(movement.quantityDelta)}
                   </ShellText>
-                )}
-              </View>
-            ))
+                  <ShellText>{movement.reason}</ShellText>
+                  {movement.purchaseReceiptId && (
+                    <ShellText>
+                      Receipt ID: {movement.purchaseReceiptId}
+                    </ShellText>
+                  )}
+                </View>
+              ))
           )}
+          {!movementHistoryQuery.error &&
+            (movementHistoryQuery.data?.length ?? 0) > historyLimit && (
+              <ShellButton
+                label="Show more movements"
+                variant="secondary"
+                onPress={() =>
+                  setHistoryLimit((count) => count + recordBatchSize)
+                }
+              />
+            )}
         </>
       )}
       {movementIngredient && selectedSection !== 'receipts' && (
-        <View style={styles.card}>
-          <ShellHeading>
-            Movement history · {movementIngredient.name}
-          </ShellHeading>
-          {movementQuery.isPending ? (
-            <ShellFeedback kind="loading" label="Loading movement history…" />
-          ) : movementQuery.error ? (
-            <ShellFeedback
-              kind="error"
-              label="Movement history could not be loaded. Refresh and try again."
-            />
-          ) : movementQuery.data?.length === 0 ? (
-            <ShellFeedback
-              kind="empty"
-              label="No stock movements are recorded."
-            />
-          ) : (
-            movementQuery.data?.map((movement: Movement) => (
-              <ShellText key={movement.id}>
-                {movement.type}: {quantity(movement.quantityDelta)}{' '}
-                {movementIngredient.baseUnit} · {movement.reason}
-              </ShellText>
-            ))
-          )}
-        </View>
+        <ShellSheet
+          visible
+          title={`Movement history · ${movementIngredient.name}`}
+          onClose={() => setMovementIngredient(undefined)}
+        >
+          <View style={styles.card}>
+            <ShellHeading level="section">
+              Movement history · {movementIngredient.name}
+            </ShellHeading>
+            {movementQuery.isPending ? (
+              <ShellFeedback kind="loading" label="Loading movement history…" />
+            ) : movementQuery.error ? (
+              <ShellFeedback
+                kind="error"
+                label="Movement history could not be loaded. Refresh and try again."
+              />
+            ) : movementQuery.data?.length === 0 ? (
+              <ShellFeedback
+                kind="empty"
+                label="No stock movements are recorded."
+              />
+            ) : (
+              movementQuery.data?.map((movement: Movement) => (
+                <ShellText key={movement.id}>
+                  {movement.type}: {quantity(movement.quantityDelta)}{' '}
+                  {movementIngredient.baseUnit} · {movement.reason}
+                </ShellText>
+              ))
+            )}
+          </View>
+        </ShellSheet>
       )}
     </>
   );
@@ -684,23 +936,26 @@ export function InventoryWorkspace({ user }: { user: StaffSession }) {
 
 const styles = StyleSheet.create({
   tabs: { gap: mobileTokens.spacing.sm },
-  search: {
-    minHeight: 48,
-    borderColor: mobileTokens.color.border,
-    borderWidth: 2,
-    borderRadius: mobileTokens.shape.control,
-    paddingHorizontal: mobileTokens.spacing.md,
-    color: mobileTokens.color.foreground,
-    fontSize: mobileTokens.type.body,
-    backgroundColor: mobileTokens.color.background,
-  },
-  card: {
-    backgroundColor: mobileTokens.color.infoBackground,
-    borderColor: mobileTokens.color.border,
-    borderRadius: mobileTokens.shape.card,
-    borderWidth: 2,
-    gap: mobileTokens.spacing.sm,
-    padding: mobileTokens.spacing.md,
-  },
+  card: recordRow,
   form: { gap: mobileTokens.spacing.sm },
+  recordHeader: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  balance: {
+    fontFamily: mobileTokens.type.mediumFont,
+    fontSize: 18,
+    lineHeight: 26,
+    color: mobileTokens.color.primary,
+    fontVariant: ['tabular-nums'],
+  },
+  caption: {
+    fontFamily: mobileTokens.type.bodyFont,
+    fontSize: 13,
+    lineHeight: 20,
+    color: mobileTokens.color.disabledText,
+  },
 });

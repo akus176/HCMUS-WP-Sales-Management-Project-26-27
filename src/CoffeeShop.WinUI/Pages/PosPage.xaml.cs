@@ -123,8 +123,8 @@ public sealed partial class PosPage : Page
         MenuItemsRow.Height = wide ? new GridLength(1, GridUnitType.Star) : GridLength.Auto;
         MenuGrid.MaxHeight = wide ? double.PositiveInfinity : 540;
         HeaderActionColumn.Width = args.NewSize.Width < 640 ? new GridLength(0) : GridLength.Auto;
-        Grid.SetColumn(NewButton, args.NewSize.Width < 640 ? 0 : 1);
-        Grid.SetRow(NewButton, args.NewSize.Width < 640 ? 1 : 0);
+        Grid.SetColumn(HeaderActions, args.NewSize.Width < 640 ? 0 : 1);
+        Grid.SetRow(HeaderActions, args.NewSize.Width < 640 ? 1 : 0);
     }
 
     private void OnMenuGridSizeChanged(object sender, SizeChangedEventArgs args)
@@ -200,6 +200,43 @@ public sealed partial class PosPage : Page
         await model.LoadAsync();
         await RefreshCustomerProfileAsync();
     }
+
+    private async void OnAddTable(object sender, RoutedEventArgs args)
+    {
+        if (!model.CanManageTables || model.IsBusy) return;
+        var number = new TextBox { Header = "Table number", MaxLength = 20, PlaceholderText = "For example, T12" };
+        var seats = new TextBox { Header = "Seats", PlaceholderText = "Positive whole number" };
+        AutomationProperties.SetName(number, "New table number");
+        AutomationProperties.SetName(seats, "Number of seats at new table");
+        var feedback = new InfoBar { Severity = InfoBarSeverity.Error, IsOpen = false };
+        var fields = new StackPanel { Spacing = 12 };
+        fields.Children.Add(number);
+        fields.Children.Add(seats);
+        fields.Children.Add(feedback);
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = "Add a dining table",
+            Content = fields,
+            PrimaryButtonText = "Add table",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary
+        };
+        dialog.PrimaryButtonClick += (_, click) =>
+        {
+            if (string.IsNullOrWhiteSpace(number.Text) ||
+                !int.TryParse(seats.Text, out var count) || count <= 0)
+            {
+                click.Cancel = true;
+                feedback.Message = "Enter a table number and a positive whole-number seat count.";
+                feedback.IsOpen = true;
+                (string.IsNullOrWhiteSpace(number.Text) ? number : seats).Focus(FocusState.Keyboard);
+            }
+        };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+        await model.CreateTableAsync(number.Text, int.Parse(seats.Text));
+    }
+
     private async void OnSearch(object sender, RoutedEventArgs args)
     {
         ClearMenuSelection();
@@ -831,6 +868,8 @@ public sealed partial class PosPage : Page
         DeliveryTab.IsEnabled = model.CanEdit;
         CustomerOptionsPanel.IsEnabled = model.CanEdit && !selectingCustomer;
         TableBox.IsEnabled = model.CanEdit;
+        AddTableButton.Visibility = model.CanManageTables ? Visibility.Visible : Visibility.Collapsed;
+        AddTableButton.IsEnabled = !model.IsBusy;
         MenuGrid.IsEnabled = model.CanEdit;
         OperatorBox.IsEnabled = !model.IsBusy;
         if (!ReferenceEquals(OperatorBox.ItemsSource, model.Options.Staff)) OperatorBox.ItemsSource = model.Options.Staff;

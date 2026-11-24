@@ -5,6 +5,10 @@ appId: com.coffeeshop.staffmobile
     direction: DOWN
 - tapOn: Mark delivered
 - scrollUntilVisible:
+    element: Confirm delivered
+    direction: DOWN
+- tapOn: Confirm delivered
+- scrollUntilVisible:
     element: Delivery delivered. Confirmed by the service.
     direction: UP
 - assertVisible: Delivery delivered. Confirmed by the service.

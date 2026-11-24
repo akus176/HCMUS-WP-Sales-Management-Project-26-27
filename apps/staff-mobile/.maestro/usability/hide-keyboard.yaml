@@ -1,0 +1,5 @@
+appId: com.coffeeshop.staffmobile
+---
+# Finish a single-line field through its IME action. Unlike a second Back,
+# this cannot leave the screen when Samsung already dismissed the keyboard.
+- pressKey: Enter

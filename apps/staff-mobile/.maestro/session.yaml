@@ -4,9 +4,8 @@ name: Staff session login, restore, and logout
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: Staff mobile
+    visible: Staff sign-in
     timeout: 60000
-- tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
 - hideKeyboard
@@ -20,19 +19,34 @@ name: Staff session login, restore, and logout
 - hideKeyboard
 - tapOn: Sign in
 - extendedWaitUntil:
-    visible: Staff home
+    visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 30000
 - assertVisible: ${MAESTRO_STAFF_NAME}
 - takeScreenshot: .maestro/results/session-signed-in
 - stopApp
 - launchApp
 - extendedWaitUntil:
-    visible: Staff home
+    visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 30000
 - assertVisible: ${MAESTRO_STAFF_NAME}
+- runFlow:
+    when:
+      visible: More
+    commands:
+      - tapOn: More
+      - scrollUntilVisible:
+          element: Open Account
+          direction: DOWN
+      - tapOn: Open Account
+- runFlow:
+    when:
+      visible: Account
+    commands:
+      - tapOn: Account
 - scrollUntilVisible:
     element: Sign out
     direction: DOWN
 - tapOn: Sign out
-- assertVisible: Staff mobile
+- tapOn: Confirm sign out
+- assertVisible: Staff sign-in
 - assertNotVisible: ${MAESTRO_STAFF_NAME}

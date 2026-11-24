@@ -1,0 +1,143 @@
+{
+  "date": "2026-11-22",
+  "client": "Expo Go 58.0.5",
+  "device": "emulator-5554 / API 36",
+  "textScale": 1,
+  "accountRole": "Admin",
+  "checks": [
+    {
+      "view": "Preparation",
+      "checks": [
+        "Preparation",
+        "All active",
+        "Confirmed",
+        "Preparing",
+        "Refresh queue"
+      ],
+      "selected": null,
+      "passed": true
+    },
+    {
+      "view": "Discount inbox",
+      "checks": [
+        "Manager approvals",
+        "Manage cancellations and deliveries"
+      ],
+      "selected": null,
+      "passed": true
+    },
+    {
+      "view": "Cancellation and delivery assignment",
+      "checks": [
+        "Manager order operations",
+        "Search by order number or table",
+        "Filter orders: All"
+      ],
+      "selected": null,
+      "passed": true
+    },
+    {
+      "view": "Counter",
+      "checks": [
+        "Counter",
+        "Orders",
+        "Tables",
+        "Search by order number or table",
+        "Filter orders: All"
+      ],
+      "selected": "Orders",
+      "passed": true
+    },
+    {
+      "view": "Direct table occupancy",
+      "checks": [
+        "Table occupancy"
+      ],
+      "selected": "Tables",
+      "passed": true
+    },
+    {
+      "view": "Inventory navigation",
+      "checks": [
+        "Ingredient balances",
+        "Low stock",
+        "Purchase receipts",
+        "Movement history"
+      ],
+      "selected": null,
+      "passed": true
+    },
+    {
+      "view": "Inventory / Low stock",
+      "checks": [
+        "Low stock"
+      ],
+      "selected": "Low stock",
+      "passed": true
+    },
+    {
+      "view": "Inventory / Purchase receipts",
+      "checks": [
+        "Purchase receipts"
+      ],
+      "selected": "Purchase receipts",
+      "passed": true
+    },
+    {
+      "view": "Inventory / Movement history",
+      "checks": [
+        "Movement history"
+      ],
+      "selected": "Movement history",
+      "passed": true
+    },
+    {
+      "view": "Inventory / Ingredient balances",
+      "checks": [
+        "Ingredient balances"
+      ],
+      "selected": "Ingredient balances",
+      "passed": true
+    },
+    {
+      "view": "Deliveries",
+      "checks": [
+        "Deliveries",
+        "Active deliveries",
+        "Completed deliveries",
+        "Refresh deliveries"
+      ],
+      "selected": "Active deliveries",
+      "passed": true
+    },
+    {
+      "view": "Completed deliveries",
+      "checks": [
+        "Completed deliveries"
+      ],
+      "selected": "Completed deliveries",
+      "passed": true
+    },
+    {
+      "view": "Accounts",
+      "checks": [
+        "Staff administration",
+        "Staff accounts",
+        "Security events",
+        "Search staff accounts"
+      ],
+      "selected": null,
+      "passed": true
+    },
+    {
+      "view": "Security events",
+      "checks": [
+        "Security events"
+      ],
+      "selected": "Security events",
+      "passed": true
+    }
+  ],
+  "initialAttempt": "The first attempt stopped because it expected Table occupancy above a long unfiltered order list. The correction adds a direct Tables switch and the final pass verifies it; this is navigation evidence, not a complete workflow suite.",
+  "scope": "Actual native page entry and section navigation against local API; no business mutation, push-delivery, complete native workflow suite or TalkBack acceptance claimed."
+}

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="141.743" timestamp="2026-11-22T16:18:21">
+    <testcase id="Inventory sections, labelled adjustment and receipt review" name="Inventory sections, labelled adjustment and receipt review" classname="Inventory sections, labelled adjustment and receipt review" file=".maestro\usability\inventory.yaml" time="141.691" timestamp="2026-11-22T16:18:21" status="SUCCESS" />
+  </testsuite>
+</testsuites>

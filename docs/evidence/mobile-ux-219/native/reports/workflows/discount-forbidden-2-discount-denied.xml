@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="8.792" timestamp="2026-11-22T16:05:01">
+    <testcase id="discount-denied" name="discount-denied" classname="discount-denied" file=".maestro\workflows-focused\discount-denied.yaml" time="8.784" timestamp="2026-11-22T16:05:01" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

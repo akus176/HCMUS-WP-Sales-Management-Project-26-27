@@ -251,46 +251,31 @@ while offline/reconnecting, rejects before sending, never pauses/replays a write
 and refreshes server data after success or a `409` conflict. See [#145 evidence](../../docs/evidence/mobile-connectivity-145/README.md)
 for the test cases and native verification limits.
 
-## Permission-aware shell (#144)
+## Counter and Preparation application scope
 
-After sign-in, `/session` lists only modules permitted by effective API permission
-codes. Role names are never authorization inputs. `/modules/[module]` rechecks
-`/api/v1/auth/me` before mounting module content, including on route focus and app
-resume. Unknown routes, malformed/cross-account responses and missing grants fail
-closed. Failed checks offer retry without displaying protected content. The API
-remains authoritative for every later business request.
+The mobile application serves counter staff and preparation staff. Navigation is
+**Today · Counter · Preparation · More**, filtered by effective API permissions.
+More contains only Account with profile, connection details and sign-out.
 
-The Preparation module now hosts the #155 barista workflow described below.
-Other modules still label their business screens/actions **planned**.
-The home also checks current server permissions before displaying navigation,
-including when a previously empty home regains focus or the app resumes.
-Home verification uses an explicit scope, so `/modules/home` is not a valid module.
+Counter provides order search, table occupancy and payment recording. Manager
+cancellation and delivery-assignment controls remain inside authorized Counter
+order details. Preparation provides the ticket queue, item/add-on details,
+start-preparing and ready confirmation flows. Each page retains its loaded data,
+search/filter state and scroll position across local tab switches.
 
-The permission-aware shell uses these shared controls and preserves the sign-in
-palette. Its scrollable phone/tablet layout, scalable text, accessible labels,
-48-dp action targets, and focus/selection feedback are covered by the #140
-foundation and the #144 shell integration evidence.
+Stock, courier delivery pages, staff administration and discount approvals are not
+exposed in mobile, including for broad staff accounts. Retired links fail closed
+without fetching their protected data. Only preparation-ticket notifications open
+work records in mobile. Backend and Windows workflows remain unchanged.
 
-`npm test` includes the six-backend-role policy matrix, module action filtering,
-real-router deep links, revocation, permission-check failures, terminal sessions,
-background/resume and late-response checks. [Evidence and remaining verification](../../docs/evidence/mobile-shell-144/README.md) distinguish browser visual fixtures
-from native Android checks. Required reviewer: @vt-Toan. Contributor: @akus176
-(with Codex assistance); the existing ticket owner remains @JakeConal.
+The delivery-only follow-up was explicitly reverted at the owner's request. The
+active native suite now covers session, Counter payments/manager actions,
+Preparation and retired-link handling. Existing domain components and permission
+metadata remain available to isolated regressions without granting mobile access.
 
-## Barista preparation (#155)
+## Validation workflow
 
-Open **Preparation** from staff home with `orders.fulfill`. The queue filters
-confirmed/preparing tickets and paginates ten tickets at a time. Open a ticket
-to inspect its items, sizes, quantities, add-ons and table. **Start preparing**
-and **Mark ready** each require confirmation and a successful service response.
-Success and conflicts refresh authoritative data; a ticket that has left the
-queue exposes no further action. Shared connectivity feedback and manual refresh
-remain available, while offline/reconnecting writes are disabled and never queued.
-
-The feature uses the generated API client, permission boundary, shared controls
-and in-memory TanStack Query cache. It adds no backend transitions, database
-access, persistent business storage or live-event subscription.
-
-Run `npm run check` for automated coverage. The opt-in Android flow is
-`npm run test:e2e:barista`; its disposable API fixture, exact setup, executed
-results and remaining emulator acceptance gate are in [#155 evidence](../../docs/evidence/mobile-barista-155/README.md).
+The owner requested GitHub CI instead of local tests. This scope correction
+updates navigation, route, permission, caching and notification test cases, plus
+the active native flow definitions. No new local test or native acceptance result
+is claimed. Historical evidence describes the source revision recorded with it.

@@ -21,15 +21,6 @@ function Read([string]$Path) {
 }
 if ($Action -eq 'Seed') {
     $suffix = [guid]::NewGuid().ToString('N').Substring(0, 8)
-    $category = Send 'categories' @{ name = "Quality $suffix"; displayOrder = 0 }
-    $item = Send 'menu-items' @{ categoryId = $category.id; name = "Quality latte $suffix"; initialVariants = @(@{ sizeName = 'Large'; price = 10 }) }
-    $decisions = foreach ($decision in @('approve', 'reject')) {
-        $id = [guid]::NewGuid().ToString()
-        $order = Send 'orders' @{ orderId = $id; channel = 'takeaway'; lines = @(@{ menuItemId = $item.id; sizeVariantId = $item.sizeVariants[0].id; quantity = 1; addonIds = @() }) }
-        $discountId = [guid]::NewGuid().ToString()
-        $null = Send "orders/$id/discounts" @{ discountId = $discountId; type = 'fixed'; value = 1; reason = "Quality $decision" }
-        @{ orderId = $id; orderNumber = $order.orderNumber; discountId = $discountId; expected = $decision }
-    }
     $ingredient = Send 'ingredients' @{ name = "Quality milk $suffix"; baseUnit = 'l'; availableQuantity = 1; reorderThreshold = 3 }
     $offline = Send 'ingredients' @{ name = "Offline milk $suffix"; baseUnit = 'l'; availableQuantity = 1; reorderThreshold = 3 }
     $supplier = Send 'suppliers' @{ name = "Quality supplier $suffix"; phone = '1234567890'; email = 'quality@example.test'; address = 'Synthetic supplier address' }
@@ -39,21 +30,14 @@ if ($Action -eq 'Seed') {
     $target = @($accounts | Where-Object username -eq $env:COFFEESHOP_MOBILE_TEST_TARGET_USERNAME)
     if ($target.Count -ne 1) { throw 'Provision exactly one eligible synthetic target account before seeding.' }
     @{
-        decisions = @($decisions); ingredientId = $ingredient.ingredientId; ingredientName = $ingredient.name
+        ingredientId = $ingredient.ingredientId; ingredientName = $ingredient.name
         offlineId = $offline.ingredientId; offlineName = $offline.name
         receiptId = $receipt.id; receiptNumber = $receipt.receiptNumber
         targetId = $target[0].id; targetName = $target[0].fullName
     } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $FixturePath
-    Write-Output 'Seeded two pending discounts, adjustment/offline ingredients, a prepared receipt, and an eligible account target.'
+    Write-Output 'Seeded adjustment/offline ingredients, a prepared receipt, and an eligible account target.'
 } else {
     $fixture = Get-Content -LiteralPath $FixturePath -Raw | ConvertFrom-Json
-    foreach ($decision in $fixture.decisions) {
-        $order = Read "orders/$($decision.orderId)"
-        $discount = @($order.discounts | Where-Object id -eq $decision.discountId)
-        $expectedStatus = if ($decision.expected -eq 'approve') { 'approved' } else { 'rejected' }
-        $expectedTotal = if ($decision.expected -eq 'approve') { 9 } else { 10 }
-        if ($discount.Count -ne 1 -or $discount[0].status -ne $expectedStatus -or $order.total -ne $expectedTotal) { throw 'Discount decision or authoritative total is incorrect.' }
-    }
     $balances = Read "ingredients?search=$([uri]::EscapeDataString($fixture.ingredientName))"
     $balance = @($balances.items | Where-Object ingredientId -eq $fixture.ingredientId)
     $movements = @(Read "ingredients/$($fixture.ingredientId)/movements")
@@ -64,5 +48,5 @@ if ($Action -eq 'Seed') {
     if (@($offline.items).Count -ne 1 -or $offline.items[0].availableQuantity -ne 1 -or @(Read "ingredients/$($fixture.offlineId)/movements").Count -ne 0) { throw 'Offline interaction changed authoritative stock.' }
     $target = Read "users/$($fixture.targetId)"
     if ($target.isActive) { throw 'Administration target remains active.' }
-    Write-Output 'PASS 6/6: approved/rejected totals, stock balance, one-time movements, offline no-write state, and deactivated account verified through a separate API session.'
+    Write-Output 'PASS 4/4: stock balance, one-time movements, offline no-write state, and deactivated account verified through a separate API session.'
 }

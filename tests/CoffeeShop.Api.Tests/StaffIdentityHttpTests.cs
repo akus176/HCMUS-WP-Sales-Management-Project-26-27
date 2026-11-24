@@ -709,6 +709,124 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
     }
 
     [PostgresFact]
+    public async Task StaffCreation_RequiresAdministratorAndRejectsInvalidAndDuplicateIdentityWithoutPartialWrites()
+    {
+        using var client = host!.CreateClient();
+        var input = new
+        {
+            fullName = "New Cashier",
+            username = "new.cashier",
+            email = "new.cashier@example.test",
+            phone = "+84901234567",
+            role = "Cashier",
+            password = "test-only-new-cashier-password"
+        };
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.PostAsJsonAsync("/api/v1/users", input)).StatusCode);
+        client.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(client)).AccessToken);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/v1/users", input)).StatusCode);
+        client.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(client, "Admin")).AccessToken);
+
+        using var invalidRole = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            input.fullName,
+            input.username,
+            input.email,
+            input.phone,
+            role = "Owner",
+            input.password
+        });
+        using var invalidPassword = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            input.fullName,
+            input.username,
+            input.email,
+            input.phone,
+            input.role,
+            password = "short"
+        });
+        using var invalidContact = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            input.fullName,
+            input.username,
+            email = "bad-address",
+            input.phone,
+            input.role,
+            input.password
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, invalidRole.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, invalidPassword.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, invalidContact.StatusCode);
+
+        using var created = await client.PostAsJsonAsync("/api/v1/users", input);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        using var duplicateUsername = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            input.fullName,
+            username = "NEW.CASHIER",
+            email = "other@example.test",
+            input.phone,
+            input.role,
+            input.password
+        });
+        using var duplicateEmail = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            input.fullName,
+            username = "other.user",
+            email = "NEW.CASHIER@EXAMPLE.TEST",
+            input.phone,
+            input.role,
+            input.password
+        });
+        Assert.Equal(HttpStatusCode.Conflict, duplicateUsername.StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, duplicateEmail.StatusCode);
+        await using var db = Database();
+        Assert.Single(await db.Users.Where(user => user.Username.ToLower() == "new.cashier").ToArrayAsync());
+        Assert.False(await db.Users.AnyAsync(user => user.Username == "other.user"));
+    }
+
+    [PostgresFact]
+    public async Task StaffCreation_HashesPasswordAuditsActorAndAllowsAssignedRoleToSignIn()
+    {
+        using var client = host!.CreateClient();
+        var admin = await LoginAsync(client, "Admin");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", admin.AccessToken);
+        const string password = "test-only-created-barista-password";
+        using var created = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            fullName = "Created Barista",
+            username = "created.barista",
+            email = "created.barista@example.test",
+            phone = (string?)null,
+            role = "Barista",
+            password,
+        });
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        Assert.Equal("no-store", created.Headers.CacheControl?.ToString());
+        var responseBody = await created.Content.ReadAsStringAsync();
+        Assert.DoesNotContain(password, responseBody);
+        Assert.DoesNotContain("passwordHash", responseBody, StringComparison.OrdinalIgnoreCase);
+        var account = (await created.Content.ReadFromJsonAsync<StaffAccountResponse>())!;
+        Assert.Equal(["Barista"], account.Roles);
+
+        await using (var db = Database())
+        {
+            var user = await db.Users.SingleAsync(item => item.Id == new EntityId(account.Id));
+            Assert.NotEqual(password, user.PasswordHash);
+            var audit = await db.SecurityAuditEvents.SingleAsync(item => item.UserId == user.Id && item.EventType == "account_created");
+            Assert.Equal("success", audit.Outcome);
+            Assert.Contains(admin.User.Id.ToString(), audit.Metadata);
+            Assert.DoesNotContain(password, audit.Metadata);
+        }
+        client.DefaultRequestHeaders.Authorization = null;
+        using var login = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginRequest(account.Username, password));
+        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+        var session = (await login.Content.ReadFromJsonAsync<TokenResponse>())!;
+        Assert.Equal(["Barista"], session.User.Roles);
+        Assert.Contains("orders.fulfill", session.User.Permissions);
+        Assert.DoesNotContain("users.manage", session.User.Permissions);
+    }
+
+    [PostgresFact]
     public async Task StaffAdministration_ProtectsFinalAdministratorWithoutChangingState()
     {
         using var client = host!.CreateClient();

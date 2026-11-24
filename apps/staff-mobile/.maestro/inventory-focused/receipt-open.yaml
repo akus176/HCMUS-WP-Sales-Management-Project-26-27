@@ -2,6 +2,10 @@ appId: com.coffeeshop.staffmobile
 ---
 - runFlow: open.yaml
 - scrollUntilVisible:
+    element: Back to ingredients
+    direction: UP
+- tapOn: Back to ingredients
+- scrollUntilVisible:
     element: Purchase receipts
     direction: UP
 - tapOn: Purchase receipts

@@ -1,0 +1,16 @@
+{
+  "source": "fea05418f75f05b072a90d659e818f10a071e0ef",
+  "standalone": true,
+  "layouts": true,
+  "suite": true,
+  "workflows": true,
+  "attempt": "acceptance-05",
+  "captured": "2026-11-22T09:57:25.396Z",
+  "backendRevision": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+  "nativeStepCount": 43,
+  "limitations": [
+    "Large layouts use display overrides on the physical phone; no physical tablet was tested.",
+    "TalkBack evidence is recorded separately.",
+    "PowerShell 5.1 ran the same public full-suite script because pwsh is unavailable."
+  ]
+}

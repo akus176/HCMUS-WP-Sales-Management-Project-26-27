@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="61.681" timestamp="2026-11-22T14:49:14">
+    <testcase id="Matched ledger and focused ticket reference states" name="Matched ledger and focused ticket reference states" classname="Matched ledger and focused ticket reference states" file=".maestro\usability\concept.yaml" time="61.588" timestamp="2026-11-22T14:49:14" status="SUCCESS" />
+  </testsuite>
+</testsuites>

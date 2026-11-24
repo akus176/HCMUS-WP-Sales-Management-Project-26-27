@@ -1,10 +1,11 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { Activity, useEffect, useState, type ReactNode } from 'react';
 import { Alert, AppState } from 'react-native';
 
 import { useSession } from '../session/context';
 import type { StaffSession } from '../session/session';
-import { ShellButton, ShellStatus } from './controls';
+import { ShellButton, ShellPage, ShellStatus } from './controls';
 import { findModule, permittedActions } from './permissions';
+import { useNativeNavigation } from './NativeNavigation';
 
 type Check = {
   snapshot: StaffSession;
@@ -19,6 +20,8 @@ export function PermissionBoundary({
   scope = 'module',
   focused = true,
   refreshKey = 0,
+  fallbackHeader,
+  retain = false,
   children,
 }: {
   moduleId?: string | string[];
@@ -26,9 +29,12 @@ export function PermissionBoundary({
   scope?: 'home' | 'module';
   focused?: boolean;
   refreshKey?: number;
+  fallbackHeader?: ReactNode;
+  retain?: boolean;
   children: (user: StaffSession) => ReactNode;
 }) {
   const { client, state } = useSession();
+  const verifyNavigation = useNativeNavigation()?.verify;
   const module = findModule(moduleId);
   const snapshot = state.user;
   const accessId = scope === 'home' ? 'home' : module?.id;
@@ -65,6 +71,9 @@ export function PermissionBoundary({
           data.permissions.every(
             (permission) => typeof permission === 'string',
           );
+        // Publish effective navigation grants in the same update as the gate,
+        // including a valid response that revokes this particular workspace.
+        if (valid) verifyNavigation?.(data);
         setCheck({
           snapshot,
           moduleId: checkId,
@@ -104,6 +113,7 @@ export function PermissionBoundary({
     active,
     retry,
     refreshKey,
+    verifyNavigation,
   ]);
 
   // Verification failure must not trap a user with saved credentials.
@@ -122,19 +132,51 @@ export function PermissionBoundary({
         }}
       />
     ) : null;
+  const fallbackContent = (content: ReactNode) => (
+    <>
+      {fallbackHeader}
+      {content}
+    </>
+  );
+  const fallback = (content: ReactNode) =>
+    retain && scope === 'home' ? (
+      <ShellPage>{fallbackContent(content)}</ShellPage>
+    ) : (
+      fallbackContent(content)
+    );
   if (state.status === 'restoring')
-    return <ShellStatus>Restoring session…</ShellStatus>;
+    return fallback(<ShellStatus>Restoring session…</ShellStatus>);
   if (!snapshot)
-    return <ShellStatus>Session ended. Sign in again.</ShellStatus>;
+    return fallback(<ShellStatus>Session ended. Sign in again.</ShellStatus>);
   if (!accessId)
-    return (
+    return fallback(
       <>
         <ShellStatus>
           Access unavailable. This module is not available.
         </ShellStatus>
         {signOut}
+      </>,
+    );
+  // Hide and suspend retained work while a new focus grant is verified. State
+  // survives tab changes; a denied grant or changed identity discards the tree.
+  if (
+    retain &&
+    check?.snapshot === snapshot &&
+    check.moduleId === checkId &&
+    typeof check.result === 'object'
+  ) {
+    const ready = focused && active && check.refreshKey === refreshKey;
+    return (
+      <>
+        {!ready &&
+          focused &&
+          fallback(<ShellStatus>Checking access…</ShellStatus>)}
+        <Activity mode={ready ? 'visible' : 'hidden'}>
+          {children(check.result)}
+        </Activity>
       </>
     );
+  }
   if (
     !focused ||
     !active ||
@@ -143,14 +185,14 @@ export function PermissionBoundary({
     check.moduleId !== checkId ||
     check.refreshKey !== refreshKey
   )
-    return (
+    return fallback(
       <>
         <ShellStatus>Checking access…</ShellStatus>
         {signOut}
-      </>
+      </>,
     );
   if (check.result === 'error')
-    return (
+    return fallback(
       <>
         <ShellStatus>
           Unable to verify access. Reconnect and try again.
@@ -163,16 +205,16 @@ export function PermissionBoundary({
           }}
         />
         {signOut}
-      </>
+      </>,
     );
   if (check.result === 'forbidden')
-    return (
+    return fallback(
       <>
         <ShellStatus>
           Access unavailable. Your current permissions do not allow this module.
         </ShellStatus>
         {signOut}
-      </>
+      </>,
     );
   return children(check.result);
 }

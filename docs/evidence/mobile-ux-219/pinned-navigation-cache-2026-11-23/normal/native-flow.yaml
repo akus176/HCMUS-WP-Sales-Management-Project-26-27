@@ -1,0 +1,91 @@
+appId: host.exp.exponent
+name: Cached navigation and pinned workspace controls
+---
+- openLink: exp://127.0.0.1:8081
+- extendedWaitUntil:
+    visible: 'Staff sign-in|Good (morning|afternoon|evening).*|Orders|Inventory'
+    timeout: 120000
+- runFlow:
+    when:
+      visible: Staff sign-in
+    commands:
+      - tapOn: Username
+      - eraseText
+      - inputText: ${MAESTRO_STAFF_USERNAME}
+      - hideKeyboard
+      - tapOn: Password
+      - inputText: ${MAESTRO_STAFF_PASSWORD}
+      - hideKeyboard
+      - tapOn: Sign in
+      - extendedWaitUntil:
+          visible: 'Good (morning|afternoon|evening).*'
+          timeout: 30000
+- tapOn: Stock
+- extendedWaitUntil:
+    visible:
+      id: inventory-section-history
+    timeout: 20000
+- takeScreenshot: stock-pinned-top
+- tapOn:
+    id: inventory-section-history
+- extendedWaitUntil:
+    visible: Recent stock movements from the shared API.
+    timeout: 15000
+- repeat:
+    times: 3
+    commands:
+      - swipe:
+          start: 95%, 75%
+          end: 95%, 35%
+          duration: 500
+- assertVisible:
+    id: inventory-section-balances
+- takeScreenshot: stock-history-pinned-after-scroll
+- tapOn:
+    id: inventory-section-receipts
+- extendedWaitUntil:
+    visible: 'Review receipt.*|No purchase receipts are available.'
+    timeout: 15000
+- takeScreenshot: stock-receipts-pinned
+- tapOn:
+    id: inventory-section-balances
+- assertVisible: Search ingredients
+- tapOn: Orders
+- extendedWaitUntil:
+    visible:
+      id: order-section-orders
+    timeout: 20000
+- repeat:
+    times: 3
+    commands:
+      - swipe:
+          start: 95%, 75%
+          end: 95%, 35%
+          duration: 500
+- assertVisible: Search orders
+- assertVisible:
+    id: order-section-tables
+- takeScreenshot: orders-search-and-tabs-pinned
+- tapOn: More
+- tapOn: Open Preparation
+- extendedWaitUntil:
+    visible:
+      id: preparation-filter-active
+    timeout: 15000
+- repeat:
+    times: 2
+    commands:
+      - swipe:
+          start: 95%, 75%
+          end: 95%, 35%
+          duration: 500
+- assertVisible:
+    id: preparation-filter-confirmed
+- takeScreenshot: preparation-pinned-filters
+- tapOn: Stock
+- assertVisible: Search ingredients
+- tapOn: Orders
+- assertVisible: Search orders
+- tapOn: Stock
+- assertVisible: Search ingredients
+- takeScreenshot: stock-return-cached

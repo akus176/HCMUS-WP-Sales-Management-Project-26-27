@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Medium_Phone_API_36.1" tests="1" failures="0" time="62.65" timestamp="2026-11-23T19:51:11">
+    <testcase id="Cached navigation and pinned workspace controls" name="Cached navigation and pinned workspace controls" classname="Cached navigation and pinned workspace controls" file="\\wsl.localhost\Ubuntu\tmp\mobile-all-pinned-large.yaml" time="62.605" timestamp="2026-11-23T19:51:11" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

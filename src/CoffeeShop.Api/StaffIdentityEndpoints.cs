@@ -104,6 +104,17 @@ public static class StaffIdentityEndpoints
         }).RequireAuthorization().Produces(204).ProducesProblem(401);
 
         var users = api.MapGroup("/users").RequireAuthorization("users.manage");
+        users.MapPost("/", async (CreateStaffRequest request, ICurrentUser actor,
+            StaffAdministrationService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            var result = await service.CreateAsync(request, actor.GetRequiredId(),
+                http.Connection.RemoteIpAddress?.ToString(), ct);
+            return result.IsSuccess
+                ? Results.Created($"/api/v1/users/{result.Value!.Id}", result.Value)
+                : ApiErrorResults.From(result.Error!);
+        }).Produces<StaffAccountResponse>(201).ProducesProblem(400).ProducesProblem(401)
+            .ProducesProblem(403).ProducesProblem(409);
         users.MapGet("/", async (StaffAdministrationService service, HttpContext http, string? search,
             bool? isActive, int? limit, CancellationToken ct) =>
         {

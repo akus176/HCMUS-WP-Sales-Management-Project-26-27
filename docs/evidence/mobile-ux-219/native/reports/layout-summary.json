@@ -1,0 +1,167 @@
+{
+  "expected": 16,
+  "profiles": {
+    "p200": {
+      "font": "2.0",
+      "night": "yes",
+      "size": "1080x2400",
+      "density": "480"
+    },
+    "t200": {
+      "font": "2.0",
+      "night": "no",
+      "size": "1600x2560",
+      "density": "320"
+    },
+    "ref100": {
+      "font": "1.0",
+      "night": "no",
+      "size": "1170x2664",
+      "density": "480"
+    },
+    "p100": {
+      "font": "1.0",
+      "night": "no",
+      "size": "1080x2400",
+      "density": "480"
+    },
+    "t100": {
+      "font": "1.0",
+      "night": "yes",
+      "size": "1600x2560",
+      "density": "320"
+    }
+  },
+  "cases": [
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "p100",
+      "role": "manager",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "p100",
+      "role": "admin",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "p100",
+      "role": "inventory",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "p100",
+      "role": "delivery",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "p200",
+      "role": "manager",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "p200",
+      "role": "admin",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "p200",
+      "role": "inventory",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "p200",
+      "role": "delivery",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "t100",
+      "role": "manager",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "t100",
+      "role": "admin",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "t100",
+      "role": "inventory",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "t100",
+      "role": "delivery",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "t200",
+      "role": "manager",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "t200",
+      "role": "admin",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "t200",
+      "role": "inventory",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "t200",
+      "role": "delivery",
+      "passing": 1
+    }
+  ],
+  "stage": "after",
+  "passed": 16
+}

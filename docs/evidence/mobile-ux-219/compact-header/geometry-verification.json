@@ -1,0 +1,26 @@
+{
+  "before": {
+    "firstTicketTopPx": 1016,
+    "filterGroupWidthDp": 342.0,
+    "filterTargetHeightsDp": [
+      48.0,
+      48.0,
+      48.0
+    ]
+  },
+  "after": {
+    "firstTicketTopPx": 666,
+    "filterGroupWidthDp": 247.33,
+    "filterTargetHeightsDp": [
+      48.0,
+      48.0,
+      48.0
+    ]
+  },
+  "spaceRecoveredDp": 116.67,
+  "fontScaleTwoFilterTargetHeightsDp": [
+    56.33,
+    56.33,
+    56.33
+  ]
+}

@@ -1,0 +1,20 @@
+﻿{
+  "device": "Samsung SM-A155F",
+  "restored": [
+    "display",
+    "density",
+    "font scale",
+    "system appearance",
+    "screen timeout",
+    "autofill",
+    "accessibility services",
+    "accessibility enabled",
+    "airplane mode",
+    "Wi-Fi",
+    "mobile data",
+    "TalkBack speech captions",
+    "notification banners"
+  ],
+  "originalDeviceSettingsVerified": true,
+  "verifiedAt": "2026-11-22T21:11:44.7171909+07:00"
+}

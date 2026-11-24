@@ -9,6 +9,11 @@ namespace CoffeeShop.WinUI.Services;
 /// <summary>POS operations go through the authenticated shared API.</summary>
 public sealed class ApiPosSource(AuthenticatedApiClient client, StaffSessionManager session)
 {
+    public bool CanManageTables => session.CurrentUser?.Permissions.Contains("tables.manage") == true;
+
+    public Task<PosTableResponse> CreateTableAsync(string number, int seats) =>
+        client.PostAsync<CreateTableRequest, PosTableResponse>("tables", new(number, seats));
+
     public async Task<IReadOnlyList<MenuItemSummary>> MenuAsync(string search)
     {
         var items = await client.GetAsync<MenuItemResponse[]>($"menu-items?isActive=true&limit=200&search={Uri.EscapeDataString(search)}");
