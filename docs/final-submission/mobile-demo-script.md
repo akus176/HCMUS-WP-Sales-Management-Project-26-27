@@ -3,12 +3,14 @@
 Record one continuous, Unlisted YouTube video against a current API and seeded PostgreSQL database.
 Do not show passwords, PATs, access tokens, refresh tokens, or local connection strings.
 
+The build based on `8c57ed2` supports rehearsing Preparation, the shared-state check, offline write protection, and sign-out. The mobile discount inbox, inventory, and courier workspaces are unavailable in that build. Use the full script once the selected build exposes those P0 workflows. [Mobile sales operation map](../evidence/issue-232-mobile-sales/README.md)
+
 ## Before recording
 
 1. Record the mobile build commit, API commit, seed version, device or emulator, and test-run link.
 2. Confirm the API is reachable from the Android device or emulator.
 3. Prepare one staff account for each demonstrated P0 role.
-4. Prepare deterministic records for a confirmed order, a pending discount, a low-stock ingredient, and an assigned delivery.
+4. Prepare deterministic records for a confirmed order, a pending discount, a low-stock ingredient, and an assigned delivery. Use WinUI or the shared API fixtures to draft and confirm the order and submit the discount request before recording. [Mobile sales operation map](../evidence/issue-232-mobile-sales/README.md)
 5. Confirm the function list marks only demonstrated and verified functions as Implemented.
 
 ## Continuous P0 script
@@ -19,7 +21,7 @@ Do not show passwords, PATs, access tokens, refresh tokens, or local connection 
 4. Start a confirmed ticket, then mark it ready.
 5. In the Windows client or a second authorized client, show the same ticket state after refresh or live update.
 6. Sign in as a manager and approve or reject a pending discount.
-7. Show the server-confirmed total in the affected order.
+7. Show the server-confirmed decision and total in the mobile approval result, then show the same affected order in WinUI.
 8. Sign in as inventory staff, open low-stock inventory, and submit one valid adjustment with a reason.
 9. Show the resulting balance and movement history.
 10. Sign in as delivery staff, open only the assigned delivery, launch navigation, mark it out for delivery, and then mark it delivered or failed.
