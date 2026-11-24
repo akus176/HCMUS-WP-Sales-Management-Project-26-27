@@ -16,15 +16,6 @@ export const mobileModules: readonly MobileModule[] = [
     ],
   },
   {
-    id: 'approvals',
-    title: 'Approvals',
-    actions: [
-      { label: 'Review discounts', permission: 'discounts.approve' },
-      { label: 'Authorize cancellations', permission: 'orders.cancel' },
-      { label: 'Assign deliveries', permission: 'delivery.assign' },
-    ],
-  },
-  {
     id: 'cashier',
     title: 'Counter',
     actions: [
@@ -77,8 +68,19 @@ export function permittedModules(permissions: readonly string[]) {
     (module) => permittedActions(module, permissions).length > 0,
   );
 }
+const orderOperations: MobileModule = {
+  id: 'operations',
+  title: 'Order operations',
+  actions: [
+    { label: 'Authorize cancellations', permission: 'orders.cancel' },
+    { label: 'Assign deliveries', permission: 'delivery.assign' },
+  ],
+};
+
 export function findModule(id: string | string[] | undefined) {
   return typeof id === 'string'
-    ? mobileModules.find((module) => module.id === id)
+    ? id === 'operations'
+      ? orderOperations
+      : mobileModules.find((module) => module.id === id)
     : undefined;
 }

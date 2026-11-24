@@ -166,6 +166,25 @@ test('home renders only effective permission modules and an explicit empty state
     screen.getByRole('button', { name: 'Open Preparation' }),
   ).toBeVisible();
   expect(screen.queryByRole('button', { name: 'Open Deliveries' })).toBeNull();
+  mockSession.state.user = {
+    ...user,
+    permissions: ['orders.cancel', 'inventory.receive'],
+  };
+  await view.rerender(<StaffHome />);
+  expect(
+    screen.getByText('No mobile modules are available for your permissions.'),
+  ).toBeVisible();
+  expect(screen.queryByText('Purchase receipts')).toBeNull();
+  mockSession.state.user = {
+    ...user,
+    permissions: ['orders.create', 'payments.record'],
+  };
+  await view.rerender(<StaffHome />);
+  expect(screen.getByRole('button', { name: 'Open Counter' })).toBeVisible();
+  expect(
+    screen.queryByText(/Discount decisions|Delivery assignment/),
+  ).toBeNull();
+  expect(screen.queryByText(/Balances|Low stock|Stock adjustments/)).toBeNull();
   mockSession.state.user = { ...user, roles: ['Admin'], permissions: [] };
   await view.rerender(<StaffHome />);
   expect(
@@ -251,16 +270,14 @@ test('malformed and cross-account permission responses cannot mount a protected 
 
 test('home discovers newly granted modules from current API permissions, not stale login claims', async () => {
   mockSession.state.user = { ...user, permissions: [] };
-  await session(async () =>
-    json({ ...user, permissions: ['delivery.update'] }),
-  );
+  await session(async () => json({ ...user, permissions: ['orders.create'] }));
   await render(
     <PermissionBoundary scope="home">
       {(verified) => <StaffHome user={verified} />}
     </PermissionBoundary>,
   );
   expect(
-    await screen.findByRole('button', { name: 'Open Deliveries' }),
+    await screen.findByRole('button', { name: 'Open Counter' }),
   ).toBeVisible();
   expect(screen.queryByRole('button', { name: 'Open Preparation' })).toBeNull();
 });
@@ -308,10 +325,10 @@ test('an initially empty home hides identity in background and discovers a new g
   );
   await act(async () => listener?.('background'));
   expect(screen.queryByText(user.fullName)).toBeNull();
-  permissions = ['delivery.update'];
+  permissions = ['orders.fulfill'];
   await act(async () => listener?.('active'));
   expect(
-    await screen.findByRole('button', { name: 'Open Deliveries' }),
+    await screen.findByRole('button', { name: 'Open Preparation' }),
   ).toBeVisible();
 });
 

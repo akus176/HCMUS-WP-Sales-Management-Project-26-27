@@ -4,9 +4,8 @@ name: Barista progression against the shared API
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: Staff mobile
+    visible: Staff sign-in
     timeout: 60000
-- tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
 - hideKeyboard
@@ -17,7 +16,26 @@ name: Barista progression against the shared API
 - extendedWaitUntil:
     visible: Open Preparation
     timeout: 30000
-- tapOn: Open Preparation
+- tapOn:
+    id: workspace-tab-barista
+- scrollUntilVisible:
+    element:
+      id: preparation-filter-confirmed
+    direction: UP
+- tapOn:
+    id: preparation-filter-confirmed
+- scrollUntilVisible:
+    element:
+      id: preparation-filter-preparing
+    direction: UP
+- tapOn:
+    id: preparation-filter-preparing
+- scrollUntilVisible:
+    element:
+      id: preparation-filter-active
+    direction: UP
+- tapOn:
+    id: preparation-filter-active
 - repeat:
     times: ${MAESTRO_QUEUE_PAGE_SKIP}
     commands:
@@ -26,11 +44,31 @@ name: Barista progression against the shared API
           direction: DOWN
       - tapOn: Next page
 - scrollUntilVisible:
-    element: All active
+    element:
+      id: preparation-filter-active
     direction: UP
 - scrollUntilVisible:
     element: Open ticket ${MAESTRO_ORDER_NUMBER}
     direction: DOWN
+- tapOn: Open ticket ${MAESTRO_ORDER_NUMBER}
+- scrollUntilVisible:
+    element: Large
+    direction: DOWN
+- assertVisible: Large
+- scrollUntilVisible:
+    element: 'Add-ons: ${MAESTRO_BARISTA_ADDON}'
+    direction: DOWN
+- assertVisible: 'Add-ons: ${MAESTRO_BARISTA_ADDON}'
+- scrollUntilVisible:
+    element: Back to Preparation
+    direction: UP
+- tapOn: Back to Preparation
+- scrollUntilVisible:
+    element: Open ticket ${MAESTRO_ORDER_NUMBER}
+    direction: DOWN
+- assertVisible:
+    text: Open ticket ${MAESTRO_ORDER_NUMBER}
+    enabled: true
 - tapOn: Open ticket ${MAESTRO_ORDER_NUMBER}
 - scrollUntilVisible:
     element: Start preparing
@@ -49,6 +87,17 @@ name: Barista progression against the shared API
     element: Mark ready
     direction: DOWN
 - takeScreenshot: .maestro/results/barista-preparing
+- tapOn: Mark ready
+- assertVisible: This updates the whole ticket.
+- scrollUntilVisible:
+    element: Keep preparing
+    direction: DOWN
+- takeScreenshot: .maestro/results/barista-ready-review
+- tapOn: Keep preparing
+- assertNotVisible: Confirm ready
+- scrollUntilVisible:
+    element: Mark ready
+    direction: DOWN
 - tapOn: Mark ready
 - scrollUntilVisible:
     element: Confirm ready

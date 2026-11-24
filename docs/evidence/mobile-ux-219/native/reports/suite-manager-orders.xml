@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="146.905" timestamp="2026-11-22T15:49:53">
+    <testcase id="Manager cancellation and ready delivery assignment against the shared API" name="Manager cancellation and ready delivery assignment against the shared API" classname="Manager cancellation and ready delivery assignment against the shared API" file=".maestro\manager-orders.yaml" time="146.888" timestamp="2026-11-22T15:49:53" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

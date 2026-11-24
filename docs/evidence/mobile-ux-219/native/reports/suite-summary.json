@@ -1,0 +1,78 @@
+{
+  "expected": 10,
+  "serverVerificationPassed": true,
+  "workflows": [
+    {
+      "passed": true,
+      "exitCode": 0,
+      "testCases": 1,
+      "passedCases": 1,
+      "workflow": "session"
+    },
+    {
+      "passed": true,
+      "exitCode": 0,
+      "testCases": 1,
+      "passedCases": 1,
+      "workflow": "barista"
+    },
+    {
+      "passed": true,
+      "exitCode": 0,
+      "testCases": 1,
+      "passedCases": 1,
+      "workflow": "approvals"
+    },
+    {
+      "passed": true,
+      "exitCode": 0,
+      "testCases": 1,
+      "passedCases": 1,
+      "workflow": "inventory"
+    },
+    {
+      "passed": true,
+      "exitCode": 0,
+      "testCases": 1,
+      "passedCases": 1,
+      "workflow": "courier"
+    },
+    {
+      "passed": true,
+      "exitCode": 0,
+      "testCases": 1,
+      "passedCases": 1,
+      "workflow": "cashier"
+    },
+    {
+      "passed": true,
+      "exitCode": 0,
+      "testCases": 1,
+      "passedCases": 1,
+      "workflow": "manager-orders"
+    },
+    {
+      "passed": true,
+      "exitCode": 0,
+      "testCases": 1,
+      "passedCases": 1,
+      "workflow": "administration"
+    },
+    {
+      "passed": true,
+      "exitCode": 0,
+      "testCases": 1,
+      "passedCases": 1,
+      "workflow": "offline"
+    },
+    {
+      "passed": true,
+      "exitCode": 0,
+      "testCases": 1,
+      "passedCases": 1,
+      "workflow": "notification-links"
+    }
+  ],
+  "failedOrMissing": 0,
+  "passed": 10
+}

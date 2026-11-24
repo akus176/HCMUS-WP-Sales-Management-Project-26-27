@@ -7,6 +7,10 @@ name: Real receipt conflict or committed-but-lost response has safe feedback
     direction: DOWN
 - tapOn: Post receipt ${MAESTRO_RECEIPT}
 - scrollUntilVisible:
+    element: Confirm receipt posting
+    direction: DOWN
+- tapOn: Confirm receipt posting
+- scrollUntilVisible:
     element: ${MAESTRO_RESULT}
     direction: UP
 - assertVisible: ${MAESTRO_RESULT}

@@ -1,0 +1,19 @@
+appId: com.coffeeshop.staffmobile
+---
+- scrollUntilVisible:
+    element: Mark ready
+    direction: DOWN
+- tapOn: Mark ready
+- scrollUntilVisible:
+    element: This updates the whole ticket.
+    direction: DOWN
+- assertVisible: This updates the whole ticket.
+- scrollUntilVisible:
+    element: Keep preparing
+    direction: DOWN
+- tapOn: Keep preparing
+- assertNotVisible: Confirm ready
+- scrollUntilVisible:
+    element: Mark ready
+    direction: DOWN
+- assertVisible: Mark ready

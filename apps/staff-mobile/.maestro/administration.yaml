@@ -11,7 +11,7 @@ name: Account details, deactivation and security event filters
     direction: DOWN
 - tapOn: Search staff accounts
 - inputText: ${MAESTRO_TARGET_NAME}
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: View details for ${MAESTRO_TARGET_NAME}
     direction: DOWN
@@ -20,6 +20,10 @@ name: Account details, deactivation and security event filters
     element: Account details
     direction: DOWN
 - assertVisible: Account details
+- scrollUntilVisible:
+    element: Close account details
+    direction: DOWN
+- tapOn: Close account details
 - scrollUntilVisible:
     element: Deactivate ${MAESTRO_TARGET_NAME}
     direction: UP
@@ -31,6 +35,10 @@ name: Account details, deactivation and security event filters
     element: '${MAESTRO_TARGET_NAME} is now inactive. Their active sessions were revoked.'
     direction: DOWN
 - assertVisible: '${MAESTRO_TARGET_NAME} is now inactive. Their active sessions were revoked.'
+- scrollUntilVisible:
+    element: Security events
+    direction: UP
+- tapOn: Security events
 - scrollUntilVisible:
     element: Account changes
     direction: DOWN

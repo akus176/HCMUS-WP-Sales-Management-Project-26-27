@@ -1,74 +1,74 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect } from 'react';
+import { useNativeNavigation } from '../../src/shell/NativeNavigation';
+import type { Workspace } from '../../src/shell/navigationPolicy';
 import { PreparationScreen } from '../../src/barista/PreparationScreen';
 
 import { PermissionBoundary } from '../../src/shell/PermissionBoundary';
 import { useRouteAccess } from '../../src/shell/useRouteAccess';
 import {
-  ShellButton,
-  ShellHeading,
   ShellPage,
-  ShellText,
+  ShellPageHeader,
+  ShellStatus,
 } from '../../src/shell/controls';
-import { findModule, permittedActions } from '../../src/shell/permissions';
-import { DiscountApprovals } from '../../src/features/approvals/DiscountApprovals';
-import { StaffAdministration } from '../../src/features/administration/StaffAdministration';
-import { InventoryWorkspace } from '../../src/features/inventory/InventoryWorkspace';
+import { findModule } from '../../src/shell/permissions';
 import { OrdersScreen } from '../../src/features/orders/OrdersScreen';
-import { DeliveryScreen } from '../../src/features/delivery/DeliveryScreen';
 
 export default function ModuleScreen() {
   const { module: moduleId } = useLocalSearchParams<{
     module: string | string[];
   }>();
-  const module = findModule(moduleId);
+  const module =
+    typeof moduleId === 'string' &&
+    ['cashier', 'barista', 'operations'].includes(moduleId)
+      ? findModule(moduleId)
+      : undefined;
   const access = useRouteAccess();
+  const navigation = useNativeNavigation();
   return (
     <ShellPage>
-      <ShellButton
-        label="Back to staff home"
-        onPress={() => router.replace('/session')}
-      />
-      <PermissionBoundary moduleId={moduleId} {...access}>
+      <PermissionBoundary
+        moduleId={module?.id}
+        {...access}
+        fallbackHeader={
+          <ShellPageHeader
+            backLabel="Back to staff home"
+            onBack={() => router.replace('/session')}
+          />
+        }
+      >
         {(user) =>
-          module?.id === 'barista' ? (
-            <PreparationScreen />
-          ) : module?.id === 'approvals' ? (
-            <>
-              {user.permissions.some((permission) =>
-                ['orders.cancel', 'delivery.assign'].includes(permission),
-              ) && (
-                <ShellButton
-                  label="Manage cancellations and deliveries"
-                  onPress={() => router.push('/modules/approvals/operations')}
-                />
-              )}
-              <DiscountApprovals user={user} />
-            </>
-          ) : module?.id === 'inventory' ? (
-            <InventoryWorkspace user={user} />
-          ) : module?.id === 'cashier' ? (
-            <OrdersScreen user={user} />
-          ) : module?.id === 'delivery' ? (
-            <DeliveryScreen />
-          ) : module?.id === 'administration' ? (
-            <StaffAdministration user={user} />
+          navigation && module ? (
+            <NativeModuleEntry id={module.id as Workspace | 'operations'} />
           ) : (
             <>
-              <ShellHeading>{module!.title}</ShellHeading>
-              <ShellText>Selected module: {module!.title}</ShellText>
-              <ShellText>
-                Workflow screens are planned and are not available yet. No
-                business action can be performed here.
-              </ShellText>
-              {permittedActions(module!, user.permissions).map((action) => (
-                <ShellText key={action.permission}>
-                  {action.label} — planned
-                </ShellText>
-              ))}
+              <ShellPageHeader
+                title={module?.title}
+                inline
+                backLabel="Back to staff home"
+                onBack={() => router.replace('/session')}
+                hideDuringDetail={module?.id === 'barista'}
+              />
+              {module?.id === 'barista' ? (
+                <PreparationScreen showHeading={false} />
+              ) : module?.id === 'cashier' ? (
+                <OrdersScreen user={user} showHeading={false} startWithMenu />
+              ) : module?.id === 'operations' ? (
+                <OrdersScreen user={user} manager />
+              ) : null}
             </>
           )
         }
       </PermissionBoundary>
     </ShellPage>
   );
+}
+
+function NativeModuleEntry({ id }: { id: Workspace | 'operations' }) {
+  const open = useNativeNavigation()?.open;
+  useEffect(() => {
+    if (id === 'operations') router.replace('/modules/cashier/operations');
+    else open?.(id);
+  }, [open, id]);
+  return <ShellStatus>Opening workspace…</ShellStatus>;
 }

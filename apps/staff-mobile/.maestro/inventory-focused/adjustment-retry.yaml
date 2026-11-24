@@ -6,9 +6,9 @@ name: Explicit retry after a lost adjustment response reuses the original operat
     direction: UP
 - tapOn: Refresh inventory
 - scrollUntilVisible:
-    element: Save adjustment
+    element: Confirm adjustment
     direction: DOWN
-- tapOn: Save adjustment
+- tapOn: Confirm adjustment
 - scrollUntilVisible:
     element: 'Adjustment saved by the server. New balance: 3 l.'
     direction: UP

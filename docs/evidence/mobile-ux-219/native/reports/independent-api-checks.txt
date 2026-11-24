@@ -1,0 +1,5 @@
+PASS: separate manager session observes Ready and the ticket is absent from the active preparation queue.
+PASS 3/3: separate manager API session observes exact paid balance, cancelled order/table release, and assigned courier.
+PASS: separate manager session observes delivered and failed states for the assigned courier.
+PASS 6/6: approved/rejected totals, stock balance, one-time movements, offline no-write state, and deactivated account verified through a separate API session.
+PASS 10/10 Android flows and separate-session API state verification.

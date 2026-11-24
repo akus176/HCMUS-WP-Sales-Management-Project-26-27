@@ -3,6 +3,8 @@
 Record one continuous, Unlisted YouTube video against a current API and seeded PostgreSQL database.
 Do not show passwords, PATs, access tokens, refresh tokens, or local connection strings.
 
+The build based on `8c57ed2` supports rehearsing Preparation, the shared-state check, offline write protection, and sign-out. The mobile discount inbox, inventory, and courier workspaces are unavailable in that build. Use the full script once the selected build exposes those P0 workflows. [Mobile sales operation map](../evidence/issue-232-mobile-sales/README.md)
+
 ## Before recording
 
 1. Record the mobile build commit, API commit, seed version, device or emulator, and test-run link.

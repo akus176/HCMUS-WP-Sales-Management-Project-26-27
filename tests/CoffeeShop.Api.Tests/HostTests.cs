@@ -187,7 +187,7 @@ public sealed class HostTests
         using var client = host.CreateClient();
         using var document = JsonDocument.Parse(await client.GetStringAsync("/openapi/v1.json"));
         var paths = document.RootElement.GetProperty("paths");
-        var sharedOnly = paths.EnumerateObject().SelectMany(path => path.Value.EnumerateObject()
+        var outsideScope = paths.EnumerateObject().SelectMany(path => path.Value.EnumerateObject()
             .Where(operation => operation.Value.ValueKind == JsonValueKind.Object &&
                 operation.Value.TryGetProperty("description", out var description) &&
                 description.GetString()?.StartsWith("Outside the first staff mobile release.", StringComparison.Ordinal) == true)
@@ -220,7 +220,7 @@ public sealed class HostTests
             "POST /api/v1/orders/{id}/preparing",
             "POST /api/v1/orders/{id}/ready",
         ];
-        Assert.Equal(expected, sharedOnly.Order(StringComparer.Ordinal));
+        Assert.Equal(expected, outsideScope.Order(StringComparer.Ordinal));
     }
 
     [Fact]

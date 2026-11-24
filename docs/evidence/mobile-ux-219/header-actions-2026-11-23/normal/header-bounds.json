@@ -1,0 +1,218 @@
+{
+  "profile": "normal",
+  "assertions": [
+    {
+      "screen": "orders-list",
+      "title": "Orders",
+      "refreshLabel": "Refresh orders and tables",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": null,
+      "backBounds": null
+    },
+    {
+      "screen": "order-detail",
+      "title": "Order details",
+      "refreshLabel": "Refresh orders and tables",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": "Back to order search",
+      "backBounds": [
+        60,
+        108,
+        204,
+        252
+      ]
+    },
+    {
+      "screen": "order-detail-scrolled",
+      "title": "Order details",
+      "refreshLabel": "Refresh orders and tables",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": "Back to order search",
+      "backBounds": [
+        60,
+        108,
+        204,
+        252
+      ]
+    },
+    {
+      "screen": "stock-balances",
+      "title": "Inventory",
+      "refreshLabel": "Refresh inventory",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": null,
+      "backBounds": null
+    },
+    {
+      "screen": "ingredient-detail",
+      "title": "Ingredient details",
+      "refreshLabel": "Refresh inventory",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": "Back to ingredients",
+      "backBounds": [
+        60,
+        108,
+        204,
+        252
+      ]
+    },
+    {
+      "screen": "stock-receipts",
+      "title": "Inventory",
+      "refreshLabel": "Refresh receipts",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": null,
+      "backBounds": null
+    },
+    {
+      "screen": "receipt-detail",
+      "title": "Receipt details",
+      "refreshLabel": "Refresh receipt status",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": "Back to receipt list",
+      "backBounds": [
+        60,
+        108,
+        204,
+        252
+      ]
+    },
+    {
+      "screen": "receipt-return",
+      "title": "Inventory",
+      "refreshLabel": "Refresh receipts",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": null,
+      "backBounds": null
+    },
+    {
+      "screen": "preparation-queue",
+      "title": "Preparation",
+      "refreshLabel": "Refresh queue",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": null,
+      "backBounds": null
+    },
+    {
+      "screen": "preparation-detail",
+      "title": "Ticket details",
+      "refreshLabel": "Refresh ticket",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": "Back to Preparation",
+      "backBounds": [
+        60,
+        108,
+        204,
+        252
+      ]
+    },
+    {
+      "screen": "approvals",
+      "title": "Approvals",
+      "refreshLabel": "Refresh pending approvals",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": null,
+      "backBounds": null
+    },
+    {
+      "screen": "manager-orders",
+      "title": "Order operations",
+      "refreshLabel": "Refresh orders and tables",
+      "refreshBounds": [
+        966,
+        409,
+        1110,
+        553
+      ],
+      "backLabel": null,
+      "backBounds": null
+    },
+    {
+      "screen": "manager-order-detail",
+      "title": "Order details",
+      "refreshLabel": "Refresh orders and tables",
+      "refreshBounds": [
+        966,
+        726,
+        1110,
+        870
+      ],
+      "backLabel": "Back to order search",
+      "backBounds": [
+        60,
+        726,
+        204,
+        870
+      ]
+    },
+    {
+      "screen": "approvals-return",
+      "title": "Approvals",
+      "refreshLabel": "Refresh pending approvals",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": null,
+      "backBounds": null
+    }
+  ],
+  "result": "passed"
+}

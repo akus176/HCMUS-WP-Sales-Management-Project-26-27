@@ -1,7 +1,4 @@
 const destinations = {
-  approval: { module: 'approvals', permission: 'discounts.approve' },
-  assignment: { module: 'delivery', permission: 'delivery.update' },
-  'low-stock': { module: 'inventory', permission: 'inventory.manage' },
   'urgent-order': { module: 'barista', permission: 'orders.fulfill' },
 } as const;
 

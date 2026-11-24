@@ -1,0 +1,12 @@
+{
+  "fontScale": 2,
+  "logicalViewport": [
+    390,
+    844
+  ],
+  "queueOpenReachable": true,
+  "detailActionReachable": true,
+  "confirmationChoicesVisibleTogether": true,
+  "confirmationCancelled": true,
+  "profileStartsFromHomeAfterExpoGoConfigurationReload": true
+}

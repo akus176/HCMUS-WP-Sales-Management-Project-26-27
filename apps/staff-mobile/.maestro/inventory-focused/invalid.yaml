@@ -29,6 +29,10 @@ name: Missing reason prevents submission and invalid stock is rejected by the AP
     direction: DOWN
 - tapOn: Save adjustment
 - scrollUntilVisible:
+    element: Confirm adjustment
+    direction: DOWN
+- tapOn: Confirm adjustment
+- scrollUntilVisible:
     element: The server rejected this adjustment. No stock was changed.*
     direction: UP
 - assertVisible: The server rejected this adjustment. No stock was changed.*

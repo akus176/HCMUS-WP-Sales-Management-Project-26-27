@@ -136,6 +136,41 @@ beforeEach(() => {
   addNetworkStateListener.mockReset();
 });
 
+async function submitAdjustment(view: Awaited<ReturnType<typeof setup>>) {
+  const review = view.queryByRole('button', { name: 'Save adjustment' });
+  if (review) await fireEvent.press(review);
+  const confirm = view.queryByRole('button', { name: 'Confirm adjustment' });
+  if (confirm) await fireEvent.press(confirm);
+}
+async function confirmReceipt(view: Awaited<ReturnType<typeof setup>>) {
+  const confirm = view.queryByRole('button', {
+    name: 'Confirm receipt posting',
+  });
+  if (confirm) await fireEvent.press(confirm);
+}
+
+test('reviewing and dismissing an adjustment never sends a stock write', async () => {
+  const { post } = createClient();
+  const view = await setup();
+  await fireEvent.press(
+    await view.findByRole('button', { name: 'Record adjustment for Oat milk' }),
+  );
+  await fireEvent.changeText(view.getByLabelText('Quantity change'), '2');
+  await fireEvent.changeText(
+    view.getByLabelText('Adjustment reason'),
+    'Physical count',
+  );
+  await fireEvent.press(view.getByRole('button', { name: 'Save adjustment' }));
+  expect(post).not.toHaveBeenCalled();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Keep editing adjustment' }),
+  );
+  expect(view.getByLabelText('Quantity change')).toHaveProp('value', '2');
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Close Adjust stock' }),
+  );
+  expect(post).not.toHaveBeenCalled();
+});
 test('loads current ingredient balances and marks items at their reorder threshold', async () => {
   const { get } = createClient();
   const view = await setup();
@@ -277,21 +312,30 @@ test('adjustment requires a reason and displays server-confirmed balance and mov
     data: { ingredientId: balance.ingredientId, availableQuantity: 3 },
   }));
   createClient(get as never, post as never);
-  const view = await setup();
+  let queries!: QueryClient;
+  const overviewKey = ['inventory', user.id, 'overview'];
+  const historyKey = ['inventory-movements', user.id, 'all'];
+  const view = await setup(user, (current) => {
+    queries = current;
+    for (const key of [overviewKey, historyKey]) {
+      current.setQueryDefaults(key, { gcTime: Infinity, staleTime: Infinity });
+      current.setQueryData(key, { cached: true });
+    }
+  });
 
   await view.findByText('Oat milk');
   await fireEvent.press(
     view.getByRole('button', { name: 'Record adjustment for Oat milk' }),
   );
   await fireEvent.changeText(view.getByLabelText('Quantity change'), '2');
-  await fireEvent.press(view.getByRole('button', { name: 'Save adjustment' }));
+  await submitAdjustment(view);
   expect(post).not.toHaveBeenCalled();
 
   await fireEvent.changeText(
     view.getByLabelText('Adjustment reason'),
     'Physical count',
   );
-  await fireEvent.press(view.getByRole('button', { name: 'Save adjustment' }));
+  await submitAdjustment(view);
   expect(
     await view.findByText('Adjustment saved by the server. New balance: 3 l.'),
   ).toBeVisible();
@@ -320,6 +364,10 @@ test('adjustment requires a reason and displays server-confirmed balance and mov
   expect(
     await view.findByText(/adjustment: 2 l · Physical count/),
   ).toBeVisible();
+  await waitFor(() => {
+    expect(queries.getQueryState(overviewKey)?.isInvalidated).toBe(true);
+    expect(queries.getQueryState(historyKey)?.isInvalidated).toBe(true);
+  });
 });
 
 test('server validation rejection does not report an adjustment as successful', async () => {
@@ -338,7 +386,7 @@ test('server validation rejection does not report an adjustment as successful', 
     view.getByLabelText('Adjustment reason'),
     'Physical count',
   );
-  await fireEvent.press(view.getByRole('button', { name: 'Save adjustment' }));
+  await submitAdjustment(view);
 
   expect(
     await view.findByText(/server rejected this adjustment/i),
@@ -365,9 +413,9 @@ test('retry after a lost adjustment response reuses the same idempotency key', a
     view.getByLabelText('Adjustment reason'),
     'Physical count',
   );
-  await fireEvent.press(view.getByRole('button', { name: 'Save adjustment' }));
+  await submitAdjustment(view);
   await view.findByText(/could not be confirmed/);
-  await fireEvent.press(view.getByRole('button', { name: 'Save adjustment' }));
+  await submitAdjustment(view);
 
   await view.findByText(/Adjustment saved by the server/);
   expect(post).toHaveBeenCalledTimes(2);
@@ -392,7 +440,16 @@ test('reviews and posts a prepared receipt once, then shows its server status', 
     return { data: undefined, response: { ok: true } };
   });
   createClient(get as never, post as never);
-  const view = await setup();
+  let queries!: QueryClient;
+  const overviewKey = ['inventory', user.id, 'overview'];
+  const historyKey = ['inventory-movements', user.id, 'all'];
+  const view = await setup(user, (current) => {
+    queries = current;
+    for (const key of [overviewKey, historyKey]) {
+      current.setQueryDefaults(key, { gcTime: Infinity, staleTime: Infinity });
+      current.setQueryData(key, { cached: true });
+    }
+  });
 
   await view.findByText('Oat milk');
   await fireEvent.press(
@@ -406,6 +463,7 @@ test('reviews and posts a prepared receipt once, then shows its server status', 
   await fireEvent.press(
     view.getByRole('button', { name: 'Post receipt RCPT-184' }),
   );
+  await confirmReceipt(view);
 
   expect(
     await view.findByText('Receipt RCPT-184 was posted by the server.'),
@@ -418,6 +476,10 @@ test('reviews and posts a prepared receipt once, then shows its server status', 
   expect(
     view.queryByRole('button', { name: 'Post receipt RCPT-184' }),
   ).toBeNull();
+  await waitFor(() => {
+    expect(queries.getQueryState(overviewKey)?.isInvalidated).toBe(true);
+    expect(queries.getQueryState(historyKey)?.isInvalidated).toBe(true);
+  });
 });
 
 test('empty receipts remain unpostable', async () => {
@@ -475,6 +537,7 @@ test('a receipt conflict refreshes state without claiming that posting succeeded
   await fireEvent.press(
     await view.findByRole('button', { name: 'Post receipt RCPT-184' }),
   );
+  await confirmReceipt(view);
 
   expect(await view.findByText(/already posted|changed/i)).toBeVisible();
   expect(
@@ -511,6 +574,7 @@ test('refreshes receipt status after a post response is lost', async () => {
   await fireEvent.press(
     await view.findByRole('button', { name: 'Post receipt RCPT-184' }),
   );
+  await confirmReceipt(view);
   expect(await view.findByText(/could not be confirmed/i)).toBeVisible();
 
   await fireEvent.press(
@@ -550,9 +614,65 @@ test('a receipt API error result does not claim that posting succeeded', async (
   await fireEvent.press(
     await view.findByRole('button', { name: 'Post receipt RCPT-184' }),
   );
+  await confirmReceipt(view);
 
   expect(await view.findByText(/already posted|changed/i)).toBeVisible();
   expect(
     view.queryByText('Receipt RCPT-184 was posted by the server.'),
   ).toBeNull();
+});
+
+test('large receipt and movement lists render in batches while keeping all records reachable', async () => {
+  const receipts = Array.from({ length: 45 }, (_, index) => ({
+    ...receipt,
+    id: `receipt-${index}`,
+    receiptNumber: `Batch receipt ${index}`,
+  }));
+  const movements = Array.from({ length: 45 }, (_, index) => ({
+    ...movement,
+    id: `movement-${index}`,
+    reason: `Batch movement ${index}`,
+  }));
+  const get = jest.fn().mockImplementation(async (path: string) => ({
+    data:
+      path === '/api/v1/purchase-receipts'
+        ? receipts
+        : path === '/api/v1/stock-movements'
+          ? movements
+          : { items: [balance], page: 1, pageSize: 100, totalCount: 1 },
+  }));
+  const { post } = createClient(get);
+  const view = await setup();
+  await view.findByText('Oat milk');
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Purchase receipts' }),
+  );
+  await view.findByText('Batch receipt 19');
+  expect(view.queryByText('Batch receipt 20')).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Show more receipts' }),
+  );
+  await view.findByText('Batch receipt 39');
+  expect(view.queryByText('Batch receipt 40')).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Show more receipts' }),
+  );
+  await view.findByText('Batch receipt 44');
+  expect(view.queryByRole('button', { name: 'Show more receipts' })).toBeNull();
+  await fireEvent.press(view.getByRole('button', { name: 'Movement history' }));
+  await view.findByText('Batch movement 19');
+  expect(view.queryByText('Batch movement 20')).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Show more movements' }),
+  );
+  await view.findByText('Batch movement 39');
+  expect(view.queryByText('Batch movement 40')).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Show more movements' }),
+  );
+  await view.findByText('Batch movement 44');
+  expect(
+    view.queryByRole('button', { name: 'Show more movements' }),
+  ).toBeNull();
+  expect(post).not.toHaveBeenCalled();
 });

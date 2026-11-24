@@ -1,39 +1,208 @@
-import { StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState, type ReactNode } from 'react';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 
-import { ShellButton, ShellFeedback } from '../shell/controls';
+import {
+  PageNotice,
+  ShellButton,
+  ShellFeedback,
+  ShellHeaderAction,
+} from '../shell/controls';
+import { mobileTokens } from '../shell/designTokens';
 import { useConnectivity } from './connectivity';
 
-export function ConnectivityBanner() {
+export function ConnectivityPresentation({
+  children,
+  branded = false,
+  compact = false,
+  liveUpdatesUnavailable = false,
+}: {
+  children: ReactNode;
+  branded?: boolean;
+  compact?: boolean;
+  liveUpdatesUnavailable?: boolean;
+}) {
   const { status, refreshConnection } = useConnectivity();
+  const [expanded, setExpanded] = useState(false);
+  const detail =
+    status === 'offline'
+      ? 'Offline. Cached data is read-only; changes are disabled. Reconnect and try again.'
+      : status === 'reconnecting'
+        ? 'Reconnecting. Refreshing current data from the service…'
+        : 'Network connected. Refresh a workspace to check the latest service data.';
+  return (
+    <PageNotice.Provider
+      value={
+        expanded || status === 'offline' || status === 'reconnecting' ? (
+          <>
+            <ShellFeedback
+              kind={status === 'offline' ? 'warning' : 'info'}
+              label={detail}
+            />
+            {branded &&
+              (status === 'offline' ? (
+                <ShellButton
+                  label="Check connection"
+                  variant="secondary"
+                  onPress={() => void refreshConnection()}
+                />
+              ) : (
+                <ShellHeaderAction
+                  kind="refresh"
+                  label="Refresh data"
+                  priority={0}
+                  onPress={() => void refreshConnection()}
+                />
+              ))}
+          </>
+        ) : liveUpdatesUnavailable ? (
+          <ShellFeedback
+            kind="warning"
+            label="Live updates unavailable. Refresh to check for changes."
+          />
+        ) : null
+      }
+    >
+      {!compact && (
+        <ConnectivityBanner
+          expanded={expanded}
+          onToggle={() => setExpanded(!expanded)}
+          branded={branded}
+        />
+      )}
+      {children}
+    </PageNotice.Provider>
+  );
+}
+
+export function ConnectivityBanner({
+  expanded = false,
+  onToggle,
+  branded = false,
+}: { expanded?: boolean; onToggle?: () => void; branded?: boolean } = {}) {
+  const { status, refreshConnection } = useConnectivity();
+  const { fontScale } = useWindowDimensions();
   const message = {
-    checking: 'Checking network status…',
-    online: 'Online. Data refreshes from the service.',
-    reconnecting: 'Reconnecting. Refreshing current data from the service…',
-    offline:
-      'Offline. Cached data is read-only; changes are disabled. Reconnect and try again.',
+    checking: 'Checking connection…',
+    online: 'Online',
+    reconnecting: 'Reconnecting…',
+    offline: 'Offline · read-only',
   }[status];
-  const kind =
-    status === 'offline' ? 'warning' : status === 'online' ? 'info' : 'loading';
   const refreshing = status === 'checking' || status === 'reconnecting';
   const actionLabel =
     status === 'offline' ? 'Check connection' : 'Refresh data';
 
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
-      <ShellFeedback kind={kind} label={message} />
-      <ShellButton
-        label={actionLabel}
-        loading={refreshing}
-        loadingLabel="Refreshing…"
-        disabled={refreshing}
-        variant="secondary"
-        onPress={() => void refreshConnection()}
-      />
-    </SafeAreaView>
+    <View
+      style={[
+        styles.container,
+        branded && styles.brandedContainer,
+        branded && fontScale > 1.5 && styles.stackedBrand,
+      ]}
+    >
+      {branded && (
+        <Text accessibilityRole="header" style={styles.brand}>
+          Corner Cafe
+        </Text>
+      )}
+      {onToggle ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Connection details"
+          accessibilityHint={message}
+          accessibilityState={{ expanded }}
+          onPress={onToggle}
+          style={({ pressed }) => [
+            styles.statusControl,
+            branded && styles.brandedStatus,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Text
+            accessibilityLiveRegion="polite"
+            style={[styles.summary, branded && styles.brandedSummary]}
+          >
+            {message} ▾
+          </Text>
+        </Pressable>
+      ) : (
+        <Text accessibilityLiveRegion="polite" style={styles.summary}>
+          {message}
+        </Text>
+      )}
+      {!branded &&
+        (status === 'offline' ? (
+          <ShellButton
+            label={actionLabel}
+            loading={refreshing}
+            disabled={refreshing}
+            variant="secondary"
+            compact
+            onPress={() => void refreshConnection()}
+          />
+        ) : (
+          <ShellHeaderAction
+            kind="refresh"
+            label={actionLabel}
+            loading={refreshing}
+            disabled={refreshing}
+            priority={0}
+            onPress={() => void refreshConnection()}
+          />
+        ))}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 8, paddingHorizontal: 16, paddingTop: 8 },
+  container: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderColor: mobileTokens.color.disabledBackground,
+    backgroundColor: mobileTokens.color.background,
+  },
+  summary: {
+    flexShrink: 1,
+    color: mobileTokens.color.foreground,
+    fontFamily: mobileTokens.type.bodyFont,
+    fontSize: mobileTokens.type.caption,
+  },
+  statusControl: {
+    minHeight: 48,
+    minWidth: 48,
+    flexGrow: 1,
+    flexShrink: 1,
+    justifyContent: 'center',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+  },
+  pressed: { backgroundColor: mobileTokens.color.highlight },
+  brandedContainer: {
+    paddingHorizontal: 24,
+    paddingVertical: 4,
+    justifyContent: 'space-between',
+    borderColor: mobileTokens.color.primary,
+  },
+  brand: {
+    fontFamily: mobileTokens.type.displayFont,
+    fontSize: 24,
+    color: mobileTokens.color.foreground,
+    flexShrink: 1,
+  },
+  brandedStatus: { flexGrow: 0 },
+  stackedBrand: { flexDirection: 'column', alignItems: 'flex-start', gap: 0 },
+  brandedSummary: {
+    fontSize: mobileTokens.type.body,
+    color: mobileTokens.color.info,
+  },
 });

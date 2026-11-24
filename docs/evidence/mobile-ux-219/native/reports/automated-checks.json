@@ -1,0 +1,17 @@
+﻿{
+  "inventoryHarness": 4,
+  "androidExport": "passed: Hermes and bundled fonts",
+  "appRevision": "fea05418f75f05b072a90d659e818f10a071e0ef",
+  "node": "26.5.0",
+  "eslint": "passed with zero warnings",
+  "workflowHarness": 3,
+  "recordedAt": "2026-11-22T15:44:00.0501704+07:00",
+  "npm": "11.17.0",
+  "testSuites": 28,
+  "tests": 341,
+  "backendRevision": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+  "qualityLogSha256": "82f960dd19abb4f7c4055e48683db053af41cd0890ea2c080917a82faccc9154",
+  "formatting": "passed",
+  "typeCheck": "passed",
+  "exportLogSha256": "2b716f57a54b717a644f9906788db9ab0a58aa5a9ed0f3ee0668e824ced086b3"
+}

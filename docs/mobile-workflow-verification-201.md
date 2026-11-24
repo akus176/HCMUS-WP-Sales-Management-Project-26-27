@@ -46,12 +46,21 @@ Configure ignored `apps/staff-mobile/.env.workflows.local` or process variables:
 | `ADB_PATH` / `ANDROID_SERIAL`                                                 | Optional explicit ADB executable/device; select a device when several are connected |
 | `COFFEESHOP_WORKFLOW_APP_COMMIT` / `COFFEESHOP_WORKFLOW_API_COMMIT`           | Exact app JavaScript and API source commits                                         |
 | `COFFEESHOP_WORKFLOW_RESULTS`                                                 | Optional local results directory                                                    |
+| `COFFEESHOP_WORKFLOW_USB`                                                     | Optional `1` for an explicitly selected USB phone using the loopback test profile   |
 
 Start Metro with the same two public values, pointing at the forwarding
 listener rather than the upstream API. Restart Metro after configuration or
 source changes when CI mode has disabled file watching. The runner forwards
 Metro over USB port 8081. Keep the API and Metro running throughout the run.
 Verify the phone is unlocked and authorized with `adb devices -l`.
+
+For USB without a LAN listener, set `COFFEESHOP_WORKFLOW_USB=1`,
+`ANDROID_SERIAL`, `EXPO_PUBLIC_APP_ENV=test`,
+`COFFEESHOP_WORKFLOW_PROXY_HOST=127.0.0.1`, and a loopback proxy URL such as
+`EXPO_PUBLIC_API_BASE_URL=http://127.0.0.1:5233/api/v1`. Start Metro with those
+same public values. The runner reverses both Metro and the proxy port over ADB.
+The upstream API and proxy ports must differ. Disposable-database, account-name,
+single-role and independent-state checks remain required in this mode.
 
 ## Execute
 
@@ -86,6 +95,13 @@ step must exit successfully and produce exactly one fresh passing JUnit case;
 missing, failed or skipped reports fail the run. All steps and server assertions
 must pass before their containing case can pass. Later cases remain `not run`
 after a failure. Never combine partial runs into a passing result.
+
+Barista progression also opens the whole-ticket ready confirmation and chooses
+**Keep preparing** before the final confirmed transition. The runner compares
+independent API/history snapshots and forwarded business-request counts before
+and after cancellation: both must remain unchanged. A fresh passing
+`barista-cancel-ready` JUnit step is required; tapping the cancel action alone
+does not establish no-write behavior.
 
 The forwarding listener fabricates no business response. For conflicts it
 commits a competing real API action immediately before forwarding Android's

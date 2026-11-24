@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    />
+    <title>Staff mobile #219 — native layout captures</title>
+    <style>
+        body {
+            margin: 24px;
+            color: #302820;
+            background: #fff9ed;
+            font:
+                16px/1.5 system-ui,
+                sans-serif;
+        }
+        label {
+            display: inline-flex;
+            gap: 8px;
+            margin: 8px 24px 16px 0;
+        }
+        select {
+            font: inherit;
+            padding: 8px;
+        }
+        main {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            overflow-x: auto;
+        }
+        figure {
+            margin: 0;
+            flex: 0 0 400px;
+        }
+        img {
+            display: block;
+            width: 400px;
+            height: auto;
+            border: 1px solid #6d4936;
+        }
+        figcaption {
+            padding: 8px 0;
+        }
+        p {
+            max-width: 960px;
+        }
+        [hidden] {
+            display: none;
+        }
+    </style>
+    <h1>Original native layout captures</h1>
+    <p>
+        Unedited PNGs, scaled uniformly with Android chrome included. Phone
+        profiles use 360×800dp; large profiles use 800×1280dp display overrides
+        on the same physical Samsung phone. App colors remain light under both
+        system settings. Baseline screenshots show visual states from earlier
+        harness attempts; they do not establish a passing baseline workflow.
+    </p>
+    <label
+        >Profile
+        <select id="profile">
+            <option value="p100">Phone · 100% · light system</option>
+            <option value="p200">Phone · 200% · dark system</option>
+            <option value="t100">Large · 100% · dark system</option>
+            <option value="t200">Large · 200% · light system</option>
+        </select></label
+    >
+    <label
+        >Screen
+        <select id="screen">
+            <option value="login">login</option>
+            <option value="prep-top">prep top</option>
+            <option value="prep-record">prep record</option>
+            <option value="prep-selected">prep selected</option>
+            <option value="prep-detail">prep detail</option>
+            <option value="counter">counter</option>
+            <option value="filters-expanded">filters expanded</option>
+            <option value="filter-selected">filter selected</option>
+            <option value="payment-keyboard">payment keyboard</option>
+            <option value="payment-review">payment review</option>
+            <option value="approval-detail">approval detail</option>
+            <option value="cancellation-keyboard">cancellation keyboard</option>
+            <option value="cancellation-review">cancellation review</option>
+            <option value="assignment-review">assignment review</option>
+            <option value="accounts">accounts</option>
+            <option value="account-entry">account entry</option>
+            <option value="account-detail">account detail</option>
+            <option value="deactivation-error">deactivation error</option>
+            <option value="security-events">security events</option>
+            <option value="low-stock">low stock</option>
+            <option value="adjustment-keyboard">adjustment keyboard</option>
+            <option value="adjustment">adjustment</option>
+            <option value="receipt-detail">receipt detail</option>
+            <option value="movements">movements</option>
+            <option value="delivery-detail">delivery detail</option>
+            <option value="failure-keyboard">failure keyboard</option>
+            <option value="failure-form">failure form</option>
+        </select></label
+    >
+    <p id="message" role="status"></p>
+    <main>
+        <figure id="baseline">
+            <figcaption>Before · <code>5c9ed01</code></figcaption>
+            <img id="before" alt="Baseline native screen" />
+        </figure>
+        <figure>
+            <figcaption>After · <code>fea0541</code></figcaption>
+            <img id="after" alt="Updated native screen" />
+        </figure>
+    </main>
+    <p>
+        <a href="comparison.html">Matched 390×844dp concept comparison</a> ·
+        <a href="updated-images.json">Original file provenance/hashes</a> ·
+        <a href="measured-targets.json">Measured native targets</a> ·
+        <a href="reports/layout-summary.json"
+            >Complete 16-case layout results</a
+        >
+    </p>
+    <script>
+        const updated = [
+            "p100/after-login.png",
+            "p100/after-prep-top.png",
+            "p100/after-prep-record.png",
+            "p100/after-prep-selected.png",
+            "p100/after-prep-detail.png",
+            "p100/after-counter.png",
+            "p100/after-filters-expanded.png",
+            "p100/after-filter-selected.png",
+            "p100/after-payment-keyboard.png",
+            "p100/after-payment-review.png",
+            "p100/after-approval-detail.png",
+            "p100/after-cancellation-keyboard.png",
+            "p100/after-cancellation-review.png",
+            "p100/after-assignment-review.png",
+            "p100/after-accounts.png",
+            "p100/after-account-entry.png",
+            "p100/after-account-detail.png",
+            "p100/after-deactivation-error.png",
+            "p100/after-security-events.png",
+            "p100/after-low-stock.png",
+            "p100/after-adjustment-keyboard.png",
+            "p100/after-adjustment.png",
+            "p100/after-receipt-detail.png",
+            "p100/after-movements.png",
+            "p100/after-delivery-detail.png",
+            "p100/after-failure-keyboard.png",
+            "p100/after-failure-form.png",
+            "p200/after-login.png",
+            "p200/after-prep-top.png",
+            "p200/after-prep-record.png",
+            "p200/after-prep-selected.png",
+            "p200/after-prep-detail.png",
+            "p200/after-counter.png",
+            "p200/after-filters-expanded.png",
+            "p200/after-filter-selected.png",
+            "p200/after-payment-keyboard.png",
+            "p200/after-payment-review.png",
+            "p200/after-approval-detail.png",
+            "p200/after-cancellation-keyboard.png",
+            "p200/after-cancellation-review.png",
+            "p200/after-assignment-review.png",
+            "p200/after-accounts.png",
+            "p200/after-account-entry.png",
+            "p200/after-account-detail.png",
+            "p200/after-deactivation-error.png",
+            "p200/after-security-events.png",
+            "p200/after-low-stock.png",
+            "p200/after-adjustment-keyboard.png",
+            "p200/after-adjustment.png",
+            "p200/after-receipt-detail.png",
+            "p200/after-movements.png",
+            "p200/after-delivery-detail.png",
+            "p200/after-failure-keyboard.png",
+            "p200/after-failure-form.png",
+            "t100/after-login.png",
+            "t100/after-prep-top.png",
+            "t100/after-prep-record.png",
+            "t100/after-prep-selected.png",
+            "t100/after-prep-detail.png",
+            "t100/after-counter.png",
+            "t100/after-filters-expanded.png",
+            "t100/after-filter-selected.png",
+            "t100/after-payment-keyboard.png",
+            "t100/after-payment-review.png",
+            "t100/after-approval-detail.png",
+            "t100/after-cancellation-keyboard.png",
+            "t100/after-cancellation-review.png",
+            "t100/after-assignment-review.png",
+            "t100/after-accounts.png",
+            "t100/after-account-entry.png",
+            "t100/after-account-detail.png",
+            "t100/after-deactivation-error.png",
+            "t100/after-security-events.png",
+            "t100/after-low-stock.png",
+            "t100/after-adjustment-keyboard.png",
+            "t100/after-adjustment.png",
+            "t100/after-receipt-detail.png",
+            "t100/after-movements.png",
+            "t100/after-delivery-detail.png",
+            "t100/after-failure-keyboard.png",
+            "t100/after-failure-form.png",
+            "t200/after-login.png",
+            "t200/after-prep-top.png",
+            "t200/after-prep-record.png",
+            "t200/after-prep-selected.png",
+            "t200/after-prep-detail.png",
+            "t200/after-counter.png",
+            "t200/after-filters-expanded.png",
+            "t200/after-filter-selected.png",
+            "t200/after-payment-keyboard.png",
+            "t200/after-payment-review.png",
+            "t200/after-approval-detail.png",
+            "t200/after-cancellation-keyboard.png",
+            "t200/after-cancellation-review.png",
+            "t200/after-assignment-review.png",
+            "t200/after-accounts.png",
+            "t200/after-account-entry.png",
+            "t200/after-account-detail.png",
+            "t200/after-deactivation-error.png",
+            "t200/after-security-events.png",
+            "t200/after-low-stock.png",
+            "t200/after-adjustment-keyboard.png",
+            "t200/after-adjustment.png",
+            "t200/after-receipt-detail.png",
+            "t200/after-movements.png",
+            "t200/after-delivery-detail.png",
+            "t200/after-failure-keyboard.png",
+            "t200/after-failure-form.png",
+        ];
+        const baseline = [
+            "p100/before-login.png",
+            "p100/before-prep-top.png",
+            "p100/before-counter.png",
+            "p100/before-accounts.png",
+            "p100/before-account-entry.png",
+            "t200/before-login.png",
+            "t200/before-prep-top.png",
+            "t200/before-counter.png",
+            "t200/before-accounts.png",
+            "t200/before-account-entry.png",
+            "p200/before-login.png",
+            "p200/before-prep-top.png",
+            "p200/before-counter.png",
+            "p200/before-accounts.png",
+            "p200/before-account-entry.png",
+            "t100/before-login.png",
+            "t100/before-prep-top.png",
+            "t100/before-counter.png",
+            "t100/before-accounts.png",
+            "t100/before-account-entry.png",
+        ];
+        const profile = document.getElementById("profile"),
+            screen = document.getElementById("screen");
+        function show() {
+            const after = profile.value + "/after-" + screen.value + ".png";
+            if (!updated.includes(after)) throw new Error("Missing image");
+            document.getElementById("after").src = after;
+            const before = profile.value + "/before-" + screen.value + ".png";
+            const exists = baseline.includes(before);
+            document.getElementById("baseline").hidden = !exists;
+            if (exists) document.getElementById("before").src = before;
+            document.getElementById("message").textContent = exists
+                ? "Baseline and current visual state. Data and list positions may differ; use the matched concept comparison for controlled data."
+                : "No baseline capture was retained for this screen/profile. The current image belongs to the complete passing layout run.";
+        }
+        profile.addEventListener("change", show);
+        screen.addEventListener("change", show);
+        show();
+    </script>
+</html>

@@ -3,9 +3,8 @@ appId: com.coffeeshop.staffmobile
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: Staff mobile
+    visible: Staff sign-in
     timeout: 60000
-- tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
 - hideKeyboard
@@ -14,5 +13,5 @@ appId: com.coffeeshop.staffmobile
 - hideKeyboard
 - tapOn: Sign in
 - extendedWaitUntil:
-    visible: Staff home
+    visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 30000

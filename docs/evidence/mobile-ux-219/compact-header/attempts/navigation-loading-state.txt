@@ -1,0 +1,11 @@
+Captured home-functions-top
+PASS Preparation
+PASS Discount inbox
+PASS Cancellation and delivery assignment
+Traceback (most recent call last):
+  File "/tmp/coffeeshop_219_spec_navigation.py", line 54, in <module>
+    check(workspace,'Counter','Orders','Tables','Search by order number or table','Filter orders: All',selected='Orders')
+  File "/tmp/coffeeshop_219_spec_navigation.py", line 39, in check
+    assert any(n.get('content-desc')==selected and n.get('selected')=='true' for n in root.iter('node')), selected
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Orders

@@ -4,9 +4,8 @@ name: Courier delivered and failed workflows against the shared API
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: Staff mobile
+    visible: Staff sign-in
     timeout: 60000
-- tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
 - hideKeyboard
@@ -17,7 +16,7 @@ name: Courier delivered and failed workflows against the shared API
 - extendedWaitUntil:
     visible: Open Deliveries
     timeout: 30000
-- tapOn: Open Deliveries
+- tapOn: Deliveries
 - scrollUntilVisible:
     element: Open delivery ${MAESTRO_DELIVERED_ORDER}
     direction: DOWN
@@ -27,9 +26,17 @@ name: Courier delivered and failed workflows against the shared API
     direction: DOWN
 - tapOn: Start delivery
 - scrollUntilVisible:
+    element: Confirm start delivery
+    direction: DOWN
+- tapOn: Confirm start delivery
+- scrollUntilVisible:
     element: Mark delivered
     direction: DOWN
 - tapOn: Mark delivered
+- scrollUntilVisible:
+    element: Confirm delivered
+    direction: DOWN
+- tapOn: Confirm delivered
 - extendedWaitUntil:
     visible: Delivery delivered. Confirmed by the service.
     timeout: 30000
@@ -47,6 +54,10 @@ name: Courier delivered and failed workflows against the shared API
     direction: DOWN
 - tapOn: Start delivery
 - scrollUntilVisible:
+    element: Confirm start delivery
+    direction: DOWN
+- tapOn: Confirm start delivery
+- scrollUntilVisible:
     element: Mark failed
     direction: DOWN
 - tapOn: Mark failed
@@ -58,6 +69,10 @@ name: Courier delivered and failed workflows against the shared API
 - inputText: Customer unavailable
 - hideKeyboard
 - tapOn: Mark failed
+- scrollUntilVisible:
+    element: Confirm failed
+    direction: DOWN
+- tapOn: Confirm failed
 - extendedWaitUntil:
     visible: Delivery failed. Confirmed by the service.
     timeout: 30000
