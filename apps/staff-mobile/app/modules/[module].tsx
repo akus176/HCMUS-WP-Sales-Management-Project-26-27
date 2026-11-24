@@ -52,7 +52,7 @@ export default function ModuleScreen() {
               {module?.id === 'barista' ? (
                 <PreparationScreen showHeading={false} />
               ) : module?.id === 'cashier' ? (
-                <OrdersScreen user={user} showHeading={false} />
+                <OrdersScreen user={user} showHeading={false} startWithMenu />
               ) : module?.id === 'operations' ? (
                 <OrdersScreen user={user} manager />
               ) : null}

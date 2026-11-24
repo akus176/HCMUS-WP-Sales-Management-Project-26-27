@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Activity, useEffect, useState } from 'react';
 import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -27,22 +27,32 @@ import { OrderPayment, type PendingPayments } from './OrderPayment';
 import { ManagerOrderActions } from './ManagerOrderActions';
 import { orderStyles, money } from './presentation';
 
+import { CounterSale } from '../counter/CounterSale';
+import {
+  CounterDraftActions,
+  type PendingCounterActions,
+} from '../counter/CounterDraftActions';
+
 const orderBatchSize = 10;
 
 export function OrdersScreen({
   user,
   manager = false,
   showHeading = true,
+  startWithMenu = false,
 }: {
   user: StaffSession;
   manager?: boolean;
   showHeading?: boolean;
+  startWithMenu?: boolean;
 }) {
   const { client } = useSession();
   const native = useNativeNavigation();
   const queries = useQueryClient();
   const { canMutate } = useConnectivity();
-  const [section, setSection] = useState<'orders' | 'tables'>('orders');
+  const [section, setSection] = useState<'new' | 'orders' | 'tables'>(
+    startWithMenu && !manager ? 'new' : 'orders',
+  );
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [visibleCount, setVisibleCount] = useState(orderBatchSize);
@@ -63,11 +73,15 @@ export function OrdersScreen({
     return () => handler.remove();
   }, [selected, filtersExpanded, navigation]);
   const [pendingPayments] = useState<PendingPayments>(() => new Map());
+  const [pendingActions] = useState<PendingCounterActions>(() => new Map());
   const canRead = user.permissions.includes('orders.create');
   const key = ['sales', user.id];
   const orders = useQuery({
     queryKey: [...key, 'orders'],
-    enabled: canRead && !accessLost,
+    enabled:
+      canRead &&
+      !accessLost &&
+      (!startWithMenu || section === 'orders' || !!selected),
     queryFn: async ({ signal }) => {
       const { data } = await client!.api.GET('/api/v1/orders', { signal });
       return data!;
@@ -75,7 +89,11 @@ export function OrdersScreen({
   });
   const tables = useQuery({
     queryKey: [...key, 'tables'],
-    enabled: canRead && !manager && !accessLost,
+    enabled:
+      canRead &&
+      !manager &&
+      !accessLost &&
+      (!startWithMenu || section === 'tables'),
     queryFn: async ({ signal }) => {
       const { data } = await client!.api.GET('/api/v1/pos/tables', { signal });
       return data!;
@@ -137,14 +155,23 @@ export function OrdersScreen({
           title={manager ? 'Manager order operations' : 'Counter'}
         />
       )}
-      {!manager && !selected && (
+      {!manager && !selected && !navigation.detailActive && (
         <ShellPinnedHeader enabled={!!native?.user}>
           <ShellSelection segmented>
-            {(['orders', 'tables'] as const).map((choice) => (
+            {(startWithMenu
+              ? (['new', 'orders', 'tables'] as const)
+              : (['orders', 'tables'] as const)
+            ).map((choice) => (
               <ShellButton
                 key={choice}
                 testID={`order-section-${choice}`}
-                label={choice === 'orders' ? 'Orders' : 'Tables'}
+                label={
+                  choice === 'new'
+                    ? 'New sale'
+                    : choice === 'orders'
+                      ? 'Orders'
+                      : 'Tables'
+                }
                 selected={section === choice}
                 variant="secondary"
                 compact
@@ -157,15 +184,27 @@ export function OrdersScreen({
           </ShellSelection>
         </ShellPinnedHeader>
       )}
-      <ShellHeaderAction
-        kind="refresh"
-        label="Refresh orders and tables"
-        disabled={!canMutate}
-        loading={fetching}
-        onPress={() => {
-          void queries.invalidateQueries({ queryKey: key });
-        }}
-      />
+      {(!startWithMenu || section !== 'new' || !!selected || manager) && (
+        <ShellHeaderAction
+          kind="refresh"
+          label="Refresh orders and tables"
+          disabled={!canMutate}
+          loading={fetching}
+          onPress={() => {
+            void queries.invalidateQueries({ queryKey: key });
+          }}
+        />
+      )}
+      {startWithMenu && !manager && (
+        <Activity mode={section === 'new' && !selected ? 'visible' : 'hidden'}>
+          <CounterSale
+            user={user}
+            pendingPayments={pendingPayments}
+            pendingActions={pendingActions}
+            onAccessLost={() => setAccessLost(true)}
+          />
+        </Activity>
+      )}
       {selected ? (
         <>
           <ShellPageHeader title="Order details" priority={1} />
@@ -242,9 +281,21 @@ export function OrdersScreen({
                   </ShellText>
                 </View>
               ))}
+              {startWithMenu && !manager && (
+                <CounterDraftActions
+                  key={`counter:${current.id}`}
+                  user={user}
+                  order={current}
+                  disabled={disabled}
+                  pendingActions={pendingActions}
+                  onAccessLost={() => setAccessLost(true)}
+                />
+              )}
               {!manager &&
                 user.permissions.includes('payments.record') &&
-                (!['cancelled', 'completed'].includes(current.status) ||
+                (!['draft', 'cancelled', 'completed'].includes(
+                  current.status,
+                ) ||
                   pendingPayments.has(current.id)) && (
                   <OrderPayment
                     key={`payment:${current.id}`}

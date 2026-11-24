@@ -74,7 +74,11 @@ export function NativeWorkspaceHost({
                       {id === 'barista' ? (
                         <PreparationScreen showHeading={false} directOpen />
                       ) : id === 'cashier' ? (
-                        <OrdersScreen user={user} showHeading={false} />
+                        <OrdersScreen
+                          user={user}
+                          showHeading={false}
+                          startWithMenu
+                        />
                       ) : null}
                     </>
                   )}
