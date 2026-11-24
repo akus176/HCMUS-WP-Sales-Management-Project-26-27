@@ -612,7 +612,7 @@ export function CounterSale({
           <ShellText>
             Showing up to 200 matches. Search by name to find more items.
           </ShellText>
-          <ShellPageFooter>
+          <ShellPageFooter floating>
             <View style={styles.ticketShortcut}>
               <ShellButton
                 label="View Counter ticket"
@@ -1132,9 +1132,9 @@ const styles = StyleSheet.create({
   searchField: { flex: 1, minWidth: 0 },
   searchAction: { flexShrink: 0 },
   ticketShortcut: {
-    alignItems: 'flex-end',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+    borderRadius: t.shape.control,
+    backgroundColor: t.color.primary,
+    ...t.elevation.card,
   },
   categories: { gap: 8, paddingVertical: 4 },
   grid: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },

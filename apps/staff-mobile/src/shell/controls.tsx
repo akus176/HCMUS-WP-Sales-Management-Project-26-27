@@ -55,7 +55,9 @@ const PageNavigation = createContext({
 export const usePageNavigation = () => useContext(PageNavigation);
 export const PageNotice = createContext<ReactNode>(null);
 const ignoreFooter = () => {};
-const PageFooter = createContext<(content: ReactNode) => void>(ignoreFooter);
+type FooterContent = { content: ReactNode; floating: boolean };
+const PageFooter =
+  createContext<(footer: FooterContent | null) => void>(ignoreFooter);
 type HeaderSlot = 'title' | 'back' | 'refresh' | 'controls' | 'search';
 type HeaderEntry = {
   id: string;
@@ -186,15 +188,21 @@ export function ShellPinnedHeader({
   return setHeader && pinned ? null : <>{children}</>;
 }
 
-/** Keep working actions in reach; enlarged text reflows them into the page. */
-export function ShellPageFooter({ children }: { children: ReactNode }) {
+/** Keep actions in reach; floating actions reserve their measured scroll clearance. */
+export function ShellPageFooter({
+  children,
+  floating = false,
+}: {
+  children: ReactNode;
+  floating?: boolean;
+}) {
   const setFooter = useContext(PageFooter);
   const { fontScale, height } = useWindowDimensions();
-  const inline = fontScale > 1.5 || height < 560;
+  const inline = !floating && (fontScale > 1.5 || height < 560);
   useEffect(() => {
-    setFooter(inline ? null : children);
+    setFooter(inline ? null : { content: children, floating });
     return () => setFooter(null);
-  }, [children, inline, setFooter]);
+  }, [children, floating, inline, setFooter]);
   return inline ? <View>{children}</View> : null;
 }
 
@@ -251,7 +259,8 @@ export function ShellPage({ children }: { children: ReactNode }) {
   const notice = useContext(PageNotice);
   const { scroll, navigation, onScroll, onContentSizeChange } =
     usePageNavigationState();
-  const [footer, setFooter] = useState<ReactNode>(null);
+  const [footer, setFooter] = useState<FooterContent | null>(null);
+  const [floatingHeight, setFloatingHeight] = useState(48);
   const { header, updateHeader } = useHeaderRegistry();
   return (
     <SafeAreaView
@@ -275,7 +284,10 @@ export function ShellPage({ children }: { children: ReactNode }) {
             <ScrollView
               testID="shell-scroll"
               ref={scroll}
-              contentContainerStyle={styles.scroll}
+              contentContainerStyle={[
+                styles.scroll,
+                footer?.floating && { paddingBottom: floatingHeight + 32 },
+              ]}
               keyboardShouldPersistTaps="handled"
               onScroll={onScroll}
               scrollEventThrottle={16}
@@ -286,7 +298,20 @@ export function ShellPage({ children }: { children: ReactNode }) {
                 {children}
               </View>
             </ScrollView>
-            {footer}
+            {footer?.floating ? (
+              <View
+                testID="shell-floating-action"
+                pointerEvents="box-none"
+                style={styles.floatingAction}
+                onLayout={({ nativeEvent }) =>
+                  setFloatingHeight(nativeEvent.layout.height)
+                }
+              >
+                {footer.content}
+              </View>
+            ) : (
+              footer?.content
+            )}
           </PageHeader.Provider>
         </PageFooter.Provider>
       </PageNavigation.Provider>
@@ -718,6 +743,13 @@ export function ShellButton({
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: mobileTokens.color.background },
   scroll: { flexGrow: 1 },
+  floatingAction: {
+    position: 'absolute',
+    bottom: 16,
+    left: 20,
+    right: 20,
+    alignItems: 'flex-end',
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',

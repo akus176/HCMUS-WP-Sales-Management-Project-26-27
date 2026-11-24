@@ -4,7 +4,7 @@ import {
   screen,
   within,
 } from '@testing-library/react-native';
-import { Dimensions } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import {
   ShellButton,
@@ -227,3 +227,49 @@ test('a workflow sheet owns its header actions and preserves the page underneath
     screen.getByRole('button', { name: 'Refresh inventory' }),
   ).toBeEnabled();
 });
+
+test.each([1, 2])(
+  'floating ticket action stays outside scrolling content with clearance at %s× text',
+  async (fontScale) => {
+    const dimensions = jest
+      .spyOn(Dimensions, 'get')
+      .mockReturnValue({ width: 390, height: 844, scale: 1, fontScale });
+    function Workspace() {
+      const [reviewing, setReviewing] = useState(false);
+      return (
+        <ShellPage>
+          <ShellText>Last menu item</ShellText>
+          {!reviewing && (
+            <ShellPageFooter floating>
+              <ShellButton
+                label="Your order"
+                onPress={() => setReviewing(true)}
+              />
+            </ShellPageFooter>
+          )}
+        </ShellPage>
+      );
+    }
+    try {
+      await render(<Workspace />);
+      const scroll = screen.getByTestId('shell-scroll');
+      expect(
+        within(scroll).queryByRole('button', { name: 'Your order' }),
+      ).toBeNull();
+      await fireEvent(screen.getByTestId('shell-floating-action'), 'layout', {
+        nativeEvent: { layout: { x: 0, y: 0, width: 350, height: 104 } },
+      });
+      expect(
+        StyleSheet.flatten(scroll.props.contentContainerStyle).paddingBottom,
+      ).toBeGreaterThanOrEqual(120);
+      await fireEvent.press(screen.getByRole('button', { name: 'Your order' }));
+      expect(screen.queryByTestId('shell-floating-action')).toBeNull();
+      expect(
+        StyleSheet.flatten(scroll.props.contentContainerStyle).paddingBottom ??
+          0,
+      ).toBe(0);
+    } finally {
+      dimensions.mockRestore();
+    }
+  },
+);
