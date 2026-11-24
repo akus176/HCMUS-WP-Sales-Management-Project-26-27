@@ -38,11 +38,9 @@ name: Recorded preparation and Counter layout
       true: ${MAESTRO_UX_AFTER == 'true'}
     commands:
       - extendedWaitUntil:
-          visible: Tables
+          visible: New sale
           timeout: 30000
-      - tapOn: Tables
-      - assertVisible: Table occupancy
-      - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/counter-tables
+      - assertNotVisible: Tables
       - tapOn: Orders
       - assertVisible: Search orders
 - takeScreenshot: ${MAESTRO_CAPTURE_DIR}/counter

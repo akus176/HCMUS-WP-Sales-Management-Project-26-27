@@ -114,8 +114,9 @@ test('Counter and Preparation are the only work tabs and More contains only Acco
     'value',
     'T04',
   );
-  await fireEvent.press(screen.getByRole('button', { name: 'Tables' }));
-  await screen.findByText('Table occupancy');
+  expect(screen.queryByRole('button', { name: 'Tables' })).toBeNull();
+  await fireEvent.press(screen.getByRole('button', { name: 'New sale' }));
+  await screen.findByLabelText('Search menu');
   await fireEvent.press(screen.getByRole('button', { name: 'Orders' }));
   expect(await screen.findByLabelText('Search orders')).toHaveProp(
     'value',
@@ -222,9 +223,7 @@ test('Counter and Preparation retain their data across warm tab switches and man
   }
   expect(h.fetcher).toHaveBeenCalledTimes(loaded);
   await fireEvent.press(screen.getByRole('tab', { name: 'Counter' }));
-  await fireEvent.press(
-    screen.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(screen.getByRole('button', { name: 'Refresh orders' }));
   await waitFor(() =>
     expect(h.fetcher.mock.calls.length).toBeGreaterThan(loaded),
   );

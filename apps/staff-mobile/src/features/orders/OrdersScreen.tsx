@@ -50,7 +50,7 @@ export function OrdersScreen({
   const native = useNativeNavigation();
   const queries = useQueryClient();
   const { canMutate } = useConnectivity();
-  const [section, setSection] = useState<'new' | 'orders' | 'tables'>(
+  const [section, setSection] = useState<'new' | 'orders'>(
     startWithMenu && !manager ? 'new' : 'orders',
   );
   const [search, setSearch] = useState('');
@@ -87,18 +87,6 @@ export function OrdersScreen({
       return data!;
     },
   });
-  const tables = useQuery({
-    queryKey: [...key, 'tables'],
-    enabled:
-      canRead &&
-      !manager &&
-      !accessLost &&
-      (!startWithMenu || section === 'tables'),
-    queryFn: async ({ signal }) => {
-      const { data } = await client!.api.GET('/api/v1/pos/tables', { signal });
-      return data!;
-    },
-  });
   const detail = useQuery({
     queryKey: [...key, 'order', selected],
     enabled: canRead && selected !== null && !accessLost,
@@ -112,13 +100,13 @@ export function OrdersScreen({
   });
   const forbidden =
     accessLost ||
-    [orders.error, tables.error, detail.error].some(
+    [orders.error, detail.error].some(
       (error) => error instanceof ApiError && error.status === 403,
     );
   const order =
     !orders.isError && orders.data?.find((row) => row.id === selected);
   const current = !detail.isError && detail.data;
-  const fetching = orders.isFetching || tables.isFetching || detail.isFetching;
+  const fetching = orders.isFetching || detail.isFetching;
   const disabled =
     !canMutate ||
     fetching ||
@@ -155,23 +143,14 @@ export function OrdersScreen({
           title={manager ? 'Manager order operations' : 'Counter'}
         />
       )}
-      {!manager && !selected && !navigation.detailActive && (
+      {startWithMenu && !manager && !selected && !navigation.detailActive && (
         <ShellPinnedHeader enabled={!!native?.user}>
           <ShellSelection segmented>
-            {(startWithMenu
-              ? (['new', 'orders', 'tables'] as const)
-              : (['orders', 'tables'] as const)
-            ).map((choice) => (
+            {(['new', 'orders'] as const).map((choice) => (
               <ShellButton
                 key={choice}
                 testID={`order-section-${choice}`}
-                label={
-                  choice === 'new'
-                    ? 'New sale'
-                    : choice === 'orders'
-                      ? 'Orders'
-                      : 'Tables'
-                }
+                label={choice === 'new' ? 'New sale' : 'Orders'}
                 selected={section === choice}
                 variant="secondary"
                 compact
@@ -187,7 +166,7 @@ export function OrdersScreen({
       {(!startWithMenu || section !== 'new' || !!selected || manager) && (
         <ShellHeaderAction
           kind="refresh"
-          label="Refresh orders and tables"
+          label="Refresh orders"
           disabled={!canMutate}
           loading={fetching}
           onPress={() => {
@@ -210,11 +189,7 @@ export function OrdersScreen({
           <ShellPageHeader title="Order details" priority={1} />
           <ShellHeaderAction
             kind="back"
-            label={
-              !manager && section === 'tables'
-                ? 'Back to table occupancy'
-                : 'Back to order search'
-            }
+            label="Back to order search"
             onPress={() => {
               setSelected(null);
               navigation.returnToList();
@@ -495,48 +470,6 @@ export function OrdersScreen({
                       )}
                     </>
                   )}
-                </>
-              )}
-            </>
-          )}
-          {!manager && section === 'tables' && (
-            <>
-              <ShellHeading level="section">Table occupancy</ShellHeading>
-              {tables.isPending && (
-                <ShellFeedback kind="loading" label="Loading tables…" />
-              )}
-              {tables.isError ? (
-                <ShellFeedback
-                  kind="error"
-                  label="Tables could not be loaded. Refresh to retry."
-                />
-              ) : (
-                <>
-                  {tables.data?.length === 0 && (
-                    <ShellFeedback
-                      kind="empty"
-                      label="No tables are configured."
-                    />
-                  )}
-                  {tables.data?.map((table) => (
-                    <View key={table.id} style={orderStyles.card}>
-                      <ShellText>{`Table ${table.tableNumber} · ${table.seats ?? 'Unspecified'} seats · ${table.isOccupied ? 'Occupied' : 'Available'}`}</ShellText>
-                      {table.activeOrderId && (
-                        <ShellSelection>
-                          <ShellButton
-                            label={`Open table ${table.tableNumber} order`}
-                            displayLabel="Open order"
-                            variant="link"
-                            focusKey={`table:${table.id}`}
-                            onPress={() => {
-                              navigation.openDetail(`table:${table.id}`);
-                              setSelected(table.activeOrderId);
-                            }}
-                          />
-                        </ShellSelection>
-                      )}
-                    </View>
-                  ))}
                 </>
               )}
             </>

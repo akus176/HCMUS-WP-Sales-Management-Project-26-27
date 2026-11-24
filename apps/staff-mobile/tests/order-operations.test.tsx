@@ -167,9 +167,7 @@ async function open(view: Awaited<ReturnType<typeof setup>>['view']) {
   if (payment && !payment.props.accessibilityState?.disabled)
     await fireEvent.press(payment);
   await waitFor(() =>
-    expect(
-      view.getByRole('button', { name: 'Refresh orders and tables' }),
-    ).toBeEnabled(),
+    expect(view.getByRole('button', { name: 'Refresh orders' })).toBeEnabled(),
   );
 }
 async function reviewPayment(
@@ -180,7 +178,7 @@ async function reviewPayment(
   await fireEvent.press(view.getByRole('button', { name: 'Review payment' }));
 }
 
-test('searches server orders by number/table, filters fulfillment and opens occupied tables', async () => {
+test('searches server orders by number/table and retains filters after opening an order', async () => {
   const { view } = await setup();
   await view.findByRole('button', { name: 'Open order ORD-182' });
   await fireEvent.changeText(view.getByLabelText('Search orders'), 't-182');
@@ -196,24 +194,22 @@ test('searches server orders by number/table, filters fulfillment and opens occu
   expect(
     view.getByRole('button', { name: 'Filter orders: Ready', expanded: false }),
   ).toBeVisible();
-  await fireEvent.press(view.getByRole('button', { name: 'Tables' }));
-  expect(view.queryByLabelText('Search orders')).toBeNull();
-  await view.findByText('Table T-182 · 2 seats · Occupied');
+  expect(view.queryByRole('button', { name: 'Tables' })).toBeNull();
   await fireEvent.press(
-    view.getByRole('button', { name: 'Open table T-182 order' }),
+    view.getByRole('button', { name: 'Filter orders: Ready' }),
+  );
+  await fireEvent.press(view.getByRole('button', { name: 'Show all orders' }));
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Open order ORD-182' }),
   );
   await view.findByText('Fulfillment: confirmed');
   await view.findByText('Add-ons: Oat milk');
   await fireEvent.press(
-    view.getByRole('button', { name: 'Back to table occupancy' }),
+    view.getByRole('button', { name: 'Back to order search' }),
   );
-  expect(
-    view.getByRole('button', { name: 'Tables', selected: true }),
-  ).toBeVisible();
-  await fireEvent.press(view.getByRole('button', { name: 'Orders' }));
   expect(view.getByLabelText('Search orders')).toHaveDisplayValue('t-182');
   expect(
-    view.getByRole('button', { name: 'Filter orders: Ready' }),
+    view.getByRole('button', { name: 'Filter orders: All' }),
   ).toBeVisible();
 });
 
@@ -311,18 +307,12 @@ test('shows empty lists, read failure and manual recovery', async () => {
   const { view, get, setRows } = await setup();
   await view.findByRole('button', { name: 'Open order ORD-182' });
   setRows([]);
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByText('No orders match this search.');
   get.mockRejectedValueOnce(new NetworkError());
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByText('Orders could not be loaded. Refresh to retry.');
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByText('No orders match this search.');
 });
 
@@ -331,9 +321,7 @@ test('a refreshed lower balance requires payment review again before the first s
   await open(view);
   await reviewPayment(view, '10');
   setRows([{ ...summary, paidAmount: 7 }]);
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByLabelText('Total: 10.00 · Paid: 7.00 · Balance: 3.00');
   await waitFor(() =>
     expect(view.getByRole('button', { name: 'Confirm payment' })).toBeEnabled(),
@@ -390,9 +378,7 @@ test('empty eligible-staff and failed staff reads disable assignment until refre
     },
   ]);
   setOrder({ ...detail, status: 'ready', channel: 'delivery' });
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await open(view);
   await view.findByText('No active delivery staff are available.');
   expect(
@@ -402,9 +388,7 @@ test('empty eligible-staff and failed staff reads disable assignment until refre
     if (path === '/api/v1/delivery-staff/options') throw new NetworkError();
     return original(path);
   });
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByText(
     'Eligible staff could not be loaded. Refresh before assigning.',
   );
@@ -412,9 +396,7 @@ test('empty eligible-staff and failed staff reads disable assignment until refre
     view.getByRole('button', { name: 'Review assignment' }),
   ).toBeDisabled();
   get.mockImplementation(original);
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByRole('button', { name: 'Select Test Courier' });
 });
 
@@ -595,9 +577,7 @@ test('assigns only server-listed eligible staff on an unassigned ready delivery'
     },
   ]);
   setOrder({ ...detail, status: 'ready', channel: 'delivery' });
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await open(view);
   await fireEvent.press(
     await view.findByRole('button', { name: 'Select Test Courier' }),
@@ -700,9 +680,7 @@ test('404 refresh removes stale detail and all actions', async () => {
     if (path === '/api/v1/orders/{id}') throw new ApiError(404);
     return original(path);
   });
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByText('Order is no longer available.');
   expect(view.queryByText(/Test latte/)).toBeNull();
   expect(view.queryByRole('button', { name: 'Review payment' })).toBeNull();

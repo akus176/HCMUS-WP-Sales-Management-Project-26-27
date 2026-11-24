@@ -7,7 +7,7 @@ administration and discount approval inbox remain outside mobile navigation.
 
 ## Making a sale
 
-Counter opens on **New sale**, with **Orders** and **Tables** beside it.
+Counter opens on **New sale**, with **Orders** beside it. Table selection is part of the dine-in ticket form.
 Search the live catalog, filter by active category, and customize an item with
 an active size, compatible add-ons and a positive whole-number quantity.
 Canceling customization does not change the cart. Identical items stay separate
@@ -40,12 +40,12 @@ nothing. Customer administration and menu maintenance are not included.
 
 ## Retention, refresh and retry
 
-The menu, current cart, service fields and loaded order/table pages are retained
+The menu, current cart, service fields and loaded order pages are retained
 across warm navigation. Switching pages alone does not invalidate query data.
 Header refresh, reconnection, relevant operational events and successful writes
 remain explicit freshness triggers. Menu cards render in batches of 20, up to
 the API's 200 search matches. Large text uses a single column and the shared
-header/footer reflow rules.
+header reflow rules. Your order floats above the bottom navigation; measured clearance keeps the final menu items reachable.
 
 Offline actions do not write or queue a replay. A lost draft-save response locks
 the same request body and order identifier for an explicit retry or read-back;

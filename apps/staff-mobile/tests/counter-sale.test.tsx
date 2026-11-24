@@ -310,7 +310,7 @@ test('canceling customization leaves the cart empty and sends no write', async (
   expect(h.post).not.toHaveBeenCalled();
 });
 
-test('cart and service survive menu, Orders and Tables switches without reloading warm data', async () => {
+test('cart and service survive menu and Orders switches without reloading warm data', async () => {
   const h = await setup();
   await addAndReview(h);
   await fireEvent.press(h.view.getByRole('button', { name: 'Delivery order' }));
@@ -323,8 +323,7 @@ test('cart and service survive menu, Orders and Tables switches without reloadin
   );
   await fireEvent.press(h.view.getByRole('button', { name: 'Orders' }));
   await h.view.findByRole('button', { name: 'Open order COUNTER-1' });
-  await fireEvent.press(h.view.getByRole('button', { name: 'Tables' }));
-  await h.view.findByText('Table T01 · 2 seats · Available');
+  expect(h.view.queryByRole('button', { name: 'Tables' })).toBeNull();
   const loaded = h.get.mock.calls.length;
   await fireEvent.press(h.view.getByRole('button', { name: 'New sale' }));
   await h.view.findByRole('button', { name: 'Customize Test latte' });

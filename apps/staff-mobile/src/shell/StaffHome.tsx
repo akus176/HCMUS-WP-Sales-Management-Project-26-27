@@ -23,7 +23,7 @@ import { ShellIcon } from './ShellIcon';
 
 const actionDescriptions: Record<string, string> = {
   'orders.fulfill': 'Tickets · Start preparation · Mark ready',
-  'orders.create': 'New sales · Orders · Tables',
+  'orders.create': 'New sales · Orders',
   'payments.record': 'Payments',
   'orders.cancel': 'Cancellations',
   'delivery.assign': 'Delivery assignment',
