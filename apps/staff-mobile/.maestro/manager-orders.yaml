@@ -18,6 +18,7 @@ name: Manager cancellation and ready delivery assignment against the shared API
     timeout: 30000
 - tapOn:
     id: workspace-tab-cashier
+- tapOn: Orders
 - tapOn: Search orders
 - eraseText
 - inputText: ${MAESTRO_CANCEL_ORDER}

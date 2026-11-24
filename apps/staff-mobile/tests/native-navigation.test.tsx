@@ -101,6 +101,8 @@ test('Counter and Preparation are the only work tabs and More contains only Acco
     screen.getAllByRole('tab').map((tab) => tab.props.accessibilityLabel),
   ).toEqual(['Today', 'Counter', 'Preparation', 'More']);
   await fireEvent.press(screen.getByRole('tab', { name: 'Counter' }));
+  await screen.findByLabelText('Search menu');
+  await fireEvent.press(screen.getByRole('button', { name: 'Orders' }));
   const search = await screen.findByLabelText('Search orders');
   await fireEvent.changeText(search, 'T04');
   await fireEvent.press(screen.getByRole('tab', { name: 'Preparation' }));
@@ -202,6 +204,8 @@ test('sign-out can be canceled in Account without losing the active session', as
 test('Counter and Preparation retain their data across warm tab switches and manual refresh still works', async () => {
   const h = await setup();
   await fireEvent.press(screen.getByRole('tab', { name: 'Counter' }));
+  await screen.findByLabelText('Search menu');
+  await fireEvent.press(screen.getByRole('button', { name: 'Orders' }));
   await screen.findByLabelText('Search orders');
   await fireEvent.press(screen.getByRole('tab', { name: 'Preparation' }));
   await screen.findByRole('button', { name: 'All active' });
