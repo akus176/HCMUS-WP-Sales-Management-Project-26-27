@@ -68,7 +68,8 @@ export function CounterSale({
   const native = useNativeNavigation();
   const navigation = usePageNavigation();
   const queries = useQueryClient();
-  const { fontScale } = useWindowDimensions();
+  const { fontScale, width } = useWindowDimensions();
+  const columnCount = fontScale > 1.5 || width < 360 ? 1 : 2;
   const [search, setSearch] = useState('');
   const [submittedSearch, setSubmittedSearch] = useState('');
   const [menuCount, setMenuCount] = useState(20);
@@ -442,30 +443,34 @@ export function CounterSale({
           )}
           <ShellPinnedHeader slot="search" enabled={!!native?.user}>
             <View style={styles.search}>
-              <ShellInput
-                label="Search menu"
-                accessibilityLabel="Search menu"
-                placeholder="Search drinks and food"
-                hideLabel
-                value={search}
-                onChangeText={setSearch}
-                returnKeyType="search"
-                onSubmitEditing={() => {
-                  setMenuCount(20);
-                  setSubmittedSearch(search.trim());
-                }}
-              />
-              <ShellButton
-                label="Search menu items"
-                displayLabel="Search"
-                compact
-                variant="secondary"
-                onPress={() => {
-                  setMenuCount(20);
-                  if (submittedSearch === search.trim()) void menu.refetch();
-                  else setSubmittedSearch(search.trim());
-                }}
-              />
+              <View style={styles.searchField}>
+                <ShellInput
+                  label="Search menu"
+                  accessibilityLabel="Search menu"
+                  placeholder="Search drinks and food"
+                  hideLabel
+                  value={search}
+                  onChangeText={setSearch}
+                  returnKeyType="search"
+                  onSubmitEditing={() => {
+                    setMenuCount(20);
+                    setSubmittedSearch(search.trim());
+                  }}
+                />
+              </View>
+              <View style={styles.searchAction}>
+                <ShellButton
+                  label="Search menu items"
+                  displayLabel="Search"
+                  compact
+                  variant="secondary"
+                  onPress={() => {
+                    setMenuCount(20);
+                    if (submittedSearch === search.trim()) void menu.refetch();
+                    else setSubmittedSearch(search.trim());
+                  }}
+                />
+              </View>
             </View>
             <ScrollView
               horizontal
@@ -513,59 +518,67 @@ export function CounterSale({
           )}
           {!menu.isError && !categories.isError && (
             <View style={styles.grid}>
-              {displayed?.slice(0, menuCount).map((item) => {
-                const sizes = item.sizeVariants.filter((size) => size.isActive);
-                const photo = menuPhoto(item.name);
-                return (
-                  <View
-                    key={item.id}
-                    style={fontScale > 1.5 ? styles.fullCard : styles.menuCard}
-                  >
-                    <ShellButton
-                      label={`Customize ${item.name}`}
-                      variant="text"
-                      disabled={!canEdit || save.isWriteDisabled}
-                      onPress={() => {
-                        setValidation('');
-                        setChoice({
-                          item,
-                          sizeId: sizes[0]!.id,
-                          addonIds: [],
-                          quantity: '1',
-                        });
-                      }}
-                    >
-                      {photo && !failedPhotos.has(item.id) ? (
-                        <Image
-                          source={{ uri: photo }}
-                          style={styles.photo}
-                          accessible={false}
-                          onError={() =>
-                            setFailedPhotos(
-                              (before) => new Set([...before, item.id]),
-                            )
-                          }
-                        />
-                      ) : (
-                        <View style={styles.photoFallback}>
-                          <ShellIcon
-                            name="cup"
-                            size={32}
-                            color={t.color.primary}
-                          />
+              {Array.from({ length: columnCount }, (_, column) => (
+                <View key={column} style={styles.menuColumn}>
+                  {displayed
+                    ?.slice(0, menuCount)
+                    .filter((_, index) => index % columnCount === column)
+                    .map((item) => {
+                      const sizes = item.sizeVariants.filter(
+                        (size) => size.isActive,
+                      );
+                      const photo = menuPhoto(item.name);
+                      return (
+                        <View key={item.id}>
+                          <ShellButton
+                            label={`Customize ${item.name}`}
+                            variant="text"
+                            disabled={!canEdit || save.isWriteDisabled}
+                            onPress={() => {
+                              setValidation('');
+                              setChoice({
+                                item,
+                                sizeId: sizes[0]!.id,
+                                addonIds: [],
+                                quantity: '1',
+                              });
+                            }}
+                          >
+                            {photo && !failedPhotos.has(item.id) ? (
+                              <Image
+                                source={{ uri: photo }}
+                                style={styles.photo}
+                                accessible={false}
+                                onError={() =>
+                                  setFailedPhotos(
+                                    (before) => new Set([...before, item.id]),
+                                  )
+                                }
+                              />
+                            ) : (
+                              <View style={styles.photoFallback}>
+                                <ShellIcon
+                                  name="cup"
+                                  size={32}
+                                  color={t.color.primary}
+                                />
+                              </View>
+                            )}
+                            <Text style={styles.itemName}>{item.name}</Text>
+                            <Text style={styles.caption}>
+                              From{' '}
+                              {money(
+                                Math.min(
+                                  ...sizes.map((size) => Number(size.price)),
+                                ),
+                              )}
+                            </Text>
+                          </ShellButton>
                         </View>
-                      )}
-                      <Text style={styles.itemName}>{item.name}</Text>
-                      <Text style={styles.caption}>
-                        From{' '}
-                        {money(
-                          Math.min(...sizes.map((size) => Number(size.price))),
-                        )}
-                      </Text>
-                    </ShellButton>
-                  </View>
-                );
-              })}
+                      );
+                    })}
+                </View>
+              ))}
             </View>
           )}
           {!menu.isPending &&
@@ -600,16 +613,18 @@ export function CounterSale({
             Showing up to 200 matches. Search by name to find more items.
           </ShellText>
           <ShellPageFooter>
-            <ShellButton
-              label="View Counter ticket"
-              displayLabel={
-                saved
-                  ? 'View current ticket'
-                  : `Your order · ${count} ${count === 1 ? 'item' : 'items'} · ${money(estimate)}`
-              }
-              prominent
-              onPress={openTicket}
-            />
+            <View style={styles.ticketShortcut}>
+              <ShellButton
+                label="View Counter ticket"
+                displayLabel={
+                  saved
+                    ? 'View current ticket'
+                    : `Your order · ${count} · ${money(estimate)}`
+                }
+                compact
+                onPress={openTicket}
+              />
+            </View>
           </ShellPageFooter>
         </>
       ) : saved ? (
@@ -1113,11 +1128,17 @@ export function CounterSale({
   );
 }
 const styles = StyleSheet.create({
-  search: { gap: 8 },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  searchField: { flex: 1, minWidth: 0 },
+  searchAction: { flexShrink: 0 },
+  ticketShortcut: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+  },
   categories: { gap: 8, paddingVertical: 4 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  menuCard: { flexBasis: '47%', flexGrow: 1 },
-  fullCard: { width: '100%' },
+  grid: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
+  menuColumn: { flex: 1, minWidth: 0, gap: 12 },
   card: {
     backgroundColor: t.color.surface,
     padding: 16,
