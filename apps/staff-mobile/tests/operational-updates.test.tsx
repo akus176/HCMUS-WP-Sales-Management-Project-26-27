@@ -5,6 +5,11 @@ import { OperationalUpdates } from '../src/realtime/OperationalUpdates';
 import { SessionProvider } from '../src/session/context';
 import { harness, user } from './helpers';
 
+const mockRefreshAccess = jest.fn();
+jest.mock('../src/shell/NativeNavigation', () => ({
+  useNativeNavigation: () => ({ refreshAccess: mockRefreshAccess }),
+}));
+
 const mockConnection = {
   start: jest.fn(async () => undefined),
   stop: jest.fn(async () => undefined),
@@ -65,6 +70,17 @@ test('a SignalR reconnect refetches the current view even without a replayed eve
   await act(async () => mockConnection.onreconnected.mock.calls[0][0]());
   await waitFor(() => expect(queries.getQueryData(key)).toBe('preparing'));
   expect(screen.queryByText(/Live updates unavailable/)).toBeNull();
+  expect(mockRefreshAccess).toHaveBeenCalledTimes(2);
+  await act(async () =>
+    mockConnection.on.mock.calls.find(
+      ([name]) => name === 'OperationalEvent',
+    )![1]({
+      type: 'account',
+      id: user.id,
+      updatedAt: new Date().toISOString(),
+    }),
+  );
+  expect(mockRefreshAccess).toHaveBeenCalledTimes(3);
   await view.unmount();
   expect(mockConnection.stop).toHaveBeenCalledTimes(1);
   unsubscribe();

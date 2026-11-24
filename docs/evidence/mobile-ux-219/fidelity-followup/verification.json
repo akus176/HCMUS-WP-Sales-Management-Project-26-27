@@ -1,0 +1,42 @@
+{
+  "mobileQuality": {
+    "status": "passed",
+    "command": "npm run check --prefix apps/staff-mobile",
+    "suites": 28,
+    "tests": 344,
+    "forwardingHarnessChecks": 7
+  },
+  "contract": {
+    "status": "passed",
+    "command": "npm run check --prefix contracts/mobile-p0",
+    "generatedDrift": false
+  },
+  "androidExport": {
+    "status": "passed",
+    "command": "npm run smoke:android --prefix apps/staff-mobile"
+  },
+  "apiReleaseBuild": {
+    "status": "passed",
+    "warnings": 0,
+    "errors": 0
+  },
+  "nativeScope": "ADB read/cancel/navigation in Expo Go; no new Maestro full-suite or TalkBack claim",
+  "screenshotsSha256": {
+    "android-back-detail.png": "1e19446ac214ea1ff15922ac0120d10518278d239d63e6ca40bfe7c44b152cb1",
+    "android-back-queue.png": "2b94a14f89e3a214e8bd291ffb4b0f8c37e9a18c2621bdbc8c5547aafa473097",
+    "before-inventory.png": "319f5a70f70106b7d084ae367de523da49aec88a61c3f059de0b04a3d8c780f3",
+    "confirmation-cancelled.png": "1e19446ac214ea1ff15922ac0120d10518278d239d63e6ca40bfe7c44b152cb1",
+    "confirmation-large.png": "d374fa6f19b72911458ecd8da93ff16381280588a654f2009db2889b378f3f3b",
+    "confirmation-normal.png": "cfb43042252c78fdd9b9531a07f2ebe8f843f6230283288061dca486ba76b91b",
+    "detail-large-top.png": "28912a9bb2e74614e448cd58efb2aa434174003a2e3513f1071ce55a015214ca",
+    "detail-normal.png": "1cf2c56e1b4e15854477d6bf1a4a888c23f922676141764121b97ea539ce4ad7",
+    "home-large.png": "c89a6df1bcfe0d655421825b0a45ed4a6fed1a49677134b745a8b339bad33b8c",
+    "home-normal.png": "94c265991e1796aeca489636e97ea14a82d2dec5d295296bc83f125deffbab28",
+    "inventory-normal.png": "44c3cdd4e23584d4bb5a28e5f0201aeb37e4a6f4ef1fbfd6bf5d9b05768aa9e7",
+    "queue-large-actions.png": "9f59f3ea967ad7492ed498770897093eee161795fa1b70621ac0dcf76652e851",
+    "queue-large-top.png": "26f5eef2527bcaa4f077bc2bbd0aab35e8cdec0084fedb6e97198812333c4efb",
+    "queue-normal.png": "8b0a82d5b053949650a431bebda794c7ea89557cf259e501feda1c32d0c3902d",
+    "queue-selected.png": "a437f3456648d611a3d839c85886823ebc5b614f1cc0799eadfa9480a69d47dc",
+    "signin-normal.png": "0cd457331fb46dcfb2c723c1a807e92c75fd77b8c0c1d910e5458ed532868a8a"
+  }
+}

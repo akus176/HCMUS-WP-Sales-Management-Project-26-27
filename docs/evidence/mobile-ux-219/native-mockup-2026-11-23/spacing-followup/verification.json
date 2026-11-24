@@ -1,0 +1,14 @@
+{
+  "baseRevision": "0e4ba8a8ef5e600fb46433c3fa6e8141c0b177c0",
+  "sourceState": "uncommitted working tree",
+  "changedSourceSha256": {
+    "apps/staff-mobile/src/shell/controls.tsx": "e55e538d764ea8f99461a408683a62b0f6b72b0d7185c5a24ad268066a5f819d",
+    "apps/staff-mobile/src/shell/NativeNavigation.tsx": "6002456f871aafc16fd50448b30cf4f649d92e73c47e0e103f541a46815a2052",
+    "apps/staff-mobile/src/shell/StaffHome.tsx": "11d18930b204cfe5bbc228a6886f6ca3661061fb5da22a9e8a5a09e01bba4fcc"
+  },
+  "nativeCase": "Today \u2192 More \u2192 Today, real local API, read-only navigation",
+  "nativePassed": true,
+  "profile": "1170x2676px, 480dpi, 100% text, light appearance",
+  "verification": "TypeScript, ESLint, Prettier, 7 existing shell/navigation tests, Android visual inspection",
+  "limits": "Normal-text targeted styling review; no new full role, enlarged-text, tablet or TalkBack acceptance claim."
+}

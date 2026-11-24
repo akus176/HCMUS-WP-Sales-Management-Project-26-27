@@ -1,0 +1,429 @@
+{
+  "runner": "verify-native-usability.ps1",
+  "attempt": "native-mockup-2026-11-23-attempt7",
+  "expected": 2,
+  "passed": 2,
+  "cases": [
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "p100",
+      "role": "mockup",
+      "passing": 1
+    },
+    {
+      "passed": true,
+      "cases": 1,
+      "exitCode": 0,
+      "profile": "p200",
+      "role": "mockup",
+      "passing": 1
+    }
+  ],
+  "profiles": {
+    "p100": {
+      "font": "1.0",
+      "night": "no",
+      "size": "1080x2400",
+      "density": "480"
+    },
+    "p200": {
+      "font": "2.0",
+      "night": "yes",
+      "size": "1080x2400",
+      "density": "480"
+    }
+  },
+  "service": "temporary read-only synthetic fixture, outside application",
+  "businessWrites": [],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ingredients/low-stock"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/discounts/pending"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/orders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/pos/tables"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ingredients"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/pos/tables"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/orders"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/orders/00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ingredients"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/refresh"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ingredients/low-stock"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/discounts/pending"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/orders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/pos/tables"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ingredients"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/orders"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/pos/tables"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/orders/00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets/00000000-0000-4000-8000-000000000001"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ingredients"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/operational-events/negotiate"
+    }
+  ],
+  "limits": [
+    "Expo Go UI review, not a release build",
+    "Full shared-API role/fault suite not rerun",
+    "Tablet, iOS and manual TalkBack review not newly completed",
+    "Expo Go developer control and missing fixture live-update hub visible"
+  ],
+  "capturePathNote": "Each passing case completed all ten screenshot commands with relative names confined by Maestro to its per-run output folder. Failed/interrupted runs are not evidence; the final 100%/200% copies have distinct hashes."
+}

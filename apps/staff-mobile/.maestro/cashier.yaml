@@ -4,9 +4,8 @@ name: Cashier payment against the shared API
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: Staff mobile
+    visible: Staff sign-in
     timeout: 60000
-- tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
 - hideKeyboard
@@ -18,19 +17,28 @@ name: Cashier payment against the shared API
     visible: Open Counter
     timeout: 30000
 - tapOn: Open Counter
+- extendedWaitUntil:
+    visible: New sale
+    timeout: 30000
+- assertNotVisible: Tables
+- tapOn: Orders
 - tapOn: Search orders
 - inputText: ${MAESTRO_PAYMENT_ORDER}
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Open order ${MAESTRO_PAYMENT_ORDER}
     direction: DOWN
 - tapOn: Open order ${MAESTRO_PAYMENT_ORDER}
 - scrollUntilVisible:
+    element: Record payment
+    direction: DOWN
+- tapOn: Record payment
+- scrollUntilVisible:
     element: Payment amount
     direction: DOWN
 - tapOn: Payment amount
 - inputText: '10'
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Review payment
     direction: DOWN

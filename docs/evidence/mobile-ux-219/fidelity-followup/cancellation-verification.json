@@ -1,0 +1,9 @@
+{
+  "orderNumber": "CC-261120-003",
+  "beforeStatus": "preparing",
+  "afterStatus": "preparing",
+  "unchangedDetail": true,
+  "keepPreparingDismissed": true,
+  "androidBackDismissedConfirmation": true,
+  "androidBackReturnedToSelectedQueue": true
+}

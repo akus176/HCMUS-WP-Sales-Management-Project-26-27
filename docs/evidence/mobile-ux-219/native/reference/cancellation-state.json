@@ -1,0 +1,173 @@
+﻿{
+  "afterRedesign": {
+    "id": "aa8095e2-4435-4c98-b96a-a396f6c2b7c7",
+    "orderNumber": "A-106",
+    "channel": "dine_in",
+    "status": "preparing",
+    "customerId": null,
+    "tableId": "45871580-4303-4ff6-a706-0a5d20f771ea",
+    "tableNumber": "02",
+    "subtotal": 12.0,
+    "discountTotal": 0.0,
+    "total": 12.0,
+    "lines": [
+      {
+        "itemName": "Cold Brew",
+        "sizeName": "L",
+        "quantity": 1,
+        "unitPrice": 4.0,
+        "total": 4.0,
+        "addons": [],
+        "addonDetails": []
+      },
+      {
+        "itemName": "Butter Croissant",
+        "sizeName": "Standard",
+        "quantity": 1,
+        "unitPrice": 3.0,
+        "total": 3.0,
+        "addons": [],
+        "addonDetails": []
+      },
+      {
+        "itemName": "Cappuccino",
+        "sizeName": "M",
+        "quantity": 1,
+        "unitPrice": 5.0,
+        "total": 5.0,
+        "addons": ["Oat milk", "Extra shot"],
+        "addonDetails": [
+          {
+            "name": "Oat milk",
+            "unitPrice": 0.0
+          },
+          {
+            "name": "Extra shot",
+            "unitPrice": 0.0
+          }
+        ]
+      }
+    ],
+    "discounts": [],
+    "customerName": null,
+    "recipientName": null,
+    "contactNumber": null,
+    "addressLine": null,
+    "customerAddressId": null
+  },
+  "unchanged": true,
+  "beforeRevision": "a5a4f0d456a8a81064473a1a11c42e1d3fd65057",
+  "before": {
+    "id": "aa8095e2-4435-4c98-b96a-a396f6c2b7c7",
+    "orderNumber": "A-106",
+    "channel": "dine_in",
+    "status": "preparing",
+    "customerId": null,
+    "tableId": "45871580-4303-4ff6-a706-0a5d20f771ea",
+    "tableNumber": "02",
+    "subtotal": 12.0,
+    "discountTotal": 0.0,
+    "total": 12.0,
+    "lines": [
+      {
+        "itemName": "Cold Brew",
+        "sizeName": "L",
+        "quantity": 1,
+        "unitPrice": 4.0,
+        "total": 4.0,
+        "addons": [],
+        "addonDetails": []
+      },
+      {
+        "itemName": "Butter Croissant",
+        "sizeName": "Standard",
+        "quantity": 1,
+        "unitPrice": 3.0,
+        "total": 3.0,
+        "addons": [],
+        "addonDetails": []
+      },
+      {
+        "itemName": "Cappuccino",
+        "sizeName": "M",
+        "quantity": 1,
+        "unitPrice": 5.0,
+        "total": 5.0,
+        "addons": ["Oat milk", "Extra shot"],
+        "addonDetails": [
+          {
+            "name": "Oat milk",
+            "unitPrice": 0.0
+          },
+          {
+            "name": "Extra shot",
+            "unitPrice": 0.0
+          }
+        ]
+      }
+    ],
+    "discounts": [],
+    "customerName": null,
+    "recipientName": null,
+    "contactNumber": null,
+    "addressLine": null,
+    "customerAddressId": null
+  },
+  "afterBaseline": {
+    "id": "aa8095e2-4435-4c98-b96a-a396f6c2b7c7",
+    "orderNumber": "A-106",
+    "channel": "dine_in",
+    "status": "preparing",
+    "customerId": null,
+    "tableId": "45871580-4303-4ff6-a706-0a5d20f771ea",
+    "tableNumber": "02",
+    "subtotal": 12.0,
+    "discountTotal": 0.0,
+    "total": 12.0,
+    "lines": [
+      {
+        "itemName": "Cold Brew",
+        "sizeName": "L",
+        "quantity": 1,
+        "unitPrice": 4.0,
+        "total": 4.0,
+        "addons": [],
+        "addonDetails": []
+      },
+      {
+        "itemName": "Butter Croissant",
+        "sizeName": "Standard",
+        "quantity": 1,
+        "unitPrice": 3.0,
+        "total": 3.0,
+        "addons": [],
+        "addonDetails": []
+      },
+      {
+        "itemName": "Cappuccino",
+        "sizeName": "M",
+        "quantity": 1,
+        "unitPrice": 5.0,
+        "total": 5.0,
+        "addons": ["Oat milk", "Extra shot"],
+        "addonDetails": [
+          {
+            "name": "Oat milk",
+            "unitPrice": 0.0
+          },
+          {
+            "name": "Extra shot",
+            "unitPrice": 0.0
+          }
+        ]
+      }
+    ],
+    "discounts": [],
+    "customerName": null,
+    "recipientName": null,
+    "contactNumber": null,
+    "addressLine": null,
+    "customerAddressId": null
+  },
+  "afterRevision": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de"
+}

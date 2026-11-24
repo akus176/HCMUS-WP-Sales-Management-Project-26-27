@@ -5,7 +5,7 @@ import StarterScreen from '../app/index';
 import LoginScreen from '../app/login';
 import SessionScreen from '../app/session';
 
-test('opens the starter through the root Expo Router route', async () => {
+test('opens working sign-in through the root Expo Router route', async () => {
   const previousProfile = process.env.EXPO_PUBLIC_APP_ENV;
   const previousUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
   process.env.EXPO_PUBLIC_APP_ENV = 'emulator';
@@ -22,7 +22,7 @@ test('opens the starter through the root Expo Router route', async () => {
     );
 
     expect(
-      await screen.findByRole('header', { name: 'Staff mobile' }),
+      await screen.findByRole('header', { name: 'Staff sign-in' }),
     ).toBeVisible();
     expect(screen).toHavePathname('/');
   } finally {

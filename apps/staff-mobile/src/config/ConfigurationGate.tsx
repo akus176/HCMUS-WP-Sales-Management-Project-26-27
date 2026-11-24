@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
-import { Text, View } from 'react-native';
+import { Text, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { mobileTokens } from '../shell/designTokens';
 
 import { configurationError, readMobileEnvironment } from './environment';
 
@@ -14,10 +16,37 @@ export function ConfigurationGate({
     readConfiguration();
   } catch {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
-        <Text accessibilityRole="header">Configuration required</Text>
-        <Text accessibilityRole="alert">{configurationError}</Text>
-      </View>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: mobileTokens.color.background }}
+      >
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            padding: 24,
+            gap: 16,
+          }}
+        >
+          <Text
+            accessibilityRole="header"
+            style={{
+              color: mobileTokens.color.foreground,
+              fontSize: mobileTokens.type.title,
+            }}
+          >
+            Configuration required
+          </Text>
+          <Text
+            accessibilityRole="alert"
+            style={{
+              color: mobileTokens.color.error,
+              fontSize: mobileTokens.type.body,
+            }}
+          >
+            {configurationError}
+          </Text>
+        </ScrollView>
+      </SafeAreaView>
     );
   }
   return children;

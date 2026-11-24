@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-23",
+  "baseRevision": "3bd2ac6",
+  "sourceSha256": {
+    "apps/staff-mobile/app/modules/[module].tsx": "45d82a9090bd000dcb6ed66013cf12a034415d550fc5378be19c6ece8e5e9dec",
+    "apps/staff-mobile/app/modules/approvals/operations.tsx": "183061946728a5ee70be5829d1a85242e8327802fb0490965a141e524b655fac",
+    "apps/staff-mobile/src/barista/PreparationScreen.tsx": "03028ccd32d9cb2d922e5b826a6b61a0561c5f7fb181345c9c2f4487109e2b05",
+    "apps/staff-mobile/src/features/administration/StaffAdministration.tsx": "eda94c16875f6cf60c0cf0cdddb0886f6fc4ae0eb7c10ff3acfe4ab4daaba5aa",
+    "apps/staff-mobile/src/features/approvals/DiscountApprovals.tsx": "b1c6478194799d63c1e61fc530327c0eb69e800e108eec09e23112762c0e1945",
+    "apps/staff-mobile/src/features/delivery/DeliveryDetail.tsx": "145993428114654edfef28a1b7c634e6c89e86896430212b8dac11dabbf938e6",
+    "apps/staff-mobile/src/features/delivery/DeliveryScreen.tsx": "1d552d78a3ec7786040ec9b3af5eaa4aacc0268cdcc0e86194761da82d96ef41",
+    "apps/staff-mobile/src/features/inventory/InventoryWorkspace.tsx": "510c019fed74554d87f92eaf42e8bd1fe88d1573f5c8b21673fedcb0949f4669",
+    "apps/staff-mobile/src/features/orders/ManagerOrderActions.tsx": "8485f46dd325591acfd3488a9b357b0a5e583ce5008ead6229018f6db1496342",
+    "apps/staff-mobile/src/features/orders/OrderPayment.tsx": "a45d046407d36f7012d94bbe8cf00df6c5d7aceebc9b8c76e9716573c8bd2a73",
+    "apps/staff-mobile/src/features/orders/OrdersScreen.tsx": "14b725dd43a2d30cce62fbc5a25e0603407c9b2398533da0ae5031a99cdd5e48",
+    "apps/staff-mobile/src/features/orders/presentation.ts": "75154cf799f36214976b993e8b14eed5b9e2fc678be674c9183582ac86efc431",
+    "apps/staff-mobile/src/shell/controls.tsx": "bf600f1e3420690cb02106924d779790e8d670a959b39c2d27c715bea01b69d4",
+    "apps/staff-mobile/tests/order-operations.test.tsx": "0aa899511534feffe6f7dd6faf662fb2d104b61fad2d4d2172f674d751a074a9",
+    "apps/staff-mobile/src/shell/recordPresentation.ts": "ba92cacb99cb91c5835e2f98ad6d1febd1a51a87de5d7b975efa7eb069559a38"
+  },
+  "device": "Android Emulator Medium_Phone_API_36.1 / emulator-5554",
+  "androidApi": "36",
+  "fontScale": "1.0",
+  "display": "Physical size: 1080x2400\nOverride size: 1170x2676",
+  "density": "Physical density: 420\nOverride density: 480",
+  "client": "Expo Go SDK 58",
+  "node": "v22.14.0",
+  "sampleProfile": "Normal text only; original PNGs with OS chrome",
+  "ordersDiagnostic": {
+    "count": 992,
+    "singleLoopbackReadSeconds": 0.04,
+    "initialRenderedBatch": 10,
+    "benchmark": false
+  },
+  "checks": {
+    "typescript": "pass",
+    "eslint": "pass",
+    "formatting": "pass",
+    "openspecStrict": "pass",
+    "focusedOrderOperations": {
+      "passed": 26,
+      "newBatchCases": 2
+    },
+    "completeNativeOrTalkBack": "not rerun; owner acceptance retained"
+  },
+  "images": {
+    "after-orders.png": {
+      "sha256": "6a8c2d36fb4690f5357ef15c49aaefbf06801e6866034172281d13541f37680e",
+      "pixels": [
+        1170,
+        2676
+      ]
+    },
+    "before-tables.png": {
+      "sha256": "2ba6cfdd57db1944a72270b73e4f5a0f4b3e72b94b11d862890ad6a3d5dc6baf",
+      "pixels": [
+        1170,
+        2676
+      ]
+    },
+    "after-tables.png": {
+      "sha256": "4f0ba31aacb4e5ec6df5955ec332cb19f5085bb94c33f8508042ee7696fd91cb",
+      "pixels": [
+        1170,
+        2676
+      ]
+    }
+  },
+  "excludedSample": "The attempted Orders baseline showed loading and was excluded; only Tables has a matched before/after comparison."
+}

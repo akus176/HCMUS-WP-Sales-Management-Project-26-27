@@ -6,6 +6,10 @@ name: Deliberately repeating an ambiguous receipt post gets a conflict and one s
     direction: DOWN
 - tapOn: Post receipt ${MAESTRO_RECEIPT}
 - scrollUntilVisible:
+    element: Confirm receipt posting
+    direction: DOWN
+- tapOn: Confirm receipt posting
+- scrollUntilVisible:
     element: 'Status: posted'
     direction: UP
 - assertVisible: 'Status: posted'

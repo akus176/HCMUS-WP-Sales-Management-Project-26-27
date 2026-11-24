@@ -1,4 +1,5 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { ScrollView } from 'react-native';
 import { QueryClient, onlineManager } from '@tanstack/react-query';
 import { ApiError, NetworkError } from '../src/api/errors';
 import type { components } from '../src/api/schema';
@@ -8,6 +9,7 @@ import type { NetworkState } from '../src/connectivity/networkAdapter';
 import { OrdersScreen } from '../src/features/orders/OrdersScreen';
 import { SessionProvider } from '../src/session/context';
 import type { SessionClient, StaffSession } from '../src/session/session';
+import { ShellPage } from '../src/shell/controls';
 
 jest.mock('expo-crypto', () => ({
   randomUUID: () => '00000000-0000-4000-8000-000000000182',
@@ -82,7 +84,11 @@ afterEach(() => {
   queries = [];
 });
 
-async function setup({ manager = false, permissions = user.permissions } = {}) {
+async function setup({
+  manager = false,
+  permissions = user.permissions,
+  page = true,
+} = {}) {
   let rows = [{ ...summary }];
   let order = { ...detail };
   const get = jest.fn(async (path: string) => {
@@ -128,7 +134,13 @@ async function setup({ manager = false, permissions = user.permissions } = {}) {
   const view = await render(
     <SessionProvider client={client} queryClient={queryClient}>
       <ConnectivityProvider>
-        <OrdersScreen user={session.user} manager={manager} />
+        {page ? (
+          <ShellPage>
+            <OrdersScreen user={session.user} manager={manager} />
+          </ShellPage>
+        ) : (
+          <OrdersScreen user={session.user} manager={manager} />
+        )}
       </ConnectivityProvider>
     </SessionProvider>,
   );
@@ -151,10 +163,11 @@ async function open(view: Awaited<ReturnType<typeof setup>>['view']) {
     await view.findByRole('button', { name: 'Open order ORD-182' }),
   );
   await view.findByText('2 × Test latte · Large · 10.00');
+  const payment = view.queryByRole('button', { name: 'Record payment' });
+  if (payment && !payment.props.accessibilityState?.disabled)
+    await fireEvent.press(payment);
   await waitFor(() =>
-    expect(
-      view.getByRole('button', { name: 'Refresh orders and tables' }),
-    ).toBeEnabled(),
+    expect(view.getByRole('button', { name: 'Refresh orders' })).toBeEnabled(),
   );
 }
 async function reviewPayment(
@@ -165,38 +178,141 @@ async function reviewPayment(
   await fireEvent.press(view.getByRole('button', { name: 'Review payment' }));
 }
 
-test('searches server orders by number/table, filters fulfillment and opens occupied tables', async () => {
+test('searches server orders by number/table and retains filters after opening an order', async () => {
   const { view } = await setup();
-  await view.findByText('Table T-182 · 2 seats · Occupied');
+  await view.findByRole('button', { name: 'Open order ORD-182' });
   await fireEvent.changeText(view.getByLabelText('Search orders'), 't-182');
   expect(view.getByRole('button', { name: 'Open order ORD-182' })).toBeTruthy();
+  expect(view.queryByRole('button', { name: 'Show ready orders' })).toBeNull();
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Filter orders: All', expanded: false }),
+  );
   await fireEvent.press(
     view.getByRole('button', { name: 'Show ready orders' }),
   );
   await view.findByText('No orders match this search.');
+  expect(
+    view.getByRole('button', { name: 'Filter orders: Ready', expanded: false }),
+  ).toBeVisible();
+  expect(view.queryByRole('button', { name: 'Tables' })).toBeNull();
   await fireEvent.press(
-    view.getByRole('button', { name: 'Open table T-182 order' }),
+    view.getByRole('button', { name: 'Filter orders: Ready' }),
+  );
+  await fireEvent.press(view.getByRole('button', { name: 'Show all orders' }));
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Open order ORD-182' }),
   );
   await view.findByText('Fulfillment: confirmed');
   await view.findByText('Add-ons: Oat milk');
+  await fireEvent.press(
+    view.getByRole('button', { name: 'Back to order search' }),
+  );
+  expect(view.getByLabelText('Search orders')).toHaveDisplayValue('t-182');
+  expect(
+    view.getByRole('button', { name: 'Filter orders: All' }),
+  ).toBeVisible();
+});
+
+test.each([false, true])(
+  'renders small batches while searching and filtering all orders (manager=%s)',
+  async (manager) => {
+    const h = await setup({ manager, page: false });
+    h.setRows(
+      Array.from({ length: 25 }, (_, index) => ({
+        ...summary,
+        id: `batch-${index}`,
+        orderNumber: `BATCH-${String(index).padStart(2, '0')}`,
+        status: index >= 20 ? 'ready' : 'confirmed',
+      })),
+    );
+    await act(async () => {
+      await h.queryClient.invalidateQueries({
+        queryKey: ['sales', user.id, 'orders'],
+      });
+    });
+    await h.view.findByText('Showing 10 of 25 orders');
+    const rendered = () =>
+      h.view.getAllByRole('button', { name: /^Open order / });
+    const revealMore = async () => {
+      await fireEvent.press(
+        h.view.getByRole('button', { name: 'Show more orders' }),
+      );
+    };
+    expect(rendered()).toHaveLength(10);
+    await revealMore();
+    expect(rendered()).toHaveLength(20);
+    await revealMore();
+    expect(rendered()).toHaveLength(25);
+    expect(
+      h.view.queryByRole('button', { name: 'Show more orders' }),
+    ).toBeNull();
+    await fireEvent.changeText(
+      h.view.getByLabelText('Search orders'),
+      'BATCH-24',
+    );
+    expect(
+      h.view.getByRole('button', { name: 'Open order BATCH-24' }),
+    ).toBeVisible();
+    expect(rendered()).toHaveLength(1);
+    await fireEvent.changeText(h.view.getByLabelText('Search orders'), '');
+    expect(h.view.getByText('Showing 10 of 25 orders')).toBeVisible();
+    await fireEvent.press(
+      h.view.getByRole('button', { name: 'Filter orders: All' }),
+    );
+    await fireEvent.press(
+      h.view.getByRole('button', { name: 'Show ready orders' }),
+    );
+    expect(rendered()).toHaveLength(5);
+    expect(
+      h.view.getByRole('button', { name: 'Open order BATCH-24' }),
+    ).toBeVisible();
+    expect(h.post).not.toHaveBeenCalled();
+  },
+);
+
+test('returns the viewport to the filter after a deeply scrolled selection collapses', async () => {
+  const scrollTo = jest.spyOn(ScrollView.prototype, 'scrollTo');
+  try {
+    const { view } = await setup();
+    await view.findByRole('button', { name: 'Open order ORD-182' });
+    const scroll = view.container.queryAll(
+      (node) => node.type === 'RCTScrollView',
+    )[0]!;
+    await fireEvent.scroll(scroll, {
+      nativeEvent: { contentOffset: { x: 0, y: 400 } },
+    });
+    await fireEvent.press(
+      view.getByRole('button', { name: 'Filter orders: All' }),
+    );
+    await fireEvent.scroll(scroll, {
+      nativeEvent: { contentOffset: { x: 0, y: 1400 } },
+    });
+    await fireEvent.press(
+      view.getByRole('button', { name: 'Show ready orders' }),
+    );
+    await fireEvent(scroll, 'contentSizeChange', 360, 2400);
+    expect(scrollTo).toHaveBeenLastCalledWith({ y: 400, animated: false });
+    expect(
+      view.getByRole('button', {
+        name: 'Filter orders: Ready',
+        expanded: false,
+      }),
+    ).toBeVisible();
+  } finally {
+    scrollTo.mockRestore();
+  }
 });
 
 test('shows empty lists, read failure and manual recovery', async () => {
   const { view, get, setRows } = await setup();
   await view.findByRole('button', { name: 'Open order ORD-182' });
   setRows([]);
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByText('No orders match this search.');
   get.mockRejectedValueOnce(new NetworkError());
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByText('Orders could not be loaded. Refresh to retry.');
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByText('No orders match this search.');
 });
 
@@ -205,10 +321,8 @@ test('a refreshed lower balance requires payment review again before the first s
   await open(view);
   await reviewPayment(view, '10');
   setRows([{ ...summary, paidAmount: 7 }]);
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
-  await view.findByText('Total: 10.00 · Paid: 7.00 · Balance: 3.00');
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
+  await view.findByLabelText('Total: 10.00 · Paid: 7.00 · Balance: 3.00');
   await waitFor(() =>
     expect(view.getByRole('button', { name: 'Confirm payment' })).toBeEnabled(),
   );
@@ -231,7 +345,7 @@ test('a payment conflict refreshes the balance without retrying the write', asyn
   await view.findByText(
     'Order changed elsewhere. Review the refreshed balance before recording a payment.',
   );
-  await view.findByText('Total: 10.00 · Paid: 10.00 · Balance: 0.00');
+  await view.findByLabelText('Total: 10.00 · Paid: 10.00 · Balance: 0.00');
   expect(post).toHaveBeenCalledTimes(1);
   expect(view.queryByRole('button', { name: 'Review payment' })).toBeNull();
 });
@@ -264,9 +378,7 @@ test('empty eligible-staff and failed staff reads disable assignment until refre
     },
   ]);
   setOrder({ ...detail, status: 'ready', channel: 'delivery' });
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await open(view);
   await view.findByText('No active delivery staff are available.');
   expect(
@@ -276,9 +388,7 @@ test('empty eligible-staff and failed staff reads disable assignment until refre
     if (path === '/api/v1/delivery-staff/options') throw new NetworkError();
     return original(path);
   });
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByText(
     'Eligible staff could not be loaded. Refresh before assigning.',
   );
@@ -286,9 +396,7 @@ test('empty eligible-staff and failed staff reads disable assignment until refre
     view.getByRole('button', { name: 'Review assignment' }),
   ).toBeDisabled();
   get.mockImplementation(original);
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByRole('button', { name: 'Select Test Courier' });
 });
 
@@ -320,7 +428,7 @@ test('guards double taps and refreshes server paid amount and balance', async ()
     }),
   );
   await view.findByText('Payment confirmed. Paid: 5.00. Balance: 5.00.');
-  await view.findByText('Total: 10.00 · Paid: 5.00 · Balance: 5.00');
+  await view.findByLabelText('Total: 10.00 · Paid: 5.00 · Balance: 5.00');
 });
 
 test('retains an uncertain payment across refresh and order navigation, then retries the identical command', async () => {
@@ -400,6 +508,30 @@ test.each(['card', 'e-wallet'])(
   },
 );
 
+test('manager order details and cancellation review render without duplicate child keys', async () => {
+  const error = jest.spyOn(console, 'error').mockImplementation(() => {});
+  try {
+    const { view } = await setup({ manager: true });
+    await open(view);
+    await fireEvent.changeText(
+      view.getByLabelText('Cancellation reason'),
+      'Customer changed plans',
+    );
+    await fireEvent.press(
+      view.getByRole('button', { name: 'Review cancellation' }),
+    );
+    await view.findByRole('button', { name: 'Confirm cancellation' });
+    const duplicateKeys = error.mock.calls.filter((args) =>
+      args.some(
+        (arg) => typeof arg === 'string' && /same key|unique.*key/i.test(arg),
+      ),
+    );
+    expect(duplicateKeys).toEqual([]);
+  } finally {
+    error.mockRestore();
+  }
+});
+
 test('requires a cancellation reason and displays the server-confirmed cancelled state', async () => {
   const { view, post, setRows, setOrder } = await setup({ manager: true });
   await open(view);
@@ -445,9 +577,7 @@ test('assigns only server-listed eligible staff on an unassigned ready delivery'
     },
   ]);
   setOrder({ ...detail, status: 'ready', channel: 'delivery' });
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await open(view);
   await fireEvent.press(
     await view.findByRole('button', { name: 'Select Test Courier' }),
@@ -550,9 +680,7 @@ test('404 refresh removes stale detail and all actions', async () => {
     if (path === '/api/v1/orders/{id}') throw new ApiError(404);
     return original(path);
   });
-  await fireEvent.press(
-    view.getByRole('button', { name: 'Refresh orders and tables' }),
-  );
+  await fireEvent.press(view.getByRole('button', { name: 'Refresh orders' }));
   await view.findByText('Order is no longer available.');
   expect(view.queryByText(/Test latte/)).toBeNull();
   expect(view.queryByRole('button', { name: 'Review payment' })).toBeNull();

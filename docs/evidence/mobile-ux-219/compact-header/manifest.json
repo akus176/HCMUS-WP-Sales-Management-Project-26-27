@@ -1,0 +1,37 @@
+{
+  "baseRevision": "310ec3d0655bcfccccaeebae69a8ba3251c05d33",
+  "device": "Medium_Phone_API_36.1 / emulator-5554",
+  "androidApi": 36,
+  "client": "Expo Go 58.0.5",
+  "capturePixels": [
+    1170,
+    2676
+  ],
+  "densityDpi": 480,
+  "referenceContentDp": [
+    390,
+    844
+  ],
+  "systemChromeDp": {
+    "top": 24,
+    "bottom": 24
+  },
+  "textScales": [
+    1,
+    2
+  ],
+  "sourceSha256": {
+    "apps/staff-mobile/app/modules/[module].tsx": "3cf1368f4971eb94be516b7771ee997e5e032ad72412229941b06b4551eff208",
+    "apps/staff-mobile/src/barista/PreparationScreen.tsx": "d52f07c349256b495d6db367b5fc717e61af51c8575b67df8e1ddeb0b31da5d1",
+    "apps/staff-mobile/src/shell/PermissionBoundary.tsx": "d0fd3094549bcfe7ad6e429b9bc42245fe7941e59b80fdd3dd24d70f7668b81e",
+    "apps/staff-mobile/src/shell/StaffHome.tsx": "db537f95a4f5f0e6c1fd7977e9133ef12adbca5ecd9190916da2d305132dcbce",
+    "apps/staff-mobile/src/shell/controls.tsx": "cc7a2fcafe9bd24de3d6aeb32e6fc6310e6bf619a8576133658b8fb63d68d065",
+    "apps/staff-mobile/src/features/orders/OrdersScreen.tsx": "0b151fa4df018c3d12e9234133ad6b2301ab335758b5a1da2f9d3eca23595d6e",
+    "apps/staff-mobile/.maestro/cashier.yaml": "aedf45f63a500ce50c7c38ba5f3131a2ecf0b5ab9e4fca4e8e884b19cc016969"
+  },
+  "before": "Preparation queue on the base revision at normal text; same four tickets and no selection.",
+  "after": "Normal queue with the header correction; Manager session. Enlarged queue uses the same changed source. Home captures use a separate locally provisioned Admin preview session.",
+  "nativeScope": "ADB navigation and geometry checks; no claim of full standalone Maestro, keyboard matrix, TalkBack, or release acceptance.",
+  "captureNote": "Unedited screenshots retain native status/navigation chrome and Expo Go Tools control. The attempt capture records Expo Go returning to home during the text-scale change; it is not queue evidence.",
+  "captureStageNote": "Queue/header PNGs precede only the unrelated Counter view addition; their listed source hashes are unchanged. Final native navigation checks exercise the Counter addition. Home summaries are unchanged across captures."
+}

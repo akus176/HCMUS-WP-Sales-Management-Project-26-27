@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="127.76" timestamp="2026-11-22T15:44:05">
+    <testcase id="Low stock, required adjustment reason, receipt posting and history" name="Low stock, required adjustment reason, receipt posting and history" classname="Low stock, required adjustment reason, receipt posting and history" file=".maestro\inventory.yaml" time="127.741" timestamp="2026-11-22T15:44:05" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

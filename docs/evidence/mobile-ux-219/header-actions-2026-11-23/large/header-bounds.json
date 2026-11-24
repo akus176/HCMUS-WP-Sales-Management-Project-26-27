@@ -1,0 +1,68 @@
+{
+  "profile": "large",
+  "assertions": [
+    {
+      "screen": "orders-list",
+      "title": "Orders",
+      "refreshLabel": "Refresh orders and tables",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": null,
+      "backBounds": null
+    },
+    {
+      "screen": "order-detail",
+      "title": "Order details",
+      "refreshLabel": "Refresh orders and tables",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": "Back to order search",
+      "backBounds": [
+        60,
+        108,
+        204,
+        252
+      ]
+    },
+    {
+      "screen": "stock-balances",
+      "title": "Inventory",
+      "refreshLabel": "Refresh inventory",
+      "refreshBounds": [
+        966,
+        108,
+        1110,
+        252
+      ],
+      "backLabel": null,
+      "backBounds": null
+    },
+    {
+      "screen": "receipt-detail",
+      "title": "Receipt details",
+      "refreshLabel": "Refresh receipt status",
+      "refreshBounds": [
+        966,
+        150,
+        1110,
+        294
+      ],
+      "backLabel": "Back to receipt list",
+      "backBounds": [
+        60,
+        150,
+        204,
+        294
+      ]
+    }
+  ],
+  "result": "passed"
+}

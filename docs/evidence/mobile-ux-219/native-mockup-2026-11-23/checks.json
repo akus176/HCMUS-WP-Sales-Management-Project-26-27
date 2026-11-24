@@ -1,0 +1,15 @@
+{
+  "componentTests": 351,
+  "suites": 29,
+  "passed": 351,
+  "failed": 0,
+  "forwarderChecks": 7,
+  "typecheck": "pass",
+  "lint": "pass",
+  "format": "pass",
+  "contract": "pass, zero drift",
+  "androidExport": "pass",
+  "openspec": "strict pass",
+  "node": "26.5.0",
+  "npm": "11.17.0"
+}

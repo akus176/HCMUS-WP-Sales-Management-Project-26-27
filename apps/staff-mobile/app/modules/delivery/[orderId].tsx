@@ -1,21 +1,17 @@
-import { useLocalSearchParams } from 'expo-router';
-
-import { DeliveryDetail } from '../../../src/features/delivery/DeliveryDetail';
+import { router } from 'expo-router';
 import { PermissionBoundary } from '../../../src/shell/PermissionBoundary';
-import { ShellPage } from '../../../src/shell/controls';
-import { useRouteAccess } from '../../../src/shell/useRouteAccess';
+import { ShellPage, ShellPageHeader } from '../../../src/shell/controls';
 
-export default function DeliveryDetailRoute() {
-  const { orderId } = useLocalSearchParams<{ orderId: string | string[] }>();
-  const access = useRouteAccess();
+/** Retired delivery links must not load courier or customer data. */
+export default function RetiredDeliveryRoute() {
   return (
     <ShellPage>
-      <PermissionBoundary moduleId="delivery" {...access}>
-        {() => (
-          <DeliveryDetail
-            orderId={typeof orderId === 'string' ? orderId : ''}
-          />
-        )}
+      <ShellPageHeader
+        backLabel="Back to staff home"
+        onBack={() => router.replace('/session')}
+      />
+      <PermissionBoundary moduleId="retired-delivery">
+        {() => null}
       </PermissionBoundary>
     </ShellPage>
   );

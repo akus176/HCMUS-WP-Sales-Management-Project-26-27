@@ -12,8 +12,8 @@ test('shared palette defines reusable type, spacing, shape and elevation tokens 
   expect(mobileTokens.spacing.md).toBeGreaterThan(0);
   expect(mobileTokens.shape.control).toBeGreaterThan(0);
   expect(mobileTokens.elevation.card).toBeDefined();
-  expect(mobileTokens.type.displayFont).toBe('Kalam');
-  expect(mobileTokens.type.bodyFont).toBe('PatrickHand');
+  expect(mobileTokens.type.displayFont).toBe('InterSemiBold');
+  expect(mobileTokens.type.bodyFont).toBe('InterRegular');
 
   const textPairs = [
     [mobileTokens.color.foreground, mobileTokens.color.background],
@@ -82,7 +82,7 @@ test('selected secondary actions keep readable text on the selected treatment', 
   ).toHaveStyle({
     backgroundColor: mobileTokens.color.selectedBackground,
   });
-  expect(screen.getByText('✓ Inventory')).toHaveStyle({
+  expect(screen.getByText('Inventory')).toHaveStyle({
     color: mobileTokens.color.selectedForeground,
   });
 });

@@ -16,6 +16,10 @@ appId: com.coffeeshop.staffmobile
     direction: DOWN
 - tapOn: Mark failed
 - scrollUntilVisible:
+    element: Confirm failed
+    direction: DOWN
+- tapOn: Confirm failed
+- scrollUntilVisible:
     element: Delivery failed. Confirmed by the service.
     direction: UP
 - assertVisible: Delivery failed. Confirmed by the service.

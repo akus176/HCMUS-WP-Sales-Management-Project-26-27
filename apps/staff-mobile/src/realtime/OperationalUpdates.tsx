@@ -6,13 +6,17 @@ import { AppState } from 'react-native';
 import { useConnectivity } from '../connectivity/connectivity';
 import { useSession } from '../session/context';
 import { ShellStatus } from '../shell/controls';
+import { useNativeNavigation } from '../shell/NativeNavigation';
 import {
   operationalEventType,
   refreshOperationalQueries,
 } from './operationalEvents';
 
-export function OperationalUpdates() {
+export function OperationalUpdates({
+  onAvailability,
+}: { onAvailability?: (degraded: boolean) => void } = {}) {
   const { client, state } = useSession();
+  const refreshAccess = useNativeNavigation()?.refreshAccess;
   const { status } = useConnectivity();
   const queries = useQueryClient();
   const userId = state.user?.id;
@@ -47,6 +51,7 @@ export function OperationalUpdates() {
     function connected() {
       if (!isCurrent()) return;
       setDegraded(false);
+      refreshAccess?.();
       void refreshOperationalQueries(queries, userId!, isCurrent);
     }
     function disconnected() {
@@ -65,6 +70,7 @@ export function OperationalUpdates() {
     connection.onclose(disconnected);
     connection.on('OperationalEvent', (event: unknown) => {
       const type = operationalEventType(event);
+      if (type === 'account' && isCurrent()) refreshAccess?.();
       if (type && isCurrent())
         void refreshOperationalQueries(queries, userId, isCurrent, type);
     });
@@ -74,9 +80,13 @@ export function OperationalUpdates() {
       clearTimeout(retry);
       void connection.stop();
     };
-  }, [client, foreground, queries, status, userId]);
+  }, [client, foreground, queries, status, userId, refreshAccess]);
 
-  if (!userId || status !== 'online' || !degraded) return null;
+  const unavailable = !!userId && status === 'online' && degraded;
+  useEffect(() => {
+    onAvailability?.(unavailable);
+  }, [onAvailability, unavailable]);
+  if (onAvailability || !unavailable) return null;
   return (
     <ShellStatus>
       Live updates unavailable. Refresh to check for changes.

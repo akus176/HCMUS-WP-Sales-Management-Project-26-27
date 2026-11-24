@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<testsuites>
+  <testsuite name="Test Suite" device="Samsung SM-A155F USB" tests="1" failures="0" time="170.011" timestamp="2026-11-22T15:39:36">
+    <testcase id="Barista progression against the shared API" name="Barista progression against the shared API" classname="Barista progression against the shared API" file=".maestro\barista.yaml" time="169.994" timestamp="2026-11-22T15:39:36" status="SUCCESS"/>
+  </testsuite>
+</testsuites>

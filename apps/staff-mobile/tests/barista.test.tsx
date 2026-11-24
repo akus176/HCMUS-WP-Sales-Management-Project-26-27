@@ -6,6 +6,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import { onlineManager } from '@tanstack/react-query';
+import { BackHandler } from 'react-native';
 
 import { PreparationScreen } from '../src/barista/PreparationScreen';
 import { ConnectivityProvider } from '../src/connectivity/connectivity';
@@ -13,6 +14,7 @@ import * as network from '../src/connectivity/networkAdapter';
 import type { NetworkState } from '../src/connectivity/networkAdapter';
 import { SessionProvider } from '../src/session/context';
 import { PermissionBoundary } from '../src/shell/PermissionBoundary';
+import { ShellPage, ShellPageHeader } from '../src/shell/controls';
 import { deferred, harness, json, user } from './helpers';
 import { QueryCleanup } from './query-cleanup';
 
@@ -45,6 +47,58 @@ const page = (items = [ticket], totalCount = items.length) => ({
   pageSize: 10,
 });
 
+test('Android Back dismisses confirmation without a write, then restores the selected queue', async () => {
+  let back: Parameters<typeof BackHandler.addEventListener>[1] | undefined;
+  const spy = jest
+    .spyOn(BackHandler, 'addEventListener')
+    .mockImplementation((_event, callback) => {
+      back = callback;
+      return { remove: jest.fn() };
+    });
+  try {
+    const preparing = { ...ticket, status: 'preparing' };
+    const h = await mount(async (request) =>
+      json(
+        request.url.includes(`${ticket.orderId}`)
+          ? preparing
+          : page([preparing]),
+      ),
+    );
+    await fireEvent.press(
+      await screen.findByRole('button', { name: 'Preparing' }),
+    );
+    await openTicket('Preparing');
+    await fireEvent.press(screen.getByRole('button', { name: 'Mark ready' }));
+    await screen.findByRole('button', { name: 'Confirm ready' });
+    await act(async () => {
+      expect(back?.({} as Parameters<NonNullable<typeof back>>[0])).toBe(true);
+    });
+    expect(screen.queryByRole('button', { name: 'Confirm ready' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Mark ready' })).toBeVisible();
+    await act(async () => {
+      expect(back?.({} as Parameters<NonNullable<typeof back>>[0])).toBe(true);
+    });
+    expect(
+      await screen.findByRole('button', {
+        name: 'Select ticket ORD-155',
+        selected: true,
+      }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Preparing', selected: true }),
+    ).toBeVisible();
+    expect(
+      h.fetcher.mock.calls.some(
+        ([request]) =>
+          request.method === 'POST' &&
+          request.url.includes('/preparation-tickets/'),
+      ),
+    ).toBe(false);
+  } finally {
+    spy.mockRestore();
+  }
+});
+
 beforeEach(() => {
   jest.mocked(network.getNetworkStateAsync).mockResolvedValue(connected);
   jest
@@ -60,6 +114,7 @@ async function mount(
   handler: (request: Request) => Promise<Response>,
   permissions = user.permissions,
 ) {
+  const backToHome = jest.fn();
   const h = harness(async (request) =>
     request.url.endsWith('/auth/me')
       ? json({ ...user, permissions })
@@ -69,9 +124,16 @@ async function mount(
     <SessionProvider client={h.client}>
       <QueryCleanup />
       <ConnectivityProvider>
-        <PermissionBoundary moduleId="barista">
-          {() => <PreparationScreen />}
-        </PermissionBoundary>
+        <ShellPage>
+          <ShellPageHeader
+            backLabel="Back to staff home"
+            onBack={backToHome}
+            hideDuringDetail
+          />
+          <PermissionBoundary moduleId="barista">
+            {() => <PreparationScreen />}
+          </PermissionBoundary>
+        </ShellPage>
       </ConnectivityProvider>
     </SessionProvider>,
   );
@@ -79,13 +141,14 @@ async function mount(
   await act(async () => {
     await h.client.login('staff', 'fixture-password');
   });
-  return h;
+  return { ...h, backToHome };
 }
-async function openTicket() {
+async function openTicket(status = 'Confirmed') {
   await fireEvent.press(
-    await screen.findByRole('button', { name: 'Open ticket ORD-155' }),
+    await screen.findByRole('button', { name: 'Select ticket ORD-155' }),
   );
-  await screen.findByText('Status: Confirmed');
+  await fireEvent.press(screen.getByRole('button', { name: 'Open ORD-155' }));
+  await screen.findByLabelText(`Status: ${status}`);
 }
 
 test('shows loading, empty results and manual refresh without inventing tickets', async () => {
@@ -106,7 +169,9 @@ test('shows loading, empty results and manual refresh without inventing tickets'
 test('filters and paginates through generated query parameters', async () => {
   const h = await mount(async () => json(page([ticket], 21)));
   await screen.findByText('Page 1 · 21 tickets');
-  await fireEvent.press(screen.getByRole('button', { name: 'Next page' }));
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Next page' }),
+  );
   await screen.findByText('Page 2 · 21 tickets');
   expect(
     h.fetcher.mock.calls.some(
@@ -142,9 +207,14 @@ test('details contain preparation fields, confirm each write, and show only serv
     return json(page(status === 'ready' ? [] : [{ ...ticket, status }]));
   });
   await openTicket();
-  expect(screen.getByText('2 × Latte · Large')).toBeVisible();
+  expect(
+    screen.queryByRole('button', { name: 'Back to staff home' }),
+  ).toBeNull();
+  expect(screen.getByText('2 ×')).toBeVisible();
+  expect(screen.getByText('Latte')).toBeVisible();
+  expect(screen.getByText('Large')).toBeVisible();
   expect(screen.getByText('Add-ons: Oat milk')).toBeVisible();
-  expect(screen.getByText('Table T3')).toBeVisible();
+  expect(screen.getByText('Table T3 · 2 items')).toBeVisible();
   await fireEvent.press(
     screen.getByRole('button', { name: 'Start preparing' }),
   );
@@ -164,12 +234,12 @@ test('details contain preparation fields, confirm each write, and show only serv
     screen.getByRole('button', { name: 'Start preparing' }),
   );
   expect(screen.queryByText(/Preparation started/)).toBeNull();
-  expect(screen.getByText('Status: Confirmed')).toBeVisible();
+  expect(screen.getByLabelText('Status: Confirmed')).toBeVisible();
   expect(
     h.fetcher.mock.calls.filter(([r]) => r.url.endsWith('/start')),
   ).toHaveLength(1);
   await act(async () => sent.resolve(new Response(null, { status: 204 })));
-  await screen.findByText('Status: Preparing');
+  await screen.findByLabelText('Status: Preparing');
   await fireEvent.press(screen.getByRole('button', { name: 'Mark ready' }));
   await fireEvent.press(screen.getByRole('button', { name: 'Confirm ready' }));
   expect(
@@ -202,7 +272,7 @@ test.each(['preparing', 'cancelled'])(
     );
     expect(await screen.findByText(/Ticket changed elsewhere/)).toBeVisible();
     if (newer === 'preparing')
-      expect(await screen.findByText('Status: Preparing')).toBeVisible();
+      expect(await screen.findByLabelText('Status: Preparing')).toBeVisible();
     else {
       expect(
         await screen.findByText(/Ticket is no longer in the preparation queue/),
@@ -274,8 +344,12 @@ test('API forbidden response immediately hides cached details even if refresh wo
   expect(
     await screen.findByText(/You do not have permission to prepare tickets/),
   ).toBeVisible();
-  expect(screen.queryByText('2 × Latte · Large')).toBeNull();
+  expect(screen.queryByText('Latte')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Start preparing' })).toBeNull();
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Back to staff home' }),
+  );
+  expect(h.backToHome).toHaveBeenCalledTimes(1);
   expect(
     h.fetcher.mock.calls.filter(([r]) => r.url.endsWith('/start')),
   ).toHaveLength(1);
@@ -297,8 +371,134 @@ test('queue errors expose retry; uncertain writes refresh without a success clai
   );
   await fireEvent.press(screen.getByRole('button', { name: 'Confirm start' }));
   expect(await screen.findByText(/No success was confirmed/)).toBeVisible();
-  expect(screen.getByText('Status: Confirmed')).toBeVisible();
+  expect(screen.getByLabelText('Status: Confirmed')).toBeVisible();
   expect(
     h.fetcher.mock.calls.filter(([r]) => r.url.endsWith('/start')),
   ).toHaveLength(1);
+});
+
+test('ledger selection identifies one Open action and never reads detail or writes before opening', async () => {
+  const h = await mount(async (request) =>
+    json(request.url.includes(ticket.orderId) ? ticket : page()),
+  );
+  expect(
+    await screen.findByRole('button', { name: 'Open selected ticket' }),
+  ).toBeDisabled();
+  const row = await screen.findByRole('button', {
+    name: 'Select ticket ORD-155',
+  });
+  expect(screen.getByText('2 × Latte')).toBeVisible();
+  expect(row.props.accessibilityHint).toContain('2 × Latte');
+  await fireEvent.press(
+    await screen.findByRole('button', {
+      name: 'Select ticket ORD-155',
+      selected: false,
+    }),
+  );
+  expect(
+    screen.getByRole('button', {
+      name: 'Select ticket ORD-155',
+      selected: true,
+    }),
+  ).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Open ORD-155' })).toBeEnabled();
+  expect(screen.getByRole('button', { name: 'Open ORD-155' })).toHaveStyle({
+    minHeight: 56,
+  });
+  expect(
+    h.fetcher.mock.calls.filter(([r]) =>
+      r.url.includes(`/preparation-tickets/${ticket.orderId}`),
+    ),
+  ).toHaveLength(0);
+  expect(
+    h.fetcher.mock.calls.filter(
+      ([r]) => r.method === 'POST' && r.url.includes('preparation-tickets'),
+    ),
+  ).toHaveLength(0);
+});
+
+test.each(['refresh', 'filter', 'page'])(
+  'clears a selection removed by %s and cannot open its stale detail',
+  async (change) => {
+    let removed = false;
+    const h = await mount(async () => json(page(removed ? [] : [ticket], 21)));
+    await fireEvent.press(
+      await screen.findByRole('button', { name: 'Select ticket ORD-155' }),
+    );
+    expect(screen.getByRole('button', { name: 'Open ORD-155' })).toBeEnabled();
+    removed = true;
+    await fireEvent.press(
+      screen.getByRole('button', {
+        name:
+          change === 'refresh'
+            ? 'Refresh queue'
+            : change === 'filter'
+              ? 'Preparing'
+              : 'Next page',
+      }),
+    );
+    await screen.findByText(/No tickets in this view/);
+    expect(
+      screen.getByRole('button', { name: 'Open selected ticket' }),
+    ).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Open ORD-155' })).toBeNull();
+    expect(
+      h.fetcher.mock.calls.filter(([r]) =>
+        r.url.includes(`/preparation-tickets/${ticket.orderId}`),
+      ),
+    ).toHaveLength(0);
+  },
+);
+
+test('returns from detail with the valid filter, page and selected ticket retained', async () => {
+  await mount(async (request) =>
+    json(request.url.includes(ticket.orderId) ? ticket : page([ticket], 21)),
+  );
+  await screen.findByRole('button', { name: 'Select ticket ORD-155' });
+  await fireEvent.press(screen.getByRole('button', { name: 'Confirmed' }));
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Next page' }),
+  );
+  await screen.findByText('Page 2 · 21 tickets');
+  await openTicket();
+  await fireEvent.press(
+    screen.getByRole('button', { name: 'Back to Preparation' }),
+  );
+  expect(screen.getByText('Page 2 · 21 tickets')).toBeVisible();
+  expect(
+    screen.getByRole('button', { name: 'Confirmed', selected: true }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole('button', {
+      name: 'Select ticket ORD-155',
+      selected: true,
+    }),
+  ).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Open ORD-155' })).toBeEnabled();
+});
+
+test('Keep preparing closes the whole-ticket confirmation without a write or later replay', async () => {
+  const preparing = { ...ticket, status: 'preparing' };
+  const h = await mount(async (request) =>
+    json(request.url.includes(ticket.orderId) ? preparing : page([preparing])),
+  );
+  await openTicket('Preparing');
+  await fireEvent.press(screen.getByRole('button', { name: 'Mark ready' }));
+  expect(screen.getByText('This updates the whole ticket.')).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Confirm ready' })).toHaveStyle({
+    minHeight: 56,
+  });
+  await fireEvent.press(screen.getByRole('button', { name: 'Keep preparing' }));
+  expect(screen.queryByRole('button', { name: 'Confirm ready' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Mark ready' })).toBeVisible();
+  await act(async () => {
+    await listener(disconnected);
+    await listener(connected);
+  });
+  expect(
+    h.fetcher.mock.calls.filter(
+      ([r]) => r.method === 'POST' && r.url.includes('preparation-tickets'),
+    ),
+  ).toHaveLength(0);
+  expect(screen.getByLabelText('Status: Preparing')).toBeVisible();
 });
