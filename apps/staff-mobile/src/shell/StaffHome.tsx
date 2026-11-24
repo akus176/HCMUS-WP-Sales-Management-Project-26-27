@@ -23,7 +23,7 @@ import { ShellIcon } from './ShellIcon';
 
 const actionDescriptions: Record<string, string> = {
   'orders.fulfill': 'Tickets · Start preparation · Mark ready',
-  'orders.create': 'Orders · Tables',
+  'orders.create': 'New sales · Orders · Tables',
   'payments.record': 'Payments',
   'orders.cancel': 'Cancellations',
   'delivery.assign': 'Delivery assignment',
@@ -124,7 +124,7 @@ export function StaffHome({
                     <Text style={styles.caption}>
                       {quick
                         ? module.id === 'cashier'
-                          ? 'Orders and tables'
+                          ? 'New sales and tickets'
                           : module.id === 'inventory'
                             ? 'Balances and receipts'
                             : description

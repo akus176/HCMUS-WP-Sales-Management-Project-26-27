@@ -144,7 +144,7 @@ export function CounterDraftActions({
       setSheet(undefined);
       setReview(undefined);
       await queries.invalidateQueries({
-        queryKey: ['sales', user.id, 'order', order.id],
+        queryKey: ['sales', user.id],
       });
     },
   });

@@ -662,6 +662,19 @@ export function CounterSale({
               <View style={styles.card}>
                 <ShellText>Subtotal: {money(current.subtotal)}</ShellText>
                 <ShellText>Discounts: {money(current.discountTotal)}</ShellText>
+                {Number(current.subtotal) -
+                  Number(current.discountTotal) -
+                  Number(current.total) >
+                  0.005 && (
+                  <ShellText>
+                    Loyalty savings:{' '}
+                    {money(
+                      Number(current.subtotal) -
+                        Number(current.discountTotal) -
+                        Number(current.total),
+                    )}
+                  </ShellText>
+                )}
                 <ShellHeading level="section">
                   Total: {money(current.total)}
                 </ShellHeading>
@@ -708,6 +721,7 @@ export function CounterSale({
                         disabled={
                           operational.isFetching ||
                           operational.isError ||
+                          row.status !== current.status ||
                           ticket.isFetching ||
                           ticket.isError
                         }
@@ -979,8 +993,8 @@ export function CounterSale({
                 Estimated total: {money(estimate)}
               </ShellHeading>
               <ShellText>
-                Save the draft to review the service's exact item snapshots and
-                total. Confirming it sends it to preparation.
+                Save the draft to review the exact item details and total.
+                Confirming it sends it to preparation.
               </ShellText>
               <ShellPageFooter>
                 <ShellButton

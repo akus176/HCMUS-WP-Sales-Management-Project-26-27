@@ -507,3 +507,41 @@ test('a rejected save unlocks editing and displays the server validation detail'
     h.view.queryByRole('button', { name: 'Retry same ticket save' }),
   ).toBeNull();
 });
+
+test('a lost confirmation response reconciles the committed status without submitting a second confirm', async () => {
+  const h = await setup();
+  await save(h);
+  h.post.mockImplementationOnce(async () => {
+    h.setOrder({ ...h.order(), status: 'confirmed' });
+    throw new NetworkError();
+  });
+  await fireEvent.press(h.view.getByRole('button', { name: 'Confirm order' }));
+  await fireEvent.press(
+    h.view.getByRole('button', { name: 'Confirm reviewed order' }),
+  );
+  await h.view.findByText('Status: confirmed · takeaway');
+  await waitFor(() =>
+    expect(
+      h.view.queryByRole('button', { name: 'Retry same Counter action' }),
+    ).toBeNull(),
+  );
+  expect(
+    h.post.mock.calls.filter(([path]) => path.endsWith('/confirm')),
+  ).toHaveLength(1);
+  await waitFor(() =>
+    expect(
+      h.view.getByRole('button', { name: 'Start new Counter ticket' }),
+    ).toBeEnabled(),
+  );
+  await fireEvent.press(
+    h.view.getByRole('button', { name: 'Start new Counter ticket' }),
+  );
+  await h.view.findByRole('button', { name: 'Customize Test latte' });
+  await fireEvent.press(
+    h.view.getByRole('button', { name: 'View Counter ticket' }),
+  );
+  await h.view.findByText(
+    'Your ticket is empty. Add drinks or food from the menu.',
+  );
+  expect(h.post).toHaveBeenCalledTimes(2);
+});
