@@ -477,21 +477,21 @@ public sealed partial class CounterSaleTests(ITestOutputHelper output)
     private static T WaitFor<T>(string description, Func<T?> find, Func<string>? details = null) where T : class
     {
         var timer = Stopwatch.StartNew();
-        COMException? unavailableElement = null;
+        COMException? transientAutomationError = null;
         do
         {
             try
             {
                 if (find() is { } result) return result;
             }
-            catch (COMException exception) when (exception.HResult == unchecked((int)0x80040201))
+            catch (COMException exception) when (exception.HResult is unchecked((int)0x80040201) or unchecked((int)0x80131505))
             {
-                // WinUI can replace a virtualized row between discovery and reading its properties.
-                unavailableElement = exception;
+                // UI Automation can lose an element or time out while WinUI replaces a row or window.
+                transientAutomationError = exception;
             }
             Thread.Sleep(150);
         } while (timer.Elapsed < TimeSpan.FromSeconds(25));
-        throw new TimeoutException($"Timed out waiting for {description}.{details?.Invoke()}", unavailableElement);
+        throw new TimeoutException($"Timed out waiting for {description}.{details?.Invoke()}", transientAutomationError);
     }
 
     private static async Task<T> ReadAsync<T>(HttpClient client, string path) =>
