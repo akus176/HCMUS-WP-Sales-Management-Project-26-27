@@ -23,7 +23,8 @@ public sealed class GoogleAdminSignInTests
             Assert.Equal("/api/v1/auth/google", request.RequestUri!.AbsolutePath);
             exchange = await request.Content!.ReadFromJsonAsync<GoogleAdminLoginRequest>(ct);
             return new(HttpStatusCode.OK) { Content = JsonContent.Create(pair) };
-        })) { BaseAddress = new("https://coffeeshop.example.test/api/v1/") };
+        }))
+        { BaseAddress = new("https://coffeeshop.example.test/api/v1/") };
         var api = new StaffIdentityApiClient(http);
         var store = new MemoryStore();
         var session = new StaffSessionManager(api, store);
@@ -62,7 +63,8 @@ public sealed class GoogleAdminSignInTests
         using var http = new HttpClient(new Handler((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = JsonContent.Create(new GoogleAdminConfigResponse("test-desktop")),
-        }))) { BaseAddress = new("https://coffeeshop.example.test/api/v1/") };
+        })))
+        { BaseAddress = new("https://coffeeshop.example.test/api/v1/") };
         var api = new StaffIdentityApiClient(http);
         var store = new MemoryStore();
         var session = new StaffSessionManager(api, store);
