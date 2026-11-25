@@ -17,7 +17,7 @@ The final deployment SHALL authenticate active non-administrator staff with a us
 
 #### Scenario: Linked administrator signs in on Windows
 - **WHEN** WinUI completes Google's system-browser authorization-code flow with PKCE and the API verifies the Google ID token signature, issuer, configured audience, expiry, nonce, and verified email
-- **THEN** the API issues application tokens only if the configured Google subject and email match an existing active account with the Admin role and the same email
+- **THEN** the API issues application tokens only if the verified Google email matches an explicitly configured link to an existing active account with the Admin role and the same email
 
 #### Scenario: Administrator sign-in is denied
 - **WHEN** a Google identity is unlinked, has invalid claims, or maps to an inactive or non-administrator account, or an administrator attempts to use a local password in the final deployment

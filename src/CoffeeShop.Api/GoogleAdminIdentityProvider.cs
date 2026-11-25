@@ -57,7 +57,6 @@ internal sealed class GoogleAdminIdentityProvider(
             !verified.TryGetPayloadValue<string>("email", out var email))
             return null;
 
-        return options.Links.SingleOrDefault(link => link.Subject == verified.Subject &&
-            string.Equals(link.Email, email, StringComparison.OrdinalIgnoreCase));
+        return options.Links.SingleOrDefault(link => string.Equals(link.Email, email, StringComparison.OrdinalIgnoreCase));
     }
 }

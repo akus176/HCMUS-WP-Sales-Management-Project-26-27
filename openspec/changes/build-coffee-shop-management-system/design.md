@@ -422,7 +422,7 @@ for errors (RFC 7807), consistent with decision #9 above (contracts never expose
 | POST   | `/users/{id}/reactivate` | `users.manage` |                                                                                                                                                                               |
 | GET    | `/audit/security-events` | `users.manage` | Paged, filter `?userId=&type=&from=&to=`.                                                                                                                                     |
 
-In the final account model, `/auth/login` accepts non-administrator staff only. WinUI opens Google's consent page in the system browser and receives the result on an ephemeral IPv4 loopback port. WinUI checks OAuth state and the API verifies the ID-token nonce against the PKCE challenge, proves the link by subject and verified email, and checks the account's current role and state. The provider client secret and the link list live on the API. Existing app token rotation, logout, and server-side permissions apply after Google sign-in.
+In the final account model, `/auth/login` accepts non-administrator staff only. WinUI opens Google's consent page in the system browser and receives the result on an ephemeral IPv4 loopback port. WinUI checks OAuth state and the API verifies the ID-token nonce against the PKCE challenge, finds the link by verified email, and checks the corresponding account's email, current role, and state. The provider client secret and the link list live on the API. Existing app token rotation, logout, and server-side permissions apply after Google sign-in.
 
 ### Catalog — `menu-and-recipes`
 

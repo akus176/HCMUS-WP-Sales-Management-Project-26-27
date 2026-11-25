@@ -125,7 +125,6 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
                 var name = links[i];
                 var prefix = $"GoogleAdmin:Links:{i}:";
                 builder.UseSetting(prefix + "UserId", userIds[name].ToString())
-                    .UseSetting(prefix + "Subject", name)
                     .UseSetting(prefix + "Email", name == "email-changed" ? "old-email@example.test" : $"{name}@example.test");
             }
             builder.ConfigureServices(services =>
@@ -146,18 +145,19 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
                         var code = form["code"].ToString();
                         if (code == "outage") return new(HttpStatusCode.ServiceUnavailable);
                         if (code == "replay") return new(HttpStatusCode.BadRequest);
-                        var subject = links.Contains(code) || code is "unlinked-admin" ? code : "Admin";
+                        var account = links.Contains(code) || code is "unlinked-admin" ? code : "Admin";
                         var email = code switch
                         {
                             "email-changed" => "old-email@example.test",
                             "wrong-email" => "unlinked-admin@example.test",
-                            _ => $"{subject}@example.test",
+                            "replacement-google-account" => "ADMIN@example.test",
+                            _ => $"{account}@example.test",
                         };
                         var expired = code == "expired";
                         var now = DateTime.UtcNow;
                         var jwt = new JwtSecurityToken(code == "wrong-issuer" ? "https://example.test" : "https://accounts.google.com",
                             code == "wrong-audience" ? "unrelated-client" : clientId, [
-                                new("sub", subject), new("email", email),
+                                new("sub", $"google-subject-{code}"), new("email", email),
                                 new("email_verified", code == "unverified" ? "false" : "true", ClaimValueTypes.Boolean),
                                 new("nonce", code == "wrong-nonce" ? "unrelated-nonce" : GoogleAdminOAuth.Challenge(verifier)),
                             ], now.AddMinutes(-10), expired ? now.AddMinutes(-5) : now.AddMinutes(5),
@@ -206,6 +206,9 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         var tokens = (await signedIn.Content.ReadFromJsonAsync<TokenResponse>())!;
         Assert.Equal(userIds["Admin"], tokens.User.Id);
         Assert.Contains("users.manage", tokens.User.Permissions);
+        using var replacementSignIn = await client.PostAsJsonAsync(googlePath, request with { Code = "replacement-google-account" });
+        Assert.Equal(HttpStatusCode.OK, replacementSignIn.StatusCode);
+        Assert.Equal(tokens.User.Id, (await replacementSignIn.Content.ReadFromJsonAsync<TokenResponse>())!.User.Id);
         client.DefaultRequestHeaders.Authorization = new("Bearer", tokens.AccessToken);
         Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/v1/auth/me")).StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/v1/users")).StatusCode);
