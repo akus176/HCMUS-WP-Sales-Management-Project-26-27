@@ -97,6 +97,8 @@
 - [ ] 10.6 Implement account administration with final-active-administrator protection; verify attempts to remove the last administrator fail without state changes
 - [x] 10.7 Implement security audit events for login, token reuse, account state, and role changes; verify audits omit passwords, access tokens, and refresh tokens
 
+Administrator Google sign-in follows [issue #227](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/227). It extends the identity and WinUI session work in 10.2–10.7 and 11.2/11.6. Its acceptance is tracked in that issue.
+
 ## 11. Final WinUI API Migration
 
 - [x] 11.1 Implement a typed HTTP client, consistent error mapping, and API service interfaces matching the WinUI-facing direct adapters; verify mocked client tests cover success and every standard error category

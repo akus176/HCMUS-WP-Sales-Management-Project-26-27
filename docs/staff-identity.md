@@ -28,13 +28,27 @@ Run the role-seed command again after deploying table creation (#229) to grant `
 
 Roles are comma-separated exact codes: `Admin`, `Manager`, `Cashier`, `Barista`, `InventoryStaff`, `DeliveryStaff`. Provisioning requires a 12–1024-character password, hashes it with ASP.NET Core's versioned salted PBKDF2 password hasher, and refuses to overwrite an existing username/email. Remove the provisioning password from the environment afterward. This is a local operator provisioning path; account administration and final-administrator protection remain Windows task 10.6.
 
+## Administrator Google sign-in (#227)
+
+1. In Google Cloud, configure the OAuth consent screen and create a **Desktop app** OAuth client. Add the approved demo accounts as test users if the consent screen is in Testing. Use the desktop client's ID and secret for the API. WinUI fetches the public client ID and uses a dynamic IPv4 loopback redirect with PKCE.
+2. Select an existing active `Admin` account or provision one with `ProvisionStaff__GoogleOnly=true`, `ProvisionStaff__Roles=Admin`, and the profile fields above. Run `--provision-staff` without a password. The command prints the new local account ID. The local account email must match the approved Google email. The deployment operator provisions Google administrators. Windows account creation still provisions password-based staff.
+3. Obtain the approved Google account's stable `sub` and verified email from a Google identity assertion verified during private enrollment. Configure one link per administrator with the local account ID, Google `sub`, and email. Keep the assertion private. Use the keys shown in [.env.example](../.env.example). For Compose, put those keys in the ignored `.env.google-admin` next to `compose.yaml`, then recreate the API container. For a standalone API, use environment variables or a private configuration provider. Use successive link indices for multiple administrators.
+4. Set `GoogleAdmin__Enabled=true` for the final deployment and restart all API instances together. Validate at least one configured, active administrator before the demo. The API denies password sign-in and pre-existing password sessions for all Admin accounts in this mode. New Google-only accounts have no usable local password. Local and CI environments can leave Google disabled for their existing credential fixtures.
+5. In WinUI, choose **Administrator sign-in with Google**, complete sign-in in the default browser, and return to WinUI. Use an HTTPS API address for remote connections. WinUI stores only the app refresh token using its current Windows-protected storage. Mobile staff continue to use username and password.
+
+The link grants sign-in to an existing account with an active Admin role and matching email. It never provisions an account or adds a role. To remove or change the link, update private configuration and restart the API. Access and refresh tokens bound to the earlier link are rejected. Deactivating the last active linked administrator is also blocked in Google mode. Keep the client secret, enrollment claims, callback URL, codes, and tokens out of screenshots, logs, and evidence.
+
+For native acceptance, use a linked test administrator and an unlinked Google test account. Verify the linked account reaches the Windows workspace and restores after an app restart. Sign out, verify the unlinked account is denied, and check that canceling the browser flow returns to an enabled login form. Record the result and HTTP status only. The automated API tests cover inactive accounts, mismatched subject or email, wrong audience, invalid signatures, and app token logout and renewal.
+
 ## Implemented HTTP contract
 
 All paths have prefix `/api/v1` and return RFC 7807 failures.
 
 | Method/path | Input/result | Authorization |
 | --- | --- | --- |
-| POST `/auth/login` | `{username,password}` → `{accessToken,refreshToken,expiresAt,user:{id,fullName,roles,permissions}}` | Anonymous; generic 401 for unknown, invalid, or inactive accounts |
+| POST `/auth/login` | `{username,password}` → `{accessToken,refreshToken,expiresAt,user:{id,fullName,roles,permissions}}` | Anonymous. Generic 401 for unknown, invalid, inactive, or Google-mode administrator accounts. |
+| GET `/auth/google/config` | `{clientId}` for the Windows OAuth client | Anonymous. 404 when disabled. |
+| POST `/auth/google` | `{code,codeVerifier,redirectUri}` → same app token response as `/auth/login` | Anonymous. Generic 401 for invalid or unlinked identities. 503 when disabled or temporarily unavailable. |
 | POST `/auth/refresh` | `{refreshToken}` → rotated token response | Anonymous; generic 401 for expired, revoked, reused, or unknown tokens |
 | GET `/auth/me` | Current staff identity, roles, effective permissions | Bearer token and active persisted account |
 | POST `/auth/logout` | `{refreshToken}` → 204 | Bearer token; token must belong to caller |

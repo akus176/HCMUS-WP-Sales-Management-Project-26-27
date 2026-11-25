@@ -411,6 +411,8 @@ for errors (RFC 7807), consistent with decision #9 above (contracts never expose
 | Method | Path                     | Permission     | Notes                                                                                                                                                                         |
 | ------ | ------------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | POST   | `/auth/login`            | none           | `{username, password}` → `{accessToken, refreshToken, expiresAt, user:{id,fullName,roles[]}}`. Generic `401` on bad credentials or deactivated account — never reveals which. |
+| GET    | `/auth/google/config`    | none           | Returns the public desktop OAuth client ID. `404` when Google sign-in is disabled. |
+| POST   | `/auth/google`           | none           | `{code, codeVerifier, redirectUri}` → existing application token pair. The API exchanges the code, verifies the ID token and checks the configured administrator link. Generic `401` on invalid or unlinked identity. `503` on provider outages or when disabled. |
 | POST   | `/auth/refresh`          | none           | `{refreshToken}` → new pair; rotates and invalidates the old one. `401` if expired/revoked/reused (reuse also revokes the whole token family + audit event).                  |
 | POST   | `/auth/logout`           | authenticated  | Revokes the presented refresh token family.                                                                                                                                   |
 | GET    | `/users`                 | `users.manage` | Paged, filter `?isActive=`.                                                                                                                                                   |
@@ -419,6 +421,8 @@ for errors (RFC 7807), consistent with decision #9 above (contracts never expose
 | POST   | `/users/{id}/deactivate` | `users.manage` | `409` if target is the last active Admin.                                                                                                                                     |
 | POST   | `/users/{id}/reactivate` | `users.manage` |                                                                                                                                                                               |
 | GET    | `/audit/security-events` | `users.manage` | Paged, filter `?userId=&type=&from=&to=`.                                                                                                                                     |
+
+In the final account model, `/auth/login` accepts non-administrator staff only. WinUI opens Google's consent page in the system browser and receives the result on an ephemeral IPv4 loopback port. WinUI checks OAuth state and the API verifies the ID-token nonce against the PKCE challenge, proves the link by subject and verified email, and checks the account's current role and state. The provider client secret and the link list live on the API. Existing app token rotation, logout, and server-side permissions apply after Google sign-in.
 
 ### Catalog — `menu-and-recipes`
 

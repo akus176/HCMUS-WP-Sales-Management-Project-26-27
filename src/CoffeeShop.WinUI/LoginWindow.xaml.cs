@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Diagnostics;
 using CoffeeShop.WinUI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -14,6 +16,7 @@ public sealed partial class LoginWindow : Window
     private bool initialized;
     private bool signingIn;
     private bool closed;
+    private CancellationTokenSource? googleCancellation;
 
     public LoginWindow()
     {
@@ -44,6 +47,10 @@ public sealed partial class LoginWindow : Window
 
     private async void OnSignIn(object sender, RoutedEventArgs e) => await SignInAsync();
 
+    private async void OnGoogleSignIn(object sender, RoutedEventArgs e) => await SignInAsync(google: true);
+
+    private void OnCancelGoogleSignIn(object sender, RoutedEventArgs e) => googleCancellation?.Cancel();
+
     private async void OnCredentialsKeyDown(object sender, KeyRoutedEventArgs e)
     {
         if (e.Key != VirtualKey.Enter) return;
@@ -65,10 +72,8 @@ public sealed partial class LoginWindow : Window
         AutomationProperties.SetHelpText(PasswordBox, "");
     }
 
-    private async Task SignInAsync()
+    private bool ValidateCredentials()
     {
-        if (signingIn || closed) return;
-        SignInFeedback.IsOpen = false;
         var missingUsername = string.IsNullOrWhiteSpace(UsernameBox.Text);
         var missingPassword = PasswordBox.Password.Length == 0;
         UsernameError.Visibility = missingUsername ? Visibility.Visible : Visibility.Collapsed;
@@ -78,15 +83,35 @@ public sealed partial class LoginWindow : Window
         if (missingUsername || missingPassword)
         {
             (missingUsername ? (Control)UsernameBox : PasswordBox).Focus(FocusState.Keyboard);
-            return;
+            return false;
         }
+        return true;
+    }
 
-        SetSigningIn(true);
-        Control retryFocus = SignInButton;
+    private async Task SignInAsync(bool google = false)
+    {
+        if (signingIn || closed) return;
+        SignInFeedback.IsOpen = false;
+        if (!google && !ValidateCredentials()) return;
+
+        using var cancellation = google ? CancellationTokenSource.CreateLinkedTokenSource(lifetime.Token) : null;
+        googleCancellation = cancellation;
+        SetSigningIn(true, google);
+        Control retryFocus = google ? GoogleSignInButton : SignInButton;
         try
         {
-            await App.Services.GetRequiredService<StaffSessionManager>()
-                .LoginAsync(UsernameBox.Text.Trim(), PasswordBox.Password, lifetime.Token);
+            if (google)
+            {
+                CancelGoogleSignInButton.Focus(FocusState.Keyboard);
+                var session = await App.Services.GetRequiredService<GoogleAdminSignIn>().LoginAsync(uri =>
+                    Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true })?.Dispose(), cancellation!.Token);
+                if (session is null) return;
+            }
+            else
+            {
+                await App.Services.GetRequiredService<StaffSessionManager>()
+                    .LoginAsync(UsernameBox.Text.Trim(), PasswordBox.Password, lifetime.Token);
+            }
             if (closed) return;
             ((App)Microsoft.UI.Xaml.Application.Current).ShowMainWindow();
             Close();
@@ -95,6 +120,15 @@ public sealed partial class LoginWindow : Window
         {
             if (closed) return;
             var unauthorized = exception.Kind == ApiErrorKind.Unauthorized;
+            if (google)
+            {
+                ShowError("Couldn't sign in with Google", unauthorized
+                    ? "Use the Google account linked to your active administrator profile."
+                    : exception.Kind == ApiErrorKind.Network
+                        ? "Can't reach Corner Cafe. Check your connection and try again."
+                        : "Google sign-in is unavailable. Try again or contact your administrator.");
+                return;
+            }
             ShowError(unauthorized ? "Check your sign-in details" : "Couldn't sign in",
                 unauthorized ? "The username or password wasn't accepted. Check both and try again."
                 : exception.Kind == ApiErrorKind.Network ? "Can't reach Corner Cafe. Check your connection and try again."
@@ -104,11 +138,16 @@ public sealed partial class LoginWindow : Window
         }
         catch (OperationCanceledException)
         {
-            if (!closed) ShowError("Sign-in timed out", "The service took too long to respond. Try again.");
+            if (!closed && cancellation?.IsCancellationRequested != true)
+                ShowError("Sign-in timed out", google ? "Finish signing in in your browser and try again." : "The service took too long to respond. Try again.");
         }
         catch (HttpRequestException)
         {
             if (!closed) ShowError("Couldn't connect", "Can't reach Corner Cafe. Check your connection and try again.");
+        }
+        catch (Exception exception) when (google && exception is Win32Exception or InvalidOperationException)
+        {
+            if (!closed) ShowError("Couldn't open Google sign-in", "Check that you have a default browser and that Corner Cafe uses a secure connection.");
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
@@ -116,6 +155,7 @@ public sealed partial class LoginWindow : Window
         }
         finally
         {
+            googleCancellation = null;
             if (!closed)
             {
                 SetSigningIn(false);
@@ -124,14 +164,15 @@ public sealed partial class LoginWindow : Window
         }
     }
 
-    private void SetSigningIn(bool value)
+    private void SetSigningIn(bool value, bool google = false)
     {
         signingIn = value;
-        UsernameBox.IsEnabled = PasswordBox.IsEnabled = SignInButton.IsEnabled = !value;
-        SignInButton.Content = value ? "Signing in…" : "Sign in";
+        UsernameBox.IsEnabled = PasswordBox.IsEnabled = SignInButton.IsEnabled = GoogleSignInButton.IsEnabled = !value;
+        SignInButton.Content = value && !google ? "Signing in…" : "Sign in";
+        CancelGoogleSignInButton.Visibility = value && google ? Visibility.Visible : Visibility.Collapsed;
         SigningInProgress.IsActive = value;
         SigningInProgress.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-        SigningInStatus.Text = value ? "Checking your account…" : "";
+        SigningInStatus.Text = !value ? "" : google ? "Continue in your browser…" : "Checking your account…";
     }
 
     private void ShowError(string title, string message)

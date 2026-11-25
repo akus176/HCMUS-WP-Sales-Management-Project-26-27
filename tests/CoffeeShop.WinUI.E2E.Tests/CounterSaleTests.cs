@@ -238,6 +238,32 @@ public sealed partial class CounterSaleTests(ITestOutputHelper output)
         }
     }
 
+    [Fact]
+    public void GoogleSignInShowsServiceFeedbackWhenDisabled()
+    {
+        using var automation = new UIA3Automation();
+        using var app = LaunchApp();
+        try
+        {
+            Window? FindWindow(string id) => app.GetAllTopLevelWindows(automation)
+                .FirstOrDefault(candidate => FindId(candidate, id) is not null);
+            var window = WaitFor("Windows login or restored session", () => FindWindow("GoogleAdminSignIn") ?? FindWindow("SignOutButton"));
+            if (FindId(window, "SignOutButton") is not null)
+            {
+                Press(window, "SignOutButton");
+                window = WaitFor("Windows Google sign-in button", () => FindWindow("GoogleAdminSignIn"));
+            }
+            Press(window, "GoogleAdminSignIn");
+            WaitFor("Google sign-in service feedback", () => FindName(window, "Couldn't sign in with Google"));
+            Assert.True(Find(window, "SignInButton").IsEnabled);
+            Assert.True(Find(window, "GoogleAdminSignIn").IsEnabled);
+        }
+        finally
+        {
+            if (!app.HasExited) app.Kill();
+        }
+    }
+
     private static Application LaunchApp()
     {
         var exe = Required("COFFEESHOP_E2E_EXE");
