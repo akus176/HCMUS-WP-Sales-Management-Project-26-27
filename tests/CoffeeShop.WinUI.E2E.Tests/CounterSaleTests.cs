@@ -300,10 +300,20 @@ public sealed partial class CounterSaleTests(ITestOutputHelper output)
     private static void SelectOption(Window window, UIA3Automation automation, AutomationElement combo, string choice)
     {
         var dropdown = combo.Patterns.ExpandCollapse.Pattern;
-        dropdown.Expand();
+        combo.Focus();
         var option = WaitFor($"{choice} in {combo.Properties.Name.ValueOrDefault}", () =>
-            window.FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem)))
-            ?? automation.GetDesktop().FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem))));
+        {
+            if (combo.IsOffscreen) return null;
+            if (dropdown.ExpandCollapseState.Value == ExpandCollapseState.Collapsed)
+            {
+                // The form can close the popup while scrolling a newly added field into view.
+                dropdown.Expand();
+                return null;
+            }
+
+            return window.FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem)))
+                ?? automation.GetDesktop().FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem)));
+        });
         option.Patterns.SelectionItem.Pattern.Select();
         if (dropdown.ExpandCollapseState.Value == ExpandCollapseState.Expanded) dropdown.Collapse();
     }
