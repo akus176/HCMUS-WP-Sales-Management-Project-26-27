@@ -18,18 +18,21 @@ public static class StaffProvisioning
             ? throw new InvalidOperationException($"Supply ProvisionStaff:{name} through local secret configuration.")
             : configuration[$"ProvisionStaff:{name}"]!;
         var username = Required("Username").Trim();
-        var password = Required("Password");
+        var googleOnly = configuration.GetValue<bool>("ProvisionStaff:GoogleOnly");
+        var password = googleOnly ? null : Required("Password");
         var email = Required("Email");
         var fullName = Required("FullName");
         var roles = Required("Roles").Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Distinct().ToArray();
-        if (username.Length > 50 || email.Length > 255 || fullName.Length > 150 || password.Length is < 12 or > 1024 ||
+        if (username.Length > 50 || email.Length > 255 || fullName.Length > 150 || password?.Length is < 12 or > 1024 ||
+            googleOnly && !roles.Contains("Admin") ||
             roles.Length == 0 || roles.Any(role => !StaffRoleSeed.Bundles.ContainsKey(role)))
             throw new InvalidOperationException("Invalid staff profile, password length, or operational role selection.");
         if (await db.Users.AnyAsync(user => user.Username == username || user.Email == email.ToLowerInvariant()))
             throw new InvalidOperationException("Staff account already exists; provisioning never overwrites an account.");
         var now = new UtcTimestamp(DateTimeOffset.UtcNow);
         var user = new User(EntityId.New(), username, email, "pending", fullName, null, now, now);
-        db.Entry(user).Property(u => u.PasswordHash).CurrentValue = StaffIdentityService.HashPassword(user, password);
+        db.Entry(user).Property(u => u.PasswordHash).CurrentValue = password is null
+            ? StaffIdentityService.NoPasswordHash : StaffIdentityService.HashPassword(user, password);
         db.Users.Add(user);
         foreach (var roleCode in roles)
         {
@@ -37,5 +40,6 @@ public static class StaffProvisioning
             db.UserRoles.Add(new(user.Id, role.Id, now));
         }
         await db.SaveChangesAsync();
+        if (googleOnly) Console.WriteLine($"Provisioned Google-only administrator ID: {user.Id.Value}");
     }
 }

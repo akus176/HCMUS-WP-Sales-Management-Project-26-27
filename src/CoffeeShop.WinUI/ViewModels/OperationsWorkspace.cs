@@ -8,22 +8,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CoffeeShop.WinUI.ViewModels;
 
-public sealed record ServiceBoardTableRow(string TableNumber, string Availability, string Association)
-{
-    public string AccessibilityLabel => Association == "No active order"
-        ? $"Table {TableNumber}, available"
-        : Association == "Order details unavailable"
-            ? $"Table {TableNumber}, occupied, order details unavailable"
-            : $"Table {TableNumber}, {Availability.ToLowerInvariant()}, order {Association}";
-}
-
 public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperatorSession session,
     ApiOperationsSource? api = null) : INotifyPropertyChanged
 {
     private EntityId? pendingPaymentId;
     public event PropertyChangedEventHandler? PropertyChanged;
     public IReadOnlyList<OperationalOrder> Orders { get; private set; } = [];
-    public IReadOnlyList<OperationalTable> Tables { get; private set; } = [];
     public IReadOnlyList<DeliveryStaffOption> DeliveryStaff { get; private set; } = [];
     public IReadOnlyList<PosStaffOption> Staff { get; private set; } = [];
     public PosStaffOption? Operator
@@ -40,11 +30,10 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public bool RequiresReload { get; private set; }
     public bool CanMutate => !IsBusy && !RequiresReload;
     public Error? Error { get; private set; }
-    public string Message { get; private set; } = "Load operational work to see the current queue, tables and fulfillment controls.";
-    public bool IsEmpty => !IsBusy && Error is null && Orders.Count == 0 && Tables.Count == 0;
+    public string Message { get; private set; } = "Load operational work to see the current queue and fulfillment controls.";
+    public bool IsEmpty => !IsBusy && Error is null && Orders.Count == 0;
     public bool HasOperator => session.IsAuthenticated;
     public bool ApiMode => api is not null;
-    public bool CanViewTables => !ApiMode || session.HasPermission("orders.create");
     public bool CanFulfill => !ApiMode || session.HasPermission("orders.fulfill");
     public bool CanComplete => !ApiMode || session.HasPermission("orders.complete");
     public bool CanRecordPayments => !ApiMode || session.HasPermission("payments.record");
@@ -54,19 +43,6 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
     public bool CanUpdateDelivery => !ApiMode || session.HasPermission("delivery.update");
     public WorkflowFeedback Feedback => WorkflowFeedback.Resolve(IsBusy, IsEmpty, Error, Message);
 
-    public static IReadOnlyList<ServiceBoardTableRow> BuildTableRows(IEnumerable<OperationalTable> tables,
-        IEnumerable<OperationalOrder> orders)
-    {
-        var orderNumbers = orders.ToDictionary(order => order.Id, order => order.OrderNumber);
-        return tables.OrderBy(table => table.TableNumber, StringComparer.CurrentCultureIgnoreCase)
-            .Select(table => new ServiceBoardTableRow(table.TableNumber,
-                table.IsOccupied ? "Occupied" : "Available",
-                !table.IsOccupied ? "No active order"
-                    : table.ActiveOrderId is { } orderId && orderNumbers.TryGetValue(orderId, out var number)
-                        ? number : "Order details unavailable"))
-            .ToArray();
-    }
-
     public void EnableOperationalWorkflow() => session.EnableOperationalWorkflow();
 
     public async Task LoadAsync() => await RunAsync(async provider =>
@@ -75,15 +51,14 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         {
             var snapshot = await api.LoadAsync();
             Orders = snapshot.Orders;
-            Tables = snapshot.Tables;
             DeliveryStaff = snapshot.DeliveryStaff;
             Staff = snapshot.Staff;
             session.Operator = Staff.SingleOrDefault();
             await LoadDetailsAsync(provider);
             if (SelectedOrderId is null || Orders.All(order => order.Id != SelectedOrderId))
                 SelectedOrderId = Orders.FirstOrDefault(order => order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready)?.Id;
-            Message = Orders.Count == 0 && Tables.Count == 0
-                ? "No operational records yet. Create and confirm an order from Point of Sale to begin."
+            Message = Orders.Count == 0
+                ? "No active orders. Confirm a ticket at Counter to start service."
                 : "Choose an order. Controls are enabled only for your permissions and its current lifecycle state.";
             RequiresReload = false;
             pendingPaymentId = null;
@@ -91,15 +66,14 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         }
         var queries = provider.GetRequiredService<FulfillmentOperationsQueryHandler>();
         Orders = await queries.GetOrdersAsync();
-        Tables = await queries.GetTablesAsync();
         DeliveryStaff = await queries.GetDeliveryStaffAsync();
         Staff = (await provider.GetRequiredService<PosOrderHandler>().GetOptionsAsync()).Staff;
         if (session.Operator is { } actor && Staff.All(staff => staff.Id != actor.Id)) session.Operator = null;
         await LoadDetailsAsync(provider);
         if (SelectedOrderId is null || Orders.All(order => order.Id != SelectedOrderId))
             SelectedOrderId = Orders.FirstOrDefault(order => order.Status is OrderStatus.Confirmed or OrderStatus.Preparing or OrderStatus.Ready)?.Id;
-        Message = Orders.Count == 0 && Tables.Count == 0
-            ? "No operational records yet. Create and confirm an order from Point of Sale to begin."
+        Message = Orders.Count == 0
+            ? "No active orders. Confirm a ticket at Counter to start service."
             : "Choose an order. Controls are enabled only for its current lifecycle state.";
     });
 
@@ -269,7 +243,6 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         {
             var snapshot = await api.LoadAsync();
             Orders = snapshot.Orders;
-            Tables = snapshot.Tables;
             DeliveryStaff = snapshot.DeliveryStaff;
             Staff = snapshot.Staff;
             await LoadDetailsAsync(provider);
@@ -280,7 +253,6 @@ public sealed class OperationsWorkspace(IServiceScopeFactory scopes, PosOperator
         }
         var queries = provider.GetRequiredService<FulfillmentOperationsQueryHandler>();
         Orders = await queries.GetOrdersAsync();
-        Tables = await queries.GetTablesAsync();
         DeliveryStaff = await queries.GetDeliveryStaffAsync();
         await LoadDetailsAsync(provider);
         Message = success;

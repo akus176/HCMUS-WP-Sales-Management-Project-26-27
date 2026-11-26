@@ -1,0 +1,43 @@
+{
+  "baseRevision": "c0010b2adaea1db26004dd6a5cf5df9593b43001",
+  "implementationRevision": "a2e7cef93955b3609e2f94f1f8636d0266df9b9b",
+  "checks": {
+    "node": "26.5.0",
+    "npm": "11.17.0",
+    "typecheck": "passed",
+    "lint": "passed",
+    "format": "passed",
+    "tests": 357,
+    "suites": 29,
+    "forwardingHarnessChecks": 7
+  },
+  "sourceSha256": {
+    "apps/staff-mobile/app/modules/approvals/operations.tsx": "305d404cdb4e81992623f538306926e4fa482f64128ec083ee10d8837cdede5e",
+    "apps/staff-mobile/src/barista/PreparationScreen.tsx": "8864b267db6c292645c3fc1bb817f307ab365570a580df540999c80aa542c7a6",
+    "apps/staff-mobile/src/connectivity/ConnectivityBanner.tsx": "13b669efb0c9988e6a70ae05d5b851828c54ba81b25fed9012bca04927745ffc",
+    "apps/staff-mobile/src/features/administration/StaffAdministration.tsx": "99bccd3902a096839562954c8b1406beb43902d64a54ddfc0bab36d3ed5f8e90",
+    "apps/staff-mobile/src/features/approvals/DiscountApprovals.tsx": "b0f00352e5042f1e0e22a991aec169ad624ca48db5a96556a322332098294bfe",
+    "apps/staff-mobile/src/features/delivery/DeliveryDetail.tsx": "d56e83aa18a090158ea9c28ace1192a2bb94052264ab66836d889f8be1ec2169",
+    "apps/staff-mobile/src/features/delivery/DeliveryScreen.tsx": "665529a48e1a1dee37a8498e90657c884dfd836228ae4a593846079d20642d75",
+    "apps/staff-mobile/src/features/inventory/InventoryWorkspace.tsx": "d05faa4912b1c24ec8e9eaddaa984f05b0a4fd0a48dc437e0c646c2761bf8436",
+    "apps/staff-mobile/src/features/orders/OrdersScreen.tsx": "9d3e61b8d6028b47aa823cb4ae0a455a29a1cbc671ab180c69330d0cf4c89ddb",
+    "apps/staff-mobile/src/shell/NativeWorkspaceHost.tsx": "ff7f2ae06e30f5e43c4fbf0b702685543d88c79c19b7d638d09637fdb3c13321",
+    "apps/staff-mobile/src/shell/controls.tsx": "c82545f67f65708f66a193a525038ed1a5f30c8fa8fc337db759ea50c3ca92f9",
+    "apps/staff-mobile/tests/native-navigation.test.tsx": "cf26d39f57cda6edb44c80dbb4bbe3995e0b6e5d3120bfd5f4bd326f77a006fb",
+    "apps/staff-mobile/tests/shell-controls.test.tsx": "88b4fe45a02eecf6d0c81d95b6d01479f7f698ea1dd1bfa94b3e7282d2dcf855"
+  },
+  "limits": [
+    "Native Manager navigation only; other roles retain component coverage",
+    "No manual TalkBack, iOS, tablet or release-acceptance claim"
+  ],
+  "nativeChecks": {
+    "platform": "Android API 36.1 / Expo Go",
+    "role": "Manager",
+    "service": "real local API",
+    "normalHeaderStatesPassed": 14,
+    "largeTextHeaderStatesPassed": 4,
+    "fontScaleRestored": 1.0,
+    "businessWrites": 0,
+    "method": "Android UI hierarchy bounds assertions and selected screenshot inspection"
+  }
+}

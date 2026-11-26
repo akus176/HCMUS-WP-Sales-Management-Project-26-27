@@ -25,7 +25,6 @@ public sealed class ApiOperationsSourceTests
             {
                 "/api/v1/orders" => Json(new[] { new OperationalOrderResponse(orderId, "D-101", "delivery",
                     "ready", 24m, 24m, null, assigned ? "assigned" : "unassigned", assigned ? staffId : null, []) }),
-                "/api/v1/pos/tables" => Json(Array.Empty<PosTableResponse>()),
                 "/api/v1/delivery-staff/options" => Json(new[] { new DeliveryStaffResponse(staffId, "Courier One") }),
                 _ when request.RequestUri.AbsolutePath == $"/api/v1/orders/{orderId}/assign-delivery" => OnAssignment(request),
                 _ => throw new InvalidOperationException($"Unexpected route {request.RequestUri.AbsolutePath}"),
@@ -50,15 +49,15 @@ public sealed class ApiOperationsSourceTests
         var assignment = Assert.Single(requests, request => request.Method == "POST");
         Assert.Equal($"/api/v1/orders/{orderId}/assign-delivery", assignment.Path);
         Assert.Equal($"{{\"staffId\":\"{staffId}\"}}", assignment.Body);
+        Assert.DoesNotContain(requests, request => request.Path == "/api/v1/pos/tables");
         Assert.All(requests, request => Assert.Equal("fixture-access", request.Token));
     }
 
     [Fact]
-    public async Task Manager_UsesApiForTableBoardPaymentDiscountCancellationAndOrderTransitions()
+    public async Task Manager_UsesApiForPaymentDiscountCancellationAndOrderTransitions()
     {
         var orderId = Guid.NewGuid();
         var staffId = Guid.NewGuid();
-        var tableId = Guid.NewGuid();
         var requests = new List<(string Method, string Path, string? Token)>();
         using var http = CreateClient(request =>
         {
@@ -67,7 +66,6 @@ public sealed class ApiOperationsSourceTests
             {
                 "/api/v1/orders" => Json(new[] { new OperationalOrderResponse(orderId, "D-104", "dine_in",
                     "confirmed", 24m, 0m, "T1", null, null, [Guid.NewGuid()]) }),
-                "/api/v1/pos/tables" => Json(new[] { new PosTableResponse(tableId, "T1", 4, true, orderId) }),
                 "/api/v1/delivery-staff/options" => Json(new[] { new DeliveryStaffResponse(staffId, "Courier One") }),
                 _ => new(HttpStatusCode.NoContent),
             };
@@ -86,10 +84,9 @@ public sealed class ApiOperationsSourceTests
         await source.DecideDiscountAsync(new(discountId), approve: true);
         await source.CancelAsync(new(orderId), "Customer changed their mind");
 
-        Assert.Equal(tableId, Assert.Single(snapshot.Tables).Id.Value);
         Assert.Equal(staffId, Assert.Single(snapshot.DeliveryStaff).Id.Value);
         Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/orders");
-        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/pos/tables");
+        Assert.DoesNotContain(requests, request => request.Path == "/api/v1/pos/tables");
         Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/preparing");
         Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/ready");
         Assert.Contains(requests, request => request.Method == "POST" && request.Path == $"/api/v1/orders/{orderId}/complete");

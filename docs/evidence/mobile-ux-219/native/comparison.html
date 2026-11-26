@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Staff mobile #219 — native concept comparison</title>
+    <style>
+        body {
+            margin: 24px;
+            color: #302820;
+            background: #fff9ed;
+            font:
+                16px/1.5 system-ui,
+                sans-serif;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        p {
+            max-width: 960px;
+        }
+        label {
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            margin: 8px 24px 16px 0;
+        }
+        select {
+            font: inherit;
+            padding: 8px;
+        }
+        main {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            overflow-x: auto;
+        }
+        figure {
+            margin: 0;
+            flex: 0 0 392px;
+        }
+        figcaption {
+            padding: 8px 0;
+        }
+        .frame {
+            width: 390px;
+            height: 844px;
+            overflow: hidden;
+            border: 1px solid #6d4936;
+            background: #fff9ed;
+        }
+        img {
+            display: block;
+            width: 390px;
+            height: auto;
+        }
+        .native img {
+            margin-top: -29px;
+        }
+        .art {
+            height: auto;
+        }
+        .chrome .native {
+            height: 888px;
+        }
+        .chrome .native img {
+            margin-top: 0;
+        }
+        small {
+            display: block;
+            max-width: 390px;
+        }
+    </style>
+    <h1>Preparation: original native captures and concept</h1>
+    <p>
+        Native content is measured at 390×844dp. The PNGs are unmodified; this
+        viewer clips the measured 29dp status bar and 15dp navigation bar using
+        CSS. Images retain their aspect ratios. The generated concept is
+        approximately 390×845dp at this display width; it is a design reference,
+        not a running application.
+    </p>
+    <label
+        >State
+        <select id="state">
+            <option value="queue">Queue ledger</option>
+            <option value="confirmation">Ready confirmation</option>
+            <option value="canceled">After Keep preparing</option>
+        </select></label
+    >
+    <label
+        ><input id="chrome" type="checkbox" /> Show Android system chrome</label
+    >
+    <main>
+        <figure>
+            <figcaption>Before · <code>a5a4f0d</code></figcaption>
+            <div class="frame native">
+                <img
+                    id="before"
+                    src="reference/before-queue.png"
+                    alt="Before: native Preparation queue"
+                />
+            </div>
+        </figure>
+        <figure>
+            <figcaption>
+                After · <code id="after-revision">5876e57</code>
+            </figcaption>
+            <div class="frame native">
+                <img
+                    id="after"
+                    src="reference/after-queue.png"
+                    alt="After: native Preparation ledger"
+                />
+            </div>
+        </figure>
+        <figure>
+            <figcaption>Concept · <code>931f7ca</code></figcaption>
+            <div class="frame art">
+                <img
+                    id="art"
+                    src="../../../ui-concepts/mobile-2026-11-22/01-queue-ledger.png"
+                    alt="Queue ledger concept reference"
+                />
+            </div>
+            <small id="note"
+                >Live data and service ordering are retained. Measurable token
+                and accessibility rules govern raster ambiguities.</small
+            >
+        </figure>
+    </main>
+    <p>
+        See
+        <a href="reference/README.md"
+            >capture provenance, measured targets and deliberate differences</a
+        >,
+        <a href="reference/manifest.json">original reference SHA-256 hashes</a>,
+        <a href="confirmation/images.json">recorded detail SHA-256 hashes</a>
+        and
+        <a href="reference/cancellation-state.json"
+            >original independent cancellation state checks</a
+        >.
+        <a href="confirmation/README.md"
+            >Responsive confirmation checks at fea0541</a
+        >
+        include a fresh measured 390×844dp detail capture on
+        <code>fea0541</code>.
+    </p>
+    <script>
+        const state = document.getElementById("state");
+        state.addEventListener("change", () => {
+            for (const stage of ["before", "after"]) {
+                const img = document.getElementById(stage);
+                img.src =
+                    stage === "after" && state.value !== "queue"
+                        ? `confirmation/ref100/after-${state.value}.png`
+                        : `reference/${stage}-${state.value}.png`;
+                img.alt = `${stage}: native ${state.options[state.selectedIndex].text}`;
+            }
+            document.getElementById("after-revision").textContent =
+                state.value === "queue" ? "5876e57" : "fea0541";
+            document.getElementById("art").src =
+                `../../../ui-concepts/mobile-2026-11-22/${state.value === "queue" ? "01-queue-ledger" : "03-ticket-focus"}.png`;
+            document.getElementById("note").textContent =
+                state.value === "canceled"
+                    ? "The concept depicts confirmation. Keep preparing intentionally closes it and restores Mark ready without changing server state."
+                    : "Live data and service ordering are retained. Measurable token and accessibility rules govern raster ambiguities.";
+        });
+        document
+            .getElementById("chrome")
+            .addEventListener("change", (event) => {
+                document.body.classList.toggle("chrome", event.target.checked);
+            });
+    </script>
+</html>

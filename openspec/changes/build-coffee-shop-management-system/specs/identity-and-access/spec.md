@@ -5,18 +5,27 @@ Defines final-version staff authentication, token lifecycle, account state, role
 ## ADDED Requirements
 
 ### Requirement: Staff authentication
-The final system SHALL authenticate active staff accounts with valid credentials and issue a short-lived access token plus a refresh token after successful login.
+The final deployment SHALL authenticate active non-administrator staff with a username and password and SHALL authenticate administrators through their linked Google identity in WinUI. Both flows SHALL issue the same application access and refresh tokens. Isolated local and test deployments MAY run with Google sign-in disabled and use existing credential fixtures.
 
 #### Scenario: Successful login
-- **WHEN** an active staff member submits valid credentials
+- **WHEN** an active non-administrator staff member submits valid credentials
 - **THEN** the system returns access and refresh tokens with the user's identity and effective role information
 
 #### Scenario: Invalid login
 - **WHEN** a user submits invalid credentials or uses a deactivated account
 - **THEN** authentication is rejected without issuing tokens or revealing which credential was incorrect
 
+#### Scenario: Linked administrator signs in on Windows
+- **WHEN** WinUI completes Google's system-browser authorization-code flow with PKCE and the API verifies the Google ID token signature, issuer, configured audience, expiry, nonce, and verified email
+- **THEN** the API issues application tokens only if the verified Google email matches an explicitly configured link to an existing active account with the Admin role and the same email
+
+#### Scenario: Administrator sign-in is denied
+- **WHEN** a Google identity is unlinked, has invalid claims, or maps to an inactive or non-administrator account, or an administrator attempts to use a local password in the final deployment
+- **THEN** the API returns a generic denial without issuing tokens or creating any account or role assignment
+
 ### Requirement: Token renewal and revocation
 The system SHALL rotate refresh tokens during renewal and SHALL reject expired, revoked, reused, or otherwise invalid refresh tokens.
+In the final deployment, administrator access and refresh tokens MUST originate from the current verified Google link. Removing the link or Admin role invalidates those sessions.
 
 #### Scenario: Renew an authenticated session
 - **WHEN** a valid unrevoked refresh token is submitted
@@ -42,6 +51,7 @@ Every protected operation MUST enforce authentication and authorization at the A
 
 ### Requirement: Account administration
 Authorized administrators SHALL be able to create, update, deactivate, reactivate, and assign roles to staff accounts, and MUST NOT be able to remove the final active administrator.
+Google links SHALL be provisioned explicitly in private server configuration by the deployment operator. In the final deployment the last active administrator with a valid configured link MUST also be protected from deactivation.
 
 #### Scenario: Protect the final administrator
 - **WHEN** an administrator attempts to deactivate or demote the only remaining active administrator
@@ -52,4 +62,4 @@ The system SHALL record auditable events for successful logins, failed logins, r
 
 #### Scenario: Record a denied login
 - **WHEN** authentication fails
-- **THEN** the system records the time, account identifier where available, outcome, and request context without storing the submitted password
+- **THEN** the system records the time, account identifier where available, outcome, and request context without storing passwords, OAuth codes, provider tokens, or application tokens

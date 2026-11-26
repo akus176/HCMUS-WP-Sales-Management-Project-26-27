@@ -7,8 +7,7 @@ import StarterScreen from '../app/index';
 import LoginScreen from '../app/login';
 import SessionScreen from '../app/session';
 import ModuleScreen from '../app/modules/[module]';
-import DiscountReviewScreen from '../app/modules/approvals/[discountId]';
-import ManagerOrdersScreen from '../app/modules/approvals/operations';
+import ManagerOrdersScreen from '../app/modules/cashier/operations';
 import DeliveryDetailRoute from '../app/modules/delivery/[orderId]';
 import { SessionProvider } from '../src/session/context';
 import { harness, json, user } from './helpers';
@@ -48,9 +47,7 @@ test('an unauthorized delivery deep link never loads another courier assignment'
   await act(async () => {
     router.push(`/modules/delivery/${orderId}`);
   });
-  await screen.findByText(
-    'Access unavailable. Your current permissions do not allow this module.',
-  );
+  await screen.findByText('Access unavailable. This module is not available.');
   expect(
     h.fetcher.mock.calls.some(([request]) =>
       request.url.includes('/courier/assignments'),
@@ -75,9 +72,9 @@ test('manager order-operation deep links require a signed-in authorized session 
       login: LoginScreen,
       session: SessionScreen,
       'modules/[module]': ModuleScreen,
-      'modules/approvals/operations': ManagerOrdersScreen,
+      'modules/cashier/operations': ManagerOrdersScreen,
     },
-    { initialUrl: '/modules/approvals/operations' },
+    { initialUrl: '/modules/cashier/operations' },
   );
   await waitFor(() => expect(screen).toHavePathname('/'));
   expect(h.fetcher).not.toHaveBeenCalled();
@@ -86,7 +83,7 @@ test('manager order-operation deep links require a signed-in authorized session 
   });
   await screen.findByRole('header', { name: 'Staff home' });
   await act(async () => {
-    router.push('/modules/approvals/operations');
+    router.push('/modules/cashier/operations');
   });
   await screen.findByText(
     'Access unavailable. Your current permissions do not allow this module.',
@@ -134,13 +131,9 @@ test('real routes reject signed-out and unauthorized links, allow a grant, then 
   await act(async () => {
     router.push('/modules/approvals');
   });
-  await screen.findByText(
-    'Access unavailable. Your current permissions do not allow this module.',
-  );
+  await screen.findByText('Access unavailable. This module is not available.');
   expect(screen.queryByRole('header', { name: 'Approvals' })).toBeNull();
-  await fireEvent.press(
-    screen.getByRole('button', { name: 'Back to staff home' }),
-  );
+  await fireEvent.press(screen.getByRole('tab', { name: 'Today' }));
   await fireEvent.press(
     await screen.findByRole('button', { name: 'Open Preparation' }),
   );
@@ -149,9 +142,11 @@ test('real routes reject signed-out and unauthorized links, allow a grant, then 
   ).toBeVisible();
   expect(screen.queryByText('Record payments — planned')).toBeNull();
   permissions = [];
-  await fireEvent.press(
-    screen.getByRole('button', { name: 'Back to staff home' }),
+  await act(async () => router.push('/modules/barista'));
+  await screen.findByText(
+    'Access unavailable. Your current permissions do not allow this module.',
   );
+  await fireEvent.press(screen.getByRole('tab', { name: 'Today' }));
   await screen.findByText(
     'No mobile modules are available for your permissions.',
   );
@@ -174,16 +169,18 @@ test('real routes reject signed-out and unauthorized links, allow a grant, then 
   ).toBe(true);
 });
 
-test('an unauthorized manager-approval deep link loads no discount data', async () => {
-  const h = harness(async () => json(user));
+test('the removed approval workspace never loads discount data even with the old permission', async () => {
+  const h = harness(async () =>
+    json({ ...user, permissions: ['discounts.approve'] }),
+  );
   function Layout() {
     return (
       <SessionProvider client={h.client}>
+        <QueryCleanup />
         <SessionRoutes />
       </SessionProvider>
     );
   }
-  const discountId = '00000000-0000-0000-0000-000000000011';
   await renderRouter(
     {
       _layout: Layout,
@@ -191,27 +188,17 @@ test('an unauthorized manager-approval deep link loads no discount data', async 
       login: LoginScreen,
       session: SessionScreen,
       'modules/[module]': ModuleScreen,
-      'modules/approvals/[discountId]': DiscountReviewScreen,
     },
-    { initialUrl: `/modules/approvals/${discountId}` },
+    { initialUrl: '/' },
   );
-  await waitFor(() => expect(screen).toHavePathname('/'));
-  expect(h.fetcher).not.toHaveBeenCalled();
-
-  await act(async () => {
-    await h.client.login('staff', 'fixture-password');
-  });
+  await waitFor(() => expect(h.client.getSnapshot().status).toBe('signedOut'));
+  await act(async () => h.client.login('staff', 'fixture-password'));
   await screen.findByRole('header', { name: 'Staff home' });
-  await act(async () => {
-    router.push(`/modules/approvals/${discountId}`);
-  });
-  await screen.findByText(
-    'Access unavailable. Your current permissions do not allow this module.',
-  );
-  expect(screen.queryByRole('header', { name: 'Discount review' })).toBeNull();
+  await act(async () => router.push('/modules/approvals'));
+  await screen.findByText('Access unavailable. This module is not available.');
   expect(
     h.fetcher.mock.calls.some(([request]) =>
-      request.url.includes('/api/v1/discounts/pending'),
+      request.url.includes('/discounts/'),
     ),
   ).toBe(false);
 });
@@ -247,19 +234,62 @@ test('a retained module refocuses only after a fresh permission check', async ()
   await act(async () => {
     await h.client.login('staff', 'fixture-password');
   });
-  await fireEvent.press(
-    await screen.findByRole('button', { name: 'Open Preparation' }),
-  );
+  await screen.findByRole('header', { name: 'Staff home' });
+  await act(async () => router.push('/modules/barista'));
   await screen.findByRole('header', { name: 'Preparation' });
   permissions = [];
-  // push preserves the module in navigation history, unlike replace/back-home.
+  // Legacy module links normalize into the retained native workspace host.
   await act(async () => router.push('/session'));
   await screen.findByText(
     'No mobile modules are available for your permissions.',
   );
-  await act(async () => router.back());
+  await act(async () => router.push('/modules/barista'));
   await screen.findByText(
     'Access unavailable. Your current permissions do not allow this module.',
   );
   expect(screen.queryByRole('header', { name: 'Preparation' })).toBeNull();
 });
+
+test.each(['inventory', 'delivery', 'administration'])(
+  'the %s page is unavailable in the Counter and Preparation app even with a grant',
+  async (module) => {
+    const h = harness(async () =>
+      json({
+        ...user,
+        permissions: ['inventory.manage', 'delivery.update', 'users.manage'],
+      }),
+    );
+    function Layout() {
+      return (
+        <SessionProvider client={h.client}>
+          <QueryCleanup />
+          <SessionRoutes />
+        </SessionProvider>
+      );
+    }
+    await renderRouter(
+      {
+        _layout: Layout,
+        index: StarterScreen,
+        login: LoginScreen,
+        session: SessionScreen,
+        'modules/[module]': ModuleScreen,
+      },
+      { initialUrl: '/' },
+    );
+    await waitFor(() =>
+      expect(h.client.getSnapshot().status).toBe('signedOut'),
+    );
+    await act(async () => h.client.login('staff', 'fixture-password'));
+    await screen.findByRole('header', { name: 'Staff home' });
+    await act(async () => router.push(`/modules/${module}`));
+    await screen.findByText(
+      'Access unavailable. This module is not available.',
+    );
+    expect(
+      h.fetcher.mock.calls.some(([request]) =>
+        /\/(ingredients|users|courier)(\/|\?|$)/.test(request.url),
+      ),
+    ).toBe(false);
+  },
+);

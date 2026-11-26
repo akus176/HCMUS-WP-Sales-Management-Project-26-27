@@ -4,9 +4,8 @@ name: Manager cancellation and ready delivery assignment against the shared API
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: Staff mobile
+    visible: Staff sign-in
     timeout: 60000
-- tapOn: Staff sign-in
 - tapOn: Username
 - inputText: ${MAESTRO_STAFF_USERNAME}
 - hideKeyboard
@@ -15,13 +14,15 @@ name: Manager cancellation and ready delivery assignment against the shared API
 - hideKeyboard
 - tapOn: Sign in
 - extendedWaitUntil:
-    visible: Open Approvals
+    visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 30000
-- tapOn: Open Approvals
-- tapOn: Manage cancellations and deliveries
+- tapOn:
+    id: workspace-tab-cashier
+- tapOn: Orders
 - tapOn: Search orders
+- eraseText
 - inputText: ${MAESTRO_CANCEL_ORDER}
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Open order ${MAESTRO_CANCEL_ORDER}
     direction: DOWN
@@ -45,15 +46,11 @@ name: Manager cancellation and ready delivery assignment against the shared API
     direction: UP
 - assertVisible: Cancellation confirmed by the service.
 - takeScreenshot: .maestro/results/manager-cancelled
-- scrollUntilVisible:
-    element: Back to staff home
-    direction: UP
-- tapOn: Back to staff home
-- tapOn: Open Approvals
-- tapOn: Manage cancellations and deliveries
+- tapOn: Back to order search
 - tapOn: Search orders
+- eraseText
 - inputText: ${MAESTRO_DELIVERY_ORDER}
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Open order ${MAESTRO_DELIVERY_ORDER}
     direction: DOWN

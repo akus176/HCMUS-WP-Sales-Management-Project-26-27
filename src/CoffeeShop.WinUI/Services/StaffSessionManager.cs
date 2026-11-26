@@ -29,12 +29,15 @@ public sealed class StaffSessionManager
     public StaffSession? CurrentUser => tokens?.User;
     public event Action? SessionExpired;
 
-    public async Task<StaffSession> LoginAsync(string username, string password, CancellationToken cancellationToken = default)
+    public Task<StaffSession> LoginAsync(string username, string password, CancellationToken cancellationToken = default) =>
+        LoginWithAsync(ct => identityApi.LoginAsync(username, password, ct), cancellationToken);
+
+    internal async Task<StaffSession> LoginWithAsync(Func<CancellationToken, Task<TokenResponse>> login, CancellationToken cancellationToken)
     {
         await gate.WaitAsync(cancellationToken);
         try
         {
-            var response = await identityApi.LoginAsync(username, password, cancellationToken);
+            var response = await login(cancellationToken);
             await tokenStore.SaveAsync(response.RefreshToken, cancellationToken);
             tokens = response;
             return response.User;

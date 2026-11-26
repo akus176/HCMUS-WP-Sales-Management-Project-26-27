@@ -8,23 +8,31 @@ name: Offline stock writes stay disabled and are not replayed
     direction: DOWN
 - tapOn: Search ingredients
 - inputText: ${MAESTRO_OFFLINE_INGREDIENT}
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
+- scrollUntilVisible:
+    element: Open ingredient ${MAESTRO_OFFLINE_INGREDIENT}
+    direction: DOWN
+- tapOn: Open ingredient ${MAESTRO_OFFLINE_INGREDIENT}
 - scrollUntilVisible:
     element: Record adjustment for ${MAESTRO_OFFLINE_INGREDIENT}
     direction: DOWN
 - tapOn: Record adjustment for ${MAESTRO_OFFLINE_INGREDIENT}
 - scrollUntilVisible:
-    element: Quantity change
+    element:
+      text: Quantity change
+      below: Quantity change
     direction: DOWN
-- tapOn: Quantity change
+- tapOn:
+    text: Quantity change
+    below: Quantity change
 - inputText: '2'
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - scrollUntilVisible:
     element: Adjustment reason
     direction: DOWN
 - tapOn: Adjustment reason
 - inputText: Must never be saved
-- hideKeyboard
+- runFlow: usability/hide-keyboard.yaml
 - setAirplaneMode: enabled
 - extendedWaitUntil:
     visible: 'Offline.*'
@@ -38,7 +46,8 @@ name: Offline stock writes stay disabled and are not replayed
     enabled: false
 - setAirplaneMode: disabled
 - extendedWaitUntil:
-    visible: 'Online.*'
+    visible:
+      text: Save adjustment
+      enabled: true
     timeout: 30000
-- assertVisible: 'Online.*'
 - assertNotVisible: 'Adjustment saved by the server.*'

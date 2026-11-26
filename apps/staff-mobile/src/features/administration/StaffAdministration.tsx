@@ -1,5 +1,6 @@
+import { useNativeNavigation } from '../../shell/NativeNavigation';
 import { useMemo, useState } from 'react';
-import { Alert, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 
 import { ApiError } from '../../api/errors';
@@ -12,11 +13,19 @@ import { useSession } from '../../session/context';
 import type { StaffSession } from '../../session/session';
 import {
   ShellButton,
+  ShellHeaderAction,
+  ShellPageHeader,
   ShellFeedback,
   ShellHeading,
   ShellText,
+  ShellInput,
+  ShellSelection,
+  ShellPinnedHeader,
+  usePageNavigation,
+  ShellMutationFeedback,
 } from '../../shell/controls';
 import { mobileTokens } from '../../shell/designTokens';
+import { recordRow } from '../../shell/recordPresentation';
 
 type StaffAccount = components['schemas']['StaffAccountResponse'];
 type SecurityEvent = components['schemas']['SecurityEventResponse'];
@@ -42,16 +51,29 @@ function errorMessage(error: unknown, operation: string) {
   return `${operation} could not be completed. Refresh the data and try again.`;
 }
 
-export function StaffAdministration({ user }: { user: StaffSession }) {
+export function StaffAdministration({
+  user,
+  showHeading = true,
+}: {
+  user: StaffSession;
+  showHeading?: boolean;
+}) {
   const { client } = useSession();
+  const native = useNativeNavigation();
   const { canMutate, refreshConnection } = useConnectivity();
   const [search, setSearch] = useState('');
+  const navigation = usePageNavigation();
+  const [section, setSection] = useState<'accounts' | 'events'>('accounts');
   const [selectedAccountId, setSelectedAccountId] = useState<string>();
   const [activeFilter, setActiveFilter] = useState<
     'active' | 'inactive' | 'all'
   >('active');
   const [eventType, setEventType] = useState<string | undefined>();
-  const [actionFeedback, setActionFeedback] = useState<string>();
+  const [actionFeedback, setActionFeedback] = useState<{
+    kind: 'success' | 'error';
+    label: string;
+    accountId: string;
+  }>();
   const queryKey = useMemo(
     () => ['staff-administration', user.id] as const,
     [user.id],
@@ -121,12 +143,18 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
       return data;
     },
     onSuccess: (account) => {
-      setActionFeedback(
-        `${account.fullName} is now inactive. Their active sessions were revoked.`,
-      );
+      setActionFeedback({
+        kind: 'success',
+        label: `${account.fullName} is now inactive. Their active sessions were revoked.`,
+        accountId: account.id,
+      });
     },
-    onError: (error) => {
-      setActionFeedback(errorMessage(error, 'Deactivation'));
+    onError: (error, accountId) => {
+      setActionFeedback({
+        kind: 'error',
+        label: errorMessage(error, 'Deactivation'),
+        accountId,
+      });
     },
   });
 
@@ -157,90 +185,132 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
 
   return (
     <>
-      <ShellHeading>Staff administration</ShellHeading>
-      <ShellText>
-        Find accounts, deactivate an eligible account, and review security
-        events.
-      </ShellText>
-      <ShellText>
-        Account creation and role editing are not available here.
-      </ShellText>
-
-      <ShellHeading>Staff accounts</ShellHeading>
-      <TextInput
-        accessibilityLabel="Search staff accounts"
-        autoCapitalize="none"
-        autoCorrect={false}
-        onChangeText={setSearch}
-        placeholder="Search name, username, or email"
-        placeholderTextColor={mobileTokens.color.disabledText}
-        style={styles.search}
-        value={search}
-      />
-      <View style={styles.filters}>
-        {(['active', 'inactive', 'all'] as const).map((filter) => (
+      {showHeading && <ShellPageHeader title="Staff administration" />}
+      <ShellMutationFeedback mutation={deactivation} />
+      <ShellPinnedHeader enabled={!!native?.user}>
+        <ShellSelection>
           <ShellButton
-            key={filter}
-            label={`${filter[0]?.toUpperCase()}${filter.slice(1)} accounts`}
-            selected={activeFilter === filter}
+            label="Staff accounts"
+            selected={section === 'accounts'}
+            compact
             variant="secondary"
-            onPress={() => setActiveFilter(filter)}
+            onPress={() => {
+              setSection('accounts');
+              setSelectedAccountId(undefined);
+            }}
           />
-        ))}
-      </View>
-      {accountsQuery.isPending ? (
-        <ShellFeedback kind="loading" label="Loading staff accounts…" />
-      ) : accountsQuery.error ? (
+          <ShellButton
+            label="Security events"
+            selected={section === 'events'}
+            compact
+            variant="secondary"
+            onPress={() => {
+              setSection('events');
+              setSelectedAccountId(undefined);
+            }}
+          />
+        </ShellSelection>
+      </ShellPinnedHeader>
+      {actionFeedback?.kind === 'success' && (
         <ShellFeedback
-          kind="error"
-          label={errorMessage(accountsQuery.error, 'Staff account search')}
+          kind={actionFeedback.kind}
+          label={actionFeedback.label}
         />
-      ) : !accountsQuery.data?.length ? (
-        <ShellFeedback
-          kind="empty"
-          label="No staff accounts match this search."
-        />
-      ) : (
-        accountsQuery.data.map((account) => (
-          <View key={account.id} style={styles.card}>
-            <ShellText>{account.fullName}</ShellText>
-            <ShellText>
-              @{account.username} · {account.isActive ? 'Active' : 'Inactive'}
-            </ShellText>
-            <ShellButton
-              label={`View details for ${account.fullName}`}
-              variant="secondary"
-              onPress={() => setSelectedAccountId(account.id)}
+      )}
+      {section === 'accounts' && !selectedAccountId && (
+        <>
+          <ShellPinnedHeader slot="search" enabled={!!native?.user}>
+            <ShellInput
+              label="Search staff accounts"
+              accessibilityLabel="Search staff accounts"
+              autoCapitalize="none"
+              autoCorrect={false}
+              onChangeText={setSearch}
+              placeholder="Search name, username, or email"
+              placeholderTextColor={mobileTokens.color.disabledText}
+              value={search}
             />
-            {account.isActive && (
-              <ShellButton
-                label={`Deactivate ${account.fullName}`}
-                disabled={!canMutate || deactivation.isPending}
-                loading={deactivation.isPending}
-                loadingLabel="Deactivating account…"
-                variant="secondary"
-                onPress={() => {
-                  Alert.alert(
-                    'Deactivate staff account?',
-                    `Deactivate ${account.fullName}? Their active sessions will be revoked.`,
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      {
-                        text: 'Deactivate',
-                        style: 'destructive',
-                        onPress: () => deactivation.mutate(account.id),
-                      },
-                    ],
-                  );
-                }}
-              />
-            )}
-          </View>
-        ))
+            <ShellSelection>
+              {(['active', 'inactive', 'all'] as const).map((filter) => (
+                <ShellButton
+                  key={filter}
+                  label={`${filter[0]?.toUpperCase()}${filter.slice(1)} accounts`}
+                  selected={activeFilter === filter}
+                  compact
+                  variant="secondary"
+                  onPress={() => setActiveFilter(filter)}
+                />
+              ))}
+            </ShellSelection>
+          </ShellPinnedHeader>
+          {accountsQuery.isPending ? (
+            <ShellFeedback kind="loading" label="Loading staff accounts…" />
+          ) : accountsQuery.error ? (
+            <ShellFeedback
+              kind="error"
+              label={errorMessage(accountsQuery.error, 'Staff account search')}
+            />
+          ) : !accountsQuery.data?.length ? (
+            <ShellFeedback
+              kind="empty"
+              label="No staff accounts match this search."
+            />
+          ) : (
+            accountsQuery.data.map((account) => (
+              <View key={account.id} style={styles.card}>
+                <ShellText>{account.fullName}</ShellText>
+                <ShellText>
+                  @{account.username} ·{' '}
+                  {account.isActive ? 'Active' : 'Inactive'}
+                </ShellText>
+                <ShellSelection>
+                  <ShellButton
+                    label={`View details for ${account.fullName}`}
+                    displayLabel="View account"
+                    variant="link"
+                    focusKey={`account:${account.id}`}
+                    onPress={() => {
+                      navigation.openDetail(`account:${account.id}`);
+                      setSelectedAccountId(account.id);
+                    }}
+                  />
+                </ShellSelection>
+                {account.isActive && (
+                  <ShellButton
+                    label={`Deactivate ${account.fullName}`}
+                    disabled={
+                      deactivation.isWriteDisabled || deactivation.isPending
+                    }
+                    loading={deactivation.isPending}
+                    loadingLabel="Deactivating account…"
+                    variant="secondary"
+                    onPress={() => {
+                      Alert.alert(
+                        'Deactivate staff account?',
+                        `Deactivate ${account.fullName}? Their active sessions will be revoked.`,
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          {
+                            text: 'Deactivate',
+                            style: 'destructive',
+                            onPress: () => deactivation.mutate(account.id),
+                          },
+                        ],
+                      );
+                    }}
+                  />
+                )}
+                {actionFeedback?.kind === 'error' &&
+                  actionFeedback.accountId === account.id && (
+                    <ShellFeedback kind="error" label={actionFeedback.label} />
+                  )}
+              </View>
+            ))
+          )}
+        </>
       )}
       {selectedAccountId && (
         <View style={styles.card}>
-          <ShellHeading>Account details</ShellHeading>
           {accountDetailQuery.isPending ? (
             <ShellFeedback kind="loading" label="Loading account details…" />
           ) : accountDetailQuery.error ? (
@@ -278,43 +348,53 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
               )}
             </>
           ) : null}
-          <ShellButton
+          <ShellPageHeader title="Account details" priority={1} />
+          <ShellHeaderAction
+            kind="back"
             label="Close account details"
-            variant="secondary"
-            onPress={() => setSelectedAccountId(undefined)}
+            onPress={() => {
+              setSelectedAccountId(undefined);
+              navigation.returnToList();
+            }}
           />
         </View>
       )}
-      {actionFeedback && <ShellFeedback kind="info" label={actionFeedback} />}
+      {section === 'events' && (
+        <>
+          <ShellHeading level="section">Security events</ShellHeading>
+          <ShellPinnedHeader slot="search" enabled={!!native?.user}>
+            <ShellSelection>
+              {eventFilters.map((filter) => (
+                <ShellButton
+                  key={filter.label}
+                  label={filter.label}
+                  selected={eventType === filter.value}
+                  compact
+                  variant="secondary"
+                  onPress={() => setEventType(filter.value)}
+                />
+              ))}
+            </ShellSelection>
+          </ShellPinnedHeader>
 
-      <ShellHeading>Security events</ShellHeading>
-      <View style={styles.filters}>
-        {eventFilters.map((filter) => (
-          <ShellButton
-            key={filter.label}
-            label={filter.label}
-            selected={eventType === filter.value}
-            variant="secondary"
-            onPress={() => setEventType(filter.value)}
-          />
-        ))}
-      </View>
-      {eventsQuery.isPending ? (
-        <ShellFeedback kind="loading" label="Loading security events…" />
-      ) : eventsQuery.error ? (
-        <ShellFeedback
-          kind="error"
-          label={errorMessage(eventsQuery.error, 'Security event search')}
-        />
-      ) : !eventsQuery.data?.length ? (
-        <ShellFeedback
-          kind="empty"
-          label="No security events match this filter."
-        />
-      ) : (
-        eventsQuery.data.map((event) => (
-          <EventCard key={event.id} event={event} />
-        ))
+          {eventsQuery.isPending ? (
+            <ShellFeedback kind="loading" label="Loading security events…" />
+          ) : eventsQuery.error ? (
+            <ShellFeedback
+              kind="error"
+              label={errorMessage(eventsQuery.error, 'Security event search')}
+            />
+          ) : !eventsQuery.data?.length ? (
+            <ShellFeedback
+              kind="empty"
+              label="No security events match this filter."
+            />
+          ) : (
+            eventsQuery.data.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))
+          )}
+        </>
       )}
 
       {!canMutate && (
@@ -323,12 +403,11 @@ export function StaffAdministration({ user }: { user: StaffSession }) {
           label="Reconnect to load or change staff administration data."
         />
       )}
-      <ShellButton
+      <ShellHeaderAction
+        kind="refresh"
         label="Refresh staff administration"
         disabled={accountsQuery.isFetching || eventsQuery.isFetching}
         loading={accountsQuery.isFetching || eventsQuery.isFetching}
-        loadingLabel="Refreshing staff data…"
-        variant="secondary"
         onPress={refresh}
       />
     </>
@@ -350,24 +429,6 @@ function EventCard({ event }: { event: SecurityEvent }) {
 }
 
 const styles = StyleSheet.create({
-  search: {
-    minHeight: 48,
-    borderWidth: 2,
-    borderColor: mobileTokens.color.border,
-    borderRadius: mobileTokens.shape.control,
-    backgroundColor: mobileTokens.color.background,
-    color: mobileTokens.color.foreground,
-    fontFamily: mobileTokens.type.bodyFont,
-    fontSize: mobileTokens.type.body,
-    paddingHorizontal: mobileTokens.spacing.md,
-  },
   filters: { gap: mobileTokens.spacing.sm },
-  card: {
-    gap: mobileTokens.spacing.sm,
-    borderWidth: 2,
-    borderColor: mobileTokens.color.border,
-    borderRadius: mobileTokens.shape.card,
-    backgroundColor: mobileTokens.color.background,
-    padding: mobileTokens.spacing.md,
-  },
+  card: recordRow,
 });

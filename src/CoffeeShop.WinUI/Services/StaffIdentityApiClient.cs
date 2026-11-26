@@ -6,6 +6,20 @@ namespace CoffeeShop.WinUI.Services;
 
 public sealed class StaffIdentityApiClient(HttpClient httpClient) : IStaffIdentityApi
 {
+    internal Task<GoogleAdminConfigResponse> GetGoogleConfigAsync(CancellationToken cancellationToken)
+    {
+        // The loopback exception supports the local backend. A remote API must use TLS.
+        if (httpClient.BaseAddress is not { } address || (!address.IsLoopback && address.Scheme != Uri.UriSchemeHttps))
+            throw new InvalidOperationException("Google sign-in requires an HTTPS API address.");
+        return SendAsync<GoogleAdminConfigResponse>(new HttpRequestMessage(HttpMethod.Get, "auth/google/config"), cancellationToken);
+    }
+
+    internal Task<TokenResponse> LoginWithGoogleAsync(GoogleAdminLoginRequest request, CancellationToken cancellationToken) =>
+        SendAsync<TokenResponse>(new HttpRequestMessage(HttpMethod.Post, "auth/google")
+        {
+            Content = JsonContent.Create(request),
+        }, cancellationToken);
+
     public Task<TokenResponse> LoginAsync(string username, string password, CancellationToken cancellationToken = default) =>
         SendAsync<TokenResponse>(new HttpRequestMessage(HttpMethod.Post, "auth/login")
         {

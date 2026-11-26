@@ -3,7 +3,8 @@
 The desktop client has a **Tables** workspace under **Manage** for dining-table
 setup. It requires the `tables.manage` permission, which is granted to the
 Admin and Manager role bundles. Cashiers and floor staff keep using the Counter
-table picker and the Service board overview without this setup surface.
+table picker and the Service board's ticket table numbers without this setup
+surface.
 
 Existing databases need one `dotnet CoffeeShop.Api.dll --seed-staff-roles` run
 (or the provisioning command) so the new permission link is created before the

@@ -4,7 +4,7 @@ using CoffeeShop.Domain.Sales;
 
 namespace CoffeeShop.Application.Tests.Testing;
 
-public sealed class FakeTableManagementRepository : ITableManagementRepository
+public sealed class FakeTableManagementRepository : ITableManagementWorkspaceRepository
 {
     public List<DiningTable> Tables { get; } = [];
 

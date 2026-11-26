@@ -1,27 +1,86 @@
-import { useRef, useState } from 'react';
+import { useNativeNavigation } from '../shell/NativeNavigation';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { StyleSheet, View } from 'react-native';
+import {
+  BackHandler,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 
 import { ApiError } from '../api/errors';
+import type { components } from '../api/schema';
 import { useSafeMutation } from '../connectivity/connectivity';
 import { useSession } from '../session/context';
 import {
   ShellButton,
+  ShellHeaderAction,
+  ShellPageHeader,
   ShellFeedback,
   ShellHeading,
   ShellText,
+  ShellSelection,
+  ShellMutationFeedback,
+  ShellPageFooter,
+  ShellPinnedHeader,
+  ShellSheet,
+  usePageNavigation,
 } from '../shell/controls';
+import { mobileTokens } from '../shell/designTokens';
 
 const pageSize = 10;
 type Filter = 'confirmed,preparing' | 'confirmed' | 'preparing';
 type Intent = { id: string; action: 'start' | 'ready'; status: string };
+type Ticket = components['schemas']['PreparationTicketResponse'];
 
-export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
+function TicketStatus({ status }: { status: string }) {
+  const label =
+    status === 'confirmed'
+      ? 'Confirmed'
+      : status === 'preparing'
+        ? 'Preparing'
+        : status;
+  return (
+    <Text
+      accessibilityLabel={`Status: ${label}`}
+      style={[styles.status, status === 'preparing' && styles.preparing]}
+    >
+      {label}
+    </Text>
+  );
+}
+
+const itemCount = (ticket: Ticket) =>
+  ticket.lines.reduce((sum, line) => sum + Number(line.quantity), 0);
+const location = (ticket: Ticket) =>
+  ticket.tableNumber ? `Table ${ticket.tableNumber}` : 'Takeaway / delivery';
+const preview = (ticket: Ticket) => {
+  const items = ticket.lines
+    .slice(0, 2)
+    .map((line) => `${line.quantity} × ${line.itemName}`)
+    .join(', ');
+  const remaining = ticket.lines.length - 2;
+  return remaining > 0 ? `${items} + ${remaining} more` : items;
+};
+
+export function PreparationScreen({
+  ticketId,
+  showHeading = true,
+  directOpen = false,
+}: { ticketId?: string; showHeading?: boolean; directOpen?: boolean } = {}) {
+  const { fontScale } = useWindowDimensions();
   const { client, state } = useSession();
+  const native = useNativeNavigation();
   const queries = useQueryClient();
   const [filter, setFilter] = useState<Filter>('confirmed,preparing');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string | null>(ticketId ?? null);
+  const [queueSelection, setQueueSelection] = useState<string | null>(null);
+  const [focusedRow, setFocusedRow] = useState<string | null>(null);
+  const navigation = usePageNavigation();
+  const initialDetail = useRef(false);
   const [intent, setIntent] = useState<Intent | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const submitting = useRef(false);
@@ -50,6 +109,24 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
       return data!;
     },
   });
+  const selectedRow = queue.isError
+    ? undefined
+    : queue.data?.items.find((row) => row.orderId === queueSelection);
+  // Discard an obsolete choice before rendering the new authoritative results;
+  // it must not silently become selected again if that record later reappears.
+  if (
+    queueSelection &&
+    queue.isSuccess &&
+    !queue.isFetching &&
+    !queue.data.items.some((row) => row.orderId === queueSelection)
+  )
+    setQueueSelection(null);
+  useEffect(() => {
+    if (ticketId && !initialDetail.current) {
+      initialDetail.current = true;
+      navigation.openDetail('preparation-open');
+    }
+  }, [ticketId, navigation]);
   const mutation = useSafeMutation({
     mutationFn: async ({ id, action }: Intent) => {
       const path =
@@ -64,7 +141,10 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
           ? 'Preparation started. Confirmed by the service.'
           : 'Ticket is Ready. Confirmed by the service.',
       );
-      if (command.action === 'ready') setSelected(null);
+      if (command.action === 'ready') {
+        setSelected(null);
+        navigation.returnToList();
+      }
     },
     // A transport failure can have an unknown outcome. Fetch server state before
     // offering another action; never replay the write or infer local success.
@@ -77,7 +157,34 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
   const forbidden = [queue.error, detail.error, mutation.error].some(
     (error) => error instanceof ApiError && error.status === 403,
   );
+  useEffect(() => {
+    // A denied detail hides private content, but must reveal the route-level
+    // Staff home recovery instead of leaving only the connection header.
+    if (forbidden && navigation.detailActive) navigation.returnToList();
+  }, [forbidden, navigation]);
   const busy = mutation.isPending;
+  const resetMutation = mutation.reset;
+  useEffect(() => {
+    if (!selected) return;
+    const subscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (busy) return true;
+        if (intent) {
+          setIntent(null);
+          navigation.focusTarget('preparation-state-action');
+        } else {
+          setSelected(null);
+          setIntent(null);
+          setNotice(null);
+          resetMutation();
+          navigation.returnToList();
+        }
+        return true;
+      },
+    );
+    return () => subscription.remove();
+  }, [busy, intent, navigation, resetMutation, selected]);
   const disabled =
     mutation.isWriteDisabled || busy || detail.isFetching || detail.isError;
   const confirm = async () => {
@@ -106,8 +213,9 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
   }
 
   return (
-    <>
-      <ShellHeading>Preparation</ShellHeading>
+    <View style={styles.workspace}>
+      {!selected && showHeading && <ShellPageHeader title="Preparation" />}
+      <ShellMutationFeedback mutation={mutation} />
       {forbidden ? (
         <ShellFeedback
           kind="error"
@@ -115,7 +223,7 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
         />
       ) : (
         <>
-          {notice && <ShellFeedback kind="info" label={notice} />}
+          {notice && <ShellFeedback kind="success" label={notice} />}
           {mutation.error && (
             <ShellFeedback
               kind="error"
@@ -131,15 +239,29 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
           )}
           {selected ? (
             <>
-              <ShellButton
-                label="Back to queue"
-                variant="secondary"
+              <ShellPageHeader title="Ticket details" priority={1} />
+
+              <ShellHeaderAction
+                kind="back"
+                label="Back to Preparation"
                 disabled={busy}
                 onPress={() => {
                   setSelected(null);
                   clearFeedback();
+                  navigation.returnToList();
                 }}
               />
+              <ShellHeaderAction
+                kind="refresh"
+                label="Refresh ticket"
+                loading={detail.isFetching}
+                disabled={busy || !mutation.canMutate}
+                onPress={() => {
+                  setIntent(null);
+                  void detail.refetch();
+                }}
+              />
+
               {detail.isPending && (
                 <ShellFeedback kind="loading" label="Loading ticket…" />
               )}
@@ -154,125 +276,184 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                   }
                 />
               )}
-              <ShellButton
-                label="Refresh ticket"
-                variant="secondary"
-                loading={detail.isFetching}
-                disabled={busy || mutation.isWriteDisabled}
-                onPress={() => {
-                  setIntent(null);
-                  void detail.refetch();
-                }}
-              />
               {ticket && (
                 <>
-                  <ShellHeading>Ticket {ticket.orderNumber}</ShellHeading>
+                  <View style={styles.detailTitle}>
+                    <ShellHeading focusOnMount>
+                      {ticket.orderNumber}
+                    </ShellHeading>
+                    <TicketStatus status={ticket.status} />
+                  </View>
                   <ShellText>
-                    Status:{' '}
-                    {ticket.status === 'confirmed'
-                      ? 'Confirmed'
-                      : ticket.status === 'preparing'
-                        ? 'Preparing'
-                        : ticket.status}
+                    {location(ticket)} · {itemCount(ticket)} items
                   </ShellText>
-                  <ShellText>
-                    {ticket.tableNumber
-                      ? `Table ${ticket.tableNumber}`
-                      : 'No table — takeaway or delivery'}
-                  </ShellText>
-                  {ticket.lines.map((line, index) => (
-                    <View key={index} style={styles.line}>
-                      <ShellText>
-                        {line.quantity} × {line.itemName} · {line.sizeName}
-                      </ShellText>
-                      <ShellText>
-                        {line.addons.length
-                          ? `Add-ons: ${line.addons.join(', ')}`
-                          : 'No add-ons'}
-                      </ShellText>
+                  <View style={styles.ledger}>
+                    {ticket.lines.map((line, index) => (
+                      <View key={index} style={styles.itemRow}>
+                        <Text style={styles.quantity}>{line.quantity} ×</Text>
+                        <View style={styles.itemDescription}>
+                          <Text style={styles.itemName}>{line.itemName}</Text>
+                          <View style={styles.itemMetadata}>
+                            <Text style={styles.body}>{line.sizeName}</Text>
+                            <Text style={styles.body} accessible={false}>
+                              ·
+                            </Text>
+                            <Text
+                              style={[
+                                styles.body,
+                                line.addons.length > 0 && styles.addons,
+                              ]}
+                            >
+                              {line.addons.length
+                                ? `Add-ons: ${line.addons.join(', ')}`
+                                : 'No add-ons'}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                  <ShellPageFooter>
+                    <View
+                      style={[
+                        styles.actionDock,
+                        intent && styles.confirmationDock,
+                      ]}
+                    >
+                      {intent && intent.status === ticket.status ? (
+                        <ShellSheet
+                          visible
+                          title={
+                            intent.action === 'start'
+                              ? 'Start preparation?'
+                              : 'Ready to serve?'
+                          }
+                          busy={busy}
+                          onClose={() => {
+                            setIntent(null);
+                            navigation.focusTarget('preparation-state-action');
+                          }}
+                        >
+                          <View style={styles.confirmation}>
+                            <Text
+                              accessibilityRole="alert"
+                              accessibilityLiveRegion="polite"
+                              style={styles.confirmationTitle}
+                            >
+                              {intent.action === 'start'
+                                ? 'Start preparing this ticket?'
+                                : 'Mark this ticket ready?'}
+                            </Text>
+                            {intent.action === 'ready' && (
+                              <ShellText>
+                                This updates the whole ticket.
+                              </ShellText>
+                            )}
+                            <ShellButton
+                              label={
+                                intent.action === 'start'
+                                  ? 'Confirm start'
+                                  : 'Confirm ready'
+                              }
+                              disabled={disabled}
+                              loading={busy}
+                              prominent
+                              onPress={() => void confirm()}
+                            />
+                            <ShellButton
+                              label={
+                                intent.action === 'ready'
+                                  ? 'Keep preparing'
+                                  : 'Keep current state'
+                              }
+                              variant="secondary"
+                              disabled={busy}
+                              onPress={() => {
+                                setIntent(null);
+                                navigation.focusTarget(
+                                  'preparation-state-action',
+                                );
+                              }}
+                            />
+                          </View>
+                        </ShellSheet>
+                      ) : ticket.status === 'confirmed' ||
+                        ticket.status === 'preparing' ? (
+                        <ShellButton
+                          label={
+                            ticket.status === 'confirmed'
+                              ? 'Start preparing'
+                              : 'Mark ready'
+                          }
+                          disabled={disabled}
+                          loading={busy}
+                          prominent
+                          loadingLabel="Sending…"
+                          focusKey="preparation-state-action"
+                          onPress={() => {
+                            clearFeedback();
+                            navigation.scrollToTop();
+                            setIntent({
+                              id: ticket.orderId,
+                              status: ticket.status,
+                              action:
+                                ticket.status === 'confirmed'
+                                  ? 'start'
+                                  : 'ready',
+                            });
+                          }}
+                        />
+                      ) : null}
                     </View>
-                  ))}
-                  {intent && intent.status === ticket.status ? (
-                    <>
-                      <ShellFeedback
-                        kind="warning"
-                        label={
-                          intent.action === 'start'
-                            ? 'Start preparing this ticket?'
-                            : 'Mark this ticket ready?'
-                        }
-                      />
-                      <ShellButton
-                        label={
-                          intent.action === 'start'
-                            ? 'Confirm start'
-                            : 'Confirm ready'
-                        }
-                        disabled={disabled}
-                        loading={busy}
-                        onPress={() => void confirm()}
-                      />
-                      <ShellButton
-                        label="Keep current state"
-                        variant="secondary"
-                        disabled={busy}
-                        onPress={() => setIntent(null)}
-                      />
-                    </>
-                  ) : ticket.status === 'confirmed' ||
-                    ticket.status === 'preparing' ? (
-                    <ShellButton
-                      label={
-                        ticket.status === 'confirmed'
-                          ? 'Start preparing'
-                          : 'Mark ready'
-                      }
-                      disabled={disabled}
-                      loading={busy}
-                      loadingLabel="Sending…"
-                      onPress={() => {
-                        clearFeedback();
-                        setIntent({
-                          id: ticket.orderId,
-                          status: ticket.status,
-                          action:
-                            ticket.status === 'confirmed' ? 'start' : 'ready',
-                        });
-                      }}
-                    />
-                  ) : null}
+                  </ShellPageFooter>
                 </>
               )}
             </>
           ) : (
             <>
-              <ShellText>
-                Confirmed and preparing tickets. Refresh for current service
-                state.
-              </ShellText>
-              <View style={styles.line}>
-                {(
-                  ['confirmed,preparing', 'confirmed', 'preparing'] as const
-                ).map((value) => (
-                  <ShellButton
-                    key={value}
-                    label={
-                      value === 'confirmed,preparing'
-                        ? 'All active'
-                        : value === 'confirmed'
-                          ? 'Confirmed'
-                          : 'Preparing'
-                    }
-                    variant="secondary"
-                    selected={filter === value}
-                    onPress={() => {
-                      setFilter(value);
-                      setPage(1);
-                      clearFeedback();
-                    }}
-                  />
-                ))}
-              </View>
+              <ShellHeaderAction
+                kind="refresh"
+                label="Refresh queue"
+                loading={queue.isFetching}
+                disabled={!mutation.canMutate}
+                onPress={() => void queue.refetch()}
+              />
+              <ShellPinnedHeader enabled={!!native?.user}>
+                <View style={styles.filters}>
+                  {(
+                    ['confirmed,preparing', 'confirmed', 'preparing'] as const
+                  ).map((value) => (
+                    <View
+                      key={value}
+                      style={[
+                        styles.filterOption,
+                        fontScale > 1.5 && styles.largeFilterOption,
+                      ]}
+                    >
+                      <ShellButton
+                        key={value}
+                        testID={`preparation-filter-${value === 'confirmed,preparing' ? 'active' : value}`}
+                        label={
+                          value === 'confirmed,preparing'
+                            ? 'All active'
+                            : value === 'confirmed'
+                              ? 'Confirmed'
+                              : 'Preparing'
+                        }
+                        variant="secondary"
+                        selected={filter === value}
+                        showSelectionMark={false}
+                        compact
+                        onPress={() => {
+                          setFilter(value);
+                          setPage(1);
+                          clearFeedback();
+                        }}
+                      />
+                    </View>
+                  ))}
+                </View>
+              </ShellPinnedHeader>
               {queue.isPending && (
                 <ShellFeedback
                   kind="loading"
@@ -282,13 +463,6 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
               {queue.isError && (
                 <ShellFeedback kind="error" label={queue.error.message} />
               )}
-              <ShellButton
-                label="Refresh queue"
-                variant="secondary"
-                loading={queue.isFetching}
-                disabled={mutation.isWriteDisabled}
-                onPress={() => void queue.refetch()}
-              />
               {!queue.isError && queue.data && (
                 <>
                   {!queue.data.items.length && (
@@ -297,58 +471,231 @@ export function PreparationScreen({ ticketId }: { ticketId?: string } = {}) {
                       label="No tickets in this view. Refresh or choose another filter."
                     />
                   )}
-                  {queue.data.items.map((item) => (
-                    <View key={item.orderId} style={styles.line}>
-                      <ShellText>
-                        {item.orderNumber} ·{' '}
-                        {item.status === 'confirmed'
-                          ? 'Confirmed'
-                          : 'Preparing'}
-                      </ShellText>
-                      <ShellText>
-                        {item.lines.reduce(
-                          (sum, line) => sum + Number(line.quantity),
-                          0,
-                        )}{' '}
-                        items
-                        {item.tableNumber ? ` · Table ${item.tableNumber}` : ''}
-                      </ShellText>
-                      <ShellButton
-                        label={`Open ticket ${item.orderNumber}`}
-                        variant="secondary"
+                  <View style={styles.ledger}>
+                    {queue.data.items.map((item) => (
+                      <Pressable
+                        key={item.orderId}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${directOpen ? 'Open' : 'Select'} ticket ${item.orderNumber}`}
+                        accessibilityHint={`${item.status}. ${itemCount(item)} items. ${location(item)}. ${preview(item)}`}
+                        accessibilityState={{
+                          selected: queueSelection === item.orderId,
+                        }}
                         onPress={() => {
-                          setSelected(item.orderId);
+                          setQueueSelection(item.orderId);
                           clearFeedback();
+                          if (directOpen) {
+                            navigation.openDetail(`ticket:${item.orderId}`);
+                            setSelected(item.orderId);
+                          }
+                        }}
+                        onFocus={() => setFocusedRow(item.orderId)}
+                        onBlur={() => setFocusedRow(null)}
+                        style={({ pressed }) => [
+                          styles.ticketRow,
+                          queueSelection === item.orderId && styles.selectedRow,
+                          pressed && styles.pressedRow,
+                          focusedRow === item.orderId && styles.focusedRow,
+                        ]}
+                      >
+                        <View style={styles.rowTitle}>
+                          <Text style={styles.ticketNumber}>
+                            {item.orderNumber}
+                          </Text>
+                          <TicketStatus status={item.status} />
+                        </View>
+                        <Text style={styles.metadata}>
+                          {itemCount(item)} items · {location(item)}
+                        </Text>
+                        <Text style={styles.metadata}>{preview(item)}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </>
+              )}
+              {!directOpen && (
+                <ShellPageFooter>
+                  <View style={styles.actionDock}>
+                    <ShellButton
+                      label={
+                        selectedRow
+                          ? `Open ${selectedRow.orderNumber}`
+                          : 'Open selected ticket'
+                      }
+                      prominent
+                      focusKey="preparation-open"
+                      disabled={
+                        !selectedRow || queue.isFetching || queue.isError
+                      }
+                      onPress={() => {
+                        if (!selectedRow || queue.isFetching || queue.isError)
+                          return;
+                        navigation.openDetail('preparation-open');
+                        setSelected(selectedRow.orderId);
+                        clearFeedback();
+                      }}
+                    />
+                  </View>
+                </ShellPageFooter>
+              )}
+              {!queue.isError && queue.data && (
+                <>
+                  <Text style={styles.metadata}>
+                    Page {page} · {queue.data.totalCount} tickets
+                  </Text>
+                  {Number(queue.data.totalCount) > pageSize && (
+                    <ShellSelection>
+                      <ShellButton
+                        label="Previous page"
+                        variant="secondary"
+                        disabled={page === 1 || queue.isFetching}
+                        onPress={() => {
+                          setPage(page - 1);
                         }}
                       />
-                    </View>
-                  ))}
-                  <ShellText>
-                    Page {page} · {queue.data.totalCount} tickets
-                  </ShellText>
-                  <ShellButton
-                    label="Previous page"
-                    variant="secondary"
-                    disabled={page === 1 || queue.isFetching}
-                    onPress={() => setPage(page - 1)}
-                  />
-                  <ShellButton
-                    label="Next page"
-                    variant="secondary"
-                    disabled={
-                      page * pageSize >= Number(queue.data.totalCount) ||
-                      queue.isFetching
-                    }
-                    onPress={() => setPage(page + 1)}
-                  />
+                      <ShellButton
+                        label="Next page"
+                        variant="secondary"
+                        disabled={
+                          page * pageSize >= Number(queue.data.totalCount) ||
+                          queue.isFetching
+                        }
+                        onPress={() => {
+                          setPage(page + 1);
+                        }}
+                      />
+                    </ShellSelection>
+                  )}
                 </>
               )}
             </>
           )}
         </>
       )}
-    </>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({ line: { gap: 8, marginVertical: 8 } });
+const styles = StyleSheet.create({
+  workspace: { gap: 16 },
+  filters: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 4,
+  },
+  filterOption: { flexGrow: 0 },
+  largeFilterOption: { flexBasis: '100%' },
+  actionDock: {
+    backgroundColor: mobileTokens.color.background,
+    borderTopWidth: 1,
+    borderTopColor: mobileTokens.color.disabledBackground,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  confirmationDock: { backgroundColor: mobileTokens.color.background },
+  ledger: { gap: 12 },
+  ticketRow: {
+    minHeight: 48,
+    minWidth: 48,
+    gap: 8,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: mobileTokens.color.surface,
+    borderLeftWidth: 4,
+    borderLeftColor: 'transparent',
+  },
+  selectedRow: {
+    borderLeftColor: mobileTokens.color.highlight,
+  },
+  pressedRow: { backgroundColor: mobileTokens.color.disabledBackground },
+  focusedRow: { backgroundColor: mobileTokens.color.infoBackground },
+  rowTitle: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  ticketNumber: {
+    fontFamily: mobileTokens.type.mediumFont,
+    fontSize: 18,
+    lineHeight: 26,
+    color: mobileTokens.color.foreground,
+    flexShrink: 1,
+  },
+  status: {
+    fontFamily: mobileTokens.type.bodyFont,
+    fontSize: 13,
+    lineHeight: 20,
+    color: mobileTokens.color.foreground,
+    backgroundColor: mobileTokens.color.highlight,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    overflow: 'hidden',
+  },
+  preparing: {
+    color: mobileTokens.color.info,
+    backgroundColor: mobileTokens.color.infoBackground,
+  },
+  metadata: {
+    fontFamily: mobileTokens.type.bodyFont,
+    fontSize: 13,
+    lineHeight: 20,
+    color: mobileTokens.color.foreground,
+  },
+  detailTitle: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  itemRow: {
+    flexDirection: 'row',
+    gap: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderColor: mobileTokens.color.primary,
+  },
+  quantity: {
+    fontFamily: mobileTokens.type.bodyFont,
+    fontSize: 20,
+    color: mobileTokens.color.foreground,
+    flexShrink: 1,
+  },
+  itemDescription: { flex: 1, gap: 4 },
+  itemMetadata: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 4,
+  },
+  itemName: {
+    fontFamily: mobileTokens.type.bodyFont,
+    fontSize: 20,
+    color: mobileTokens.color.foreground,
+  },
+  body: {
+    fontFamily: mobileTokens.type.bodyFont,
+    fontSize: 16,
+    lineHeight: 23,
+    color: mobileTokens.color.foreground,
+  },
+  addons: {
+    backgroundColor: mobileTokens.color.highlight,
+    borderRadius: 8,
+    paddingHorizontal: 4,
+  },
+  confirmation: {
+    gap: 8,
+  },
+  confirmationTitle: {
+    fontFamily: mobileTokens.type.mediumFont,
+    fontSize: 18,
+    lineHeight: 26,
+    color: mobileTokens.color.foreground,
+  },
+});

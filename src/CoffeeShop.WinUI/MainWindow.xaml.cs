@@ -27,7 +27,7 @@ public sealed partial class MainWindow : Window
     private readonly PosOperatorSession staffSession;
     private readonly StaffSessionManager? sessionManager;
     private readonly bool verifyShell = Environment.GetCommandLineArgs().Contains("--verify-shell");
-    private bool UsePermissionNavigation => sessionManager is not null && !verifyShell;
+    private bool UsePermissionNavigation => App.IsApiMode && sessionManager is not null && !verifyShell;
 
     public MainWindow()
     {
@@ -39,7 +39,7 @@ public sealed partial class MainWindow : Window
 #endif
         staffSession = App.Services.GetRequiredService<PosOperatorSession>();
         sessionManager = App.Services.GetService<StaffSessionManager>();
-        SignOutButton.Visibility = sessionManager is null ? Visibility.Collapsed : Visibility.Visible;
+        SignOutButton.Visibility = App.IsApiMode && sessionManager is not null ? Visibility.Visible : Visibility.Collapsed;
         if (sessionManager is not null) sessionManager.SessionExpired += OnSessionExpired;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(TitleDragRegion);
@@ -78,6 +78,7 @@ public sealed partial class MainWindow : Window
         "menu" => Symbol.Bullets,
         "stock-room" => Symbol.Library,
         "customers" => Symbol.People,
+        "accounts" => Symbol.Contact,
         _ => Symbol.ShowResults,
     };
     private void InitializeNavigation()
@@ -287,6 +288,7 @@ public sealed partial class MainWindow : Window
         ServiceConsoleWorkspace.Customers => new CustomersPage(),
         ServiceConsoleWorkspace.Tables => new TablesPage(),
         ServiceConsoleWorkspace.Reports => new ReportsPage(),
+        ServiceConsoleWorkspace.Accounts => new AccountsPage(),
         _ => throw new ArgumentOutOfRangeException(nameof(route)),
     };
     private void OnShellSizeChanged(object sender, SizeChangedEventArgs e)
@@ -313,7 +315,12 @@ public sealed partial class MainWindow : Window
 
     private void UpdateTablesViewportWidth() => DispatcherQueue.TryEnqueue(() =>
     {
-        if (ContentFrame.Content is TablesPage tables && ContentFrame.ActualWidth > 0)
-            tables.SetViewportWidth(ContentFrame.ActualWidth);
+        if (ContentFrame.Content is TablesPage tables && ShellRoot.ActualWidth > 0)
+        {
+            var frameOriginX = ContentFrame.TransformToVisual(ShellRoot)
+                .TransformPoint(new Windows.Foundation.Point()).X;
+            var availableWidth = ShellRoot.ActualWidth - frameOriginX;
+            if (availableWidth > 0) tables.SetViewportWidth(availableWidth);
+        }
     });
 }

@@ -27,15 +27,8 @@ public sealed class ApiOperationsSource(AuthenticatedApiClient client, StaffSess
         else summaries = [];
 
         var orders = summaries.Select(ToOperational).ToArray();
-        IReadOnlyList<OperationalTable> tables = [];
         IReadOnlyList<DeliveryStaffOption> deliveryStaff = [];
         IReadOnlyList<PosStaffOption> staff = [];
-        if (Can("orders.create"))
-        {
-            var tableRows = await client.GetAsync<PosTableResponse[]>("pos/tables");
-            tables = tableRows.Select(table => new OperationalTable(new(table.Id), table.TableNumber,
-                table.Seats, table.IsOccupied, ToId(table.ActiveOrderId))).ToArray();
-        }
         if (Can("delivery.assign"))
         {
             var deliveryRows = await client.GetAsync<DeliveryStaffResponse[]>("delivery-staff/options");
@@ -43,7 +36,7 @@ public sealed class ApiOperationsSource(AuthenticatedApiClient client, StaffSess
         }
         if (session.CurrentUser is { } user) staff = [new(new(user.Id), user.FullName)];
 
-        return new(orders, tables, deliveryStaff, staff);
+        return new(orders, deliveryStaff, staff);
     }
 
     public async Task<PosOrderDetail> GetDetailAsync(EntityId id)
@@ -109,5 +102,4 @@ public sealed class ApiOperationsSource(AuthenticatedApiClient client, StaffSess
 }
 
 public sealed record OperationsSnapshot(IReadOnlyList<OperationalOrder> Orders,
-    IReadOnlyList<OperationalTable> Tables, IReadOnlyList<DeliveryStaffOption> DeliveryStaff,
-    IReadOnlyList<PosStaffOption> Staff);
+    IReadOnlyList<DeliveryStaffOption> DeliveryStaff, IReadOnlyList<PosStaffOption> Staff);

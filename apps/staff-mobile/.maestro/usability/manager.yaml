@@ -1,0 +1,147 @@
+appId: com.coffeeshop.staffmobile
+name: Updated operational navigation, filters and review forms
+---
+- runFlow: before.yaml
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Search orders
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Search orders
+- inputText: ${MAESTRO_PAYMENT_ORDER}
+- runFlow: hide-keyboard.yaml
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Open order ${MAESTRO_PAYMENT_ORDER}
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Open order ${MAESTRO_PAYMENT_ORDER}
+- scrollUntilVisible:
+    element: Record payment
+    direction: DOWN
+- tapOn: Record payment
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Payment amount
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/payment
+- tapOn: Payment amount
+- inputText: '5'
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/payment-keyboard
+- runFlow: hide-keyboard.yaml
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Review payment
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Review payment
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Confirm payment
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/payment-review
+- tapOn: Close Record payment
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Back to order search
+      MAESTRO_SCROLL_DIRECTION: UP
+- tapOn: Back to order search
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: 'Filter orders: All'
+      MAESTRO_SCROLL_DIRECTION: UP
+- tapOn: 'Filter orders: All'
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/filters-expanded
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Show ready orders
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Show ready orders
+- assertVisible: 'Filter orders: Ready'
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/filter-selected
+- openLink: coffeeshop-staff:///modules/cashier/operations
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Search orders
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Search orders
+- inputText: ${MAESTRO_CANCEL_ORDER}
+- runFlow: hide-keyboard.yaml
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Open order ${MAESTRO_CANCEL_ORDER}
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Open order ${MAESTRO_CANCEL_ORDER}
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Cancellation reason
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Cancellation reason
+- inputText: Usability audit only
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/cancellation-keyboard
+- hideKeyboard
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Review cancellation
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Review cancellation
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Confirm cancellation
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/cancellation-review
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Keep current order
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Keep current order
+# Start a fresh view: tapping a long order ID can place the caret midway through
+# the existing value, so eraseText alone does not reliably clear the search.
+- openLink: coffeeshop-staff:///session
+- extendedWaitUntil:
+    visible: 'Staff home|Good (morning|afternoon|evening).*'
+    timeout: 30000
+- openLink: coffeeshop-staff:///modules/cashier/operations
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Search orders
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Search orders
+- inputText: ${MAESTRO_DELIVERY_ORDER}
+- runFlow: hide-keyboard.yaml
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Open order ${MAESTRO_DELIVERY_ORDER}
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Open order ${MAESTRO_DELIVERY_ORDER}
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Select ${MAESTRO_COURIER_NAME}
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Select ${MAESTRO_COURIER_NAME}
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Review assignment
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- tapOn: Review assignment
+- runFlow:
+    file: scroll-to.yaml
+    env:
+      MAESTRO_SCROLL_TARGET: Confirm assignment
+      MAESTRO_SCROLL_DIRECTION: DOWN
+- takeScreenshot: ${MAESTRO_CAPTURE_DIR}/assignment-review

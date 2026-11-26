@@ -12,7 +12,7 @@ public sealed record CreateTableCommand(string TableNumber, int? Seats);
 public sealed record UpdateTableCommand(EntityId Id, string TableNumber, int? Seats);
 public sealed record DeleteTableCommand(EntityId Id);
 
-public interface ITableManagementRepository
+public interface ITableManagementWorkspaceRepository
 {
     Task<IReadOnlyList<TableManagementSummary>> ListTablesAsync(CancellationToken cancellationToken = default);
     Task<DiningTable?> FindTableAsync(EntityId id, CancellationToken cancellationToken = default);
@@ -22,14 +22,14 @@ public interface ITableManagementRepository
     void RemoveTable(DiningTable table);
 }
 
-public sealed class TableManagementQueryHandler(ITableManagementRepository repository)
+public sealed class TableManagementQueryHandler(ITableManagementWorkspaceRepository repository)
 {
     public Task<IReadOnlyList<TableManagementSummary>> ListAsync(CancellationToken cancellationToken = default) =>
         repository.ListTablesAsync(cancellationToken);
 }
 
 public sealed class TableCommandHandler(
-    ITableManagementRepository repository,
+    ITableManagementWorkspaceRepository repository,
     IUnitOfWork unitOfWork)
 {
     public async Task<Result<EntityId>> CreateAsync(CreateTableCommand command,

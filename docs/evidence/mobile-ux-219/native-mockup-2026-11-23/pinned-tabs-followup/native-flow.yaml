@@ -1,0 +1,46 @@
+appId: host.exp.exponent
+name: Orders and Tables stay pinned while records scroll
+---
+- runFlow:
+    when:
+      notVisible:
+        id: order-section-orders
+    commands:
+      - tapOn: Orders
+- runFlow:
+    when:
+      visible: Back to order search
+    commands:
+      - tapOn: Back to order search
+- runFlow:
+    when:
+      visible: Back to table occupancy
+    commands:
+      - tapOn: Back to table occupancy
+- extendedWaitUntil:
+    visible:
+      id: order-section-orders
+    timeout: 20000
+- tapOn:
+    id: order-section-orders
+- extendedWaitUntil:
+    visible: Search orders
+    timeout: 20000
+- takeScreenshot: pinned-orders-before-scroll
+- repeat:
+    times: 3
+    commands:
+      - swipe:
+          start: 95%, 75%
+          end: 95%, 30%
+          duration: 500
+- assertVisible: Tables
+- takeScreenshot: pinned-orders-after-scroll
+- tapOn:
+    id: order-section-tables
+- assertVisible: Table occupancy
+- takeScreenshot: pinned-tables
+- tapOn:
+    id: order-section-orders
+- assertVisible: Search orders
+- takeScreenshot: pinned-orders-return

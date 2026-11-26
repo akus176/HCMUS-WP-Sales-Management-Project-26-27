@@ -254,6 +254,107 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["GoogleAdminLoginRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["TokenResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/google/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GoogleAdminConfigResponse"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/login": {
         parameters: {
             query?: never;
@@ -1098,6 +1199,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. Existing customer and saved-address lookup only; customer/address administration remains outside mobile scope. */
         get: {
             parameters: {
                 query?: {
@@ -1133,6 +1235,7 @@ export interface paths {
             };
         };
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -1206,6 +1309,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. Existing customer and saved-address lookup only; customer/address administration remains outside mobile scope. */
         get: {
             parameters: {
                 query?: never;
@@ -1251,6 +1355,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /** @description Outside the first staff mobile release. */
         patch: {
             parameters: {
                 query?: never;
@@ -1329,6 +1434,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. */
         get: {
             parameters: {
                 query?: {
@@ -1372,6 +1478,7 @@ export interface paths {
             };
         };
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -1453,6 +1560,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /** @description Outside the first staff mobile release. */
         patch: {
             parameters: {
                 query?: never;
@@ -1534,6 +1642,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -1615,6 +1724,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -1696,6 +1806,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. */
         post: {
             parameters: {
                 query?: never;
@@ -1774,6 +1885,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. */
         get: {
             parameters: {
                 query?: {
@@ -1832,6 +1944,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. Staff Mobile uses /api/v1/delivery-staff/options. */
         get: {
             parameters: {
                 query?: never;
@@ -2572,6 +2685,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. */
         get: {
             parameters: {
                 query?: never;
@@ -2606,6 +2720,7 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
+        /** @description Outside the first staff mobile release. */
         patch: {
             parameters: {
                 query?: never;
@@ -3353,6 +3468,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints. */
         get: {
             parameters: {
                 query?: never;
@@ -3397,6 +3513,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints. */
         get: {
             parameters: {
                 query?: never;
@@ -3473,6 +3590,7 @@ export interface paths {
             };
         };
         put?: never;
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. */
         post: {
             parameters: {
                 query?: never;
@@ -3627,6 +3745,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. Courier execution is outside current mobile scope. */
         post: {
             parameters: {
                 query?: never;
@@ -3662,6 +3781,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. */
         post: {
             parameters: {
                 query?: never;
@@ -3703,6 +3823,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. */
         post: {
             parameters: {
                 query?: never;
@@ -3744,6 +3865,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. */
         post: {
             parameters: {
                 query?: never;
@@ -3916,6 +4038,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints. */
         post: {
             parameters: {
                 query?: never;
@@ -3951,6 +4074,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Outside the first staff mobile release. Staff Mobile uses the preparation-ticket endpoints. */
         post: {
             parameters: {
                 query?: never;
@@ -5585,6 +5709,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Outside the first staff mobile release. Staff Mobile uses /api/v1/pos/tables. */
         get: {
             parameters: {
                 query?: never;
@@ -5604,7 +5729,66 @@ export interface paths {
             };
         };
         put?: never;
-        post?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateTableRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PosTableResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -5661,7 +5845,66 @@ export interface paths {
             };
         };
         put?: never;
-        post?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateStaffRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["StaffAccountResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -5980,6 +6223,14 @@ export interface components {
             /** Format: uuid */
             supplierId: string;
         };
+        CreateStaffRequest: {
+            email: null | string;
+            fullName: null | string;
+            password: null | string;
+            phone: null | string;
+            role: null | string;
+            username: null | string;
+        };
         CreateTableRequest: {
             /** Format: int32 */
             seats: null | number | string;
@@ -6069,6 +6320,14 @@ export interface components {
         };
         FailDeliveryRequest: {
             reason: null | string;
+        };
+        GoogleAdminConfigResponse: {
+            clientId: string;
+        };
+        GoogleAdminLoginRequest: {
+            code: null | string;
+            codeVerifier: null | string;
+            redirectUri: null | string;
         };
         IngredientBalanceResponse: {
             /** Format: double */

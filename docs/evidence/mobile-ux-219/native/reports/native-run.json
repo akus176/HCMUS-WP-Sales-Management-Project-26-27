@@ -1,0 +1,82 @@
+﻿{
+  "device": {
+    "android": 16,
+    "apkSha256": "4d20f33f0dfdddde66fe64aecb03eff4918d5ebc94b5d1d2896853b0c0eaa213",
+    "connection": "USB loopback",
+    "model": "Samsung SM-A155F",
+    "nativeShell": "Existing ARM development build, unchanged native dependencies",
+    "api": 36
+  },
+  "appRevision": "fea05418f75f05b072a90d659e818f10a071e0ef",
+  "recordedAt": "2026-11-22T15:58:12.6754368+07:00",
+  "tools": {
+    "maestro": "2.12.1",
+    "jdk": "17.0.21",
+    "powershell": "5.1",
+    "expo": "58.0.23",
+    "reactNative": "0.88.1",
+    "adb": "37.0.0"
+  },
+  "attempt": "acceptance-05",
+  "backendRevision": "5876e5799ef03ebcf2ae5cd042b53bc332ff54de",
+  "fullSuite": {
+    "expected": 10,
+    "independentApiVerification": true,
+    "passed": 10
+  },
+  "ciChecks": {
+    "value": [
+      {
+        "link": "https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/actions/runs/45003474658/job/137149846019",
+        "name": "build-and-test",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/actions/runs/45003474658/job/137149845905",
+        "name": "mobile-p0-contract",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/actions/runs/45003474658/job/137149845882",
+        "name": "secrets",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/actions/runs/45003474658/job/137149845871",
+        "name": "dependencies",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/actions/runs/45003474658/job/137149845644",
+        "name": "mobile-quality",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/actions/runs/45003474658/job/137149845822",
+        "name": "mobile-android",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/actions/runs/45003474658/job/137149846176",
+        "name": "windows-e2e",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/actions/runs/45003474658/job/137149845967",
+        "name": "catalog-postgres",
+        "state": "SUCCESS"
+      },
+      {
+        "link": "https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/actions/runs/45003474658/job/137149845907",
+        "name": "compose-smoke",
+        "state": "SUCCESS"
+      }
+    ],
+    "Count": 9
+  },
+  "mobileTree": "60bb317547f56ab382aadae04590488b9ab44798",
+  "backendDllSha256": "8a5abc47c3ff438452a2189198e309c7a3e0777f5abc92eedb8d2932fc35a35a",
+  "layoutCasesPassed": 16,
+  "focusedCasesPassed": 19,
+  "focusedNativeStepsPassed": 43
+}

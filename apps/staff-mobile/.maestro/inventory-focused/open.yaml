@@ -3,7 +3,7 @@ appId: com.coffeeshop.staffmobile
 - stopApp
 - launchApp
 - extendedWaitUntil:
-    visible: Staff home
+    visible: 'Staff home|Good (morning|afternoon|evening).*'
     timeout: 60000
 - tapOn: Open Inventory
 - scrollUntilVisible:
@@ -12,3 +12,7 @@ appId: com.coffeeshop.staffmobile
 - tapOn: Search ingredients
 - inputText: ${MAESTRO_INGREDIENT}
 - hideKeyboard
+- scrollUntilVisible:
+    element: Open ingredient ${MAESTRO_INGREDIENT}
+    direction: DOWN
+- tapOn: Open ingredient ${MAESTRO_INGREDIENT}

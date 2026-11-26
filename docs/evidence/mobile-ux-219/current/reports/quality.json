@@ -1,0 +1,19 @@
+﻿{
+  "formatting": "pass",
+  "routerSourceTree": "e0d0d178613a2aba2ecd0dc58465cc5c3244f628",
+  "applicationRevision": "3117ec2",
+  "typeScript": "pass",
+  "componentSuites": 28,
+  "componentTests": 344,
+  "runtimeSourceRevision": "8807a65964b35966640f33469fe9fe38f6e653ef",
+  "workflowHarnessTests": 3,
+  "androidHermesExport": "pass",
+  "inventoryHarnessTests": 4,
+  "contract": "pass: zero generated drift",
+  "mobileSourceTree": "dd47813e33734c6377bbb60d3c1c71ad8c594073",
+  "capturedAt": "2026-11-22T20:57:07.7777251+07:00",
+  "npm": "11.17.0",
+  "node": "26.5.0",
+  "eslint": "pass",
+  "driverRevision": "f55da46321186f251dab8b1da67e3be8e0b06a50"
+}

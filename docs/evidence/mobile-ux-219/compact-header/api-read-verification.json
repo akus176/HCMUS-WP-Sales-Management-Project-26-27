@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-22",
+  "accountRole": "Admin",
+  "environment": "local development API",
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preparation-tickets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/discounts/pending",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/orders",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/pos/tables",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ingredients",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ingredients/low-stock",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/purchase-receipts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/stock-movements",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/courier/assignments",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/users",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/security-events",
+      "status": 200
+    }
+  ],
+  "scope": "Fresh authenticated read access only; not mutation or release acceptance."
+}

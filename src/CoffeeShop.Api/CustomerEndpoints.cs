@@ -8,7 +8,8 @@ public static class CustomerEndpoints
 {
     public static void MapCustomerEndpoints(this RouteGroupBuilder api)
     {
-        var customers = api.MapGroup("/customers").RequireAuthorization("customers.manage");
+        var customers = api.MapGroup("/customers").RequireAuthorization("customers.manage")
+            .WithDescription(StaffMobileRelease.OutsideScope);
         customers.MapGet("/", async (CustomerQueryHandler handler, string? search, bool? isActive,
             int? limit, bool? includeInactive, CancellationToken ct) =>
         {
@@ -18,14 +19,16 @@ public static class CustomerEndpoints
             if (result.IsFailure) return ApiErrorResults.From(result.Error!);
             var filtered = isActive == false ? result.Value.Where(customer => !customer.IsActive) : result.Value;
             return Results.Ok(filtered.Select(ToResponse).ToArray());
-        }).Produces<CustomerResponse[]>().ProducesProblem(400);
+        }).Produces<CustomerResponse[]>().ProducesProblem(400)
+            .WithDescription(StaffMobileRelease.CounterCustomerLookup);
 
         customers.MapGet("/{id:guid}", async (Guid id, CustomerQueryHandler handler, CancellationToken ct) =>
         {
             if (id == Guid.Empty) return InvalidId();
             var result = await handler.GetCustomerDetailAsync(new(id), ct);
             return result.IsSuccess ? Results.Ok(ToResponse(result.Value)) : ApiErrorResults.From(result.Error!);
-        }).Produces<CustomerDetailResponse>().ProducesProblem(400).ProducesProblem(404);
+        }).Produces<CustomerDetailResponse>().ProducesProblem(400).ProducesProblem(404)
+            .WithDescription(StaffMobileRelease.CounterCustomerLookup);
 
         customers.MapPost("/", async (CustomerUpsertRequest request, CustomerCommandHandler commands,
             CustomerQueryHandler queries, CancellationToken ct) =>
@@ -123,7 +126,8 @@ public static class CustomerEndpoints
         {
             var result = await handler.GetLoyaltySettingsAsync(ct);
             return result.IsSuccess ? Results.Ok(ToResponse(result.Value)) : ApiErrorResults.From(result.Error!);
-        }).RequireAuthorization().Produces<LoyaltySettingsResponse>().ProducesProblem(404);
+        }).RequireAuthorization().Produces<LoyaltySettingsResponse>().ProducesProblem(404)
+            .WithDescription(StaffMobileRelease.OutsideScope);
 
         api.MapPatch("/loyalty-settings", async (LoyaltySettingsRequest request,
             LoyaltyCommandHandler commands, CustomerQueryHandler queries, CancellationToken ct) =>
@@ -134,7 +138,8 @@ public static class CustomerEndpoints
             var result = await queries.GetLoyaltySettingsAsync(ct);
             return result.IsSuccess ? Results.Ok(ToResponse(result.Value)) : ApiErrorResults.From(result.Error!);
         }).RequireAuthorization("users.manage").Produces<LoyaltySettingsResponse>().ProducesProblem(400)
-            .ProducesProblem(401).ProducesProblem(403);
+            .ProducesProblem(401).ProducesProblem(403)
+            .WithDescription(StaffMobileRelease.OutsideScope);
 
         api.MapPost("/orders/{id:guid}/loyalty/redeem", async (Guid id, RedeemLoyaltyRequest request,
             LoyaltyCommandHandler handler, CancellationToken ct) =>
@@ -152,7 +157,8 @@ public static class CustomerEndpoints
                 result.Value.Points, result.Value.DiscountAmount, result.Value.AlreadyApplied));
         }).RequireAuthorization("loyalty.redeem").Produces<LoyaltyOperationResponse>()
             .ProducesProblem(400).ProducesProblem(401).ProducesProblem(403).ProducesProblem(404)
-            .ProducesProblem(409).ProducesProblem(422);
+            .ProducesProblem(409).ProducesProblem(422)
+            .WithDescription(StaffMobileRelease.CounterScope);
     }
 
     private static CustomerResponse ToResponse(CustomerSummary customer) => new(customer.Id.Value,

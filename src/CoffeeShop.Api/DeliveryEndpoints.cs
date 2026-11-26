@@ -11,7 +11,8 @@ public static class DeliveryEndpoints
     public static void MapDeliveryEndpoints(this RouteGroupBuilder api)
     {
         api.MapGet("/delivery-staff", async (FulfillmentOperationsQueryHandler query, CancellationToken ct) =>
-            Results.Ok(await query.GetDeliveryStaffAsync(ct))).RequireAuthorization("delivery.assign");
+            Results.Ok(await query.GetDeliveryStaffAsync(ct))).RequireAuthorization("delivery.assign")
+            .WithDescription(StaffMobileRelease.OutsideScope + " Staff Mobile uses /api/v1/delivery-staff/options.");
         api.MapGet("/delivery-staff/options", async (FulfillmentOperationsQueryHandler query, CancellationToken ct) =>
             Results.Ok((await query.GetDeliveryStaffAsync(ct)).Select(staff =>
                 new DeliveryStaffResponse(staff.Id.Value, staff.FullName)).ToArray()))

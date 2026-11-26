@@ -6,7 +6,7 @@ import { SessionProvider } from '../src/session/context';
 import { harness, json, user } from './helpers';
 
 const mockRecordId = '00000000-0000-0000-0000-000000000101';
-let mockKind = 'approval';
+let mockKind = 'urgent-order';
 jest.mock('expo-router', () => ({
   router: { replace: jest.fn() },
   useLocalSearchParams: () => ({ kind: mockKind, recordId: mockRecordId }),
@@ -15,7 +15,7 @@ jest.mock('expo-router', () => ({
 }));
 
 test('notification destinations are allowlisted and accept only opaque identifiers', () => {
-  for (const kind of ['approval', 'assignment', 'low-stock', 'urgent-order'])
+  for (const kind of ['urgent-order'])
     expect(
       notificationDestination({ kind, recordId: mockRecordId })?.kind,
     ).toBe(kind);
@@ -33,8 +33,8 @@ test('notification destinations are allowlisted and accept only opaque identifie
   ).toBeUndefined();
 });
 
-test('a stale approval link rechecks the exact permission before making a protected read', async () => {
-  mockKind = 'approval';
+test('a stale preparation link rechecks its permission before making a protected read', async () => {
+  mockKind = 'urgent-order';
   const app = harness(async () =>
     json({ ...user, permissions: ['orders.cancel'] }),
   );
@@ -52,11 +52,11 @@ test('a stale approval link rechecks the exact permission before making a protec
     ([request]) => new URL(request.url).pathname,
   );
   expect(requests).toContain('/api/v1/auth/me');
-  expect(requests).not.toContain('/api/v1/discounts/pending');
+  expect(requests).not.toContain(`/api/v1/preparation-tickets/${mockRecordId}`);
 });
 
 test('a signed-out notification link makes no protected request', async () => {
-  mockKind = 'assignment';
+  mockKind = 'urgent-order';
   const app = harness();
   await app.client.restore();
   await render(
@@ -67,3 +67,23 @@ test('a signed-out notification link makes no protected request', async () => {
   expect(await screen.findByText(/Sign in again/)).toBeTruthy();
   expect(app.fetcher).not.toHaveBeenCalled();
 });
+
+test.each(['approval', 'assignment', 'low-stock'])(
+  'retired notification %s is rejected without loading a record',
+  async (kind) => {
+    expect(
+      notificationDestination({ kind, recordId: mockRecordId }),
+    ).toBeUndefined();
+    mockKind = kind;
+    const app = harness();
+    await render(
+      <SessionProvider client={app.client}>
+        <NotificationRecordRoute />
+      </SessionProvider>,
+    );
+    expect(
+      await screen.findByText('This notification link is unavailable.'),
+    ).toBeVisible();
+    expect(app.fetcher).not.toHaveBeenCalled();
+  },
+);

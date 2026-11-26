@@ -5,14 +5,10 @@ peach preparing notes, and sage ready notes. A smaller page heading leaves more
 room for work. Each column has an aligned heading, count, short explanation, and
 empty state. Notes show the amount due and use 44-DIP action targets.
 
-The Service board shows a compact table overview below the order columns, so the
-active tickets stay first. Each table shows its server-reported availability and,
-when occupied, the associated active order number. A missing order summary is
-labeled as unavailable rather than guessed.
-The overview refreshes with the same snapshot as the order columns after refresh,
-assignment, completion, and cancellation. It includes newly created tables when
-the board reloads. Users without table-read permission do not see an empty-state
-message that could imply the shop has no tables.
+The Service board focuses on active orders and their ticket details; it does not
+show a separate overview of all dining tables. Dine-in tickets retain their table
+number. Use the **Tables** workspace under **Manage** to inspect current
+availability and manage table setup.
 
 The ticket inspector uses a dark identity header and a light body so items, sizes,
 add-ons, two-decimal prices, totals, and the primary action remain readable. It
@@ -68,11 +64,6 @@ The database test uses a temporary database. It verifies that an action moves it
 requested ticket even when another is selected, rejects skipped/reversed states,
 blocks unpaid completion, and completes after payment. The workspace suite includes
 operator and state eligibility tests.
-
-Service-board table-row tests cover available/occupied labels, order association,
-and the fallback when an occupied table's order summary is absent. Native Windows
-review must still confirm the overview's responsive layout, keyboard access, and
-screen-reader labels; attach that evidence to issue #231.
 
 The native verifier reads live orders and temporarily selects a local operator for
 capture without submitting business commands. `boardUx` in the local

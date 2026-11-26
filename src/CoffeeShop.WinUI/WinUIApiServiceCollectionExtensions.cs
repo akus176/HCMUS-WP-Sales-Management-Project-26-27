@@ -12,12 +12,15 @@ internal static class WinUIApiServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
         services.AddSingleton(new HttpClient { BaseAddress = apiBaseAddress, Timeout = TimeSpan.FromSeconds(15) });
-        services.AddSingleton<IStaffIdentityApi, StaffIdentityApiClient>();
+        services.AddSingleton<StaffIdentityApiClient>();
+        services.AddSingleton<IStaffIdentityApi>(provider => provider.GetRequiredService<StaffIdentityApiClient>());
+        services.AddSingleton<GoogleAdminSignIn>();
         services.AddSingleton<IRefreshTokenStore>(_ => new ProtectedRefreshTokenFileStore(
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CoffeeShop", "refresh-token.bin"),
             new WindowsDpapiSecretProtector()));
         services.AddSingleton<StaffSessionManager>();
         services.AddSingleton<AuthenticatedApiClient>();
+        services.AddSingleton<ApiStaffAccountsSource>();
         services.AddSingleton<ApiReportsSource>();
         services.AddSingleton(provider => new ApiAssistantSource(apiBaseAddress, provider.GetRequiredService<StaffSessionManager>()));
         services.AddSingleton<ApiPosSource>();

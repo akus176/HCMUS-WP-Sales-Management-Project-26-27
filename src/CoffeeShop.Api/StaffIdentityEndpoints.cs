@@ -2,10 +2,13 @@ namespace CoffeeShop.Api;
 
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using CoffeeShop.Application.Common.Security;
 using CoffeeShop.Contracts;
 using CoffeeShop.Infrastructure.Postgres.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 
 public static class StaffIdentityEndpoints
@@ -15,6 +18,12 @@ public static class StaffIdentityEndpoints
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddScoped<StaffIdentityService>();
         builder.Services.AddScoped<StaffAdministrationService>();
+        builder.Services.AddSingleton(GoogleAdminOptions.Load(builder.Configuration));
+        builder.Services.AddSingleton<IConfigurationManager<OpenIdConnectConfiguration>>(_ =>
+            new ConfigurationManager<OpenIdConnectConfiguration>("https://accounts.google.com/.well-known/openid-configuration",
+                new OpenIdConnectConfigurationRetriever()));
+        builder.Services.AddHttpClient<GoogleAdminIdentityProvider>(client => client.Timeout = TimeSpan.FromSeconds(10))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
         var key = builder.Configuration["Jwt:SigningKey"];
         var issuer = builder.Configuration["Jwt:Issuer"];
         var audience = builder.Configuration["Jwt:Audience"];
@@ -56,7 +65,8 @@ public static class StaffIdentityEndpoints
                         return;
                     }
                     var service = context.HttpContext.RequestServices.GetRequiredService<StaffIdentityService>();
-                    var session = await service.SessionAsync(new(id), context.HttpContext.RequestAborted);
+                    var session = await service.SessionAsync(new(id), context.HttpContext.RequestAborted,
+                        context.Principal?.FindFirstValue(StaffIdentityService.GoogleBindingClaim));
                     if (session is null)
                     {
                         context.Fail("Invalid staff session.");
@@ -85,14 +95,38 @@ public static class StaffIdentityEndpoints
             http.Response.Headers.CacheControl = "no-store";
             return pair is null ? Denied() : Results.Ok(pair);
         }).AllowAnonymous().Produces<TokenResponse>().ProducesProblem(401);
+        api.MapGet("/auth/google/config", (GoogleAdminOptions google, HttpContext http) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            return google.Enabled ? Results.Ok(new GoogleAdminConfigResponse(google.ClientId))
+                : Results.Problem(statusCode: 404, title: "Google sign-in is not configured");
+        }).AllowAnonymous().Produces<GoogleAdminConfigResponse>().ProducesProblem(404);
+        api.MapPost("/auth/google", async (GoogleAdminLoginRequest request, GoogleAdminOptions google,
+            GoogleAdminIdentityProvider provider, StaffIdentityService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            if (!google.Enabled) return GoogleUnavailable();
+            GoogleAdminLink? link;
+            try { link = await provider.VerifyAsync(request, ct); }
+            catch (Exception exception) when (exception is HttpRequestException or InvalidOperationException or JsonException ||
+                exception is OperationCanceledException && !ct.IsCancellationRequested)
+            {
+                return GoogleUnavailable();
+            }
+            var pair = await service.GoogleLoginAsync(link, http.Connection.RemoteIpAddress?.ToString(), ct);
+            return pair is null ? Denied() : Results.Ok(pair);
+        }).AllowAnonymous().Produces<TokenResponse>().ProducesProblem(401).ProducesProblem(503);
         api.MapPost("/auth/refresh", async (RefreshRequest request, StaffIdentityService service, HttpContext http, CancellationToken ct) =>
         {
             var pair = await service.RefreshAsync(request.RefreshToken, http.Connection.RemoteIpAddress?.ToString(), ct);
             http.Response.Headers.CacheControl = "no-store";
             return pair is null ? Denied() : Results.Ok(pair);
         }).AllowAnonymous().Produces<TokenResponse>().ProducesProblem(401);
-        api.MapGet("/auth/me", async (ICurrentUser user, StaffIdentityService service, CancellationToken ct) =>
-            Results.Ok(await service.SessionAsync(user.GetRequiredId(), ct)))
+        api.MapGet("/auth/me", async (ICurrentUser user, StaffIdentityService service, HttpContext http, CancellationToken ct) =>
+        {
+            var session = await service.SessionAsync(user.GetRequiredId(), ct, http.User.FindFirstValue(StaffIdentityService.GoogleBindingClaim));
+            return session is null ? Denied() : Results.Ok(session);
+        })
             .RequireAuthorization().Produces<StaffSession>().ProducesProblem(401);
         api.MapPost("/auth/logout", async (RefreshRequest request, ICurrentUser user, StaffIdentityService service, CancellationToken ct) =>
             await service.LogoutAsync(user.GetRequiredId(), request.RefreshToken, false, ct) ? Results.NoContent() : Denied())
@@ -104,6 +138,17 @@ public static class StaffIdentityEndpoints
         }).RequireAuthorization().Produces(204).ProducesProblem(401);
 
         var users = api.MapGroup("/users").RequireAuthorization("users.manage");
+        users.MapPost("/", async (CreateStaffRequest request, ICurrentUser actor,
+            StaffAdministrationService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            var result = await service.CreateAsync(request, actor.GetRequiredId(),
+                http.Connection.RemoteIpAddress?.ToString(), ct);
+            return result.IsSuccess
+                ? Results.Created($"/api/v1/users/{result.Value!.Id}", result.Value)
+                : ApiErrorResults.From(result.Error!);
+        }).Produces<StaffAccountResponse>(201).ProducesProblem(400).ProducesProblem(401)
+            .ProducesProblem(403).ProducesProblem(409);
         users.MapGet("/", async (StaffAdministrationService service, HttpContext http, string? search,
             bool? isActive, int? limit, CancellationToken ct) =>
         {
@@ -140,4 +185,5 @@ public static class StaffIdentityEndpoints
     }
 
     private static IResult Denied() => Results.Problem(statusCode: 401, title: "Authentication failed", detail: "Invalid credentials or session.");
+    private static IResult GoogleUnavailable() => Results.Problem(statusCode: 503, title: "Google sign-in is unavailable");
 }

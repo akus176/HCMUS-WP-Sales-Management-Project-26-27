@@ -1,11 +1,15 @@
 namespace CoffeeShop.Contracts;
 
 public sealed record LoginRequest(string? Username, string? Password);
+public sealed record GoogleAdminConfigResponse(string ClientId);
+public sealed record GoogleAdminLoginRequest(string? Code, string? CodeVerifier, string? RedirectUri);
 public sealed record RefreshRequest(string? RefreshToken);
 public sealed record StaffSession(Guid Id, string FullName, string[] Roles, string[] Permissions);
 public sealed record TokenResponse(string AccessToken, string RefreshToken, DateTimeOffset ExpiresAt, StaffSession User);
 
 public sealed record DeactivateStaffRequest(bool Confirm);
+public sealed record CreateStaffRequest(
+    string? FullName, string? Username, string? Email, string? Phone, string? Role, string? Password);
 public sealed record StaffAccountResponse(
     Guid Id,
     string Username,

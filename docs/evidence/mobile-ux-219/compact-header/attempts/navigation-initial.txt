@@ -1,0 +1,14 @@
+Captured home-functions-top
+PASS Preparation
+PASS Discount inbox
+PASS Cancellation and delivery assignment
+Traceback (most recent call last):
+  File "/tmp/coffeeshop_219_spec_navigation.py", line 46, in <module>
+    elif workspace=='Counter':check(workspace,'Counter','Search by order number or table','Filter orders: All','Table occupancy')
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/coffeeshop_219_spec_navigation.py", line 35, in check
+    for label in expected:seen(label)
+                          ^^^^^^^^^^^
+  File "/tmp/coffeeshop_219_spec_navigation.py", line 13, in seen
+    raise RuntimeError('View not found: '+label)
+RuntimeError: View not found: Table occupancy

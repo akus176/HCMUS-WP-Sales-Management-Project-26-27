@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-22",
+  "mobileCheck": {
+    "command": "NODE_OPTIONS=--experimental-strip-types npm run check --prefix apps/staff-mobile",
+    "passed": true,
+    "suites": 28,
+    "tests": 344,
+    "forwardingHarnessTests": 7,
+    "typescript": "pass",
+    "eslint": "pass",
+    "prettier": "pass"
+  },
+  "openspec": {
+    "command": "openspec validate polish-staff-mobile-ux --strict",
+    "passed": true
+  },
+  "maestroCashierYaml": {
+    "parse": "pass: js-yaml, two documents",
+    "format": "pass",
+    "standaloneExecution": "not run; remains under issue task 2.2"
+  },
+  "nativeNavigation": {
+    "passed": true,
+    "viewsAndSections": 14,
+    "runner": "ADB interactions in Expo Go"
+  },
+  "apiReadChecks": 12,
+  "nativeFullAcceptance": "pending; includes standalone Maestro, full layout/keyboard matrix and TalkBack",
+  "reviewerApproval": "pending"
+}

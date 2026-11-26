@@ -36,6 +36,13 @@ test('blocks startup before session children mount and never displays unsafe inp
   expect(screen.getByRole('alert')).toBeVisible();
   expect(screen.queryByText(/private-value/)).toBeNull();
   expect(mounted).not.toHaveBeenCalled();
+  expect(
+    screen.container.queryAll((node) => node.type === 'RCTScrollView').length,
+  ).toBeGreaterThan(0);
+  expect(screen.getByRole('alert')).toHaveStyle({
+    fontSize: 16,
+    color: '#aa2c2c',
+  });
 });
 
 test('allows startup with valid emulator configuration', async () => {

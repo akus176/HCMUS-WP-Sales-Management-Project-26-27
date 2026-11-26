@@ -1,0 +1,90 @@
+<Page x:Class="CoffeeShop.WinUI.Pages.AccountsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      FontFamily="{StaticResource ConsoleSansFont}"
+      Foreground="{StaticResource ConsoleInkBrush}"
+      Background="{StaticResource ConsoleGroundBrush}"
+      RequestedTheme="Light">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="{StaticResource ConsolePagePadding}" Spacing="20">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Accounts" Style="{StaticResource ConsolePageTitleStyle}"
+                           AutomationProperties.HeadingLevel="Level1" />
+                <TextBlock Text="Manage staff access from the administrator console."
+                           Style="{StaticResource ConsoleBodyStyle}" TextWrapping="Wrap" />
+            </StackPanel>
+            <InfoBar x:Name="FeedbackBar" IsOpen="False" IsClosable="False"
+                     AutomationProperties.LiveSetting="Polite" />
+            <Grid x:Name="AccountsLayout" ColumnSpacing="24" RowSpacing="20" SizeChanged="OnLayoutSizeChanged">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Border x:Name="DirectoryPanel" Style="{StaticResource WorkspacePanel}" Padding="20">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Staff directory" Style="{StaticResource ConsoleSectionTitleStyle}"
+                                   AutomationProperties.HeadingLevel="Level2" />
+                        <TextBox x:Name="SearchBox" Header="Search by name, username or email" MaxLength="150"
+                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" />
+                        <Button x:Name="RefreshButton" Content="SEARCH ACCOUNTS" Click="OnRefresh"
+                                Style="{StaticResource ConsoleButtonStyle}" MinHeight="48"
+                                AutomationProperties.Name="Search staff accounts" />
+                        <ProgressRing x:Name="ListProgress" IsActive="False" Visibility="Collapsed" Width="24" Height="24"
+                                      HorizontalAlignment="Left" AutomationProperties.Name="Loading staff accounts" />
+                        <TextBlock x:Name="ListStatus" Style="{StaticResource ConsoleBodyStyle}" TextWrapping="Wrap"
+                                   AutomationProperties.LiveSetting="Polite" />
+                        <ListView x:Name="AccountsList" MinHeight="240" MaxHeight="520"
+                                  SelectionMode="None" AutomationProperties.Name="Staff accounts">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Padding="4,8" Spacing="3">
+                                        <TextBlock Text="{Binding FullName}" Style="{StaticResource ConsoleSectionTitleStyle}" FontSize="18" />
+                                        <TextBlock Text="{Binding Identity}" Style="{StaticResource ConsoleBodyStyle}"
+                                                   TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding RoleAndState}" Style="{StaticResource ConsoleLabelStyle}"
+                                                   TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
+                </Border>
+                <Border x:Name="CreationPanel" Grid.Column="1" Style="{StaticResource WorkspacePanel}" Padding="20">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="New staff account" Style="{StaticResource ConsoleSectionTitleStyle}"
+                                   AutomationProperties.HeadingLevel="Level2" />
+                        <TextBlock Text="Choose the role this person needs on their first sign-in."
+                                   Style="{StaticResource ConsoleBodyStyle}" TextWrapping="Wrap" />
+                        <TextBox x:Name="FullNameBox" Header="Full name" MaxLength="150"
+                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" />
+                        <TextBox x:Name="UsernameBox" Header="Username" MaxLength="50"
+                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" />
+                        <TextBox x:Name="EmailBox" Header="Email address" MaxLength="255"
+                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" InputScope="EmailSmtpAddress" />
+                        <TextBox x:Name="PhoneBox" Header="Phone (optional)" MaxLength="30"
+                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" InputScope="TelephoneNumber" />
+                        <ComboBox x:Name="RoleBox" Header="Operational role" SelectedIndex="2"
+                                  MinHeight="48" HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="Administrator" Tag="Admin" />
+                            <ComboBoxItem Content="Manager" Tag="Manager" />
+                            <ComboBoxItem Content="Cashier" Tag="Cashier" />
+                            <ComboBoxItem Content="Barista" Tag="Barista" />
+                            <ComboBoxItem Content="Inventory staff" Tag="InventoryStaff" />
+                            <ComboBoxItem Content="Delivery staff" Tag="DeliveryStaff" />
+                        </ComboBox>
+                        <PasswordBox x:Name="InitialPasswordBox" Header="Initial password" MaxLength="1024"
+                                     MinHeight="48" AutomationProperties.HelpText="Use at least 12 characters. The password is not shown again." />
+                        <TextBlock x:Name="ValidationText" Style="{StaticResource ConsoleBodyStyle}"
+                                   TextWrapping="Wrap" Visibility="Collapsed" AutomationProperties.LiveSetting="Polite" />
+                        <Button x:Name="CreateButton" Content="CREATE STAFF ACCOUNT" Click="OnCreate"
+                                Style="{StaticResource ConsolePrimaryButtonStyle}" MinHeight="48" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

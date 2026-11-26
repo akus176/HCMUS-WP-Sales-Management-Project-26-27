@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Net.WebSockets;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using CoffeeShop.Api;
@@ -21,7 +22,10 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 
@@ -84,6 +88,167 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("no-store", response.Headers.CacheControl?.ToString());
         return (await response.Content.ReadFromJsonAsync<TokenResponse>())!;
+    }
+
+    [PostgresFact]
+    public async Task GoogleAdmin_ValidatesProviderAndLinkAndPreservesStaffSessionsAndAdminProtection()
+    {
+        const string clientId = "test-desktop.apps.googleusercontent.com";
+        const string verifier = "test-verifier-abcdefghijklmnopqrstuvwxyz-0123456789";
+        using var rsa = RSA.Create(2048);
+        using var unrelatedRsa = RSA.Create(2048);
+        var key = new RsaSecurityKey(rsa) { KeyId = "test-provider-key" };
+        var unrelatedKey = new RsaSecurityKey(unrelatedRsa) { KeyId = key.KeyId };
+        var tokenMetadata = new OpenIdConnectConfiguration();
+        tokenMetadata.SigningKeys.Add(key);
+        using var legacyClient = host!.CreateClient();
+        var legacyAdmin = await LoginAsync(legacyClient, "Admin");
+        var legacyStaff = await LoginAsync(legacyClient);
+        var links = new[] { "Admin", "inactive-admin", "Cashier", "email-changed" };
+        Dictionary<string, Guid> userIds;
+        await using (var db = Database())
+        {
+            await AddUserAsync(db, "inactive-admin", ["Admin"], false);
+            await AddUserAsync(db, "unlinked-admin", ["Admin"]);
+            await AddUserAsync(db, "email-changed", ["Admin"]);
+            userIds = await db.Users.Where(user => links.Contains(user.Username))
+                .ToDictionaryAsync(user => user.Username, user => user.Id.Value);
+        }
+
+        int exchangeCalls = 0;
+        await using var googleHost = host.WithWebHostBuilder(builder =>
+        {
+            builder.UseSetting("GoogleAdmin:Enabled", "true").UseSetting("GoogleAdmin:ClientId", clientId)
+                .UseSetting("GoogleAdmin:ClientSecret", "synthetic-test-only");
+            for (var i = 0; i < links.Length; i++)
+            {
+                var name = links[i];
+                var prefix = $"GoogleAdmin:Links:{i}:";
+                builder.UseSetting(prefix + "UserId", userIds[name].ToString())
+                    .UseSetting(prefix + "Email", name == "email-changed" ? "old-email@example.test" : $"{name}@example.test");
+            }
+            builder.ConfigureServices(services =>
+            {
+                services.RemoveAll<IConfigurationManager<OpenIdConnectConfiguration>>();
+                services.AddSingleton<IConfigurationManager<OpenIdConnectConfiguration>>(
+                    new StaticConfigurationManager<OpenIdConnectConfiguration>(tokenMetadata));
+                services.AddHttpClient("GoogleAdminIdentityProvider").ConfigurePrimaryHttpMessageHandler(() =>
+                    new GoogleExchangeHandler(async (request, ct) =>
+                    {
+                        Interlocked.Increment(ref exchangeCalls);
+                        Assert.Equal("https://oauth2.googleapis.com/token", request.RequestUri!.AbsoluteUri);
+                        var form = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(await request.Content!.ReadAsStringAsync(ct));
+                        Assert.Equal("authorization_code", form["grant_type"].ToString());
+                        Assert.Equal(clientId, form["client_id"].ToString());
+                        Assert.Equal(verifier, form["code_verifier"].ToString());
+                        Assert.Equal(GoogleAdminOAuth.LoopbackRedirect(34567), form["redirect_uri"].ToString());
+                        var code = form["code"].ToString();
+                        if (code == "outage") return new(HttpStatusCode.ServiceUnavailable);
+                        if (code == "replay") return new(HttpStatusCode.BadRequest);
+                        var account = links.Contains(code) || code is "unlinked-admin" ? code : "Admin";
+                        var email = code switch
+                        {
+                            "email-changed" => "old-email@example.test",
+                            "wrong-email" => "unlinked-admin@example.test",
+                            "replacement-google-account" => "ADMIN@example.test",
+                            _ => $"{account}@example.test",
+                        };
+                        var expired = code == "expired";
+                        var now = DateTime.UtcNow;
+                        var jwt = new JwtSecurityToken(code == "wrong-issuer" ? "https://example.test" : "https://accounts.google.com",
+                            code == "wrong-audience" ? "unrelated-client" : clientId, [
+                                new("sub", $"google-subject-{code}"), new("email", email),
+                                new("email_verified", code == "unverified" ? "false" : "true", ClaimValueTypes.Boolean),
+                                new("nonce", code == "wrong-nonce" ? "unrelated-nonce" : GoogleAdminOAuth.Challenge(verifier)),
+                            ], now.AddMinutes(-10), expired ? now.AddMinutes(-5) : now.AddMinutes(5),
+                            code == "unsigned" ? null : new SigningCredentials(code == "wrong-signature" ? unrelatedKey : key, SecurityAlgorithms.RsaSha256));
+                        return new(HttpStatusCode.OK) { Content = JsonContent.Create(new { id_token = new JwtSecurityTokenHandler().WriteToken(jwt) }) };
+                    }));
+            });
+        });
+        using var client = googleHost.CreateClient();
+        const string googlePath = "/api/v1/auth/google";
+        using var publicConfig = await client.GetAsync(googlePath + "/config");
+        Assert.Equal("no-store", publicConfig.Headers.CacheControl?.ToString());
+        Assert.Equal(clientId, (await publicConfig.Content.ReadFromJsonAsync<GoogleAdminConfigResponse>())!.ClientId);
+        using var disabledConfig = await legacyClient.GetAsync(googlePath + "/config");
+        Assert.Equal(HttpStatusCode.NotFound, disabledConfig.StatusCode);
+        var request = new GoogleAdminLoginRequest("Admin", verifier, GoogleAdminOAuth.LoopbackRedirect(34567));
+        using var wrongRedirect = await client.PostAsJsonAsync(googlePath, request with { RedirectUri = "https://example.test/oauth/google" });
+        Assert.Equal(HttpStatusCode.Unauthorized, wrongRedirect.StatusCode);
+        Assert.Equal(0, exchangeCalls);
+        foreach (var code in new[] { "inactive-admin", "unlinked-admin", "Cashier", "email-changed", "wrong-email", "unverified", "wrong-nonce", "wrong-audience", "wrong-issuer", "expired", "unsigned", "wrong-signature", "replay" })
+        {
+            using var denied = await client.PostAsJsonAsync(googlePath, request with { Code = code });
+            Assert.Equal(HttpStatusCode.Unauthorized, denied.StatusCode);
+            Assert.Equal("no-store", denied.Headers.CacheControl?.ToString());
+            Assert.DoesNotContain("refreshToken", await denied.Content.ReadAsStringAsync());
+        }
+        using var outage = await client.PostAsJsonAsync(googlePath, request with { Code = "outage" });
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, outage.StatusCode);
+        using var password = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginRequest("Admin", Password));
+        Assert.Equal(HttpStatusCode.Unauthorized, password.StatusCode);
+        using var unlinkedPassword = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginRequest("unlinked-admin", Password));
+        Assert.Equal(HttpStatusCode.Unauthorized, unlinkedPassword.StatusCode);
+        using var legacyRenewal = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(legacyAdmin.RefreshToken));
+        Assert.Equal(HttpStatusCode.Unauthorized, legacyRenewal.StatusCode);
+        client.DefaultRequestHeaders.Authorization = new("Bearer", legacyAdmin.AccessToken);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/v1/auth/me")).StatusCode);
+        client.DefaultRequestHeaders.Authorization = new("Bearer", legacyStaff.AccessToken);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/v1/auth/me")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.GetAsync("/api/v1/users")).StatusCode);
+        client.DefaultRequestHeaders.Authorization = null;
+        using var staffRenewal = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(legacyStaff.RefreshToken));
+        Assert.Equal(HttpStatusCode.OK, staffRenewal.StatusCode);
+
+        using var signedIn = await client.PostAsJsonAsync(googlePath, request);
+        Assert.Equal(HttpStatusCode.OK, signedIn.StatusCode);
+        var tokens = (await signedIn.Content.ReadFromJsonAsync<TokenResponse>())!;
+        Assert.Equal(userIds["Admin"], tokens.User.Id);
+        Assert.Contains("users.manage", tokens.User.Permissions);
+        using var replacementSignIn = await client.PostAsJsonAsync(googlePath, request with { Code = "replacement-google-account" });
+        Assert.Equal(HttpStatusCode.OK, replacementSignIn.StatusCode);
+        Assert.Equal(tokens.User.Id, (await replacementSignIn.Content.ReadFromJsonAsync<TokenResponse>())!.User.Id);
+        client.DefaultRequestHeaders.Authorization = new("Bearer", tokens.AccessToken);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/v1/auth/me")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/v1/users")).StatusCode);
+        var deactivate = $"/api/v1/users/{tokens.User.Id}/deactivate";
+        using var protectedAdmin = await client.PostAsJsonAsync(deactivate, new DeactivateStaffRequest(true));
+        Assert.Equal(HttpStatusCode.Conflict, protectedAdmin.StatusCode);
+        using var renewed = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(tokens.RefreshToken));
+        Assert.Equal(HttpStatusCode.OK, renewed.StatusCode);
+        var rotated = (await renewed.Content.ReadFromJsonAsync<TokenResponse>())!;
+        using var logout = await client.PostAsJsonAsync("/api/v1/auth/logout", new RefreshRequest(rotated.RefreshToken));
+        Assert.Equal(HttpStatusCode.NoContent, logout.StatusCode);
+        using var revoked = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(rotated.RefreshToken));
+        Assert.Equal(HttpStatusCode.Unauthorized, revoked.StatusCode);
+    }
+
+    private sealed class GoogleExchangeHandler(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> send) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) => send(request, ct);
+    }
+
+    [PostgresFact]
+    public async Task GoogleAdminProvisioning_CreatesAnAdminWithoutAUsablePassword()
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["ProvisionStaff:Username"] = "google-only-admin",
+            ["ProvisionStaff:Email"] = "google-only-admin@example.test",
+            ["ProvisionStaff:FullName"] = "Google-only Admin",
+            ["ProvisionStaff:GoogleOnly"] = "true",
+            ["ProvisionStaff:Roles"] = "Admin",
+        }).Build();
+        await StaffProvisioning.RunAsync(host!.Services, configuration, true);
+        using var client = host.CreateClient();
+        using var denied = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginRequest("google-only-admin", Password));
+        Assert.Equal(HttpStatusCode.Unauthorized, denied.StatusCode);
+        await using var db = Database();
+        var admin = await db.Users.Include(user => user.UserRoles).ThenInclude(role => role.Role)
+            .SingleAsync(user => user.Username == "google-only-admin");
+        Assert.True(admin.IsActive);
+        Assert.Equal("Admin", Assert.Single(admin.UserRoles).Role!.Code);
     }
 
     [PostgresFact]
@@ -706,6 +871,124 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.DoesNotContain(Password, eventJson);
         Assert.DoesNotContain(admin.AccessToken, eventJson);
         Assert.DoesNotContain(admin.RefreshToken, eventJson);
+    }
+
+    [PostgresFact]
+    public async Task StaffCreation_RequiresAdministratorAndRejectsInvalidAndDuplicateIdentityWithoutPartialWrites()
+    {
+        using var client = host!.CreateClient();
+        var input = new
+        {
+            fullName = "New Cashier",
+            username = "new.cashier",
+            email = "new.cashier@example.test",
+            phone = "+84901234567",
+            role = "Cashier",
+            password = "test-only-new-cashier-password"
+        };
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.PostAsJsonAsync("/api/v1/users", input)).StatusCode);
+        client.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(client)).AccessToken);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/v1/users", input)).StatusCode);
+        client.DefaultRequestHeaders.Authorization = new("Bearer", (await LoginAsync(client, "Admin")).AccessToken);
+
+        using var invalidRole = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            input.fullName,
+            input.username,
+            input.email,
+            input.phone,
+            role = "Owner",
+            input.password
+        });
+        using var invalidPassword = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            input.fullName,
+            input.username,
+            input.email,
+            input.phone,
+            input.role,
+            password = "short"
+        });
+        using var invalidContact = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            input.fullName,
+            input.username,
+            email = "bad-address",
+            input.phone,
+            input.role,
+            input.password
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, invalidRole.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, invalidPassword.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, invalidContact.StatusCode);
+
+        using var created = await client.PostAsJsonAsync("/api/v1/users", input);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        using var duplicateUsername = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            input.fullName,
+            username = "NEW.CASHIER",
+            email = "other@example.test",
+            input.phone,
+            input.role,
+            input.password
+        });
+        using var duplicateEmail = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            input.fullName,
+            username = "other.user",
+            email = "NEW.CASHIER@EXAMPLE.TEST",
+            input.phone,
+            input.role,
+            input.password
+        });
+        Assert.Equal(HttpStatusCode.Conflict, duplicateUsername.StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, duplicateEmail.StatusCode);
+        await using var db = Database();
+        Assert.Single(await db.Users.Where(user => user.Username.ToLower() == "new.cashier").ToArrayAsync());
+        Assert.False(await db.Users.AnyAsync(user => user.Username == "other.user"));
+    }
+
+    [PostgresFact]
+    public async Task StaffCreation_HashesPasswordAuditsActorAndAllowsAssignedRoleToSignIn()
+    {
+        using var client = host!.CreateClient();
+        var admin = await LoginAsync(client, "Admin");
+        client.DefaultRequestHeaders.Authorization = new("Bearer", admin.AccessToken);
+        const string password = "test-only-created-barista-password";
+        using var created = await client.PostAsJsonAsync("/api/v1/users", new
+        {
+            fullName = "Created Barista",
+            username = "created.barista",
+            email = "created.barista@example.test",
+            phone = (string?)null,
+            role = "Barista",
+            password,
+        });
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        Assert.Equal("no-store", created.Headers.CacheControl?.ToString());
+        var responseBody = await created.Content.ReadAsStringAsync();
+        Assert.DoesNotContain(password, responseBody);
+        Assert.DoesNotContain("passwordHash", responseBody, StringComparison.OrdinalIgnoreCase);
+        var account = (await created.Content.ReadFromJsonAsync<StaffAccountResponse>())!;
+        Assert.Equal(["Barista"], account.Roles);
+
+        await using (var db = Database())
+        {
+            var user = await db.Users.SingleAsync(item => item.Id == new EntityId(account.Id));
+            Assert.NotEqual(password, user.PasswordHash);
+            var audit = await db.SecurityAuditEvents.SingleAsync(item => item.UserId == user.Id && item.EventType == "account_created");
+            Assert.Equal("success", audit.Outcome);
+            Assert.Contains(admin.User.Id.ToString(), audit.Metadata);
+            Assert.DoesNotContain(password, audit.Metadata);
+        }
+        client.DefaultRequestHeaders.Authorization = null;
+        using var login = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginRequest(account.Username, password));
+        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+        var session = (await login.Content.ReadFromJsonAsync<TokenResponse>())!;
+        Assert.Equal(["Barista"], session.User.Roles);
+        Assert.Contains("orders.fulfill", session.User.Permissions);
+        Assert.DoesNotContain("users.manage", session.User.Permissions);
     }
 
     [PostgresFact]

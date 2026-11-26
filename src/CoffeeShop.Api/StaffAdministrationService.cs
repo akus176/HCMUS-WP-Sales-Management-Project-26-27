@@ -1,15 +1,73 @@
 namespace CoffeeShop.Api;
 
+using System.Net.Mail;
+using System.Text.Json;
 using CoffeeShop.Application.Common.Results;
 using CoffeeShop.Contracts;
 using CoffeeShop.Domain.Common;
 using CoffeeShop.Domain.Identity;
 using CoffeeShop.Infrastructure.Postgres;
+using CoffeeShop.Infrastructure.Postgres.Identity;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
-public sealed class StaffAdministrationService(CoffeeShopDbContext db, TimeProvider time)
+public sealed class StaffAdministrationService(CoffeeShopDbContext db, TimeProvider time, GoogleAdminOptions google)
 {
     private const int MaximumPageSize = 100;
+
+    public async Task<Result<StaffAccountResponse>> CreateAsync(
+        CreateStaffRequest request, EntityId actorId, string? ipAddress, CancellationToken ct)
+    {
+        var username = request.Username?.Trim();
+        var email = request.Email?.Trim().ToLowerInvariant();
+        var fullName = request.FullName?.Trim();
+        var phone = request.Phone?.Trim();
+        var roleCode = request.Role?.Trim();
+        if (google.Enabled && roleCode == "Admin")
+            return Result<StaffAccountResponse>.Failure(Error.Validation(
+                "staff.google_admin_provisioning_required", "Google administrators must be provisioned by the deployment operator."));
+        if (string.IsNullOrWhiteSpace(username) || username.Length > 50 ||
+            string.IsNullOrWhiteSpace(fullName) || fullName.Length > 150 ||
+            string.IsNullOrWhiteSpace(email) || email.Length > 255 ||
+            !MailAddress.TryCreate(email, out var address) || address.Address != email ||
+            phone?.Length > 30 || request.Password is null || request.Password.Length is < 12 or > 1024 ||
+            roleCode is null || !StaffRoleSeed.Bundles.ContainsKey(roleCode))
+            return Result<StaffAccountResponse>.Failure(Error.Validation(
+                "staff.invalid_profile", "Enter a valid name, username, email, phone, operational role and password of 12 to 1024 characters."));
+
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        // Serialize account creation so case-insensitive identity checks also cover concurrent requests.
+        await db.Database.ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock(228001)", ct);
+        var normalizedUsername = username.ToLowerInvariant();
+        if (await db.Users.AnyAsync(user => user.Username.ToLower() == normalizedUsername || user.Email == email, ct))
+            return Result<StaffAccountResponse>.Failure(Error.Conflict(
+                "staff.duplicate_identity", "A staff account already uses that username or email."));
+
+        var role = await db.Roles.SingleOrDefaultAsync(item => item.Code == roleCode, ct);
+        if (role is null)
+            return Result<StaffAccountResponse>.Failure(Error.Validation(
+                "staff.invalid_role", "The selected operational role is unavailable."));
+
+        var now = new UtcTimestamp(time.GetUtcNow());
+        var user = new User(EntityId.New(), username, email, "pending", fullName, phone, now, now);
+        db.Entry(user).Property(item => item.PasswordHash).CurrentValue = StaffIdentityService.HashPassword(user, request.Password);
+        db.Users.Add(user);
+        db.UserRoles.Add(new UserRole(user.Id, role.Id, now, actorId));
+        db.SecurityAuditEvents.Add(new SecurityAuditEvent(EntityId.New(), "account_created", now,
+            "success", user.Id, ipAddress, JsonSerializer.Serialize(new { actorId = actorId.Value })));
+        try
+        {
+            await db.SaveChangesAsync(ct);
+            await transaction.CommitAsync(ct);
+        }
+        catch (DbUpdateException exception) when (exception.InnerException is PostgresException
+        { SqlState: PostgresErrorCodes.UniqueViolation, ConstraintName: "IX_users_username" or "IX_users_email" })
+        {
+            return Result<StaffAccountResponse>.Failure(Error.Conflict(
+                "staff.duplicate_identity", "A staff account already uses that username or email."));
+        }
+        return Result<StaffAccountResponse>.Success(ToResponse(user));
+    }
 
     public async Task<StaffAccountResponse[]> SearchAccountsAsync(
         string? search, bool? isActive, int? limit, CancellationToken ct)
@@ -100,9 +158,11 @@ public sealed class StaffAdministrationService(CoffeeShopDbContext db, TimeProvi
         var isAdministrator = user.UserRoles.Any(role => role.Role?.Code == "Admin");
         if (isAdministrator)
         {
-            var activeAdministrators = await db.Users.CountAsync(candidate => candidate.IsActive &&
-                candidate.UserRoles.Any(role => role.Role!.Code == "Admin"), ct);
-            if (activeAdministrators <= 1)
+            var remainingAdmins = await db.Users.Where(candidate => candidate.IsActive && candidate.Id != user.Id &&
+                candidate.UserRoles.Any(role => role.Role!.Code == "Admin"))
+                .Select(candidate => new { candidate.Id, candidate.Email }).ToArrayAsync(ct);
+            if (remainingAdmins.Length == 0 || (google.SessionBinding(user.Id.Value, user.Email) is not null &&
+                !remainingAdmins.Any(candidate => google.SessionBinding(candidate.Id.Value, candidate.Email) is not null)))
                 return Result<StaffAccountResponse>.Failure(Error.Conflict(
                     "staff.final_administrator", "The final active administrator cannot be deactivated."));
         }

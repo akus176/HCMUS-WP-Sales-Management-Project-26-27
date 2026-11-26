@@ -1,13 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
 
 import { PreparationScreen } from '../../../src/barista/PreparationScreen';
-import { DiscountApprovals } from '../../../src/features/approvals/DiscountApprovals';
-import { DeliveryDetail } from '../../../src/features/delivery/DeliveryDetail';
 import { notificationDestination } from '../../../src/notifications/destination';
-import { LowStockRecord } from '../../../src/notifications/LowStockRecord';
 import { PermissionBoundary } from '../../../src/shell/PermissionBoundary';
 import {
-  ShellButton,
+  ShellPageHeader,
   ShellPage,
   ShellStatus,
 } from '../../../src/shell/controls';
@@ -19,9 +16,10 @@ export default function NotificationRecordRoute() {
   const access = useRouteAccess();
   return (
     <ShellPage>
-      <ShellButton
-        label="Back to staff home"
-        onPress={() => router.replace('/session')}
+      <ShellPageHeader
+        backLabel="Back to staff home"
+        onBack={() => router.replace('/session')}
+        hideDuringDetail={target?.kind === 'urgent-order'}
       />
       {target ? (
         <PermissionBoundary
@@ -30,28 +28,13 @@ export default function NotificationRecordRoute() {
           requiredPermission={target.permission}
           {...access}
         >
-          {(user) => {
-            switch (target.kind) {
-              case 'approval':
-                return (
-                  <DiscountApprovals
-                    user={user}
-                    discountId={target.recordId}
-                    lookupAllPages
-                  />
-                );
-              case 'assignment':
-                return <DeliveryDetail orderId={target.recordId} />;
-              case 'low-stock':
-                return <LowStockRecord id={target.recordId} />;
-              case 'urgent-order':
-                return (
-                  <PreparationScreen
-                    key={target.recordId}
-                    ticketId={target.recordId}
-                  />
-                );
-            }
+          {() => {
+            return (
+              <PreparationScreen
+                key={target.recordId}
+                ticketId={target.recordId}
+              />
+            );
           }}
         </PermissionBoundary>
       ) : (

@@ -1,5 +1,12 @@
 # Mobile verification and contributor runbook
 
+Current acceptance follows the [26 November Counter + Preparation decision](mobile-scope-206.md)
+and #206 for selected Mobile 5.1–5.4. The historical multi-role procedures below
+remain useful for tooling and prior evidence; retired approvals, inventory/receipts,
+courier and administration cases are not current mobile release requirements.
+Use the current runner manifest and record exact revisions/results. CI, an old
+full-role report or the scope decision alone does not prove current Android acceptance.
+
 Issue [#186](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/186)
 covers Mobile 6.1, 6.2, 6.3 and 6.5. Use a fresh disposable database and synthetic
 accounts. The native suite changes orders, stock and one account.
