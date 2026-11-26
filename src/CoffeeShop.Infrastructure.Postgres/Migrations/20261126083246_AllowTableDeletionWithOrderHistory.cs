@@ -1,48 +1,47 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace CoffeeShop.Infrastructure.Postgres.Migrations
+namespace CoffeeShop.Infrastructure.Postgres.Migrations;
+
+/// <inheritdoc />
+public partial class AllowTableDeletionWithOrderHistory : Migration
 {
     /// <inheritdoc />
-    public partial class AllowTableDeletionWithOrderHistory : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_orders_tables_table_id",
-                schema: "sales",
-                table: "orders");
+        migrationBuilder.DropForeignKey(
+            name: "FK_orders_tables_table_id",
+            schema: "sales",
+            table: "orders");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_orders_tables_table_id",
-                schema: "sales",
-                table: "orders",
-                column: "table_id",
-                principalSchema: "sales",
-                principalTable: "tables",
-                principalColumn: "id",
-                onDelete: ReferentialAction.SetNull);
-        }
+        migrationBuilder.AddForeignKey(
+            name: "FK_orders_tables_table_id",
+            schema: "sales",
+            table: "orders",
+            column: "table_id",
+            principalSchema: "sales",
+            principalTable: "tables",
+            principalColumn: "id",
+            onDelete: ReferentialAction.SetNull);
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_orders_tables_table_id",
-                schema: "sales",
-                table: "orders");
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropForeignKey(
+            name: "FK_orders_tables_table_id",
+            schema: "sales",
+            table: "orders");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_orders_tables_table_id",
-                schema: "sales",
-                table: "orders",
-                column: "table_id",
-                principalSchema: "sales",
-                principalTable: "tables",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Restrict);
-        }
+        migrationBuilder.AddForeignKey(
+            name: "FK_orders_tables_table_id",
+            schema: "sales",
+            table: "orders",
+            column: "table_id",
+            principalSchema: "sales",
+            principalTable: "tables",
+            principalColumn: "id",
+            onDelete: ReferentialAction.Restrict);
     }
 }
