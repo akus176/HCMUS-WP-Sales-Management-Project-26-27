@@ -9,6 +9,7 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace CoffeeShop.WinUI;
 
@@ -62,6 +63,14 @@ public sealed partial class MainWindow : Window
         };
     }
     private static object Resource(string key) => Microsoft.UI.Xaml.Application.Current.Resources[key];
+    private static IconElement TableNavigationIcon()
+    {
+        var geometry = new GeometryGroup();
+        geometry.Children.Add(new RectangleGeometry { Rect = new Windows.Foundation.Rect(2.5, 4.5, 15, 2.5) });
+        geometry.Children.Add(new RectangleGeometry { Rect = new Windows.Foundation.Rect(4.5, 8, 2.5, 9.5) });
+        geometry.Children.Add(new RectangleGeometry { Rect = new Windows.Foundation.Rect(13, 8, 2.5, 9.5) });
+        return new PathIcon { Data = geometry };
+    }
     private static Symbol NavigationSymbol(string tag) => tag switch
     {
         "counter" => Symbol.Shop,
@@ -97,7 +106,7 @@ public sealed partial class MainWindow : Window
             var item = new NavigationViewItem
             {
                 Content = destination.Label,
-                Icon = new SymbolIcon(NavigationSymbol(destination.Tag)),
+                Icon = destination.Tag == "tables" ? TableNavigationIcon() : new SymbolIcon(NavigationSymbol(destination.Tag)),
                 Tag = destination.Tag,
                 Style = (Style)Resource("ConsoleNavigationItemStyle"),
                 FontSize = 14,
@@ -261,6 +270,7 @@ public sealed partial class MainWindow : Window
                 if (!pages.TryGetValue(key, out var page)) pages.Add(key, page = CreatePage(route));
                 ContentFrame.Content = page;
                 currentRoute = key;
+                UpdateTablesViewportWidth();
             }
         }
 
@@ -275,12 +285,14 @@ public sealed partial class MainWindow : Window
         ServiceConsoleWorkspace.Menu => new CatalogPage(),
         ServiceConsoleWorkspace.StockRoom => new StockRoomPage(),
         ServiceConsoleWorkspace.Customers => new CustomersPage(),
+        ServiceConsoleWorkspace.Tables => new TablesPage(),
         ServiceConsoleWorkspace.Reports => new ReportsPage(),
         _ => throw new ArgumentOutOfRangeException(nameof(route)),
     };
     private void OnShellSizeChanged(object sender, SizeChangedEventArgs e)
     {
         if (Nav is null) return;
+        UpdateTablesViewportWidth();
         var next = ServiceConsoleNavigation.LayoutFor(e.NewSize.Width);
         if (layout == next) return;
         layout = next;
@@ -296,5 +308,12 @@ public sealed partial class MainWindow : Window
         MenuToggle.Visibility = next == ServiceConsoleLayoutMode.Expanded ? Visibility.Collapsed : Visibility.Visible;
         RefreshNavigationItems();
         DatabaseFailurePanel.Margin = new Thickness(next == ServiceConsoleLayoutMode.Expanded ? 248 : 20, 60, 20, 20);
+        UpdateTablesViewportWidth();
     }
+
+    private void UpdateTablesViewportWidth() => DispatcherQueue.TryEnqueue(() =>
+    {
+        if (ContentFrame.Content is TablesPage tables && ContentFrame.ActualWidth > 0)
+            tables.SetViewportWidth(ContentFrame.ActualWidth);
+    });
 }

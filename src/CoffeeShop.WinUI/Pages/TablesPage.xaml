@@ -1,0 +1,117 @@
+<Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="CoffeeShop.WinUI.Pages.TablesPage" FontFamily="{StaticResource ConsoleSansFont}" Background="{StaticResource ConsoleGroundBrush}" Foreground="{StaticResource ConsoleInkBrush}" RequestedTheme="Light" SizeChanged="OnPageSizeChanged">
+    <Page.Resources>
+        <Style x:Key="TableButton" TargetType="Button" BasedOn="{StaticResource ConsoleButtonStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CharacterSpacing" Value="0" />
+            <Setter Property="MinWidth" Value="112" />
+            <Setter Property="MinHeight" Value="48" />
+            <Setter Property="Padding" Value="16,0" />
+        </Style>
+        <Style x:Key="TablePrimary" TargetType="Button" BasedOn="{StaticResource ConsolePrimaryButtonStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CharacterSpacing" Value="0" />
+            <Setter Property="MinWidth" Value="112" />
+            <Setter Property="MinHeight" Value="48" />
+            <Setter Property="Padding" Value="16,0" />
+        </Style>
+        <Style x:Key="TableLink" TargetType="Button" BasedOn="{StaticResource TableButton}">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource ConsoleAccentTextBrush}" />
+            <Setter Property="Padding" Value="8,0" />
+        </Style>
+        <Style x:Key="TableText" TargetType="TextBlock" BasedOn="{StaticResource ConsoleBodyStyle}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="LineHeight" Value="21" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="TableLabel" TargetType="TextBlock" BasedOn="{StaticResource ConsoleLabelStyle}">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="CharacterSpacing" Value="80" />
+        </Style>
+        <Style x:Key="TableField" TargetType="TextBox" BasedOn="{StaticResource ConsoleFieldStyle}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="MinHeight" Value="44" />
+        </Style>
+        <Style x:Key="TableListItem" TargetType="ListViewItem" BasedOn="{StaticResource WorkspaceListItem}">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style x:Key="TableDialog" TargetType="ContentDialog" BasedOn="{StaticResource WorkspaceDialog}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="PrimaryButtonStyle" Value="{StaticResource TablePrimary}" />
+            <Setter Property="CloseButtonStyle" Value="{StaticResource TableButton}" />
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource TableButton}" />
+        <Style TargetType="TextBox" BasedOn="{StaticResource TableField}" />
+        <Style TargetType="TextBlock" BasedOn="{StaticResource TableText}" />
+        <Style TargetType="ListViewItem" BasedOn="{StaticResource TableListItem}" />
+    </Page.Resources>
+    <Grid x:Name="RootGrid" Padding="24,6,0,12" RowSpacing="6" HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid x:Name="Header" Padding="0,0,0,10" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1" ColumnSpacing="18" RowSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="HeaderActionColumn" Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel Spacing="2" VerticalAlignment="Center">
+                <TextBlock Text="Tables" Style="{StaticResource ConsolePageTitleStyle}" AutomationProperties.HeadingLevel="Level1" />
+                <TextBlock x:Name="SummaryText" FontSize="13" Foreground="{StaticResource ConsoleMutedInkBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+            <StackPanel x:Name="HeaderActions" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Bottom" Margin="0,0,24,0">
+                <Button Content="Refresh" Click="OnRefresh" Style="{StaticResource TableButton}" VerticalAlignment="Bottom" AutomationProperties.Name="Refresh tables" />
+                <Button Content="New table" Click="OnNewTable" Style="{StaticResource TablePrimary}" VerticalAlignment="Bottom" AutomationProperties.Name="Create dining table" />
+            </StackPanel>
+        </Grid>
+        <StackPanel Grid.Row="1" Spacing="6">
+            <ProgressBar x:Name="LoadingBar" IsIndeterminate="True" Visibility="Collapsed" />
+            <InfoBar x:Name="Status" IsClosable="False" IsOpen="False" />
+            <TextBlock x:Name="EmptyText" Visibility="Collapsed" Foreground="{StaticResource ConsoleMutedInkBrush}"
+                       Text="No dining tables yet. Create the first table to enable dine-in service." TextWrapping="Wrap" />
+        </StackPanel>
+        <Grid Grid.Row="2" Margin="0,6,0,0">
+            <ListView x:Name="TablesList" SelectionMode="None" Padding="0" AutomationProperties.Name="Dining tables"
+                      HorizontalAlignment="Stretch" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      ScrollViewer.HorizontalScrollMode="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ContainerContentChanging="OnContainerContentChanging">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="0,12" ColumnSpacing="16" BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="76" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Number}" FontFamily="{StaticResource ConsoleSerifFont}" FontSize="24"
+                                           Foreground="{StaticResource ConsoleInkBrush}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding Seats}" Style="{StaticResource TableLabel}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Status}" Style="{StaticResource TableLabel}" Foreground="{Binding StatusBrush}" />
+                                <TextBlock Text="{Binding Association}" FontSize="13" Foreground="{StaticResource ConsoleMutedInkBrush}"
+                                           TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Association}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                <Button Content="Edit" Tag="{Binding}" Click="OnEditTable" Style="{StaticResource TableLink}"
+                                        AutomationProperties.Name="{Binding EditName}" />
+                                <Button Content="Remove" Tag="{Binding}" Click="OnRemoveTable" Style="{StaticResource TableLink}"
+                                        Foreground="{StaticResource ConsoleMutedInkBrush}" IsEnabled="{Binding CanRemove}"
+                                        ToolTipService.ToolTip="{Binding RemoveHint}"
+                                        AutomationProperties.Name="{Binding RemoveName}" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+    </Grid>
+</Page>

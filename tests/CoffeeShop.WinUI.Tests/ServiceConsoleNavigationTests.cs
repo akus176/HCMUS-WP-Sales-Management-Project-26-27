@@ -25,9 +25,9 @@ public sealed class ServiceConsoleNavigationTests
     }
 
     [Fact]
-    public void PrimaryDestinations_AreExactlyTheSixConceptWorkspaces()
+    public void PrimaryDestinations_AreExactlyTheSevenConceptWorkspaces()
     {
-        Assert.Equal(["counter", "service-board", "menu", "stock-room", "customers", "reports"],
+        Assert.Equal(["counter", "service-board", "menu", "stock-room", "customers", "tables", "reports"],
             ServiceConsoleNavigation.PrimaryDestinations.Select(item => item.Tag));
         Assert.All(ServiceConsoleNavigation.PrimaryDestinations, item => Assert.Equal(item, ServiceConsoleNavigation.Resolve(item.Tag).Destination));
         Assert.Equal("counter", ServiceConsoleNavigation.DefaultTag);
@@ -42,6 +42,7 @@ public sealed class ServiceConsoleNavigationTests
         Assert.Equal(["stock-room"], ServiceConsoleNavigation.ForPermissions(["inventory.manage"]).Select(item => item.Tag));
         Assert.Equal(["reports"], ServiceConsoleNavigation.ForPermissions(["reports.lowstock"]).Select(item => item.Tag));
         Assert.Equal(["menu"], ServiceConsoleNavigation.ForPermissions(["menu.manage"]).Select(item => item.Tag));
+        Assert.Equal(["tables"], ServiceConsoleNavigation.ForPermissions(["tables.manage"]).Select(item => item.Tag));
         Assert.Empty(ServiceConsoleNavigation.ForPermissions(["unknown.permission"]));
     }
 

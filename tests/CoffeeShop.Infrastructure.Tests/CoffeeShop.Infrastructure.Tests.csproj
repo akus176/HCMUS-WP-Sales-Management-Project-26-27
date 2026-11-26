@@ -35,6 +35,8 @@
     <Compile Include="..\..\src\CoffeeShop.WinUI\Services\StaffSessionManager.cs" Link="Services\StaffSessionManager.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\Services\IStaffIdentityApi.cs" Link="Services\IStaffIdentityApi.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\InventoryAuditWorkspace.cs" Link="ViewModels\InventoryAuditWorkspace.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\ViewModels\TableManagementWorkspace.cs" Link="ViewModels\TableManagementWorkspace.cs" />
+    <Compile Include="..\..\src\CoffeeShop.WinUI\Services\TableManagementSource.cs" Link="Services\TableManagementSource.cs" />
     <Compile Include="..\..\src\CoffeeShop.WinUI\WinUIServiceCollectionExtensions.cs" Link="WinUIServiceCollectionExtensions.cs" />
   </ItemGroup>
 

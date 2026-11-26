@@ -5,9 +5,10 @@ peach preparing notes, and sage ready notes. A smaller page heading leaves more
 room for work. Each column has an aligned heading, count, short explanation, and
 empty state. Notes show the amount due and use 44-DIP action targets.
 
-The Service board starts with a compact table overview. Each table shows its
-server-reported availability and, when occupied, the associated active order
-number. A missing order summary is labeled as unavailable rather than guessed.
+The Service board shows a compact table overview below the order columns, so the
+active tickets stay first. Each table shows its server-reported availability and,
+when occupied, the associated active order number. A missing order summary is
+labeled as unavailable rather than guessed.
 The overview refreshes with the same snapshot as the order columns after refresh,
 assignment, completion, and cancellation. It includes newly created tables when
 the board reloads. Users without table-read permission do not see an empty-state
