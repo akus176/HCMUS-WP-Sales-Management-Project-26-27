@@ -11,7 +11,7 @@ using CoffeeShop.Infrastructure.Postgres.Identity;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
-public sealed class StaffAdministrationService(CoffeeShopDbContext db, TimeProvider time)
+public sealed class StaffAdministrationService(CoffeeShopDbContext db, TimeProvider time, GoogleAdminOptions google)
 {
     private const int MaximumPageSize = 100;
 
@@ -23,6 +23,9 @@ public sealed class StaffAdministrationService(CoffeeShopDbContext db, TimeProvi
         var fullName = request.FullName?.Trim();
         var phone = request.Phone?.Trim();
         var roleCode = request.Role?.Trim();
+        if (google.Enabled && roleCode == "Admin")
+            return Result<StaffAccountResponse>.Failure(Error.Validation(
+                "staff.google_admin_provisioning_required", "Google administrators must be provisioned by the deployment operator."));
         if (string.IsNullOrWhiteSpace(username) || username.Length > 50 ||
             string.IsNullOrWhiteSpace(fullName) || fullName.Length > 150 ||
             string.IsNullOrWhiteSpace(email) || email.Length > 255 ||
@@ -155,9 +158,11 @@ public sealed class StaffAdministrationService(CoffeeShopDbContext db, TimeProvi
         var isAdministrator = user.UserRoles.Any(role => role.Role?.Code == "Admin");
         if (isAdministrator)
         {
-            var activeAdministrators = await db.Users.CountAsync(candidate => candidate.IsActive &&
-                candidate.UserRoles.Any(role => role.Role!.Code == "Admin"), ct);
-            if (activeAdministrators <= 1)
+            var remainingAdmins = await db.Users.Where(candidate => candidate.IsActive && candidate.Id != user.Id &&
+                candidate.UserRoles.Any(role => role.Role!.Code == "Admin"))
+                .Select(candidate => new { candidate.Id, candidate.Email }).ToArrayAsync(ct);
+            if (remainingAdmins.Length == 0 || (google.SessionBinding(user.Id.Value, user.Email) is not null &&
+                !remainingAdmins.Any(candidate => google.SessionBinding(candidate.Id.Value, candidate.Email) is not null)))
                 return Result<StaffAccountResponse>.Failure(Error.Conflict(
                     "staff.final_administrator", "The final active administrator cannot be deactivated."));
         }

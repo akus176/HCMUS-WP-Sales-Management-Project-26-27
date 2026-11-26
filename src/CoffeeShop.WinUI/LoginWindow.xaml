@@ -94,6 +94,16 @@
                                 BorderBrush="{ThemeResource SignInInkBrush}" CornerRadius="0" AccessKey="S"
                                 UseSystemFocusVisuals="True" FocusVisualPrimaryBrush="{ThemeResource SignInAccentBrush}"
                                 Click="OnSignIn" />
+                        <Button x:Name="GoogleSignInButton" Content="Administrator sign-in with Google"
+                                AutomationProperties.AutomationId="GoogleAdminSignIn" AccessKey="G"
+                                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                                FontFamily="{StaticResource ConsoleSansMediumFont}" FontSize="16" MinHeight="52" Padding="16,14"
+                                Background="{ThemeResource SignInGroundBrush}" Foreground="{ThemeResource SignInInkBrush}"
+                                BorderBrush="{ThemeResource SignInRuleBrush}" CornerRadius="0"
+                                UseSystemFocusVisuals="True" FocusVisualPrimaryBrush="{ThemeResource SignInAccentBrush}"
+                                Click="OnGoogleSignIn" />
+                        <Button x:Name="CancelGoogleSignInButton" Content="Cancel Google sign-in" Visibility="Collapsed"
+                                Click="OnCancelGoogleSignIn" />
                         <Grid MinHeight="24" ColumnSpacing="10">
                             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                             <ProgressRing x:Name="SigningInProgress" Width="20" Height="20" IsActive="False" Visibility="Collapsed"

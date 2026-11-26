@@ -238,6 +238,32 @@ public sealed partial class CounterSaleTests(ITestOutputHelper output)
         }
     }
 
+    [Fact]
+    public void GoogleSignInShowsServiceFeedbackWhenDisabled()
+    {
+        using var automation = new UIA3Automation();
+        using var app = LaunchApp();
+        try
+        {
+            Window? FindWindow(string id) => app.GetAllTopLevelWindows(automation)
+                .FirstOrDefault(candidate => FindId(candidate, id) is not null);
+            var window = WaitFor("Windows login or restored session", () => FindWindow("GoogleAdminSignIn") ?? FindWindow("SignOutButton"));
+            if (FindId(window, "SignOutButton") is not null)
+            {
+                Press(window, "SignOutButton");
+                window = WaitFor("Windows Google sign-in button", () => FindWindow("GoogleAdminSignIn"));
+            }
+            Press(window, "GoogleAdminSignIn");
+            WaitFor("Google sign-in service feedback", () => FindName(window, "Couldn't sign in with Google"));
+            Assert.True(Find(window, "SignInButton").IsEnabled);
+            Assert.True(Find(window, "GoogleAdminSignIn").IsEnabled);
+        }
+        finally
+        {
+            if (!app.HasExited) app.Kill();
+        }
+    }
+
     private static Application LaunchApp()
     {
         var exe = Required("COFFEESHOP_E2E_EXE");
@@ -274,10 +300,20 @@ public sealed partial class CounterSaleTests(ITestOutputHelper output)
     private static void SelectOption(Window window, UIA3Automation automation, AutomationElement combo, string choice)
     {
         var dropdown = combo.Patterns.ExpandCollapse.Pattern;
-        dropdown.Expand();
+        combo.Focus();
         var option = WaitFor($"{choice} in {combo.Properties.Name.ValueOrDefault}", () =>
-            window.FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem)))
-            ?? automation.GetDesktop().FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem))));
+        {
+            if (combo.IsOffscreen) return null;
+            if (dropdown.ExpandCollapseState.Value == ExpandCollapseState.Collapsed)
+            {
+                // The form can close the popup while scrolling a newly added field into view.
+                dropdown.Expand();
+                return null;
+            }
+
+            return window.FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem)))
+                ?? automation.GetDesktop().FindFirstDescendant(cf => cf.ByName(choice).And(cf.ByControlType(ControlType.ListItem)));
+        });
         option.Patterns.SelectionItem.Pattern.Select();
         if (dropdown.ExpandCollapseState.Value == ExpandCollapseState.Expanded) dropdown.Collapse();
     }
@@ -441,21 +477,21 @@ public sealed partial class CounterSaleTests(ITestOutputHelper output)
     private static T WaitFor<T>(string description, Func<T?> find, Func<string>? details = null) where T : class
     {
         var timer = Stopwatch.StartNew();
-        COMException? unavailableElement = null;
+        COMException? transientAutomationError = null;
         do
         {
             try
             {
                 if (find() is { } result) return result;
             }
-            catch (COMException exception) when (exception.HResult == unchecked((int)0x80040201))
+            catch (COMException exception) when (exception.HResult is unchecked((int)0x80040201) or unchecked((int)0x80131505))
             {
-                // WinUI can replace a virtualized row between discovery and reading its properties.
-                unavailableElement = exception;
+                // UI Automation can lose an element or time out while WinUI replaces a row or window.
+                transientAutomationError = exception;
             }
             Thread.Sleep(150);
         } while (timer.Elapsed < TimeSpan.FromSeconds(25));
-        throw new TimeoutException($"Timed out waiting for {description}.{details?.Invoke()}", unavailableElement);
+        throw new TimeoutException($"Timed out waiting for {description}.{details?.Invoke()}", transientAutomationError);
     }
 
     private static async Task<T> ReadAsync<T>(HttpClient client, string path) =>

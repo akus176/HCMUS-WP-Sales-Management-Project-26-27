@@ -12,19 +12,26 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-public sealed class StaffIdentityService(CoffeeShopDbContext db, IConfiguration configuration, TimeProvider time)
+public sealed class StaffIdentityService(CoffeeShopDbContext db, IConfiguration configuration, TimeProvider time, GoogleAdminOptions google)
 {
+    internal const string GoogleBindingClaim = "google_binding";
+    internal const string NoPasswordHash = "!";
     private static readonly PasswordHasher<User> Hasher = new();
     private static readonly string DummyHash = Hasher.HashPassword(null!, Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)));
 
     public static string HashPassword(User user, string password) => Hasher.HashPassword(user, password);
     public static string HashToken(string token) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
 
-    public async Task<StaffSession?> SessionAsync(EntityId id, CancellationToken ct)
+    public async Task<StaffSession?> SessionAsync(EntityId id, CancellationToken ct, string? googleBinding = null)
     {
         var user = await db.Users.AsNoTracking().SingleOrDefaultAsync(u => u.Id == id && u.IsActive, ct);
         if (user is null) return null;
         var roles = await db.UserRoles.Where(ur => ur.UserId == id).Select(ur => ur.Role!.Code).ToArrayAsync(ct);
+        if (google.Enabled && roles.Contains("Admin"))
+        {
+            if (googleBinding is null || google.SessionBinding(user.Id.Value, user.Email) != googleBinding) return null;
+        }
+        else if (googleBinding is not null) return null;
         var permissions = await db.UserRoles.Where(ur => ur.UserId == id)
             .SelectMany(ur => ur.Role!.RolePermissions.Select(rp => rp.Permission!.Code)).Distinct().ToArrayAsync(ct);
         return new(user.Id.Value, user.FullName, roles.Order().ToArray(), permissions.Order().ToArray());
@@ -48,20 +55,36 @@ public sealed class StaffIdentityService(CoffeeShopDbContext db, IConfiguration 
             await LockUserAsync(user.Id, ct);
             await db.Entry(user).ReloadAsync(ct);
         }
+        var hash = user?.PasswordHash;
         PasswordVerificationResult verification;
-        try { verification = Hasher.VerifyHashedPassword(user!, user?.PasswordHash ?? DummyHash, password); }
+        try { verification = Hasher.VerifyHashedPassword(user!, hash is null or NoPasswordHash ? DummyHash : hash, password); }
         catch (FormatException) { verification = PasswordVerificationResult.Failed; }
-        if (user is null || !user.IsActive || verification == PasswordVerificationResult.Failed)
-        {
-            Audit("login_failed", "denied", user?.Id, ip);
-            await db.SaveChangesAsync(ct);
-            await transaction.CommitAsync(ct);
-            return null;
-        }
-        var pair = await IssueAsync(user.Id, Guid.NewGuid(), ip, ct);
-        Audit("login_success", "success", user.Id, ip);
-        await db.SaveChangesAsync(ct);
+        var session = user is not null && hash != NoPasswordHash && verification != PasswordVerificationResult.Failed
+            ? await SessionAsync(user.Id, ct) : null;
+        var pair = await CompleteLoginAsync(session, user?.Id, ip, ct);
         await transaction.CommitAsync(ct);
+        return pair;
+    }
+
+    internal async Task<TokenResponse?> GoogleLoginAsync(GoogleAdminLink? link, string? ip, CancellationToken ct)
+    {
+        if (link is null || google.SessionBinding(link.UserId, link.Email) is not { } binding)
+            return await CompleteLoginAsync(null, null, ip, ct);
+        var id = new EntityId(link.UserId);
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        await LockUserAsync(id, ct);
+        var session = await SessionAsync(id, ct, binding);
+        var pair = await CompleteLoginAsync(session, session is null ? null : id, ip, ct, binding);
+        await transaction.CommitAsync(ct);
+        return pair;
+    }
+
+    private async Task<TokenResponse?> CompleteLoginAsync(StaffSession? session, EntityId? id, string? ip,
+        CancellationToken ct, string? googleBinding = null)
+    {
+        var pair = session is null ? null : Issue(session, Guid.NewGuid(), ip, googleBinding);
+        Audit(session is null ? "login_failed" : "login_success", session is null ? "denied" : "success", id, ip);
+        await db.SaveChangesAsync(ct);
         return pair;
     }
 
@@ -89,11 +112,19 @@ public sealed class StaffIdentityService(CoffeeShopDbContext db, IConfiguration 
         }
         else
         {
-            pair = await IssueAsync(stored.UserId, stored.FamilyId, ip, ct);
-            var replacement = db.ChangeTracker.Entries<RefreshToken>()
-                .Single(entry => entry.State == EntityState.Added).Entity;
-            stored.Revoke(now, replacement.Id);
-            Audit("token_refresh", "success", stored.UserId, ip);
+            // Legacy refresh tokens are plain Base64. Google sessions carry their link binding before a dot.
+            var separator = token.IndexOf('.');
+            var binding = separator < 0 ? null : token[..separator];
+            var session = await SessionAsync(stored.UserId, ct, binding);
+            if (session is null) await RevokeAsync(stored.UserId, stored.FamilyId, now, ct);
+            else
+            {
+                pair = Issue(session, stored.FamilyId, ip, binding);
+                var replacement = db.ChangeTracker.Entries<RefreshToken>()
+                    .Single(entry => entry.State == EntityState.Added).Entity;
+                stored.Revoke(now, replacement.Id);
+                Audit("token_refresh", "success", stored.UserId, ip);
+            }
         }
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
@@ -129,18 +160,20 @@ public sealed class StaffIdentityService(CoffeeShopDbContext db, IConfiguration 
         foreach (var token in tokens) token.Revoke(now);
     }
 
-    private async Task<TokenResponse> IssueAsync(EntityId userId, Guid family, string? ip, CancellationToken ct)
+    private TokenResponse Issue(StaffSession session, Guid family, string? ip, string? googleBinding)
     {
         var now = time.GetUtcNow();
         var expires = now.AddMinutes(10);
-        var session = (await SessionAsync(userId, ct))!;
+        var userId = new EntityId(session.Id);
         var claims = new List<Claim> { new("sub", userId.ToString()), new("jti", Guid.NewGuid().ToString()) };
+        if (googleBinding is not null) claims.Add(new(GoogleBindingClaim, googleBinding));
         claims.AddRange(session.Roles.Select(role => new Claim("role", role)));
         // Permissions are resolved from the database on each authenticated request.
         var credentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SigningKey"]!)), SecurityAlgorithms.HmacSha256);
         var jwt = new JwtSecurityToken(configuration["Jwt:Issuer"], configuration["Jwt:Audience"], claims,
             now.UtcDateTime, expires.UtcDateTime, credentials);
         var refresh = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        if (googleBinding is not null) refresh = $"{googleBinding}.{refresh}";
         db.RefreshTokens.Add(new RefreshToken(EntityId.New(), userId, HashToken(refresh), family,
             new UtcTimestamp(now), new UtcTimestamp(now.AddDays(14)), createdByIp: ip));
         return new(new JwtSecurityTokenHandler().WriteToken(jwt), refresh, expires, session);

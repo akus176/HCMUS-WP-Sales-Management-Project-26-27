@@ -12,7 +12,9 @@ internal static class WinUIApiServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
         services.AddSingleton(new HttpClient { BaseAddress = apiBaseAddress, Timeout = TimeSpan.FromSeconds(15) });
-        services.AddSingleton<IStaffIdentityApi, StaffIdentityApiClient>();
+        services.AddSingleton<StaffIdentityApiClient>();
+        services.AddSingleton<IStaffIdentityApi>(provider => provider.GetRequiredService<StaffIdentityApiClient>());
+        services.AddSingleton<GoogleAdminSignIn>();
         services.AddSingleton<IRefreshTokenStore>(_ => new ProtectedRefreshTokenFileStore(
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CoffeeShop", "refresh-token.bin"),
             new WindowsDpapiSecretProtector()));

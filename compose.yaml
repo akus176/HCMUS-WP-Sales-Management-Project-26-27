@@ -67,6 +67,9 @@ services:
         SDK_IMAGE: ${SDK_IMAGE:-mcr.microsoft.com/dotnet/sdk:10.0}
         RUNTIME_IMAGE: ${RUNTIME_IMAGE:-mcr.microsoft.com/dotnet/aspnet:10.0}
     restart: unless-stopped
+    env_file:
+      - path: .env.google-admin
+        required: false
     environment:
       ConnectionStrings__CoffeeShop: "Host=postgres;Port=5432;Database=${POSTGRES_DB:?Set POSTGRES_DB in .env};Username=${POSTGRES_USER:?Set POSTGRES_USER in .env};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}"
       Jwt__Issuer: ${Jwt__Issuer:?Set Jwt__Issuer in .env}
