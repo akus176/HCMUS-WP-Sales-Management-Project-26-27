@@ -36,7 +36,7 @@ public static class SalesEndpoints
                     line.Quantity, (line.AddonIds ?? []).Select(id => new EntityId(id)).ToArray())).ToArray()), ct);
             return result.IsSuccess ? Results.Json(ToOrder(result.Value), statusCode: 201) : ApiErrorResults.From(result.Error!);
         }).RequireAuthorization("orders.create").Produces<OrderResponse>(201)
-            .WithDescription(StaffMobileRelease.OutsideScope);
+            .WithDescription(StaffMobileRelease.CounterScope);
         orders.MapPost("/{id:guid}/confirm", async (Guid id, ConfirmOrderRequest request, PosOrderHandler handler,
             CancellationToken ct) =>
         {
@@ -44,7 +44,7 @@ public static class SalesEndpoints
             var result = await handler.ConfirmAsync(new(id), request.ReviewedTotal, ct);
             return result.IsSuccess ? Results.Ok(ToOrder(result.Value)) : ApiErrorResults.From(result.Error!);
         }).RequireAuthorization("orders.confirm").Produces<OrderResponse>()
-            .WithDescription(StaffMobileRelease.OutsideScope);
+            .WithDescription(StaffMobileRelease.CounterScope);
         orders.MapPost("/{id:guid}/payments", async (Guid id, RecordPaymentRequest request,
             PaymentCommandHandler handler, CancellationToken ct) =>
         {
@@ -66,7 +66,7 @@ public static class SalesEndpoints
                 result.Value.Status, result.Value.ComputedAmount, result.Value.DiscountTotal, result.Value.Total),
                 statusCode: 201) : ApiErrorResults.From(result.Error!);
         }).RequireAuthorization("discounts.request").Produces<DiscountDecisionResponse>(201)
-            .WithDescription(StaffMobileRelease.OutsideScope);
+            .WithDescription(StaffMobileRelease.CounterScope);
         orders.MapPost("/{id:guid}/cancel", async (Guid id, CancelOrderRequest request,
             OrderCancellationCommandHandler handler, CancellationToken ct) =>
         {
@@ -82,7 +82,7 @@ public static class SalesEndpoints
             .WithDescription(StaffMobileRelease.UsePreparationTickets);
         orders.MapPost("/{id:guid}/complete", (Guid id, OrderFulfillmentCommandHandler handler,
             CancellationToken ct) => Transition(id, OrderStatus.Completed, handler, ct)).RequireAuthorization("orders.complete")
-            .WithDescription(StaffMobileRelease.OutsideScope + " The mobile courier workflow uses assignment endpoints.");
+            .WithDescription(StaffMobileRelease.OutsideScope + " Courier execution is outside current mobile scope.");
 
         api.MapGet("/tables", async (FulfillmentOperationsQueryHandler handler, CancellationToken ct) =>
             Results.Ok(await handler.GetTablesAsync(ct))).RequireAuthorization("orders.create")

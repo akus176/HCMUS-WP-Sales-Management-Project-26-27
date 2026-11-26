@@ -1,51 +1,52 @@
 ## Why
 
-Coffee-shop staff need a portable way to act on orders, approvals, deliveries, and inventory while moving around the shop or completing deliveries. A shared mobile client will extend the existing management system without duplicating its business rules or creating a separate source of operational data.
+Counter and Preparation staff need a focused mobile client for taking and reviewing
+sales and preparing tickets against the same authoritative backend as WinUI.
 
 ## What Changes
 
-- Add an Android-first React Native staff application, built with TypeScript and Expo, that remains compatible with iOS and responsive tablet layouts.
-- Serve admin, manager, cashier, barista, inventory staff, and delivery staff through permission-aware navigation and role-specific workflows.
-- Use the same ASP.NET Core API, authentication, authorization, business rules, and PostgreSQL data as the final WinUI client.
-- Provide mobile workflows for the barista preparation queue, manager approvals, order and table monitoring, delivery fulfillment, inventory operations, and limited account/security administration.
-- Add actionable notifications and near-real-time updates for operational events, with safe manual refresh behavior when live updates are unavailable.
-- Keep the client online-first: cached operational details may remain readable, but state-changing actions require a confirmed server response.
-- Generate the TypeScript API client from the backend OpenAPI document so mobile contracts remain aligned with the server.
+- Keep Android-first React Native/Expo with TypeScript, secure staff sessions and permission-derived navigation.
+- Limit operational workspaces to Counter and Preparation. Today is the entry surface; More contains Account only.
+- Include Counter catalog/customization/cart, service modes, dine-in available-table selection, existing-customer/address lookup, draft save/review/confirm, discount requests, loyalty redemption, order lookup/status and payments.
+- Keep permission-gated manager cancellation and ready-delivery assignment inside Counter.
+- Keep Preparation queue/detail, start/ready confirmation, live/manual refresh and online-only writes.
+- Retain device lifecycle and privacy-safe urgent Preparation notifications with authenticated, freshly authorized deep links.
+- Continue using the shared API, business rules and PostgreSQL state; generate client types from shared OpenAPI.
 
 ## Delivery Boundaries
 
-The complete specification remains the product target. Delivery SHALL proceed in priority
-order so the team can demonstrate a coherent, tested mobile application before adding
-broader operational coverage.
+The owner's 26 November 2026 Counter + Preparation decision supersedes the previous
+six-workspace target. [Scope decision and acceptance map](../../../docs/mobile-scope-206.md)
+records included workflows, explicit exclusions, owners and remaining gates.
 
-- **P0 — demonstrable shared-state vertical slice:** individual login, permission-aware
-  navigation, barista preparation, manager discount approval, inventory low-stock and
-  adjustment, delivery completion or failure, online-only writes, and one verified
-  mobile-to-Windows state update.
-- **P1 — operational breadth:** cashier payment, cancellation approval, delivery assignment,
-  device registration, privacy-safe notifications, and limited mobile administration.
-- **P2 — release hardening:** complete Android end-to-end coverage, accessibility review,
-  CI Android build, physical-device procedure, rollback drill, and release candidate.
+- **P0:** sessions, permission-derived shell, Preparation, online-only protection and shared-state verification for retained workflows. Historical #201/#198/#202/#203 evidence stays tied to its recorded revisions.
+- **P1:** Counter sales/order/payment and manager actions, device lifecycle and urgent Preparation notification/deep links (Mobile 5.1–5.4, selected by #206).
+- **P2:** current Android acceptance, accessibility, CI, physical-device/release procedures and final demonstration evidence. CI success alone does not complete native acceptance.
 
-P1 and P2 work MUST NOT be presented as implemented while a P0 dependency lacks a
-server contract, automated evidence, or a working Android demonstration. The task list
-is the authoritative implementation sequence; GitHub Issue #95 remains the team-facing
-tracking surface.
+Mobile approval inboxes, Stock/inventory/receipts, courier workspaces, staff
+administration, a standalone Tables occupancy view, and full customer/address/settings
+administration are excluded. WinUI/shared backend workflows remain available. Delivery
+service mode and manager assignment remain Counter actions. Discount requests remain
+in Counter; approval decisions are made in WinUI.
+
+#95 tracks current tasks, #206 remains open for selected P1 verification and @longtoZ's
+approval, and #232 owns operation-to-scope traceability. This scope decision is not
+reviewer acceptance or final release/demo completion.
 
 ## Capabilities
 
 ### New Capabilities
 
-- `staff-mobile-app`: Defines role-aware mobile access, supported staff workflows, live updates and notifications, connectivity behavior, security, and accessibility for the shared coffee-shop backend.
+- `staff-mobile-app`: Secure, permission-aware Counter and Preparation against the shared backend, with safe connectivity, notifications and accessible mobile presentation.
 
 ### Modified Capabilities
 
-None. The mobile client consumes the authentication, sales, inventory, and administration behavior already planned for the shared backend without changing those domain requirements.
+None. No domain rules, API permissions or Windows requirements change.
 
 ## Impact
 
-- Adds a new `apps/staff-mobile` React Native application and its test, configuration, and generated API-client assets.
-- Adds mobile-specific dependencies for Expo routing, secure storage, notifications, server-state management, forms, validation, and real-time communication.
-- Requires the ASP.NET Core API to expose the existing staff workflows through stable OpenAPI contracts and to provide authenticated real-time events and notification registration endpoints.
-- Requires mobile deep links, device-token lifecycle handling, protected local token storage, and privacy controls for customer delivery information.
-- Does not add direct PostgreSQL access, offline writes, a second backend, multi-branch support, employee scheduling, payroll, customer ordering, or a mobile replacement for the complete desktop administration and reporting experience.
+Uses `apps/staff-mobile`, its generated API boundary, operational events and device
+registration. Shared API documentation distinguishes selected mobile operations from
+WinUI-only operations without removing endpoints. Retired mobile code/tests and prior
+evidence may remain for traceability; their existence does not expose a supported
+workspace. No direct database access, second backend or offline write queue is added.

@@ -1,5 +1,9 @@
 # Mobile Counter workflow
 
+The [26 November 2026 scope decision](mobile-scope-206.md) selects these Counter
+features and Preparation for the current mobile release. #206 remains open for
+current Android/shared-API evidence and named-reviewer approval.
+
 The mobile Counter now follows the Windows Counter flow documented in
 [counter-ui.md](counter-ui.md). Mobile navigation remains **Today, Counter,
 Preparation, More**; More contains Account. The courier workspace, Stock,

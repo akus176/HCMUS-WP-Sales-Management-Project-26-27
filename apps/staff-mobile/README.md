@@ -1,8 +1,10 @@
 # Staff mobile development
 
-Strict TypeScript, Expo SDK 58, React Native 0.88, and Expo Router. The public
-starter links to staff sign-in. An authenticated session screen supports sign-out;
-operational workflows and the permission-aware module shell belong to later issues.
+Strict TypeScript, Expo SDK 58, React Native 0.88, and Expo Router. The authenticated app exposes permission-based Counter and Preparation, plus Today
+and More/Account. Counter includes sales/order/payment and eligible manager actions;
+Preparation handles queue/ticket transitions. See the [current scope decision](../../docs/mobile-scope-206.md)
+and [Counter workflow](../../docs/mobile-counter-workflow.md). Retired workspaces remain
+excluded even if their shared APIs or historical tests still exist.
 
 ## Install and check
 

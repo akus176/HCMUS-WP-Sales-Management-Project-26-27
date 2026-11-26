@@ -181,7 +181,7 @@ public sealed class HostTests
     }
 
     [Fact]
-    public async Task OpenApiIdentifiesSharedSalesOperationsOutsideFirstMobileRelease()
+    public async Task OpenApiDistinguishesSelectedCounterOperationsFromWindowsOnlyOperations()
     {
         using var host = CreateHost();
         using var client = host.CreateClient();
@@ -195,8 +195,6 @@ public sealed class HostTests
 
         string[] expected =
         [
-            "GET /api/v1/customers",
-            "GET /api/v1/customers/{id}",
             "GET /api/v1/customers/{id}/addresses",
             "GET /api/v1/customers/{id}/loyalty-transactions",
             "GET /api/v1/delivery-staff",
@@ -212,15 +210,26 @@ public sealed class HostTests
             "POST /api/v1/customers/{id}/addresses/{addressId}/deactivate",
             "POST /api/v1/customers/{id}/addresses/{addressId}/default",
             "POST /api/v1/customers/{id}/deactivate",
-            "POST /api/v1/orders",
             "POST /api/v1/orders/{id}/complete",
-            "POST /api/v1/orders/{id}/confirm",
-            "POST /api/v1/orders/{id}/discounts",
-            "POST /api/v1/orders/{id}/loyalty/redeem",
             "POST /api/v1/orders/{id}/preparing",
             "POST /api/v1/orders/{id}/ready",
         ];
         Assert.Equal(expected, outsideScope.Order(StringComparer.Ordinal));
+
+        foreach (var (path, method) in new[]
+        {
+            ("/api/v1/customers", "get"),
+            ("/api/v1/customers/{id}", "get"),
+            ("/api/v1/orders", "post"),
+            ("/api/v1/orders/{id}/confirm", "post"),
+            ("/api/v1/orders/{id}/discounts", "post"),
+            ("/api/v1/orders/{id}/loyalty/redeem", "post"),
+        })
+        {
+            var operation = paths.GetProperty(path).GetProperty(method);
+            Assert.StartsWith("Included in the Counter + Preparation staff mobile scope.", operation.GetProperty("description").GetString());
+            Assert.True(operation.GetProperty("security")[0].TryGetProperty("Bearer", out _), $"{method} {path} must require bearer authentication.");
+        }
     }
 
     [Fact]
