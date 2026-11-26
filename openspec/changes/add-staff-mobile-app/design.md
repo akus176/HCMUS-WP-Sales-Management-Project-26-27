@@ -4,16 +4,27 @@ See `proposal.md` for motivation and `specs/staff-mobile-app/spec.md` for observ
 
 The mobile client must share that final backend and business state with WinUI. It cannot reference C# contracts directly, cannot connect to PostgreSQL, and must preserve the existing order, delivery, inventory, payment, discount, and account rules. Android phones are the first deployment target, but the architecture must not prevent iOS or tablet support.
 
+## Current scope decision (26 November 2026)
+
+The owner selected Counter + Preparation. [The decision record](../../../docs/mobile-scope-206.md)
+supersedes earlier six-role workspace assumptions and retired workflow rollout steps.
+Counter includes draft sales, existing-customer lookup, discount requests, loyalty,
+order/payment operations and eligible manager cancellation/assignment. Preparation
+retains queue/detail transitions. More contains Account only. Windows approval,
+inventory/receipts, courier and administration functions remain outside mobile scope.
+The previous full-role evidence remains historical; #206 must record current selected
+Android coverage and @longtoZ approval before closure.
+
 ## Goals / Non-Goals
 
 **Goals:**
 
 - Add a maintainable React Native client that fits the existing repository and API boundary.
 - Keep authentication, authorization, validation, concurrency, auditing, and business transitions authoritative on the server.
-- Give each staff role a focused mobile surface without duplicating the full desktop application.
+- Expose Counter and Preparation from effective permissions without duplicating the complete desktop application.
 - Provide prompt operational updates and notifications with safe behavior during network loss.
 - Keep TypeScript API types synchronized with ASP.NET contracts through repeatable generation.
-- Make the highest-risk workflows testable: authentication, barista transitions, manager approvals, payments, inventory changes, and delivery completion.
+- Make the highest-risk workflows testable: authentication, Counter save/confirm/adjustment/payment retries, manager cancellation/assignment and Preparation transitions.
 
 **Non-Goals:**
 
@@ -35,7 +46,7 @@ This gives the team a productive cross-platform toolchain while retaining access
 
 The mobile client calls the same versioned `/api/v1` endpoints used by the final WinUI client. It never references persistence models or database credentials. Domain transitions, permissions, idempotency, validation, and audit recording stay in the existing Domain, Application, and API layers.
 
-Existing endpoints are reused for authentication, orders, tables, payments, stock, users, and security events. Add only the read and delivery mechanisms the mobile workflows lack, including queries for pending discounts and the current delivery staff member's assignments, authenticated real-time events, and device registration for push notifications.
+Reuse existing authenticated catalog, customer lookup, order, payment, table-availability and preparation endpoints, operational events and device registration. Shared Windows endpoints remain published even when the corresponding mobile workspace is excluded.
 
 A mobile-specific backend or direct database connection was rejected because either would duplicate rules and allow the Windows and mobile clients to disagree.
 
@@ -69,46 +80,33 @@ Polling alone was rejected because it wastes mobile resources and delays urgent 
 
 TanStack Query may retain already loaded records in memory while the application remains open. When connectivity is unavailable, mutations are disabled and never placed in a background write queue. The UI displays offline or reconnecting state, preserves user-entered form data where safe, and requires an explicit retry after connection returns.
 
-Persistent offline business caching and queued synchronization were rejected because they require encryption, conflict resolution, expiry rules, and domain-specific reconciliation outside the current system's scope. Active delivery data is not persisted beyond the authenticated session in the first release.
+Persistent offline business caching and queued synchronization were rejected because they require encryption, conflict resolution, expiry rules, and domain-specific reconciliation outside the current system's scope. Counter delivery contact/address data and uncertain commands remain session-scoped; durable offline carts are excluded.
 
 ### 8. Organize navigation and features around permissions
 
-The authenticated root derives accessible route groups from effective permission codes, not hard-coded role-name checks. Feature folders own screens, query hooks, mutations, validation, and tests for barista, approvals, cashier, inventory, delivery, and limited administration. Deep-link guards resolve current permissions before fetching or rendering protected content.
+The authenticated root derives accessible route groups from effective permission codes, not hard-coded role-name checks. Active feature folders own Counter and Preparation queries, mutations, validation and tests. Retired modules may remain as historical source but are unavailable through navigation and guarded routes. Deep-link guards resolve current permissions before fetching or rendering protected content.
 
 The server remains authoritative; client route guards improve usability but are never treated as security enforcement.
 
 ### 9. Adapt the existing visual language for mobile operations
 
-Implement shared mobile theme tokens matching the existing warm-paper palette, pencil foreground, red correction accent, blue informational accent, yellow highlights, and handwritten display typography. Reduce rotation and decoration on dense operational lists, use stable irregular shapes rather than layout-time randomness, and keep functional icons conventional and labeled.
+Implement shared mobile theme tokens matching the existing warm-paper palette, pencil foreground, red correction accent, blue informational accent, yellow highlights, and bundled Inter typography from the selected native redesign. Reduce rotation and decoration on dense operational lists, use stable irregular shapes rather than layout-time randomness, and keep functional icons conventional and labeled.
 
 Use portrait-first layouts, responsive tablet composition, minimum 48-dp action targets, dynamic type, screen-reader labels, and contrast checks. Reproducing WinUI XAML components directly was rejected; the clients share design intent and tokens, not platform widgets.
 
 ### 10. Test contracts and critical workflows at multiple boundaries
 
-Use unit and component tests for permissions, validation, error mapping, and screen behavior; mock API transport at the generated-client boundary. Use API integration tests for mobile-required queries, device registration, hub authorization, and permission filtering. Use mobile end-to-end tests for login, barista progression, approval handling, payment, inventory adjustment, delivery completion, offline write prevention, and logout cleanup.
+Use unit and component tests for permissions, validation, error mapping, and screen behavior; mock API transport at the generated-client boundary. Use API integration tests for mobile-required queries, device registration, hub authorization, and permission filtering. Use mobile end-to-end tests for login, Counter save/confirm/customer/adjustment/payment, manager cancellation/assignment, Preparation progression, urgent Preparation links, offline protection and logout cleanup.
 
 CI builds the Android application, validates TypeScript and lint rules, runs unit tests, checks generated-client drift, and runs backend tests. Device-dependent push delivery can use a provider fake in CI plus a documented real-device verification before release.
 
 ### 11. Deliver the application through evidence-gated phases
 
-Keep the complete specification as the product target, but order delivery by demonstrable
-value and dependency readiness. P0 is the only minimum that may support a final mobile
-demonstration: authenticated, permission-aware navigation; barista preparation; manager
-discount approval; inventory low-stock and stock adjustment; delivery completion or
-failure; online-only write protection; and one verified shared-state update visible to
-the Windows client.
-
-P1 adds cashier, cancellation, assignment, device registration, notifications, and
-limited administration. P2 adds release hardening, broader end-to-end coverage, device
-validation, and rollback evidence. A phase entry requires a stable API contract, a
-working implementation, automated evidence, and a reproducible demo state. The final
-submission function list SHALL identify each function as implemented, planned, or out of
-scope; it must never rely on the architecture document as proof of implementation.
-
-A phased delivery model was selected over an all-role parallel build because the current
-mobile client and its required API boundary do not yet exist. It protects the team from
-claiming broad but unverified functionality and gives the video one coherent end-to-end
-story before optional capabilities are added.
+Use the scope decision rather than the former six-workspace target. P0 retains
+sessions, permissions, Preparation, safe connectivity and shared-state behavior.
+P1 covers Mobile 5.1–5.4 as mapped in #206. P2 retains release/accessibility/demo gates.
+Historical reports remain tied to their actual revisions; full current acceptance
+cannot be inferred from a checked old task or a green CI build.
 
 ## Risks / Trade-offs
 
@@ -117,7 +115,7 @@ story before optional capabilities are added.
 - **[Refresh-token rotation can race across requests]** → Use one refresh mutex and replay eligible failed requests only after successful renewal.
 - **[SignalR events can be missed during suspension or reconnect]** → Treat events as invalidation hints, refetch authoritative lists after reconnect, and use push notifications for background urgency.
 - **[Notifications can disclose customer or financial data]** → Use generic preview text and opaque identifiers, then reauthorize and fetch details after the user opens the app.
-- **[One application serving six roles can become cluttered]** → Build navigation from permissions and keep each workflow in an isolated feature module with a role-focused home surface.
+- **[Role names can imply unavailable mobile workspaces]** → Expose only Counter/Preparation actions justified by effective permissions; keep exclusions explicit in the function list.
 - **[Online-only writes limit delivery use in weak coverage]** → Make connection state explicit and preserve safe form input, while postponing synchronization until the product has evidence that its complexity is necessary.
 - **[Expo support may not cover a future native dependency]** → Use development builds and Expo prebuild; eject to maintained native projects only if a validated requirement cannot be met otherwise.
 
@@ -126,7 +124,7 @@ story before optional capabilities are added.
 1. Scaffold `apps/staff-mobile` with pinned tooling, environment validation, theme tokens, navigation, and test harnesses.
 2. Establish deterministic OpenAPI client generation and implement authenticated API transport with secure token rotation.
 3. Add missing backend read endpoints, device registration, and the authenticated operational event hub behind existing permission policies.
-4. Deliver the barista queue first, then manager approvals and cashier views, followed by delivery, inventory, and limited administration.
+4. Keep the Counter + Preparation layout, reconcile current scope and operation descriptions, and verify selected Counter/manager/device/notification flows under #206.
 5. Add push registration, deep links, reconnect behavior, privacy cleanup, accessibility verification, and end-to-end tests.
 6. Run Android internal testing against a staging-like API, validate multi-client synchronization with WinUI, and document physical-device network configuration.
 7. Release behind an environment/configuration gate. Roll back by withdrawing the mobile build and disabling mobile device registrations/hub access; the shared API and WinUI workflows continue operating without mobile data migration.

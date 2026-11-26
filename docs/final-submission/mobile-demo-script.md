@@ -1,48 +1,44 @@
-# Staff Mobile App — P0 Demonstration Script
+# Staff Mobile App — Counter + Preparation Demonstration Plan
 
-Record one continuous, Unlisted YouTube video against a current API and seeded PostgreSQL database.
-Do not show passwords, PATs, access tokens, refresh tokens, or local connection strings.
-
-The build based on `8c57ed2` supports rehearsing Preparation, the shared-state check, offline write protection, and sign-out. The mobile discount inbox, inventory, and courier workspaces are unavailable in that build. Use the full script once the selected build exposes those P0 workflows. [Mobile sales operation map](../evidence/issue-232-mobile-sales/README.md)
+This plan follows the [current scope decision](../mobile-scope-206.md). It supersedes
+the earlier six-workspace video plan. It is a plan, not a recorded demonstration or
+new acceptance evidence. #206 verifies selected P1 flows before they are claimed;
+#95 Mobile 6.6 owns the final video/timestamps/submission work.
 
 ## Before recording
 
-1. Record the mobile build commit, API commit, seed version, device or emulator, and test-run link.
-2. Confirm the API is reachable from the Android device or emulator.
-3. Prepare one staff account for each demonstrated P0 role.
-4. Prepare deterministic records for a confirmed order, a pending discount, a low-stock ingredient, and an assigned delivery. Use WinUI or the shared API fixtures to draft and confirm the order and submit the discount request before recording. [Mobile sales operation map](../evidence/issue-232-mobile-sales/README.md)
-5. Confirm the function list marks only demonstrated and verified functions as Implemented.
+1. Record mobile/API commits, device/build versions, seed version, synthetic account permissions and accepted test links.
+2. Confirm retained P0/shared-state coverage and #206 acceptance; do not demonstrate unverified selected actions as accepted features.
+3. Use a disposable API/database and synthetic customers, addresses, menu, available table, ready delivery and eligible assigned staff. Keep credentials/tokens/connection strings out of the recording.
+4. Prepare distinct Counter and Preparation permissions, or a multi-permission account; authorization remains server-side.
+5. Map the chosen scenes to F-01–F-04, F-10–F-13 and F-16–F-20 in the function list. Excluded rows are not scenes.
 
-## Continuous P0 script
+## Proposed continuous sequence
 
-1. Open the repository and identify the staff-mobile OpenSpec and function list.
-2. Launch the mobile application and sign in as a barista.
-3. Show permission-aware navigation and the preparation queue.
-4. Start a confirmed ticket, then mark it ready.
-5. In the Windows client or a second authorized client, show the same ticket state after refresh or live update.
-6. Sign in as a manager and approve or reject a pending discount.
-7. Show the server-confirmed decision and total in the mobile approval result, then show the same affected order in WinUI.
-8. Sign in as inventory staff, open low-stock inventory, and submit one valid adjustment with a reason.
-9. Show the resulting balance and movement history.
-10. Sign in as delivery staff, open only the assigned delivery, launch navigation, mark it out for delivery, and then mark it delivered or failed.
-11. If a failure is demonstrated, show that a reason is required.
-12. Disable connectivity, show the visible offline state, and show that a state-changing action is disabled or rejected without a local success claim.
-13. Sign out and show that protected navigation no longer exposes the previous data.
-14. End with the current CI/test evidence and the final function-list status.
+1. Identify the scope/spec, exact build and function list. Sign in and show permitted Today/Counter/Preparation/More navigation; More contains Account only (F-01/F-02).
+2. In Counter, search/filter the menu, choose a size/add-on, cancel once without changing the cart, then add items and adjust independent lines (F-18).
+3. Show service selection and the dine-in available-table picker. Show optional existing-customer/saved-address selection and explain manual delivery-address editing; no Tables overview or customer administration is advertised (F-12/F-19).
+4. Save a disposable draft, show authoritative snapshots/total and review confirmation. If accepted and selected, demonstrate a reviewed discount request or loyalty redemption on a separate eligible draft (F-18/F-20). Discount approval remains a WinUI task, not a mobile inbox.
+5. Confirm a reviewed ticket and show the same authoritative order in Preparation and WinUI/shared API. Start preparation, cancel a ready review without a write, then confirm ready (F-03/F-04/F-10).
+6. Show order lookup/status and a supported reviewed payment with the server-confirmed paid amount/balance (F-12).
+7. With eligible manager permissions and separate seeded records, demonstrate cancellation with a reason and assignment of a ready delivery to eligible staff (F-13). No mobile courier execution is claimed.
+8. If current native push/device evidence is accepted, demonstrate a generic urgent Preparation notification, authenticated opening, and permission re-evaluation. Otherwise record the limitation rather than claiming delivery (F-16).
+9. Show offline write protection with no automatic replay after reconnection, then Account connection details/sign-out and protected-data cleanup (F-11/F-01).
+10. Show accepted revision-bound evidence and honest function-list statuses. Keep release/submission claims separate.
 
-## Evidence checklist
+## Evidence needed
 
-| Proof | Required evidence |
-| --- | --- |
-| Shared backend | A P0 update becomes visible to an authorized Windows or mobile client. |
-| Permission safety | Each role sees only its permitted modules and records. |
-| Server authority | Invalid, stale, or offline changes do not claim local success. |
-| Privacy | No sensitive data appears in notification previews or recording setup. |
-| Traceability | Each shown workflow has a function-list row, test evidence, and video timestamp. |
+| Proof          | Required record                                                                                            |
+| -------------- | ---------------------------------------------------------------------------------------------------------- |
+| Current scope  | Linked owner decision, merged specification/function list and reviewer decision                            |
+| Shared backend | Current Counter/Preparation state visible to a second authorized client; no direct database use by mobile  |
+| Safe writes    | Invalid/stale/offline actions preserve server state; explicit retries keep their stable identity           |
+| Privacy/access | No credentials or real customer data in video/previews; protected and retired links deny access            |
+| Traceability   | Actual commands/results, exact revisions/device/seed and accepted evidence; final timestamps per shown row |
 
 ## After recording
 
-1. Set the video to Unlisted.
-2. Add exact timestamps to `mobile-function-list.md`.
-3. Add the video URL to the final submission form or LMS record required by the course.
-4. Verify the published video does not show a secret or planned-only function.
+Publish the selected final video as Unlisted, review it for secrets, and add its URL
+and exact timestamps to the function list. Final submission remains the separate
+course/LMS gate. Do not include mobile approvals, inventory, receipts, administration,
+courier screens or a standalone Tables view to satisfy historical scope.
