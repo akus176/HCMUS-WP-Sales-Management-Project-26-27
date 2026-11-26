@@ -1199,7 +1199,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Outside the first staff mobile release. */
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. Existing customer and saved-address lookup only; customer/address administration remains outside mobile scope. */
         get: {
             parameters: {
                 query?: {
@@ -1309,7 +1309,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Outside the first staff mobile release. */
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. Existing customer and saved-address lookup only; customer/address administration remains outside mobile scope. */
         get: {
             parameters: {
                 query?: never;
@@ -3590,7 +3590,7 @@ export interface paths {
             };
         };
         put?: never;
-        /** @description Outside the first staff mobile release. */
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. */
         post: {
             parameters: {
                 query?: never;
@@ -3745,7 +3745,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Outside the first staff mobile release. The mobile courier workflow uses assignment endpoints. */
+        /** @description Outside the first staff mobile release. Courier execution is outside current mobile scope. */
         post: {
             parameters: {
                 query?: never;
@@ -3781,7 +3781,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Outside the first staff mobile release. */
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. */
         post: {
             parameters: {
                 query?: never;
@@ -3823,7 +3823,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Outside the first staff mobile release. */
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. */
         post: {
             parameters: {
                 query?: never;
@@ -3865,7 +3865,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Outside the first staff mobile release. */
+        /** @description Included in the Counter + Preparation staff mobile scope. Current Android acceptance is tracked in #206. */
         post: {
             parameters: {
                 query?: never;
