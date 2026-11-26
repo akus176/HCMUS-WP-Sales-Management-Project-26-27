@@ -20,11 +20,11 @@ public sealed class TableManagementWorkspaceTests
             return Task.FromResult(Result<IReadOnlyList<TableManagementSummary>>.Success(Tables.ToArray()));
         }
 
-        public Task<Result<EntityId>> CreateAsync(CreateTableCommand command)
+        public Task<Result<EntityId>> CreateAsync(CreateDiningTableCommand command)
         {
             if (NextError is { } error) return Task.FromResult(Result<EntityId>.Failure(error));
             var id = EntityId.New();
-            Tables.Add(new TableManagementSummary(id, command.TableNumber.Trim(), command.Seats, false, null));
+            Tables.Add(new TableManagementSummary(id, command.TableNumber!.Trim(), command.Seats, false, null));
             return Task.FromResult(Result<EntityId>.Success(id));
         }
 

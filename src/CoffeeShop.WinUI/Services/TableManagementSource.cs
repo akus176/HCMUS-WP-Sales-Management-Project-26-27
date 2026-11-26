@@ -9,7 +9,7 @@ namespace CoffeeShop.WinUI.Services;
 public interface ITableManagementSource
 {
     Task<Result<IReadOnlyList<TableManagementSummary>>> ListAsync();
-    Task<Result<EntityId>> CreateAsync(CreateTableCommand command);
+    Task<Result<EntityId>> CreateAsync(CreateDiningTableCommand command);
     Task<Result> UpdateAsync(UpdateTableCommand command);
     Task<Result> DeleteAsync(DeleteTableCommand command);
 }
@@ -20,8 +20,13 @@ public sealed class DirectTableManagementSource(IServiceScopeFactory scopes) : I
         Result<IReadOnlyList<TableManagementSummary>>.Success(
             await service.GetRequiredService<TableManagementQueryHandler>().ListAsync()));
 
-    public Task<Result<EntityId>> CreateAsync(CreateTableCommand command) => CommandAsync(service =>
-        service.GetRequiredService<TableCommandHandler>().CreateAsync(command));
+    public Task<Result<EntityId>> CreateAsync(CreateDiningTableCommand command) => CommandAsync(async service =>
+    {
+        var result = await service.GetRequiredService<TableManagementCommandHandler>().CreateAsync(command);
+        return result.IsSuccess
+            ? Result<EntityId>.Success(result.Value.Id)
+            : Result<EntityId>.Failure(result.Error!);
+    });
 
     public Task<Result> UpdateAsync(UpdateTableCommand command) => CommandAsync(service =>
         service.GetRequiredService<TableCommandHandler>().UpdateAsync(command));
@@ -55,8 +60,8 @@ public sealed class ApiTableManagementSource(AuthenticatedApiClient client) : IT
             .Select(row => new TableManagementSummary(new(row.Id), row.TableNumber, row.Seats, row.IsOccupied,
                 row.ActiveOrderNumber)).ToArray());
 
-    public Task<Result<EntityId>> CreateAsync(CreateTableCommand command) => RunAsync(async () =>
-        new EntityId((await client.PostAsync<CreateTableRequest, TableManagementResponse>("table-management",
+    public Task<Result<EntityId>> CreateAsync(CreateDiningTableCommand command) => RunAsync(async () =>
+        new EntityId((await client.PostAsync<CreateTableRequest, PosTableResponse>("tables",
             new(command.TableNumber, command.Seats))).Id));
 
     public Task<Result> UpdateAsync(UpdateTableCommand command) => RunCommandAsync(() =>

@@ -149,7 +149,7 @@ public sealed partial class TablesPage : Page
     private async Task EditTableAsync(TableManagementSummary? table)
     {
         var number = Field("Table number", table?.TableNumber, 20, "T09");
-        var seats = Field("Seats (optional)", table?.Seats?.ToString(), 3, "4");
+        var seats = Field(table is null ? "Seats" : "Seats (optional)", table?.Seats?.ToString(), 3, "4");
         seats.InputScope = new InputScope { Names = { new InputScopeName(InputScopeNameValue.Number) } };
         var error = new InfoBar { IsOpen = false, IsClosable = false, Severity = InfoBarSeverity.Error };
         var progress = new ProgressBar { IsIndeterminate = true, Visibility = Visibility.Collapsed };
@@ -191,7 +191,7 @@ public sealed partial class TablesPage : Page
                 progress.Visibility = Visibility.Visible;
                 editor.IsEnabled = false;
                 dialog.IsPrimaryButtonEnabled = false;
-                if (!TryParseSeats(seats.Text, out var parsedSeats, out var seatsError))
+                if (!TryParseSeats(seats.Text, table is null, out var parsedSeats, out var seatsError))
                 {
                     error.Message = seatsError;
                     error.IsOpen = true;
@@ -218,14 +218,19 @@ public sealed partial class TablesPage : Page
         await dialog.ShowAsync();
     }
 
-    private static bool TryParseSeats(string text, out int? seats, out string error)
+    private static bool TryParseSeats(string text, bool required, out int? seats, out string error)
     {
         seats = null;
         error = "";
-        if (string.IsNullOrWhiteSpace(text)) return true;
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            if (!required) return true;
+            error = "Enter the table's seat count.";
+            return false;
+        }
         if (!int.TryParse(text.Trim(), out var value) || value <= 0)
         {
-            error = "Seats must be a whole number greater than zero, or left blank.";
+            error = "Seats must be a whole number greater than zero.";
             return false;
         }
 

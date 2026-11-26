@@ -104,14 +104,6 @@ public static class SalesEndpoints
         tableManagement.MapGet("/", async (TableManagementQueryHandler handler, CancellationToken ct) =>
             Results.Ok((await handler.ListAsync(ct)).Select(ToTableManagement).ToArray()))
             .Produces<TableManagementResponse[]>().ProducesProblem(403);
-        tableManagement.MapPost("/", async (CreateTableRequest request, TableCommandHandler handler,
-            TableManagementQueryHandler query, CancellationToken ct) =>
-        {
-            var result = await handler.CreateAsync(new(request.TableNumber ?? string.Empty, request.Seats), ct);
-            if (result.IsFailure) return ApiErrorResults.From(result.Error!);
-            var created = (await query.ListAsync(ct)).Single(row => row.Id == result.Value);
-            return Results.Json(ToTableManagement(created), statusCode: StatusCodes.Status201Created);
-        }).Produces<TableManagementResponse>(201).ProducesProblem(400).ProducesProblem(409);
         tableManagement.MapPut("/{id:guid}", async (Guid id, UpdateTableRequest request, TableCommandHandler handler,
             TableManagementQueryHandler query, CancellationToken ct) =>
         {

@@ -26,7 +26,7 @@ public sealed class TableManagementWorkspace(ITableManagementSource source) : IN
     {
         var result = id is { } tableId
             ? await source.UpdateAsync(new(tableId, number, seats))
-            : await source.CreateAsync(new(number, seats));
+            : await source.CreateAsync(new CreateDiningTableCommand(number, seats));
         if (result.IsFailure) return result.Error!;
         return await LoadRowsAsync();
     }, id is null ? "Table created." : "Table updated.", markSuccess: true);

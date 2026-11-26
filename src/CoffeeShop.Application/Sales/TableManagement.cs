@@ -8,7 +8,6 @@ using CoffeeShop.Domain.Sales;
 public sealed record TableManagementSummary(EntityId Id, string TableNumber, int? Seats, bool IsOccupied,
     string? ActiveOrderNumber);
 
-public sealed record CreateTableCommand(string TableNumber, int? Seats);
 public sealed record UpdateTableCommand(EntityId Id, string TableNumber, int? Seats);
 public sealed record DeleteTableCommand(EntityId Id);
 
@@ -18,7 +17,6 @@ public interface ITableManagementWorkspaceRepository
     Task<DiningTable?> FindTableAsync(EntityId id, CancellationToken cancellationToken = default);
     Task<bool> TableNumberExistsAsync(string tableNumber, EntityId? exceptId,
         CancellationToken cancellationToken = default);
-    void AddTable(DiningTable table);
     void RemoveTable(DiningTable table);
 }
 
@@ -32,22 +30,6 @@ public sealed class TableCommandHandler(
     ITableManagementWorkspaceRepository repository,
     IUnitOfWork unitOfWork)
 {
-    public async Task<Result<EntityId>> CreateAsync(CreateTableCommand command,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(command);
-        var number = NormalizeNumber(command.TableNumber);
-        if (number.IsFailure) return Result<EntityId>.Failure(number.Error!);
-        if (!ValidSeats(command.Seats)) return Result<EntityId>.Failure(SeatsError());
-        if (await repository.TableNumberExistsAsync(number.Value, null, cancellationToken))
-            return Result<EntityId>.Failure(NumberExists(number.Value));
-
-        var table = new DiningTable(EntityId.New(), number.Value, command.Seats);
-        repository.AddTable(table);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result<EntityId>.Success(table.Id);
-    }
-
     public async Task<Result> UpdateAsync(UpdateTableCommand command,
         CancellationToken cancellationToken = default)
     {

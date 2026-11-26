@@ -15,7 +15,7 @@ workspace appears.
 - A list of every dining table with its number, seat count, live
   occupied/available state, and the active order number when occupied.
 - **New table** creates a table from a number (required, 20 characters or
-  fewer) and an optional positive seat count.
+  fewer) and a positive seat count.
 - **Edit** changes the number and seat count. Renaming a table updates the
   Counter and Service board labels; it does not rewrite past orders.
 - **Remove** deletes the table after confirmation. An occupied table cannot be
@@ -27,12 +27,12 @@ workspace appears.
 
 ## API
 
-All routes require `tables.manage`.
+The create route and all management routes require `tables.manage`.
 
 | Route | Purpose |
 |---|---|
 | `GET /api/v1/table-management` | List tables with active order numbers |
-| `POST /api/v1/table-management` | Create a table `{ tableNumber, seats }` |
+| `POST /api/v1/tables` | Create a table `{ tableNumber, seats }` |
 | `PUT /api/v1/table-management/{id}` | Update number and seats |
 | `DELETE /api/v1/table-management/{id}` | Delete an unoccupied table |
 
@@ -41,8 +41,9 @@ Counter and Service board need. They are unaffected by the management routes.
 
 ## Verification
 
-`TableCommandHandlerTests` cover creation, duplicate numbers, validation, edits,
-occupied-table deletion conflicts, successful deletion, and number reuse.
+`TableManagementCommandHandlerTests` cover table creation, duplicate numbers, and
+input validation. `TableCommandHandlerTests` cover edits, occupied-table deletion
+conflicts, successful deletion, and number reuse.
 `TableManagementWorkspaceTests` cover loading, refresh after create/delete, and
 conflict feedback. Native Windows layout and screen-reader review should confirm
 the list rows and dialogs at wide and narrow sizes.

@@ -22,52 +22,6 @@ public class TableCommandHandlerTests
     }
 
     [Fact]
-    public async Task CreateAsync_WithValidData_AddsTableAndSaves()
-    {
-        var result = await handler.CreateAsync(new CreateTableCommand("  T09  ", 6));
-
-        Assert.True(result.IsSuccess);
-        var table = Assert.Single(repository.Tables);
-        Assert.Equal("T09", table.TableNumber);
-        Assert.Equal(6, table.Seats);
-        Assert.Equal(1, unitOfWork.SaveChangesCallCount);
-    }
-
-    [Fact]
-    public async Task CreateAsync_WithBlankNumber_ReturnsValidationError()
-    {
-        var result = await handler.CreateAsync(new CreateTableCommand("  ", 4));
-
-        Assert.True(result.IsFailure);
-        Assert.Equal("tables.number_required", result.Error!.Code);
-        Assert.Empty(repository.Tables);
-        Assert.Equal(0, unitOfWork.SaveChangesCallCount);
-    }
-
-    [Fact]
-    public async Task CreateAsync_WithNonPositiveSeats_ReturnsValidationError()
-    {
-        var result = await handler.CreateAsync(new CreateTableCommand("T02", 0));
-
-        Assert.True(result.IsFailure);
-        Assert.Equal("tables.seats_invalid", result.Error!.Code);
-        Assert.Empty(repository.Tables);
-    }
-
-    [Fact]
-    public async Task CreateAsync_WithExistingNumber_ReturnsConflict()
-    {
-        AddTable("T03");
-
-        var result = await handler.CreateAsync(new CreateTableCommand("T03", 2));
-
-        Assert.True(result.IsFailure);
-        Assert.Equal(ErrorType.Conflict, result.Error!.Type);
-        Assert.Equal("tables.number_exists", result.Error.Code);
-        Assert.Single(repository.Tables);
-    }
-
-    [Fact]
     public async Task UpdateAsync_WithValidData_ChangesNumberAndSeats()
     {
         var table = AddTable("T04", 2);
@@ -114,15 +68,4 @@ public class TableCommandHandlerTests
         Assert.Equal(1, unitOfWork.SaveChangesCallCount);
     }
 
-    [Fact]
-    public async Task DeleteAsync_AllowsTheNumberToBeCreatedAgain()
-    {
-        var table = AddTable("T08");
-        Assert.True((await handler.DeleteAsync(new DeleteTableCommand(table.Id))).IsSuccess);
-
-        var result = await handler.CreateAsync(new CreateTableCommand("T08", 4));
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal("T08", Assert.Single(repository.Tables).TableNumber);
-    }
 }
