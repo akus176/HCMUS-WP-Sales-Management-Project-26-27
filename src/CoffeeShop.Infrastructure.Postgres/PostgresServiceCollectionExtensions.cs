@@ -43,6 +43,9 @@ public static class PostgresServiceCollectionExtensions
         services.AddScoped<IOrderFulfillmentRepository>(serviceProvider => serviceProvider.GetRequiredService<FulfillmentOperationsRepository>());
         services.AddScoped<FulfillmentOperationsQueryHandler>();
         services.AddScoped<OrderFulfillmentCommandHandler>();
+        services.AddScoped<ITableManagementWorkspaceRepository, TableManagementRepository>();
+        services.AddScoped<TableManagementQueryHandler>();
+        services.AddScoped<TableCommandHandler>();
         services.AddScoped<IRevenueReportRepository, RevenueReportRepository>();
         services.AddScoped<RevenueReportQueryHandler>();
         services.AddScoped<OrderChannelReportQueryHandler>();

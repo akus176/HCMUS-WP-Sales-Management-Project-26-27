@@ -2062,7 +2062,7 @@ namespace CoffeeShop.Infrastructure.Postgres.Migrations
                     b.HasOne("CoffeeShop.Domain.Sales.DiningTable", null)
                         .WithMany()
                         .HasForeignKey("TableId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("CoffeeShop.Domain.Sales.OrderLine", b =>

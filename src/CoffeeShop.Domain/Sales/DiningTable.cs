@@ -8,7 +8,8 @@ public class DiningTable
     {
     }
 
-    public DiningTable(EntityId id, string tableNumber, int? seats = null, bool isOccupied = false, EntityId? activeOrderId = null)
+    public DiningTable(EntityId id, string tableNumber, int? seats = null, bool isOccupied = false,
+        EntityId? activeOrderId = null)
     {
         ArgumentNullException.ThrowIfNull(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(tableNumber);
@@ -18,7 +19,7 @@ public class DiningTable
         }
 
         Id = id;
-        TableNumber = tableNumber.Trim();
+        TableNumber = ValidateNumber(tableNumber);
         Seats = seats;
         IsOccupied = isOccupied;
         ActiveOrderId = activeOrderId;
@@ -39,6 +40,30 @@ public class DiningTable
         }
 
         return !IsOccupied && (Seats is null || partySize <= Seats.Value);
+    }
+
+    public void UpdateDetails(string tableNumber, int? seats)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tableNumber);
+        if (seats is <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(seats));
+        }
+
+        TableNumber = ValidateNumber(tableNumber);
+        Seats = seats;
+    }
+
+    public static string ValidateNumber(string tableNumber)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(tableNumber);
+        var trimmed = tableNumber.Trim();
+        if (trimmed.Length > 20)
+        {
+            throw new ArgumentException("Table number must be 20 characters or fewer.", nameof(tableNumber));
+        }
+
+        return trimmed;
     }
 
     /// <summary>

@@ -48,7 +48,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.HasIndex(order => new { order.Channel, order.CreatedAt });
         builder.HasIndex(order => order.TableId);
         builder.HasOne<Customer>().WithMany().HasForeignKey(order => order.CustomerId).OnDelete(DeleteBehavior.Restrict);
-        builder.HasOne<DiningTable>().WithMany().HasForeignKey(order => order.TableId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<DiningTable>().WithMany().HasForeignKey(order => order.TableId).OnDelete(DeleteBehavior.SetNull);
         builder.HasOne<User>().WithMany().HasForeignKey(order => order.CreatedBy).OnDelete(DeleteBehavior.Restrict);
     }
 

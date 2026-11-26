@@ -1,6 +1,6 @@
 namespace CoffeeShop.WinUI.ViewModels;
 
-public enum ServiceConsoleWorkspace { Counter, ServiceBoard, Menu, StockRoom, Customers, Reports, Accounts }
+public enum ServiceConsoleWorkspace { Counter, ServiceBoard, Menu, StockRoom, Customers, Tables, Reports, Accounts }
 public enum ServiceConsoleLayoutMode { Compact, Medium, Expanded }
 
 public sealed record ServiceConsoleDestination(string Tag, string Label, string Numeral, string Group, ServiceConsoleWorkspace Workspace);
@@ -17,6 +17,7 @@ public static class ServiceConsoleNavigation
             ["menu"] = ["menu.manage"],
             ["stock-room"] = ["inventory.manage", "inventory.receive", "inventory.adjust"],
             ["customers"] = ["customers.manage"],
+            ["tables"] = ["tables.manage"],
             ["reports"] = ["reports.revenue", "reports.bestsellers", "reports.channels", "reports.lowstock"],
             ["accounts"] = ["users.manage"],
         };
@@ -27,7 +28,8 @@ public static class ServiceConsoleNavigation
         new("menu", "Menu", "III", "Manage", ServiceConsoleWorkspace.Menu),
         new("stock-room", "Stock room", "IV", "Manage", ServiceConsoleWorkspace.StockRoom),
         new("customers", "Customers", "V", "Manage", ServiceConsoleWorkspace.Customers),
-        new("reports", "Reports", "VI", "Insights", ServiceConsoleWorkspace.Reports),
+        new("tables", "Tables", "VI", "Manage", ServiceConsoleWorkspace.Tables),
+        new("reports", "Reports", "VII", "Insights", ServiceConsoleWorkspace.Reports),
     ]);
     private static IReadOnlyList<ServiceConsoleDestination> AuthorizedDestinations { get; } =
         [.. PrimaryDestinations, new("accounts", "Accounts", "VII", "Administration", ServiceConsoleWorkspace.Accounts)];

@@ -35,6 +35,8 @@ internal static class WinUIServiceCollectionExtensions
         services.AddScoped<CustomerOrderSelectionHandler>();
         services.AddSingleton<CustomerOrderContext>();
         services.AddSingleton<ICustomerWorkspaceSource, DirectCustomerWorkspaceSource>();
+        services.AddSingleton<ITableManagementSource, DirectTableManagementSource>();
+        services.AddSingleton<TableManagementWorkspace>();
         services.AddSingleton<CustomerWorkspace>(provider => new CustomerWorkspace(
             provider.GetRequiredService<ICustomerWorkspaceSource>(), provider.GetRequiredService<CustomerOrderContext>()));
         services.AddScoped<PosOrderHandler>();

@@ -100,6 +100,26 @@ public static class SalesEndpoints
             Results.Ok((await handler.GetTablesAsync(ct)).Select(table => new PosTableResponse(table.Id.Value,
                 table.TableNumber, table.Seats, table.IsOccupied, table.ActiveOrderId?.Value)).ToArray()))
             .RequireAuthorization("orders.create").Produces<PosTableResponse[]>().ProducesProblem(403);
+        var tableManagement = api.MapGroup("/table-management").RequireAuthorization("tables.manage");
+        tableManagement.MapGet("/", async (TableManagementQueryHandler handler, CancellationToken ct) =>
+            Results.Ok((await handler.ListAsync(ct)).Select(ToTableManagement).ToArray()))
+            .Produces<TableManagementResponse[]>().ProducesProblem(403);
+        tableManagement.MapPut("/{id:guid}", async (Guid id, UpdateTableRequest request, TableCommandHandler handler,
+            TableManagementQueryHandler query, CancellationToken ct) =>
+        {
+            if (id == Guid.Empty) return InvalidId();
+            var result = await handler.UpdateAsync(new(new(id), request.TableNumber ?? string.Empty, request.Seats), ct);
+            if (result.IsFailure) return ApiErrorResults.From(result.Error!);
+            var updated = (await query.ListAsync(ct)).Single(row => row.Id.Value == id);
+            return Results.Ok(ToTableManagement(updated));
+        }).Produces<TableManagementResponse>().ProducesProblem(400).ProducesProblem(404).ProducesProblem(409);
+        tableManagement.MapDelete("/{id:guid}", async (Guid id, TableCommandHandler handler,
+            CancellationToken ct) =>
+        {
+            if (id == Guid.Empty) return InvalidId();
+            var result = await handler.DeleteAsync(new(new(id)), ct);
+            return result.IsSuccess ? Results.NoContent() : ApiErrorResults.From(result.Error!);
+        }).Produces(204).ProducesProblem(404).ProducesProblem(409);
         api.MapGet("/preparation-tickets", async (FulfillmentOperationsQueryHandler query,
             PosOrderHandler ordersHandler, string? status, int? page, int? pageSize, CancellationToken ct) =>
         {
@@ -203,6 +223,9 @@ public static class SalesEndpoints
             result.Value.Status, result.Value.ComputedAmount, result.Value.DiscountTotal, result.Value.Total))
             : ApiErrorResults.From(result.Error!);
     }
+
+    private static TableManagementResponse ToTableManagement(TableManagementSummary table) => new(table.Id.Value,
+        table.TableNumber, table.Seats, table.IsOccupied, table.ActiveOrderNumber);
 
     private static OperationalOrderResponse ToOperational(OperationalOrder order, bool includeFinancials = true) => new(order.Id.Value,
         order.OrderNumber, order.Channel, order.Status, includeFinancials ? order.Total : 0m,

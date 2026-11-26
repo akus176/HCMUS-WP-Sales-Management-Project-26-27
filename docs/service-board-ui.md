@@ -5,13 +5,17 @@ peach preparing notes, and sage ready notes. A smaller page heading leaves more
 room for work. Each column has an aligned heading, count, short explanation, and
 empty state. Notes show the amount due and use 44-DIP action targets.
 
+The Service board focuses on active orders and their ticket details; it does not
+show a separate overview of all dining tables. Dine-in tickets retain their table
+number. Use the **Tables** workspace under **Manage** to inspect current
+availability and manage table setup.
+
 The ticket inspector uses a dark identity header and a light body so items, sizes,
 add-ons, two-decimal prices, totals, and the primary action remain readable. It
 shows one next action for the selected order. Payment, discount requests,
-delivery, and cancellation have separate disclosures. The order's table ID stays
-on its note and ticket header; the board has no seating or availability overview.
-Delivery controls follow the current delivery stage and appear only on delivery
-orders. Discount requests show their value instead of raw identifiers.
+delivery, and cancellation have separate disclosures. Delivery controls follow
+the current delivery stage and appear only on delivery orders. Discount requests
+show their value instead of raw identifiers.
 
 Unpaid ready notes expose **Review payment**. This selects that note and opens
 the payment form without changing order state. **Collect payment** in the inspector

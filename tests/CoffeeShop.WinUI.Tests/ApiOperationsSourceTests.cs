@@ -50,11 +50,12 @@ public sealed class ApiOperationsSourceTests
         var assignment = Assert.Single(requests, request => request.Method == "POST");
         Assert.Equal($"/api/v1/orders/{orderId}/assign-delivery", assignment.Path);
         Assert.Equal($"{{\"staffId\":\"{staffId}\"}}", assignment.Body);
+        Assert.Contains(requests, request => request.Method == "GET" && request.Path == "/api/v1/pos/tables");
         Assert.All(requests, request => Assert.Equal("fixture-access", request.Token));
     }
 
     [Fact]
-    public async Task Manager_UsesApiForTableBoardPaymentDiscountCancellationAndOrderTransitions()
+    public async Task Manager_LoadsTableSnapshotAndUsesApiForPaymentDiscountCancellationAndOrderTransitions()
     {
         var orderId = Guid.NewGuid();
         var staffId = Guid.NewGuid();
