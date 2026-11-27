@@ -8,7 +8,7 @@ namespace CoffeeShop.WinUI.Pages;
 /// </summary>
 public sealed record SupplierRow
 {
-    public SupplierRow(Supplier supplier, int receiptCount = 0, int postedReceiptCount = 0)
+    public SupplierRow(Supplier supplier, int receiptCount = 0, int postedReceiptCount = 0, bool canManage = false)
     {
         Id = supplier.Id;
         Name = supplier.Name;
@@ -18,6 +18,7 @@ public sealed record SupplierRow
         StatusDisplay = supplier.IsActive ? "Active" : "Inactive";
         ToggleActiveLabel = supplier.IsActive ? "Deactivate" : "Activate";
         IsActive = supplier.IsActive;
+        CanManage = canManage;
         ContactDisplay = string.Join(" · ", new[] { Phone, Email }.Where(value => !string.IsNullOrWhiteSpace(value)));
         AddressDisplay = string.IsNullOrWhiteSpace(Address) ? "No address recorded" : Address;
         ReceiptSummary = receiptCount == 0
@@ -45,6 +46,8 @@ public sealed record SupplierRow
     public string ToggleActiveLabel { get; }
 
     public bool IsActive { get; }
+
+    public bool CanManage { get; }
 
     public string ContactDisplay { get; }
 

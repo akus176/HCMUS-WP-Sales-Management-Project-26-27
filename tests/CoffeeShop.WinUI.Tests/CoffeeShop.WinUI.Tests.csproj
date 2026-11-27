@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
     <DefineConstants>$(DefineConstants);COFFEESHOP_API_ONLY</DefineConstants>
   </PropertyGroup>
 
