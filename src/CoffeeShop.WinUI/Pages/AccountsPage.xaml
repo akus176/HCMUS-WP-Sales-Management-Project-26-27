@@ -47,10 +47,50 @@
                                                    TextWrapping="Wrap" />
                                         <TextBlock Text="{Binding RoleAndState}" Style="{StaticResource ConsoleLabelStyle}"
                                                    TextWrapping="Wrap" />
+                                        <Button Content="EDIT ACCOUNT" Tag="{Binding Account}" Click="OnEdit" AccessKey="E"
+                                                Style="{StaticResource ConsoleButtonStyle}" MinHeight="44"
+                                                AutomationProperties.Name="Edit staff account" />
                                     </StackPanel>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
+                    </StackPanel>
+                </Border>
+                <Border x:Name="EditPanel" Grid.Column="1" Style="{StaticResource WorkspacePanel}" Padding="20"
+                        Visibility="Collapsed">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Edit staff account" Style="{StaticResource ConsoleSectionTitleStyle}"
+                                   AutomationProperties.HeadingLevel="Level2" />
+                        <TextBlock x:Name="EditIdentityText" Style="{StaticResource ConsoleBodyStyle}"
+                                   TextWrapping="Wrap" />
+                        <TextBox x:Name="EditFullNameBox" Header="Full name" MaxLength="150"
+                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" />
+                        <TextBox x:Name="EditUsernameBox" Header="Username" MaxLength="50"
+                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" />
+                        <TextBox x:Name="EditEmailBox" Header="Email address" MaxLength="255"
+                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" InputScope="EmailSmtpAddress" />
+                        <TextBox x:Name="EditPhoneBox" Header="Phone (optional)" MaxLength="30"
+                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" InputScope="TelephoneNumber" />
+                        <TextBlock Text="Roles" Style="{StaticResource ConsoleLabelStyle}"
+                                   AutomationProperties.HeadingLevel="Level3" />
+                        <ItemsControl x:Name="EditRolesList" AutomationProperties.Name="Assigned staff roles">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              MinHeight="44" AutomationProperties.Name="{Binding Label}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock x:Name="EditValidationText" Style="{StaticResource ConsoleBodyStyle}"
+                                   TextWrapping="Wrap" Visibility="Collapsed" AutomationProperties.LiveSetting="Polite" />
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Button x:Name="SaveEditButton" Content="SAVE CHANGES" Click="OnSaveEdit" AccessKey="S"
+                                    Style="{StaticResource ConsolePrimaryButtonStyle}" MinHeight="48" />
+                            <Button x:Name="CancelEditButton" Content="CANCEL" Click="OnCancelEdit" AccessKey="C"
+                                    Style="{StaticResource ConsoleButtonStyle}" MinHeight="48" />
+                        </StackPanel>
+                        <Button x:Name="AccountStateButton" Click="OnChangeAccountState" AccessKey="T"
+                                Style="{StaticResource ConsoleButtonStyle}" MinHeight="48" />
                     </StackPanel>
                 </Border>
                 <Border x:Name="CreationPanel" Grid.Column="1" Style="{StaticResource WorkspacePanel}" Padding="20">

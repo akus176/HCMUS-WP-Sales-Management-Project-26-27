@@ -164,11 +164,29 @@ public static class StaffIdentityEndpoints
             var account = await service.GetAccountAsync(id, ct);
             return account is null ? Results.Problem(statusCode: 404, title: "Staff account not found") : Results.Ok(account);
         }).Produces<StaffAccountResponse>().ProducesProblem(400).ProducesProblem(401).ProducesProblem(403).ProducesProblem(404);
-        users.MapPost("/{id:guid}/deactivate", async (Guid id, DeactivateStaffRequest request,
+        users.MapPut("/{id:guid}", async (Guid id, UpdateStaffRequest request, ICurrentUser actor,
             StaffAdministrationService service, HttpContext http, CancellationToken ct) =>
         {
             http.Response.Headers.CacheControl = "no-store";
-            var result = await service.DeactivateAsync(id, request.Confirm,
+            var result = await service.UpdateAsync(id, request, actor.GetRequiredId(),
+                http.Connection.RemoteIpAddress?.ToString(), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : ApiErrorResults.From(result.Error!);
+        }).Produces<StaffAccountResponse>().ProducesProblem(400).ProducesProblem(401).ProducesProblem(403)
+            .ProducesProblem(404).ProducesProblem(409);
+        users.MapPost("/{id:guid}/reactivate", async (Guid id, ReactivateStaffRequest request,
+            ICurrentUser actor, StaffAdministrationService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            var result = await service.ReactivateAsync(id, request.Confirm, actor.GetRequiredId(),
+                http.Connection.RemoteIpAddress?.ToString(), ct);
+            return result.IsSuccess ? Results.Ok(result.Value) : ApiErrorResults.From(result.Error!);
+        }).Produces<StaffAccountResponse>().ProducesProblem(400).ProducesProblem(401).ProducesProblem(403)
+            .ProducesProblem(404).ProducesProblem(409);
+        users.MapPost("/{id:guid}/deactivate", async (Guid id, DeactivateStaffRequest request,
+            ICurrentUser actor, StaffAdministrationService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            var result = await service.DeactivateAsync(id, request.Confirm, actor.GetRequiredId(),
                 http.Connection.RemoteIpAddress?.ToString(), ct);
             return result.IsSuccess ? Results.Ok(result.Value) : ApiErrorResults.From(result.Error!);
         }).Produces<StaffAccountResponse>().ProducesProblem(400).ProducesProblem(401).ProducesProblem(403)

@@ -24,4 +24,31 @@ public sealed class StaffAccountFormTests
         Assert.Null(StaffAccountForm.Validate(new CreateStaffRequest(
             "New Cashier", "new.cashier", "new@example.test", "+84901234567", "Cashier", "valid-initial-password")));
     }
+
+    [Fact]
+    public void ValidateUpdate_AcceptsExistingProfileWithMultipleRoles()
+    {
+        Assert.Null(StaffAccountForm.Validate(new UpdateStaffRequest(
+            "cashier", "Cashier", "cashier@example.test", null, ["Cashier", "Barista"])));
+    }
+
+    [Theory]
+    [InlineData("invalid", "Cashier")]
+    [InlineData("cashier@example.test", "Unknown")]
+    public void ValidateUpdate_RejectsInvalidEmailOrRole(string email, string role)
+    {
+        var error = StaffAccountForm.Validate(new UpdateStaffRequest(
+            "cashier", "Cashier", email, null, [role]));
+
+        Assert.NotNull(error);
+    }
+
+    [Fact]
+    public void ValidateUpdate_RequiresAtLeastOneUniqueRole()
+    {
+        Assert.NotNull(StaffAccountForm.Validate(new UpdateStaffRequest(
+            "cashier", "Cashier", "cashier@example.test", null, [])));
+        Assert.NotNull(StaffAccountForm.Validate(new UpdateStaffRequest(
+            "cashier", "Cashier", "cashier@example.test", null, ["Cashier", "Cashier"])));
+    }
 }

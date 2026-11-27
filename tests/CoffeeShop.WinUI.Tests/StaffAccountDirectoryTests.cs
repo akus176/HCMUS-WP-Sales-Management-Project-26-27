@@ -30,6 +30,19 @@ public sealed class StaffAccountDirectoryTests
         Assert.Single(display, account => account.Id == created.Id);
     }
 
+    [Fact]
+    public void IncludeUpdated_PinsUpdatedAccountAndAvoidsDuplicates()
+    {
+        var original = Account("updated");
+        var updated = original with { FullName = "Updated Cashier" };
+
+        var display = StaffAccountDirectory.IncludeUpdated(updated, [Account("earlier"), original]);
+
+        Assert.Equal(updated, display[0]);
+        Assert.Equal(2, display.Length);
+        Assert.Single(display, account => account.Id == updated.Id);
+    }
+
     private static StaffAccountResponse Account(string username) => new(
         Guid.NewGuid(), username, username, $"{username}@example.test", null, true,
         ["Cashier"], DateTimeOffset.UtcNow, null);
