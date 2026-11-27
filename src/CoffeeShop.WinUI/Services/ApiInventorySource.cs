@@ -33,6 +33,9 @@ public sealed class ApiInventorySource(AuthenticatedApiClient client)
         return suppliers.SingleOrDefault(supplier => supplier.Id == id);
     }
 
+    public async Task<Ingredient?> FindIngredientAsync(EntityId id) =>
+        ToIngredient(await client.GetAsync<IngredientBalanceResponse>($"ingredients/{id.Value}"));
+
     public async Task<Ingredient> CreateIngredientAsync(string name, string unit, decimal balance, decimal threshold) =>
         ToIngredient(await client.PostAsync<CreateIngredientRequest, IngredientBalanceResponse>("ingredients",
             new(name, unit, balance, threshold)));

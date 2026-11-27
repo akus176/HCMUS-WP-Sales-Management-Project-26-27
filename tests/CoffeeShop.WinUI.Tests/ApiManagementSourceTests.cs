@@ -332,6 +332,8 @@ public sealed class ApiManagementSourceTests
             if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/api/v1/ingredients")
                 return Json(new PageResponse<IngredientBalanceResponse>(
                     [new(ingredientId, "Coffee beans", "g", 100m, 25m, true)], 1, 200, 1));
+            if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == $"/api/v1/ingredients/{ingredientId}")
+                return Json(new IngredientBalanceResponse(ingredientId, "Coffee beans", "g", 100m, 25m, true));
             return new HttpResponseMessage(HttpStatusCode.NoContent);
         });
         var source = new ApiInventorySource(new AuthenticatedApiClient(client, CreateSession()));
@@ -345,12 +347,14 @@ public sealed class ApiManagementSourceTests
         var ingredient = await source.CreateIngredientAsync("Coffee beans", "g", 100m, 20m);
         Assert.Equal(ingredientId, ingredient.Id.Value);
         await source.SetThresholdAsync(new(ingredientId), 25m);
+        Assert.Equal(25m, (await source.FindIngredientAsync(new(ingredientId)))!.ReorderThreshold);
         await source.DeactivateIngredientAsync(new(ingredientId));
         await source.ActivateIngredientAsync(new(ingredientId));
         await source.ListIngredientsAsync(includeInactive: false);
 
         Assert.Contains(calls, call => call.Method == "PUT" && call.Path == $"/api/v1/suppliers/{supplierId}");
         Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/ingredients/{ingredientId}/threshold");
+        Assert.Contains(calls, call => call.Method == "GET" && call.Path == $"/api/v1/ingredients/{ingredientId}");
         Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/suppliers/{supplierId}/deactivate");
         Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/ingredients/{ingredientId}/activate");
         Assert.Contains(calls, call => call.Method == "GET" && call.Path == "/api/v1/ingredients?page=1&pageSize=200&isActive=true");

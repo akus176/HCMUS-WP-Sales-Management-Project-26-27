@@ -962,6 +962,10 @@
                                                     </StackPanel>
                                                 </Border>
                                                 <Button x:Name="BeginAdjustmentButton" Content="Adjust stock" Style="{StaticResource StockPrimary}" Margin="0,12,0,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Click="OnBeginAdjustmentClick" AutomationProperties.Name="Adjust selected ingredient stock" />
+                                                <StackPanel x:Name="IngredientManageActions" Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                                                    <Button x:Name="EditIngredientButton" Content="Edit threshold" Style="{StaticResource StockSecondary}" Click="OnEditIngredientClick" AutomationProperties.Name="Edit selected ingredient threshold" />
+                                                    <Button x:Name="ToggleIngredientButton" Content="Deactivate" Style="{StaticResource StockSecondary}" Click="OnToggleIngredientClick" AutomationProperties.Name="Deactivate selected ingredient" />
+                                                </StackPanel>
                                                 <StackPanel x:Name="AdjustmentForm" Visibility="Collapsed">
                                                     <TextBlock FontFamily="Segoe UI" Text="Quantity change" Style="{StaticResource StockFine}" Margin="0,9,0,4" FontSize="11" />
                                                     <Grid BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
