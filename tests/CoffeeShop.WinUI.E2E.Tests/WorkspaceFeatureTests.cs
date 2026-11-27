@@ -120,6 +120,70 @@ public sealed partial class CounterSaleTests
     }
 
     [Fact]
+    public async Task StockRoomThresholdAndLifecycleActionsRefreshTheNativeWorkspace()
+    {
+        const string ingredientName = "E2E Threshold Cocoa";
+        const string supplierName = "E2E Stock Supplier";
+        const string supplierPhone = "0281234599";
+        const string updatedPhone = "0281234588";
+
+        await RunWorkspaceAsync(async (main, automation, api) =>
+        {
+            Navigate(main, "Stock room");
+            Press(main, "NewIngredientButton");
+            TypeText(Find(main, "NameBox"), ingredientName);
+            SelectOption(main, automation, Find(main, "UnitBox"), "Grams (g)");
+            TypeText(Find(main, "BalanceBox"), "10");
+            TypeText(Find(main, "ThresholdBox"), "5");
+            SaveDialog(main, "Create");
+            TypeText(Find(main, "SearchBox"), ingredientName);
+            var row = WaitFor("new ingredient row", () =>
+                FindRow(main, "IngredientsListView", $"{ingredientName}. 10 g on hand."));
+            row.Click();
+            Press(main, "EditIngredientButton");
+            TypeText(Find(main, "ThresholdBox"), "15");
+            SaveDialog(main, "Save");
+            ExpectText(main, "DrawerStatusText", "LOW STOCK");
+            var ingredient = Assert.Single((await ReadAsync<PageResponse<IngredientBalanceResponse>>(
+                api, $"ingredients?search={Escape(ingredientName)}")).Items);
+            Assert.Equal(10m, ingredient.AvailableQuantity);
+            Assert.Equal(15m, ingredient.ReorderThreshold);
+
+            Press(main, "ToggleIngredientButton");
+            SaveDialog(main, "Deactivate");
+            ExpectText(main, "DrawerStatusText", "INACTIVE");
+            Assert.False((await ReadAsync<IngredientBalanceResponse>(api,
+                $"ingredients/{ingredient.IngredientId}")).IsActive);
+            Press(main, "ToggleIngredientButton");
+            SaveDialog(main, "Activate");
+            ExpectText(main, "DrawerStatusText", "LOW STOCK");
+            Assert.True((await ReadAsync<IngredientBalanceResponse>(api,
+                $"ingredients/{ingredient.IngredientId}")).IsActive);
+
+            Find(main, "TabSuppliers").Click();
+            Press(main, "NewSupplierButton");
+            TypeText(Find(main, "NameBox"), supplierName);
+            TypeText(Find(main, "PhoneBox"), supplierPhone);
+            SaveDialog(main, "Create");
+            var supplier = Assert.Single(await ReadAsync<SupplierResponse[]>(api, "suppliers"),
+                item => item.Name == supplierName);
+            PressNamed(main, $"Deactivate supplier {supplierName}");
+            SaveDialog(main, "Deactivate");
+            PressNamed(main, $"Activate supplier {supplierName}");
+            Assert.False(Assert.Single(await ReadAsync<SupplierResponse[]>(api, "suppliers"),
+                item => item.Id == supplier.Id).IsActive);
+            SaveDialog(main, "Activate");
+            Assert.True(Assert.Single(await ReadAsync<SupplierResponse[]>(api, "suppliers"),
+                item => item.Id == supplier.Id).IsActive);
+            PressNamed(main, $"Edit supplier {supplierName}");
+            TypeText(Find(main, "PhoneBox"), updatedPhone);
+            SaveDialog(main, "Save");
+            Assert.Equal(updatedPhone, Assert.Single(await ReadAsync<SupplierResponse[]>(api, "suppliers"),
+                item => item.Id == supplier.Id).Phone);
+        });
+    }
+
+    [Fact]
     public async Task CancellingConfirmedTicketRestoresStockAndRedeemedPoints()
     {
         const string reason = "Guest cancelled before preparation.";

@@ -815,6 +815,7 @@
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <StackPanel VerticalAlignment="Center" Spacing="3">
                                                     <TextBlock Text="{Binding Name}" FontFamily="Segoe UI" FontSize="13" TextTrimming="CharacterEllipsis" />
@@ -830,7 +831,8 @@
                                                 <Border Grid.Column="1" Style="{StaticResource ConsoleStampStyle}" VerticalAlignment="Center">
                                                     <TextBlock FontFamily="Segoe UI" Text="{Binding StatusDisplay}" Style="{StaticResource ConsoleLabelStyle}" />
                                                 </Border>
-                                                <Button Grid.Column="2" Content="Edit" Style="{StaticResource StockRowAction}" Tag="{Binding}" Click="OnEditSupplierClick" AutomationProperties.Name="{Binding EditActionName}" ToolTipService.ToolTip="{Binding EditActionName}" />
+                                                <Button Grid.Column="2" Content="Edit" Style="{StaticResource StockRowAction}" Tag="{Binding}" IsEnabled="{Binding CanManage}" Click="OnEditSupplierClick" AutomationProperties.Name="{Binding EditActionName}" ToolTipService.ToolTip="{Binding EditActionName}" />
+                                                <Button Grid.Column="3" Content="{Binding ToggleActiveLabel}" Style="{StaticResource StockRowAction}" Tag="{Binding}" IsEnabled="{Binding CanManage}" Click="OnToggleSupplierClick" AutomationProperties.Name="{Binding ToggleActionName}" ToolTipService.ToolTip="{Binding ToggleActionName}" />
                                             </Grid>
                                         </DataTemplate>
                                     </ListView.ItemTemplate>

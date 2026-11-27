@@ -361,6 +361,34 @@ public sealed class ApiManagementSourceTests
         Assert.All(calls, call => Assert.Equal("fixture-access", call.Token));
     }
 
+    [Theory]
+    [InlineData("threshold", HttpStatusCode.Forbidden, ApiErrorKind.Forbidden)]
+    [InlineData("threshold", HttpStatusCode.Conflict, ApiErrorKind.Conflict)]
+    [InlineData("ingredient", HttpStatusCode.Forbidden, ApiErrorKind.Forbidden)]
+    [InlineData("ingredient", HttpStatusCode.Conflict, ApiErrorKind.Conflict)]
+    [InlineData("supplier", HttpStatusCode.Forbidden, ApiErrorKind.Forbidden)]
+    [InlineData("supplier", HttpStatusCode.Conflict, ApiErrorKind.Conflict)]
+    public async Task InventoryMutation_PreservesForbiddenAndConflictResponses(
+        string operation, HttpStatusCode status, ApiErrorKind expectedKind)
+    {
+        var id = Guid.NewGuid();
+        using var client = CreateClient(_ => new HttpResponseMessage(status)
+        {
+            Content = JsonContent.Create(new { title = "Action rejected", detail = "Refresh the stock room." }),
+        });
+        var source = new ApiInventorySource(new AuthenticatedApiClient(client, CreateSession()));
+
+        var error = await Assert.ThrowsAsync<ApiException>(() => operation switch
+        {
+            "threshold" => source.SetThresholdAsync(new(id), 25m),
+            "ingredient" => source.DeactivateIngredientAsync(new(id)),
+            _ => source.DeactivateSupplierAsync(new(id)),
+        });
+
+        Assert.Equal(expectedKind, error.Kind);
+        Assert.Equal(status, error.StatusCode);
+    }
+
     private static StaffSessionManager CreateSession()
     {
         var manager = new StaffSessionManager(new Identity(), new Store());

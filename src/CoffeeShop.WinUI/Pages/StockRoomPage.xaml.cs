@@ -70,6 +70,8 @@ public sealed partial class StockRoomPage : Page
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         ConfigureLayout(ActualWidth, ActualHeight);
+        drawerOpen = !compactLayout;
+        UpdateEditor();
         await RefreshDataAsync();
         UpdateActiveTabVisuals();
         SwitchSectionView();
@@ -131,7 +133,7 @@ public sealed partial class StockRoomPage : Page
             SuppliersListView.ItemsSource = suppliers.Select(supplier =>
             {
                 var counts = receiptCounts.GetValueOrDefault(supplier.Id);
-                return new SupplierRow(supplier, counts.Total, counts.Posted);
+                return new SupplierRow(supplier, counts.Total, counts.Posted, session.HasPermission("inventory.manage"));
             }).ToList();
             SuppliersEmptyText.Visibility = suppliers.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -242,7 +244,7 @@ public sealed partial class StockRoomPage : Page
 
     private void SwitchSectionView()
     {
-        drawerOpen = true;
+        if (!compactLayout) drawerOpen = true;
         if (!compactLayout)
         {
             ContentSplitGrid.ColumnDefinitions[1].Width = new GridLength(360);
@@ -402,7 +404,7 @@ public sealed partial class StockRoomPage : Page
             IngredientsListView.SelectedItem = row;
             if (changed)
             {
-                if (row is not null) drawerOpen = true;
+                if (row is not null && !compactLayout) drawerOpen = true;
                 isAdjusting = false;
                 var draft = row is null ? new StockAdjustmentDraft() : adjustmentDrafts.For(row.Id);
                 restoringDraft = true;
@@ -584,6 +586,7 @@ public sealed partial class StockRoomPage : Page
                     new(dialog.IngredientName, dialog.BaseUnit, dialog.AvailableQuantity, dialog.ReorderThreshold));
                 if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
             }
+            if (compactLayout) drawerOpen = false;
             await ReloadStockDataAsync($"Ingredient '{dialog.IngredientName}' created.");
         }
         catch (ApiException exception) { ShowApiFailure("create ingredient", exception); }
@@ -603,7 +606,7 @@ public sealed partial class StockRoomPage : Page
     {
         await ReloadStockDataAsync();
         ShowFeedback(new(WorkflowFeedbackKind.Conflict, "Stock room changed",
-            $"{name} changed since this list loaded.", [], "Review the refreshed row before trying again."));
+            $"{name} changed since this list loaded.", [], "Refresh and review the current row before trying again."));
     }
 
     private async Task<bool> ConfirmStateChangeAsync(string type, string name, bool activate)
@@ -868,6 +871,7 @@ public sealed partial class StockRoomPage : Page
     private async void OnEditSupplierClick(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is not SupplierRow row) return;
+        if (!StockRoomActionPolicy.CanManage(session.HasPermission("inventory.manage"), isBusy)) return;
 
         using var scope = App.Services.CreateScope();
         var supplier = App.IsApiMode
@@ -901,6 +905,49 @@ public sealed partial class StockRoomPage : Page
         }
         catch (ApiException exception) { ShowApiFailure("update supplier", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("update supplier", "Verify connection.")); }
+        finally { SetBusy(false); }
+    }
+
+    private async void OnToggleSupplierClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as Button)?.Tag is not SupplierRow row ||
+            !StockRoomActionPolicy.CanManage(session.HasPermission("inventory.manage"), isBusy)) return;
+
+        var activate = !row.IsActive;
+        if (!await ConfirmStateChangeAsync("supplier", row.Name, activate)) return;
+        SetBusy(true);
+        try
+        {
+            using var scope = App.Services.CreateScope();
+            var supplier = App.IsApiMode
+                ? await App.Services.GetRequiredService<ApiInventorySource>().FindSupplierAsync(row.Id)
+                : await scope.ServiceProvider.GetRequiredService<IInventoryRepository>().FindSupplierAsync(row.Id);
+            if (supplier is null || StockRoomActionPolicy.IsStale(row.IsActive, supplier.IsActive) ||
+                !StockRoomActionPolicy.IsTransitionNeeded(supplier.IsActive, activate))
+            {
+                await ShowStaleStockStateAsync(row.Name);
+                return;
+            }
+
+            ShowFeedback(WorkflowFeedback.Loading($"{(activate ? "Activating" : "Deactivating")} {row.Name}..."));
+            if (App.IsApiMode)
+            {
+                var api = App.Services.GetRequiredService<ApiInventorySource>();
+                if (activate) await api.ActivateSupplierAsync(row.Id);
+                else await api.DeactivateSupplierAsync(row.Id);
+            }
+            else
+            {
+                var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
+                var result = activate
+                    ? await handler.ActivateSupplierAsync(new(row.Id))
+                    : await handler.DeactivateSupplierAsync(new(row.Id));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
+            }
+            await ReloadStockDataAsync($"Supplier '{row.Name}' {(activate ? "activated" : "deactivated")}.");
+        }
+        catch (ApiException exception) { ShowApiFailure("change supplier state", exception); }
+        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("change supplier state", "Refresh before retrying.")); }
         finally { SetBusy(false); }
     }
 
@@ -998,8 +1045,8 @@ public sealed partial class StockRoomPage : Page
 
     private void OnDrawerCloseClick(object sender, RoutedEventArgs e)
     {
-        if (isAdjusting) { isAdjusting = false; UpdateEditor(); return; }
-        if (compactLayout) SelectSection("ingredients");
+        if (isAdjusting) { isAdjusting = false; if (compactLayout) drawerOpen = false; UpdateEditor(); return; }
+        if (compactLayout) { drawerOpen = false; SelectSection("ingredients"); }
         else
         {
             drawerOpen = false;
@@ -1119,7 +1166,9 @@ public sealed partial class StockRoomPage : Page
 
     private void ConfigureLayout(double width, double height)
     {
+        var wasCompact = compactLayout;
         compactLayout = width < 1180 || height < 520;
+        if (compactLayout && !wasCompact && !isAdjusting) drawerOpen = false;
         // Keep the footer and filter reset reachable on short desktop windows,
         // but let taller windows show more of the ledger.
         IngredientsListView.MaxHeight = Math.Max(compactLayout ? 416 : 104, height - 350);
@@ -1262,8 +1311,7 @@ public sealed partial class StockRoomPage : Page
     {
         if (!isInitialized) return;
         var editing = activeSection == "ingredients" && isAdjusting && selectedIngredientRow is not null;
-        var showDrawer = activeSection == "ingredients" && selectedIngredientRow is not null &&
-            (compactLayout ? editing : drawerOpen);
+        var showDrawer = activeSection == "ingredients" && selectedIngredientRow is not null && drawerOpen;
         AdjustmentForm.Visibility = editing ? Visibility.Visible : Visibility.Collapsed;
         AdjustmentActions.Visibility = editing ? Visibility.Visible : Visibility.Collapsed;
         BeginAdjustmentButton.Visibility = editing || !session.HasPermission("inventory.adjust") ? Visibility.Collapsed : Visibility.Visible;
@@ -1289,7 +1337,7 @@ public sealed partial class StockRoomPage : Page
         DrawerPanel.Visibility = showDrawer ? Visibility.Visible : Visibility.Collapsed;
         ContentSplitGrid.ColumnDefinitions[1].Width = new GridLength(showDrawer && !compactLayout ? 360 : 0);
         ContentSplitGrid.ColumnSpacing = showDrawer && !compactLayout ? 24 : 0;
-        SectionsHost.Visibility = compactLayout && editing ? Visibility.Collapsed : Visibility.Visible;
+        SectionsHost.Visibility = compactLayout && showDrawer ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private static void SetTabLabel(ToggleButton tab, string label, int? count = null)
