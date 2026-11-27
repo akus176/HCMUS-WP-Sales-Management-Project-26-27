@@ -190,8 +190,12 @@ public sealed class StaffAdministrationService(CoffeeShopDbContext db, TimeProvi
         if (rolesChanged)
         {
             var previousRoles = currentRoleCodes.Order(StringComparer.Ordinal).ToArray();
-            db.UserRoles.RemoveRange(user.UserRoles);
-            foreach (var roleCode in newRoleCodes.Order(StringComparer.Ordinal))
+            var removedRoles = user.UserRoles
+                .Where(userRole => !newRoleCodes.Contains(userRole.Role!.Code))
+                .ToArray();
+            db.UserRoles.RemoveRange(removedRoles);
+            foreach (var roleCode in newRoleCodes.Except(currentRoleCodes, StringComparer.Ordinal)
+                .Order(StringComparer.Ordinal))
                 db.UserRoles.Add(new UserRole(user.Id, rolesByCode[roleCode].Id, now, actorId));
             db.SecurityAuditEvents.Add(new SecurityAuditEvent(EntityId.New(), "role_changed", now,
                 "success", user.Id, ipAddress, JsonSerializer.Serialize(new

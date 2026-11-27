@@ -1009,7 +1009,10 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Created, created.StatusCode);
         var account = (await created.Content.ReadFromJsonAsync<StaffAccountResponse>())!;
 
-        var cashier = await LoginAsync(client);
+        using var originalLogin = await client.PostAsJsonAsync("/api/v1/auth/login",
+            new LoginRequest(account.Username, "test-only-account-lifecycle-password"));
+        Assert.Equal(HttpStatusCode.OK, originalLogin.StatusCode);
+        var cashier = (await originalLogin.Content.ReadFromJsonAsync<TokenResponse>())!;
         client.DefaultRequestHeaders.Authorization = new("Bearer", cashier.AccessToken);
         using var forbidden = await client.PutAsJsonAsync($"/api/v1/users/{account.Id}", new
         {
@@ -1055,16 +1058,20 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.DoesNotContain("users.manage", session.User.Permissions);
 
         await using var db = Database();
-        var updateAudit = await db.SecurityAuditEvents.SingleAsync(item => item.UserId == new EntityId(account.Id) &&
+        var updateAudit = await db.SecurityAuditEvents.FirstAsync(item => item.UserId == new EntityId(account.Id) &&
             item.EventType == "account_updated");
-        var roleAudit = await db.SecurityAuditEvents.SingleAsync(item => item.UserId == new EntityId(account.Id) &&
-            item.EventType == "role_changed");
+        var roleAuditMetadata = await db.SecurityAuditEvents.AsNoTracking()
+            .Where(item => item.UserId == new EntityId(account.Id) && item.EventType == "role_changed")
+            .Select(item => item.Metadata).ToArrayAsync();
         Assert.Contains(admin.User.Id.ToString(), updateAudit.Metadata);
-        Assert.Contains(admin.User.Id.ToString(), roleAudit.Metadata);
-        Assert.Contains("Cashier", roleAudit.Metadata);
-        Assert.Contains("Barista", roleAudit.Metadata);
+        Assert.Contains(roleAuditMetadata, metadata => metadata is not null &&
+            metadata.Contains(admin.User.Id.ToString(), StringComparison.Ordinal) &&
+            metadata.Contains("previousRoles", StringComparison.Ordinal));
+        Assert.Contains(roleAuditMetadata, metadata => metadata is not null &&
+            metadata.Contains("Cashier", StringComparison.Ordinal) && metadata.Contains("Barista", StringComparison.Ordinal));
         Assert.DoesNotContain("test-only-account-lifecycle-password", updateAudit.Metadata);
-        Assert.DoesNotContain(admin.AccessToken, roleAudit.Metadata);
+        Assert.DoesNotContain(roleAuditMetadata, metadata => metadata is not null &&
+            metadata.Contains(admin.AccessToken, StringComparison.Ordinal));
     }
 
     [PostgresFact]
@@ -1074,6 +1081,11 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         var admin = await LoginAsync(client, "Admin");
         client.DefaultRequestHeaders.Authorization = new("Bearer", admin.AccessToken);
         var target = await LoginAsync(client);
+        await using var beforeDb = Database();
+        var auditIdsBefore = await beforeDb.SecurityAuditEvents.AsNoTracking()
+            .Where(item => item.UserId == new EntityId(target.User.Id) &&
+                (item.EventType == "account_updated" || item.EventType == "role_changed"))
+            .Select(item => item.Id.Value).ToArrayAsync();
         using var duplicate = await client.PutAsJsonAsync($"/api/v1/users/{target.User.Id}", new
         {
             username = "Manager",
@@ -1109,8 +1121,48 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Equal("Cashier", unchanged.FullName);
         Assert.Equal("cashier@example.test", unchanged.Email);
         Assert.Equal(["Cashier"], unchanged.UserRoles.Select(item => item.Role!.Code).ToArray());
-        Assert.False(await db.SecurityAuditEvents.AnyAsync(item => item.UserId == unchanged.Id &&
-            (item.EventType == "account_updated" || item.EventType == "role_changed")));
+        var auditIdsAfter = await db.SecurityAuditEvents.AsNoTracking()
+            .Where(item => item.UserId == unchanged.Id &&
+                (item.EventType == "account_updated" || item.EventType == "role_changed"))
+            .Select(item => item.Id.Value).ToArrayAsync();
+        Assert.Equal(auditIdsBefore.Order(), auditIdsAfter.Order());
+    }
+
+    [PostgresFact]
+    public async Task StaffAdministration_ChangesOnlyAddedAndRemovedRolesWhenRoleSetsOverlap()
+    {
+        using var client = host!.CreateClient();
+        var admin = await LoginAsync(client, "Admin");
+        var target = await LoginAsync(client);
+        client.DefaultRequestHeaders.Authorization = new("Bearer", admin.AccessToken);
+
+        using var firstUpdate = await client.PutAsJsonAsync($"/api/v1/users/{target.User.Id}", new
+        {
+            username = "cashier",
+            fullName = "Cashier",
+            email = "cashier@example.test",
+            phone = (string?)null,
+            roles = new[] { "Cashier", "Barista" },
+        });
+        Assert.Equal(HttpStatusCode.OK, firstUpdate.StatusCode);
+
+        using var overlappingUpdate = await client.PutAsJsonAsync($"/api/v1/users/{target.User.Id}", new
+        {
+            username = "cashier",
+            fullName = "Cashier",
+            email = "cashier@example.test",
+            phone = (string?)null,
+            roles = new[] { "Cashier", "InventoryStaff" },
+        });
+        Assert.Equal(HttpStatusCode.OK, overlappingUpdate.StatusCode);
+        var account = (await overlappingUpdate.Content.ReadFromJsonAsync<StaffAccountResponse>())!;
+        Assert.Equal(["Cashier", "InventoryStaff"], account.Roles);
+
+        await using var db = Database();
+        var persisted = await db.UserRoles.Include(item => item.Role)
+            .Where(item => item.UserId == new EntityId(target.User.Id))
+            .Select(item => item.Role!.Code).OrderBy(code => code).ToArrayAsync();
+        Assert.Equal(["Cashier", "InventoryStaff"], persisted);
     }
 
     [PostgresFact]
@@ -1119,6 +1171,10 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var client = host!.CreateClient();
         var admin = await LoginAsync(client, "Admin");
         client.DefaultRequestHeaders.Authorization = new("Bearer", admin.AccessToken);
+        await using var beforeDb = Database();
+        var auditIdsBefore = await beforeDb.SecurityAuditEvents.AsNoTracking()
+            .Where(item => item.UserId == new EntityId(admin.User.Id) && item.EventType == "role_changed")
+            .Select(item => item.Id.Value).ToArrayAsync();
         using var response = await client.PutAsJsonAsync($"/api/v1/users/{admin.User.Id}", new
         {
             username = "Admin",
@@ -1134,8 +1190,10 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
             .SingleAsync(item => item.Id == new EntityId(admin.User.Id));
         Assert.True(unchanged.IsActive);
         Assert.Equal(["Admin"], unchanged.UserRoles.Select(item => item.Role!.Code).ToArray());
-        Assert.False(await db.SecurityAuditEvents.AnyAsync(item => item.UserId == unchanged.Id &&
-            item.EventType == "role_changed"));
+        var auditIdsAfter = await db.SecurityAuditEvents.AsNoTracking()
+            .Where(item => item.UserId == unchanged.Id && item.EventType == "role_changed")
+            .Select(item => item.Id.Value).ToArrayAsync();
+        Assert.Equal(auditIdsBefore.Order(), auditIdsAfter.Order());
         using var refresh = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(admin.RefreshToken));
         Assert.Equal(HttpStatusCode.OK, refresh.StatusCode);
     }
@@ -1146,6 +1204,10 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var client = host!.CreateClient();
         var admin = await LoginAsync(client, "Admin");
         await using var db = Database();
+        var auditIdsBefore = await db.SecurityAuditEvents.AsNoTracking()
+            .Where(item => item.UserId == new EntityId(admin.User.Id) &&
+                (item.EventType == "account_updated" || item.EventType == "role_changed"))
+            .Select(item => item.Id.Value).ToArrayAsync();
         var google = new GoogleAdminOptions
         {
             Enabled = true,
@@ -1167,8 +1229,11 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
             .SingleAsync(item => item.Id == new EntityId(admin.User.Id));
         Assert.Equal("admin@example.test", unchanged.Email);
         Assert.Equal(["Admin"], unchanged.UserRoles.Select(item => item.Role!.Code).ToArray());
-        Assert.False(await db.SecurityAuditEvents.AnyAsync(item => item.UserId == unchanged.Id &&
-            (item.EventType == "account_updated" || item.EventType == "role_changed")));
+        var auditIdsAfter = await db.SecurityAuditEvents.AsNoTracking()
+            .Where(item => item.UserId == unchanged.Id &&
+                (item.EventType == "account_updated" || item.EventType == "role_changed"))
+            .Select(item => item.Id.Value).ToArrayAsync();
+        Assert.Equal(auditIdsBefore.Order(), auditIdsAfter.Order());
     }
 
     [PostgresFact]
@@ -1192,8 +1257,11 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         Assert.Null(response.DeactivatedAt);
 
         await using var db = Database();
-        Assert.True(await db.SecurityAuditEvents.AnyAsync(item => item.UserId == new EntityId(target.User.Id) &&
-            item.EventType == "account_reactivated" && item.Metadata != null && item.Metadata.Contains(admin.User.Id.ToString())));
+        var reactivationAudits = await db.SecurityAuditEvents.AsNoTracking()
+            .Where(item => item.UserId == new EntityId(target.User.Id) && item.EventType == "account_reactivated")
+            .Select(item => item.Metadata).ToArrayAsync();
+        Assert.Contains(reactivationAudits, metadata => metadata is not null &&
+            metadata.Contains(admin.User.Id.ToString(), StringComparison.Ordinal));
         using var oldRefresh = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(target.RefreshToken));
         Assert.Equal(HttpStatusCode.Unauthorized, oldRefresh.StatusCode);
         using var managerLogin = await client.PostAsJsonAsync("/api/v1/auth/login", new LoginRequest("Manager", Password));
