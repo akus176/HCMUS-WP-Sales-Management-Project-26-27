@@ -49,6 +49,8 @@ public sealed class StockRoomDetailPresentationTests
         Assert.Contains($"Since {now.Value.ToLocalTime():d MMM yyyy}", row.SinceDisplay);
         Assert.Contains("Last updated", row.HistoryDisplay);
         Assert.Equal("Active", row.StatusDisplay);
+        Assert.Equal("Deactivate", row.ToggleActiveLabel);
+        Assert.False(row.CanManage);
         Assert.Equal("Edit supplier Fresh Dairy Co.", row.EditActionName);
         Assert.Equal("Fresh Dairy Co., Active, 0281234568 · dairy@example.test", row.ToString());
     }
@@ -65,5 +67,6 @@ public sealed class StockRoomDetailPresentationTests
         Assert.Equal("No receipts", row.ReceiptSummary);
         Assert.Equal("Inactive", row.StatusDisplay);
         Assert.Equal("Activate", row.ToggleActiveLabel);
+        Assert.True(new SupplierRow(supplier, canManage: true).CanManage);
     }
 }

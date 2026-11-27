@@ -70,6 +70,8 @@ public sealed partial class StockRoomPage : Page
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         ConfigureLayout(ActualWidth, ActualHeight);
+        drawerOpen = !compactLayout;
+        UpdateEditor();
         await RefreshDataAsync();
         UpdateActiveTabVisuals();
         SwitchSectionView();
@@ -131,7 +133,7 @@ public sealed partial class StockRoomPage : Page
             SuppliersListView.ItemsSource = suppliers.Select(supplier =>
             {
                 var counts = receiptCounts.GetValueOrDefault(supplier.Id);
-                return new SupplierRow(supplier, counts.Total, counts.Posted);
+                return new SupplierRow(supplier, counts.Total, counts.Posted, session.HasPermission("inventory.manage"));
             }).ToList();
             SuppliersEmptyText.Visibility = suppliers.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -242,7 +244,7 @@ public sealed partial class StockRoomPage : Page
 
     private void SwitchSectionView()
     {
-        drawerOpen = true;
+        if (!compactLayout) drawerOpen = true;
         if (!compactLayout)
         {
             ContentSplitGrid.ColumnDefinitions[1].Width = new GridLength(360);
@@ -402,7 +404,7 @@ public sealed partial class StockRoomPage : Page
             IngredientsListView.SelectedItem = row;
             if (changed)
             {
-                if (row is not null) drawerOpen = true;
+                if (row is not null && !compactLayout) drawerOpen = true;
                 isAdjusting = false;
                 var draft = row is null ? new StockAdjustmentDraft() : adjustmentDrafts.For(row.Id);
                 restoringDraft = true;
@@ -584,10 +586,133 @@ public sealed partial class StockRoomPage : Page
                     new(dialog.IngredientName, dialog.BaseUnit, dialog.AvailableQuantity, dialog.ReorderThreshold));
                 if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
             }
+            if (compactLayout) drawerOpen = false;
             await ReloadStockDataAsync($"Ingredient '{dialog.IngredientName}' created.");
         }
         catch (ApiException exception) { ShowApiFailure("create ingredient", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("create ingredient", "Retry after verifying connection.")); }
+        finally { SetBusy(false); }
+    }
+
+    private async Task<Ingredient?> FindCurrentIngredientAsync(EntityId id)
+    {
+        if (App.IsApiMode)
+            return await App.Services.GetRequiredService<ApiInventorySource>().FindIngredientAsync(id);
+        using var scope = App.Services.CreateScope();
+        return await scope.ServiceProvider.GetRequiredService<IInventoryRepository>().FindIngredientAsync(id);
+    }
+
+    private async Task ShowStaleStockStateAsync(string name)
+    {
+        await ReloadStockDataAsync();
+        ShowFeedback(new(WorkflowFeedbackKind.Conflict, "Stock room changed",
+            $"{name} changed since this list loaded.", [], "Refresh and review the current row before trying again."));
+    }
+
+    private async Task<bool> ConfirmStateChangeAsync(string type, string name, bool activate)
+    {
+        var action = activate ? "Activate" : "Deactivate";
+        var consequence = type == "ingredient"
+            ? "Inactive ingredients cannot be used for new stock operations. Their balance and history remain available."
+            : "Inactive suppliers cannot be selected for new receipts. Existing receipts remain available.";
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = $"{action} {type}?",
+            Content = $"{action} '{name}'?\n\n{consequence}",
+            PrimaryButtonText = action,
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Close
+        };
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+    }
+
+    private async void OnEditIngredientClick(object sender, RoutedEventArgs e)
+    {
+        if (!StockRoomActionPolicy.CanManage(session.HasPermission("inventory.manage"), isBusy) || selectedIngredientRow is not { } row)
+            return;
+
+        SetBusy(true);
+        try
+        {
+            var current = await FindCurrentIngredientAsync(row.Id);
+            if (current is null)
+            {
+                await ShowStaleStockStateAsync(row.Name);
+                return;
+            }
+            if (current.ReorderThreshold != row.ReorderThreshold || current.IsActive != row.IsActive)
+            {
+                await ShowStaleStockStateAsync(row.Name);
+                return;
+            }
+
+            var dialog = new IngredientDialog(current) { XamlRoot = XamlRoot };
+            SetBusy(false);
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+            SetBusy(true);
+            current = await FindCurrentIngredientAsync(row.Id);
+            if (current is null || current.ReorderThreshold != row.ReorderThreshold || current.IsActive != row.IsActive)
+            {
+                await ShowStaleStockStateAsync(row.Name);
+                return;
+            }
+
+            ShowFeedback(WorkflowFeedback.Loading($"Saving {row.Name} threshold..."));
+            if (App.IsApiMode)
+                await App.Services.GetRequiredService<ApiInventorySource>().SetThresholdAsync(row.Id, dialog.ReorderThreshold);
+            else
+            {
+                using var scope = App.Services.CreateScope();
+                var result = await scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>()
+                    .SetReorderThresholdAsync(new(row.Id, dialog.ReorderThreshold));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
+            }
+            await ReloadStockDataAsync($"Threshold for '{row.Name}' updated.");
+        }
+        catch (ApiException exception) { ShowApiFailure("update ingredient threshold", exception); }
+        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("update ingredient threshold", "Refresh before retrying.")); }
+        finally { SetBusy(false); }
+    }
+
+    private async void OnToggleIngredientClick(object sender, RoutedEventArgs e)
+    {
+        if (!StockRoomActionPolicy.CanManage(session.HasPermission("inventory.manage"), isBusy) || selectedIngredientRow is not { } row)
+            return;
+
+        var activate = !row.IsActive;
+        if (!await ConfirmStateChangeAsync("ingredient", row.Name, activate)) return;
+        SetBusy(true);
+        try
+        {
+            var current = await FindCurrentIngredientAsync(row.Id);
+            if (current is null || StockRoomActionPolicy.IsStale(row.IsActive, current.IsActive) ||
+                !StockRoomActionPolicy.IsTransitionNeeded(current.IsActive, activate))
+            {
+                await ShowStaleStockStateAsync(row.Name);
+                return;
+            }
+
+            ShowFeedback(WorkflowFeedback.Loading($"{(activate ? "Activating" : "Deactivating")} {row.Name}..."));
+            if (App.IsApiMode)
+            {
+                var api = App.Services.GetRequiredService<ApiInventorySource>();
+                if (activate) await api.ActivateIngredientAsync(row.Id);
+                else await api.DeactivateIngredientAsync(row.Id);
+            }
+            else
+            {
+                using var scope = App.Services.CreateScope();
+                var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
+                var result = activate
+                    ? await handler.ActivateIngredientAsync(new(row.Id))
+                    : await handler.DeactivateIngredientAsync(new(row.Id));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
+            }
+            await ReloadStockDataAsync($"Ingredient '{row.Name}' {(activate ? "activated" : "deactivated")}.");
+        }
+        catch (ApiException exception) { ShowApiFailure("change ingredient state", exception); }
+        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("change ingredient state", "Refresh before retrying.")); }
         finally { SetBusy(false); }
     }
 
@@ -746,6 +871,7 @@ public sealed partial class StockRoomPage : Page
     private async void OnEditSupplierClick(object sender, RoutedEventArgs e)
     {
         if ((sender as Button)?.Tag is not SupplierRow row) return;
+        if (!StockRoomActionPolicy.CanManage(session.HasPermission("inventory.manage"), isBusy)) return;
 
         using var scope = App.Services.CreateScope();
         var supplier = App.IsApiMode
@@ -779,6 +905,49 @@ public sealed partial class StockRoomPage : Page
         }
         catch (ApiException exception) { ShowApiFailure("update supplier", exception); }
         catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("update supplier", "Verify connection.")); }
+        finally { SetBusy(false); }
+    }
+
+    private async void OnToggleSupplierClick(object sender, RoutedEventArgs e)
+    {
+        if ((sender as Button)?.Tag is not SupplierRow row ||
+            !StockRoomActionPolicy.CanManage(session.HasPermission("inventory.manage"), isBusy)) return;
+
+        var activate = !row.IsActive;
+        if (!await ConfirmStateChangeAsync("supplier", row.Name, activate)) return;
+        SetBusy(true);
+        try
+        {
+            using var scope = App.Services.CreateScope();
+            var supplier = App.IsApiMode
+                ? await App.Services.GetRequiredService<ApiInventorySource>().FindSupplierAsync(row.Id)
+                : await scope.ServiceProvider.GetRequiredService<IInventoryRepository>().FindSupplierAsync(row.Id);
+            if (supplier is null || StockRoomActionPolicy.IsStale(row.IsActive, supplier.IsActive) ||
+                !StockRoomActionPolicy.IsTransitionNeeded(supplier.IsActive, activate))
+            {
+                await ShowStaleStockStateAsync(row.Name);
+                return;
+            }
+
+            ShowFeedback(WorkflowFeedback.Loading($"{(activate ? "Activating" : "Deactivating")} {row.Name}..."));
+            if (App.IsApiMode)
+            {
+                var api = App.Services.GetRequiredService<ApiInventorySource>();
+                if (activate) await api.ActivateSupplierAsync(row.Id);
+                else await api.DeactivateSupplierAsync(row.Id);
+            }
+            else
+            {
+                var handler = scope.ServiceProvider.GetRequiredService<InventoryCommandHandler>();
+                var result = activate
+                    ? await handler.ActivateSupplierAsync(new(row.Id))
+                    : await handler.DeactivateSupplierAsync(new(row.Id));
+                if (result.IsFailure) { ShowFeedback(WorkflowFeedback.FromError(result.Error!)); return; }
+            }
+            await ReloadStockDataAsync($"Supplier '{row.Name}' {(activate ? "activated" : "deactivated")}.");
+        }
+        catch (ApiException exception) { ShowApiFailure("change supplier state", exception); }
+        catch { ShowFeedback(WorkflowFeedback.DatabaseFailure("change supplier state", "Refresh before retrying.")); }
         finally { SetBusy(false); }
     }
 
@@ -876,8 +1045,8 @@ public sealed partial class StockRoomPage : Page
 
     private void OnDrawerCloseClick(object sender, RoutedEventArgs e)
     {
-        if (isAdjusting) { isAdjusting = false; UpdateEditor(); return; }
-        if (compactLayout) SelectSection("ingredients");
+        if (isAdjusting) { isAdjusting = false; if (compactLayout) drawerOpen = false; UpdateEditor(); return; }
+        if (compactLayout) { drawerOpen = false; SelectSection("ingredients"); }
         else
         {
             drawerOpen = false;
@@ -968,7 +1137,9 @@ public sealed partial class StockRoomPage : Page
         ReceiptsListView.IsEnabled = SuppliersListView.IsEnabled = MovementsListView.IsEnabled = HistoryIngredientBox.IsEnabled = !busy;
         ClearFiltersButton.IsEnabled = BalancesEmptyClearButton.IsEnabled = DrawerCloseButton.IsEnabled = !busy;
         SortIngredientButton.IsEnabled = SortOnHandButton.IsEnabled = SortReorderButton.IsEnabled = SortStatusButton.IsEnabled = LastMovementHeaderButton.IsEnabled = !busy;
+        EditIngredientButton.IsEnabled = ToggleIngredientButton.IsEnabled = !busy;
         RecalculateProjection();
+        UpdateEditor();
     }
 
     private void OnRootSizeChanged(object sender, SizeChangedEventArgs e)
@@ -995,7 +1166,9 @@ public sealed partial class StockRoomPage : Page
 
     private void ConfigureLayout(double width, double height)
     {
+        var wasCompact = compactLayout;
         compactLayout = width < 1180 || height < 520;
+        if (compactLayout && !wasCompact && !isAdjusting) drawerOpen = false;
         // Keep the footer and filter reset reachable on short desktop windows,
         // but let taller windows show more of the ledger.
         IngredientsListView.MaxHeight = Math.Max(compactLayout ? 416 : 104, height - 350);
@@ -1138,11 +1311,20 @@ public sealed partial class StockRoomPage : Page
     {
         if (!isInitialized) return;
         var editing = activeSection == "ingredients" && isAdjusting && selectedIngredientRow is not null;
-        var showDrawer = activeSection == "ingredients" && selectedIngredientRow is not null &&
-            (compactLayout ? editing : drawerOpen);
+        var showDrawer = activeSection == "ingredients" && selectedIngredientRow is not null && drawerOpen;
         AdjustmentForm.Visibility = editing ? Visibility.Visible : Visibility.Collapsed;
         AdjustmentActions.Visibility = editing ? Visibility.Visible : Visibility.Collapsed;
         BeginAdjustmentButton.Visibility = editing || !session.HasPermission("inventory.adjust") ? Visibility.Collapsed : Visibility.Visible;
+        IngredientManageActions.Visibility = !editing && session.HasPermission("inventory.manage")
+            ? Visibility.Visible : Visibility.Collapsed;
+        EditIngredientButton.IsEnabled = ToggleIngredientButton.IsEnabled =
+            StockRoomActionPolicy.CanManage(session.HasPermission("inventory.manage"), isBusy) && selectedIngredientRow is not null;
+        if (selectedIngredientRow is { } managed)
+        {
+            ToggleIngredientButton.Content = managed.ToggleActiveLabel;
+            AutomationProperties.SetName(ToggleIngredientButton, $"{managed.ToggleActiveLabel} ingredient {managed.Name}");
+            AutomationProperties.SetName(EditIngredientButton, $"Edit threshold for {managed.Name}");
+        }
         RecordAdjustmentButton.Visibility = session.HasPermission("inventory.adjust") ? Visibility.Visible : Visibility.Collapsed;
         DrawerTagsPanel.Visibility = editing ? Visibility.Collapsed : Visibility.Visible;
         RecentHistoryPanel.Visibility = editing ? Visibility.Collapsed : Visibility.Visible;
@@ -1155,7 +1337,7 @@ public sealed partial class StockRoomPage : Page
         DrawerPanel.Visibility = showDrawer ? Visibility.Visible : Visibility.Collapsed;
         ContentSplitGrid.ColumnDefinitions[1].Width = new GridLength(showDrawer && !compactLayout ? 360 : 0);
         ContentSplitGrid.ColumnSpacing = showDrawer && !compactLayout ? 24 : 0;
-        SectionsHost.Visibility = compactLayout && editing ? Visibility.Collapsed : Visibility.Visible;
+        SectionsHost.Visibility = compactLayout && showDrawer ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private static void SetTabLabel(ToggleButton tab, string label, int? count = null)
