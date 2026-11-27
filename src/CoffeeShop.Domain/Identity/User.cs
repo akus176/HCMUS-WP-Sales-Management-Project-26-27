@@ -76,4 +76,27 @@ public class User
         DeactivatedAt = changedAt;
         UpdatedAt = changedAt;
     }
+
+    public void UpdateProfile(string username, string email, string fullName, string? phone, UtcTimestamp changedAt)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(username);
+        ArgumentException.ThrowIfNullOrWhiteSpace(email);
+        ArgumentException.ThrowIfNullOrWhiteSpace(fullName);
+        ArgumentNullException.ThrowIfNull(changedAt);
+
+        Username = username.Trim();
+        Email = email.Trim().ToLowerInvariant();
+        FullName = fullName.Trim();
+        Phone = string.IsNullOrWhiteSpace(phone) ? null : phone.Trim();
+        UpdatedAt = changedAt;
+    }
+
+    public void Reactivate(UtcTimestamp changedAt)
+    {
+        ArgumentNullException.ThrowIfNull(changedAt);
+        if (IsActive) throw new InvalidOperationException("The staff account is already active.");
+        IsActive = true;
+        DeactivatedAt = null;
+        UpdatedAt = changedAt;
+    }
 }

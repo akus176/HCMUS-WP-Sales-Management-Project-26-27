@@ -8,8 +8,11 @@ public sealed record StaffSession(Guid Id, string FullName, string[] Roles, stri
 public sealed record TokenResponse(string AccessToken, string RefreshToken, DateTimeOffset ExpiresAt, StaffSession User);
 
 public sealed record DeactivateStaffRequest(bool Confirm);
+public sealed record ReactivateStaffRequest(bool Confirm);
 public sealed record CreateStaffRequest(
     string? FullName, string? Username, string? Email, string? Phone, string? Role, string? Password);
+public sealed record UpdateStaffRequest(
+    string? Username, string? FullName, string? Email, string? Phone, string[]? Roles);
 public sealed record StaffAccountResponse(
     Guid Id,
     string Username,
