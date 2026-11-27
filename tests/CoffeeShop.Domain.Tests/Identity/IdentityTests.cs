@@ -22,6 +22,35 @@ public class IdentityTests
         Assert.Null(user.DeactivatedAt);
     }
 
+    [Fact]
+    public void User_UpdateProfile_NormalizesIdentityAndAdvancesTimestamp()
+    {
+        var user = new User(EntityId.New(), "cashier", "cashier@example.test", "hash", "Old Name", null, Now, Now);
+        var changedAt = new UtcTimestamp(DateTimeOffset.UtcNow.AddMinutes(1));
+
+        user.UpdateProfile(" new.cashier ", " NEW@EXAMPLE.TEST ", " New Name ", " +84901234567 ", changedAt);
+
+        Assert.Equal("new.cashier", user.Username);
+        Assert.Equal("new@example.test", user.Email);
+        Assert.Equal("New Name", user.FullName);
+        Assert.Equal("+84901234567", user.Phone);
+        Assert.Equal(changedAt, user.UpdatedAt);
+    }
+
+    [Fact]
+    public void User_Reactivate_ClearsDeactivationAndAdvancesTimestamp()
+    {
+        var user = new User(EntityId.New(), "cashier", "cashier@example.test", "hash", "Cashier", null,
+            Now, Now, isActive: false, deactivatedAt: Now);
+        var changedAt = new UtcTimestamp(DateTimeOffset.UtcNow.AddMinutes(1));
+
+        user.Reactivate(changedAt);
+
+        Assert.True(user.IsActive);
+        Assert.Null(user.DeactivatedAt);
+        Assert.Equal(changedAt, user.UpdatedAt);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("   ")]

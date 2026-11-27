@@ -332,6 +332,8 @@ public sealed class ApiManagementSourceTests
             if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/api/v1/ingredients")
                 return Json(new PageResponse<IngredientBalanceResponse>(
                     [new(ingredientId, "Coffee beans", "g", 100m, 25m, true)], 1, 200, 1));
+            if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == $"/api/v1/ingredients/{ingredientId}")
+                return Json(new IngredientBalanceResponse(ingredientId, "Coffee beans", "g", 100m, 25m, true));
             return new HttpResponseMessage(HttpStatusCode.NoContent);
         });
         var source = new ApiInventorySource(new AuthenticatedApiClient(client, CreateSession()));
@@ -345,16 +347,46 @@ public sealed class ApiManagementSourceTests
         var ingredient = await source.CreateIngredientAsync("Coffee beans", "g", 100m, 20m);
         Assert.Equal(ingredientId, ingredient.Id.Value);
         await source.SetThresholdAsync(new(ingredientId), 25m);
+        Assert.Equal(25m, (await source.FindIngredientAsync(new(ingredientId)))!.ReorderThreshold);
         await source.DeactivateIngredientAsync(new(ingredientId));
         await source.ActivateIngredientAsync(new(ingredientId));
         await source.ListIngredientsAsync(includeInactive: false);
 
         Assert.Contains(calls, call => call.Method == "PUT" && call.Path == $"/api/v1/suppliers/{supplierId}");
         Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/ingredients/{ingredientId}/threshold");
+        Assert.Contains(calls, call => call.Method == "GET" && call.Path == $"/api/v1/ingredients/{ingredientId}");
         Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/suppliers/{supplierId}/deactivate");
         Assert.Contains(calls, call => call.Method == "POST" && call.Path == $"/api/v1/ingredients/{ingredientId}/activate");
         Assert.Contains(calls, call => call.Method == "GET" && call.Path == "/api/v1/ingredients?page=1&pageSize=200&isActive=true");
         Assert.All(calls, call => Assert.Equal("fixture-access", call.Token));
+    }
+
+    [Theory]
+    [InlineData("threshold", HttpStatusCode.Forbidden, ApiErrorKind.Forbidden)]
+    [InlineData("threshold", HttpStatusCode.Conflict, ApiErrorKind.Conflict)]
+    [InlineData("ingredient", HttpStatusCode.Forbidden, ApiErrorKind.Forbidden)]
+    [InlineData("ingredient", HttpStatusCode.Conflict, ApiErrorKind.Conflict)]
+    [InlineData("supplier", HttpStatusCode.Forbidden, ApiErrorKind.Forbidden)]
+    [InlineData("supplier", HttpStatusCode.Conflict, ApiErrorKind.Conflict)]
+    public async Task InventoryMutation_PreservesForbiddenAndConflictResponses(
+        string operation, HttpStatusCode status, ApiErrorKind expectedKind)
+    {
+        var id = Guid.NewGuid();
+        using var client = CreateClient(_ => new HttpResponseMessage(status)
+        {
+            Content = JsonContent.Create(new { title = "Action rejected", detail = "Refresh the stock room." }),
+        });
+        var source = new ApiInventorySource(new AuthenticatedApiClient(client, CreateSession()));
+
+        var error = await Assert.ThrowsAsync<ApiException>(() => operation switch
+        {
+            "threshold" => source.SetThresholdAsync(new(id), 25m),
+            "ingredient" => source.DeactivateIngredientAsync(new(id)),
+            _ => source.DeactivateSupplierAsync(new(id)),
+        });
+
+        Assert.Equal(expectedKind, error.Kind);
+        Assert.Equal(status, error.StatusCode);
     }
 
     private static StaffSessionManager CreateSession()
