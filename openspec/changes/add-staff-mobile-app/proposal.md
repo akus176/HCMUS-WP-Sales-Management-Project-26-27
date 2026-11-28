@@ -6,11 +6,13 @@ sales and preparing tickets against the same authoritative backend as WinUI.
 ## What Changes
 
 - Keep Android-first React Native/Expo with TypeScript, secure staff sessions and permission-derived navigation.
+- Use the approved native mobile presentation: permission-derived persistent Today, Counter, Preparation and More destinations; retained workspace state; Account under More; Inter typography, original vector icons, warm paper surfaces, focused records and confirmable sheets.
 - Limit operational workspaces to Counter and Preparation. Today is the entry surface; More contains Account only.
 - Include Counter catalog/customization/cart, service modes, dine-in available-table selection, existing-customer/address lookup, draft save/review/confirm, discount requests, loyalty redemption, order lookup/status and payments.
 - Keep permission-gated manager cancellation and ready-delivery assignment inside Counter.
 - Keep Preparation queue/detail, start/ready confirmation, live/manual refresh and online-only writes.
 - Retain device lifecycle and privacy-safe urgent Preparation notifications with authenticated, freshly authorized deep links.
+- Provide ordinary device sign-out and a distinct account-wide **Sign out everywhere** action under Account. Account-wide revocation is server-confirmed and clears the initiating device's protected state; ordinary sign-out remains session-scoped and can clear local state offline.
 - Continue using the shared API, business rules and PostgreSQL state; generate client types from shared OpenAPI.
 
 ## Delivery Boundaries
@@ -32,6 +34,22 @@ in Counter; approval decisions are made in WinUI.
 #95 tracks current tasks, #206 remains open for selected P1 verification and @longtoZ's
 approval, and #232 owns operation-to-scope traceability. This scope decision is not
 reviewer acceptance or final release/demo completion.
+
+## Current implementation reconciliation (28 November 2026)
+
+The implemented application now follows the selected native redesign: permission-derived
+persistent Today, Counter, Preparation and More destinations; retained mounted workspace
+state with fresh access checks; Account under More; Inter typography; original vector
+icons; warm paper surfaces; focused record and detail views; and confirmable sheets. The
+parent task ledger records the implemented shell and presentation while selected-device
+acceptance remains under #206.
+
+Session actions now distinguish ordinary device sign-out from account-wide sign-out.
+Ordinary sign-out remains session-scoped and can clear local state offline. Account-wide
+sign-out is a separate Account action implemented in #234/PR #245: it requires a confirmed
+`204`, clears this device's protected state, preserves the session on failure/timeout, and
+does not claim immediate access-token invalidation. Its implementation is complete; its
+selected-device acceptance remains part of #206.
 
 ## Capabilities
 
