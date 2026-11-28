@@ -1,86 +1,38 @@
-# Missing Features Audit — Inconsistencies Between Layers
+# Missing features audit — current source reconciliation
 
-This report lists features that are **missing at one layer while another layer already depends on them**, producing inconsistency in the application.
+Checked against `main` at `82988f4` (2026-11-26). This is a snapshot of merged implementation, not a new feature specification. The [course requirements](https://app.notion.com/p/Windows-project-3e43c0d79f2680a8bba1ed55b35f71a7) require multiple users, roles, and server-side authorization. The active OpenSpec may require more than the course baseline.
 
-Scope audited: API (`src/CoffeeShop.Api`), desktop app (`src/CoffeeShop.WinUI`), mobile app (`apps/staff-mobile`), domain/persistence (`src/CoffeeShop.Domain`, `src/CoffeeShop.Infrastructure.Postgres`), API contract (`contracts/mobile-p0/openapi.json`), and seed scripts (`scripts/postgres/`).
+## Current decisions
 
----
+- **Stock room actions are deferred.** Issue [#230](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/230) remains the focused implementation issue; do not mark its actions complete.
+- **Source code determines implementation status.** A checked issue box or closed issue is not proof that every operation in a broader OpenSpec requirement exists.
+- **Staff lifecycle implementation is proposed in [PR #244](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/pull/244).** It adds update, reactivation, role changes, final-administrator protection, and tests. PR #244 remains open; until it merges, the `main` snapshot below still has those gaps.
+- **Historical omissions do not automatically become work.** Add code only when an active requirement or an explicit product decision calls for that behavior.
 
-## Account model decision
+## Former priority gaps
 
-To eliminate password-management work, the product adopts a two-tier identity model:
+| Item | Current implementation | Remaining work |
+| --- | --- | --- |
+| Administrator Google sign-in ([#227](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/227)) | API `/auth/google` verifies the configured identity link; WinUI offers a browser sign-in flow. Local credential fixtures remain supported where Google sign-in is disabled. | Deployment configuration and native acceptance evidence are separate from the presence of code. |
+| Staff creation ([#228](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/228)) | `POST /users` and the WinUI Accounts form create a staff account with one selected role and an initial password. API search, detail, and eligible deactivation also exist. | On the audited `main` snapshot, account update, reactivation, and post-creation role changes are absent. The active [identity spec](../openspec/changes/build-coffee-shop-management-system/specs/identity-and-access/spec.md) requires them; their implementation and tests are in open PR #244. Do not present #228's creation scope as the whole of 10.6. |
+| Dining tables ([#229](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/229), [#231](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/231)) | API and WinUI support table creation, management listing, editing, and deletion with state rules. A dedicated Tables page shows availability. | The old claim that tables require SQL seed edits is false. |
+| Stock room ([#230](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/230)) | API and desktop adapter support threshold changes and ingredient/supplier activation. Supplier editing works. | The Stock room page never calls those five adapter methods; its ingredient dialog edit mode has no caller. Deferred until requested. |
 
-| Account tier | How it is created | How it signs in |
-|---|---|---|
-| **Administrator** | Linked to a **Google account** — no local password exists | Google sign-in (OAuth) |
-| **Staff (mobile account)** | Created **only by an administrator in the Windows app** (name, role, initial password) | Username + password set by the administrator at creation |
+## Account administration tracker reconciliation
 
-Consequences: no password reset/change feature is needed for administrators (Google owns the credential), and staff passwords are set once by the administrator at creation time — a forgotten staff password is handled by the administrator deactivating and re-creating the account, not by a reset flow.
+On the audited `main` snapshot, the API and WinUI support staff **create, list, view, and deactivate**, but not **update, reactivate, or post-creation role assignment**. The active [identity spec](../openspec/changes/build-coffee-shop-management-system/specs/identity-and-access/spec.md) requires all of these. The main-branch [task tracker](../openspec/changes/build-coffee-shop-management-system/tasks.md) leaves 10.6 unchecked. PR #244 implements the full lifecycle and checks 10.6 after its PostgreSQL API tests and Windows E2E checks passed; it remains open and has not changed the audited main snapshot yet. The final-active-administrator deactivation guard already existed at that snapshot, but did not complete the other account operations.
 
----
+## Historical inventory — absence does not establish priority
 
-## In scope — fix this week
+| Capability absent or limited | Current assessment |
+| --- | --- |
+| Payment refunds or voids | The API records payments but has no refund/void workflow. The loyalty spec describes reversal **if** a refund invalidates points; it does not by itself define a refund feature. No dedicated refund issue was found. |
+| Reservations | Domain and persistence models exist, but no API or client workflow. No current reservation-delivery requirement or dedicated issue was found. |
+| Export from Reports | The UI has no export action. [#117](https://github.com/akus176/HCMUS-WP-Sales-Management-Project-26-27/issues/117) treats unsupported export controls as concept-only, so export is not an approved gap to implement. |
+| Dynamic role/permission bundle management | Roles are seeded; the course baseline requires role-based access, which the API enforces. This is separate from the unmet staff role-reassignment requirement above. |
+| Catalog/customer/address reactivation; ingredient name/unit edits; supplier get-by-ID; purchase-receipt header edits or draft deletion; administrator device listing/revocation; manual loyalty adjustments | These operations are not exposed by the current API/UI. Their absence alone does not justify adding them to this delivery. Preserve historical references and stock/loyalty rules if any are later scoped. |
+| Partial recipe editing | The API replaces a variant recipe as a whole. This is a supported edit operation, not a missing feature by itself. |
+| Mobile operations | Counter order creation/confirmation, discount requests, loyalty redemption, existing-customer lookup, and Preparation start/ready actions are implemented. The current [mobile task tracker](../openspec/changes/add-staff-mobile-app/tasks.md) retires broader inventory, courier, administration, and receipt screens; lack of those screens is not a current implementation gap. |
+| Hard deletion | The old blanket claim is false: table deletion and draft receipt-line deletion exist. Other historical records are intentionally preserved. |
 
-Only the gaps below break the product's own logic during a demo.
-
-### 0. Google sign-in for administrator accounts
-| | |
-|---|---|
-| **Exists today** | The API issues its own JWTs from a local username/password check (`POST /auth/login`, `StaffIdentityEndpoints.cs:82`). Every account — including administrators — depends on a locally hashed password provisioned via CLI. |
-| **Missing** | Any Google/OAuth flow. Administrator accounts cannot be linked to a Google identity. |
-| **Fix** | Add Google authentication to the API (validate a Google ID token with `Microsoft.AspNetCore.Authentication.JwtBearer` + Google's JWKS, or full OAuth via `AddGoogle()`), then link/accept the Google email as the administrator identity when issuing the app's own JWT. On WinUI, replace the password boxes in `LoginWindow` with an interactive browser flow (system browser or WebView2) that returns the Google result to the app. |
-| **Risk note** | This is the largest new item of the week (OAuth client setup, redirect handling in a desktop app). If it threatens the deadline, the fallback is to keep CLI provisioning for the single administrator demo account — the model above still holds because *no staff-facing password feature* is implied either way. |
-
-### 1. Create a staff account from the Windows app (administrator only)
-| | |
-|---|---|
-| **Exists today** | Accounts can be listed, inspected, and deactivated by a `users.manage` administrator — on the API (`GET /users`, `GET /users/{id}`, `POST /users/{id}/deactivate` in `src/CoffeeShop.Api/StaffIdentityEndpoints.cs:106-131`) and in the mobile Administration module (`apps/staff-mobile/src/features/administration/StaffAdministration.tsx`). |
-| **Missing** | **Create a staff account with a role** — the only way to make an account is the CLI provisioning command (`--provision-staff`, `src/CoffeeShop.Api/StaffProvisioning.cs`, run via `docker compose exec` per `README.md` step 3). Roles on an account are displayed read-only and can never be changed. Per the account model above, staff accounts are created **in the Windows app only**; the mobile app keeps its existing view/deactivate administration. |
-| **Inconsistency** | An administrator can *deactivate* staff but cannot *hire* (create) them. Every new employee requires shell access to the server, which no business user has. |
-| **Fix** | Add `POST /users` (username, email, full name, phone, role, initial password) to `StaffIdentityEndpoints.cs` with `users.manage` authorization, reusing the validation and password hashing from `StaffProvisioning.cs`. On the desktop, add a small **Accounts** surface (a new page or an admin-only dialog reachable from the shell) with a "New staff account" form — the WinUI app currently has no staff UI at all, so this is its first administration view. The administrator sets the initial password; no reset feature follows from the account model. |
-
-### 2. Dining table creation
-| | |
-|---|---|
-| **Exists today** | Tables appear throughout the system: the Counter has a table picker (`TableBox` in `src/CoffeeShop.WinUI/Pages/PosPage.xaml:428`), the Service board prints the table number on cards, and the mobile cashier has a read-only "Table occupancy" tab (`GET /api/v1/pos/tables`). |
-| **Missing** | **Create a table** — the API exposes only `GET /tables` and `GET /pos/tables` (`src/CoffeeShop.Api/SalesEndpoints.cs:81-83`); there is no `POST/PUT/DELETE` anywhere. Every table row was inserted by `scripts/postgres/windows-demo-seed.sql:191`. |
-| **Inconsistency** | A fresh/empty database has **zero tables**, so Dine-in ordering is unusable until someone edits SQL. If the shop adds a physical table, the system can never reflect it. |
-| **Fix** | Add `POST /tables` (table number, seats) and optionally `PUT /tables/{id}` to `SalesEndpoints.cs` guarded by an appropriate permission. Surface it as a minimal manager action (e.g., an "Add table" button on the mobile Table occupancy tab or a desktop dialog) — no floor plan needed. |
-
-### 3. Wire the missing stock-room edit actions (API already built)
-| | |
-|---|---|
-| **Exists today** | The API is complete: `POST /ingredients/{id}/deactivate`, `/activate`, `/threshold` and `POST /suppliers/{id}/deactivate`, `/activate` (`src/CoffeeShop.Api/InventoryEndpoints.cs:59-127`). The desktop client methods exist too (`src/CoffeeShop.WinUI/Services/ApiInventorySource.cs:63-69`). |
-| **Missing** | No button calls any of them. Verified: `SetThresholdAsync` and the four activate/deactivate methods have **zero call sites**. The `IngredientDialog` edit mode (threshold-only, `IngredientDialog.xaml.cs:26-35`) is **dead code** — the dialog is only ever constructed in create mode (`StockRoomPage.xaml.cs:568`), so an ingredient's threshold cannot be changed from any UI. The supplier Edit button, by contrast, works correctly in both modes (`StockRoomPage.xaml.cs:746-783`). |
-| **Inconsistency** | The UI pretends ingredient editing exists (a full edit-capable dialog ships in the code) while the actions are unreachable. |
-| **Fix** | In the Stock room: add an ingredient Edit action that opens `IngredientDialog(ingredient)` — the dialog already implements everything, it just needs a caller — plus Deactivate/Activate row actions for ingredients and suppliers, following the Catalog page's existing Deactivate pattern. |
-
----
-
-## Historical detail — full audit
-
-<details>
-<summary>Complete gap inventory (kept for reference)</summary>
-
-### API-level gaps with no client
-- No `POST /users` (create), role assignment, password reset, or reactivation for staff accounts (`StaffIdentityEndpoints.cs:106-131`).
-- No `POST/PUT/DELETE` for dining tables; only `GET /tables` and `GET /pos/tables` (`SalesEndpoints.cs:81-83`).
-- No reservation endpoints at all despite full domain/persistence support (`Reservation.cs`, `ReservationConfiguration.cs`).
-- Payment recording only — no refund or void (`SalesEndpoints.cs:46`).
-- Roles/permissions are static seed bundles; no management endpoints (`StaffIdentityEndpoints.cs:73-77`).
-- No activate/reactivate for categories, menu items, size variants, or addons — deactivate is one-way (`CatalogEndpoints.cs:53,75,82,129`, `Program.cs:167`).
-- No customer/address hard delete or reactivate (`CustomerEndpoints.cs:52,104`).
-- No ingredient update (rename/unit change) (`InventoryEndpoints.cs:39-100`).
-- No supplier get-by-id; no hard delete for any resource.
-- No purchase-receipt header edit or draft delete (`InventoryEndpoints.cs:134-196`).
-- Recipe editing is full-replace only (`CatalogEndpoints.cs:103`).
-- Mobile device registration/revocation is owner-only; no admin list or revoke (`MobileDeviceEndpoints.cs:18-49`).
-
-### UI-level gaps
-- Desktop Stock room never wires the existing deactivate/activate API calls (`ApiInventorySource.cs:66-69`).
-- `IngredientDialog` supports an edit mode that locks name/unit and edits only the threshold (`IngredientDialog.xaml.cs:26-35`) — but it is dead code: the dialog is only constructed in create mode (`StockRoomPage.xaml.cs:568`), so ingredients have no edit action at all. Supplier edit is fully wired and works in both modes (`StockRoomPage.xaml.cs:746-783`).
-- The Service board loads table data but never renders it (`OperationsWorkspace.cs:17,71`); `docs/service-board-ui.md` documents the missing seating overview.
-- Mobile contract features unused by the app: order creation, confirm/preparing/ready/complete, discount requests, loyalty redeem, customer management, ingredient/receipt creation, threshold setting, logout-all (`contracts/mobile-p0/openapi.json`).
-- Reports page has no export; loyalty ledger is display-only with no manual adjustment (`CustomerWorkspace.cs:69`).
-
-</details>
+This file records source-level findings. It does not claim a passing test suite, native UI acceptance, or a completed end-to-end demo.
