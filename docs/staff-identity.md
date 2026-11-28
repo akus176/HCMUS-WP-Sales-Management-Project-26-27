@@ -61,6 +61,10 @@ Existing category writes require `menu.manage`. All named operational permission
 
 Refresh, login, and logout serialize through a PostgreSQL user-row lock. Two requests presenting the same refresh token cannot both rotate successfully: the second observes revocation, rejects reuse, and revokes the successor family. Independent login sessions remain separate families. Security audits contain event type, account identifier where available, time, outcome, and remote IP. Persistence also records account-state and role-assignment changes with identifier-only metadata, in the same save as the change. Passwords and raw tokens are never audit fields.
 
+## Mobile account-wide sign-out (#234)
+
+The staff app keeps ordinary **Sign out** session-scoped and adds a distinct **Sign out everywhere** action under More → Account. The mobile client calls `POST /auth/logout-all` with the current bearer token and only clears its own protected state after a `204`. Duplicate confirmations share one request; a late response cannot clear a newer session; offline, `401`, rejection, network, timeout and unknown outcomes keep the local session and never claim global success. Ordinary sign-out still works offline and never calls the account-wide route. Access tokens already issued to other devices keep their existing short expiry, so the action revokes refresh families rather than promising immediate JWT invalidation.
+
 Deactivation and password-hash changes revoke every refresh family atomically with the account update, under the same user-row lock. Reactivation cannot restore a previously revoked session.
 
 The administrator creation endpoint assigns one of the six seeded operational roles, hashes the initial password, and records `account_created` with the creator's ID and target account ID. Neither the response nor security-event query exposes the password or hash. The active identity spec still requires profile/role update and reactivation; issue #228 implements creation only, and its audit proposal about password reset does not remove those requirements. Windows 10.6 stays open until those remaining administration operations are implemented and verified.
