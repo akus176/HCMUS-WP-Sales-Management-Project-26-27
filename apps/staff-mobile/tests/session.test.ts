@@ -484,6 +484,42 @@ test('a late account-wide response cannot clear a newer session', async () => {
   expect(h.clearData).not.toHaveBeenCalled();
 });
 
+test('account-wide logout treats an offline token renewal as uncertain', async () => {
+  const nearExpiry = {
+    ...pair(),
+    expiresAt: new Date(Date.now() + 10_000).toISOString(),
+  };
+  let saved: string | null = null;
+  const storage = {
+    get: async () => saved,
+    set: jest.fn(async (value: string) => {
+      saved = value;
+    }),
+    remove: jest.fn(async () => {
+      saved = null;
+    }),
+  };
+  const clearData = jest.fn();
+  const client = createSessionClient({
+    origin: 'https://staff.example',
+    storage,
+    clearData,
+    fetch: (async (request: Request) => {
+      if (request.url.endsWith('/auth/login')) return json(nearExpiry);
+      if (request.url.endsWith('/auth/refresh')) throw new Error('offline');
+      return json(user);
+    }) as typeof fetch,
+  });
+  await client.login('staff', 'fixture-password');
+  clearData.mockClear();
+  await expect(client.logoutAll()).rejects.toMatchObject({
+    name: 'AccountWideLogoutError',
+    reason: 'uncertain',
+  });
+  expect(client.getSnapshot().status).toBe('signedIn');
+  expect(clearData).not.toHaveBeenCalled();
+});
+
 test('confirmed account-wide logout reports saved-token cleanup failure', async () => {
   const h = harness(async (request) =>
     request.url.endsWith('/auth/logout-all')
