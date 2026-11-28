@@ -32,6 +32,63 @@ The application SHALL authenticate individual active staff accounts through the 
 - **WHEN** session renewal fails because the refresh token is expired, revoked, reused, or otherwise invalid
 - **THEN** the application clears the session and requires the staff member to authenticate again without exposing protected data
 
+### Requirement: Ordinary device sign-out
+
+The application SHALL provide ordinary device sign-out. When the service is reachable it SHALL revoke only the presented refresh family, and it SHALL clear local protected state even when offline.
+
+#### Scenario: Staff cancels ordinary sign-out
+
+- **WHEN** staff open the ordinary sign-out confirmation and cancel
+- **THEN** no revocation request is sent and the current session remains usable
+
+#### Scenario: Staff signs out offline
+
+- **WHEN** staff confirm ordinary sign-out without connectivity
+- **THEN** the application clears local credentials and protected caches and does not queue or claim a server-side revocation
+
+### Requirement: Account-wide sign-out
+
+The application SHALL provide a distinct account-wide sign-out action under Account. It MUST claim success only after a confirmed `204`, clear the initiating device's protected state after confirmation, and preserve the session for offline, rejected, network, timeout or uncertain outcomes without automatic replay. Already-issued access tokens retain their natural expiry.
+
+#### Scenario: Staff cancels account-wide sign-out
+
+- **WHEN** staff choose **Sign out everywhere** under Account and cancel the confirmation
+- **THEN** no account-wide revocation is sent and the current session and protected data remain available
+
+#### Scenario: Account-wide revocation is not confirmed
+
+- **WHEN** account-wide sign-out is offline, rejected, unauthorized, times out, or otherwise cannot be confirmed
+- **THEN** the application reports the accurate outcome, preserves the local session when its credentials remain valid, and does not replay the mutation automatically
+
+#### Scenario: Account-wide revocation succeeds
+
+- **WHEN** the service confirms account-wide revocation with `204`
+- **THEN** the application removes this device's push registration where possible, aborts in-flight work, clears cached protected data and the saved refresh token, and returns to sign-in without claiming immediate access-token invalidation
+
+#### Scenario: A newer session starts during revocation
+
+- **WHEN** a newer sign-in replaces the session before an account-wide response completes
+- **THEN** the late completion does not clear the newer session's credentials, caches or device registration
+
+### Requirement: Persistent permission-derived navigation
+
+The application SHALL present a persistent permission-derived bottom navigation with Today, permitted Counter and Preparation destinations, and More. More SHALL contain Account only. Mounted workspaces SHALL retain their filters, pagination, selection, scroll position and safe unsaved input across warm switches. Inactive content MUST be hidden from accessibility, and fresh permission checks MUST precede revealing retained work; revoked workspace trees SHALL be discarded.
+
+#### Scenario: Staff switches warm workspaces
+
+- **WHEN** staff move between Today, Counter and Preparation without restarting the app
+- **THEN** each mounted workspace retains its search, filter, paging, selection and scroll state while inactive content is hidden from assistive technology
+
+#### Scenario: Permission is revoked while work is retained
+
+- **WHEN** fresh access verification removes a retained workspace permission
+- **THEN** that workspace and its cached operational data are removed before the app reveals the updated navigation
+
+#### Scenario: Staff opens personal actions
+
+- **WHEN** staff open More and Account
+- **THEN** they find connection details and both ordinary and account-wide sign-out actions, with operational tabs unchanged
+
 ### Requirement: Permission-aware mobile experience
 
 The application SHALL derive Counter and Preparation availability and their actions from effective permissions, regardless of role name, and MUST treat API authorization as authoritative. Today and More/Account SHALL remain the personal navigation surfaces. More SHALL contain Account only. A role without a selected operational permission SHALL NOT receive a retired workspace.
@@ -123,7 +180,7 @@ The current mobile release SHALL NOT expose discount approval/rejection, invento
 
 ### Requirement: Device notification lifecycle
 
-The app SHALL register and rotate device tokens for the authenticated owner, attempt removal on logout, handle notification permission denial without blocking core workflows and support invalid-token cleanup through the existing backend.
+The app SHALL register and rotate device tokens for the authenticated owner, attempt removal on ordinary or account-wide sign-out, handle notification permission denial without blocking core workflows and support invalid-token cleanup through the existing backend.
 
 #### Scenario: Notification permission is denied
 
@@ -173,7 +230,7 @@ The application MUST store session secrets using platform-protected storage, MUS
 
 #### Scenario: Staff member logs out
 
-- **WHEN** a staff member logs out
+- **WHEN** a staff member signs out this device or confirms account-wide sign-out
 - **THEN** the application removes tokens and locally retained protected business data before returning to the login screen
 
 ### Requirement: Accessible responsive interface

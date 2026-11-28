@@ -32,6 +32,7 @@ Android coverage and @longtoZ approval before closure.
 - Direct database access, offline write synchronization, or conflict merging.
 - Replacing the full desktop POS, menu/recipe editor, reporting suite, AI assistant, or role-configuration interface.
 - Employee scheduling, payroll, multi-branch support, customer self-service, third-party delivery integration, or background location tracking.
+- Immediate access-token/JWT revocation or a remote session inventory; account-wide sign-out revokes refresh families while existing access tokens retain their short natural expiry.
 - Committing generated credentials, signing secrets, production push keys, or environment-specific API addresses.
 
 ## Decisions
@@ -66,6 +67,8 @@ Do not create a general Redux-style duplicate of backend entities. Maintaining a
 
 Keep the short-lived access token in memory and the refresh token in Expo SecureStore. Serialize refresh attempts so simultaneous `401` responses cannot rotate the same refresh token more than once. On terminal refresh failure, account deactivation, logout, or token-reuse response, clear tokens, query caches, protected navigation history, and retained business data.
 
+Ordinary **Sign out** remains device-scoped: it revokes the presented refresh family when reachable and can clear local state offline. The distinct **Sign out everywhere** action under Account calls `POST /api/v1/auth/logout-all`, requires a confirmed `204`, clears the initiating device's protected state only after confirmation, and preserves the session for offline, rejected, network, timeout, or uncertain outcomes. Duplicate confirmations share one request; a late response cannot clear a newer session; the mutation is never replayed automatically. Already-issued access tokens retain their natural expiry.
+
 AsyncStorage and plain application configuration were rejected for tokens because neither provides an appropriate protected credential boundary.
 
 ### 6. Combine authenticated live events with push notifications
@@ -86,17 +89,19 @@ Persistent offline business caching and queued synchronization were rejected bec
 
 The authenticated root derives accessible route groups from effective permission codes, not hard-coded role-name checks. Active feature folders own Counter and Preparation queries, mutations, validation and tests. Retired modules may remain as historical source but are unavailable through navigation and guarded routes. Deep-link guards resolve current permissions before fetching or rendering protected content.
 
+The current shell uses a persistent permission-derived bottom bar with Today, permitted Counter/Preparation destinations and More. More contains Account only. Mounted workspaces retain their scroll, filters, selection and unsaved form state across warm switches; inactive content is hidden from accessibility, fresh server grants are checked before retained work is revealed, and revoked workspace trees are discarded. Account owns connection details, ordinary device sign-out and account-wide sign-out.
+
 The server remains authoritative; client route guards improve usability but are never treated as security enforcement.
 
 ### 9. Adapt the existing visual language for mobile operations
 
-Implement shared mobile theme tokens matching the existing warm-paper palette, pencil foreground, red correction accent, blue informational accent, yellow highlights, and bundled Inter typography from the selected native redesign. Reduce rotation and decoration on dense operational lists, use stable irregular shapes rather than layout-time randomness, and keep functional icons conventional and labeled.
+Implement shared mobile theme tokens matching the existing warm-paper palette, pencil foreground, red correction accent, blue informational accent, yellow highlights, and bundled Inter typography from the selected native redesign. The current presentation uses permission-derived bottom navigation, warm off-white backgrounds, white record cards, 20-dp page padding, 12-dp corners, original vector icons, focused record/detail views and scrollable confirmation sheets. Reduce rotation and decoration on dense operational lists, use stable irregular shapes rather than layout-time randomness, and keep functional icons conventional and labeled.
 
 Use portrait-first layouts, responsive tablet composition, minimum 48-dp action targets, dynamic type, screen-reader labels, and contrast checks. Reproducing WinUI XAML components directly was rejected; the clients share design intent and tokens, not platform widgets.
 
 ### 10. Test contracts and critical workflows at multiple boundaries
 
-Use unit and component tests for permissions, validation, error mapping, and screen behavior; mock API transport at the generated-client boundary. Use API integration tests for mobile-required queries, device registration, hub authorization, and permission filtering. Use mobile end-to-end tests for login, Counter save/confirm/customer/adjustment/payment, manager cancellation/assignment, Preparation progression, urgent Preparation links, offline protection and logout cleanup.
+Use unit and component tests for permissions, validation, error mapping, and screen behavior; mock API transport at the generated-client boundary. Use API integration tests for mobile-required queries, device registration, hub authorization, and permission filtering. Use mobile end-to-end tests for login, Counter save/confirm/customer/adjustment/payment, manager cancellation/assignment, Preparation progression, urgent Preparation links, offline protection, retained workspace navigation, ordinary sign-out and account-wide sign-out cleanup.
 
 CI builds the Android application, validates TypeScript and lint rules, runs unit tests, checks generated-client drift, and runs backend tests. Device-dependent push delivery can use a provider fake in CI plus a documented real-device verification before release.
 
@@ -124,7 +129,7 @@ cannot be inferred from a checked old task or a green CI build.
 1. Scaffold `apps/staff-mobile` with pinned tooling, environment validation, theme tokens, navigation, and test harnesses.
 2. Establish deterministic OpenAPI client generation and implement authenticated API transport with secure token rotation.
 3. Add missing backend read endpoints, device registration, and the authenticated operational event hub behind existing permission policies.
-4. Keep the Counter + Preparation layout, reconcile current scope and operation descriptions, and verify selected Counter/manager/device/notification flows under #206.
-5. Add push registration, deep links, reconnect behavior, privacy cleanup, accessibility verification, and end-to-end tests.
+4. Keep the Counter + Preparation layout, apply the approved native redesign and retained permission-derived navigation, reconcile current scope and operation descriptions, and verify selected Counter/manager/device/notification flows under #206.
+5. Implement ordinary device sign-out and account-wide sign-out with current failure/race protection, then add push registration, deep links, reconnect behavior, privacy cleanup, accessibility verification, and end-to-end tests.
 6. Run Android internal testing against a staging-like API, validate multi-client synchronization with WinUI, and document physical-device network configuration.
 7. Release behind an environment/configuration gate. Roll back by withdrawing the mobile build and disabling mobile device registrations/hub access; the shared API and WinUI workflows continue operating without mobile data migration.
