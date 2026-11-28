@@ -33,7 +33,7 @@ scope does not promise durable offline carts or automatic write replay.
 | Mobile 4.3: mobile discount approval/rejection inbox                               | Out of Scope; WinUI retains the workflow. Discount requests remain in Counter.                          |
 | Mobile 4.4: stock balances, low stock, adjustment and movement screens             | Out of Scope; WinUI retains the workflow. Counter confirmation still uses server stock rules.           |
 | Mobile 4.5: courier assignments, navigation and delivery outcomes                  | Out of Scope; WinUI/shared API retain the workflow. Retired mobile links must not expose customer data. |
-| Mobile 5.5: staff account administration and security-event screens                | Out of Scope; Account contains the signed-in user's session/connection/sign-out controls only.          |
+| Mobile 5.5: staff account administration and security-event screens                | Out of Scope; Account contains the signed-in user's session, connection, device sign-out and account-wide sign-out controls only. |
 | Mobile 5.6: purchase-receipt review/posting                                        | Out of Scope; WinUI retains receipt and stock movement workflows.                                       |
 | Standalone Tables tab / whole-shop occupancy overview                              | Out of Scope; dine-in selects from available tables in the ticket form.                                 |
 | Approval, low-stock or courier notification destinations                           | Out of Scope; only urgent Preparation destinations are selected for mobile.                             |

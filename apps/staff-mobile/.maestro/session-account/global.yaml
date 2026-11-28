@@ -1,0 +1,21 @@
+appId: com.coffeeshop.staffmobile
+name: Confirmed account-wide sign-out clears this device
+---
+- runFlow: ../common/login.yaml
+- runFlow: ../common/open-account.yaml
+- scrollUntilVisible:
+    element: 'Sign out everywhere'
+    direction: DOWN
+- tapOn: '^Sign out everywhere$'
+- assertVisible: 'Sign out everywhere?'
+- tapOn: '^Confirm sign out everywhere$'
+- extendedWaitUntil:
+    visible: 'Staff sign-in'
+    timeout: 30000
+- assertNotVisible: ${MAESTRO_STAFF_NAME}
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: 'Staff sign-in'
+    timeout: 30000
+- assertNotVisible: ${MAESTRO_STAFF_NAME}

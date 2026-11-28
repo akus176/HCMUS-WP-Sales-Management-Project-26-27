@@ -767,20 +767,44 @@ public sealed class StaffIdentityHttpTests : IAsyncLifetime
         using var client = host!.CreateClient();
         var first = await LoginAsync(client);
         var second = await LoginAsync(client);
-        var other = await LoginAsync(client, "Manager");
+        var otherOne = await LoginAsync(client, "Manager");
+        var otherTwo = await LoginAsync(client, "Manager");
+
+        using var anonymous = host.CreateClient();
+        using var unauthenticated = await anonymous.PostAsync("/api/v1/auth/logout-all", null);
+        Assert.Equal(HttpStatusCode.Unauthorized, unauthenticated.StatusCode);
+
         client.DefaultRequestHeaders.Authorization = new("Bearer", first.AccessToken);
-        using var wrongOwner = await client.PostAsJsonAsync("/api/v1/auth/logout", new RefreshRequest(other.RefreshToken));
+        using var wrongOwner = await client.PostAsJsonAsync("/api/v1/auth/logout", new RefreshRequest(otherOne.RefreshToken));
         Assert.Equal(HttpStatusCode.Unauthorized, wrongOwner.StatusCode);
+
+        // Ordinary logout revokes only the presented family.
         using var logout = await client.PostAsJsonAsync("/api/v1/auth/logout", new RefreshRequest(first.RefreshToken));
         Assert.Equal(HttpStatusCode.NoContent, logout.StatusCode);
-        using var denied = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(first.RefreshToken));
-        Assert.Equal(HttpStatusCode.Unauthorized, denied.StatusCode);
+        using var firstDenied = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(first.RefreshToken));
+        Assert.Equal(HttpStatusCode.Unauthorized, firstDenied.StatusCode);
+        TokenResponse secondRotated;
+        using (var secondOk = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(second.RefreshToken)))
+        {
+            Assert.Equal(HttpStatusCode.OK, secondOk.StatusCode);
+            secondRotated = (await secondOk.Content.ReadFromJsonAsync<TokenResponse>())!;
+        }
+        TokenResponse otherRotated;
+        using (var otherStillOk = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(otherOne.RefreshToken)))
+        {
+            Assert.Equal(HttpStatusCode.OK, otherStillOk.StatusCode);
+            otherRotated = (await otherStillOk.Content.ReadFromJsonAsync<TokenResponse>())!;
+        }
+
+        // Account-wide logout revokes every refresh family for the acting account only.
         using var all = await client.PostAsync("/api/v1/auth/logout-all", null);
         Assert.Equal(HttpStatusCode.NoContent, all.StatusCode);
-        using var secondDenied = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(second.RefreshToken));
+        using var secondDenied = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(secondRotated.RefreshToken));
         Assert.Equal(HttpStatusCode.Unauthorized, secondDenied.StatusCode);
-        using var otherOk = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(other.RefreshToken));
-        Assert.Equal(HttpStatusCode.OK, otherOk.StatusCode);
+        using var otherOneOk = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(otherRotated.RefreshToken));
+        Assert.Equal(HttpStatusCode.OK, otherOneOk.StatusCode);
+        using var otherTwoOk = await client.PostAsJsonAsync("/api/v1/auth/refresh", new RefreshRequest(otherTwo.RefreshToken));
+        Assert.Equal(HttpStatusCode.OK, otherTwoOk.StatusCode);
     }
 
     [PostgresFact]

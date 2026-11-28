@@ -1,0 +1,26 @@
+appId: com.coffeeshop.staffmobile
+name: Offline disables account-wide sign-out but keeps device sign-out
+---
+- runFlow: ../common/login.yaml
+- runFlow: ../common/open-account.yaml
+- scrollUntilVisible:
+    element: 'Sign out everywhere'
+    direction: DOWN
+- setAirplaneMode: enabled
+- extendedWaitUntil:
+    visible: 'Offline.*'
+    timeout: 30000
+- assertVisible: 'Reconnect to sign out everywhere.'
+- assertVisible:
+    text: '^Sign out everywhere$'
+    enabled: false
+- assertVisible:
+    text: '^Sign out$'
+    enabled: true
+- setAirplaneMode: disabled
+- extendedWaitUntil:
+    visible:
+      text: '^Sign out everywhere$'
+      enabled: true
+    timeout: 30000
+- assertVisible: ${MAESTRO_STAFF_NAME}

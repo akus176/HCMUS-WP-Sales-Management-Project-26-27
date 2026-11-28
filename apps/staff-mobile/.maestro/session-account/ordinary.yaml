@@ -1,0 +1,16 @@
+appId: com.coffeeshop.staffmobile
+name: Ordinary sign-out stays session-scoped
+---
+- runFlow: ../common/login.yaml
+- runFlow: ../common/open-account.yaml
+- scrollUntilVisible:
+    element: 'Sign out'
+    direction: DOWN
+- tapOn: '^Sign out$'
+- assertVisible: 'Sign out of this device?'
+- assertNotVisible: '^Confirm sign out everywhere$'
+- tapOn: '^Confirm sign out$'
+- extendedWaitUntil:
+    visible: 'Staff sign-in'
+    timeout: 30000
+- assertNotVisible: ${MAESTRO_STAFF_NAME}

@@ -1,0 +1,14 @@
+appId: com.coffeeshop.staffmobile
+name: Cancel account-wide sign-out without a request
+---
+- runFlow: ../common/login.yaml
+- runFlow: ../common/open-account.yaml
+- scrollUntilVisible:
+    element: 'Sign out everywhere'
+    direction: DOWN
+- tapOn: '^Sign out everywhere$'
+- assertVisible: 'Sign out everywhere?'
+- assertVisible: '^Confirm sign out everywhere$'
+- tapOn: '^Cancel$'
+- assertNotVisible: '^Confirm sign out everywhere$'
+- assertVisible: ${MAESTRO_STAFF_NAME}

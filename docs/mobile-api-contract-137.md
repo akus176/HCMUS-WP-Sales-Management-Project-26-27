@@ -25,6 +25,19 @@ Bearer JWT, expires in ten minutes, and does not carry the permission list.
 Refresh tokens rotate and are never sent in a URL. Auth responses set
 `Cache-Control: no-store`. No client-supplied actor ID is authoritative.
 
+### Mobile session actions (#234)
+
+The staff app keeps ordinary **Sign out** for the current device and exposes a
+separate **Sign out everywhere** action under More → Account. Ordinary sign-out
+uses `POST /api/v1/auth/logout` with the saved refresh token and can clear local
+state while offline. Account-wide sign-out uses `POST /api/v1/auth/logout-all`
+with the current bearer token and MUST treat only `204` as confirmation. On
+confirmation the app clears its own protected state; offline, `401`, rejection,
+network, timeout and unknown outcomes keep the local session and are reported
+without claiming global success. `logout-all` revokes every refresh family for
+the authenticated account, but already-issued access tokens retain the existing
+natural expiry; immediate JWT invalidation is not part of this contract.
+
 ## P0 route and DTO decisions for #142
 
 The mobile P0 contract uses `PageResponse<T>` with `items`, `page`,
