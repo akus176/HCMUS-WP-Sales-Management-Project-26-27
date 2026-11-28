@@ -330,6 +330,175 @@ test('logout stays locally cleared if server revocation is unavailable', async (
   await h.client.logout();
   expect(h.saved()).toBeNull();
   expect(h.client.getSnapshot().user).toBeNull();
+  expect(
+    h.fetcher.mock.calls.some(([request]) =>
+      request.url.endsWith('/auth/logout-all'),
+    ),
+  ).toBe(false);
+});
+
+test('account-wide logout confirms server revocation before clearing protected state', async () => {
+  const h = harness(async (request) =>
+    request.url.endsWith('/auth/logout-all')
+      ? new Response(null, { status: 204 })
+      : json(user),
+  );
+  await h.client.login('staff', 'fixture-password');
+  h.clearData.mockClear();
+  await h.client.logoutAll();
+  const revocation = h.fetcher.mock.calls
+    .map(([request]) => request)
+    .filter((request) => request.url.endsWith('/auth/logout-all'));
+  expect(revocation).toHaveLength(1);
+  expect(revocation[0]!.url).toBe(
+    'https://staff.example/api/v1/auth/logout-all',
+  );
+  expect(revocation[0]!.headers.get('Authorization')).toBe(
+    `Bearer ${pair().accessToken}`,
+  );
+  expect(h.client.getSnapshot()).toEqual({ status: 'signedOut', user: null });
+  expect(h.saved()).toBeNull();
+  expect(h.clearData).toHaveBeenCalledTimes(1);
+});
+
+test.each([
+  [401, 'unauthorized'],
+  [403, 'rejected'],
+  [409, 'rejected'],
+  [500, 'uncertain'],
+  [503, 'uncertain'],
+])(
+  'account-wide logout keeps the session for status %s',
+  async (status, reason) => {
+    const h = harness(async (request) =>
+      request.url.endsWith('/auth/logout-all') ? json({}, status) : json(user),
+    );
+    await h.client.login('staff', 'fixture-password');
+    h.clearData.mockClear();
+    await expect(h.client.logoutAll()).rejects.toMatchObject({
+      name: 'AccountWideLogoutError',
+      reason,
+    });
+    expect(h.client.getSnapshot().status).toBe('signedIn');
+    expect(h.saved()).toBe(pair().refreshToken);
+    expect(h.clearData).not.toHaveBeenCalled();
+    expect(
+      h.fetcher.mock.calls.filter(([request]) =>
+        request.url.endsWith('/auth/logout-all'),
+      ),
+    ).toHaveLength(1);
+  },
+);
+
+test('account-wide logout keeps the session and does not replay after a network failure', async () => {
+  const h = harness(async (request) => {
+    if (request.url.endsWith('/auth/logout-all')) throw new Error('offline');
+    return json(user);
+  });
+  await h.client.login('staff', 'fixture-password');
+  h.clearData.mockClear();
+  await expect(h.client.logoutAll()).rejects.toMatchObject({
+    name: 'AccountWideLogoutError',
+    reason: 'uncertain',
+  });
+  expect(h.client.getSnapshot().status).toBe('signedIn');
+  expect(h.saved()).toBe(pair().refreshToken);
+  expect(h.clearData).not.toHaveBeenCalled();
+  expect(
+    h.fetcher.mock.calls.filter(([request]) =>
+      request.url.endsWith('/auth/logout-all'),
+    ),
+  ).toHaveLength(1);
+});
+
+test('account-wide logout times out without clearing the session', async () => {
+  const entered = deferred<void>();
+  const h = harness(async (request) => {
+    if (!request.url.endsWith('/auth/logout-all')) return json(user);
+    entered.resolve();
+    return new Promise<Response>((_resolve, reject) => {
+      request.signal.addEventListener('abort', () =>
+        reject(new Error('aborted')),
+      );
+    });
+  });
+  await h.client.login('staff', 'fixture-password');
+  h.clearData.mockClear();
+  jest.useFakeTimers();
+  try {
+    const pending = h.client.logoutAll();
+    await entered.promise;
+    jest.advanceTimersByTime(10_000);
+    await expect(pending).rejects.toMatchObject({
+      name: 'AccountWideLogoutError',
+      reason: 'uncertain',
+    });
+  } finally {
+    jest.useRealTimers();
+  }
+  expect(h.client.getSnapshot().status).toBe('signedIn');
+  expect(h.saved()).toBe(pair().refreshToken);
+  expect(h.clearData).not.toHaveBeenCalled();
+});
+
+test('duplicate account-wide confirmations share one request', async () => {
+  const entered = deferred<void>();
+  const release = deferred<void>();
+  let requests = 0;
+  const h = harness(async (request) => {
+    if (!request.url.endsWith('/auth/logout-all')) return json(user);
+    requests++;
+    entered.resolve();
+    await release.promise;
+    return new Response(null, { status: 204 });
+  });
+  await h.client.login('staff', 'fixture-password');
+  const first = h.client.logoutAll();
+  const second = h.client.logoutAll();
+  expect(second).toBe(first);
+  await entered.promise;
+  release.resolve();
+  await Promise.all([first, second]);
+  expect(requests).toBe(1);
+  expect(h.client.getSnapshot()).toEqual({ status: 'signedOut', user: null });
+});
+
+test('a late account-wide response cannot clear a newer session', async () => {
+  const entered = deferred<void>();
+  const release = deferred<void>();
+  const h = harness(async (request) => {
+    if (!request.url.endsWith('/auth/logout-all')) return json(user);
+    entered.resolve();
+    await release.promise;
+    return new Response(null, { status: 204 });
+  });
+  await h.client.login('staff', 'fixture-password');
+  const pending = h.client.logoutAll();
+  await entered.promise;
+  await h.client.login('staff', 'fixture-password');
+  h.clearData.mockClear();
+  release.resolve();
+  await pending;
+  expect(h.client.getSnapshot().status).toBe('signedIn');
+  expect(h.saved()).toBe(pair().refreshToken);
+  expect(h.clearData).not.toHaveBeenCalled();
+});
+
+test('confirmed account-wide logout reports saved-token cleanup failure', async () => {
+  const h = harness(async (request) =>
+    request.url.endsWith('/auth/logout-all')
+      ? new Response(null, { status: 204 })
+      : json(user),
+  );
+  await h.client.login('staff', 'fixture-password');
+  h.storage.remove = jest.fn(async () => {
+    throw new Error('secure store unavailable');
+  });
+  await expect(h.client.logoutAll()).rejects.toMatchObject({
+    name: 'AccountWideLogoutError',
+    reason: 'storage',
+  });
+  expect(h.client.getSnapshot()).toEqual({ status: 'signedOut', user: null });
 });
 
 test('API configuration rejects invalid values without echoing them', () => {

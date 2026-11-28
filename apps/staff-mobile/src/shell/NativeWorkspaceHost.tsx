@@ -1,6 +1,6 @@
 import { Activity, useLayoutEffect, useState } from 'react';
 import { Alert, BackHandler, StyleSheet, Text, View } from 'react-native';
-import type { StaffSession } from '../session/session';
+import { AccountWideLogoutError, type StaffSession } from '../session/session';
 import { useSession } from '../session/context';
 import { useConnectivity } from '../connectivity/connectivity';
 import { PreparationScreen } from '../barista/PreparationScreen';
@@ -10,6 +10,7 @@ import { isWorkspaceAllowed, type Workspace } from './navigationPolicy';
 import { StaffHome } from './StaffHome';
 import {
   ShellButton,
+  ShellFeedback,
   ShellPage,
   ShellPageHeader,
   ShellSheet,
@@ -117,10 +118,37 @@ function MoreWorkspaces() {
 function Account({ user }: { user: StaffSession }) {
   const navigation = useNativeNavigation();
   const { client } = useSession();
-  const { status, refreshConnection } = useConnectivity();
+  const { status, canMutate, refreshConnection } = useConnectivity();
   const [connection, setConnection] = useState(false);
   const [signout, setSignout] = useState(false);
+  const [signoutAll, setSignoutAll] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [busyAll, setBusyAll] = useState(false);
+  const [signoutAllError, setSignoutAllError] = useState<string | null>(null);
+  const closeSignoutAll = () => {
+    if (busyAll) return;
+    setSignoutAll(false);
+    setSignoutAllError(null);
+  };
+  const confirmSignoutAll = () => {
+    if (!client || busyAll) return;
+    if (!canMutate) {
+      setSignoutAllError('Connect to the internet to sign out everywhere.');
+      return;
+    }
+    setBusyAll(true);
+    setSignoutAllError(null);
+    void client
+      .logoutAll()
+      .catch((error) =>
+        setSignoutAllError(
+          error instanceof AccountWideLogoutError
+            ? error.message
+            : 'Signing out everywhere could not be confirmed. Check your connection and try again.',
+        ),
+      )
+      .finally(() => setBusyAll(false));
+  };
   return (
     <>
       <ShellPageHeader
@@ -160,6 +188,24 @@ function Account({ user }: { user: StaffSession }) {
         variant="secondary"
         onPress={() => setSignout(true)}
       />
+      <View style={styles.action}>
+        <ShellButton
+          label="Sign out everywhere"
+          variant="secondary"
+          disabled={!canMutate || busy || busyAll}
+          onPress={() => {
+            setSignoutAllError(null);
+            setSignoutAll(true);
+          }}
+        />
+        <Text style={styles.caption}>
+          {status === 'checking'
+            ? 'Checking connection…'
+            : canMutate
+              ? 'Ends your session on every device, including this one.'
+              : 'Reconnect to sign out everywhere.'}
+        </Text>
+      </View>
       <ShellSheet
         visible={connection}
         title="Connection"
@@ -204,6 +250,38 @@ function Account({ user }: { user: StaffSession }) {
           onPress={() => setSignout(false)}
         />
       </ShellSheet>
+      <ShellSheet
+        visible={signoutAll}
+        title="Sign out everywhere?"
+        busy={busyAll}
+        onClose={closeSignoutAll}
+      >
+        <ShellText>
+          This ends your session on every device, including this one. You will
+          need to sign in again.
+        </ShellText>
+        {!canMutate && (
+          <ShellFeedback
+            kind="warning"
+            label="Reconnect to sign out everywhere."
+          />
+        )}
+        {!!signoutAllError && (
+          <ShellFeedback kind="error" label={signoutAllError} />
+        )}
+        <ShellButton
+          label="Confirm sign out everywhere"
+          loading={busyAll}
+          disabled={!canMutate || busyAll}
+          onPress={confirmSignoutAll}
+        />
+        <ShellButton
+          label="Cancel"
+          variant="secondary"
+          disabled={busyAll}
+          onPress={closeSignoutAll}
+        />
+      </ShellSheet>
     </>
   );
 }
@@ -233,4 +311,5 @@ const styles = StyleSheet.create({
     backgroundColor: t.color.surface,
     borderRadius: 12,
   },
+  action: { gap: 6 },
 });

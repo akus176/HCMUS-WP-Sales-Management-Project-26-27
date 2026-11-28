@@ -12,7 +12,7 @@ export const user = {
 export const pair = (suffix = 'a') => ({
   accessToken: `fixture-access-${suffix}`,
   refreshToken: `fixture-refresh-${suffix}`,
-  expiresAt: '2026-11-04T17:00:00Z',
+  expiresAt: '2099-01-01T00:00:00Z',
   user,
 });
 export function json(body: unknown, status = 200) {

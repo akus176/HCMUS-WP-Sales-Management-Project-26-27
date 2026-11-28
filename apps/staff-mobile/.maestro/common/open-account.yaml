@@ -1,0 +1,7 @@
+appId: com.coffeeshop.staffmobile
+---
+- tapOn: '^More$'
+- scrollUntilVisible:
+    element: 'Open Account'
+    direction: DOWN
+- tapOn: '^Open Account$'

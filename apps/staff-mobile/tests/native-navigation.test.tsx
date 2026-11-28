@@ -5,6 +5,7 @@ import { SessionRoutes } from '../app/_layout';
 import StarterScreen from '../app/index';
 import SessionScreen from '../app/session';
 import { SessionProvider } from '../src/session/context';
+import { getNetworkStateAsync } from '../src/connectivity/networkAdapter';
 import { harness, json, user } from './helpers';
 import { QueryCleanup } from './query-cleanup';
 
@@ -32,6 +33,12 @@ beforeEach(() => {
       };
     });
 });
+afterEach(() => {
+  (getNetworkStateAsync as jest.Mock).mockResolvedValue({
+    isConnected: true,
+    isInternetReachable: true,
+  });
+});
 
 const grants = [
   'orders.create',
@@ -42,12 +49,19 @@ const grants = [
   'users.manage',
   'delivery.update',
 ];
-async function setup(permissions = grants) {
+async function setup(
+  permissions = grants,
+  fault?: (path: string) => Response | undefined,
+) {
   let effective = permissions;
   const h = harness(async (request) => {
     const path = new URL(request.url).pathname;
+    const injected = fault?.(path);
+    if (injected) return injected;
     if (path.endsWith('/auth/me'))
       return json({ ...user, permissions: effective });
+    if (path.endsWith('/auth/logout-all'))
+      return new Response(null, { status: 204 });
     if (path.endsWith('/orders') || path.endsWith('/pos/tables'))
       return json([]);
     if (path.endsWith('/preparation-tickets'))
@@ -200,6 +214,96 @@ test('sign-out can be canceled in Account without losing the active session', as
   expect(
     h.fetcher.mock.calls.some(([r]) => r.url.endsWith('/auth/logout')),
   ).toBe(false);
+});
+
+test('account-wide sign-out can be canceled without sending a request', async () => {
+  const h = await setup(['orders.fulfill']);
+  await fireEvent.press(screen.getByRole('tab', { name: 'More' }));
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Open Account' }),
+  );
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Sign out everywhere' }),
+  );
+  expect(await screen.findByText('Sign out everywhere?')).toBeVisible();
+  await fireEvent.press(screen.getByRole('button', { name: 'Cancel' }));
+  expect(
+    screen.queryByRole('button', { name: 'Confirm sign out everywhere' }),
+  ).toBeNull();
+  expect(h.client.getSnapshot().status).toBe('signedIn');
+  expect(
+    h.fetcher.mock.calls.some(([r]) => r.url.endsWith('/auth/logout-all')),
+  ).toBe(false);
+});
+
+test('confirmed account-wide sign-out clears the session without ordinary logout', async () => {
+  const h = await setup(['orders.fulfill']);
+  await fireEvent.press(screen.getByRole('tab', { name: 'More' }));
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Open Account' }),
+  );
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Sign out everywhere' }),
+  );
+  await fireEvent.press(
+    await screen.findByRole('button', {
+      name: 'Confirm sign out everywhere',
+    }),
+  );
+  await waitFor(() => expect(h.client.getSnapshot().status).toBe('signedOut'));
+  expect(
+    h.fetcher.mock.calls.filter(([r]) => r.url.endsWith('/auth/logout-all')),
+  ).toHaveLength(1);
+  expect(
+    h.fetcher.mock.calls.some(([r]) => r.url.endsWith('/auth/logout')),
+  ).toBe(false);
+});
+
+test('failed account-wide sign-out keeps the session and shows an accurate error', async () => {
+  const h = await setup(['orders.fulfill'], (path) =>
+    path.endsWith('/auth/logout-all') ? json({}, 500) : undefined,
+  );
+  await fireEvent.press(screen.getByRole('tab', { name: 'More' }));
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Open Account' }),
+  );
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Sign out everywhere' }),
+  );
+  await fireEvent.press(
+    await screen.findByRole('button', {
+      name: 'Confirm sign out everywhere',
+    }),
+  );
+  expect(
+    await screen.findByText(
+      'Signing out everywhere could not be confirmed. Check your connection and try again.',
+    ),
+  ).toBeVisible();
+  expect(h.client.getSnapshot().status).toBe('signedIn');
+  expect(
+    screen.getByRole('button', { name: 'Confirm sign out everywhere' }),
+  ).toBeEnabled();
+});
+
+test('offline disables only account-wide sign-out', async () => {
+  (getNetworkStateAsync as jest.Mock).mockResolvedValue({
+    isConnected: false,
+    isInternetReachable: false,
+  });
+  const h = await setup(['orders.fulfill']);
+  await fireEvent.press(screen.getByRole('tab', { name: 'More' }));
+  await fireEvent.press(
+    await screen.findByRole('button', { name: 'Open Account' }),
+  );
+  expect(
+    await screen.findByText('Reconnect to sign out everywhere.'),
+  ).toBeVisible();
+  expect(
+    screen.getByRole('button', { name: 'Sign out everywhere' }),
+  ).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Sign out' })).toBeEnabled();
+  expect(h.client.getSnapshot().status).toBe('signedIn');
 });
 
 test('Counter and Preparation retain their data across warm tab switches and manual refresh still works', async () => {

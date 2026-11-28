@@ -24,6 +24,25 @@ export type RefreshStorage = {
   set: (token: string) => Promise<void>;
   remove: () => Promise<void>;
 };
+export type AccountWideLogoutReason =
+  'unauthorized' | 'rejected' | 'uncertain' | 'storage';
+
+const accountWideLogoutMessages: Record<AccountWideLogoutReason, string> = {
+  unauthorized:
+    'Your sign-in expired before signing out everywhere was confirmed. Sign in again.',
+  rejected: 'The service did not confirm signing out everywhere. Try again.',
+  uncertain:
+    'Signing out everywhere could not be confirmed. Check your connection and try again.',
+  storage:
+    'Signed out everywhere, but this device could not remove its saved sign-in. Try again.',
+};
+
+export class AccountWideLogoutError extends Error {
+  constructor(readonly reason: AccountWideLogoutReason) {
+    super(accountWideLogoutMessages[reason]);
+    this.name = 'AccountWideLogoutError';
+  }
+}
 
 function sameCodes(left: readonly string[], right: readonly string[]) {
   if (!Array.isArray(left) || !Array.isArray(right)) return false;
@@ -81,6 +100,7 @@ export function createSessionClient(options: {
   let epoch = 0;
   let storageQueue: Promise<unknown> = Promise.resolve();
   let renewal: { epoch: number; promise: Promise<void> } | undefined;
+  let globalLogout: { epoch: number; promise: Promise<void> } | undefined;
   const listeners = new Set<() => void>();
   const requests = new Set<AbortController>();
   function publish(next: SessionState) {
@@ -339,6 +359,70 @@ export function createSessionClient(options: {
       }
       const error = await removed;
       if (error) throw error;
+    },
+    logoutAll() {
+      const generation = epoch;
+      const userId = state.user?.id;
+      if (!userId)
+        return Promise.reject(new AccountWideLogoutError('unauthorized'));
+      if (globalLogout?.epoch === generation) return globalLogout.promise;
+      const promise = (async () => {
+        let token: string;
+        try {
+          token = await getOperationalAccessToken(userId, generation);
+        } catch (error) {
+          if (generation !== epoch) throw cancelled();
+          throw new AccountWideLogoutError(
+            error instanceof ApiError && error.status === 401
+              ? 'unauthorized'
+              : 'uncertain',
+          );
+        }
+        if (generation !== epoch) throw cancelled();
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        let failure: AccountWideLogoutReason | undefined;
+        try {
+          const revoke = createClient<paths>({
+            baseUrl: options.origin,
+            fetch: fetcher,
+          });
+          const { response } = await revoke.POST('/api/v1/auth/logout-all', {
+            headers: { Authorization: `Bearer ${token}` },
+            signal: controller.signal,
+          });
+          if (!response.ok)
+            failure =
+              response.status === 401
+                ? 'unauthorized'
+                : response.status >= 500
+                  ? 'uncertain'
+                  : 'rejected';
+        } catch {
+          failure = 'uncertain';
+        } finally {
+          clearTimeout(timeout);
+        }
+        if (failure) throw new AccountWideLogoutError(failure);
+        // A newer sign-in owns its credentials, caches and device registration.
+        if (generation !== epoch) return;
+        // The server has confirmed revocation. Device cleanup is best effort and
+        // must not turn a confirmed global sign-out into a false failure.
+        await devices.remove(userId, async () => token).catch(() => undefined);
+        if (generation !== epoch) return;
+        try {
+          await clear();
+        } catch {
+          throw new AccountWideLogoutError('storage');
+        }
+      })();
+      globalLogout = { epoch: generation, promise };
+      void promise
+        .finally(() => {
+          if (globalLogout?.promise === promise) globalLogout = undefined;
+        })
+        .catch(() => undefined);
+      return promise;
     },
   };
 }
