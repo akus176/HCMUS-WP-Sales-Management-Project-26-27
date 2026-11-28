@@ -37,11 +37,11 @@ The application MUST send `POST /api/v1/auth/logout-all` with the current bearer
 
 ### Requirement: Truthful account-wide failure outcomes
 
-The application MUST NOT claim global success for offline, unauthorized, rejected, network-failed, timed-out or otherwise unknown outcomes. It MUST keep the current session usable and MUST NOT replay the revocation automatically.
+The application MUST NOT claim global success for offline, unauthorized, rejected, network-failed, timed-out or otherwise unknown outcomes. It MUST keep the current session usable when its credentials remain valid, MUST NOT replay the revocation automatically, and MAY follow the existing terminal sign-out path when refresh credentials are already rejected.
 
 #### Scenario: Service rejects or does not authorize the request
-- **WHEN** account-wide sign-out receives a `401` or another non-success response
-- **THEN** the session remains signed in, the confirmation presents an accurate error and no protected state is cleared as if revocation succeeded
+- **WHEN** the account-wide revocation request receives a `401` or another non-success response
+- **THEN** the session remains signed in unless the existing refresh path has already rejected its credentials, the confirmation presents an accurate error and no protected state is cleared as if revocation succeeded
 
 #### Scenario: Network or timeout outcome
 - **WHEN** the request fails in transport or exceeds the bounded request time
