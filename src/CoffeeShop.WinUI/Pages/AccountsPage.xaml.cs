@@ -17,6 +17,8 @@ public sealed partial class AccountsPage : Page
     private static readonly SolidColorBrush ActiveChipEdgeBrush = Brush("ConsoleReadyEdgeBrush");
     private static readonly SolidColorBrush InactiveChipBrush = Brush("ConsolePanelBrush");
     private static readonly SolidColorBrush InactiveChipEdgeBrush = Brush("ConsolePanelLineBrush");
+    private static readonly SolidColorBrush RoleBrush = Brush("ConsoleAccentTextBrush");
+    private static readonly SolidColorBrush NoRoleBrush = Brush("ConsoleMutedInkBrush");
 
     private readonly ApiStaffAccountsSource accounts;
     private bool busy;
@@ -33,9 +35,11 @@ public sealed partial class AccountsPage : Page
     }
 
     public sealed record AccountRow(
+        string Initials,
         string FullName,
         string Identity,
         string RolesText,
+        SolidColorBrush RolesBrush,
         string StateLabel,
         SolidColorBrush StateBrush,
         SolidColorBrush StateEdgeBrush,
@@ -43,21 +47,31 @@ public sealed partial class AccountsPage : Page
         StaffAccountResponse Account)
     {
         public static AccountRow From(StaffAccountResponse account) => new(
+            InitialsOf(account.FullName),
             account.FullName,
             $"{account.Username} · {account.Email}",
-            string.Join(", ", account.Roles),
+            account.Roles.Length == 0 ? "No roles assigned" : string.Join(" · ", account.Roles),
+            account.Roles.Length == 0 ? NoRoleBrush : RoleBrush,
             account.IsActive ? "ACTIVE" : "INACTIVE",
             account.IsActive ? ActiveChipBrush : InactiveChipBrush,
             account.IsActive ? ActiveChipEdgeBrush : InactiveChipEdgeBrush,
             $"Edit staff account {account.FullName}",
             account);
+
+        private static string InitialsOf(string fullName)
+        {
+            var words = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return words.Length switch
+            {
+                0 => "?",
+                1 => char.ToUpperInvariant(words[0][0]).ToString(),
+                _ => string.Concat(char.ToUpperInvariant(words[0][0]), char.ToUpperInvariant(words[^1][0])),
+            };
+        }
     }
 
     private static SolidColorBrush Brush(string key) =>
         (SolidColorBrush)Microsoft.UI.Xaml.Application.Current.Resources[key];
-
-    private static Style ButtonStyle(string key) =>
-        (Style)Microsoft.UI.Xaml.Application.Current.Resources[key];
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -83,11 +97,44 @@ public sealed partial class AccountsPage : Page
         await RefreshAsync();
     }
 
+    private void OnNewAccount(object sender, RoutedEventArgs e)
+    {
+        if (busy) return;
+        editingAccount = null;
+        EditPanel.Visibility = Visibility.Collapsed;
+        CreationPanel.Visibility = Visibility.Visible;
+        ValidationText.Text = string.Empty;
+        ValidationText.Visibility = Visibility.Collapsed;
+        ShowForm();
+        FullNameBox.Focus(FocusState.Programmatic);
+    }
+
+    private void OnCancelCreate(object sender, RoutedEventArgs e) => HideForm();
+
+    private void ShowForm()
+    {
+        FormHost.Visibility = Visibility.Visible;
+        NewAccountButton.Visibility = Visibility.Collapsed;
+        PageScroll.ChangeView(null, 0, null, true);
+    }
+
+    private void HideForm()
+    {
+        FormHost.Visibility = Visibility.Collapsed;
+        NewAccountButton.Visibility = Visibility.Visible;
+        editingAccount = null;
+        EditPanel.Visibility = Visibility.Collapsed;
+        CreationPanel.Visibility = Visibility.Visible;
+        PageScroll.ChangeView(null, 0, null, true);
+        DispatcherQueue.TryEnqueue(() => NewAccountButton.Focus(FocusState.Programmatic));
+    }
+
     private void OnEdit(object sender, RoutedEventArgs e)
     {
         if (busy || (sender as Button)?.Tag is not StaffAccountResponse account) return;
         editingAccount = account;
-        EditIdentityText.Text = $"{account.FullName} · account {account.Id:D}";
+        EditTitleText.Text = account.FullName;
+        EditIdentityText.Text = $"@{account.Username} · {account.Email}";
         EditFullNameBox.Text = account.FullName;
         EditUsernameBox.Text = account.Username;
         EditEmailBox.Text = account.Email;
@@ -100,16 +147,11 @@ public sealed partial class AccountsPage : Page
         ApplyAccountStateButton(account);
         CreationPanel.Visibility = Visibility.Collapsed;
         EditPanel.Visibility = Visibility.Visible;
+        ShowForm();
         EditFullNameBox.Focus(FocusState.Programmatic);
     }
 
-    private void OnCancelEdit(object sender, RoutedEventArgs e)
-    {
-        editingAccount = null;
-        EditPanel.Visibility = Visibility.Collapsed;
-        CreationPanel.Visibility = Visibility.Visible;
-        SearchBox.Focus(FocusState.Programmatic);
-    }
+    private void OnCancelEdit(object sender, RoutedEventArgs e) => HideForm();
 
     private async Task RefreshAsync()
     {
@@ -141,7 +183,7 @@ public sealed partial class AccountsPage : Page
         var validation = StaffAccountForm.Validate(request);
         if (!ShowValidation(ValidationText, validation, FullNameBox))
         {
-            ShowFeedback(InfoBarSeverity.Warning, "Check staff details", validation!);
+            FeedbackBar.IsOpen = false;
             return;
         }
 
@@ -162,7 +204,8 @@ public sealed partial class AccountsPage : Page
                     ListStatus.Text = "Showing the new account plus the first 100 directory entries. Search to find others.";
                 ShowFeedback(InfoBarSeverity.Success, "Staff account created",
                     $"{created.FullName} can now sign in with the assigned role.");
-                SearchBox.Focus(FocusState.Programmatic);
+                HideForm();
+                DispatcherQueue.TryEnqueue(() => SearchBox.Focus(FocusState.Programmatic));
             }
             catch (ApiException)
             {
@@ -187,7 +230,7 @@ public sealed partial class AccountsPage : Page
         var validation = StaffAccountForm.Validate(request);
         if (!ShowValidation(EditValidationText, validation, EditFullNameBox))
         {
-            ShowFeedback(InfoBarSeverity.Warning, "Check account details", validation!);
+            FeedbackBar.IsOpen = false;
             return;
         }
 
@@ -206,8 +249,10 @@ public sealed partial class AccountsPage : Page
                 ListStatus.Text = "Changes were saved. Search again to load the rest of the directory.";
             }
             editingAccount = updated;
-            EditIdentityText.Text = $"{updated.FullName} · account {updated.Id:D}";
+            EditTitleText.Text = updated.FullName;
+            EditIdentityText.Text = $"@{updated.Username} · {updated.Email}";
             ShowFeedback(InfoBarSeverity.Success, "Staff account updated", "The profile and assigned roles were saved.");
+            HideForm();
         }
         catch (ApiException exception) { ShowFailure(exception); }
         catch (OperationCanceledException)
@@ -269,8 +314,10 @@ public sealed partial class AccountsPage : Page
 
     private void ApplyAccountStateButton(StaffAccountResponse account)
     {
-        AccountStateButton.Content = account.IsActive ? "DEACTIVATE ACCOUNT" : "REACTIVATE ACCOUNT";
-        AccountStateButton.Style = ButtonStyle(account.IsActive ? "ConsoleDangerButtonStyle" : "ConsoleButtonStyle");
+        AccountStateButton.Content = account.IsActive ? "Deactivate account" : "Reactivate account";
+        AccountStateButton.Style = (Style)Resources[account.IsActive ? "AccountsDanger" : "AccountsButton"];
+        EditStateText.Text = account.IsActive ? "ACTIVE" : "INACTIVE";
+        EditStateChip.BorderBrush = account.IsActive ? Brush("ConsoleAccentLightBrush") : Brush("ConsoleOnFieldMutedBrush");
         AutomationProperties.SetName(AccountStateButton,
             account.IsActive ? "Deactivate staff account" : "Reactivate staff account");
     }
@@ -279,17 +326,21 @@ public sealed partial class AccountsPage : Page
     {
         var rows = results.Select(AccountRow.From).ToArray();
         AccountsList.ItemsSource = rows;
+        DirectoryCountText.Text = results.Length >= 100
+            ? "100+ ACCOUNTS"
+            : $"{results.Length} ACCOUNT{(results.Length == 1 ? string.Empty : "S")}";
         var empty = rows.Length == 0;
         AccountsList.Visibility = empty ? Visibility.Collapsed : Visibility.Visible;
         EmptyState.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
         var hasQuery = SearchBox.Text.Trim().Length > 0;
         ClearSearchButton.Visibility = empty && hasQuery ? Visibility.Visible : Visibility.Collapsed;
+        EmptyCreateButton.Visibility = empty && !hasQuery ? Visibility.Visible : Visibility.Collapsed;
         if (empty)
         {
             EmptyTitle.Text = hasQuery ? "No staff accounts match this search." : "No staff accounts yet.";
             EmptyMessage.Text = hasQuery
                 ? "Check the spelling, or clear the search to see the full directory."
-                : "Create the first staff account with the form beside the directory.";
+                : "Use the form to create the first staff account.";
             ListStatus.Text = string.Empty;
             ListStatus.Visibility = Visibility.Collapsed;
             return;
@@ -313,7 +364,8 @@ public sealed partial class AccountsPage : Page
     {
         busy = value;
         SearchBox.IsEnabled = RefreshButton.IsEnabled = ClearSearchButton.IsEnabled = !value;
-        CreateButton.IsEnabled = !value;
+        NewAccountButton.IsEnabled = EmptyCreateButton.IsEnabled = !value;
+        CreateButton.IsEnabled = CancelCreateButton.IsEnabled = !value;
         AccountsList.IsEnabled = !value;
         SaveEditButton.IsEnabled = CancelEditButton.IsEnabled = AccountStateButton.IsEnabled = !value;
         ListProgress.IsActive = value;
