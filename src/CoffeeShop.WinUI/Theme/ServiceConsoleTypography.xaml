@@ -36,4 +36,10 @@
         <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
         <Setter Property="Typography.NumeralStyle" Value="Lining" />
     </Style>
+    <Style x:Key="ConsoleValidationStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleSansFont}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{StaticResource ConsoleDangerBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
 </ResourceDictionary>
