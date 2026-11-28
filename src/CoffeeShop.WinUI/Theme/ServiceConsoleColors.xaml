@@ -25,4 +25,6 @@
     <SolidColorBrush x:Key="ConsolePreparingTapeBrush" Color="#CCD7C4A8" />
     <SolidColorBrush x:Key="ConsoleReadyTapeBrush" Color="#CCCCD4BC" />
     <SolidColorBrush x:Key="ConsoleShadowBrush" Color="#20262321" />
+    <SolidColorBrush x:Key="ConsoleDangerBrush" Color="#8A3B2C" />
+    <SolidColorBrush x:Key="ConsoleDangerWashBrush" Color="#F3E0DA" />
 </ResourceDictionary>

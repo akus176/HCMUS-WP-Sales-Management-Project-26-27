@@ -5,126 +5,445 @@
       Foreground="{StaticResource ConsoleInkBrush}"
       Background="{StaticResource ConsoleGroundBrush}"
       RequestedTheme="Light">
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Padding="{StaticResource ConsolePagePadding}" Spacing="20">
-            <StackPanel Spacing="4">
-                <TextBlock Text="Accounts" Style="{StaticResource ConsolePageTitleStyle}"
-                           AutomationProperties.HeadingLevel="Level1" />
-                <TextBlock Text="Manage staff access from the administrator console."
-                           Style="{StaticResource ConsoleBodyStyle}" TextWrapping="Wrap" />
-            </StackPanel>
-            <InfoBar x:Name="FeedbackBar" IsOpen="False" IsClosable="False"
-                     AutomationProperties.LiveSetting="Polite" />
-            <Grid x:Name="AccountsLayout" ColumnSpacing="24" RowSpacing="20" SizeChanged="OnLayoutSizeChanged">
+    <Page.Resources>
+        <Style x:Key="AccountsCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource ConsoleRaisedGroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ConsolePanelLineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="2" />
+        </Style>
+        <Style x:Key="AccountsCardHeader" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource ConsoleFieldBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ConsoleAccentBrush}" />
+            <Setter Property="BorderThickness" Value="0,2,0,0" />
+            <Setter Property="Padding" Value="18,14" />
+        </Style>
+        <Style x:Key="AccountsKicker" TargetType="TextBlock" BasedOn="{StaticResource ConsoleLabelStyle}">
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="CharacterSpacing" Value="120" />
+        </Style>
+        <Style x:Key="AccountsText" TargetType="TextBlock" BasedOn="{StaticResource ConsoleBodyStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="LineHeight" Value="19" />
+        </Style>
+        <Style x:Key="AccountsSmall" TargetType="TextBlock" BasedOn="{StaticResource AccountsText}">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="LineHeight" Value="17" />
+        </Style>
+        <Style x:Key="AccountsHeading" TargetType="TextBlock" BasedOn="{StaticResource ConsoleSectionTitleStyle}">
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="AccountsField" TargetType="TextBox" BasedOn="{StaticResource ConsoleFieldStyle}">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="Background" Value="{StaticResource ConsoleGroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ConsolePanelLineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="AccountsPassword" TargetType="PasswordBox">
+            <Setter Property="FontFamily" Value="{StaticResource ConsoleSansFont}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="Background" Value="{StaticResource ConsoleGroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ConsolePanelLineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="AccountsSelect" TargetType="ComboBox">
+            <Setter Property="FontFamily" Value="{StaticResource ConsoleSansFont}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="Background" Value="{StaticResource ConsoleGroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ConsolePanelLineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="AccountsCheck" TargetType="CheckBox">
+            <Setter Property="FontFamily" Value="{StaticResource ConsoleSansFont}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="AccountsButton" TargetType="Button" BasedOn="{StaticResource ConsoleButtonStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CharacterSpacing" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="14,0" />
+        </Style>
+        <Style x:Key="AccountsPrimary" TargetType="Button" BasedOn="{StaticResource ConsolePrimaryButtonStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CharacterSpacing" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="14,0" />
+        </Style>
+        <Style x:Key="AccountsLink" TargetType="Button" BasedOn="{StaticResource AccountsButton}">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource ConsoleAccentTextBrush}" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="MinWidth" Value="44" />
+        </Style>
+        <Style x:Key="AccountsDanger" TargetType="Button" BasedOn="{StaticResource ConsoleDangerButtonStyle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="CharacterSpacing" Value="0" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="Padding" Value="14,0" />
+        </Style>
+        <Style x:Key="AccountsRow" TargetType="ListViewItem" BasedOn="{StaticResource WorkspaceListItem}">
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <Style x:Key="AccountsValidation" TargetType="TextBlock" BasedOn="{StaticResource ConsoleValidationStyle}">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="LineHeight" Value="17" />
+        </Style>
+        <Style x:Key="AccountsState" TargetType="TextBlock" BasedOn="{StaticResource ConsoleLabelStyle}">
+            <Setter Property="FontSize" Value="9" />
+            <Setter Property="CharacterSpacing" Value="100" />
+            <Setter Property="Foreground" Value="{StaticResource ConsoleInkBrush}" />
+        </Style>
+    </Page.Resources>
+    <ScrollViewer x:Name="PageScroll" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <Grid x:Name="PageRoot" Padding="{StaticResource ConsolePagePadding}" RowSpacing="14">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid x:Name="Header" Padding="0,0,0,10" BorderBrush="{StaticResource ConsoleAccentBrush}"
+                  BorderThickness="0,0,0,1" ColumnSpacing="18">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Border x:Name="DirectoryPanel" Style="{StaticResource WorkspacePanel}" Padding="20">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Staff directory" Style="{StaticResource ConsoleSectionTitleStyle}"
-                                   AutomationProperties.HeadingLevel="Level2" />
-                        <TextBox x:Name="SearchBox" Header="Search by name, username or email" MaxLength="150"
-                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" />
-                        <Button x:Name="RefreshButton" Content="SEARCH ACCOUNTS" Click="OnRefresh"
-                                Style="{StaticResource ConsoleButtonStyle}" MinHeight="48"
-                                AutomationProperties.Name="Search staff accounts" />
-                        <ProgressRing x:Name="ListProgress" IsActive="False" Visibility="Collapsed" Width="24" Height="24"
-                                      HorizontalAlignment="Left" AutomationProperties.Name="Loading staff accounts" />
-                        <TextBlock x:Name="ListStatus" Style="{StaticResource ConsoleBodyStyle}" TextWrapping="Wrap"
-                                   AutomationProperties.LiveSetting="Polite" />
-                        <ListView x:Name="AccountsList" MinHeight="240" MaxHeight="520"
-                                  SelectionMode="None" AutomationProperties.Name="Staff accounts">
+                <StackPanel Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="Accounts" Style="{StaticResource ConsolePageTitleStyle}"
+                               AutomationProperties.HeadingLevel="Level1" />
+                    <TextBlock Text="Create staff, assign operational roles, and control who can sign in. Changes apply on the staff member's next request."
+                               Style="{StaticResource AccountsText}" />
+                </StackPanel>
+                <Button x:Name="NewAccountButton" Grid.Column="1" Content="New staff account" Click="OnNewAccount"
+                        Style="{StaticResource AccountsPrimary}" VerticalAlignment="Bottom"
+                        AutomationProperties.Name="Create a staff account" />
+            </Grid>
+
+            <InfoBar x:Name="FeedbackBar" Grid.Row="1" IsOpen="False" IsClosable="False"
+                     AutomationProperties.LiveSetting="Polite" />
+
+            <Border x:Name="FormHost" Grid.Row="2" Style="{StaticResource AccountsCard}" Visibility="Collapsed">
+                <Grid>
+                    <Grid x:Name="CreationPanel">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border Style="{StaticResource AccountsCardHeader}">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="NEW SIGN-IN" Style="{StaticResource AccountsKicker}"
+                                           Foreground="{StaticResource ConsoleAccentLightBrush}" />
+                                <TextBlock Text="New staff account" Style="{StaticResource AccountsHeading}"
+                                           Foreground="{StaticResource ConsoleOnFieldBrush}"
+                                           AutomationProperties.HeadingLevel="Level2" />
+                                <TextBlock Text="Create a sign-in and assign the role this person needs on their first shift."
+                                           Style="{StaticResource AccountsSmall}" Margin="0,2,0,0"
+                                           Foreground="{StaticResource ConsoleOnFieldMutedBrush}" />
+                            </StackPanel>
+                        </Border>
+                        <StackPanel Grid.Row="1" Padding="18" Spacing="14">
+                            <Grid ColumnSpacing="12" RowSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBox x:Name="FullNameBox" Header="Full name *" MaxLength="150"
+                                         Style="{StaticResource AccountsField}" />
+                                <TextBox x:Name="UsernameBox" Grid.Column="1" Header="Username *" MaxLength="50"
+                                         Style="{StaticResource AccountsField}" />
+                                <TextBox x:Name="EmailBox" Grid.Column="2" Header="Email address *" MaxLength="255"
+                                         Style="{StaticResource AccountsField}" InputScope="EmailSmtpAddress" />
+                                <TextBox x:Name="PhoneBox" Grid.Row="1" Header="Phone (optional)" MaxLength="30"
+                                         Style="{StaticResource AccountsField}" InputScope="TelephoneNumber" />
+                                <ComboBox x:Name="RoleBox" Grid.Row="1" Grid.Column="1" Header="Role *"
+                                          SelectedIndex="2" Style="{StaticResource AccountsSelect}">
+                                    <ComboBoxItem Content="Administrator" Tag="Admin" />
+                                    <ComboBoxItem Content="Manager" Tag="Manager" />
+                                    <ComboBoxItem Content="Cashier" Tag="Cashier" />
+                                    <ComboBoxItem Content="Barista" Tag="Barista" />
+                                    <ComboBoxItem Content="Inventory staff" Tag="InventoryStaff" />
+                                    <ComboBoxItem Content="Delivery staff" Tag="DeliveryStaff" />
+                                </ComboBox>
+                                <PasswordBox x:Name="InitialPasswordBox" Grid.Row="1" Grid.Column="2"
+                                             Header="Initial password *" MaxLength="1024"
+                                             Style="{StaticResource AccountsPassword}" />
+                            </Grid>
+                            <TextBlock Text="12 characters or more. Share it with the new staff member; it is not shown again after creation."
+                                       Style="{StaticResource AccountsSmall}" />
+                            <TextBlock x:Name="ValidationText" Style="{StaticResource AccountsValidation}"
+                                       Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
+                            <Border BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,1,0,0" />
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                <Button x:Name="CancelCreateButton" Content="Cancel" Click="OnCancelCreate"
+                                        Style="{StaticResource AccountsButton}" />
+                                <Button x:Name="CreateButton" Content="Create staff account" Click="OnCreate"
+                                        Style="{StaticResource AccountsPrimary}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid x:Name="EditPanel" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border Style="{StaticResource AccountsCardHeader}">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="EDITING STAFF ACCOUNT" Style="{StaticResource AccountsKicker}"
+                                               Foreground="{StaticResource ConsoleAccentLightBrush}" />
+                                    <TextBlock x:Name="EditTitleText" Style="{StaticResource AccountsHeading}"
+                                               Foreground="{StaticResource ConsoleOnFieldBrush}"
+                                               AutomationProperties.HeadingLevel="Level2" />
+                                    <TextBlock x:Name="EditIdentityText" Style="{StaticResource AccountsSmall}"
+                                               Margin="0,2,0,0"
+                                               Foreground="{StaticResource ConsoleOnFieldMutedBrush}" />
+                                </StackPanel>
+                                <Border x:Name="EditStateChip" Grid.Column="1" Padding="8,3" VerticalAlignment="Top"
+                                        BorderBrush="{StaticResource ConsoleAccentLightBrush}" BorderThickness="1">
+                                    <TextBlock x:Name="EditStateText" Text="ACTIVE"
+                                               FontFamily="{StaticResource ConsoleSansFont}" FontSize="9"
+                                               CharacterSpacing="120"
+                                               Foreground="{StaticResource ConsoleOnFieldBrush}" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <Grid Grid.Row="1" Padding="18" ColumnSpacing="24" RowSpacing="14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*" />
+                                <ColumnDefinition Width="2*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <StackPanel Spacing="14">
+                                <Grid ColumnSpacing="12" RowSpacing="14">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBox x:Name="EditFullNameBox" Header="Full name *" MaxLength="150"
+                                             Style="{StaticResource AccountsField}" />
+                                    <TextBox x:Name="EditUsernameBox" Grid.Column="1" Header="Username *" MaxLength="50"
+                                             Style="{StaticResource AccountsField}" />
+                                    <TextBox x:Name="EditEmailBox" Grid.Row="1" Header="Email address *" MaxLength="255"
+                                             Style="{StaticResource AccountsField}" InputScope="EmailSmtpAddress" />
+                                    <TextBox x:Name="EditPhoneBox" Grid.Row="1" Grid.Column="1" Header="Phone (optional)"
+                                             MaxLength="30" Style="{StaticResource AccountsField}"
+                                             InputScope="TelephoneNumber" />
+                                </Grid>
+                                <TextBlock x:Name="EditValidationText" Style="{StaticResource AccountsValidation}"
+                                           Visibility="Collapsed" AutomationProperties.LiveSetting="Assertive" />
+                                <Border Margin="0,2,0,0" BorderBrush="{StaticResource ConsoleRuleBrush}"
+                                        BorderThickness="0,1,0,0" Padding="0,12,0,0">
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="ACCOUNT STATE" Style="{StaticResource AccountsKicker}" />
+                                        <TextBlock Text="Deactivation signs the person out and blocks new sessions immediately."
+                                                   Style="{StaticResource AccountsSmall}" />
+                                        <Button x:Name="AccountStateButton" Click="OnChangeAccountState" AccessKey="T"
+                                                Style="{StaticResource AccountsDanger}" MinWidth="200"
+                                                HorizontalAlignment="Left" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="6">
+                                <TextBlock Text="ROLES" Style="{StaticResource AccountsKicker}" />
+                                <TextBlock Text="Choose every role this person needs." Style="{StaticResource AccountsSmall}" />
+                                <ItemsControl x:Name="EditRolesList" Margin="0,4,0,0"
+                                              AutomationProperties.Name="Assigned staff roles">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                      Style="{StaticResource AccountsCheck}"
+                                                      AutomationProperties.Name="{Binding Label}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                            <Border Grid.Row="1" Grid.ColumnSpan="2" BorderBrush="{StaticResource ConsoleRuleBrush}"
+                                    BorderThickness="0,1,0,0" />
+                            <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="8"
+                                        HorizontalAlignment="Right">
+                                <Button x:Name="CancelEditButton" Content="Cancel" Click="OnCancelEdit"
+                                        AccessKey="C" Style="{StaticResource AccountsButton}" />
+                                <Button x:Name="SaveEditButton" Content="Save changes" Click="OnSaveEdit"
+                                        AccessKey="S" Style="{StaticResource AccountsPrimary}" />
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border x:Name="DirectoryPanel" Grid.Row="3" Style="{StaticResource AccountsCard}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Border Style="{StaticResource AccountsCardHeader}">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="ACCESS CONTROL" Style="{StaticResource AccountsKicker}"
+                                           Foreground="{StaticResource ConsoleAccentLightBrush}" />
+                                <TextBlock Text="Staff directory" Style="{StaticResource AccountsHeading}"
+                                           Foreground="{StaticResource ConsoleOnFieldBrush}"
+                                           AutomationProperties.HeadingLevel="Level2" />
+                            </StackPanel>
+                            <TextBlock x:Name="DirectoryCountText" Grid.Column="1" Text="0 ACCOUNTS"
+                                       Style="{StaticResource AccountsKicker}" VerticalAlignment="Bottom"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{StaticResource ConsoleAccentLightBrush}" />
+                        </Grid>
+                    </Border>
+                    <Grid Grid.Row="1" Padding="18,14,18,8" RowSpacing="6">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border Background="{StaticResource ConsoleGroundBrush}"
+                                BorderBrush="{StaticResource ConsolePanelLineBrush}" BorderThickness="1"
+                                CornerRadius="2">
+                            <Grid ColumnSpacing="4" Padding="0,0,4,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon Glyph="&#xE721;" FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                          FontSize="14" Margin="12,0,0,0" IsHitTestVisible="False"
+                                          VerticalAlignment="Center"
+                                          Foreground="{StaticResource ConsoleMutedInkBrush}"
+                                          AutomationProperties.AccessibilityView="Raw" />
+                                <TextBox x:Name="SearchBox" Grid.Column="1" PlaceholderText="Search by name, username or email"
+                                         MaxLength="150" KeyDown="OnSearchKeyDown" FontSize="14" MinHeight="42"
+                                         Padding="0,8" Background="Transparent" BorderThickness="0"
+                                         VerticalContentAlignment="Center"
+                                         AutomationProperties.Name="Search staff accounts"
+                                         AutomationProperties.HelpText="Press Enter or choose Search to run the search." />
+                                <Button x:Name="RefreshButton" Grid.Column="2" Content="Search" Click="OnRefresh"
+                                        Style="{StaticResource AccountsLink}" Margin="0,3,0,3" MinHeight="36"
+                                        AutomationProperties.Name="Search staff accounts" />
+                            </Grid>
+                        </Border>
+                        <Grid Grid.Row="1" ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <ProgressRing x:Name="ListProgress" IsActive="False" Visibility="Collapsed"
+                                          Width="16" Height="16" VerticalAlignment="Center"
+                                          AutomationProperties.Name="Loading staff accounts" />
+                            <TextBlock x:Name="ListStatus" Grid.Column="1" Style="{StaticResource AccountsSmall}"
+                                       VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+                        </Grid>
+                    </Grid>
+                    <Grid Grid.Row="2">
+                        <ListView x:Name="AccountsList" MaxHeight="520" SelectionMode="None" Padding="18,0,18,10"
+                                  ItemContainerStyle="{StaticResource AccountsRow}"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                  AutomationProperties.Name="Staff accounts">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Padding="4,8" Spacing="3">
-                                        <TextBlock Text="{Binding FullName}" Style="{StaticResource ConsoleSectionTitleStyle}" FontSize="18" />
-                                        <TextBlock Text="{Binding Identity}" Style="{StaticResource ConsoleBodyStyle}"
-                                                   TextWrapping="Wrap" />
-                                        <TextBlock Text="{Binding RoleAndState}" Style="{StaticResource ConsoleLabelStyle}"
-                                                   TextWrapping="Wrap" />
-                                        <Button Content="EDIT ACCOUNT" Tag="{Binding Account}" Click="OnEdit" AccessKey="E"
-                                                Style="{StaticResource ConsoleButtonStyle}" MinHeight="44"
-                                                AutomationProperties.Name="Edit staff account" />
-                                    </StackPanel>
+                                    <Grid Padding="0,10" ColumnSpacing="12" MinHeight="64"
+                                          BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="0,0,0,1">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="40" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="38" Height="38" VerticalAlignment="Center"
+                                                Background="{StaticResource ConsolePanelBrush}"
+                                                BorderBrush="{StaticResource ConsolePanelLineBrush}"
+                                                BorderThickness="1">
+                                            <TextBlock Text="{Binding Initials}"
+                                                       FontFamily="{StaticResource ConsoleSerifFont}" FontSize="17"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                       AutomationProperties.AccessibilityView="Raw" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding FullName}" FontFamily="{StaticResource ConsoleSansMediumFont}"
+                                                       FontSize="14" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"
+                                                       ToolTipService.ToolTip="{Binding FullName}" />
+                                            <TextBlock Text="{Binding Identity}" Style="{StaticResource AccountsSmall}"
+                                                       FontSize="12" Foreground="{StaticResource ConsoleMutedInkBrush}"
+                                                       TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding RolesText}" FontSize="11" TextWrapping="NoWrap"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Foreground="{Binding RolesBrush}" />
+                                        </StackPanel>
+                                        <Border Grid.Column="2" Background="{Binding StateBrush}"
+                                                BorderBrush="{Binding StateEdgeBrush}" BorderThickness="1"
+                                                Padding="8,3" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding StateLabel}" Style="{StaticResource AccountsState}" />
+                                        </Border>
+                                        <Button Grid.Column="3" Content="Edit" Tag="{Binding Account}" Click="OnEdit"
+                                                AccessKey="E" Style="{StaticResource AccountsLink}"
+                                                VerticalAlignment="Center" AutomationProperties.Name="{Binding EditName}" />
+                                    </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                    </StackPanel>
-                </Border>
-                <Border x:Name="EditPanel" Grid.Column="1" Style="{StaticResource WorkspacePanel}" Padding="20"
-                        Visibility="Collapsed">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Edit staff account" Style="{StaticResource ConsoleSectionTitleStyle}"
-                                   AutomationProperties.HeadingLevel="Level2" />
-                        <TextBlock x:Name="EditIdentityText" Style="{StaticResource ConsoleBodyStyle}"
-                                   TextWrapping="Wrap" />
-                        <TextBox x:Name="EditFullNameBox" Header="Full name" MaxLength="150"
-                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" />
-                        <TextBox x:Name="EditUsernameBox" Header="Username" MaxLength="50"
-                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" />
-                        <TextBox x:Name="EditEmailBox" Header="Email address" MaxLength="255"
-                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" InputScope="EmailSmtpAddress" />
-                        <TextBox x:Name="EditPhoneBox" Header="Phone (optional)" MaxLength="30"
-                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" InputScope="TelephoneNumber" />
-                        <TextBlock Text="Roles" Style="{StaticResource ConsoleLabelStyle}"
-                                   AutomationProperties.HeadingLevel="Level3" />
-                        <ItemsControl x:Name="EditRolesList" AutomationProperties.Name="Assigned staff roles">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                              MinHeight="44" AutomationProperties.Name="{Binding Label}" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <TextBlock x:Name="EditValidationText" Style="{StaticResource ConsoleBodyStyle}"
-                                   TextWrapping="Wrap" Visibility="Collapsed" AutomationProperties.LiveSetting="Polite" />
-                        <StackPanel Orientation="Horizontal" Spacing="10">
-                            <Button x:Name="SaveEditButton" Content="SAVE CHANGES" Click="OnSaveEdit" AccessKey="S"
-                                    Style="{StaticResource ConsolePrimaryButtonStyle}" MinHeight="48" />
-                            <Button x:Name="CancelEditButton" Content="CANCEL" Click="OnCancelEdit" AccessKey="C"
-                                    Style="{StaticResource ConsoleButtonStyle}" MinHeight="48" />
-                        </StackPanel>
-                        <Button x:Name="AccountStateButton" Click="OnChangeAccountState" AccessKey="T"
-                                Style="{StaticResource ConsoleButtonStyle}" MinHeight="48" />
-                    </StackPanel>
-                </Border>
-                <Border x:Name="CreationPanel" Grid.Column="1" Style="{StaticResource WorkspacePanel}" Padding="20">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="New staff account" Style="{StaticResource ConsoleSectionTitleStyle}"
-                                   AutomationProperties.HeadingLevel="Level2" />
-                        <TextBlock Text="Choose the role this person needs on their first sign-in."
-                                   Style="{StaticResource ConsoleBodyStyle}" TextWrapping="Wrap" />
-                        <TextBox x:Name="FullNameBox" Header="Full name" MaxLength="150"
-                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" />
-                        <TextBox x:Name="UsernameBox" Header="Username" MaxLength="50"
-                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" />
-                        <TextBox x:Name="EmailBox" Header="Email address" MaxLength="255"
-                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" InputScope="EmailSmtpAddress" />
-                        <TextBox x:Name="PhoneBox" Header="Phone (optional)" MaxLength="30"
-                                 Style="{StaticResource ConsoleFieldStyle}" MinHeight="48" InputScope="TelephoneNumber" />
-                        <ComboBox x:Name="RoleBox" Header="Operational role" SelectedIndex="2"
-                                  MinHeight="48" HorizontalAlignment="Stretch">
-                            <ComboBoxItem Content="Administrator" Tag="Admin" />
-                            <ComboBoxItem Content="Manager" Tag="Manager" />
-                            <ComboBoxItem Content="Cashier" Tag="Cashier" />
-                            <ComboBoxItem Content="Barista" Tag="Barista" />
-                            <ComboBoxItem Content="Inventory staff" Tag="InventoryStaff" />
-                            <ComboBoxItem Content="Delivery staff" Tag="DeliveryStaff" />
-                        </ComboBox>
-                        <PasswordBox x:Name="InitialPasswordBox" Header="Initial password" MaxLength="1024"
-                                     MinHeight="48" AutomationProperties.HelpText="Use at least 12 characters. The password is not shown again." />
-                        <TextBlock x:Name="ValidationText" Style="{StaticResource ConsoleBodyStyle}"
-                                   TextWrapping="Wrap" Visibility="Collapsed" AutomationProperties.LiveSetting="Polite" />
-                        <Button x:Name="CreateButton" Content="CREATE STAFF ACCOUNT" Click="OnCreate"
-                                Style="{StaticResource ConsolePrimaryButtonStyle}" MinHeight="48" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-        </StackPanel>
+                        <Border x:Name="EmptyState" Visibility="Collapsed" Margin="18,4,18,18" Padding="24"
+                                Background="{StaticResource ConsoleGroundBrush}"
+                                BorderBrush="{StaticResource ConsoleRuleBrush}" BorderThickness="1">
+                            <StackPanel Spacing="10" MaxWidth="420" HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <TextBlock x:Name="EmptyTitle" Style="{StaticResource AccountsHeading}" FontSize="20"
+                                           TextAlignment="Center" TextWrapping="Wrap" />
+                                <TextBlock x:Name="EmptyMessage" Style="{StaticResource AccountsText}"
+                                           TextAlignment="Center" />
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                    <Button x:Name="EmptyCreateButton" Content="New staff account" Click="OnNewAccount"
+                                            Style="{StaticResource AccountsPrimary}" />
+                                    <Button x:Name="ClearSearchButton" Content="Clear search" Click="OnClearSearch"
+                                            Style="{StaticResource AccountsButton}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
     </ScrollViewer>
 </Page>

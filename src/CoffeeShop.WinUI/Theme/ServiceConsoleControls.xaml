@@ -52,6 +52,36 @@
         <Setter Property="Padding" Value="12" />
         <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
+    <Style x:Key="ConsoleDangerButtonStyle" TargetType="Button">
+        <Setter Property="MinWidth" Value="{StaticResource ConsoleTouchTarget}" />
+        <Setter Property="MinHeight" Value="{StaticResource ConsoleTouchTarget}" />
+        <Setter Property="FontFamily" Value="{StaticResource ConsoleSansFont}" />
+        <Setter Property="FontSize" Value="8" />
+        <Setter Property="CharacterSpacing" Value="160" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{StaticResource ConsoleDangerBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource ConsoleDangerBrush}" />
+        <Setter Property="UseSystemFocusVisuals" Value="True" />
+        <Setter Property="FocusVisualPrimaryBrush" Value="{StaticResource ConsoleAccentTextBrush}" />
+        <Setter Property="FocusVisualSecondaryBrush" Value="{StaticResource ConsoleGroundBrush}" />
+        <Setter Property="FocusVisualPrimaryThickness" Value="2" />
+        <Setter Property="Template">
+            <Setter.Value><ControlTemplate TargetType="Button">
+                <Border x:Name="Chrome" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                    <VisualStateManager.VisualStateGroups><VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal" />
+                        <VisualState x:Name="PointerOver"><VisualState.Setters><Setter Target="Chrome.Background" Value="{StaticResource ConsoleDangerWashBrush}" /></VisualState.Setters></VisualState>
+                        <VisualState x:Name="Pressed"><VisualState.Setters><Setter Target="Chrome.Opacity" Value=".85" /></VisualState.Setters></VisualState>
+                        <VisualState x:Name="Disabled"><VisualState.Setters><Setter Target="Chrome.Opacity" Value=".4" /></VisualState.Setters></VisualState>
+                    </VisualStateGroup></VisualStateManager.VisualStateGroups>
+                    <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" CharacterSpacing="{TemplateBinding CharacterSpacing}" Foreground="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate></Setter.Value>
+        </Setter>
+    </Style>
     <Style x:Key="ConsoleFieldStyle" TargetType="TextBox">
         <Setter Property="MinHeight" Value="48" />
         <Setter Property="FontFamily" Value="{StaticResource ConsoleSansFont}" />
